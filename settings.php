@@ -15,7 +15,7 @@
   $lrg_sql_user = "root";
   $lrg_sql_pass = "";
 
-  $lrg_sql_db   = "d2_league_".$lrg_league_name."_data";
+  $lrg_sql_db   = "d2_league_".$lrg_league_name;
 
 # League Parameters
 

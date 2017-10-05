@@ -259,22 +259,30 @@ echo "[ ] Collecting players data\n";
 
 $sql = "SELECT playerID FROM matchlines GROUP BY playerID;";
 $players = array ();
-if ($conn->multi_query($sql))
-  do {
-    $res = $conn->store_result($sql);
-    $player = $result->fetch_row()[0];
+if ($conn->multi_query($sql)) {
+  $res = $conn->store_result();
+
+  while ($row = $res->fetch_row()) {
+    $player = $row[0];
     $json = file_get_contents('https://api.opendota.com/api/players/'.$player);
     $matchdata = json_decode($json, true);
-    $players[sizeof($players)] = array ();
-    $players[]["id"] = $player;
-    if ($matchdata["profile"]["name"] == null) $players[]["name"] = $matchdata["profile"]["personaname"];
-    else $players[]["name"] = $matchdata["profile"]["name"];
-    # table also includes player positions and real names placeholders, but
-    # for now you will fill it up by yourself
-    # TODO
-  } while ($mysqli->next_result());
+    $n = sizeof($players);
+    $players[$n] = array ();
+    $players[$n]["id"] = $player;
+    if ($matchdata["profile"]["name"] == null) $players[$n]["name"] = $matchdata["profile"]["personaname"];
+    else $players[$n]["name"] = $matchdata["profile"]["name"];
+  }
+  $res->free();
+}
 
-# TODO
+$sql = "INSERT INTO players (playerID, nickname) VALUES ";
+foreach ($players as $player) {
+  $sql .= "(".$player['id'].",\"".$player['name']."\"),";
+}
+$sql[strlen($sql)-1] = ";";
+
+if ($conn->multi_query($sql) === TRUE) echo "[S] Successfully recorded draft to database.\n";
+else die("[F] Unexpected problems when recording to database.\n".$conn->error."\n");
 
 if ($lrg_teams) {
   echo "[ ] Collecting teams data\n";
