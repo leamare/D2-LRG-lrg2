@@ -255,4 +255,40 @@ fclose($f);
 
 echo "[S] Recorded failed matches to $filename\n";
 
+echo "[ ] Collecting players data\n";
+
+$sql = "SELECT playerID FROM matchlines GROUP BY playerID;";
+$players = array ();
+if ($conn->multi_query($sql))
+  do {
+    $res = $conn->store_result($sql);
+    $player = $result->fetch_row()[0];
+    $json = file_get_contents('https://api.opendota.com/api/players/'.$player);
+    $matchdata = json_decode($json, true);
+    $players[sizeof($players)] = array ();
+    $players[]["id"] = $player;
+    if ($matchdata["profile"]["name"] == null) $players[]["name"] = $matchdata["profile"]["personaname"];
+    else $players[]["name"] = $matchdata["profile"]["name"];
+    # table also includes player positions and real names placeholders, but
+    # for now you will fill it up by yourself
+    # TODO
+  } while ($mysqli->next_result());
+
+# TODO
+
+if ($lrg_teams) {
+  echo "[ ] Collecting teams data\n";
+
+  # TODO
+
+  echo "[ ] Collecting match data about participating teams\n";
+
+  # TODO
+  # make it first by adding it to $matches block
+} else {
+  echo "[ ] Skipping team stats for PvP competition\n";
+}
+
+echo "[S] Fetch complete.\n";
+
 ?>
