@@ -91,13 +91,23 @@ foreach ($matches as $match) {
         $t_adv_matchlines[$i]['playerid'] = $matchdata['players'][$j]['account_id'];
         $t_adv_matchlines[$i]['heroid'] = $matchdata['players'][$j]['hero_id'];
         $t_adv_matchlines[$i]['lh10'] = $matchdata['players'][$j]['lh_t'][10];
-        if($matchdata['players'][$j]['is_roaming']) {
-            $t_adv_matchlines[$i]['is_core'] = 0;
-            $t_adv_matchlines[$i]['lane'] = -1;
-        } else {
-            $t_adv_matchlines[$i]['is_core'] = $matchdata['players'][$j]['lane_role'];
-            $t_adv_matchlines[$i]['lane'] = $matchdata['players'][$j]['lane'];
+        $t_adv_matchlines[$i]['lane'] = $matchdata['players'][$j]['lane_role'];
+        if($matchdata['players'][$j]['lane_role'] == 5) $matchdata['players'][$j]['lane_role'] = 4; # we don't care about different jungles
+
+        # trying to decide, is it a core
+        $support_indicators = 0;
+        if ($matchdata['players'][$j]['lh_t'][5] < 10) $support_indicators++;
+        if ($matchdata['players'][$j]['observer_uses'] < 2) $support_indicators++;
+        if ($matchdata['players'][$j]['gold_per_min'] < 350) $support_indicators++;
+        if ($matchdata['players'][$j]['is_roaming']) {
+          $support_indicators++;
+          $matchdata['players'][$j]['lane_role'] = 5;
         }
+
+        if ($support_indicators > 1) $t_adv_matchlines[$i]['is_core'] = true;
+        else $t_adv_matchlines[$i]['is_core'] = false;
+
+
         $t_adv_matchlines[$i]['lane_efficiency'] = $matchdata['players'][$j]['lane_efficiency'];
         $t_adv_matchlines[$i]['observers'] = $matchdata['players'][$j]['observer_uses'];
         $t_adv_matchlines[$i]['sentries'] = $matchdata['players'][$j]['sentry_uses'];
