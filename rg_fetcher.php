@@ -25,7 +25,7 @@ $matches = array_unique($matches);
 $json = "";
 $t_matches = array ();
 $t_matchlines = array();
-$t_adv_matchlnes = array ();
+$t_adv_matchlines = array ();
 $t_draft = array ();
 
 foreach ($matches as $match) {
@@ -124,6 +124,7 @@ foreach ($matches as $match) {
         $t_adv_matchlines[$i]['pings'] = $matchdata['players'][$j]['pings'];
         $t_adv_matchlines[$i]['stuns'] = $matchdata['players'][$j]['stuns'];
         $t_adv_matchlines[$i]['teamfight_part'] = $matchdata['players'][$j]['teamfight_participation'];
+        $t_adv_matchlines[$i]['damage_taken'] = array_sum($matchdata['players'][$j]['damage_taken']);
     }
 
     $i = sizeof($t_draft);
@@ -214,7 +215,7 @@ if ($conn->multi_query($sql) === TRUE) echo "[S] Successfully recorded matchline
 else die("[F] Unexpected problems when recording to database.\n".$conn->error."\n");
 
 $sql = " INSERT INTO adv_matchlines (matchid, playerid, heroid, lh_at10, isCore, lane, efficiency_at10, wards, sentries,".
-        "couriers_killed, roshans_killed, multi_kill, streak, stacks, time_dead, buybacks, wards_destroyed, pings, stuns, teamfight_part) VALUES ";
+        "couriers_killed, roshans_killed, multi_kill, streak, stacks, time_dead, buybacks, wards_destroyed, pings, stuns, teamfight_part, damage_taken) VALUES ";
 for($i = 0; $i < $len; $i++) {
     $sql .= "(".$t_adv_matchlines[$i]['matchid'].",".$t_adv_matchlines[$i]['playerid'].",".$t_adv_matchlines[$i]['heroid'].",".
                 $t_adv_matchlines[$i]['lh10'].",".$t_adv_matchlines[$i]['is_core'].",".$t_adv_matchlines[$i]['lane'].",".
@@ -222,7 +223,7 @@ for($i = 0; $i < $len; $i++) {
                 $t_adv_matchlines[$i]['couriers_killed'].",".$t_adv_matchlines[$i]['roshans_killed'].",".$t_adv_matchlines[$i]['wards_destroyed'].",".
                 $t_adv_matchlines[$i]['max_multikill'].",".$t_adv_matchlines[$i]['max_streak'].",".$t_adv_matchlines[$i]['stacks'].",".
                 $t_adv_matchlines[$i]['time_dead'].",".$t_adv_matchlines[$i]['buybacks'].",".$t_adv_matchlines[$i]['pings'].",".
-                $t_adv_matchlines[$i]['stuns'].",".$t_adv_matchlines[$i]['teamfight_part']."),";
+                $t_adv_matchlines[$i]['stuns'].",".$t_adv_matchlines[$i]['teamfight_part'].",".$t_adv_matchlines[$i]['damage_taken']."),";
 }
 $sql[strlen($sql)-1] = ";";
 
@@ -285,14 +286,20 @@ if ($conn->multi_query($sql) === TRUE) echo "[S] Successfully recorded draft to 
 else die("[F] Unexpected problems when recording to database.\n".$conn->error."\n");
 
 if ($lrg_teams) {
-  echo "[ ] Collecting teams data\n";
-
-  # TODO
-
   echo "[ ] Collecting match data about participating teams\n";
 
   # TODO
   # make it first by adding it to $matches block
+
+  echo "[ ] Collecting teams data\n";
+
+  # TODO
+  # teamID, team tag, team name
+
+  echo "[ ] Linking players with teams\n";
+
+  # TODO
+  # teamID, playerID, position
 } else {
   echo "[ ] Skipping team stats for PvP competition\n";
 }
