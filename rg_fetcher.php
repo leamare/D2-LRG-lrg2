@@ -97,20 +97,20 @@ foreach ($matches as $match) {
         # trying to decide, is it a core
         $support_indicators = 0;
         if ($matchdata['players'][$j]['lh_t'][5] < 10) $support_indicators++;
-        if ($matchdata['players'][$j]['observer_uses'] < 2) $support_indicators++;
+        if ($matchdata['players'][$j]['observer_uses'] > 2) $support_indicators++;
         if ($matchdata['players'][$j]['gold_per_min'] < 350) $support_indicators++;
         if ($matchdata['players'][$j]['is_roaming']) {
           $support_indicators++;
           $matchdata['players'][$j]['lane_role'] = 5;
         }
 
-        if ($support_indicators > 1) $t_adv_matchlines[$i]['is_core'] = true;
-        else $t_adv_matchlines[$i]['is_core'] = false;
+        if ($support_indicators > 1) $t_adv_matchlines[$i]['is_core'] = 0;
+        else $t_adv_matchlines[$i]['is_core'] = 1;
 
 
         $t_adv_matchlines[$i]['lane_efficiency'] = $matchdata['players'][$j]['lane_efficiency'];
-        $t_adv_matchlines[$i]['observers'] = $matchdata['players'][$j]['observer_uses'];
-        $t_adv_matchlines[$i]['sentries'] = $matchdata['players'][$j]['sentry_uses'];
+        $t_adv_matchlines[$i]['observers'] = $matchdata['players'][$j]['obs_placed'];
+        $t_adv_matchlines[$i]['sentries'] = $matchdata['players'][$j]['sen_placed'];
         $t_adv_matchlines[$i]['couriers_killed'] = $matchdata['players'][$j]['courier_kills'];
         $t_adv_matchlines[$i]['roshans_killed'] = $matchdata['players'][$j]['roshan_kills'];
         $t_adv_matchlines[$i]['wards_destroyed'] = $matchdata['players'][$j]['observer_kills'];
@@ -198,7 +198,7 @@ $sql[strlen($sql)-1] = ";";
 if ($conn->multi_query($sql) === TRUE) echo "[S] Successfully recorded matches to database.\n";
 else die("[F] Unexpected problems when recording to database.\n".$conn->error."\n");
 
-$sql = " INSERT INTO matchlines (matchID, playerID, heroID, level, isRadiant, kills, deaths, assists, networth,".
+$sql = " INSERT INTO matchlines (matchid, playerid, heroid, level, isRadiant, kills, deaths, assists, networth,".
         "gpm, xpm, heal, heroDamage, towerDamage, lastHits, denies) VALUES ";
 $len = sizeof($t_matchlines);
 for($i = 0; $i < $len; $i++) {
@@ -215,7 +215,7 @@ if ($conn->multi_query($sql) === TRUE) echo "[S] Successfully recorded matchline
 else die("[F] Unexpected problems when recording to database.\n".$conn->error."\n");
 
 $sql = " INSERT INTO adv_matchlines (matchid, playerid, heroid, lh_at10, isCore, lane, efficiency_at10, wards, sentries,".
-        "couriers_killed, roshans_killed, multi_kill, streak, stacks, time_dead, buybacks, wards_destroyed, pings, stuns, teamfight_part, damage_taken) VALUES ";
+        "couriers_killed, roshans_killed, wards_destroyed, multi_kill, streak, stacks, time_dead, buybacks, pings, stuns, teamfight_part, damage_taken) VALUES ";
 for($i = 0; $i < $len; $i++) {
     $sql .= "(".$t_adv_matchlines[$i]['matchid'].",".$t_adv_matchlines[$i]['playerid'].",".$t_adv_matchlines[$i]['heroid'].",".
                 $t_adv_matchlines[$i]['lh10'].",".$t_adv_matchlines[$i]['is_core'].",".$t_adv_matchlines[$i]['lane'].",".
@@ -242,19 +242,21 @@ $sql[strlen($sql)-1] = ";";
 if ($conn->multi_query($sql) === TRUE) echo "[S] Successfully recorded draft to database.\n";
 else die("[F] Unexpected problems when recording to database.\n".$conn->error."\n");
 
-echo "\nUnparsed matches: \n";
-foreach ($failed_matches as $fm)
-    echo "\t$fm\n";
+if (sizeof($failed_matches)) {
+  echo "\nUnparsed matches: \n";
+  foreach ($failed_matches as $fm)
+      echo "\t$fm\n";
 
-echo "\n[_] Recording failed matches to file...\n";
+  echo "\n[_] Recording failed matches to file...\n";
 
-$output = implode("\n", $failed_matches);
-$filename = "tmp_fm".time();
-$f = fopen($filename, "w");
-fwrite($f, $output);
-fclose($f);
+  $output = implode("\n", $failed_matches);
+  $filename = "tmp_fm".time();
+  $f = fopen($filename, "w");
+  fwrite($f, $output);
+  fclose($f);
 
-echo "[S] Recorded failed matches to $filename\n";
+  echo "[S] Recorded failed matches to $filename\n";
+}
 
 echo "[ ] Collecting players data\n";
 
@@ -282,7 +284,7 @@ foreach ($players as $player) {
 }
 $sql[strlen($sql)-1] = ";";
 
-if ($conn->multi_query($sql) === TRUE) echo "[S] Successfully recorded draft to database.\n";
+if ($conn->multi_query($sql) === TRUE) echo "[S] Successfully recorded players data to database.\n";
 else die("[F] Unexpected problems when recording to database.\n".$conn->error."\n");
 
 if ($lrg_teams) {
