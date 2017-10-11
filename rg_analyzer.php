@@ -706,10 +706,11 @@
  echo("[ ] Encoding results to JSON\n");
  $output = json_encode($result);
 
- $filename = "report_".$lrg_league_name.".json";
- $f = fopen($filename, "w");
+ $filename = "reports/report_".$lrg_league_name.".json";
+ $f = fopen($filename, "w") or die("[F] Couldn't open file to save results. Check working directory for `reports` folder.\n");
  fwrite($f, $output);
  fclose($f);
- echo("[ ] Recording results to file `report_$lrg_league_name.json`\n");
+ echo("[S] Recorded results to file `report_$lrg_league_name.json`\n");
+
 
  ?>
