@@ -145,7 +145,7 @@
 
     $result["averages_heroes"] = array();
 
-    if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for RECORDS.\n";
+    if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for AVERAGE FOR HEROES.\n";
     else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
 
     do {
@@ -296,7 +296,7 @@
                 FROM draft JOIN matches ON draft.matchid = matches.matchid
                 WHERE is_pick = ".($pick ? "true" : "false")." AND stage = ".$stage."
                 GROUP BY draft.hero_id";
-        if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for PICKS AND BANS.\n";
+        if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for DRAFT STAGE $pick $stage.\n";
         else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
 
         $query_res = $conn->store_result();
@@ -330,7 +330,8 @@
     $result["hero_positions"] = array ();
 
     for ($core = 0; $core < 2; $core++) {
-      for ($lane = 1; $lane < 6; $lane++) {
+      for ($lane = 1; $lane > 0 && $lane < 6; $lane++) {
+        if (!$core) { $lane = 0; }
         $result["hero_positions"][$core][$lane] = array();
 
         $sql = "SELECT
@@ -353,17 +354,19 @@
                 	matchlines ml
                     	ON am.matchid = ml.matchid AND am.heroid = ml.heroid
                     JOIN matches m
-                    	ON m.matchid = am.matchid
-                WHERE am.isCore = 1 AND am.lane = 2
-                GROUP BY am.heroid
+                    	ON m.matchid = am.matchid ".
+               ($core == 0 ? "WHERE am.isCore = 0"
+              :"WHERE am.isCore = 1 AND am.lane = $lane")
+              ." \nGROUP BY am.heroid
                 ORDER BY matches DESC;";
-        if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for HERO POSITIONS.\n";
+
+        if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for HERO POSITIONS $core $lane.\n";
         else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
 
         $query_res = $conn->store_result();
 
         for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
-          $result["hero_positions"][$core][$lane] = array (
+          $result["hero_positions"][$core][$lane][] = array (
             "heroid" => $row[0],
             "matches"=> $row[1],
             "winrate"=> $row[2],
@@ -383,6 +386,7 @@
         }
 
         $query_res->free_result();
+        if (!$core) { break; }
       }
     }
 
@@ -390,16 +394,19 @@
 
     if ($lrg_ana_heroes_positions_matchids) {
       #   include matchids
-      $result["hero_positions_matches"];
+      $result["hero_positions_matches"] = array();
 
       for ($core = 0; $core < 2; $core++) {
         for ($lane = 1; $lane < 6; $lane++) {
+          if (!$core) { $lane = 0; }
           $result["hero_positions_matches"][$core][$lane] = array();
+
+          echo "[S] Requested data for HERO POSITIONS MATCHES $core $lane.\n";
 
           foreach ($result["hero_positions"][$core][$lane] as $hero) {
             $sql = "SELECT matchid FROM adv_matchlines WHERE heroid = ".$hero['heroid']." AND isCore = ".$core." AND lane = ".$lane.";";
 
-            if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for HERO PAIRS MATCHES.\n";
+            if ($conn->multi_query($sql) === TRUE);
             else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
 
             $query_res = $conn->store_result();
@@ -410,13 +417,14 @@
 
             $query_res->free_result();
           }
+          if (!$core) { break; }
         }
       }
     }
   }
 
   if ($lrg_ana_heroes_stats_sides) {
-    $result["hero_positions"] = array ();
+    $result["hero_sides"] = array ();
 
     for ($side = 0; $side < 2; $side++) {
       $result["hero_sides"][$side] = array();
@@ -426,17 +434,17 @@
                 SUM(ml.gpm)/SUM(1) gpm,
                 SUM(ml.xpm)/SUM(1) xpm
               FROM matchlines ml JOIN matches m
-                    ON m.matchid = am.matchid
+                    ON m.matchid = ml.matchid
               WHERE ml.isRadiant = $side
               GROUP BY ml.heroid
               ORDER BY matches DESC;";
-      if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for HERO SIDES.\n";
+      if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for HERO SIDES $side.\n";
       else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
 
       $query_res = $conn->store_result();
 
       for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
-        $result["hero_positions"][$core] = array (
+        $result["hero_sides"][$side] = array (
           "heroid" => $row[0],
           "matches"=> $row[1],
           "winrate"=> $row[2],
@@ -491,7 +499,7 @@
 
         $result["hero_pairs_matches"][$pair['heroid1']."-".$pair['heroid2']] = array();
 
-        if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for PICKS AND BANS.\n";
+        if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for HERO PAIRS MATCHES.\n";
         else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
 
         $query_res = $conn->store_result();
@@ -571,10 +579,12 @@
 
   if ($lrg_teams) {
     # team competitions placeholder
+    # TODO
   } else {
-    echo "[ ] Working for players competition...";
+    echo "[ ] Working for players competition...\n";
 
     if ($lrg_ana_player_vs_player) {
+        $result["pvp"] = array ();
 
         $sql = "SELECT m1.playerid, m2.playerid, SUM(1) match_count, SUM(NOT matches.radiantWin XOR m1.isRadiant) player1_won, SUM(NOT matches.radiantWin XOR m1.isRadiant)/SUM(1) p1_winrate
             FROM matchlines m1
@@ -584,18 +594,122 @@
                 	ON m1.matchid = matches.matchid
             GROUP BY m1.playerid, m2.playerid;";
 
+        if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for PLAYER AGAINST PLAYER.\n";
+        else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+
+        $query_res = $conn->store_result();
+
+        for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+          $result["pvp"][] = array (
+            "playerid1" => $row[0],
+            "playerid2" => $row[1],
+            "matches" => $row[2],
+            "p1won" => $row[3],
+            "p1winrate" => $row[4]
+          );
+        }
+
+        $query_res->free_result();
     }
 
     if ($lrg_ana_player_positions_stats) {
+      $result["player_positions"] = array();
+
+      for ($core = 0; $core < 2; $core++) {
+        for ($lane = 1; $lane < 6 && $lane > 0; $lane++) {
+          if (!$core) { $lane = 0; }
+          $result["player_positions"][$core][$lane] = array();
+
+          $sql = "SELECT
+                    am.playerid playerid,
+                    SUM(1) matches,
+                    SUM(NOT m.radiantWin XOR ml.isradiant)/SUM(1) winrate,
+                    SUM(ml.gpm)/SUM(1) gpm,
+                    SUM(ml.xpm)/SUM(1) xpm,
+                    SUM( ml.heal / (m.duration/60) )/SUM(1) avg_heal,
+                    SUM( ml.heroDamage / (m.duration/60) )/SUM(1) avg_hero_dmg,
+                    SUM( ml.towerDamage / (m.duration/60) )/SUM(1) avg_tower_dmg,
+                    SUM( am.damage_taken / (m.duration/60) )/SUM(1) avg_dmg_taken,
+                    SUM(am.stuns)/SUM(1) stuns,
+                    SUM(am.lh_at10)/SUM(1) lh_10,
+                    SUM(ml.denies)/SUM(1) denies,
+                    SUM(m.duration)/(SUM(1)*60) avg_duration
+                  FROM adv_matchlines am JOIN
+                  	matchlines ml
+                      	ON am.matchid = ml.matchid AND am.playerid = ml.playerid
+                      JOIN matches m
+                      	ON m.matchid = am.matchid ".
+                 ($core == 0 ? "WHERE am.isCore = 0"
+                :"WHERE am.isCore = 1 AND am.lane = $lane")
+                ." GROUP BY am.playerid
+                  ORDER BY matches DESC;";
+          if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for PLAYER POSITIONS $core $lane.\n";
+          else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+
+          $query_res = $conn->store_result();
+
+          for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+            $result["hero_positions"][$core][$lane][] = array (
+              "playerid" => $row[0],
+              "matches"=> $row[1],
+              "winrate"=> $row[2],
+              "gpm"  => $row[3],
+              "xpm" => $row[4],
+              "heal_per_min" => $row[5],
+              "hero_damage_per_min" => $row[6],
+              "tower_damage_per_min"=> $row[7],
+              "damage_taken" => $row[8],
+              "stuns" => $row[9],
+              "lh_at10" => $row[10],
+              "denies" => $row[11],
+              "duration" => $row[12]
+            );
+          }
+
+          $query_res->free_result();
+          if (!$core) { break; }
+        }
+      }
+    }
+
+    if ($lrg_ana_player_pairs) {
 
     }
     # TODO
-    # placeholder
-
   }
 
   if ($lrg_ana_matchlist) {
-    # $lrg_ana_matchlist_players
+    $result["matches"] = array();
+
+    $sql = "SELECT matchid, heroid, playerid FROM matchlines;";
+
+    if ($conn->multi_query($sql) === TRUE) echo "[S] MATCHES LIST.\n";
+    else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+
+    $query_res = $conn->store_result();
+
+    for ($matchline = 1, $row = $query_res->fetch_row();
+         $row != null;
+         $row = $query_res->fetch_row(), $matchline = ($matchline == 10) ? 1 : $matchline+1) {
+      if ($matchline == 1) {
+        $result["matches"][$row[0]] = array();
+      }
+      $result["matches"][$row[0]][] = array (
+        "hero" => $row[1],
+        "player" => $row[2]
+      );
+    }
+
+    $query_res->free_result();
   }
+
+ echo("[ ] Encoding results to JSON\n");
+ $output = json_encode($result);
+
+ $filename = "report_".$lrg_league_name.".json";
+ $f = fopen($filename, "w");
+ fwrite($f, $output);
+ fclose($f);
+ echo("[ ] Recording results to file `report_$lrg_league_name.json`\n");
 
  ?>
