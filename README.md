@@ -1,9 +1,11 @@
 Dota 2 League Stats Fetcher and Report Generator
 
-*Q: But why PHP?*
-Just because. There's no reasoning behind it. I just wanted to do so.
+**Q: But why PHP?**
 
-*Q: What does it do?*
+Just because. There's no reasoning behind it. I just wanted to do so. Don't judge me.
+
+**Q: What does it do?**
+
 * rg_fetcher - Fetches matchdata from OpenDota, adds it to MySQL database (there's no special reason to use it as well).
 * rg_analyzer - Generates precached report file based on matchdata.
 * (TODO) rg_report - Generates fancy (or not so fancy) report page for rg_analyzer output. Can be used on your webserver as well.
