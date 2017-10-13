@@ -28,7 +28,7 @@
     # heroes contested
     $sql .= "SELECT \"heroes_contested\", SUM(1) FROM (SELECT hero_id FROM draft GROUP BY hero_id);"
     # game with most buybacks
-    $sql  = "SELECT \"buybacks_total\", SUM(buybacks) bbs FROM adv_matchlines GROUP BY matchid ORDER BY bbs DESC;";
+    $sql  = "SELECT \"buybacks_total_game\", matchid, SUM(buybacks) bbs FROM adv_matchlines GROUP BY matchid ORDER BY bbs DESC;";
     # total wards placed
     $sql  = "SELECT \"obs_total\", SUM(wards) FROM adv_matchlines;";
     # total wards destroyed
@@ -37,6 +37,8 @@
     $sql  = "SELECT \"couriers_killed_total\", SUM(couriers_killed) FROM adv_matchlines;";
     # roshans killed
     $sql  = "SELECT \"roshans_killed_total\", SUM(roshans_killed) FROM adv_matchlines;";
+    # matches total
+    $sql  = "SELECT \"matches_total\", SUM(matches) FROM matches;";
 
     if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for RANDOM STATS.\n";
     else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
@@ -46,7 +48,7 @@
 
       $row = $query_res->fetch_row();
 
-      $result["records"][$row[0]] = $row[1];
+      $result["random"][$row[0]] = $row[1];
 
       $query_res->free_result();
     } while($conn->next_result());
