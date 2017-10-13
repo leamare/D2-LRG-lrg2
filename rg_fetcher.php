@@ -27,13 +27,43 @@ $t_matches = array ();
 $t_matchlines = array();
 $t_adv_matchlines = array ();
 $t_draft = array ();
+if ($lrg_teams) {
+    $t_team_matches = array();
+    $t_teams = array();
+
+    $sql = "SELECT teamid, name, tag FROM teams";
+    if ($conn->multi_query($sql)) {
+      $res = $conn->store_result();
+
+      while ($row = $res->fetch_row()) {
+        $t_teams[$row[0]] = array(
+          "name"  => $row[1],
+          "tag"   => $row[2],
+          "added" => true
+        );
+      }
+      $res->free();
+    }
+}
+
+$t_players = array();
+$sql = "SELECT playerid FROM players";
+if ($conn->multi_query($sql)) {
+  $res = $conn->store_result();
+
+  while ($row = $res->fetch_row()) {
+    $t_players[$row[0]] = true;
+  }
+  $res->free();
+}
+
 
 foreach ($matches as $match) {
     if ($match[0] == "#") continue;
 
     $query = $conn->query("SELECT matchid FROM matches WHERE matchid = ".$match.";");
 
-    if ($query->num_rows != 0) {
+    if ($query->num_rows) {
         echo("[E] Match $match: Already have it in database, skipping\n");
         continue;
     }
@@ -68,10 +98,42 @@ foreach ($matches as $match) {
          $t_matches[$i]['comeback'] = $matchdata['comeback'];
     else $t_matches[$i]['comeback'] = $matchdata['throw'];
 
+    if ($lrg_teams) {
+      for($i=0; $i<2; $i++) {
+        $tag = !$i ? 'dire_team' : 'radiant_team';
+        $t_team_matches[] = array(
+          "matchid" => $match,
+          "teamid"  => $matchdata[$tag]['team_id'],
+          "is_radiant" => $i,
+        );
+        if (!isset($t_teams[$matchdata[$tag]['team_id']])) {
+          $t_teams[$matchdata[$tag]['team_id']] = array(
+            "name" => $matchdata[$tag]['name'],
+            "tag" => $matchdata[$tag]['tag'],
+            "added" => false
+          );
+        }
+      }
+    }
+
     $i = sizeof($t_matchlines);
     for ($j = 0; $j < 10; $j++, $i++) {
         $t_matchlines[$i]['matchid'] = $match;
-        $t_matchlines[$i]['playerid'] = $matchdata['players'][$j]['account_id'];
+        # support for botmatches
+        if ($matchdata['players'][$j]['account_id'] != null)
+          $t_matchlines[$i]['playerid'] = $matchdata['players'][$j]['account_id'];
+        else {
+          if (isset($matchdata['radiant_team'])) {
+            if($matchdata['players'][$j]['isRadiant']) $t_matchlines[$i]['playerid'] = $matchdata['radiant_team']['team_id'];
+            else $t_matchlines[$i]['playerid'] = $matchdata['dire_team']['team_id'];
+          } else $t_matchlines[$i]['playerid'] = 1;
+
+          $t_matchlines[$i]['playerid'] *= (-1)*$matchdata['players'][$j]['hero_id';
+        }
+        if(!isset($t_players[$matchdata['players'][$j]['account_id']])) {
+          if ($matchdata['players'][$j]["name"] == null) $t_players[$matchdata['players'][$j]['account_id']] = $matchdata['players'][$j]["personaname"];
+          else $t_players[$matchdata['players'][$j]['account_id']] = $matchdata['players'][$j]["name"];
+        }
         $t_matchlines[$i]['heroid'] = $matchdata['players'][$j]['hero_id'];
         $t_matchlines[$i]['isRadiant'] = $matchdata['players'][$j]['isRadiant'];
         $t_matchlines[$i]['level'] = $matchdata['players'][$j]['level'];
@@ -260,45 +322,80 @@ if (sizeof($failed_matches)) {
 
 echo "[ ] Collecting players data\n";
 
-$sql = "SELECT playerID FROM matchlines GROUP BY playerID;";
-$players = array ();
-if ($conn->multi_query($sql)) {
-  $res = $conn->store_result();
-
-  while ($row = $res->fetch_row()) {
-    $player = $row[0];
-    $json = file_get_contents('https://api.opendota.com/api/players/'.$player);
-    $matchdata = json_decode($json, true);
-    $n = sizeof($players);
-    $players[$n] = array ();
-    $players[$n]["id"] = $player;
-    if ($matchdata["profile"]["name"] == null) $players[$n]["name"] = $matchdata["profile"]["personaname"];
-    else $players[$n]["name"] = $matchdata["profile"]["name"];
+$new_players = array_count_values($t_players);
+if(isset($new_players[false])) {
+  $sql = "INSERT INTO players (playerID, nickname) VALUES ";
+  foreach ($t_players as $id => $player) {
+    if ($player == true) continue;
+    $sql .= "(".$id.",\"".$player."\"),";
   }
-  $res->free();
-}
+  $sql[strlen($sql)-1] = ";";
 
-$sql = "INSERT INTO players (playerID, nickname) VALUES ";
-foreach ($players as $player) {
-  $sql .= "(".$player['id'].",\"".$player['name']."\"),";
+  if ($conn->multi_query($sql) === TRUE) echo "[S] Successfully recorded new players data to database.\n";
+  else die("[F] Unexpected problems when recording to database.\n".$conn->error."\n");
 }
-$sql[strlen($sql)-1] = ";";
-
-if ($conn->multi_query($sql) === TRUE) echo "[S] Successfully recorded players data to database.\n";
-else die("[F] Unexpected problems when recording to database.\n".$conn->error."\n");
 
 if ($lrg_teams) {
-  echo "[ ] Collecting match data about participating teams\n";
+  echo "[ ] Adding new team matches\n";
+  $t_team_matches[] = array(
+    "matchid" => $match,
+    "teamid"  => $matchdata[$tag]['team_id'],
+    "is_radiant" => $i,
+  );
 
-  # TODO
-  # make it first by adding it to $matches block
+  $sql = "INSERT INTO teams_matches (matchid, teamid, is_radiant) VALUES ";
 
-  echo "[ ] Collecting teams data\n";
+  foreach($t_team_matches as $match) {
+      $sql .= "(".$match['matchid'].",.$match['teamid'].",.$match['is_radiant']."),";
+  }
+  $sql[strlen($sql)-1] = ";";
 
-  # TODO
-  # teamID, team tag, team name
+  if ($conn->multi_query($sql) === TRUE) echo "[S] Successfully recorded new team matches data to database.\n";
+  else die("[F] Unexpected problems when recording to database.\n".$conn->error."\n");
 
-  echo "[ ] Linking players with teams\n";
+  echo "[ ] Adding teams data\n";
+
+  $newteams = array();
+  foreach($t_teams as $id => $team) {
+    if($team['added']) continue;
+    $newteams[$id] = $team;
+  }
+  if(sizeof($newteams)) {
+    $sql = "INSERT INTO teams (teamid, name, tag) VALUES ";
+    foreach ($newteams as $id => $team) {
+      $sql .= "(".$id.",\"".$team['name']."\",\"".$team['tag']."\"),";
+    }
+    $sql[strlen($sql)-1] = ";";
+
+    if ($conn->multi_query($sql) === TRUE) echo "[S] Successfully recorded new teams data to database.\n";
+    else die("[F] Unexpected problems when recording to database.\n".$conn->error."\n");
+
+    if ($lrg_ana_teams_rosters) {
+      echo "[ ] Getting team rosters\n";
+
+      $sql = "INSERT INTO teams_rosters (teamid, playerid, position) VALUES ";
+
+      foreach ($newteams as $id => $team) {
+        $json = file_get_contents('https://api.steampowered.com/IDOTA2Match_570/GetTeamInfoByTeamID/v001/?key=766BB2E9B3343EF6D94851890EDADD1C&teams_requested=1&start_at_team_id='.$id);
+        $matchdata = json_decode($json, true);
+        # it may return more than 5 players, but we actually care only about the first 5 players
+        # others are probably coach and standins
+
+        # initial idea about positions was to detect player position somehow and use it in team competitions
+        # to detect heros stats based on player positions
+        # right now it's placeholder
+        # TODO
+        $position = 0;
+
+        for($i=0; $i<5; $i++)
+          $sql .= "(".$id.",".$matchdata['teams'][0]['player_'.$i.'_account_id']."),";
+      }
+      $sql[strlen($sql)-1] = ";";
+
+      if ($conn->multi_query($sql) === TRUE) echo "[S] Successfully recorded new teams rosters to database.\n";
+      else die("[F] Unexpected problems when recording to database.\n".$conn->error."\n");
+    }
+  }
 
   # TODO
   # teamID, playerID, position
