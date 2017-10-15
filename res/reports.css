@@ -1,0 +1,101 @@
+table.list , table.pvp {
+  border: 1px solid black;
+  width: 80%;
+  border-spacing: 0px;
+  text-align: left;
+  margin-top: 30px;
+  margin-left: auto;
+	margin-right: auto;
+  color: #fff;
+  border-collapse: collapse;
+}
+table.list , table.pvp * {
+	font-size: 18px;
+	line-height: 34px;
+}
+table.list td, table.list th {
+  padding-left: 30px;
+}
+
+table.list tr, table.pvp tr {
+    height: 45px;
+    border-bottom: 1px solid #101010;
+    border-top: 1px solid #101010;
+    background-color: #323232;
+    opacity: 0.7;
+}
+table.list tr td {
+  font-size: 18px;
+  font-family: 'Radiance-SemiBold';
+  letter-spacing: 1px;
+  padding-top: 5px;
+}
+
+table.list caption, table.pvp caption {
+    margin-bottom: 30px;
+    font-size: 24px;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    font-weight: bold;
+    color: #D9D9D9;
+}
+
+table.list .thead {
+    height: 26px !important;
+    background-color: #525353 !important;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    padding-top: 7px;
+    color: white;
+    opacity: 1;
+    cursor: pointer;
+}
+table.list .thead th {
+    font-size: 12px;
+    line-height:normal;
+}
+
+
+table.list tr:hover  {
+    opacity: 1;
+}
+
+table.pvp {
+  text-align: center;
+  table-layout: fixed;
+  border: 1px solid #000;
+}
+table.pvp tr td:first-child {
+  background-color: #525353 !important;
+}
+table.pvp .thead th:first-child {
+  width: 15%;
+}
+table.pvp tr th+th {
+  width: auto;
+}
+table.pvp .thead {
+  height: 100px;
+}
+table.pvp .thead th  {
+  background-color: #525353 !important;
+  transform-origin: center center 0;
+  white-space: nowrap;
+}
+table.pvp .thead th span{
+  display: inline-block;
+  transform: rotate(-65deg);
+}
+
+table.pvp tr td.low-wr {
+  background-color: #3d2323;
+}
+table.pvp tr td.high-wr {
+  background-color: #243c22;
+}
+table.pvp tr:hover  {
+    opacity: 1;
+}
