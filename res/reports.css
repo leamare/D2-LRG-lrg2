@@ -85,6 +85,7 @@ table.list .thead {
 table.list .thead th {
     font-size: 12px;
     line-height:normal;
+
 }
 table.wide .thead {
   height: 52px;
@@ -104,22 +105,49 @@ table.pvp tr td:first-child {
   background-color: #525353 !important;
 }
 table.pvp .thead th:first-child {
-  width: 15%;
+  width: 10%;
 }
 table.pvp tr th+th {
   width: auto;
 }
-table.pvp .thead {
-  height: 200px;
-}
 table.pvp .thead th  {
   background-color: #525353 !important;
-  transform-origin: center center 0;
   white-space: nowrap;
+  position: relative;
+  cursor: pointer;
+  opacity: 0.8;
+  overflow: hidden;
+}
+table.pvp .thead th:hover  {
+  opacity: 1;
+  overflow: initial;
 }
 table.pvp .thead th span{
-  display: inline-block;
-  transform: rotate(-90deg);
+  line-height: 52px;
+  display: block;
+  margin: 0 7px;
+
+  transition: all 100ms ease;
+  z-index: 1000;
+  position: absolute;
+  top:0;
+  left:0;
+  width:inherit;
+  overflow:hidden;
+}
+table.pvp .thead th span:hover {
+  position: absolute;
+  width: auto;
+  opacity:1;
+  overflow:initial;
+  background-color: #525353;
+  padding: 0 10px;
+  margin: 0;
+  box-shadow: 0 0 5px #000;
+}
+table.pvp td {
+    cursor: pointer;
+    opacity: 0.6;
 }
 
 table.pvp tr td.low-wr {
@@ -129,7 +157,10 @@ table.pvp tr td.high-wr {
   background-color: #243c22;
 }
 table.pvp tr:hover td {
-    opacity: 1;
+    opacity: 0.8;
+}
+table.pvp tr td:hover {
+    opacity: 1 !important;
 }
 
 table .hero_portrait {

@@ -25,12 +25,8 @@
     $sql .= "SELECT \"heroes_contested\", count(distinct hero_id) FROM draft;";
     # Radiant winrate
     $sql .= "SELECT \"radiant_wr\", SUM(radiantWin)*100/SUM(1) FROM matches;";
-    # Radiant matches
-    $sql .= "SELECT \"radiant_matches\", SUM(radiantWin) FROM matches;";
     # Dire winrate
     $sql .= "SELECT \"dire_wr\", (1-(SUM(radiantWin)/SUM(1)))*100 FROM matches;";
-    # Dire matches
-    $sql .= "SELECT \"dire_matches\", SUM(1)-SUM(radiantWin) FROM matches;";
     # total creeps killed (lh+dn)
     $sql .= "SELECT \"creeps_killed\", SUM(lasthits+denies) FROM matchlines;";
     # total wards placed
