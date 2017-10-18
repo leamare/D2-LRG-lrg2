@@ -13,7 +13,6 @@ Just because. There's no reasoning behind it. I just wanted to do so. Don't judg
 
 TODO
 
-- analyzer: team competitions
 - update metadata
 - backup metadata
 - backup database & restore (JSON?)

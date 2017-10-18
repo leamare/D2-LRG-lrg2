@@ -158,7 +158,7 @@ foreach ($matches as $match) {
 
         # trying to decide, is it a core
         $support_indicators = 0;
-        if ($matchdata['players'][$j]['lh_t'][5] < 10) $support_indicators++;
+        if ($matchdata['players'][$j]['lh_t'][5] < 5) $support_indicators++;
         if ($matchdata['players'][$j]['observer_uses'] > 2) $support_indicators++;
         if ($matchdata['players'][$j]['gold_per_min'] < 350) $support_indicators++;
         if ($matchdata['players'][$j]['is_roaming']) {

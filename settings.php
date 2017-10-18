@@ -31,7 +31,7 @@
 
 # Fetcher module
 
-$lrg_input  = "matches.list";
+$lrg_input  = $lrg_league_name.".list";
 
 # Player Info Module
 
@@ -58,7 +58,7 @@ $lrg_ana_hero_pairs             = true; # hero pairs winrates
 $lrg_ana_hero_pairs_matchids    = true; #   include matchids
 
 $lrg_ana_hero_triplets          = true; # hero triplets winrates
-$lrg_ana_hero_truplets_matchids = true; #   include matchids
+$lrg_ana_hero_triplets_matchids = true; #   include matchids
 
 $lrg_ana_matchlist = true; # matches list + drafts in matches and participants
 $lrg_ana_matchlist_players = true; #   players: player list
@@ -66,9 +66,13 @@ $lrg_ana_matchlist_players = true; #   players: player list
 # PLAYERS ONLY (only work with $lrg_teams = false)
 $lrg_ana_player_vs_player = true; # players only: player vs player winrates
 $lrg_ana_player_positions_stats = true; # players stats on positions
+$lrg_ana_player_pairs = true; # player pairs
+$lrg_ana_player_triplets = true; # player triplets
+
 
 # TEAMS ONLY (only workwith $lrg_teams = true)
-$lrg_ana_teams_total    = true;
+$lrg_ana_teams_rosters  = true;
+$lrg_ana_teams_avg      = true;
 $lrg_ana_teams_pickbans = true;
 $lrg_ana_teams_draft    = true;
 $lrg_ana_teams_heropos  = true;
