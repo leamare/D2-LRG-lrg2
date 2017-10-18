@@ -418,7 +418,11 @@ if (isset($modules['players'])) {
                   ($playerline[$player_ids[$i]]['winrate'] > 0.55 ? " class=\"high-wr\"" : (
                         $playerline[$player_ids[$i]]['winrate'] < 0.45 ? " class=\"low-wr\"" : ""
                       )
-                    ).">".number_format($playerline[$player_ids[$i]]['winrate']*100,1)."</td>";
+                    )." onclick=\"showModal('".$strings['matches'].": ".$pvp[$pid][$player_ids[$i]]['matches']
+                          ."<br />".$strings['winrate'].": ".number_format($pvp[$pid][$player_ids[$i]]['winrate']*100,2)
+                          ."%<br />".$strings['won']." ".$pvp[$pid][$player_ids[$i]]['won']." - "
+                                   .$strings['lost']." ".$pvp[$pid][$player_ids[$i]]['lost']."','".$report['players'][$pid]." vs ".$report['players'][$player_ids[$i]]."')\">".
+                      number_format($playerline[$player_ids[$i]]['winrate']*100,0)."</td>";
         }
       }
       $modules['players']['pvp']['grid'] .= "</tr>";

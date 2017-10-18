@@ -4,10 +4,9 @@
 # I guess I'll dublicate league and analyzer parameters, so
 # it will be able to restore data.
 
-#TODO settings prefix
+# global settings
 
-  $lrg_league_name = "test";
-  $lrg_league_desc = "Test Test Test";
+  $lrg_locale = "en";
 
 # SQL Connection information
 
@@ -16,6 +15,12 @@
   $lrg_sql_pass = "";
 
   $lrg_sql_db   = "d2_league_".$lrg_league_name;
+
+
+#TODO settings prefix
+
+  $lrg_league_name = "test";
+  $lrg_league_desc = "Test Test Test";
 
 # League Parameters
 
