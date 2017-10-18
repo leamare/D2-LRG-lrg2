@@ -33,7 +33,8 @@ body {
 
 a, a:active, a:visited, a:focus {
 	font-size: 18px;
-	color: #D9D9D9;
+	color: #fff;
+  text-decoration: none;
 }
 
 a:hover {
@@ -99,6 +100,7 @@ a:hover {
 	padding-top: 40px;
 	background-color: #000000;
 	padding-bottom: 80px;
+  overflow: hidden;
 }
 
 .content-section .content-header {
@@ -126,31 +128,66 @@ a:hover {
 	line-height: 34px;
 	color: #aaa;
 
-	width: 850px;
-	margin-left: auto;
-	margin-right: auto;
+
+	margin: 30px 20% 0;
 
 	margin-top: 30px;
 }
 
-#selector-modules {
+.selector-modules {
 	margin-left: auto;
 	margin-right: auto;
 
 	color: #464646;
 	font-family: 'Radiance-SemiBold';
 
-	font-size: 24px;
 	text-align: center;
 
 	margin-top: 90px;
 	margin-bottom: 20px;
 
+  font-size: 24px;
+}
+.selector-modules-sublevel {
+	text-align: center;
+
+  border-top: 1px solid #464646;
+  color: #aaa;
+
+  padding-top: 20px;
+	margin: 0 25% 20px;
+
+  font-size: 20px;
+}
+.selector-modules-level-3 {
+	text-align: center;
+
+  border-top: 1px solid #464646;
+  color: #aaa;
+
+  padding-top: 20px;
+	margin: 0 25% 20px;
+
+  font-size: 18px;
+}
+.selector-modules-level-4 {
+	text-align: center;
+
+  border-top: 1px solid #464646;
+  color: #aaa;
+
+  padding-top: 20px;
+	margin: 0 25% 20px;
+
+  font-size: 16px;
+}
+.selector {
+  font-size: inherit;
 }
 
 .selector
 {
-	font-size: 24px;
+	font-size: inherit;
 	text-transform: uppercase;
 	letter-spacing: 4px;
 
@@ -162,6 +199,7 @@ a:hover {
 	font-family: 'Radiance-SemiBold';
 
 	color: #D9D9D9;
+  display: inline-block;
 }
 .selector:hover {
 	color: white;
@@ -197,4 +235,14 @@ footer {
     padding-bottom: 120px;
     width: 1000px;
     margin: auto;
+}
+
+.selector-module {
+  display: none;
+}
+.selector-module.active {
+  display: block;
+}
+.selector.active {
+  text-decoration: underline;
 }
