@@ -14,8 +14,6 @@
   $lrg_sql_user = "root";
   $lrg_sql_pass = "";
 
-  $lrg_sql_db   = "d2_league_".$lrg_league_name;
-
 
 #TODO settings prefix
 
@@ -27,6 +25,8 @@
   $lrg_teams = false; # set team or player mix competition
                       # false = players competition
                       # true  = teams competition
+
+$lrg_sql_db   = "d2_league_".$lrg_league_name;
 
 # TODO
 

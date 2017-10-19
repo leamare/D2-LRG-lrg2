@@ -5,6 +5,7 @@
     "creeps_killed"  => "Total Creeps Killed",
     "total_time_dead" => "Total time players were dead",
     "heroes_contested"=> "Heroes contested",
+    "heroes_picked"=> "Heroes picked",
     "buybacks_total_game" => "Match with most buybacks",
     "obs_total" => "Total observer wards planted",
     "obs_killed_total" => "Total observer wards destroyed",
@@ -28,9 +29,9 @@
 
     "radiant" => "Radiant",
     "radiant_wr" => "Radiant Winrate",
-    "radiant_matches" => "Radiant Matches",
+    "radiant_matches" => "Radiant Won",
     "dire" => "Dire",
-    "dire_wr" => "Dire Winrate",
+    "dire_wr" => "Dire Won",
     "dire_matches" => "Dire Matches",
 
     "record" => "Record",
@@ -48,8 +49,9 @@
     "hero_pairs" => "Pairs",
     "hero_triplets" => "Triplets",
     "pvp" => "Player versus player",
-    "player_positions" => "Players stats on various positions",
+    "player_positions" => "Player positions",
     "player_pairs" => "Player pairs",
+    "player_triplets" => "Player triplets",
 
     "core" => "Core",
     "support" => "Support",

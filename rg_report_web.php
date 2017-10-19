@@ -268,6 +268,7 @@ if (isset($modules['heroes'])) {
       }
       $modules['heroes']['hero_sides'][$side ? 'dire' : 'radiant'] .= "</table>";
     }
+    unset($keys);
   }
   if (isset($report['hero_pairs'])) {
     $modules['heroes']['hero_pairs'] = "";
@@ -399,19 +400,15 @@ if (isset($modules['players'])) {
           );
         }
       }
-      $pvp[$pid][$pid] = array(
-        "winrate" => 0,
-        "matches" => 0,
-        "won" => 0,
-        "lost" => 0
-      );
     }
 
 
     foreach($pvp as $pid => $playerline) {
       $modules['players']['pvp']['grid'] .= "<tr><td>".$report['players'][$pid]."</td>";
       for($i=0, $end = sizeof($player_ids); $i<$end; $i++) {
-        if($playerline[$player_ids[$i]]['matches'] == 0) {
+        if($pid == $player_ids[$i]) {
+          $modules['players']['pvp']['grid'] .= "<td class=\"transparent\"></td>";
+        } else if($playerline[$player_ids[$i]]['matches'] == 0) {
           $modules['players']['pvp']['grid'] .= "<td>-</td>";
         } else {
           $modules['players']['pvp']['grid'] .= "<td".
@@ -442,7 +439,7 @@ if (isset($modules['players'])) {
                                                     <th onclick=\"sortTableNum(4,'player-pvp-$pid');\">".$strings['lost']."</th>
                                                  </tr>";
       for($i=0, $end = sizeof($player_ids); $i<$end; $i++) {
-        if($player_ids[$i] == $pid) {
+        if($player_ids[$i] == $pid || $pvp[$pid][$player_ids[$i]]['matches'] == 0) {
           continue;
         } else {
           $modules['players']['pvp']['pid'.$pid] .= "<tr>
@@ -456,6 +453,99 @@ if (isset($modules['players'])) {
       }
       $modules['players']['pvp']['pid'.$pid] .= "</table>";
     }
+    unset($pvp);
+  }
+  if (isset($report['player_pairs'])) {
+    $modules['players']['player_pairs'] = "";
+
+    $modules['players']['player_pairs'] .= "<table id=\"player-pairs\" class=\"list\">
+                                          <tr class=\"thead\">
+                                            <th onclick=\"sortTable(0,'player-pairs');\">".$strings['player']." 1</th>
+                                            <th onclick=\"sortTable(1,'player-pairs');\">".$strings['player']." 2</th>
+                                            <th onclick=\"sortTableNum(2,'player-pairs');\">".$strings['matches']."</th>
+                                            <th onclick=\"sortTableNum(3,'player-pairs');\">".$strings['winrate']."</th>
+                                          </tr>";
+    foreach($report['player_pairs'] as $pair) {
+      $modules['players']['player_pairs'] .= "<tr>
+                                            <td>".$report['players'][ $pair['playerid1'] ]."</td>
+                                            <td>".$report['players'][ $pair['playerid2'] ]."</td>
+                                           <td>".$pair['matches']."</td>
+                                           <td>".$pair['winrate']."</td>
+                                          </tr>";
+    }
+    $modules['players']['player_pairs'] .= "</table>";
+  }
+  if (isset($report['player_triplets'])) {
+    $modules['players']['player_triplets'] = "";
+
+    $modules['players']['player_triplets'] .= "<table id=\"player-triplets\" class=\"list\">
+                                          <tr class=\"thead\">
+                                            <th onclick=\"sortTable(0,'player-triplets');\">".$strings['player']." 1</th>
+                                            <th onclick=\"sortTable(1,'player-triplets');\">".$strings['player']." 2</th>
+                                            <th onclick=\"sortTable(2,'player-triplets');\">".$strings['player']." 3</th>
+                                            <th onclick=\"sortTableNum(3,'player-triplets');\">".$strings['matches']."</th>
+                                            <th onclick=\"sortTableNum(4,'player-triplets');\">".$strings['winrate']."</th>
+                                          </tr>";
+    foreach($report['player_triplets'] as $pair) {
+      $modules['players']['player_triplets'] .= "<tr>
+                                            <td>".$report['players'][ $pair['playerid1'] ]."</td>
+                                            <td>".$report['players'][ $pair['playerid2'] ]."</td>
+                                            <td>".$report['players'][ $pair['playerid3'] ]."</td>
+                                           <td>".$pair['matches']."</td>
+                                           <td>".$pair['winrate']."</td>
+                                          </tr>";
+    }
+    $modules['players']['player_triplets'] .= "</table>";
+  }
+  if (isset($report['player_positions'])) {
+    $modules['players']['player_positions'] = array();
+
+    for ($i=0; $i<2 && !isset($keys); $i++) {
+      for ($j=1; $j<6 && $j>0; $j++) {
+        if (!$i) { $j = 0; }
+        if(isset($report['player_positions'][$i][$j][0])) {
+          $keys = array_keys($report['player_positions'][$i][$j][0]);
+          break;
+        }
+        if (!$i) { break; }
+      }
+    }
+
+    for ($i=0; $i<2; $i++) {
+      for ($j=1; $j<6 && $j>0; $j++) {
+        if (!$i) { $j = 0; }
+        $strings["positions-$i-$j"] = ($i ? $strings['core'] : $strings['support'])." ".$meta['lanes'][$j];
+
+        if(sizeof($report['player_positions'][$i][$j])) {
+          $modules['players']['player_positions']["positions-$i-$j"]  = "";
+          $modules['players']['player_positions']["positions-$i-$j"] .= "<table id=\"players-positions-$i-$j\" class=\"list wide\">
+                                            <tr class=\"thead\">
+                                              <th onclick=\"sortTable(0,'players-positions-$i-$j');\">".$strings['player']."</th>";
+          for($k=1, $end=sizeof($keys); $k < $end; $k++) {
+            $modules['players']['player_positions']["positions-$i-$j"] .= "<th onclick=\"sortTableNum($k,'players-positions-$i-$j');\">".$strings[$keys[$k]]."</th>";
+          }
+          $modules['players']['player_positions']["positions-$i-$j"] .= "</tr>";
+
+
+          foreach($report['player_positions'][$i][$j] as $player) {
+
+            $modules['players']['player_positions']["positions-$i-$j"] .= "<tr".(isset($report['player_positions_matches']) ?
+                                                                      " onclick=\"showModal('".implode($report['player_positions_matches'][$i][$j][$player['playerid']], ", ").
+                                                                      "', '".$strings['matches']."');\"" : "").">
+                                                <td>".$report['players'][$player['playerid']]."</td>
+                                                <td>".$player['matches_s']."</td>
+                                                <td>".number_format($player['winrate_s']*100,1)."%</td>";
+            for($k=3, $end=sizeof($keys); $k < $end; $k++) {
+              $modules['players']['player_positions']["positions-$i-$j"] .= "<td>".number_format($player[$keys[$k]],1)."</td>";
+            }
+            $modules['players']['player_positions']["positions-$i-$j"] .= "</tr>";
+          }
+          $modules['players']['player_positions']["positions-$i-$j"] .= "</table>";
+        }
+        if (!$i) { break; }
+      }
+    }
+    unset($keys);
   }
 }
 # teams
@@ -475,7 +565,11 @@ if (isset($modules['players'])) {
     </head>
     <body>
       <header class="navBar">
-        <span class="navItem"></span>
+        <span class="navItem dotalogo"><a href="#"></a></span>
+        <span class="navItem">123</span>
+        <span class="navItem">123</span>
+        <span class="navItem">123</span>
+        <span class="navItem">123</span>
       </header>
       <div id="content-wrapper">
         <div id="header-image" class="section-header">
