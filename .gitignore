@@ -1,0 +1,6 @@
+output
+report.html
+test.html
+testrun.php
+gi_*
+!.gitignore
