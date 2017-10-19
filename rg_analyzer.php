@@ -23,6 +23,8 @@
     $sql  = "SELECT \"matches_total\", COUNT(matchid) FROM matches;";
     # heroes contested
     $sql .= "SELECT \"heroes_contested\", count(distinct hero_id) FROM draft;";
+    # heroes picked
+    $sql .= "SELECT \"heroes_picked\", count(distinct hero_id) FROM draft WHERE is_pick = 1;";
     # Radiant winrate
     $sql .= "SELECT \"radiant_wr\", SUM(radiantWin)*100/SUM(1) FROM matches;";
     # Dire winrate
@@ -1071,8 +1073,8 @@
           for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
             $result["player_positions"][$core][$lane][] = array (
               "playerid" => $row[0],
-              "matches"=> $row[1],
-              "winrate"=> $row[2],
+              "matches_s"=> $row[1],
+              "winrate_s"=> $row[2],
               "gpm"  => $row[3],
               "xpm" => $row[4],
               "heal_per_min" => $row[5],
@@ -1102,6 +1104,8 @@
               GROUP BY m1.playerid, m2.playerid
               HAVING match_count > 2
               ORDER BY match_count DESC;";
+
+
       # limiting match count for hero pair to 3:
       # 1 match = every possible pair
       # 2 matches = may be a coincedence
@@ -1117,6 +1121,41 @@
           "playerid2" => $row[1],
           "matches" => $row[2],
           "winrate" => $row[3]
+        );
+      }
+
+      $query_res->free_result();
+    }
+
+    if ($lrg_ana_player_triplets) {
+      $result["player_triplets"] = array();
+
+      $sql = "SELECT m1.playerid, m2.playerid, m3.playerid, SUM(1) match_count, SUM(NOT matches.radiantWin XOR m1.isRadiant)/SUM(1) winrate
+              FROM matchlines m1
+                JOIN matchlines m2
+                    ON m1.matchid = m2.matchid and m1.isRadiant = m2.isRadiant and m1.playerid < m2.playerid
+                  JOIN matchlines m3
+                    ON m1.matchid = m3.matchid and m1.isRadiant = m3.isRadiant and m2.playerid < m3.playerid
+                  JOIN matches
+                    ON m1.matchid = matches.matchid
+              GROUP BY m1.playerid, m2.playerid, m3.playerid HAVING match_count > 2
+              ORDER BY match_count DESC, winrate DESC;";
+      # limiting match count for hero pair to 3:
+      # 1 match = every possible pair
+      # 2 matches = may be a coincedence
+
+      if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for PLAYER PAIRS.\n";
+      else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+
+      $query_res = $conn->store_result();
+
+      for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+        $result["player_triplets"][] = array (
+          "playerid1" => $row[0],
+          "playerid2" => $row[1],
+          "playerid3" => $row[2],
+          "matches" => $row[3],
+          "winrate" => $row[4]
         );
       }
 

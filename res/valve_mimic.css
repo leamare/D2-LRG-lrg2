@@ -246,3 +246,43 @@ footer {
 .selector.active {
   text-decoration: underline;
 }
+
+
+header.navBar {
+    height: 64px;
+    position: relative;
+    z-index: 10001;
+    background-image: url(http://cdn.dota2.com/apps/dota2/images/header/header_bg.png);
+    font-family: 'Radiance';
+    box-shadow: 0 0 10px #000;
+    text-align: center;
+    padding: 0 15%;
+    font-size: 0;
+}
+.navItem {
+    margin: 24px 0;
+    padding: 0 20px;
+    font-size: 18px;
+    line-height: 18px;
+    color: #cecece;
+    display: inline-block;
+    border-right: 1px solid #464646;
+    float: left;
+}
+.navItem:last-child {
+  border: none;
+}
+.navItem.dotalogo {
+  font-size: 0;
+  height: 33px;
+  width: 33px;
+  background-image: url(spec_dota_logo_small.png);
+  background-position: center;
+  margin: 15px 0;
+  background-repeat: no-repeat;
+}
+.navItem.dotalogo a {
+  width: 33px;
+  height: 33px;
+  display: block;
+}

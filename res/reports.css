@@ -156,6 +156,9 @@ table.pvp tr td.low-wr {
 table.pvp tr td.high-wr {
   background-color: #243c22;
 }
+table.pvp tr td.transparent {
+  opacity: 0.4;
+}
 table.pvp tr:hover td {
     opacity: 0.8;
 }
