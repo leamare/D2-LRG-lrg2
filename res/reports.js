@@ -8,6 +8,17 @@ function showModal(text, cap) {
 window.onclick = function(event) {
     if (event.target == document.getElementById('modal-box')) {
         document.getElementById('modal-box').style.display = "none";
+        document.getElementById('modal-sublevel').style.display = "none";
+    }
+}
+
+function expandSubModal(text) {
+    document.getElementById('modal-sublevel').innerHTML = text;
+    document.getElementById('modal-sublevel').style.display = "block";
+}
+document.getElementById('modal-text').onclick = function(event) {
+    if (event.target == document.getElementById('modal-text')) {
+        document.getElementById('modal-sublevel').style.display = "none";
     }
 }
 

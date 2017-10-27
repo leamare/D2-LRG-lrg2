@@ -177,66 +177,72 @@ table .hero_portrait {
 }
 
 
-/* Modal window code from w3c */
-.modal {
-    display: none; /* Hidden by default */
-    position: fixed; /* Stay in place */
-    z-index: 1; /* Sit on top */
-    left: 0;
-    top: 0;
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
-    overflow: auto; /* Enable scroll if needed */
-    background-color: rgb(0,0,0); /* Fallback color */
-    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-    -webkit-animation-name: fadeIn; /* Fade in the background */
-    -webkit-animation-duration: 0.4s;
-    animation-name: fadeIn;
-    animation-duration: 0.4s
+.content-cards .match-card {
+  padding: 30px 0;
+  border-bottom: 1px solid #464646;
+}
+.content-cards .match-card:last-child {
+  border: none;
 }
 
-/* Modal Content */
-.modal-content {
-    position: fixed;
-    bottom: 0;
-    background-color: #525353;
-    width: 100%;
-    -webkit-animation-name: slideIn;
-    -webkit-animation-duration: 0.4s;
-    animation-name: slideIn;
-    animation-duration: 0.4s;
-}
-.modal-text {
-    color: #fff;
-    font-size: 22px;
-    font-family: 'Radiance-SemiBold';
-    padding: 30px 5%;
-}
-.modal-header {
-    color: #fff;
-    background-color: #323232;
-    font-size: 22px;
-    font-family: 'Radiance-SemiBold';
-    padding: 30px 5%;
+.match-card {
+  font-size: inherit;
+  line-height: inherit;
+  overflow: hidden;
 }
 
-/* Add Animation */
-@-webkit-keyframes slideIn {
-    from {bottom: -300px; opacity: 0}
-    to {bottom: 0; opacity: 1}
+.match-id {
+  font-size: 24px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  font-weight: bold;
+  color: #D9D9D9;
 }
-
-@keyframes slideIn {
-    from {bottom: -300px; opacity: 0}
-    to {bottom: 0; opacity: 1}
+.match-team.radiant {
+  float:left;
 }
-
-@-webkit-keyframes fadeIn {
-    from {opacity: 0}
-    to {opacity: 1}
+.match-team.dire {
+  float:right;
 }
+.match-team {
+  width: 46%;
 
-@keyframes fadeIn {
-    from {opacity: 0}
-    to {opacity: 1}
+  font-size: inherit;
+  line-height: inherit;
+}
+.match-team .match-players .match-player {
+  font-size: 14px;
+  color: #fff;
+  width: 20%;
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.match-team .match-heroes .match-hero {
+  width: 20%;
+  display: inline-block;
+}
+.match-team .match-heroes .match-hero img {
+  width: 90%;
+  margin:5% 0 ;
+}
+.match-team-name {
+  text-align: center;
+  font-size: 24px;
+  line-height: 36px;
+}
+.match-add-info {
+  clear: both;
+  padding-top: 10px;
+}
+.match-info-line {
+  font-size: 16px;
+  line-height: 20px;
+}
+.match-info-line .caption {
+  font-weight: bold;
+  font-size: inherit;
 }

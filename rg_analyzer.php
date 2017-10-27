@@ -21,6 +21,11 @@
 
     # matches total
     $sql  = "SELECT \"matches_total\", COUNT(matchid) FROM matches;";
+    # players on event
+    $sql .= "SELECT \"players_on_event\", COUNT(playerID) FROM players;";
+    if($lg_settings['main']['teams']) # teams on event
+      $sql .= "SELECT \"teams_on_event\", COUNT(teamid) FROM teams;";
+
     # heroes contested
     $sql .= "SELECT \"heroes_contested\", count(distinct hero_id) FROM draft;";
     # heroes picked
@@ -61,7 +66,7 @@
     } while($conn->next_result());
   }
 
-  if ($lrg_ana_records) {
+  if ($lg_settings['ana']['records']) {
     # records
     $result["records"] = array();
 
@@ -106,9 +111,9 @@
     $sql .= "SELECT \"couriers_killed_by_player\" cap, matchid, couriers_killed, playerid, heroid FROM adv_matchlines ORDER BY couriers_killed DESC;";
 
     # couriers killed in game
-    $sql .= "SELECT \"couriers_killed_in_game\" cap, matchid, COUNT(couriers_killed) cours, 0 playerid, 0 heroid FROM adv_matchlines GROUP BY matchid ORDER BY cours DESC;";
+    $sql .= "SELECT \"couriers_killed_in_game\" cap, matchid, SUM(couriers_killed) cours, 0 playerid, 0 heroid FROM adv_matchlines GROUP BY matchid ORDER BY cours DESC;";
     # roshans killed in game
-    $sql .= "SELECT \"roshans_killed_in_game\" cap, matchid, COUNT(roshans_killed) roshs, 0 playerid, 0 heroid FROM adv_matchlines GROUP BY matchid ORDER BY roshs  DESC;";
+    $sql .= "SELECT \"roshans_killed_in_game\" cap, matchid, SUM(roshans_killed) roshs, 0 playerid, 0 heroid FROM adv_matchlines GROUP BY matchid ORDER BY roshs  DESC;";
 
     # stomp
     $sql .= "SELECT \"stomp\" cap, matchid, stomp, 0 playerid, 0 heroid FROM matches ORDER BY stomp DESC;";
@@ -116,6 +121,19 @@
     $sql .= "SELECT \"comeback\" cap, matchid, comeback, 0 playerid, 0 heroid FROM matches ORDER BY comeback DESC;";
     # length
     $sql .= "SELECT \"duration\" cap, matchid, duration/60, 0 playerid, 0 heroid FROM matches ORDER BY duration DESC;";
+
+    # widest hero pool
+    $sql .= "SELECT \"widest_hero_pool\" cap, 0 matchid, COUNT(distinct heroid) val, playerid, 0 heroid FROM matchlines GROUP BY playerid ORDER BY val DESC;";
+    # smallest hero pool
+    $sql .= "SELECT \"smallest_hero_pool\" cap, 0 matchid, COUNT(distinct heroid) val, playerid, 0 heroid FROM matchlines GROUP BY playerid ORDER BY val;";
+
+    if ($lg_settings['main']['teams']) {
+      # widest hero pool team
+      $sql .= "SELECT \"widest_hero_pool_team\" cap, 0 matchid, COUNT(distinct heroid) val, teams_matches.teamid, 0 heroid
+               FROM matchlines JOIN teams_matches ON matchlines.matchid = teams_matches.matchid AND teams_matches.is_radiant = matchlines.isRadiant
+               GROUP BY matchlines.heroid ORDER BY val DESC;";
+    }
+
 
     #   playerid and heroid = 0 for matchrecords
 
@@ -138,7 +156,7 @@
     } while($conn->next_result());
   }
 
-  if ($lrg_ana_avg_heroes) {
+  if ($lg_settings['ana']['avg_heroes']) {
     # average for heroes
 
     # kills
@@ -210,7 +228,7 @@
     } while($conn->next_result());
   }
 
-  if ($lrg_ana_avg_players) {
+  if ($lg_settings['ana']['avg_players']) {
     # average for players
 
     # kills
@@ -286,43 +304,78 @@
    } while($conn->next_result());
   }
 
-  if ($lrg_ana_pickban) {
+  if ($lg_settings['ana']['pickban']) {
     # pick/ban heroes stats
 
-    $sql = "SELECT dp.hero_id, dp.matches, dp.winrate, db.matches, db.winrate, dp.matches+db.matches total_matches FROM (
-         SELECT draft.hero_id hero_id, SUM(1) matches, SUM(NOT matches.radiantWin XOR draft.is_radiant)/SUM(1) winrate
+    $sql = "SELECT draft.hero_id hero_id, SUM(1) matches, SUM(NOT matches.radiantWin XOR draft.is_radiant)/SUM(1) winrate
     	   FROM draft JOIN matches ON draft.matchid = matches.matchid
     	   WHERE is_pick = true
     	   GROUP BY draft.hero_id
-    ) dp JOIN (
-         SELECT draft.hero_id hero_id, SUM(1) matches, SUM(NOT matches.radiantWin XOR draft.is_radiant)/SUM(1) winrate
-   	     FROM draft JOIN matches ON draft.matchid = matches.matchid
-    	   WHERE is_pick = false
-    	   GROUP BY draft.hero_id
-    ) db ON dp.hero_id = db.hero_id ORDER BY dp.winrate DESC, total_matches DESC;";
+    ORDER BY winrate DESC, matches DESC;";
 
+
+/*) dp LEFT OUTER JOIN (
+     SELECT draft.hero_id hero_id, SUM(1) matches, SUM(NOT matches.radiantWin XOR draft.is_radiant)/SUM(1) winrate
+     FROM draft JOIN matches ON draft.matchid = matches.matchid
+     WHERE is_pick = false
+     GROUP BY draft.hero_id
+) db ON dp.hero_id = db.hero_id
+*/
     $result["pickban"] = array();
 
-    if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for PICKS AND BANS.\n";
+    if ($conn->multi_query($sql) === TRUE);
     else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
 
     $query_res = $conn->store_result();
 
     for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
-      $result["pickban"][] = array (
-        "heroid" => $row[0],
-        "matches_total"   => $row[5],
+      $result["pickban"][$row[0]] = array (
+        "matches_total"   => $row[1],
         "matches_picked"  => $row[1],
         "winrate_picked"  => $row[2],
-        "matches_banned"  => $row[3],
-        "winrate_banned"  => $row[4]
+        "matches_banned"  => 0,
+        "winrate_banned"  => 0
       );
     }
 
     $query_res->free_result();
+
+    $sql = "SELECT draft.hero_id hero_id, SUM(1) matches, SUM(NOT matches.radiantWin XOR draft.is_radiant)/SUM(1) winrate
+    	   FROM draft JOIN matches ON draft.matchid = matches.matchid
+    	   WHERE is_pick = false
+    	   GROUP BY draft.hero_id
+    ORDER BY winrate DESC, matches DESC;";
+
+    if ($conn->multi_query($sql) === TRUE);
+    else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+
+    $query_res = $conn->store_result();
+
+    for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+      if(isset($result["pickban"][$row[0]])) {
+        $result["pickban"][$row[0]] = array (
+          "matches_total"   => ($result["pickban"][$row[0]]["matches_total"]+$row[1]),
+          "matches_picked"  => $result["pickban"][$row[0]]["matches_picked"],
+          "winrate_picked"  => $result["pickban"][$row[0]]["winrate_picked"],
+          "matches_banned"  => $row[1],
+          "winrate_banned"  => $row[2]
+        );
+      } else
+        $result["pickban"][$row[0]] = array (
+          "matches_total"   => $row[1],
+          "matches_picked"  => 0,
+          "winrate_picked"  => 0,
+          "matches_banned"  => $row[1],
+          "winrate_banned"  => $row[2]
+        );
+    }
+
+    $query_res->free_result();
+
+    // TODO Sort
   }
 
-  if ($lrg_ana_draft_stages) {
+  if ($lg_settings['ana']['draft_stages']) {
     # pick/ban draft stages stats
     $result["draft"] = array ();
 
@@ -354,7 +407,7 @@
     # total of 10 requests
   }
 
-  if ($lrg_ana_heroes_positions) {
+  if ($lg_settings['ana']['hero_positions']) {
     # heroes on positions
 
     $result["hero_positions"] = array ();
@@ -388,7 +441,7 @@
                ($core == 0 ? "WHERE am.isCore = 0"
               :"WHERE am.isCore = 1 AND am.lane = $lane")
               ." GROUP BY am.heroid
-                ORDER BY winrate DESC, matches DESC;";
+                ORDER BY matches DESC, winrate DESC;";
 
         if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for HERO POSITIONS $core $lane.\n";
         else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
@@ -420,9 +473,9 @@
       }
     }
 
-    # $lrg_ana_heroes_positions_based_on_players
+    # $lg_settings['ana']['hero_positions_player_data']
 
-    if ($lrg_ana_heroes_positions_matchids) {
+    if ($lg_settings['ana']['hero_positions_matches']) {
       #   include matchids
       $result["hero_positions_matches"] = array();
 
@@ -456,7 +509,7 @@
     }
   }
 
-  if ($lrg_ana_heroes_stats_sides) {
+  if ($lg_settings['ana']['hero_sides']) {
     $result["hero_sides"] = array ();
 
     for ($side = 0; $side < 2; $side++) {
@@ -490,7 +543,7 @@
     }
   }
 
-  if ($lrg_ana_hero_pairs) {
+  if ($lg_settings['ana']['hero_pairs']) {
     $result["hero_pairs"] = array();
 
     $sql = "SELECT m1.heroid, m2.heroid, SUM(1) match_count, SUM(NOT matches.radiantWin XOR m1.isRadiant)/SUM(1) winrate
@@ -521,7 +574,7 @@
     $query_res->free_result();
 
 
-    if ($lrg_ana_hero_pairs_matchids) {
+    if ($lg_settings['ana']['hero_pairs_matches']) {
       $result["hero_pairs_matches"] = array ();
 
       foreach($result['hero_pairs'] as $pair) {
@@ -546,7 +599,7 @@
     }
   }
 
-  if ($lrg_ana_hero_triplets) {
+  if ($lg_settings['ana']['hero_triplets']) {
     $result["hero_triplets"] = array();
 
     $sql = "SELECT m1.heroid, m2.heroid, m3.heroid, SUM(1) match_count, SUM(NOT matches.radiantWin XOR m1.isRadiant)/SUM(1) winrate
@@ -582,7 +635,7 @@
     $query_res->free_result();
 
 
-    if ($lrg_ana_hero_triplets_matchids) {
+    if ($lg_settings['ana']['hero_triplets_matches']) {
       $result["hero_triplets_matches"] = array ();
 
       foreach($result['hero_triplets'] as $pair) {
@@ -610,7 +663,7 @@
     }
   }
 
-  if ($lrg_teams) {
+  if ($lg_settings['main']['teams']) {
     # team competitions placeholder
     $result['teams'] = array();
 
@@ -647,7 +700,7 @@
 
       $query_res->free_result();
 
-      if ($lrg_ana_teams_rosters) {
+      if ($lg_settings['ana']['teams']['rosters']) {
         $sql = "SELECT playerid FROM teams_rosters WHERE teamid = ".$id.";";
 
         if ($conn->multi_query($sql) === TRUE);
@@ -662,7 +715,7 @@
         $query_res->free_result();
       }
 
-      if ($lrg_ana_teams_avg) {
+      if ($lg_settings['ana']['teams']['avg']) {
         # avg kills
         $sql = "SELECT \"kills\", SUM(sum_kills)/SUM(1) FROM (
                   SELECT SUM(kills) sum_kills
@@ -754,7 +807,7 @@
         } while($conn->next_result());
       }
 
-      if ($lrg_ana_teams_pickbans) {
+      if ($lg_settings['ana']['teams']['pickbans']) {
         $sql = "SELECT dp.hero_id, dp.matches, dp.winrate, db.matches, db.winrate, dp.matches+db.matches total_matches FROM (
              SELECT draft.hero_id hero_id, SUM(1) matches, SUM(NOT matches.radiantWin XOR draft.is_radiant)/SUM(1) winrate
              FROM draft JOIN matches ON draft.matchid = matches.matchid
@@ -791,7 +844,7 @@
         $query_res->free_result();
       }
 
-      if ($lrg_ana_teams_draft) {
+      if ($lg_settings['ana']['teams']['draft']) {
         # pick/ban draft stages stats
         $result["teams"][$id]["draft"] = array (
           "picks" => array(),
@@ -829,7 +882,7 @@
         # total of 10 requests
       }
 
-      if ($lrg_ana_teams_heropos) {
+      if ($lg_settings['ana']['teams']['heropos']) {
         $result["teams"][$id]["hero_positions"] = array ();
 
         for ($core = 0; $core < 2; $core++) {
@@ -864,7 +917,7 @@
                    ($core == 0 ? "am.isCore = 0"
                   :"am.isCore = 1 AND am.lane = $lane")
                   ." \nGROUP BY am.heroid
-                    ORDER BY matches DESC;";
+                    ORDER BY matches DESC, winrate DESC;";
 
             if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for HERO POSITIONS $core $lane.\n";
             else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
@@ -897,7 +950,7 @@
         }
       }
 
-      if ($lrg_ana_teams_pairs) {
+      if ($lg_settings['ana']['teams']['pairs']) {
         $result["teams"][$id]["hero_pairs"] = array();
 
         $sql = "SELECT m1.heroid, m2.heroid, SUM(1) match_count, SUM(NOT matches.radiantWin XOR m1.isRadiant)/SUM(1) winrate
@@ -930,7 +983,7 @@
         $query_res->free_result();
       }
 
-      if ($lrg_ana_teams_triplets) {
+      if ($lg_settings['ana']['teams']['triplets']) {
         $result["teams"][$id]["hero_triplets"] = array();
 
         $sql = "SELECT m1.heroid, m2.heroid, m3.heroid, SUM(1) match_count, SUM(NOT matches.radiantWin XOR m1.isRadiant)/SUM(1) winrate
@@ -969,7 +1022,7 @@
         $query_res->free_result();
       }
 
-      if ($lrg_ana_teams_matches) {
+      if ($lg_settings['ana']['teams']['matches']) {
         $result["teams"][$id]["matches"] = array();
 
         $sql = "SELECT ml.matchid, ml.heroid, ml.playerid
@@ -1005,7 +1058,7 @@
   } else {
     echo "[ ] Working for players competition...\n";
 
-    if ($lrg_ana_player_vs_player) {
+    if ($lg_settings['ana']['pvp']) {
         $result["pvp"] = array ();
 
         $sql = "SELECT m1.playerid, m2.playerid, SUM(1) match_count, SUM(NOT matches.radiantWin XOR m1.isRadiant) player1_won, SUM(NOT matches.radiantWin XOR m1.isRadiant)/SUM(1) p1_winrate
@@ -1032,9 +1085,32 @@
         }
 
         $query_res->free_result();
+
+        if ($lg_settings['ana']['pvp_matches']) {
+          for ($i=0,$e=sizeof($result['pvp']); $i<$e; $i++) {
+            $sql = "SELECT m1.matchid
+                FROM matchlines m1
+                	JOIN matchlines m2
+                  		ON m1.matchid = m2.matchid and m1.isRadiant <> m2.isRadiant
+                WHERE m1.playerid = ".$result['pvp'][$i]['playerid1']." AND m2.playerid = ".$result['pvp'][$i]['playerid2'].";";
+
+            if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for PLAYER AGAINST PLAYER.\n";
+            else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+
+            $query_res = $conn->store_result();
+
+            $result['pvp'][$i]['matchids'] = array();
+
+            for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+              $result['pvp'][$i]['matchids'][] = $row[0];
+            }
+
+            $query_res->free_result();
+          }
+        }
     }
 
-    if ($lrg_ana_player_positions_stats) {
+    if ($lg_settings['ana']['player_positions']) {
       $result["player_positions"] = array();
 
       for ($core = 0; $core < 2; $core++) {
@@ -1064,7 +1140,7 @@
                  ($core == 0 ? "WHERE am.isCore = 0"
                 :"WHERE am.isCore = 1 AND am.lane = $lane")
                 ." GROUP BY am.playerid
-                  ORDER BY matches DESC;";
+                  ORDER BY matches DESC, winrate DESC;";
           if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for PLAYER POSITIONS $core $lane.\n";
           else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
 
@@ -1089,12 +1165,36 @@
           }
 
           $query_res->free_result();
+
+          if($lg_settings['ana']['player_positions_matches']) {
+            $result["player_positions_matches"][$core][$lane] = array();
+
+            foreach($result["player_positions"][$core][$lane] as $playerline) {
+              $result["player_positions_matches"][$core][$lane][$playerline['playerid']] = array();
+              $sql = "SELECT matchid
+                      FROM adv_matchlines WHERE ".
+                     ($core == 0 ? "isCore = 0" : "isCore = 1 AND lane = $lane")
+                    ." AND playerid = ".$playerline['playerid'].";";
+
+              if ($conn->multi_query($sql) === TRUE);
+              else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+
+              $query_res = $conn->store_result();
+
+              for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+                $result["player_positions_matches"][$core][$lane][$playerline['playerid']][] = $row[0];
+              }
+
+              $query_res->free_result();
+            }
+          }
+
           if (!$core) { break; }
         }
       }
     }
 
-    if ($lrg_ana_player_pairs) {
+    if ($lg_settings['ana']['player_pairs']) {
       $result["player_pairs"] = array();
 
       $sql = "SELECT m1.playerid, m2.playerid, SUM(1) match_count, SUM(NOT matches.radiantWin XOR m1.isRadiant)/SUM(1) winrate
@@ -1125,9 +1225,33 @@
       }
 
       $query_res->free_result();
+
+      if($lg_settings['ana']['player_pairs_matches']) {
+        $result["player_pairs_matches"] = array();
+        foreach($result["player_pairs"] as $pair) {
+          $result["player_pairs_matches"][$pair['playerid1']."-".$pair['playerid2']] = array();
+
+          $sql = "SELECT m1.matchid
+                  FROM matchlines m1 JOIN matchlines m2
+                    ON m1.matchid = m2.matchid and m1.isRadiant = m2.isRadiant and m1.playerid < m2.playerid
+                    JOIN matches ON m1.matchid = matches.matchid
+                  WHERE m1.playerid = ".$pair['playerid1']." AND m2.playerid = ".$pair['playerid2'].";";
+
+          if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for PLAYER PAIRS.\n";
+          else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+
+          $query_res = $conn->store_result();
+
+          for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+            $result["player_pairs_matches"][$pair['playerid1']."-".$pair['playerid2']][] = $row[0];
+          }
+
+          $query_res->free_result();
+        }
+      }
     }
 
-    if ($lrg_ana_player_triplets) {
+    if ($lg_settings['ana']['player_triplets']) {
       $result["player_triplets"] = array();
 
       $sql = "SELECT m1.playerid, m2.playerid, m3.playerid, SUM(1) match_count, SUM(NOT matches.radiantWin XOR m1.isRadiant)/SUM(1) winrate
@@ -1160,13 +1284,41 @@
       }
 
       $query_res->free_result();
+
+      if($lg_settings['ana']['player_triplets_matches']) {
+        $result["player_triplets_matches"] = array();
+        foreach($result["player_triplets"] as $pair) {
+          $result["player_triplets_matches"][$pair['playerid1']."-".$pair['playerid2']."-".$pair['playerid3']] = array();
+
+          $sql = "SELECT m1.matchid
+                  FROM matchlines m1
+                    JOIN matchlines m2
+                        ON m1.matchid = m2.matchid and m1.isRadiant = m2.isRadiant and m1.playerid < m2.playerid
+                      JOIN matchlines m3
+                        ON m1.matchid = m3.matchid and m1.isRadiant = m3.isRadiant and m2.playerid < m3.playerid
+                      JOIN matches
+                        ON m1.matchid = matches.matchid
+                  WHERE m1.playerid = ".$pair['playerid1']." AND m2.playerid = ".$pair['playerid2']." AND m3.playerid = ".$pair['playerid3'].";";
+
+          if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for PLAYER TRIPLES.\n";
+          else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+
+          $query_res = $conn->store_result();
+
+          for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+            $result["player_triplets_matches"][$pair['playerid1']."-".$pair['playerid2']."-".$pair['playerid3']][] = $row[0];
+          }
+
+          $query_res->free_result();
+        }
+      }
     }
   }
 
-  if ($lrg_ana_matchlist) {
+  if ($lg_settings['ana']['matchlist']) {
     $result["matches"] = array();
 
-    $sql = "SELECT matchid, heroid, playerid FROM matchlines;";
+    $sql = "SELECT matchid, heroid, playerid, isRadiant FROM matchlines;";
 
     if ($conn->multi_query($sql) === TRUE) echo "[S] MATCHES LIST.\n";
     else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
@@ -1181,11 +1333,53 @@
       }
       $result["matches"][$row[0]][] = array (
         "hero" => $row[1],
-        "player" => $row[2]
+        "player" => $row[2],
+        "radiant" => $row[3]
       );
     }
 
+
+    $result["matches_additional"] = array();
+    foreach ($result["matches"] as $matchid => $matchinfo) {
+      $sql = "SELECT duration, cluster, modeID, radiantWin, start_date FROM matches WHERE matchid = $matchid;";
+
+      if ($conn->multi_query($sql) === TRUE);
+      else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+
+      $query_res = $conn->store_result();
+      $row = $query_res->fetch_row();
+
+      $result["matches_additional"][$matchid] = array (
+        "duration" => $row[0],
+        "cluster" => $row[1],
+        "game_mode" => $row[2],
+        "radiant_win" => $row[3],
+        "date" => $row[4]
+      );
+
+    }
+
     $query_res->free_result();
+
+    if($lg_settings['main']['teams']) {
+      $result["match_participants_teams"] = array();
+      $sql = "SELECT matchid, teamid, is_radiant FROM matchlines;";
+
+      if ($conn->multi_query($sql) === TRUE) echo "[S] PARTICIPANTS LIST.\n";
+      else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+
+      $query_res = $conn->store_result();
+
+      for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+        if(!isset($result["match_participants_teams"]))
+          $result["match_participants_teams"][$row[0]] = array();
+        if($row[2] == true)
+          $result["match_participants_teams"]["radiant"] = $row[1];
+        else $result["match_participants_teams"]["dire"] = $row[1];
+      }
+
+      $query_res->free_result();
+    }
   }
 
 # players metadata
@@ -1204,6 +1398,8 @@
 
     $query_res->free_result();
   }
+
+ $result['settings'] = $lg_settings['web'];
 
  echo("[ ] Encoding results to JSON\n");
  $output = json_encode($result);

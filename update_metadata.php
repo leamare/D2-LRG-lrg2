@@ -10,7 +10,9 @@
   $sql = "SELECT heroID, hero_tag, hero_locale_name FROM heroes;
           SELECT itemID, itemTag FROM items;
           SELECT lane_id, name FROM lanes;
-          SELECT modeID, modeName FROM gamemodes;";
+          SELECT modeID, modeName FROM gamemodes;
+          SELECT region_id, region_name FROM regions;
+          SELECT cluster, region_id FROM clusters;";
 
   if ($conn->multi_query($sql)) {
     $res = $conn->store_result();
@@ -51,6 +53,26 @@
     $out['modes'] = array();
     while ($row = $res->fetch_row()) {
       $out['modes'][$row[0]] = $row[1];
+    }
+    $res->free();
+
+    $conn->next_result();
+
+    $res = $conn->store_result();
+
+    $out['regions'] = array();
+    while ($row = $res->fetch_row()) {
+      $out['regions'][$row[0]] = $row[1];
+    }
+    $res->free();
+
+    $conn->next_result();
+
+    $res = $conn->store_result();
+
+    $out['clusters'] = array();
+    while ($row = $res->fetch_row()) {
+      $out['clusters'][$row[0]] = $row[1];
     }
     $res->free();
 

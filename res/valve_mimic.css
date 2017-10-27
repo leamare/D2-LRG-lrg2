@@ -134,6 +134,19 @@ a:hover {
 	margin-top: 30px;
 }
 
+.content-cards {
+	text-align: center;
+
+	font-size: 18px;
+	line-height: 34px;
+	color: #ccc;
+
+
+	margin: 30px 15% 0;
+
+	margin-top: 30px;
+}
+
 .selector-modules {
 	margin-left: auto;
 	margin-right: auto;
@@ -230,13 +243,6 @@ a:hover {
     line-height: 30px;
 }
 
-footer {
-    padding-top: 80px;
-    padding-bottom: 120px;
-    width: 1000px;
-    margin: auto;
-}
-
 .selector-module {
   display: none;
 }
@@ -260,7 +266,7 @@ header.navBar {
     font-size: 0;
 }
 .navItem {
-    margin: 24px 0;
+    margin: 20px 0;
     padding: 0 20px;
     font-size: 18px;
     line-height: 18px;
@@ -285,4 +291,108 @@ header.navBar {
   width: 33px;
   height: 33px;
   display: block;
+}
+
+.hero {
+  display: inline-block;
+  float: left;
+  position: relative;
+  opacity:0.8;
+}
+.hero img {
+}
+.hero .hero_name {
+  display: block;
+  background-color: rgba(0,0,0,0.7);
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  font-size: 14px;
+}
+
+
+
+/* Modal window code from w3c */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    -webkit-animation-name: fadeIn; /* Fade in the background */
+    -webkit-animation-duration: 0.4s;
+    animation-name: fadeIn;
+    animation-duration: 0.4s
+}
+
+/* Modal Content */
+.modal-content {
+    position: fixed;
+    bottom: 0;
+    background-color: #525353;
+    width: 100%;
+    -webkit-animation-name: slideIn;
+    -webkit-animation-duration: 0.4s;
+    animation-name: slideIn;
+    animation-duration: 0.4s;
+}
+.modal-text {
+    color: #fff;
+    font-size: 22px;
+    font-family: 'Radiance-SemiBold';
+    padding: 30px 5%;
+}
+.modal-sublevel {
+    color: #fff;
+    font-size: 22px;
+    font-family: 'Radiance-SemiBold';
+    padding: 30px 5%;
+    background-color: #999;
+    display: none;
+    -webkit-animation-name: slideIn;
+    -webkit-animation-duration: 0.4s;
+    animation-name: slideIn;
+    animation-duration: 0.4s;
+}
+.modal-header {
+    color: #fff;
+    background-color: #323232;
+    font-size: 22px;
+    font-family: 'Radiance-SemiBold';
+    padding: 30px 5%;
+}
+
+/* Add Animation */
+@-webkit-keyframes slideIn {
+    from {bottom: -300px; opacity: 0}
+    to {bottom: 0; opacity: 1}
+}
+
+@keyframes slideIn {
+    from {bottom: -300px; opacity: 0}
+    to {bottom: 0; opacity: 1}
+}
+
+@-webkit-keyframes fadeIn {
+    from {opacity: 0}
+    to {opacity: 1}
+}
+
+@keyframes fadeIn {
+    from {opacity: 0}
+    to {opacity: 1}
+}
+
+footer {
+  color: #525050;
+  font-size: 12px;
+  line-height: 20px;
+  padding: 40px 0 80px 0;
+  margin: auto;
+  width: 70%;
 }
