@@ -20,13 +20,23 @@
   $lrg_league_name = "test";
   $lrg_league_desc = "Test Test Test";
 
+  $lrg_sql_db   = "d2_league_".$lrg_league_name;
+
+  $lrg_use_cache = true;
+
+  $lg_settings = array(
+    "main"=> array(),
+    "ana" => array(),
+    "web" => array()
+  );
+
 # League Parameters
 
-  $lrg_teams = false; # set team or player mix competition
+  $lg_settings['main']['teams'] = false; # set team or player mix competition
                       # false = players competition
                       # true  = teams competition
 
-$lrg_sql_db   = "d2_league_".$lrg_league_name;
+  $lg_settings['main']['fantasy'] = false; # not implemented yet TODO
 
 # TODO
 
@@ -36,8 +46,6 @@ $lrg_sql_db   = "d2_league_".$lrg_league_name;
 
 # Fetcher module
 
-$lrg_input  = $lrg_league_name.".list";
-
 # Player Info Module
 
 # TODO
@@ -45,53 +53,74 @@ $lrg_input  = $lrg_league_name.".list";
 
 # Analyzer Module
 
-$lrg_ana_records     = true; # records
-$lrg_ana_avg_heroes  = true; # averages for heroes
-$lrg_ana_avg_players = true; # averages for players
 
-$lrg_ana_pickban     = true; # pick/ban heroes stats
 
-$lrg_ana_heroes_positions          = true; # heroes on positions
-$lrg_ana_heroes_positions_matchids = true; #   include matchids
-$lrg_ana_heroes_positions_based_on_players = true;
+$lg_settings['ana']['records']     = true; # records
+$lg_settings['ana']['avg_heroes']  = true; # averages for heroes
+$lg_settings['ana']['avg_players'] = true; # averages for players
+
+$lg_settings['ana']['pickban']     = true; # pick/ban heroes stats
+
+$lg_settings['ana']['hero_positions']             = true; # heroes on positions
+$lg_settings['ana']['hero_positions_matches']     = true; #   include matchids
+$lg_settings['ana']['hero_positions_player_data'] = true;
     # team games only: rely on player's positions instead of lanes
-$lrg_ana_heroes_stats_sides = true; # hero stats on sides
+$lg_settings['ana']['hero_sides'] = true; # hero stats on sides
 
-$lrg_ana_draft_stages = true; # pick/ban draft stages stats
+$lg_settings['ana']['draft_stages'] = true; # pick/ban draft stages stats
 
-$lrg_ana_hero_pairs             = true; # hero pairs winrates
-$lrg_ana_hero_pairs_matchids    = true; #   include matchids
+$lg_settings['ana']['hero_pairs']            = true; # hero pairs winrates
+$lg_settings['ana']['hero_pairs_matches']    = true; #   include matchids
 
-$lrg_ana_hero_triplets          = true; # hero triplets winrates
-$lrg_ana_hero_triplets_matchids = true; #   include matchids
+$lg_settings['ana']['hero_triplets']          = true; # hero triplets winrates
+$lg_settings['ana']['hero_triplets_matches'] = true; #   include matchids
 
-$lrg_ana_matchlist = true; # matches list + drafts in matches and participants
-$lrg_ana_matchlist_players = true; #   players: player list
+$lg_settings['ana']['matchlist'] = true; # matches list + drafts in matches and participants
 
-# PLAYERS ONLY (only work with $lrg_teams = false)
-$lrg_ana_player_vs_player = true; # players only: player vs player winrates
-$lrg_ana_player_positions_stats = true; # players stats on positions
-$lrg_ana_player_pairs = true; # player pairs
-$lrg_ana_player_triplets = true; # player triplets
+# PLAYERS ONLY (only work with $lg_settings['main']['teams'] = false)
+$lg_settings['ana']['pvp'] = true; # players only: player vs player winrates
+$lg_settings['ana']['pvp_matches'] = true;
 
+$lg_settings['ana']['player_positions'] = true; # players stats on positions
+$lg_settings['ana']['player_positions_matches'] = true;
 
-# TEAMS ONLY (only workwith $lrg_teams = true)
-$lrg_ana_teams_rosters  = true;
-$lrg_ana_teams_avg      = true;
-$lrg_ana_teams_pickbans = true;
-$lrg_ana_teams_draft    = true;
-$lrg_ana_teams_heropos  = true;
-$lrg_ana_teams_pairs    = true;
-$lrg_ana_teams_triplets = true;
-$lrg_ana_teams_matches  = true;
-# teams only: team stats
-#   total games, winrate, average k / d / a / xpm / gpm / wards / wards_destroyed
-#   pick/ban stats
-#   draft stages stats
-#   heroes on positions
-#   hero pairs
-#   hero triplets
-#   matches list
-$lrg_ana_team_vs_team   = true;
+$lg_settings['ana']['player_pairs'] = true; # player pairs
+$lg_settings['ana']['player_pairs_matches'] = true;
+
+$lg_settings['ana']['player_triplets'] = true; # player triplets
+$lg_settings['ana']['player_triplets_matches'] = true;
+
+$lg_settings['ana']['player_vs_hero'] = false; # not implemented yet TODO
+$lg_settings['ana']['player_hero_combos'] = false; # not implemented yet TODO
+$lg_settings['ana']['player_hero_stats'] = false;  # not implemented yet TODO
+
+$lg_settings['ana']['hero_vs_hero'] = false; # not implemented yet TODO
+
+if($lg_settings['main']['teams']) {
+  $lg_settings['ana']['teams'] = array();
+  # TEAMS ONLY (only workwith $lg_settings['main']['teams'] = true)
+  $lg_settings['ana']['teams']['rosters']  = true;
+  $lg_settings['ana']['teams']['avg']      = true; # TODO
+  $lg_settings['ana']['teams']['pickbans'] = true;
+  $lg_settings['ana']['teams']['draft']    = true;
+  $lg_settings['ana']['teams']['heropos']  = true;
+  $lg_settings['ana']['teams']['pairs']    = true;
+  $lg_settings['ana']['teams']['triplets'] = true;
+  $lg_settings['ana']['teams']['matches']  = true;
+  # teams only: team stats
+  #   total games, winrate, average k / d / a / xpm / gpm / wards / wards_destroyed
+  #   pick/ban stats
+  #   draft stages stats
+  #   heroes on positions
+  #   hero pairs
+  #   hero triplets
+  #   matches list
+  $lg_settings['ana']['teams']['team_vs_team']   = true; # TODO
+}
+
+$lg_settings['web'] = array(
+  "pvp_grid" => true,
+  "hero_combos_graph" => true
+);
 
 ?>

@@ -9,6 +9,8 @@ $conn = new mysqli($lrg_sql_host, $lrg_sql_user, $lrg_sql_pass, $lrg_sql_db);
 
 if ($conn->connect_error) die("[F] Connection to SQL server failed: ".$conn->connect_error."\n");
 
+$lrg_input  = "matchlists/".$lrg_league_name.".list";
+
 $matches = array ();
 $failed_matches = array ();
 
@@ -27,7 +29,7 @@ $t_matches = array ();
 $t_matchlines = array();
 $t_adv_matchlines = array ();
 $t_draft = array ();
-if ($lrg_teams) {
+if ($lg_settings['main']['teams']) {
     $t_team_matches = array();
     $t_teams = array();
 
@@ -68,21 +70,35 @@ foreach ($matches as $match) {
         continue;
     }
 
-    echo("[_] Match $match: Requesting OpenDota API\n");
+    if($lrg_use_cache && file_exists("cache/".$match.".json")) {
+      echo("[_] Match $match: Found local cached version, reusing it\n");
+      $json = file_get_contents("cache/".$match.".json");
+      $matchdata = json_decode($json, true);
+    } else {
+      echo("[_] Match $match: Requesting OpenDota API\n");
+      $json = file_get_contents('https://api.opendota.com/api/matches/'.$match);
+      $matchdata = json_decode($json, true);
+      if ($matchdata == null) {
+          echo("[E] Match $match: Can't parse JSON from OpenDota, skipping\n");
+          $failed_matches[sizeof($failed_matches)] = $match;
+          continue;
+      } else if ($matchdata['players'][0]['lh_t'] == null) {
+          echo("[E] Match $match: Replay is not parsed, skipping\n");
+          $failed_matches[sizeof($failed_matches)] = $match;
+          continue;
+      }
+      echo("[S] Match $match: Request OK\n");
 
-    $json = file_get_contents('https://api.opendota.com/api/matches/'.$match);
-    $matchdata = json_decode($json, true);
-    if ($matchdata == null) {
-        echo("[E] Match $match: Can't parse JSON from OpenDota, skipping\n");
-        $failed_matches[sizeof($failed_matches)] = $match;
-        continue;
-    } else if ($matchdata['players'][0]['lh_t'] == null) {
-        echo("[E] Match $match: Replay is not parsed, skipping\n");
-        $failed_matches[sizeof($failed_matches)] = $match;
-        continue;
+      if($lrg_use_cache) {
+        $f = fopen("cache/".$match.".json", "w");
+        fwrite($f, $json);
+        fclose($f);
+
+        echo("[S] Match $match: Saved cached version\n");
+      }
     }
 
-    echo("[S] Match $match: Request OK\n");
+    unset($json);
 
     $i = sizeof($t_matches);
     $t_matches[$i]['matchid'] = $match;
@@ -90,6 +106,7 @@ foreach ($matches as $match) {
     $t_matches[$i]['duration'] = $matchdata['duration'];
     $t_matches[$i]['modeID'] = $matchdata['game_mode'];
     $t_matches[$i]['leagueID'] = $matchdata['leagueid'];
+    $t_matches[$i]['cluster']  = $matchdata['cluster'];
     $t_matches[$i]['date'] = $matchdata['start_time'];
     if (isset($matchdata['stomp']))
          $t_matches[$i]['stomp'] = $matchdata['stomp'];
@@ -98,7 +115,7 @@ foreach ($matches as $match) {
          $t_matches[$i]['comeback'] = $matchdata['comeback'];
     else $t_matches[$i]['comeback'] = $matchdata['throw'];
 
-    if ($lrg_teams) {
+    if ($lg_settings['main']['teams']) {
       for($i=0; $i<2; $i++) {
         $tag = !$i ? 'dire_team' : 'radiant_team';
         $t_team_matches[] = array(
@@ -128,7 +145,7 @@ foreach ($matches as $match) {
             else $t_matchlines[$i]['playerid'] = $matchdata['dire_team']['team_id'];
           } else $t_matchlines[$i]['playerid'] = 1;
 
-          $t_matchlines[$i]['playerid'] *= (-1)*$matchdata['players'][$j]['hero_id';
+          $t_matchlines[$i]['playerid'] *= (-1)*$matchdata['players'][$j]['hero_id'];
         }
         if(!isset($t_players[$matchdata['players'][$j]['account_id']])) {
           if ($matchdata['players'][$j]["name"] == null) $t_players[$matchdata['players'][$j]['account_id']] = $matchdata['players'][$j]["personaname"];
@@ -158,13 +175,14 @@ foreach ($matches as $match) {
 
         # trying to decide, is it a core
         $support_indicators = 0;
-        if ($matchdata['players'][$j]['lh_t'][5] < 5) $support_indicators++;
+        if ($matchdata['players'][$j]['lh_t'][4] < 2) $support_indicators++;
         if ($matchdata['players'][$j]['observer_uses'] > 2) $support_indicators++;
-        if ($matchdata['players'][$j]['gold_per_min'] < 350) $support_indicators++;
+        if ($matchdata['players'][$j]['gold_per_min'] < 290) $support_indicators++;
         if ($matchdata['players'][$j]['is_roaming']) {
           $support_indicators++;
           $matchdata['players'][$j]['lane_role'] = 5;
         }
+        if ($matchdata['players'][$j]['lane_efficiency'] < 0.45) $support_indicators++;
 
         if ($support_indicators > 1) $t_adv_matchlines[$i]['is_core'] = 0;
         else $t_adv_matchlines[$i]['is_core'] = 1;
@@ -186,7 +204,10 @@ foreach ($matches as $match) {
         $t_adv_matchlines[$i]['pings'] = $matchdata['players'][$j]['pings'];
         $t_adv_matchlines[$i]['stuns'] = $matchdata['players'][$j]['stuns'];
         $t_adv_matchlines[$i]['teamfight_part'] = $matchdata['players'][$j]['teamfight_participation'];
-        $t_adv_matchlines[$i]['damage_taken'] = array_sum($matchdata['players'][$j]['damage_taken']);
+        $t_adv_matchlines[$i]['damage_taken'] = 0;
+        foreach($matchdata['players'][$j]['damage_inflictor_received'] as $key => $instance) {
+          $t_adv_matchlines[$i]['damage_taken'] += $instance;
+        }
     }
 
     $i = sizeof($t_draft);
@@ -249,11 +270,11 @@ foreach ($matches as $match) {
 if (sizeof($t_matches) == 0) die ("[W] No matches to record, exitting...\n");
 
 $len = sizeof($t_matches);
-$sql = "INSERT INTO matches (matchid, radiantWin, duration, modeID, leagueID, date, stomp, comeback) VALUES ";
+$sql = "INSERT INTO matches (matchid, radiantWin, duration, modeID, leagueID, start_date, stomp, comeback, cluster) VALUES ";
 for($i = 0; $i < $len; $i++) {
     $sql .= "(".$t_matches[$i]['matchid'].",".($t_matches[$i]['radiantWin'] ? "true" : "false" ).",".$t_matches[$i]['duration'].","
                .$t_matches[$i]['modeID'].",".$t_matches[$i]['leagueID'].",".$t_matches[$i]['date'].","
-               .$t_matches[$i]['stomp'].",".$t_matches[$i]['comeback']."),";
+               .$t_matches[$i]['stomp'].",".$t_matches[$i]['comeback'].",".$t_matches[$i]['cluster']."),";
 }
 $sql[strlen($sql)-1] = ";";
 
@@ -322,20 +343,22 @@ if (sizeof($failed_matches)) {
 
 echo "[ ] Collecting players data\n";
 
-$new_players = array_count_values($t_players);
-if(isset($new_players[false])) {
-  $sql = "INSERT INTO players (playerID, nickname) VALUES ";
-  foreach ($t_players as $id => $player) {
-    if ($player == true) continue;
-    $sql .= "(".$id.",\"".$player."\"),";
-  }
-  $sql[strlen($sql)-1] = ";";
+$new_players = false;
 
+$sql = "INSERT INTO players (playerID, nickname) VALUES ";
+foreach ($t_players as $id => $player) {
+  if ($player === true) continue;
+  if (!$new_players) $new_players = true;
+  $sql .= "(".$id.",\"".$player."\"),";
+}
+$sql[strlen($sql)-1] = ";";
+
+if ($new_players) {
   if ($conn->multi_query($sql) === TRUE) echo "[S] Successfully recorded new players data to database.\n";
   else die("[F] Unexpected problems when recording to database.\n".$conn->error."\n");
 }
 
-if ($lrg_teams) {
+if ($lg_settings['main']['teams']) {
   echo "[ ] Adding new team matches\n";
   $t_team_matches[] = array(
     "matchid" => $match,
@@ -346,7 +369,7 @@ if ($lrg_teams) {
   $sql = "INSERT INTO teams_matches (matchid, teamid, is_radiant) VALUES ";
 
   foreach($t_team_matches as $match) {
-      $sql .= "(".$match['matchid'].",.$match['teamid'].",.$match['is_radiant']."),";
+      $sql .= "(".$match['matchid'].",".$match['teamid'].",".$match['is_radiant']."),";
   }
   $sql[strlen($sql)-1] = ";";
 
