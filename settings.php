@@ -6,8 +6,6 @@
 
 # global settings
 
-  $lrg_locale = "en";
-
 # SQL Connection information
 
   $lrg_sql_host = "localhost";
@@ -119,8 +117,18 @@ if($lg_settings['main']['teams']) {
 }
 
 $lg_settings['web'] = array(
+  "custom_style" => "sa",
   "pvp_grid" => true,
-  "hero_combos_graph" => true
+
+  "hero_combos_graph" => true,
+  "player_combos_graph" => true,
+  "overview_charts" => true,
+  "overview_regions" => true,
+  "overview_modes" => true,
+  "overview_records" => true,
+  "overview_top_contested" => true,
+  "overview_top_1st_stage" => true,
+  "overview_top_positions" => true
 );
 
 ?>

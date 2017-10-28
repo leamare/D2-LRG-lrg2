@@ -177,18 +177,21 @@ table .hero_portrait {
 }
 
 
-.content-cards .match-card {
+.content-cards .match-card, .content-cards .player-card {
   padding: 30px 0;
   border-bottom: 1px solid #464646;
 }
-.content-cards .match-card:last-child {
+.content-cards .match-card:last-child, .content-cards .player-card:last-child {
   border: none;
 }
 
-.match-card {
+.match-card, .player-card {
+  overflow: hidden;
+}
+.match-card *, .player-card * {
   font-size: inherit;
   line-height: inherit;
-  overflow: hidden;
+  font-family: inherit;
 }
 
 .match-id {
@@ -200,16 +203,22 @@ table .hero_portrait {
   text-align: center;
   font-weight: bold;
   color: #D9D9D9;
+  float: left;
+  width: 4%;
+}
+.match-id a {
+  font-size: inherit;
+  line-height: inherit;
 }
 .match-team.radiant {
   float:left;
 }
 .match-team.dire {
-  float:right;
+  float:left;
 }
 .match-team {
-  width: 46%;
-
+  width: 34%;
+  margin: 0 2%;
   font-size: inherit;
   line-height: inherit;
 }
@@ -235,7 +244,8 @@ table .hero_portrait {
   line-height: 36px;
 }
 .match-add-info {
-  clear: both;
+  float: right;
+  width: 20%;
   padding-top: 10px;
 }
 .match-info-line {
@@ -245,4 +255,66 @@ table .hero_portrait {
 .match-info-line .caption {
   font-weight: bold;
   font-size: inherit;
+}
+
+
+.player-name {
+  font-size: 28px;
+  text-align: left;
+  font-weight: bold;
+  color: #D9D9D9;
+  margin-bottom: 10px;
+  background-color: rgba(255,255,255,0.1);
+  padding: 5px;
+}
+.player-name a {
+  font-size: inherit;
+  line-height: inherit;
+}
+.player-team {
+  font-size: 22px;
+  text-align: left;
+  color: #D9D9D9;
+  margin-bottom: 15px;
+}
+
+.player-heroes, .player-positions {
+  float: right;
+  width: 26%;
+  text-align: left;
+  margin: 0 2%;
+}
+.player-add-info {
+  float: left;
+  width: 26%;
+  text-align: left;
+  margin-left: 2%;
+}
+.player-heroes .hero_portrait {
+  height: 18px;
+  display: inline-block;
+  vertical-align: sub;
+}
+
+.section-caption {
+  font-size: 22px;
+  text-align: left;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+  color: #FFF;
+}
+
+.player-info-line {
+  font-size: 18px;
+  line-height: 20px;
+  margin-bottom: 10px;
+}
+.player-info-line .caption {
+  font-weight: bold;
+  font-size: inherit;
+}
+
+.section-lines .player-info-line:first-of-type {
+  font-size: 20px;
+  font-weight: bold;
 }

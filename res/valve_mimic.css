@@ -196,11 +196,6 @@ a:hover {
 }
 .selector {
   font-size: inherit;
-}
-
-.selector
-{
-	font-size: inherit;
 	text-transform: uppercase;
 	letter-spacing: 4px;
 
@@ -214,6 +209,12 @@ a:hover {
 	color: #D9D9D9;
   display: inline-block;
 }
+.selector a {
+  font-size: inherit;
+  line-height: inherit;
+  font-family: inherit;
+}
+
 .selector:hover {
 	color: white;
 }

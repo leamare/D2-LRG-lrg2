@@ -56,6 +56,7 @@
     "player_positions" => "Player positions",
     "player_pairs" => "Player pairs",
     "player_triplets" => "Player triplets",
+    "player_combos" => "Player combos",
 
     "core" => "Core",
     "support" => "Support",
@@ -108,6 +109,7 @@
     "roshans_killed_in_game" => "Roshan kills in match",
     "roshan_kills_with_team" => "Roshan kills with team",
     "longest_killstreak_in_match" => "Average longest killstreak in match",
+    "hero_pool" => "Hero Pool",
     "widest_hero_pool" => "Player with Widest Hero Pool",
     "smallest_hero_pool" => "Player with Smallest Hero Pool",
     "widest_hero_pool_team" => "Team with Widest Hero Pool",
@@ -134,7 +136,10 @@
     "hero_damage_per_min_s" => "HD/min",
     "tower_damage_per_min_s" => "TD/min",
     "heal_per_min_s" => "Heal/min",
-    "taken_damage_per_min_s" => "Taken HD/min"
+    "taken_damage_per_min_s" => "Taken HD/min",
+
+    "noleague_cap" => "Wrong league",
+    "noleague_desc" => "This is just an interface for generated reports. Please use correct league tag or contact server administrator."
   );
 
  ?>
