@@ -52,11 +52,13 @@
     "hero_pairs" => "Pairs",
     "hero_triplets" => "Triplets",
     "hero_combos" => "Combinations",
+    "hero_combo_graph" => "Hero Combos Graph",
     "pvp" => "Player versus player",
     "player_positions" => "Player positions",
     "player_pairs" => "Player pairs",
     "player_triplets" => "Player triplets",
     "player_combos" => "Player combos",
+    "players_combo_graph" => "Player Combos Graph (Wins)",
 
     "core" => "Core",
     "support" => "Support",

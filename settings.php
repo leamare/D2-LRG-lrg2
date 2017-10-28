@@ -15,9 +15,9 @@
 
 #TODO settings prefix
 
-  //$lrg_league_name = "test";
+  #$lrg_league_name = "test";
   $lrg_league_name = "fpl_sept_2017";
-  //$lrg_league_desc = "Test Test Test";
+  #$lrg_league_desc = "Test Test Test";
   $lrg_league_desc = "FPL - September 2017";
 
   $lrg_sql_db   = "d2_league_".$lrg_league_name;
@@ -73,7 +73,10 @@ $lg_settings['ana']['hero_pairs']            = true; # hero pairs winrates
 $lg_settings['ana']['hero_pairs_matches']    = true; #   include matchids
 
 $lg_settings['ana']['hero_triplets']          = true; # hero triplets winrates
-$lg_settings['ana']['hero_triplets_matches'] = true; #   include matchids
+$lg_settings['ana']['hero_triplets_matches']  = true; #   include matchids
+
+$lg_settings['ana']['hero_combos_graph']      = true; # interactive graph using vis.js
+                                                      # may not work with big amount of data
 
 $lg_settings['ana']['matchlist'] = true; # matches list + drafts in matches and participants
 
@@ -89,6 +92,9 @@ $lg_settings['ana']['player_pairs_matches'] = true;
 
 $lg_settings['ana']['player_triplets'] = true; # player triplets
 $lg_settings['ana']['player_triplets_matches'] = true;
+
+$lg_settings['ana']['players_combo_graph']     = false; # interactive graph using vis.js
+                                                      # may not work with big amount of data
 
 $lg_settings['ana']['player_vs_hero'] = false; # not implemented yet TODO
 $lg_settings['ana']['player_hero_combos'] = false; # not implemented yet TODO
@@ -123,8 +129,8 @@ $lg_settings['web'] = array(
   "custom_style" => "fpl",
   "pvp_grid" => false,
 
-  "hero_combos_graph" => true,
-  "player_combos_graph" => true,
+  "heroes_combo_graph" => true,
+  "players_combo_graph" => true,
   "overview_charts" => true,
   "overview_regions" => true,
   "overview_modes" => true,
