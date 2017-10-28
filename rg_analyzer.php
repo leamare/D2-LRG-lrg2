@@ -64,6 +64,12 @@
 
       $query_res->free_result();
     } while($conn->next_result());
+
+    # sometimes getting all the pairs will be too much
+    # using 5% to 10% of total matches as limiter
+    # 10% would be too much, while 5% can be not enough
+    $limiter = (int)($result['random']['matches_total']*0.04);
+    $limiter_triplets = (int)($result['random']['matches_total']*0.01);
   }
 
   if ($lg_settings['ana']['records']) {
@@ -546,12 +552,12 @@
   if ($lg_settings['ana']['hero_pairs']) {
     $result["hero_pairs"] = array();
 
-    $sql = "SELECT m1.heroid, m2.heroid, SUM(1) match_count, SUM(NOT matches.radiantWin XOR m1.isRadiant)/SUM(1) winrate
+    $sql = "SELECT m1.heroid, m2.heroid, COUNT(distinct m1.matchid) match_count, SUM(NOT matches.radiantWin XOR m1.isRadiant)/SUM(1) winrate
             FROM matchlines m1 JOIN matchlines m2
               ON m1.matchid = m2.matchid and m1.isRadiant = m2.isRadiant and m1.heroid < m2.heroid
               JOIN matches ON m1.matchid = matches.matchid
             GROUP BY m1.heroid, m2.heroid
-            HAVING match_count > 1
+            HAVING match_count > $limiter
             ORDER BY match_count DESC, winrate DESC;";
     # limiting match count for hero pair to 3:
     # 1 match = every possible pair
@@ -585,7 +591,7 @@
 
         $result["hero_pairs_matches"][$pair['heroid1']."-".$pair['heroid2']] = array();
 
-        if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for HERO PAIRS MATCHES.\n";
+        if ($conn->multi_query($sql) === TRUE) ;#echo "[S] Requested data for HERO PAIRS MATCHES.\n";
         else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
 
         $query_res = $conn->store_result();
@@ -611,8 +617,8 @@
               	JOIN matches
                 	ON m1.matchid = matches.matchid
             GROUP BY m1.heroid, m2.heroid, m3.heroid
-            HAVING match_count > 1
-            ORDER BY winrate DESC, match_count DESC;";
+            HAVING match_count > $limiter_triplets
+            ORDER BY match_count DESC, winrate DESC;";
     # limiting match count for hero pair to 3:
     # 1 match = every possible pair
     # 2 matches = may be a coincedence
@@ -623,7 +629,7 @@
     $query_res = $conn->store_result();
 
     for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
-      $result["hero_pairs"][] = array (
+      $result["hero_triplets"][] = array (
         "heroid1" => $row[0],
         "heroid2" => $row[1],
         "heroid3" => $row[2],
@@ -649,7 +655,7 @@
 
         $result["hero_pairs_matches"][$pair['heroid1']."-".$pair['heroid2']."-".$pair['heroid3']] = array();
 
-        if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for HERO TRIPLETS MATCHES.\n";
+        if ($conn->multi_query($sql) === TRUE) ;#echo "[S] Requested data for HERO TRIPLETS MATCHES.\n";
         else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
 
         $query_res = $conn->store_result();
@@ -960,7 +966,7 @@
                   JOIN teams_matches ON m1.matchid = teams_matches.matchid
                 WHERE teams_matches.teamid = ".$id."
                 GROUP BY m1.heroid, m2.heroid
-                HAVING match_count > 1
+                HAVING match_count > $limiter
                 ORDER BY match_count DESC;";
         # limiting match count for hero pair to 3:
         # 1 match = every possible pair
@@ -998,7 +1004,7 @@
                       ON m1.matchid = teams_matches.matchid
                 WHERE teams_matches.teamid = ".$id."
                 GROUP BY m1.heroid, m2.heroid, m3.heroid
-                HAVING match_count >= 2
+                HAVING match_count > $limiter_triplets
                 ORDER BY match_count DESC;";
         # limiting match count for hero pair to 3:
         # 1 match = every possible pair
@@ -1094,7 +1100,7 @@
                   		ON m1.matchid = m2.matchid and m1.isRadiant <> m2.isRadiant
                 WHERE m1.playerid = ".$result['pvp'][$i]['playerid1']." AND m2.playerid = ".$result['pvp'][$i]['playerid2'].";";
 
-            if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for PLAYER AGAINST PLAYER.\n";
+            if ($conn->multi_query($sql) === TRUE)  ;# echo "[S] Requested data for PLAYER AGAINST PLAYER.\n";
             else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
 
             $query_res = $conn->store_result();
@@ -1237,7 +1243,7 @@
                     JOIN matches ON m1.matchid = matches.matchid
                   WHERE m1.playerid = ".$pair['playerid1']." AND m2.playerid = ".$pair['playerid2'].";";
 
-          if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for PLAYER PAIRS.\n";
+          if ($conn->multi_query($sql) === TRUE) ;#echo "[S] Requested data for PLAYER PAIRS.\n";
           else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
 
           $query_res = $conn->store_result();
@@ -1300,7 +1306,7 @@
                         ON m1.matchid = matches.matchid
                   WHERE m1.playerid = ".$pair['playerid1']." AND m2.playerid = ".$pair['playerid2']." AND m3.playerid = ".$pair['playerid3'].";";
 
-          if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for PLAYER TRIPLES.\n";
+          if ($conn->multi_query($sql) === TRUE) ;#echo "[S] Requested data for PLAYER TRIPLES.\n";
           else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
 
           $query_res = $conn->store_result();
@@ -1481,7 +1487,7 @@
       $query_res = $conn->store_result();
       $result["players_additional"][$pid]['heroes'] = array();
 
-      for ($i=0, $row = $query_res->fetch_row(); $i<4 && $row != null; $row = $query_res->fetch_row()) {
+      for ($i=0, $row = $query_res->fetch_row(); $i<4 && $row != null; $i++, $row = $query_res->fetch_row()) {
         $result["players_additional"][$pid]['heroes'][] = array(
           "heroid" => $row[0],
           "matches" => $row[1],
@@ -1492,10 +1498,10 @@
       $query_res->free_result();
 
       # positions
-      $sql = "SELECT aml.lane, COUNT(distinct aml.matchid) matches, SUM(NOT m.radiantWin XOR ml.isRadiant)/SUM(1) wins FROM adv_matchlines aml
+      $sql = "SELECT aml.lane, COUNT(distinct aml.matchid) matches, SUM(NOT m.radiantWin XOR ml.isRadiant) wins FROM adv_matchlines aml
               JOIN matches m ON m.matchid = aml.matchid
-              JOIN matchlines ml ON m.matchid = ml.matchid
-              WHERE aml.playerid = $pid AND aml.isCore = 1 GROUP BY aml.lane ORDER BY wins DESC, matches DESC;";
+              JOIN matchlines ml ON aml.matchid = ml.matchid  AND aml.playerid = ml.playerid
+              WHERE ml.playerid = $pid AND aml.isCore = 1 GROUP BY aml.lane ORDER BY wins DESC, matches DESC;";
 
       if ($conn->multi_query($sql) === TRUE);
       else die("[F] Unexpected problems when requesting database1.\n".$conn->error."\n");
@@ -1514,9 +1520,9 @@
 
       $query_res->free_result();
 
-      $sql = "SELECT aml.lane, COUNT(distinct aml.matchid) matches, SUM(NOT m.radiantWin XOR ml.isRadiant)/SUM(1) wins FROM adv_matchlines aml
+      $sql = "SELECT aml.lane, COUNT(distinct aml.matchid) matches, SUM(NOT m.radiantWin XOR ml.isRadiant) wins FROM adv_matchlines aml
               JOIN matches m ON m.matchid = aml.matchid
-              JOIN matchlines ml ON m.matchid = ml.matchid
+              JOIN matchlines ml ON aml.matchid = ml.matchid AND aml.playerid = ml.playerid
               WHERE aml.playerid = $pid AND aml.isCore = 0 GROUP BY aml.isCore ORDER BY wins DESC, matches DESC;";
 
       if ($conn->multi_query($sql) === TRUE);
@@ -1535,23 +1541,12 @@
 
 
       $query_res->free_result();
-
-      # pings
-      $sql = "SELECT pings/SUM(1) FROM adv_matchlines WHERE playerid = $pid GROUP BY playerid;";
-
-      if ($conn->multi_query($sql) === TRUE);
-      else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
-
-      $query_res = $conn->store_result();
-
-      $row = $query_res->fetch_row();
-      $result["players_additional"][$pid]['pings'] = $row[0];
-
-      $query_res->free_result();
     }
   }
 
  $result['settings'] = $lg_settings['web'];
+ $result['settings']['limiter'] = $limiter;
+ $result['settings']['limiter_triplets'] = $limiter_triplets;
 
  echo("[ ] Encoding results to JSON\n");
  $output = json_encode($result);
