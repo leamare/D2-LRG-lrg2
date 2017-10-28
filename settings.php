@@ -15,8 +15,10 @@
 
 #TODO settings prefix
 
-  $lrg_league_name = "test";
-  $lrg_league_desc = "Test Test Test";
+  //$lrg_league_name = "test";
+  $lrg_league_name = "fpl_sept_2017";
+  //$lrg_league_desc = "Test Test Test";
+  $lrg_league_desc = "FPL - September 2017";
 
   $lrg_sql_db   = "d2_league_".$lrg_league_name;
 
@@ -117,8 +119,9 @@ if($lg_settings['main']['teams']) {
 }
 
 $lg_settings['web'] = array(
-  "custom_style" => "sa",
-  "pvp_grid" => true,
+  //"custom_style" => "sa",
+  "custom_style" => "fpl",
+  "pvp_grid" => false,
 
   "hero_combos_graph" => true,
   "player_combos_graph" => true,

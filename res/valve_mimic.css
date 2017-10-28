@@ -397,3 +397,39 @@ footer {
   margin: auto;
   width: 70%;
 }
+.share-links {
+  margin: 15px 0;
+  float: right;
+  font-size: 0;
+}
+.share-links .share-link {
+  height: 33px;
+  width: 33px;
+  display: inline-block;
+  opacity: 0.5;
+  background-image: url('share.png');
+  background-repeat: no-repeat;
+  transition: all 300ms ease;
+}
+.share-links .share-link:hover {
+  opacity: 1;
+}
+.share-links .share-link a {
+  font-size: 0;
+  height: 33px;
+  width: 33px;
+  display: inline-block;
+  cursor: pointer;
+}
+.share-links .share-link.reddit {
+  background-position: 0;
+}
+.share-links .share-link.twitter {
+  background-position: -33px;
+}
+.share-links .share-link.vk {
+  background-position: -66px;
+}
+.share-links .share-link.fb {
+  background-position: -99px;
+}

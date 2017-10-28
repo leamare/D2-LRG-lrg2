@@ -172,19 +172,25 @@ foreach ($matches as $match) {
         $t_adv_matchlines[$i]['lh10'] = $matchdata['players'][$j]['lh_t'][10];
         $t_adv_matchlines[$i]['lane'] = $matchdata['players'][$j]['lane_role'];
         if($matchdata['players'][$j]['lane_role'] == 5) $matchdata['players'][$j]['lane_role'] = 4; # we don't care about different jungles
+        if ($matchdata['players'][$j]['is_roaming']) {
+          $matchdata['players'][$j]['lane_role'] = 5;
+        }
 
         # trying to decide, is it a core
         $support_indicators = 0;
-        if ($matchdata['players'][$j]['lh_t'][4] < 2) $support_indicators++;
-        if ($matchdata['players'][$j]['observer_uses'] > 2) $support_indicators++;
+        if ($matchdata['players'][$j]['lh_t'][5] < 6) $support_indicators++;
+        if ($matchdata['players'][$j]['lh_t'][3] < 2) $support_indicators++;
+        if ($matchdata['players'][$j]['obs_placed'] > 1) $support_indicators++;
+        if ($matchdata['players'][$j]['obs_placed'] > 5) $support_indicators++;
+        if ($matchdata['players'][$j]['obs_placed'] > 10) $support_indicators++;
+        if ($matchdata['players'][$j]['gold_per_min'] < 350) $support_indicators++;
         if ($matchdata['players'][$j]['gold_per_min'] < 290) $support_indicators++;
-        if ($matchdata['players'][$j]['is_roaming']) {
-          $support_indicators++;
-          $matchdata['players'][$j]['lane_role'] = 5;
-        }
         if ($matchdata['players'][$j]['lane_efficiency'] < 0.45) $support_indicators++;
+        if ($matchdata['players'][$j]['lane_efficiency'] < 0.35) $support_indicators++;
+        if ($matchdata['players'][$j]['hero_damage']*60/$matchdata['duration'] < 350) $support_indicators++;
+        if ($matchdata['players'][$j]['last_hits']*60/$matchdata['duration'] < 2) $support_indicators++;
 
-        if ($support_indicators > 1) $t_adv_matchlines[$i]['is_core'] = 0;
+        if ($support_indicators > 4) $t_adv_matchlines[$i]['is_core'] = 0;
         else $t_adv_matchlines[$i]['is_core'] = 1;
 
 
@@ -201,7 +207,7 @@ foreach ($matches as $match) {
         $t_adv_matchlines[$i]['stacks'] = $matchdata['players'][$j]['camps_stacked'];
         $t_adv_matchlines[$i]['time_dead'] = $matchdata['players'][$j]['life_state_dead'];
         $t_adv_matchlines[$i]['buybacks'] = $matchdata['players'][$j]['buyback_count'];
-        $t_adv_matchlines[$i]['pings'] = $matchdata['players'][$j]['pings'];
+        $t_adv_matchlines[$i]['pings'] = isset($matchdata['players'][$j]['pings']) ? $matchdata['players'][$j]['pings'] : 0;
         $t_adv_matchlines[$i]['stuns'] = $matchdata['players'][$j]['stuns'];
         $t_adv_matchlines[$i]['teamfight_part'] = $matchdata['players'][$j]['teamfight_participation'];
         $t_adv_matchlines[$i]['damage_taken'] = 0;
