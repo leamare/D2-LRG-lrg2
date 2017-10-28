@@ -50,8 +50,7 @@ a:hover {
 }
 
 #header-image {
-	/* background-image: url('header_procircuit.jpg'); */
-  background-image: url('fpl.jpg');
+  background-image: url('header.jpg');
 }
 
 .section-header h1 {
@@ -62,7 +61,6 @@ a:hover {
 	text-transform: uppercase;
 	color: white;
 	padding-top: 158px;
-	margin-top: -8px;
 	margin-bottom: 0px;
 	font-family: 'Radiance-SemiBold';
 	text-shadow: 2px 2px 10px #000000;

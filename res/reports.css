@@ -319,3 +319,10 @@ table .hero_portrait {
   font-size: 20px;
   font-weight: bold;
 }
+
+#hero-combos-graph, #players-combos-graph {
+  width: 1000px;
+  height: 700px;
+  margin: 0 auto;
+  background-color: #fff;
+}
