@@ -32,7 +32,8 @@ body {
 }
 
 a, a:active, a:visited, a:focus {
-	font-size: 18px;
+	font-size: inherit;
+  line-height: inherit;
 	color: #fff;
   text-decoration: none;
 }
@@ -100,6 +101,16 @@ a:hover {
 	padding-bottom: 80px;
   overflow: hidden;
 }
+.content-section div:first-child {
+  margin-top: 0;
+}
+.content-section div:last-child {
+  margin-bottom: 0;
+}
+
+.content-top {
+  margin-bottom: 40px;
+}
 
 .content-section .content-header {
 	background-color: #525353;
@@ -154,7 +165,7 @@ a:hover {
 
 	text-align: center;
 
-	margin-top: 90px;
+	margin-top: 40px;
 	margin-bottom: 20px;
 
   font-size: 24px;
@@ -290,23 +301,6 @@ header.navBar {
   width: 33px;
   height: 33px;
   display: block;
-}
-
-.hero {
-  display: inline-block;
-  float: left;
-  position: relative;
-  opacity:0.8;
-}
-.hero img {
-}
-.hero .hero_name {
-  display: block;
-  background-color: rgba(0,0,0,0.7);
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  font-size: 14px;
 }
 
 
