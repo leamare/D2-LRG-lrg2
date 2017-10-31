@@ -11,6 +11,17 @@ Just because. There's no reasoning behind it. I just wanted to do so. Don't judg
 * (TODO) rg_report - Generates fancy (or not so fancy) report page for rg_analyzer output. Can be used on your webserver as well.
 * (TODO) rg_init - Initialises new league database and other resources.
 
+=== settings.php
+
+You can specify your Steam API key and MySQL credentials, as well as change MySQL database prefix.
+
+This module is included by rg_init, rg_fetcher and rg_analyzer
+
+=== rg_init
+
+=== rg_fetcher 
+
+=== rg_analyzer
 
 === rg_report_web
 

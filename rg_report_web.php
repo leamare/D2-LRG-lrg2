@@ -13,7 +13,11 @@ $mod = "";
     global $lrg_use_get;
     global $mod;
 
-    return ($lrg_use_get && stripos($mod, $module) === 0) || !$lrg_use_get || !$lrg_get_depth || unset_module();
+    if(unset_module()) {
+      $mod = $module;
+    }
+
+    return ($lrg_use_get && stripos($mod, $module) === 0) || !$lrg_use_get || !$lrg_get_depth || $lrg_get_depth <= substr_count($module, "-");
   }
 
   function unset_module() {
@@ -49,7 +53,7 @@ $mod = "";
 
     $output = "<div class=\"player-card\"><div class=\"player-name\"><a href=\"http://opendota.com/players/$player_id\" target=\"_blank\">".$pname." (".$player_id.")</a></div>";
     if(isset($report['teams']))
-      $output .= "<div class=\"player-team\">".$pinfo['team']."</div>";
+      $output .= "<div class=\"player-team\">".team_name($pinfo['team'])." (".$pinfo['team'].")</div>";
     $output .= "<div class=\"player-add-info\">".
                   "<div class=\"player-info-line\"><span class=\"caption\">".$strings['matches'].":</span> ".$pinfo['matches']." (".
                     $pinfo['won']." - ".($pinfo['matches'] - $pinfo['won']).")</div>".
@@ -79,6 +83,13 @@ $mod = "";
     return $output."</div>";
   }
 
+  function team_name($tid) {
+    global $report;
+    if($tid && isset($report['teams'][ $tid ]['name']))
+      return $report['teams'][ $tid ]['name'];
+    return "(no team)";
+  }
+
   function team_card() {
 
   }
@@ -101,9 +112,15 @@ $mod = "";
       }
 
     }
-    if(isset($report['teams'])) {
-      $team_radiant = $report['teams'][ $report['match_participants_teams']['radiant'] ]['name']." (".$report['teams'][ $report['match_participants_teams']['radiant'] ]['tag'].")";
-      $team_dire = $report['teams'][ $report['match_participants_teams']['dire'] ]['name']." (".$report['teams'][ $report['match_participants_teams']['dire'] ]['tag'].")";
+    if(isset($report['teams']) && isset($report['match_participants_teams'][$mid])) {
+      if(isset($report['teams'][ $report['match_participants_teams'][$mid]['radiant'] ]['name']))
+        $team_radiant = $report['teams'][ $report['match_participants_teams'][$mid]['radiant'] ]['name'].
+          " (".$report['teams'][ $report['match_participants_teams'][$mid]['radiant'] ]['tag'].")";
+      else $team_radiant = "Radiant";
+      if(isset($report['teams'][ $report['match_participants_teams'][$mid]['dire'] ]['name']))
+        $team_dire = $report['teams'][ $report['match_participants_teams'][$mid]['dire'] ]['name'].
+          " (".$report['teams'][ $report['match_participants_teams'][$mid]['dire'] ]['tag'].")";
+      else $team_dire = "Dire";
     } else {
       $team_radiant = "Radiant";
       $team_dire = "Dire";
@@ -203,7 +220,7 @@ $level_codes = array(
   0 => array ( "", "higher-level" ),
   1 => array ( "sublevel", "lower-level" ),
   2 => array ( "level-3", "level-3" ),
-  4 => array ( "level-4", "level-4" )
+  3 => array ( "level-4", "level-4" )
 );
 
 /* INITIALISATION */
@@ -388,14 +405,14 @@ $level_codes = array(
           }
           $modules['heroes']['pickban'] .= "</table>";
 
-          $modules['heroes']['pickban'] .= "<div class=\"content-text\"><h1>".$strings['heroes_uncontested'].": ".sizeof($heroes)."</h1>";
+          $modules['heroes']['pickban'] .= "<div class=\"content-text\"><h1>".$strings['heroes_uncontested'].": ".sizeof($heroes)."</h1><div class=\"hero-list\">";
 
           foreach($heroes as $hero) {
             $modules['heroes']['pickban'] .= "<div class=\"hero\"><img src=\"res/heroes/".$hero['tag'].
                 ".png\" alt=\"".$hero['tag']."\" /><span class=\"hero_name\">".
                 $hero['name']."</span></div>";
           }
-          $modules['heroes']['pickban'] .= "</div>";
+          $modules['heroes']['pickban'] .= "</div></div>";
         }
     }
     if (isset($report['draft'])) {
@@ -545,7 +562,7 @@ $level_codes = array(
         if(isset($report['hero_combos_graph'])) {
           $use_graph = true;
 
-          $modules['heroes']['hero_combo_graph'] .= "<div id=\"hero-combos-graph\"></div><script type=\"text/javascript\">";
+          $modules['heroes']['hero_combo_graph'] .= "<div id=\"hero-combos-graph\" class=\"graph\"></div><script type=\"text/javascript\">";
 
           $nodes = "";
           foreach($meta['heroes'] as $hid => $hero) {
@@ -564,7 +581,26 @@ $level_codes = array(
 
           $modules['heroes']['hero_combo_graph'] .= "var container = document.getElementById('hero-combos-graph');\n".
                                                       "var data = { nodes: nodes, edges: edges};\n".
-                                                      "var options={nodes: { shape: 'dot', scaling:{ label: { min:8, max:20 } } }};\n".
+                                                      "var options={
+                                                        physics:{
+                                                          barnesHut:{
+                                                            avoidOverlap:0.8,
+                                                            centralGravity:0.05,
+                                                            springLength:90,
+                                                            springConstant:0.001,
+                                                            gravitationalConstant:-500
+                                                          },
+                                                          timestep: 0.01
+                                                        }, nodes: {
+                                                           shape: 'dot',
+                                                           font: {color:'#ccc',size:14},
+                                                           scaling:{
+                                                             label: {
+                                                               min:8, max:20
+                                                             }
+                                                           }
+                                                         }
+                                                       };\n".
                                                       "var network = new vis.Network(container, data, options);\n".
                                                       "</script>";
         }
@@ -798,7 +834,7 @@ $level_codes = array(
         if(isset($report['players_combo_graph'])) {
           $use_graph = true;
 
-          $modules['players']['players_combo_graph'] .= "<div id=\"players-combos-graph\"></div><script type=\"text/javascript\">";
+          $modules['players']['players_combo_graph'] .= "<div id=\"players-combos-graph\" class=\"graph\"></div><script type=\"text/javascript\">";
 
           $nodes = "";
           foreach($report['players'] as $pid => $player) {
@@ -815,7 +851,23 @@ $level_codes = array(
 
           $modules['players']['players_combo_graph'] .= "var container = document.getElementById('players-combos-graph');\n".
                                                       "var data = { nodes: nodes, edges: edges};\n".
-                                                      "var options={nodes: { shape: 'dot', scaling:{ label: { min:8, max:20 } } }};\n".
+                                                      "var options={
+                                                        physics:{
+                                                          barnesHut:{
+                                                            avoidOverlap:0.8,
+                                                            centralGravity:0.05,
+                                                          },
+                                                          timestep: 0.01
+                                                        }, nodes: {
+                                                           shape: 'dot',
+                                                           font: {color:'#ccc',size:14},
+                                                           scaling:{
+                                                             label: {
+                                                               min:8, max:20
+                                                             }
+                                                           }
+                                                         }
+                                                       };\n".
                                                       "var network = new vis.Network(container, data, options);\n".
                                                       "</script>";
         }
@@ -908,7 +960,7 @@ $level_codes = array(
               foreach($report['player_positions'][$i][$j] as $player) {
 
                 $modules['players']['player_positions']["positions_$i"."_$j"] .= "<tr".(isset($report['player_positions_matches']) ?
-                                                                          " onclick=\"showModal('".implode($report['player_positions_matches'][$i][$j][$player['playerid']], ", ").
+                                                                          " onclick=\"showModal('".join_matches($report['player_positions_matches'][$i][$j][$player['playerid']]).
                                                                           "', '".$report['players'][$player['playerid']]." - ".
                                                                           $strings["positions_$i"."_$j"]." - ".$strings['matches']."');\"" : "").">
                                                     <td>".$report['players'][$player['playerid']]."</td>
@@ -929,6 +981,285 @@ $level_codes = array(
     }
   }
   # teams
+  if (isset($modules['teams']) && check_module("teams")) {
+    if($mod == "teams") $unset_module = true;
+    $parent = "teams-";
+
+    foreach ($report['teams'] as $tid => $team) {
+      $modules['teams']["team_".$tid."_stats"] = array();
+      $strings["team_".$tid."_stats"] = $team['name'];
+
+      if(check_module($parent."team_".$tid."_stats")) {
+        if($mod == $parent."team_".$tid."_stats") $unset_module = true;
+
+        if (isset($report['teams'][$tid]['averages'])) {
+          $modules['teams']["team_".$tid."_stats"]['overview'] = "";
+
+          if(check_module($parent."team_".$tid."_stats-overview")) {
+            $modules['teams']["team_".$tid."_stats"]['overview'] .= "<table id=\"teams-$tid-avg-table\" class=\"list\"><caption>".team_name($tid)."</caption>";
+
+            foreach ($report['teams'][$tid]['averages'] as $value) {
+              $modules['teams']["team_".$tid."_stats"]['overview'] .= "<tr><td>".$strings[ $value['type'] ]."</td><td>".number_format($value['value'], 2)."</td></tr>";
+            }
+
+            $modules['teams']["team_".$tid."_stats"]['overview'] .= "</table>";
+          }
+        }
+        if (isset($report['teams'][$tid]['pickban'])) {
+          $modules['teams']["team_".$tid."_stats"]['pickban'] = "";
+
+          if(check_module($parent."team_".$tid."_stats-pickban")) {
+            $heroes = $meta['heroes'];
+
+            $modules['teams']["team_".$tid."_stats"]['pickban'] .=  "<table id=\"pickban-team$tid\" class=\"list\">
+                                                  <tr class=\"thead\">
+                                                    <th onclick=\"sortTable(0,'pickban-team$tid');\">".$strings['hero']."</th>
+                                                    <th onclick=\"sortTableNum(1,'pickban-team$tid');\">".$strings['matches_total']."</th>
+                                                    <th onclick=\"sortTableNum(2,'pickban-team$tid');\">".$strings['matches_picked']."</th>
+                                                    <th onclick=\"sortTableNum(3,'pickban-team$tid');\">".$strings['winrate_picked']."</th>
+                                                    <th onclick=\"sortTableNum(4,'pickban-team$tid');\">".$strings['matches_banned']."</th>
+                                                    <th onclick=\"sortTableNum(5,'pickban-team$tid');\">".$strings['winrate_banned']."</th>
+                                                  </tr>";
+            foreach($report['teams'][$tid]['pickban'] as $hid => $hero) {
+              unset($heroes[$hid]);
+              $modules['teams']["team_".$tid."_stats"]['pickban'] .=  "<tr>
+                                                    <td>".($hid ? hero_full($hid, $meta) : "").
+                                                   "</td>
+                                                    <td>".$hero['matches_total']."</td>
+                                                    <td>".$hero['matches_picked']."</td>
+                                                    <td>".($hero['matches_picked'] ? number_format($hero['wins_picked']*100/$hero['matches_picked'],2) : 0)."%</td>
+                                                    <td>".$hero['matches_banned']."</td>
+                                                    <td>".($hero['matches_banned'] ? number_format($hero['wins_banned']*100/$hero['matches_banned'],2) : 0)."%</td>
+                                                  </tr>";
+            }
+            $modules['teams']["team_".$tid."_stats"]['pickban'] .= "</table>";
+
+            $modules['teams']["team_".$tid."_stats"]['pickban'] .= "<div class=\"content-text\"><h1>".$strings['heroes_uncontested'].": ".sizeof($heroes)."</h1><div class=\"hero-list\">";
+
+            foreach($heroes as $hero) {
+              $modules['teams']["team_".$tid."_stats"]['pickban'] .= "<div class=\"hero\"><img src=\"res/heroes/".$hero['tag'].
+                  ".png\" alt=\"".$hero['tag']."\" /><span class=\"hero_name\">".
+                  $hero['name']."</span></div>";
+            }
+            $modules['teams']["team_".$tid."_stats"]['pickban'] .= "</div></div>";
+          }
+        }
+        if (isset($report['teams'][$tid]['draft'])) {
+          $modules['teams']["team_".$tid."_stats"]['draft'] = "";
+
+          if(check_module($parent."team_".$tid."_stats-draft")) {
+            for ($i=0; $i<2; $i++) {
+              for ($j=1; $j<4; $j++, isset($report['teams'][$tid]['draft'])) {
+                uasort($report['teams'][$tid]['draft'][$i][$j], function($a, $b) {
+                  if($a['matches'] == $b['matches']) return 0;
+                  else return ($a['matches'] < $b['matches']) ? 1 : -1;
+                });
+
+                $modules['teams']["team_".$tid."_stats"]['draft'] .= "<table id=\"team$tid-draft-$i-$j\" class=\"list list-small\">
+                                                  <caption> Stage $j of ".($i ? $strings['picks'] : $strings['bans'])."</caption>
+                                                  <tr class=\"thead\">
+                                                    <th onclick=\"sortTable(0,'team$tid-draft-$i-$j');\">".$strings['hero']."</th>
+                                                    <th onclick=\"sortTableNum(1,'team$tid-draft-$i-$j');\">".$strings['matches']."</th>
+                                                    <th onclick=\"sortTableNum(2,'team$tid-draft-$i-$j');\">".$strings['winrate']."</th>
+                                                  </tr>";
+
+                foreach($report['teams'][$tid]['draft'][$i][$j] as $hero) {
+                  $modules['teams']["team_".$tid."_stats"]['draft'] .= "<tr>
+                                                      <td>".($hero['heroid'] ? hero_full($hero['heroid'], $meta) : "").
+                                                     "</td>
+                                                      <td>".$hero['matches']."</td>
+                                                      <td>".number_format($hero['winrate']*100,2)."%</td>
+                                                    </tr>";
+                }
+                $modules['teams']["team_".$tid."_stats"]['draft'] .= "</table>";
+
+              }
+            }
+          }
+        }
+        if (isset($report['teams'][$tid]['hero_positions'])) {
+          $modules['teams']["team_".$tid."_stats"]['hero_positions'] = "";
+
+          if (check_module($parent."team_".$tid."_stats-hero_positions")) {
+            if($mod == $parent."team_".$tid."_stats-hero_positions") $unset_module = true;
+            for ($i=0; $i<2 && !isset($keys); $i++) {
+              for ($j=1; $j<6 && $j>0; $j++) {
+                if (!$i) { $j = 0; }
+                if(isset($report['teams'][$tid]['hero_positions'][$i][$j][0])) {
+                  $keys = array_keys($report['teams'][$tid]['hero_positions'][$i][$j][0]);
+                  break;
+                }
+                if (!$i) { break; }
+              }
+            }
+
+            for ($i=0; $i<2; $i++) {
+              for ($j=1; $j<6 && $j>0; $j++) {
+                if (!$i) { $j = 0; }
+
+                if(!isset($strings["positions_$i"."_$j"]))
+                  $strings["positions_$i"."_$j"] = ($i ? $strings['core'] : $strings['support'])." ".$meta['lanes'][$j];
+
+                if(sizeof($report['teams'][$tid]['hero_positions'][$i][$j])) {
+                  $modules['teams']["team_".$tid."_stats"]['hero_positions']["positions_$i"."_$j"]  = "";
+
+                  if (check_module($parent."team_".$tid."_stats-hero_positions-positions_$i"."_$j")) {
+                    $modules['teams']["team_".$tid."_stats"]['hero_positions']["positions_$i"."_$j"] .= "<table id=\"heroes-positions-$i-$j\" class=\"list wide\">
+                                                      <tr class=\"thead\">
+                                                        <th onclick=\"sortTable(0,'heroes-positions-$i-$j');\">".$strings['hero']."</th>";
+                    for($k=1, $end=sizeof($keys); $k < $end; $k++) {
+                      $modules['teams']["team_".$tid."_stats"]['hero_positions']["positions_$i"."_$j"] .= "<th onclick=\"sortTableNum($k,'heroes-positions-$i-$j');\">".$strings[$keys[$k]]."</th>";
+                    }
+                    $modules['teams']["team_".$tid."_stats"]['hero_positions']["positions_$i"."_$j"] .= "</tr>";
+
+                    uasort($report['teams'][$tid]['hero_positions'][$i][$j], function($a, $b) {
+                      if($a['matches_s'] == $b['matches_s']) return 0;
+                      else return ($a['matches_s'] < $b['matches_s']) ? 1 : -1;
+                    });
+
+                    foreach($report['teams'][$tid]['hero_positions'][$i][$j] as $hero) {
+
+                      $modules['teams']["team_".$tid."_stats"]['hero_positions']["positions_$i"."_$j"] .= "<tr".(isset($report['teams'][$tid]['hero_positions_matches']) ?
+                                                                        " onclick=\"showModal('".htmlspecialchars(join_matches($report['teams'][$tid]['hero_positions_matches'][$i][$j][$hero['heroid']])).
+                                                                                "', '".$meta['heroes'][ $hero['heroid'] ]['name']." - ".
+                                                                                $strings["positions_$i"."_$j"]." - ".$strings['matches']."');\"" : "").">
+                                                          <td>".($hero['heroid'] ?
+                                                            "<img class=\"hero_portrait\" src=\"res/heroes/".$meta['heroes'][ $hero['heroid'] ]['tag'].
+                                                            ".png\" alt=\"".$meta['heroes'][ $hero['heroid'] ]['tag']."\" /> ".
+                                                            $meta['heroes'][ $hero['heroid'] ]['name'] : "").
+                                                         "</td>
+                                                          <td>".$hero['matches_s']."</td>
+                                                          <td>".number_format($hero['winrate_s']*100,1)."%</td>";
+                      for($k=3, $end=sizeof($keys); $k < $end; $k++) {
+                        $modules['teams']["team_".$tid."_stats"]['hero_positions']["positions_$i"."_$j"] .= "<td>".number_format($hero[$keys[$k]],1)."</td>";
+                      }
+                      $modules['teams']["team_".$tid."_stats"]['hero_positions']["positions_$i"."_$j"] .= "</tr>";
+                    }
+                    $modules['teams']["team_".$tid."_stats"]['hero_positions']["positions_$i"."_$j"] .= "</table>";
+                  }
+                }
+                if (!$i) { break; }
+              }
+            }
+            unset($keys);
+          }
+        }
+        if (isset($report['teams'][$tid]['hero_graph']) && $report['settings']['heroes_combo_graph'] && isset($report['teams'][$tid]['pickban'])) {
+          $modules['teams']["team_".$tid."_stats"]['hero_combo_graph'] = "";
+
+          if (check_module($parent."team_".$tid."_stats-hero_combo_graph") && isset($report['teams'][$tid]['pickban'])) {
+            $use_graph = true;
+
+            $modules['teams']["team_".$tid."_stats"]['hero_combo_graph'] .= "<div id=\"team$tid-combos-graph\" class=\"graph\"></div><script type=\"text/javascript\">";
+
+            $nodes = "";
+            foreach($meta['heroes'] as $hid => $hero) {
+              $nodes .= "{id: $hid, value: ".
+                (isset($report['teams'][$tid]['pickban'][$hid]['matches_picked']) ? $report['pickban'][$hid]['matches_picked'] : 0).
+                ", label: '".addslashes($hero['name'])."'},";
+            }
+            $modules['teams']["team_".$tid."_stats"]['hero_combo_graph'] .= "var nodes = [".$nodes."];";
+
+            $nodes = "";
+            foreach($report['teams'][$tid]['hero_graph'] as $combo) {
+              $nodes .= "{from: ".$combo['heroid1'].", to: ".$combo['heroid2'].", value:".$combo['matches']."},";
+            }
+
+            $modules['teams']["team_".$tid."_stats"]['hero_combo_graph'] .= "var edges = [".$nodes."];";
+
+            $modules['teams']["team_".$tid."_stats"]['hero_combo_graph'] .= "var container = document.getElementById('team$tid-combos-graph');\n".
+                                                        "var data = { nodes: nodes, edges: edges};\n".
+                                                        "var options={
+                                                          physics:{
+                                                            barnesHut:{
+                                                              avoidOverlap:0.8,
+                                                              centralGravity:0.05,
+                                                              springLength:90,
+                                                              springConstant:0.001,
+                                                              gravitationalConstant:-500
+                                                            },
+                                                            timestep: 0.01
+                                                          }, nodes: {
+                                                             shape: 'dot',
+                                                             font: {color:'#ccc',size:14},
+                                                             scaling:{
+                                                               label: {
+                                                                 min:8, max:20
+                                                               }
+                                                             }
+                                                           }
+                                                         };\n".
+                                                        "var network = new vis.Network(container, data, options);\n".
+                                                        "</script>";
+          }
+        }
+        if (isset($report['teams'][$tid]['hero_pairs']) || isset($report['teams'][$tid]['hero_triplets'])) {
+          $modules['teams']["team_".$tid."_stats"]['hero_combos'] = "";
+
+          if (check_module($parent."team_".$tid."_stats-hero_combos")) {
+            $modules['teams']["team_".$tid."_stats"]['hero_combos'] .= "<table id=\"team$tid-pairs\" class=\"list\">
+                                                  <caption>".$strings['hero_pairs']."</caption>
+                                                  <tr class=\"thead\">
+                                                    <th onclick=\"sortTable(0,'hero-pairs');\">".$strings['hero']." 1</th>
+                                                    <th onclick=\"sortTable(1,'hero-pairs');\">".$strings['hero']." 2</th>
+                                                    <th onclick=\"sortTableNum(2,'hero-pairs');\">".$strings['matches']."</th>
+                                                    <th onclick=\"sortTableNum(3,'hero-pairs');\">".$strings['winrate']."</th>
+                                                  </tr>";
+            foreach($report['teams'][$tid]['hero_pairs'] as $pair) {
+              $modules['teams']["team_".$tid."_stats"]['hero_combos'] .= "<tr".(isset($report['teams'][$tid]['hero_pairs_matches']) ?
+                                                  " onclick=\"showModal('".
+                                                            htmlspecialchars(join_matches($report['teams'][$tid]['hero_pairs_matches'][$pair['heroid1'].'-'.$pair['heroid2']])).
+                                                                        "', '".$strings['matches']."');\"" : "").">
+                                                    <td>".($pair['heroid1'] ? hero_full($pair['heroid1'], $meta) : "").
+                                                   "</td><td>".($pair['heroid2'] ? hero_full($pair['heroid2'], $meta) : "").
+                                                   "</td>
+                                                   <td>".$pair['matches']."</td>
+                                                   <td>".number_format($pair['winrate']*100,2)."</td>
+                                                  </tr>";
+            }
+            $modules['teams']["team_".$tid."_stats"]['hero_combos'] .= "</table>";
+
+            if (!empty($report['teams'][$tid]['hero_triplets'])) {
+              $modules['teams']["team_".$tid."_stats"]['hero_combos'] .= "<table id=\"hero-triplets\" class=\"list\">
+                                                    <caption>".$strings['hero_triplets']."</caption>
+                                                    <tr class=\"thead\">
+                                                      <th onclick=\"sortTable(0,'hero-triplets');\">".$strings['hero']." 1</th>
+                                                      <th onclick=\"sortTable(1,'hero-triplets');\">".$strings['hero']." 2</th>
+                                                      <th onclick=\"sortTable(2,'hero-triplets');\">".$strings['hero']." 3</th>
+                                                      <th onclick=\"sortTableNum(3,'hero-triplets');\">".$strings['matches']."</th>
+                                                      <th onclick=\"sortTableNum(4,'hero-triplets');\">".$strings['winrate']."</th>
+                                                    </tr>";
+              foreach($report['teams'][$tid]['hero_triplets'] as $pair) {
+                $modules['teams']["team_".$tid."_stats"]['hero_combos'] .= "<tr".(isset($report['teams'][$tid]['hero_pairs_matches']) ?
+                                                    " onclick=\"showModal('".
+                                                    implode($report['hero_pairs_matches'][$pair['heroid1'].'-'.$pair['heroid2'].'-'.$pair['heroid3']], ", ").
+                                                                          "', '".$strings['matches']."');\"" : "").">
+                                                      <td>".($pair['heroid1'] ? hero_full($pair['heroid1'], $meta) : "").
+                                                     "</td><td>".($pair['heroid2'] ? hero_full($pair['heroid2'], $meta) : "").
+                                                     "</td><td>".($pair['heroid3'] ? hero_full($pair['heroid3'], $meta) : "").
+                                                     "</td>
+                                                     <td>".$pair['matches']."</td>
+                                                     <td>".number_format($pair['winrate']*100,2)."</td>
+                                                    </tr>";
+              }
+              $modules['teams']["team_".$tid."_stats"]['hero_combos'] .= "</table>";
+            }
+          }
+        }
+        if (isset($report['teams'][$tid]['matches']) && isset($report['matches'])) {
+          $modules['teams']["team_".$tid."_stats"]['matches'] = "";
+
+          if(check_module($parent."team_".$tid."_stats-matches")) {
+            $modules['teams']["team_".$tid."_stats"]['matches'] = "<div class=\"content-cards\">";
+            foreach($report['teams'][$tid]['matches'] as $matchid => $match) {
+              $modules['teams']["team_".$tid."_stats"]['matches'] .= match_card($matchid, $report, $meta, $strings);
+            }
+            $modules['teams']["team_".$tid."_stats"]['matches'] .= "</div>";
+          }
+        }
+      }
+    }
+  }
 
   # matches
   if (isset($modules['matches']) && check_module("matches")) {
@@ -959,7 +1290,7 @@ $level_codes = array(
       <title>League Report</title>
       <link href="res/valve_mimic.css" rel="stylesheet" type="text/css" />
       <link href="res/reports.css" rel="stylesheet" type="text/css" />
-      <?php if(isset($report['settings']['custom_style']) && file_exists("res/custom_colors_".$report['settings']['custom_style'].".css"))
+      <?php if(isset($report['settings']['custom_style']) && file_exists("res/custom_styles/".$report['settings']['custom_style'].".css"))
                 echo "<link href=\"res/custom_colors_".$report['settings']['custom_style'].".css\" rel=\"stylesheet\" type=\"text/css\" />";
             if($use_graph) {
               echo "<script type=\"text/javascript\" src=\"http://visjs.org/dist/vis.js\"></script>";
@@ -967,7 +1298,7 @@ $level_codes = array(
             }
        ?>
     </head>
-    <body onload="draw()">
+    <body>
       <header class="navBar">
         <span class="navItem dotalogo"><a href="http://spectralalliance.ru/dota"></a></span>
         <span class="navItem"><a href="http://spectralalliance.ru/dota-reports" target="_blank" alt="Dota 2 League Reports">League Reports</a></span>
@@ -985,8 +1316,8 @@ $level_codes = array(
       <div id="content-wrapper">
       <?php if (!empty($leaguetag)) { ?>
         <div id="header-image" class="section-header">
-          <h1><?php echo $report['leaguetag']; ?></h1>
-          <h2><?php echo $report['leaguedesc']; ?></h2>
+          <h1><?php echo $report['league_name']; ?></h1>
+          <h2><?php echo $report['league_desc']; ?></h2>
           <h3><?php echo $strings[$h3].": ".$report['random'][$h3]; ?></h3>
         </div>
         <div id="main-section" class="content-section">
@@ -1017,6 +1348,7 @@ echo $output;
         <footer>
           Dota 2 is a registered trademark of Valve Corporation.<br />
           Match replay data analyzed by OpenDota.<br />
+          Graphs are made with vis.js and chart.js.<br />
           Made by Spectral Alliance with support of TheCyberSport.<br />
           Klozi is a registered trademark of Grafensky.<br />
           All changes can be discussed on Spectral Alliance discord channel and on github.

@@ -1,3 +1,7 @@
+body {
+  min-width: 1100px;
+}
+
 table.list , table.pvp {
   border: 1px solid black;
   width: 70%;
@@ -218,7 +222,7 @@ table .hero_portrait {
 }
 .match-team {
   width: 34%;
-  margin: 0 2%;
+  margin: 30px 2% 0;
   font-size: inherit;
   line-height: inherit;
 }
@@ -264,7 +268,7 @@ table .hero_portrait {
   font-weight: bold;
   color: #D9D9D9;
   margin-bottom: 10px;
-  background-color: rgba(255,255,255,0.1);
+  background-color: rgba(255,255,255,0.2);
   padding: 5px;
 }
 .player-name a {
@@ -276,6 +280,8 @@ table .hero_portrait {
   text-align: left;
   color: #D9D9D9;
   margin-bottom: 15px;
+  background-color: rgba(255,255,255,0.1);
+  padding: 5px;
 }
 
 .player-heroes, .player-positions {
@@ -320,9 +326,29 @@ table .hero_portrait {
   font-weight: bold;
 }
 
-#hero-combos-graph, #players-combos-graph {
-  width: 1000px;
+.graph {
+  width: 1100px;
   height: 700px;
   margin: 0 auto;
-  background-color: #fff;
+}
+
+.hero {
+  display: inline-block;
+  position: relative;
+  opacity:0.8;
+}
+.hero:hover {
+  opacity: 1;
+}
+.hero .hero_name {
+  display: block;
+  background-color: rgba(0,0,0,0.7);
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  font-size: 14px;
+}
+
+.content-text .hero-list {
+  line-height: 0px;
 }

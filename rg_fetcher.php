@@ -9,7 +9,7 @@ $conn = new mysqli($lrg_sql_host, $lrg_sql_user, $lrg_sql_pass, $lrg_sql_db);
 
 if ($conn->connect_error) die("[F] Connection to SQL server failed: ".$conn->connect_error."\n");
 
-$lrg_input  = "matchlists/".$lrg_league_name.".list";
+$lrg_input  = "matchlists/".$lrg_league_tag.".list";
 
 $matches = array ();
 $failed_matches = array ();
@@ -115,7 +115,7 @@ foreach ($matches as $match) {
          $t_matches[$i]['comeback'] = $matchdata['comeback'];
     else $t_matches[$i]['comeback'] = $matchdata['throw'];
 
-    if ($lg_settings['main']['teams']) {
+    if ($lg_settings['main']['teams'] && isset($matchdata['radiant_team']) && isset($matchdata['dire_team'])) {
       for($i=0; $i<2; $i++) {
         $tag = !$i ? 'dire_team' : 'radiant_team';
         $t_team_matches[] = array(
@@ -223,6 +223,10 @@ foreach ($matches as $match) {
     # 2  = Captain's Mode
     # 9  = Reverse Captain's Mode
     # 16 = Captain's Draft
+    #
+    # versions:
+    # <= 20 = before 7.07
+    # > 20 = after 7.07
     # TODO Draft information from Stratz for ranked all pick (22)
 
 
@@ -238,9 +242,21 @@ foreach ($matches as $match) {
             $stage_sum = (1+(int)$draft_instance['is_pick'])*($draft_instance['team'] ? 1 : -1);
             $draft_stage = 0;
 
-            if    (++$stages[$stage_sum] < 3) $draft_stage = 1;
-            else if ($stages[$stage_sum] < 5) $draft_stage = 2;
-            else $draft_stage = 3;
+            if ($matchdata['version'] < 21) {
+              if    (++$stages[$stage_sum] < 3) $draft_stage = 1;
+              else if ($stages[$stage_sum] < 5) $draft_stage = 2;
+              else $draft_stage = 3;
+            } else {
+              if($draft_instance['is_pick']) {
+                if    (++$stages[$stage_sum] < 3) $draft_stage = 1;
+                else if ($stages[$stage_sum] < 5) $draft_stage = 2;
+                else $draft_stage = 3;
+              } else {
+                if    (++$stages[$stage_sum] < 4) $draft_stage = 1;
+                else if ($stages[$stage_sum] < 6) $draft_stage = 2;
+                else $draft_stage = 3;
+              }
+            }
 
             $t_draft[$i]['matchid'] = $match;
             $t_draft[$i]['is_radiant'] = $draft_instance['team'] ? 0 : 1;
@@ -399,31 +415,30 @@ if ($lg_settings['main']['teams']) {
     if ($conn->multi_query($sql) === TRUE) echo "[S] Successfully recorded new teams data to database.\n";
     else die("[F] Unexpected problems when recording to database.\n".$conn->error."\n");
 
-    if ($lrg_ana_teams_rosters) {
-      echo "[ ] Getting team rosters\n";
+    echo "[ ] Getting teams rosters\n";
 
-      $sql = "INSERT INTO teams_rosters (teamid, playerid, position) VALUES ";
+    $sql = "INSERT INTO teams_rosters (teamid, playerid, position) VALUES ";
 
-      foreach ($newteams as $id => $team) {
-        $json = file_get_contents('https://api.steampowered.com/IDOTA2Match_570/GetTeamInfoByTeamID/v001/?key=766BB2E9B3343EF6D94851890EDADD1C&teams_requested=1&start_at_team_id='.$id);
-        $matchdata = json_decode($json, true);
-        # it may return more than 5 players, but we actually care only about the first 5 players
-        # others are probably coach and standins
+    foreach ($newteams as $id => $team) {
+      $json = file_get_contents('https://api.steampowered.com/IDOTA2Match_570/GetTeamInfoByTeamID/v001/?key='.$steamapikey.'&teams_requested=1&start_at_team_id='.$id);
+      $matchdata = json_decode($json, true);
+      # it may return more than 5 players, but we actually care only about the first 5 players
+      # others are probably coach and standins, they aren't part of official active roster
 
-        # initial idea about positions was to detect player position somehow and use it in team competitions
-        # to detect heros stats based on player positions
-        # right now it's placeholder
-        # TODO
-        $position = 0;
+      # initial idea about positions was to detect player position somehow and use it in team competitions
+      # to detect heros stats based on player positions
+      # right now it's placeholder
+      # TODO
+      $position = 0;
 
-        for($i=0; $i<5; $i++)
-          $sql .= "(".$id.",".$matchdata['teams'][0]['player_'.$i.'_account_id']."),";
-      }
-      $sql[strlen($sql)-1] = ";";
+      for($i=0; $i<6 && isset($matchdata['result']['teams'][0]['player_'.$i.'_account_id']); $i++)
+          $sql .= "(".$id.",".$matchdata['result']['teams'][0]['player_'.$i.'_account_id'].", ".$position."),";
 
-      if ($conn->multi_query($sql) === TRUE) echo "[S] Successfully recorded new teams rosters to database.\n";
-      else die("[F] Unexpected problems when recording to database.\n".$conn->error."\n");
     }
+    $sql[strlen($sql)-1] = ";";
+
+    if ($conn->multi_query($sql) === TRUE) echo "[S] Successfully recorded new teams rosters to database.\n";
+    else die("[F] Unexpected problems when recording to database.\n".$conn->error."\n");
   }
 
   # TODO
