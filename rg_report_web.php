@@ -100,6 +100,7 @@ $mod = "";
     $output = "<div class=\"team-card\"><div class=\"team-name\">".team_name($tid)." (".$tid.")</div>";
 
     $output .= "<div class=\"team-info-block\">".
+                  "<div class=\"section-caption\">".$strings['summary'].":</div>".
                   "<div class=\"team-info-line\"><span class=\"caption\">".$strings['matches'].":</span> ".$report['teams'][$tid]['matches_total']."</div>".
                   "<div class=\"team-info-line\"><span class=\"caption\">".$strings['winrate'].":</span> ".
                       number_format($report['teams'][$tid]['wins']*100/$report['teams'][$tid]['matches_total'])."%</div>".
@@ -800,7 +801,7 @@ $level_codes = array(
         for($k=1, $end=sizeof($keys); $k < $end; $k++) {
           $modules['players']['summary'] .= "<th onclick=\"sortTableNum($k,'players-summary');\">".$strings[$keys[$k]]."</th>";
         }
-        $modules['players']['summary'] .= "<th onclick=\"sortTableNum($k,'players-summary');\">".$strings['position']."</th>";
+        $modules['players']['summary'] .= "<th onclick=\"sortTableNum($k,'players-summary');\">".$strings['common_position']."</th>";
         $modules['players']['summary'] .= "</tr>";
 
         foreach($report['players_summary'] as $player) {
@@ -1437,14 +1438,6 @@ $level_codes = array(
     if($mod == "participants") $unset_module = true;
     $parent = "participants-";
 
-    $modules['participants']['players'] = "";
-    if(check_module($parent."players")) {
-      $modules['participants']['players'] = "<div class=\"content-cards\">";
-      foreach($report['players'] as $player_id => $player) {
-        $modules['participants']['players'] .= player_card($player_id, $report, $meta, $strings);
-      }
-      $modules['participants']['players'] .= "</div>";
-    }
     if(isset($report['teams'])) {
       $modules['participants']['teams'] = "";
       if(check_module($parent."teams")) {
@@ -1454,6 +1447,15 @@ $level_codes = array(
         }
         $modules['participants']['teams'] .= "</div>";
       }
+    }
+
+    $modules['participants']['players'] = "";
+    if(check_module($parent."players")) {
+      $modules['participants']['players'] = "<div class=\"content-cards\">";
+      foreach($report['players'] as $player_id => $player) {
+        $modules['participants']['players'] .= player_card($player_id, $report, $meta, $strings);
+      }
+      $modules['participants']['players'] .= "</div>";
     }
   }
 }
