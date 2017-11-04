@@ -4,6 +4,7 @@
 $lrg_use_get = true;
 $lrg_get_depth = 3;
 $locale = "en";
+$max_tabs = 10;
 
 $mod = "";
 
@@ -39,8 +40,9 @@ $mod = "";
     return hero_portrait($hid, $meta)." ".$meta['heroes'][ $hid ]['name'];
   }
 
-  function player_name() {
-
+  function player_name($pid) {
+    global $report;
+    return $report['players'][$pid];
   }
 
   function player_card_link() {
@@ -90,7 +92,68 @@ $mod = "";
     return "(no team)";
   }
 
-  function team_card() {
+  function team_card($tid) {
+    global $report;
+    global $meta;
+    global $strings;
+
+    $output = "<div class=\"team-card\"><div class=\"team-name\">".team_name($tid)." (".$tid.")</div>";
+
+    $output .= "<div class=\"team-info-block\">".
+                  "<div class=\"team-info-line\"><span class=\"caption\">".$strings['matches'].":</span> ".$report['teams'][$tid]['matches_total']."</div>".
+                  "<div class=\"team-info-line\"><span class=\"caption\">".$strings['winrate'].":</span> ".
+                      number_format($report['teams'][$tid]['wins']*100/$report['teams'][$tid]['matches_total'])."%</div>".
+                  "<div class=\"team-info-line\"><span class=\"caption\">".$strings['gpm'].":</span> ".number_format($report['teams'][$tid]['averages']['gpm'])."</div>".
+                  "<div class=\"team-info-line\"><span class=\"caption\">".$strings['xpm'].":</span> ".number_format($report['teams'][$tid]['averages']['xpm'])."</div>".
+                  "<div class=\"team-info-line\"><span class=\"caption\">".$strings['kda'].":</span> ".number_format($report['teams'][$tid]['averages']['kills']).
+                    "/".number_format($report['teams'][$tid]['averages']['deaths'])."/".number_format($report['teams'][$tid]['averages']['assists'])."</div></div>";
+
+    $output .= "<div class=\"team-info-block\">".
+                  "<div class=\"section-caption\">".$strings['active_roster'].":</div>";
+    foreach($report['teams'][$tid]['active_roster'] as $player) {
+      if (!isset($report['players'][$player])) continue;
+      $position = reset($report['players_additional'][$player]['positions']);
+      $output .= "<div class=\"team-info-line\">".player_name($player)." (".($position['core'] ? $strings['core']." " : $strings['support']).
+                    $meta['lanes'][ $position['lane'] ].")</div>";
+    }
+    $output .= "</div>";
+
+    if (isset($report['teams'][$tid]['pickban'])) {
+      $heroes = $report['teams'][$tid]['pickban'];
+      uasort($heroes, function($a, $b) {
+        if($a['matches_picked'] == $b['matches_picked']) return 0;
+        else return ($a['matches_picked'] < $b['matches_picked']) ? 1 : -1;
+      });
+
+      $output .= "<div class=\"team-info-block\">".
+                    "<div class=\"section-caption\">".$strings['top_pick_heroes'].":</div>";
+      $counter = 0;
+      foreach($heroes as $hid => $stats) {
+        if($counter > 3) break;
+        $output .= "<div class=\"team-info-line\"><span class=\"caption\">".hero_full($hid, $meta).":</span> ";
+        $output .= $stats['matches_picked']." - ".number_format($stats['wins_picked']*100/$stats['matches_picked'], 2)."%</div>";
+        $counter++;
+      }
+      $output .= "</div>";
+    }
+
+    if (isset($report['teams'][$tid]['hero_pairs'])) {
+      $heroes = $report['teams'][$tid]['hero_pairs'];
+
+      $output .= "<div class=\"team-info-block\">".
+                    "<div class=\"section-caption\">".$strings['top_pick_pairs'].":</div>";
+      $counter = 0;
+      foreach($heroes as $stats) {
+        if($counter > 2) break;
+        $output .= "<div class=\"team-info-line\"><span class=\"caption\">".hero_full($stats['heroid1'], $meta)." + ".hero_full($stats['heroid2'], $meta).":</span> ";
+        $output .= $stats['matches']." - ".number_format($stats['winrate']*100, 2)."%</div>";
+        $counter++;
+      }
+      $output .= "</div>";
+
+    }
+
+    return $output."</div>";
 
   }
 
@@ -177,6 +240,7 @@ $mod = "";
     global $mod;
     global $strings;
     global $leaguetag;
+    global $max_tabs;
 
     $out = "";
     $first = true;
@@ -191,17 +255,29 @@ $mod = "";
     }
     # reusing assets Kappa
     $selectors = array();
+    $selectors_num = sizeof($modules);
 
     foreach($modules as $modname => $module) {
-      if($lrg_use_get && $lrg_get_depth > $level) {
-        if (stripos($mod, (empty($parent) ? "" : $parent."-" ).$modname) === 0)
-          $selectors[] = "<span class=\"selector active\">".$strings[$modname]."</span>";
-        else
-          $selectors[] = "<span class=\"selector".($unset_selector ? " active" : "").
-                            "\"><a href=\"?league=".$leaguetag."&mod=".(empty($parent) ? "" : $parent."-" ).$modname."\">".$strings[$modname]."</a></span>";
+      if ($selectors_num < $max_tabs) {
+        if($lrg_use_get && $lrg_get_depth > $level) {
+          if (stripos($mod, (empty($parent) ? "" : $parent."-" ).$modname) === 0)
+            $selectors[] = "<span class=\"selector active\">".$strings[$modname]."</span>";
+          else
+            $selectors[] = "<span class=\"selector".($unset_selector ? " active" : "").
+                              "\"><a href=\"?league=".$leaguetag."&mod=".(empty($parent) ? "" : $parent."-" ).$modname."\">".$strings[$modname]."</a></span>";
+        } else {
+          $selectors[] = "<span class=\"mod-".$level_codes[$level][1]."-selector selector".
+                              ($first ? " active" : "")."\" onclick=\"switchTab(event, 'module-".(empty($parent) ? "" : $parent."-" ).$modname."', 'mod-".$level_codes[$level][1]."');\">".$strings[$modname]."</span>";
+        }
       } else {
-        $selectors[] = "<span class=\"mod-".$level_codes[$level][1]."-selector selector".
-                            ($first ? " active" : "")."\" onclick=\"switchTab(event, 'module-".(empty($parent) ? "" : $parent."-" ).$modname."', 'mod-".$level_codes[$level][1]."');\">".$strings[$modname]."</span>";
+        if($lrg_use_get && $lrg_get_depth > $level) {
+          if (stripos($mod, (empty($parent) ? "" : $parent."-" ).$modname) === 0)
+            $selectors[] = "<option selected=\"selected\" value=\"?league=".$leaguetag."&mod=".(empty($parent) ? "" : $parent."-" ).$modname."\">".$strings[$modname]."</option>";
+          else
+            $selectors[] = "<option".($unset_selector ? "selected=\"selected\"" : "")." value=\"?league=".$leaguetag."&mod=".(empty($parent) ? "" : $parent."-" ).$modname."\">".$strings[$modname]."</option>";
+        } else {
+          $selectors[] = "<option value=\"module-".(empty($parent) ? "" : $parent."-" ).$modname."\">".$strings[$modname]."</option>";
+        }
       }
       if(($lrg_use_get && stripos($mod, (empty($parent) ? "" : $parent."-" ).$modname) === 0) || !$lrg_use_get || $lrg_get_depth < $level+1 || $unset_selector) {
         if(is_array($module)) {
@@ -212,7 +288,18 @@ $mod = "";
         $unset_selector = false;
       }
     }
-    return "<div class=\"selector-modules".(empty($level_codes[$level][0]) ? "" : "-".$level_codes[$level][0])."\">".implode($selectors, " | ")."</div>".$out;
+    if ($selectors_num < $max_tabs)
+      return "<div class=\"selector-modules".(empty($level_codes[$level][0]) ? "" : "-".$level_codes[$level][0])."\">".implode($selectors, " | ")."</div>".$out;
+    else
+    if($lrg_use_get && $lrg_get_depth > $level)
+      return "<div class=\"selector-modules".(empty($level_codes[$level][0]) ? "" : "-".$level_codes[$level][0])."\">".
+          "<select onchange=\"select_modules_link(this);\" class=\"select-selectors select-selectors".(empty($level_codes[$level][0]) ? "" : "-".$level_codes[$level][0])."\">".
+          implode($selectors, "")."</select></div>".$out;
+      else
+      return "<div class=\"selector-modules".(empty($level_codes[$level][0]) ? "" : "-".$level_codes[$level][0])."\">".
+          "<select onchange=\"switchTab(event, this.value, 'mod-".$level_codes[$level][1]."');\" class=\"select-selectors select-selectors".
+          (empty($level_codes[$level][0]) ? "" : "-".$level_codes[$level][0])."\">".
+          implode($selectors, "")."</select></div>".$out;
   }
 }
 $level_codes = array(
@@ -283,7 +370,7 @@ $level_codes = array(
     if (isset($report['averages_players']) || isset($report['pvp']) || isset($report['player_positions']) || isset($report['player_pairs']))
       $modules['players'] = array();
 
-    if (isset($report['teams'])) $modules['teams'] = array();
+    if (isset($report['teams'])) { $modules['teams'] = array(); $modules['summary_teams'] = ""; }
 
     if (isset($report['matches'])) $modules['matches'] = "";
 
@@ -702,6 +789,40 @@ $level_codes = array(
         }
       }
     }
+    if (isset($report['players_summary'])) {
+
+      $modules['players']['summary']  = "";
+      if(check_module($parent."summary")) {
+        $keys = array_keys($report['players_summary'][0]);
+        $modules['players']['summary'] .= "<table id=\"players-summary\" class=\"list wide\">
+                                          <tr class=\"thead\">
+                                            <th onclick=\"sortTable(0,'players-summary');\">".$strings['hero']."</th>";
+        for($k=1, $end=sizeof($keys); $k < $end; $k++) {
+          $modules['players']['summary'] .= "<th onclick=\"sortTableNum($k,'players-summary');\">".$strings[$keys[$k]]."</th>";
+        }
+        $modules['players']['summary'] .= "<th onclick=\"sortTableNum($k,'players-summary');\">".$strings['position']."</th>";
+        $modules['players']['summary'] .= "</tr>";
+
+        foreach($report['players_summary'] as $player) {
+
+          $modules['players']['summary'] .= "<tr>
+                                              <td>".player_name($player['playerid'])."</td>
+                                              <td>".$player['matches_s']."</td>
+                                              <td>".number_format($player['winrate_s']*100,1)."%</td>";
+          for($k=3, $end=sizeof($keys); $k < $end; $k++) {
+            if ($player[$keys[$k]] > 1)
+              $modules['players']['summary'] .= "<td>".number_format($player[$keys[$k]],1)."</td>";
+            else $modules['players']['summary'] .= "<td>".number_format($player[$keys[$k]],2)."</td>";
+          }
+          $position = reset($report['players_additional'][$player['playerid']]['positions']);
+          $modules['players']['summary'] .= "<td>".($position['core'] ? $strings['core']." " : $strings['support']).
+                        $meta['lanes'][ $position['lane'] ]."</td>";
+          $modules['players']['summary'] .= "</tr>";
+        }
+        $modules['players']['summary'] .= "</table>";
+        unset($keys);
+      }
+    }
     if (isset($report['pvp'])) {
       $pvp = array();
       $modules['players']['pvp'] = array();
@@ -960,14 +1081,16 @@ $level_codes = array(
               foreach($report['player_positions'][$i][$j] as $player) {
 
                 $modules['players']['player_positions']["positions_$i"."_$j"] .= "<tr".(isset($report['player_positions_matches']) ?
-                                                                          " onclick=\"showModal('".join_matches($report['player_positions_matches'][$i][$j][$player['playerid']]).
+                                                    " onclick=\"showModal('".htmlspecialchars(join_matches($report['player_positions_matches'][$i][$j][$player['playerid']])).
                                                                           "', '".$report['players'][$player['playerid']]." - ".
                                                                           $strings["positions_$i"."_$j"]." - ".$strings['matches']."');\"" : "").">
                                                     <td>".$report['players'][$player['playerid']]."</td>
                                                     <td>".$player['matches_s']."</td>
                                                     <td>".number_format($player['winrate_s']*100,1)."%</td>";
                 for($k=3, $end=sizeof($keys); $k < $end; $k++) {
-                  $modules['players']['player_positions']["positions_$i"."_$j"] .= "<td>".number_format($player[$keys[$k]],1)."</td>";
+                  if ($player[$keys[$k]] > 1)
+                    $modules['players']['player_positions']["positions_$i"."_$j"] .= "<td>".number_format($player[$keys[$k]],1)."</td>";
+                  else $modules['players']['player_positions']["positions_$i"."_$j"] .= "<td>".number_format($player[$keys[$k]],2)."</td>";
                 }
                 $modules['players']['player_positions']["positions_$i"."_$j"] .= "</tr>";
               }
@@ -993,13 +1116,13 @@ $level_codes = array(
         if($mod == $parent."team_".$tid."_stats") $unset_module = true;
 
         if (isset($report['teams'][$tid]['averages'])) {
-          $modules['teams']["team_".$tid."_stats"]['overview'] = "";
+          $modules['teams']["team_".$tid."_stats"]['overview'] = "<div class=\"content-cards\">".team_card($tid)."</div>";
 
           if(check_module($parent."team_".$tid."_stats-overview")) {
-            $modules['teams']["team_".$tid."_stats"]['overview'] .= "<table id=\"teams-$tid-avg-table\" class=\"list\"><caption>".team_name($tid)."</caption>";
+            $modules['teams']["team_".$tid."_stats"]['overview'] .= "<table id=\"teams-$tid-avg-table\" class=\"list\"> ";
 
-            foreach ($report['teams'][$tid]['averages'] as $value) {
-              $modules['teams']["team_".$tid."_stats"]['overview'] .= "<tr><td>".$strings[ $value['type'] ]."</td><td>".number_format($value['value'], 2)."</td></tr>";
+            foreach ($report['teams'][$tid]['averages'] as $key => $value) {
+              $modules['teams']["team_".$tid."_stats"]['overview'] .= "<tr><td>".$strings[ $key ]."</td><td>".number_format($value, 2)."</td></tr>";
             }
 
             $modules['teams']["team_".$tid."_stats"]['overview'] .= "</table>";
@@ -1261,6 +1384,45 @@ $level_codes = array(
     }
   }
 
+  if (isset($modules['summary_teams']) && check_module("summary_teams")) {
+    $modules['summary_teams'] = "<table id=\"teams-sum\" class=\"list wide\">";
+
+    $modules['summary_teams'] .= "<tr class=\"thead\">".
+                    "<th onclick=\"sortTable(0,'teams-sum');\">".$strings['team_name']."</th>".
+                    "<th onclick=\"sortTable(1,'teams-sum');\">".$strings['matches_s']."</th>".
+                    "<th onclick=\"sortTable(2,'teams-sum');\">".$strings['winrate_s']."</th>".
+                    "<th onclick=\"sortTable(3,'teams-sum');\">".$strings['hero_pool']."</th>".
+                    "<th onclick=\"sortTable(4,'teams-sum');\">".$strings['kills']."</th>".
+                    "<th onclick=\"sortTable(5,'teams-sum');\">".$strings['deaths']."</th>".
+                    "<th onclick=\"sortTable(6,'teams-sum');\">".$strings['assists']."</th>".
+                    "<th onclick=\"sortTable(7,'teams-sum');\">".$strings['gpm']."</th>".
+                    "<th onclick=\"sortTable(8,'teams-sum');\">".$strings['xpm']."</th>".
+                    "<th onclick=\"sortTable(9,'teams-sum');\">".$strings['wards_placed_s']."</th>".
+                    "<th onclick=\"sortTable(10,'teams-sum');\">".$strings['sentries_placed_s']."</th>".
+                    "<th onclick=\"sortTable(11,'teams-sum');\">".$strings['wards_destroyed_s']."</th>".
+                    "<th onclick=\"sortTable(11,'teams-sum');\">".$strings['duration']."</th>".
+              "</tr>";
+
+    foreach($report['teams'] as $team_id => $team) {
+      $modules['summary_teams'] .= "<tr>".
+                    "<td>".team_name($team_id)."</td>".
+                    "<td>".$team['matches_total']."</td>".
+                    "<td>".number_format($team['wins']*100/$team['matches_total'],2)."%</td>".
+                    "<td>".$team['averages']['hero_pool']."</td>".
+                    "<td>".number_format($team['averages']['kills'],1)."</td>".
+                    "<td>".number_format($team['averages']['deaths'],1)."</td>".
+                    "<td>".number_format($team['averages']['assists'],1)."</td>".
+                    "<td>".number_format($team['averages']['gpm'],1)."</td>".
+                    "<td>".number_format($team['averages']['xpm'],1)."</td>".
+                    "<td>".number_format($team['averages']['wards_placed'],1)."</td>".
+                    "<td>".number_format($team['averages']['sentries_placed'],1)."</td>".
+                    "<td>".number_format($team['averages']['wards_destroyed'],1)."</td>".
+                    "<td>".number_format($team['averages']['duration'],1)."</td>".
+              "</tr>";
+    }
+    $modules['summary_teams'] .= "</table>";
+  }
+
   # matches
   if (isset($modules['matches']) && check_module("matches")) {
     $modules['matches'] = "<div class=\"content-cards\">";
@@ -1272,13 +1434,27 @@ $level_codes = array(
 
   # participants
   if(isset($modules['participants']) && check_module("participants")) {
+    if($mod == "participants") $unset_module = true;
+    $parent = "participants-";
 
-
-    $modules['participants']['players'] = "<div class=\"content-cards\">";
-    foreach($report['players'] as $player_id => $player) {
-      $modules['participants']['players'] .= player_card($player_id, $report, $meta, $strings);
+    $modules['participants']['players'] = "";
+    if(check_module($parent."players")) {
+      $modules['participants']['players'] = "<div class=\"content-cards\">";
+      foreach($report['players'] as $player_id => $player) {
+        $modules['participants']['players'] .= player_card($player_id, $report, $meta, $strings);
+      }
+      $modules['participants']['players'] .= "</div>";
     }
-    $modules['participants']['players'] .= "</div>";
+    if(isset($report['teams'])) {
+      $modules['participants']['teams'] = "";
+      if(check_module($parent."teams")) {
+        $modules['participants']['teams'] = "<div class=\"content-cards\">";
+        foreach($report['teams'] as $team_id => $team) {
+          $modules['participants']['teams'] .= team_card($team_id);
+        }
+        $modules['participants']['teams'] .= "</div>";
+      }
+    }
   }
 }
   ?>
@@ -1291,7 +1467,7 @@ $level_codes = array(
       <link href="res/valve_mimic.css" rel="stylesheet" type="text/css" />
       <link href="res/reports.css" rel="stylesheet" type="text/css" />
       <?php if(isset($report['settings']['custom_style']) && file_exists("res/custom_styles/".$report['settings']['custom_style'].".css"))
-                echo "<link href=\"res/custom_colors_".$report['settings']['custom_style'].".css\" rel=\"stylesheet\" type=\"text/css\" />";
+                echo "<link href=\"res/custom_styles/".$report['settings']['custom_style'].".css\" rel=\"stylesheet\" type=\"text/css\" />";
             if($use_graph) {
               echo "<script type=\"text/javascript\" src=\"http://visjs.org/dist/vis.js\"></script>";
               echo "<link href=\"http://visjs.org/dist/vis-network.min.css\" rel=\"stylesheet\" type=\"text/css\" />";
