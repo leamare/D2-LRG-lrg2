@@ -12,7 +12,8 @@
           SELECT lane_id, name FROM lanes;
           SELECT modeID, modeName FROM gamemodes;
           SELECT region_id, region_name FROM regions;
-          SELECT cluster, region_id FROM clusters;";
+          SELECT cluster, region_id FROM clusters;
+          SELECT patchid, version FROM versions;";
 
   if ($conn->multi_query($sql)) {
     $res = $conn->store_result();
@@ -73,6 +74,16 @@
     $out['clusters'] = array();
     while ($row = $res->fetch_row()) {
       $out['clusters'][$row[0]] = $row[1];
+    }
+    $res->free();
+
+    $conn->next_result();
+
+    $res = $conn->store_result();
+
+    $out['versions'] = array();
+    while ($row = $res->fetch_row()) {
+      $out['versions'][$row[0]] = $row[1];
     }
     $res->free();
 

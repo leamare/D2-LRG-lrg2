@@ -167,7 +167,8 @@ if ($conn->select_db($lrg_db_prefix."_".$lg_settings['league_tag'])) {
     `start_date` int(11) NOT NULL,
     `stomp` int(11) NOT NULL,
     `comeback` int(11) NOT NULL,
-    `cluster` int(10) UNSIGNED NOT NULL
+    `cluster` int(10) UNSIGNED NOT NULL,
+    `version` int(10) UNSIGNED NOT NULL
   );");
     if ($conn->connect_error) die("[F] Can't create table `matches`: ".$conn->connect_error."\n");
   echo "OK\n[ ] Creating table `matchlines`...";

@@ -185,6 +185,7 @@
               SUM( am.damage_taken / (m.duration/60) )/SUM(1) avg_dmg_taken,
               SUM(am.stuns)/SUM(1) stuns,
               SUM(am.lh_at10)/SUM(1) lh_10,
+              SUM(ml.lasthits)/SUM(m.duration)/(SUM(1)*60) lh,
               SUM(m.duration)/(SUM(1)*60) avg_duration
             FROM adv_matchlines am JOIN
               matchlines ml
@@ -215,6 +216,7 @@
         "taken_damage_per_min_s" => $row[11],
         "stuns" => $row[12],
         "lh_at10" => $row[13],
+        "lasthits_per_min_s" => $row[15],
         "duration" => $row[14],
       );
     }
@@ -398,7 +400,8 @@
                   SUM(m.duration)/(SUM(1)*60) avg_duration,
                   (SUM(ml.kills)+SUM(ml.assists))/(SUM(ml.deaths)) kills,
                   COUNT(DISTINCT ml.heroid) heropool,
-                  COUNT(DISTINCT ml.heroid)/SUM(1) heropool
+                  COUNT(DISTINCT ml.heroid)/SUM(1) heropool,
+                  SUM(ml.lasthits)/SUM(m.duration)/(SUM(1)*60) lh
                 FROM adv_matchlines am JOIN
                   matchlines ml
                       ON am.matchid = ml.matchid AND am.playerid = ml.playerid
@@ -423,13 +426,14 @@
             "diversity" => $row[15],
             "gpm"  => $row[3],
             "xpm" => $row[4],
-            "heal_per_min" => $row[5],
-            "hero_damage_per_min" => $row[6],
-            "tower_damage_per_min"=> $row[7],
-            "taken_damage_per_min" => $row[8],
+            "heal_per_min_s" => $row[5],
+            "hero_damage_per_min_s" => $row[6],
+            "tower_damage_per_min_s"=> $row[7],
+            "taken_damage_per_min_s" => $row[8],
             "stuns" => $row[9],
             "lh_at10" => $row[10],
-            "denies" => $row[11],
+            "lasthits_per_min_s" => $row[16],
+            "denies_s" => $row[11],
             "duration" => $row[12]
           );
         }
@@ -473,14 +477,6 @@
     	   GROUP BY draft.hero_id
     ORDER BY winrate DESC, matches DESC;";
 
-
-/*) dp LEFT OUTER JOIN (
-     SELECT draft.hero_id hero_id, SUM(1) matches, SUM(NOT matches.radiantWin XOR draft.is_radiant)/SUM(1) winrate
-     FROM draft JOIN matches ON draft.matchid = matches.matchid
-     WHERE is_pick = false
-     GROUP BY draft.hero_id
-) db ON dp.hero_id = db.hero_id
-*/
     $result["pickban"] = array();
 
     if ($conn->multi_query($sql) === TRUE);
@@ -592,7 +588,8 @@
                   SUM( am.damage_taken / (m.duration/60) )/SUM(1) avg_dmg_taken,
                   SUM(am.stuns)/SUM(1) stuns,
                   SUM(am.lh_at10)/SUM(1) lh_10,
-                  SUM(m.duration)/(SUM(1)*60) avg_duration
+                  SUM(m.duration)/(SUM(1)*60) avg_duration,
+                  SUM(ml.lasthits)/SUM(m.duration)/(SUM(1)*60) lh
                 FROM adv_matchlines am JOIN
                 	matchlines ml
                     	ON am.matchid = ml.matchid AND am.heroid = ml.heroid
@@ -624,6 +621,7 @@
             "taken_damage_per_min_s" => $row[11],
             "stuns" => $row[12],
             "lh_at10" => $row[13],
+            "lasthits_per_min_s" => $row[15],
             "duration" => $row[14]
           );
         }

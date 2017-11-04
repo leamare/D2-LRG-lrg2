@@ -111,6 +111,7 @@ foreach ($matches as $match) {
 
     $i = sizeof($t_matches);
     $t_matches[$i]['matchid'] = $match;
+    $t_matches[$i]['version'] = $matchdata['patch'];
     $t_matches[$i]['radiantWin'] = $matchdata['radiant_win'];
     $t_matches[$i]['duration'] = $matchdata['duration'];
     $t_matches[$i]['modeID'] = $matchdata['game_mode'];
@@ -301,11 +302,11 @@ foreach ($matches as $match) {
 if (sizeof($t_matches) == 0) die ("[W] No matches to record, exitting...\n");
 
 $len = sizeof($t_matches);
-$sql = "INSERT INTO matches (matchid, radiantWin, duration, modeID, leagueID, start_date, stomp, comeback, cluster) VALUES ";
+$sql = "INSERT INTO matches (matchid, radiantWin, duration, modeID, leagueID, start_date, stomp, comeback, cluster, version) VALUES ";
 for($i = 0; $i < $len; $i++) {
     $sql .= "(".$t_matches[$i]['matchid'].",".($t_matches[$i]['radiantWin'] ? "true" : "false" ).",".$t_matches[$i]['duration'].","
                .$t_matches[$i]['modeID'].",".$t_matches[$i]['leagueID'].",".$t_matches[$i]['date'].","
-               .$t_matches[$i]['stomp'].",".$t_matches[$i]['comeback'].",".$t_matches[$i]['cluster']."),";
+               .$t_matches[$i]['stomp'].",".$t_matches[$i]['comeback'].",".$t_matches[$i]['cluster'].",".$t_matches[$i]['version']."),";
 }
 $sql[strlen($sql)-1] = ";";
 

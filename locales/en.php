@@ -95,7 +95,9 @@
     "lasthits" => "Last hits",
     "lh_at10" => "LH at 10:00",
     "lasthits_per_min" => "Last hits / min",
+    "lasthits_per_min_s" => "LH/min",
     "denies" => "Creeps denied",
+    "denies_s" => "DN",
     "stacks" => "Neutral camps stacked",
     "hero_damage" => "Damage to heroes",
     "tower_damage" => "Damage to buildings",
@@ -127,6 +129,7 @@
     "widest_hero_pool_team" => "Team with Widest Hero Pool",
     "smallest_hero_pool_team" => "Team with Smallest Hero Pool",
     "diversity" => "Player Diversity",
+    "common_position" => "Common Position",
 
     "stomp" => "Networth stomp by a team",
     "comeback" => "Networth comeback by a team",
