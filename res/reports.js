@@ -115,3 +115,9 @@ function switchTab(evt, moduleID, className) {
     document.getElementById(moduleID).className += " active";
     evt.currentTarget.className += " active";
 }
+
+
+function select_modules_link(a) {
+  if(a.value)
+    window.location=a.value;
+}

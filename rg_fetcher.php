@@ -89,6 +89,15 @@ foreach ($matches as $match) {
       }
       echo("[S] Match $match: Request OK\n");
 
+      if($matchdata['duration'] < 18000) {
+        echo("[ ] Match duration is less than 5 minutes, skipping...\n")
+        continue;
+      }
+      if($matchdata['radiant_score'] < 4 && $matchdata['dire_score'] < 4) {
+        echo("[ ] Match score is less than 4 - 4, skipping...\n")
+        continue;
+      }
+
       if($lrg_use_cache) {
         $f = fopen("cache/".$match.".json", "w");
         fwrite($f, $json);

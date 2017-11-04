@@ -218,6 +218,13 @@ a:hover {
 	color: #D9D9D9;
   display: inline-block;
 }
+.select-selectors {
+  background: transparent;
+  color: inherit;
+  line-height: inherit;
+  font-family: inherit;
+  font-size: inherit;
+}
 .selector a {
   font-size: inherit;
   line-height: inherit;

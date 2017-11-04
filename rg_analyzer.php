@@ -167,6 +167,61 @@
     } while($conn->next_result());
   }
 
+  /* Players Summary */ {
+    $result["players_summary"] = array();
+
+    $sql = "SELECT
+              am.playerid pid,
+              SUM(1) matches,
+              SUM(NOT m.radiantWin XOR ml.isradiant)/SUM(1) winrate,
+              (SUM(ml.kills)+SUM(ml.assists))/(SUM(ml.deaths)) kills,
+              COUNT(DISTINCT ml.heroid) heropool,
+              COUNT(DISTINCT ml.heroid)/SUM(1) heropool,
+              SUM(ml.gpm)/SUM(1) gpm,
+              SUM(ml.xpm)/SUM(1) xpm,
+              SUM( ml.heal / (m.duration/60) )/SUM(1) avg_heal,
+              SUM( ml.heroDamage / (m.duration/60) )/SUM(1) avg_hero_dmg,
+              SUM( ml.towerDamage / (m.duration/60) )/SUM(1) avg_tower_dmg,
+              SUM( am.damage_taken / (m.duration/60) )/SUM(1) avg_dmg_taken,
+              SUM(am.stuns)/SUM(1) stuns,
+              SUM(am.lh_at10)/SUM(1) lh_10,
+              SUM(m.duration)/(SUM(1)*60) avg_duration
+            FROM adv_matchlines am JOIN
+              matchlines ml
+                  ON am.matchid = ml.matchid AND am.heroid = ml.heroid
+                JOIN matches m
+                  ON m.matchid = am.matchid
+            GROUP BY pid
+            ORDER BY matches DESC, winrate DESC;";
+
+    if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for PLAYER SUMMARY.\n";
+    else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+
+    $query_res = $conn->store_result();
+
+    for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+      $result["players_summary"][] = array (
+        "playerid" => $row[0],
+        "matches_s"=> $row[1],
+        "winrate_s"=> $row[2],
+        "hero_pool" => $row[4],
+        "diversity" => $row[5],
+        "kda"  => $row[3],
+        "gpm"    => $row[6],
+        "xpm"    => $row[7],
+        "heal_per_min_s" => $row[8],
+        "hero_damage_per_min_s" => $row[9],
+        "tower_damage_per_min_s"=> $row[10],
+        "taken_damage_per_min_s" => $row[11],
+        "stuns" => $row[12],
+        "lh_at10" => $row[13],
+        "duration" => $row[14],
+      );
+    }
+
+    $query_res->free_result();
+  }
+
   if ($lg_settings['ana']['avg_heroes']) {
     # average for heroes
 
@@ -262,16 +317,16 @@
 
     # hero damage / minute
     $sql .= "SELECT \"hero_damage_per_min\", matchlines.playerid playerid, SUM(matchlines.heroDamage/(matches.duration/60))/SUM(1)
-               value FROM matchlines JOIN matches ON matchlines.matchid = matches.matchid GROUP BY playerid ORDER BY value DESC";
+               value FROM matchlines JOIN matches ON matchlines.matchid = matches.matchid GROUP BY playerid ORDER BY value DESC;";
     # tower damage / minute
     $sql .= "SELECT \"tower_damage_per_min\", matchlines.playerid playerid, SUM(matchlines.towerDamage/(matches.duration/60))/SUM(1)
-               value FROM matchlines JOIN matches ON matchlines.matchid = matches.matchid GROUP BY playerid ORDER BY value DESC";
+               value FROM matchlines JOIN matches ON matchlines.matchid = matches.matchid GROUP BY playerid ORDER BY value DESC;";
     # taken damage / minute
     $sql .= "SELECT \"taken_damage_per_min\", adv_matchlines.playerid playerid, SUM(adv_matchlines.damage_taken/(matches.duration/60))/SUM(1)
-               value FROM adv_matchlines JOIN matches ON adv_matchlines.matchid = matches.matchid GROUP BY playerid ORDER BY value DESC";
+               value FROM adv_matchlines JOIN matches ON adv_matchlines.matchid = matches.matchid GROUP BY playerid ORDER BY value DESC;";
     # heal / minute
     $sql .= "SELECT \"heal_per_min\", matchlines.playerid playerid, SUM(matchlines.heal/(matches.duration/60))/SUM(1)
-               value FROM matchlines JOIN matches ON matchlines.matchid = matches.matchid GROUP BY playerid ORDER BY value DESC";
+               value FROM matchlines JOIN matches ON matchlines.matchid = matches.matchid GROUP BY playerid ORDER BY value DESC;";
 
     # stuns
     $sql .= "SELECT \"stuns\", playerid, SUM(stuns)/SUM(1) value FROM adv_matchlines GROUP BY playerid ORDER BY value DESC;";
@@ -289,8 +344,12 @@
     # stacks
     $sql .= "SELECT \"stacks\", playerid, SUM(stacks)/SUM(1) value FROM adv_matchlines GROUP BY playerid ORDER BY value DESC;";
     # pings per minute
-    $sql .= "SELECT \"taken_damage_per_min\", adv_matchlines.playerid playerid, SUM(adv_matchlines.pings/(matches.duration/60))/SUM(1)
-               value FROM adv_matchlines JOIN matches ON adv_matchlines.matchid = matches.matchid GROUP BY playerid ORDER BY value DESC";
+    $sql .= "SELECT \"pings\", adv_matchlines.playerid playerid, SUM(adv_matchlines.pings/(matches.duration/60))/SUM(1)
+               value FROM adv_matchlines JOIN matches ON adv_matchlines.matchid = matches.matchid GROUP BY playerid ORDER BY value DESC;";
+    # hero pool size
+    $sql .= "SELECT \"hero_pool\", playerid, COUNT(DISTINCT heroid) value FROM matchlines GROUP BY playerid ORDER BY value DESC;";
+    # plyer diversity
+    $sql .= "SELECT \"diversity\", playerid, COUNT(DISTINCT heroid)/COUNT(DISTINCT matchid) value, COUNT(DISTINCT matchid) matches FROM matchlines GROUP BY playerid ORDER BY matches DESC, value DESC;";
 
    $result["averages_players"] = array();
 
@@ -313,6 +372,96 @@
      $query_res->free_result();
 
    } while($conn->next_result());
+  }
+
+  if ($lg_settings['ana']['player_positions']) {
+    $result["player_positions"] = array();
+
+    for ($core = 0; $core < 2; $core++) {
+      for ($lane = 1; $lane < 6 && $lane > 0; $lane++) {
+        if (!$core) { $lane = 0; }
+        $result["player_positions"][$core][$lane] = array();
+
+        $sql = "SELECT
+                  am.playerid playerid,
+                  SUM(1) matches,
+                  SUM(NOT m.radiantWin XOR ml.isradiant)/SUM(1) winrate,
+                  SUM(ml.gpm)/SUM(1) gpm,
+                  SUM(ml.xpm)/SUM(1) xpm,
+                  SUM( ml.heal / (m.duration/60) )/SUM(1) avg_heal,
+                  SUM( ml.heroDamage / (m.duration/60) )/SUM(1) avg_hero_dmg,
+                  SUM( ml.towerDamage / (m.duration/60) )/SUM(1) avg_tower_dmg,
+                  SUM( am.damage_taken / (m.duration/60) )/SUM(1) avg_dmg_taken,
+                  SUM(am.stuns)/SUM(1) stuns,
+                  SUM(am.lh_at10)/SUM(1) lh_10,
+                  SUM(ml.denies)/SUM(1) denies,
+                  SUM(m.duration)/(SUM(1)*60) avg_duration,
+                  (SUM(ml.kills)+SUM(ml.assists))/(SUM(ml.deaths)) kills,
+                  COUNT(DISTINCT ml.heroid) heropool,
+                  COUNT(DISTINCT ml.heroid)/SUM(1) heropool
+                FROM adv_matchlines am JOIN
+                  matchlines ml
+                      ON am.matchid = ml.matchid AND am.playerid = ml.playerid
+                    JOIN matches m
+                      ON m.matchid = am.matchid ".
+               ($core == 0 ? "WHERE am.isCore = 0"
+              :"WHERE am.isCore = 1 AND am.lane = $lane")
+              ." GROUP BY am.playerid
+                ORDER BY matches DESC, winrate DESC;";
+        if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for PLAYER POSITIONS $core $lane.\n";
+        else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+
+        $query_res = $conn->store_result();
+
+        for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+          $result["player_positions"][$core][$lane][] = array (
+            "playerid" => $row[0],
+            "matches_s"=> $row[1],
+            "winrate_s"=> $row[2],
+            "kda" => $row[13],
+            "hero_pool" => $row[14],
+            "diversity" => $row[15],
+            "gpm"  => $row[3],
+            "xpm" => $row[4],
+            "heal_per_min" => $row[5],
+            "hero_damage_per_min" => $row[6],
+            "tower_damage_per_min"=> $row[7],
+            "taken_damage_per_min" => $row[8],
+            "stuns" => $row[9],
+            "lh_at10" => $row[10],
+            "denies" => $row[11],
+            "duration" => $row[12]
+          );
+        }
+
+        $query_res->free_result();
+
+        if($lg_settings['ana']['player_positions_matches']) {
+          $result["player_positions_matches"][$core][$lane] = array();
+
+          foreach($result["player_positions"][$core][$lane] as $playerline) {
+            $result["player_positions_matches"][$core][$lane][$playerline['playerid']] = array();
+            $sql = "SELECT matchid
+                    FROM adv_matchlines WHERE ".
+                   ($core == 0 ? "isCore = 0" : "isCore = 1 AND lane = $lane")
+                  ." AND playerid = ".$playerline['playerid'].";";
+
+            if ($conn->multi_query($sql) === TRUE);
+            else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+
+            $query_res = $conn->store_result();
+
+            for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+              $result["player_positions_matches"][$core][$lane][$playerline['playerid']][] = $row[0];
+            }
+
+            $query_res->free_result();
+          }
+        }
+
+        if (!$core) { break; }
+      }
+    }
   }
 
   if ($lg_settings['ana']['pickban']) {
@@ -753,19 +902,30 @@
 
       $query_res->free_result();
 
+      $sql = "SELECT playerid FROM matchlines JOIN teams_matches
+              ON matchlines.matchid = teams_matches.matchid AND matchlines.isRadiant = teams_matches.is_radiant
+              WHERE teams_matches.teamid = ".$id." GROUP BY playerid;";
+
+      if ($conn->multi_query($sql) === TRUE);
+      else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+
+      $query_res = $conn->store_result();
+      $result['teams'][$id]['active_roster'] = array();
+      for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+        $result["teams"][$id]['active_roster'][] = $row[0];
+      }
+
+      $query_res->free_result();
+
 
       if ($lg_settings['ana']['teams']['avg']) {
-        # matches_total
-        $sql = "SELECT \"matches_total\", COUNT(DISTINCT matchid) FROM teams_matches WHERE teamid = $id;";
-
         # avg kills
-        $sql .= "SELECT \"kills\", SUM(ans.sum_kills)/SUM(ans.match_count) FROM (
+        $sql = "SELECT \"kills\", SUM(ans.sum_kills)/SUM(ans.match_count) FROM (
                   SELECT SUM(kills) sum_kills, COUNT(DISTINCT matchlines.matchid) match_count
                   FROM matchlines JOIN teams_matches
                   ON matchlines.matchid = teams_matches.matchid
                   AND matchlines.isRadiant = teams_matches.is_radiant
                   WHERE teams_matches.teamid = ".$id."
-    			        GROUP BY matchlines.matchid
               ) ans;";
 
         # avg deaths
@@ -775,7 +935,6 @@
                   ON matchlines.matchid = teams_matches.matchid
                   AND matchlines.isRadiant = teams_matches.is_radiant
                   WHERE teams_matches.teamid = ".$id."
-                  GROUP BY matchlines.matchid
               ) ans;";
 
         # avg assists
@@ -785,7 +944,6 @@
                   ON matchlines.matchid = teams_matches.matchid
                   AND matchlines.isRadiant = teams_matches.is_radiant
                   WHERE teams_matches.teamid = ".$id."
-                  GROUP BY matchlines.matchid
               ) ans;";
 
         # avg xpm
@@ -847,6 +1005,16 @@
                   GROUP BY matchlines.matchid
               ) ans;";
 
+        # hero pool
+        $sql .= "SELECT \"hero_pool\", COUNT(DISTINCT matchlines.heroid) FROM matchlines JOIN teams_matches
+                  ON matchlines.matchid = teams_matches.matchid
+                  AND matchlines.isRadiant = teams_matches.is_radiant
+                  WHERE teams_matches.teamid = ".$id.";";
+
+        # duration
+        $sql .= "SELECT \"duration\", (SUM(matches.duration)/60)/COUNT(DISTINCT matches.matchid) FROM matches JOIN teams_matches
+                  ON matches.matchid = teams_matches.matchid WHERE teams_matches.teamid = ".$id.";";
+
         if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for TEAM $id AVERAGES.\n";
         else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
 
@@ -857,10 +1025,7 @@
 
           $row = $query_res->fetch_row();
 
-          $result['teams'][$id]['averages'][] = array (
-            "type"     => $row[0],
-            "value"    => $row[1]
-          );
+          $result['teams'][$id]['averages'][$row[0]] = $row[1];
 
           $query_res->free_result();
         } while($conn->next_result());
@@ -1209,90 +1374,6 @@
             $query_res->free_result();
           }
         }
-    }
-
-    if ($lg_settings['ana']['player_positions']) {
-      $result["player_positions"] = array();
-
-      for ($core = 0; $core < 2; $core++) {
-        for ($lane = 1; $lane < 6 && $lane > 0; $lane++) {
-          if (!$core) { $lane = 0; }
-          $result["player_positions"][$core][$lane] = array();
-
-          $sql = "SELECT
-                    am.playerid playerid,
-                    SUM(1) matches,
-                    SUM(NOT m.radiantWin XOR ml.isradiant)/SUM(1) winrate,
-                    SUM(ml.gpm)/SUM(1) gpm,
-                    SUM(ml.xpm)/SUM(1) xpm,
-                    SUM( ml.heal / (m.duration/60) )/SUM(1) avg_heal,
-                    SUM( ml.heroDamage / (m.duration/60) )/SUM(1) avg_hero_dmg,
-                    SUM( ml.towerDamage / (m.duration/60) )/SUM(1) avg_tower_dmg,
-                    SUM( am.damage_taken / (m.duration/60) )/SUM(1) avg_dmg_taken,
-                    SUM(am.stuns)/SUM(1) stuns,
-                    SUM(am.lh_at10)/SUM(1) lh_10,
-                    SUM(ml.denies)/SUM(1) denies,
-                    SUM(m.duration)/(SUM(1)*60) avg_duration
-                  FROM adv_matchlines am JOIN
-                  	matchlines ml
-                      	ON am.matchid = ml.matchid AND am.playerid = ml.playerid
-                      JOIN matches m
-                      	ON m.matchid = am.matchid ".
-                 ($core == 0 ? "WHERE am.isCore = 0"
-                :"WHERE am.isCore = 1 AND am.lane = $lane")
-                ." GROUP BY am.playerid
-                  ORDER BY matches DESC, winrate DESC;";
-          if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for PLAYER POSITIONS $core $lane.\n";
-          else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
-
-          $query_res = $conn->store_result();
-
-          for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
-            $result["player_positions"][$core][$lane][] = array (
-              "playerid" => $row[0],
-              "matches_s"=> $row[1],
-              "winrate_s"=> $row[2],
-              "gpm"  => $row[3],
-              "xpm" => $row[4],
-              "heal_per_min" => $row[5],
-              "hero_damage_per_min" => $row[6],
-              "tower_damage_per_min"=> $row[7],
-              "taken_damage_per_min" => $row[8],
-              "stuns" => $row[9],
-              "lh_at10" => $row[10],
-              "denies" => $row[11],
-              "duration" => $row[12]
-            );
-          }
-
-          $query_res->free_result();
-
-          if($lg_settings['ana']['player_positions_matches']) {
-            $result["player_positions_matches"][$core][$lane] = array();
-
-            foreach($result["player_positions"][$core][$lane] as $playerline) {
-              $result["player_positions_matches"][$core][$lane][$playerline['playerid']] = array();
-              $sql = "SELECT matchid
-                      FROM adv_matchlines WHERE ".
-                     ($core == 0 ? "isCore = 0" : "isCore = 1 AND lane = $lane")
-                    ." AND playerid = ".$playerline['playerid'].";";
-
-              if ($conn->multi_query($sql) === TRUE);
-              else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
-
-              $query_res = $conn->store_result();
-
-              for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
-                $result["player_positions_matches"][$core][$lane][$playerline['playerid']][] = $row[0];
-              }
-
-              $query_res->free_result();
-            }
-          }
-
-          if (!$core) { break; }
-        }
-      }
     }
 
     if ($lg_settings['ana']['players_combo_graph']) {

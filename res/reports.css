@@ -189,10 +189,11 @@ table .hero_portrait {
   border: none;
 }
 
-.match-card, .player-card {
+.match-card, .player-card, .team-card {
   overflow: hidden;
+  padding-bottom: 20px;
 }
-.match-card *, .player-card * {
+.match-card *, .player-card *, .team-card * {
   font-size: inherit;
   line-height: inherit;
   font-family: inherit;
@@ -324,6 +325,48 @@ table .hero_portrait {
 .section-lines .player-info-line:first-of-type {
   font-size: 20px;
   font-weight: bold;
+}
+
+.team-name {
+  font-size: 28px;
+  text-align: left;
+  font-weight: bold;
+  color: #D9D9D9;
+  margin-bottom: 10px;
+  background-color: rgba(255,255,255,0.2);
+  padding: 5px;
+}
+.team-name a {
+  font-size: inherit;
+  line-height: inherit;
+}
+.team-info-block .hero_portrait {
+  height: 18px;
+  display: inline-block;
+  vertical-align: sub;
+}
+
+.team-info-line {
+  font-size: 18px;
+  line-height: 20px;
+  margin-bottom: 10px;
+}
+.team-info-line .caption {
+  font-weight: bold;
+  font-size: inherit;
+}
+.team-info-block {
+  float: left;
+  width: 21%;
+  text-align: left;
+  margin: 0 1%;
+  margin-top:11px;
+}
+.team-card .team-info-block:nth-child(2) {
+  width: 13%;
+}
+.team-card .team-info-block:last-child {
+  width: 37%;
 }
 
 .graph {
