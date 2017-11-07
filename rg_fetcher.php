@@ -89,12 +89,12 @@ foreach ($matches as $match) {
       }
       echo("[S] Match $match: Request OK\n");
 
-      if($matchdata['duration'] < 18000) {
-        echo("[ ] Match duration is less than 5 minutes, skipping...\n")
+      if($matchdata['duration'] < 300) {
+        echo("[ ] Match duration is less than 5 minutes, skipping...\n");
         continue;
       }
       if($matchdata['radiant_score'] < 4 && $matchdata['dire_score'] < 4) {
-        echo("[ ] Match score is less than 4 - 4, skipping...\n")
+        echo("[ ] Match score is less than 4 - 4, skipping...\n");
         continue;
       }
 
@@ -167,7 +167,7 @@ foreach ($matches as $match) {
         $t_matchlines[$i]['kills'] = $matchdata['players'][$j]['kills'];
         $t_matchlines[$i]['deaths'] = $matchdata['players'][$j]['deaths'];
         $t_matchlines[$i]['assists'] = $matchdata['players'][$j]['assists'];
-        $t_matchlines[$i]['networth'] = $matchdata['players'][$j]['gold'];
+        $t_matchlines[$i]['networth'] = $matchdata['players'][$j]['total_gold'];
         $t_matchlines[$i]['gpm'] = $matchdata['players'][$j]['gold_per_min'];
         $t_matchlines[$i]['xpm'] = $matchdata['players'][$j]['xp_per_min'];
         $t_matchlines[$i]['heal'] = $matchdata['players'][$j]['hero_healing'];
@@ -392,11 +392,6 @@ if ($new_players) {
 
 if ($lg_settings['main']['teams']) {
   echo "[ ] Adding new team matches\n";
-  $t_team_matches[] = array(
-    "matchid" => $match,
-    "teamid"  => $matchdata[$tag]['team_id'],
-    "is_radiant" => $i,
-  );
 
   $sql = "INSERT INTO teams_matches (matchid, teamid, is_radiant) VALUES ";
 

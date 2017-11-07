@@ -5,6 +5,7 @@
   # Analyzer module
   # JSON output
 
+  
   echo("\nConnecting to database...\n");
 
   $conn = new mysqli($lrg_sql_host, $lrg_sql_user, $lrg_sql_pass, $lrg_sql_db);
@@ -165,6 +166,136 @@
 
       $query_res->free_result();
     } while($conn->next_result());
+  }
+
+  /* patches */ {
+    $result["versions"] = array();
+
+    $sql = "SELECT version, count(distinct matchid) matches
+            FROM matches
+            GROUP BY version
+            ORDER BY matches DESC;";
+
+    if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for VERSIONS.\n";
+    else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+
+    $query_res = $conn->store_result();
+
+    for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+      $result["versions"][$row[0]] = $row[1];
+    }
+
+    $query_res->free_result();
+  }
+
+  /* game modes */ {
+    $result["modes"] = array();
+
+    $sql = "SELECT modeID, count(distinct matchid) matches
+            FROM matches
+            GROUP BY modeID
+            ORDER BY matches DESC;";
+
+    if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for GAME MODES.\n";
+    else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+
+    $query_res = $conn->store_result();
+
+    for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+      $result["modes"][$row[0]] = $row[1];
+    }
+
+    $query_res->free_result();
+  }
+
+  /* regions */ {
+    $result["regions"] = array();
+
+    $sql = "SELECT cluster, (cluster div 10) clust_id, count(distinct matchid) matches
+            FROM matches
+            GROUP BY clust_id
+            ORDER BY matches DESC;";
+
+    if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for REGIONS.\n";
+    else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+
+    $query_res = $conn->store_result();
+
+    for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+      $result["regions"][$row[0]] = $row[2];
+    }
+
+    $query_res->free_result();
+  }
+
+  /* league days */ {
+    $sql = "SELECT start_date FROM matches ORDER BY start_date;";
+
+    if ($conn->multi_query($sql) === FALSE) die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+    $query_res = $conn->store_result();
+    $start_timestamp = $query_res->fetch_row()[0] - 3600;
+
+    $query_res->free_result();
+
+    $result["days"] = array();
+    # 86400 = day = 3600*24
+    $sql = "SELECT start_date, ( (start_date-$start_timestamp) DIV 86400 ) day FROM matches GROUP BY day;";
+
+    if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for DAYS.\n";
+    else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+
+    $query_res = $conn->store_result();
+
+    for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+      $result["days"][$row[1]] = array(
+        "timestamp" => $row[0],
+        "matches" => array()
+      );
+    }
+
+    $query_res->free_result();
+
+    foreach($result["days"] as $day => $date) {
+      $sql = "SELECT matchid FROM matches WHERE start_date >= ".$date['timestamp']." AND start_date < ".$date['timestamp']."+86401;";
+
+      if ($conn->multi_query($sql) === FALSE) die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+
+      $query_res = $conn->store_result();
+
+      for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+        $result["days"][$day]['matches'][] = $row[0];
+      }
+
+      $query_res->free_result();
+    }
+  }
+
+  /* first and last match */ {
+    $sql = "SELECT matchid, start_date
+            FROM matches
+            ORDER BY start_date ASC;";
+
+    if ($conn->multi_query($sql) !== TRUE) die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+
+    $query_res = $conn->store_result();
+    $row = $query_res->fetch_row();
+
+    $result["first_match"] = array( "mid" => $row[0], "date" => $row[1] );
+
+    $query_res->free_result();
+
+    $sql = "SELECT matchid, start_date
+            FROM matches
+            ORDER BY start_date DESC;";
+
+    if ($conn->multi_query($sql) !== TRUE) die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+
+    $query_res = $conn->store_result();
+    $row = $query_res->fetch_row();
+
+    $result["last_match"] = array( "mid" => $row[0], "date" => $row[1] );
+
+    $query_res->free_result();
   }
 
   /* Players Summary */ {
@@ -1314,11 +1445,33 @@
       }
     }
 
-    # team hero pairs/triplets
-    # team draft stages
-    # team hero positions
+    if ($lg_settings['ana']['teams']['team_vs_team']) {
+      $result["tvt"] = array ();
 
-    # TODO
+      $sql = "SELECT m1.teamid, m2.teamid, SUM(1) match_count, SUM(NOT matches.radiantWin XOR m1.is_radiant) team1_won
+          FROM teams_matches m1
+            JOIN teams_matches m2
+                ON m1.matchid = m2.matchid and m1.is_radiant <> m2.is_radiant and m1.teamid < m2.teamid
+              JOIN matches
+                ON m1.matchid = matches.matchid
+          GROUP BY m1.teamid, m2.teamid;";
+
+      if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for TEAM VS TEAM.\n";
+      else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+
+      $query_res = $conn->store_result();
+
+      for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+        $result["tvt"][] = array (
+          "teamid1" => $row[0],
+          "teamid2" => $row[1],
+          "matches" => $row[2],
+          "t1won" => $row[3]
+        );
+      }
+
+      $query_res->free_result();
+    }
   } else {
     echo "[ ] Working for players competition...\n";
 
@@ -1562,10 +1715,26 @@
         "radiant_win" => $row[3],
         "date" => $row[4]
       );
+      $query_res->free_result();
 
+      $sql = "SELECT SUM(kills), SUM(networth) FROM matchlines WHERE matchid = $matchid GROUP BY isRadiant ORDER BY isRadiant ASC;";
+
+      if ($conn->multi_query($sql) === TRUE);
+      else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+
+      $query_res = $conn->store_result();
+      $row = $query_res->fetch_row();
+
+      $result["matches_additional"][$matchid]["dire_score"] = $row[0];
+      $result["matches_additional"][$matchid]["dire_nw"] = $row[1];
+
+      $row = $query_res->fetch_row();
+
+      $result["matches_additional"][$matchid]["radiant_score"] = $row[0];
+      $result["matches_additional"][$matchid]["radiant_nw"] = $row[1];
+
+      $query_res->free_result();
     }
-
-    $query_res->free_result();
 
     if($lg_settings['main']['teams']) {
       $result["match_participants_teams"] = array();

@@ -1,6 +1,13 @@
 <?php
   $strings = array(
+    "date_format" => "h:i:s j M Y",
+
+    "league_name" => "League name",
+    "league_tag" => "League tag",
+    "league_desc" => "Description",
+
     "random" => "Random stats",
+    "notable_matches" => "Notable matches",
     "buybacks_total" => "Total Buybacks",
     "creeps_killed"  => "Total Creeps Killed",
     "total_time_dead" => "Total time players were dead (minutes)",
@@ -56,6 +63,7 @@
     "hero_combos" => "Combinations",
     "hero_combo_graph" => "Hero Combos Graph",
     "pvp" => "Player versus player",
+    "tvt" => "Team versus team",
     "player_positions" => "Player positions",
     "player_pairs" => "Player pairs",
     "player_triplets" => "Player triplets",
@@ -82,6 +90,7 @@
     "player_nickname" => "Nickname",
     "active_roster" => "Active roster",
     "top_pick_heroes" => "Favorite heroes",
+    "top_contested_heroes" => "Contested heroes",
     "top_pick_pairs" => "Favorite pairs",
 
     "gpm" => "GPM",
@@ -154,8 +163,36 @@
     "heal_per_min_s" => "Heal/min",
     "taken_damage_per_min_s" => "Taken HD/min",
 
-    "noleague_cap" => "Wrong league",
-    "noleague_desc" => "This is just an interface for generated reports. Please use correct league tag or contact server administrator."
+    "noleague_cap" => "League Reports List",
+    "noleague_desc" => "This instance containce these reports:",
+
+    "over-pregen-report" => "This is automatically generated report for",
+    "over-league" => "league",
+    "over-custom-league" => "custom league",
+    "over-matches-left" => "There were ",
+    "over-matches-right" => " matches played in this league.",
+    "over-teams-left" => "",
+    "over-teams-right" => " teams participated in this event.",
+    "over-players-left" => "",
+    "over-players-right" => " players participated in this event.",
+    "over-one-version-left" => "All matches were played on ",
+    "over-one-version-right" => " version.",
+    "over-most-version-left" => " matches were played on ",
+    "over-most-version-right" => " version.",
+    "over-one-mode-left" => "All matches were played in ",
+    "over-one-mode-right" => " gamemode.",
+    "over-most-mode-left" => " matches were played in ",
+    "over-most-mode-right" => " gamemode.",
+    "over-one-region-left" => "All matches were played on ",
+    "over-one-region-right" => " servers.",
+    "over-most-region-left" => " matches were played on ",
+    "over-most-region-right" => " servers.",
+    "over-first-match" => "First match was played on ",
+    "over-last-match" => "Last match was played on ",
+    "over-last-match-winner" => " won the last match.",
+    "matches_per_day" => "Matches per day",
+    "first_match" => "First match",
+    "last_match" => "Last match"
   );
 
  ?>
