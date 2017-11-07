@@ -31,13 +31,15 @@ $mod = "";
     return false;
   }
 
-  function hero_portrait($hid, &$meta) {
+  function hero_portrait($hid) {
+    global $meta;
     return "<img class=\"hero_portrait\" src=\"res/heroes/".$meta['heroes'][ $hid ]['tag'].
       ".png\" alt=\"".$meta['heroes'][ $hid ]['tag']."\" />";
   }
 
-  function hero_full($hid, &$meta) {
-    return hero_portrait($hid, $meta)." ".$meta['heroes'][ $hid ]['name'];
+  function hero_full($hid) {
+    global $meta;
+    return hero_portrait($hid)." ".$meta['heroes'][ $hid ]['name'];
   }
 
   function player_name($pid) {
@@ -49,7 +51,10 @@ $mod = "";
 
   }
 
-  function player_card($player_id, &$report, &$meta, &$strings) {
+  function player_card($player_id) {
+    global $report;
+    global $meta;
+    global $strings;
     $pname = $report['players'][$player_id];
     $pinfo = $report['players_additional'][$player_id];
 
@@ -67,7 +72,7 @@ $mod = "";
     # heroes
     $output .= "<div class=\"player-heroes\"><div class=\"section-caption\">".$strings['heroes']."</div><div class=\"section-lines\">";
     foreach($pinfo['heroes'] as $hero) {
-      $output .= "<div class=\"player-info-line\"><span class=\"caption\">".hero_full($hero['heroid'], $meta).":</span> ";
+      $output .= "<div class=\"player-info-line\"><span class=\"caption\">".hero_full($hero['heroid']).":</span> ";
       $output .= $hero['matches']." - ".number_format($hero['wins']*100/$hero['matches'], 2)."%</div>";
     }
     $output .= "</div></div>";
@@ -131,7 +136,7 @@ $mod = "";
       $counter = 0;
       foreach($heroes as $hid => $stats) {
         if($counter > 3) break;
-        $output .= "<div class=\"team-info-line\"><span class=\"caption\">".hero_full($hid, $meta).":</span> ";
+        $output .= "<div class=\"team-info-line\"><span class=\"caption\">".hero_full($hid).":</span> ";
         $output .= $stats['matches_picked']." - ".number_format($stats['wins_picked']*100/$stats['matches_picked'], 2)."%</div>";
         $counter++;
       }
@@ -146,7 +151,7 @@ $mod = "";
       $counter = 0;
       foreach($heroes as $stats) {
         if($counter > 2) break;
-        $output .= "<div class=\"team-info-line\"><span class=\"caption\">".hero_full($stats['heroid1'], $meta)." + ".hero_full($stats['heroid2'], $meta).":</span> ";
+        $output .= "<div class=\"team-info-line\"><span class=\"caption\">".hero_full($stats['heroid1'])." + ".hero_full($stats['heroid2']).":</span> ";
         $output .= $stats['matches']." - ".number_format($stats['winrate']*100, 2)."%</div>";
         $counter++;
       }
@@ -158,7 +163,10 @@ $mod = "";
 
   }
 
-  function match_card($mid, &$report, &$meta, &$strings) {
+  function match_card($mid) {
+    global $report;
+    global $meta;
+    global $strings;
     $output = "<div class=\"match-card\"><div class=\"match-id\">".match_link($mid)."</div>";
     $radiant = "<div class=\"match-team radiant\">";
     $dire = "<div class=\"match-team dire\">";
@@ -169,10 +177,10 @@ $mod = "";
     for($i=0; $i<10; $i++) {
       if($report['matches'][$mid][$i]['radiant']) {
         $players_radi .= "<div class=\"match-player\">".$report['players'][ $report['matches'][$mid][$i]['player'] ]."</div>";
-        $heroes_radi .= "<div class=\"match-hero\">".hero_portrait($report['matches'][$mid][$i]['hero'], $meta)."</div>";
+        $heroes_radi .= "<div class=\"match-hero\">".hero_portrait($report['matches'][$mid][$i]['hero'])."</div>";
       } else {
         $players_dire .= "<div class=\"match-player\">".$report['players'][ $report['matches'][$mid][$i]['player'] ]."</div>";
-        $heroes_dire .= "<div class=\"match-hero\">".hero_portrait($report['matches'][$mid][$i]['hero'], $meta)."</div>";
+        $heroes_dire .= "<div class=\"match-hero\">".hero_portrait($report['matches'][$mid][$i]['hero'])."</div>";
       }
 
     }
@@ -189,11 +197,14 @@ $mod = "";
       $team_radiant = "Radiant";
       $team_dire = "Dire";
     }
-    $radiant .= "<div class=\"match-team-name\">".$team_radiant."</div>";
-    $dire .= "<div class=\"match-team-name\">".$team_dire."</div>";
+    $radiant .= "<div class=\"match-team-name\">".$team_radiant." - ".$report['matches_additional'][$mid]['radiant_score']."</div>";
+    $dire .= "<div class=\"match-team-name\">".$report['matches_additional'][$mid]['dire_score']." - ".$team_dire."</div>";
 
-    $radiant .= "<div class=\"match-players\">".$players_radi."</div><div class=\"match-heroes\">".$heroes_radi."</div></div>";
-    $dire .= "<div class=\"match-players\">".$players_dire."</div><div class=\"match-heroes\">".$heroes_dire."</div></div>";
+    $radiant .= "<div class=\"match-players\">".$players_radi."</div><div class=\"match-heroes\">".$heroes_radi."</div>".
+                "<div class=\"match-team-nw\">".$report['matches_additional'][$mid]['radiant_nw']."</div></div>";
+    $dire .= "<div class=\"match-players\">".$players_dire."</div><div class=\"match-heroes\">".$heroes_dire."</div>".
+            "<div class=\"match-team-nw\">".$report['matches_additional'][$mid]['dire_nw']."</div></div>";
+
 
     $output .= $radiant.$dire;
 
@@ -215,7 +226,7 @@ $mod = "";
                     <div class=\"match-info-line\"><span class=\"caption\">".$strings['winner']." :</span> ".
                       ($report['matches_additional'][$mid]['radiant_win'] ? $team_radiant : $team_dire)."</div>
                     <div class=\"match-info-line\"><span class=\"caption\">".$strings['date']." :</span> ".
-                      date("h:i:s j M Y", $report['matches_additional'][$mid]['date'])."</div>
+                      date($strings['date_format'], $report['matches_additional'][$mid]['date'])."</div>
                 </div>";
 
     return $output."</div>";
@@ -310,12 +321,13 @@ $level_codes = array(
   2 => array ( "level-3", "level-3" ),
   3 => array ( "level-4", "level-4" )
 );
+$charts_colors = array( "#ff6384","#36a2eb","#ffcd55","#16ac70","#107290","#d62728","#ff7f0e","#2ca02c","#1f77b4" );
 
 /* INITIALISATION */
 
     if(isset($argv)) {
 
-    $options = getopt("l:m:d:f");
+    $options = getopt("l:m:d:f:S");
 
     if(isset($options['l'])) {
       $leaguetag = $options['l'];
@@ -329,6 +341,9 @@ $level_codes = array(
     }
     if(isset($options['d'])) {
       $lrg_get_depth = (int)$options['d'];
+    }
+    if(isset($options['S'])) {
+      $override_style = $options['S'];
     }
   } else if ($lrg_use_get) {
     if(isset($_GET['league']) && !empty($_GET['league'])) {
@@ -344,12 +359,18 @@ $level_codes = array(
     if(isset($_GET['loc']) && !empty($_GET['loc'])) {
       $locale = $_GET['loc'];
     }
+    if(isset($_GET['stow']) && !empty($_GET['stow'])) {
+      $override_style = $_GET['stow'];
+    }
   }
 
   if(file_exists('locales/'.$locale.'.php'))
     require_once('locales/'.$locale.'.php');
   else
     require_once('locales/en.php');
+
+    $use_visjs = false;
+    $use_graphjs = false;
 
   if (!empty($leaguetag)) {
     $output = "";
@@ -372,6 +393,7 @@ $level_codes = array(
       $modules['players'] = array();
 
     if (isset($report['teams'])) { $modules['teams'] = array(); $modules['summary_teams'] = ""; }
+    if (isset($report['teams'])) $modules['tvt'] = "";
 
     if (isset($report['matches'])) $modules['matches'] = "";
 
@@ -380,8 +402,6 @@ $level_codes = array(
     if(empty($mod)) $unset_module = true;
     else $unset_module = false;
 
-    $use_graph = false;
-
     $h3 = array_rand($report['random']);
 
     $random_caption = "placeholder";
@@ -389,7 +409,235 @@ $level_codes = array(
 
   # overview
   if ( check_module("overview") ) {
-    $modules['overview'] .= "<div class=\"content-text\"><h1>".$random_caption."</h1>".$random_text."</div>";
+    $modules['overview'] .= "<div class=\"content-header\">".$strings['summary']."</div>";
+    $modules['overview'] .= "<div class=\"content-text\">";
+    $modules['overview'] .= $strings['over-pregen-report'];
+    if ($report['league_id'] == null || $report['league_id'] == "custom")
+      $modules['overview'] .= " ".$strings['over-custom-league']." ".$report['league_name'].".<br />";
+    else
+      $modules['overview'] .= " ".$report['league_name']." (".$report['league_id'].") — ".$report['league_desc'].".<br />";
+    $modules['overview'] .= $strings['over-matches-left'].$report['random']['matches_total'].$strings['over-matches-right']."<br />";
+    if(isset($report['teams']))
+      $modules['overview'] .= $strings['over-teams-left'].$report['random']['teams_on_event'].$strings['over-teams-right']."<br />";
+    else $modules['overview'] .= $strings['over-players-left'].$report['random']['players_on_event'].$strings['over-players-right']."<br />";
+
+    $mode = reset($report['versions']);
+    if ($mode/$report['random']['matches_total'] > 0.99)
+      $modules['overview'] .= $strings['over-one-version-left'].$meta['versions'][ key($report['versions']) ].$strings['over-one-version-right']."<br />";
+    else $modules['overview'] .= $mode.$strings['over-most-version-left'].$meta['versions'][ key($report['versions']) ].$strings['over-most-version-right']."<br />";
+
+    $mode = reset($report['modes']);
+    if ($mode/$report['random']['matches_total'] > 0.99)
+      $modules['overview'] .= $strings['over-one-mode-left'].$meta['modes'][ key($report['modes']) ].$strings['over-one-mode-right']."<br />";
+    else $modules['overview'] .= $mode.$strings['over-most-mode-left'].$meta['modes'][ key($report['modes']) ].$strings['over-most-mode-right']."<br />";
+
+    $mode = reset($report['regions']);
+    if ($mode/$report['random']['matches_total'] > 0.99)
+      $modules['overview'] .= $strings['over-one-region-left'].$meta['regions'][$meta['clusters'][ key($report['regions']) ]].$strings['over-one-region-right']."<br />";
+    else
+      $modules['overview'] .= $mode.$strings['over-most-region-left'].$meta['regions'][$meta['clusters'][ key($report['regions']) ]].$strings['over-most-region-right']."<br />";
+
+    $modules['overview'] .= $strings['over-first-match']." ".date($strings['date_format'], $report['first_match']['date'])."<br />";
+    $modules['overview'] .= $strings['over-last-match']." ".date($strings['date_format'], $report['last_match']['date'])."<br />";
+    if(isset($report['teams'])) {
+      if( $report['matches_additional'][ $report['last_match']['mid'] ]['radiant_win'] ) {
+        if(isset($report['teams'][ $report['match_participants_teams'][ $report['last_match']['mid'] ]['radiant'] ]['name']))
+          $modules['overview'] .= $report['teams'][ $report['match_participants_teams'][ $report['last_match']['mid'] ]['radiant'] ]['name'];
+        else $modules['overview'] .= "Radiant";
+      } else {
+        if(isset($report['teams'][ $report['match_participants_teams'][ $report['last_match']['mid'] ]['dire'] ]['name']))
+          $modules['overview'] .= $report['teams'][ $report['match_participants_teams'][ $report['last_match']['mid'] ]['dire'] ]['name'];
+        else $modules['overview'] .= "Dire";
+      }
+
+      $modules['overview'] .= $strings['over-last-match-winner']."<br />";
+    }
+
+    $modules['overview'] .= "</div>";
+
+
+    $use_graphjs = true;
+    $modules['overview'] .= "<div class=\"content-text\">";
+
+    $mode = reset($report['versions']);
+
+    if ($mode/$report['random']['matches_total'] < 0.99) {
+      $converted_modes = array();
+      foreach ($report['versions'] as $mode => $data) {
+        $converted_modes[] = $meta['versions'][$mode];
+      }
+      $colors = array_slice($charts_colors, 0, sizeof($converted_modes));
+      $modules['overview'] .= "<div class=\"chart-pie\"><canvas id=\"overview-patches\" width=\"undefined\" height=\"undefined\"></canvas><script>".
+                            "var modes_chart_el = document.getElementById('overview-patches'); ".
+                            "var modes_chart = new Chart(modes_chart_el, {
+                              type: 'pie',
+                              data: {
+                                labels: [ '".implode($converted_modes,"','")."' ],
+                                datasets: [{data: [ ".implode($report['versions'],",")." ],
+                                borderWidth: 0,
+                                backgroundColor:['".implode($colors,"','")."']}]
+                              }
+                            });</script></div>";
+    }
+
+    $mode = reset($report['modes']);
+    if ($mode/$report['random']['matches_total'] < 0.99) {
+      $converted_modes = array();
+      foreach ($report['modes'] as $mode => $data) {
+        $converted_modes[] = $meta['modes'][$mode];
+      }
+      $colors = array_slice($charts_colors, 0, sizeof($converted_modes));
+      $modules['overview'] .= "<div class=\"chart-pie\"><canvas id=\"overview-modes\" width=\"undefined\" height=\"undefined\"></canvas><script>".
+                            "var modes_chart_el = document.getElementById('overview-modes'); ".
+                            "var modes_chart = new Chart(modes_chart_el, {
+                              type: 'pie',
+                              data: {
+                                labels: [ '".implode($converted_modes,"','")."' ],
+                                datasets: [{data: [ ".implode($report['modes'],",")." ],
+                                borderWidth: 0,
+                                backgroundColor:['".implode($colors,"','")."']}]
+                              }
+                            });</script></div>";
+    }
+
+    $mode = reset($report['regions']);
+    if ($mode/$report['random']['matches_total'] < 0.99) {
+      $converted_modes = array();
+      foreach ($report['regions'] as $mode => $data) {
+        $region = $meta['clusters'][$mode];
+        if(isset($converted_modes[$region])) continue;
+        $converted_modes[$region] = $meta['regions'][$region];
+      }
+      $regions_matches = array();
+      foreach ($report['regions'] as $mode => $data) {
+        $region = $meta['regions'][ $meta['clusters'][$mode] ];
+        if(isset($regions_matches[$region])) $regions_matches[$region] += $data;
+        $regions_matches[$region] = $data;
+      }
+      $colors = array_slice($charts_colors, 0, sizeof($converted_modes));
+      $modules['overview'] .= "<div class=\"chart-pie\"><canvas id=\"overview-regions\" width=\"undefined\" height=\"undefined\"></canvas><script>".
+                            "var modes_chart_el = document.getElementById('overview-regions'); ".
+                            "var modes_chart = new Chart(modes_chart_el, {
+                              type: 'pie',
+                              data: {
+                                labels: [ '".implode($converted_modes,"','")."' ],
+                                datasets: [{data: [ ".implode($regions_matches,",")." ],
+                                borderWidth: 0,
+                                backgroundColor:['".implode($colors,"','")."']}]
+                              }
+                            });</script></div>";
+      unset($regions_matches);
+    }
+
+    $modules['overview'] .= "<div class=\"chart-pie\"><canvas id=\"overview-sides\" width=\"undefined\" height=\"undefined\"></canvas><script>".
+                          "var modes_chart_el = document.getElementById('overview-sides'); ".
+                          "var modes_chart = new Chart(modes_chart_el, {
+                            type: 'pie',
+                            data: {
+                              labels: [ '".$strings['radiant']."','".$strings['dire']."' ],
+                              datasets: [{data: [ ".$report['random']['radiant_wr'].",".$report['random']['dire_wr']." ],
+                              borderWidth: 0,
+                              backgroundColor:['#6af','#f66']}]
+                            }
+                          });</script></div>";
+
+    $converted_modes = array();
+    $matchcount = array();
+    foreach($report['days'] as $dn => $day) {
+      $converted_modes[] = date("j M Y", $day['timestamp'])." (".($dn+1).")";
+      $matchcount[] = sizeof($day['matches']);
+    }
+    $colors = array_slice($charts_colors, 0, sizeof($converted_modes));
+    $modules['overview'] .= "<h1>".$strings['matches_per_day']."</h1>".
+                          "<div class=\"chart-bars\"><canvas id=\"overview-days\" width=\"undefined\" height=\"undefined\"></canvas><script>".
+                          "var modes_chart_el = document.getElementById('overview-days'); ".
+                          "var modes_chart = new Chart(modes_chart_el, {
+                            type: 'horizontalBar',
+                            data: {
+                              labels: [ '','".implode($converted_modes,"','")."' ],
+                              datasets: [{label:'".$strings['matches_per_day']."',data: [ 0,".implode($matchcount,",")." ],
+                              backgroundColor:'#999'}]
+                            }
+                          });</script></div>";
+
+
+    $modules['overview'] .= "</div>";
+
+    if(isset($report['pickban'])) {
+        $modules['overview'] .= "<div class=\"content-header\">".$strings['top_contested_heroes']."</div>";
+
+        $modules['overview'] .=  "<table id=\"over-heroes-pickban\" class=\"list\">
+                                              <tr class=\"thead\">
+                                                <th>".$strings['hero']."</th>
+                                                <th>".$strings['matches_total']."</th>
+                                                <th>".$strings['matches_picked']."</th>
+                                                <th>".$strings['winrate_picked']."</th>
+                                                <th>".$strings['matches_banned']."</th>
+                                                <th>".$strings['winrate_banned']."</th>
+                                              </tr>";
+
+        $workspace = $report['pickban'];
+        uasort($workspace, function($a, $b) {
+          if($a['matches_total'] == $b['matches_total']) return 0;
+          else return ($a['matches_total'] < $b['matches_total']) ? 1 : -1;
+        });
+
+        $counter = 5;
+        foreach($workspace as $hid => $hero) {
+          if($counter == 0) break;
+          $modules['overview'] .=  "<tr>
+                                      <td>".($hid ? hero_full($hid) : "").
+                                     "</td>
+                                      <td>".$hero['matches_total']."</td>
+                                      <td>".$hero['matches_picked']."</td>
+                                      <td>".number_format($hero['winrate_picked']*100,2)."%</td>
+                                      <td>".$hero['matches_banned']."</td>
+                                      <td>".number_format($hero['winrate_banned']*100,2)."%</td>
+                                    </tr>";
+          $counter--;
+        }
+        unset($workspace);
+        $modules['overview'] .= "</table>";
+    }
+
+    if(isset($report['hero_pairs']) && !empty($report['hero_pairs'])) {
+        $modules['overview'] .= "<div class=\"content-header\">".$strings['top_pick_pairs']."</div>";
+
+        $modules['overview'] .= "<table id=\"over-hero-pairs\" class=\"list\">
+                                  <tr class=\"thead\">
+                                    <th>".$strings['hero']." 1</th>
+                                    <th>".$strings['hero']." 2</th>
+                                    <th>".$strings['matches']."</th>
+                                    <th>".$strings['winrate']."</th>
+                                  </tr>";
+        $counter = 3;
+        foreach($report['hero_pairs'] as $pair) {
+          if($counter == 0) break;
+          $modules['overview'] .= "<tr>
+                                    <td>".($pair['heroid1'] ? hero_full($pair['heroid1']) : "").
+                                   "</td><td>".($pair['heroid2'] ? hero_full($pair['heroid2'])  : "").
+                                   "</td>
+                                   <td>".$pair['matches']."</td>
+                                   <td>".number_format($pair['winrate']*100,2)."</td>
+                                  </tr>";
+          $counter--;
+        }
+        $modules['overview'] .= "</table>";
+    }
+
+    $modules['overview'] .= "<div class=\"content-header\">".$strings['notable_matches']."</div>";
+    $modules['overview'] .= "<div class=\"content-cards\">".
+          "<h1>".$strings['first_match']."</h1>".match_card($report['first_match']['mid']);
+    if(isset($report['teams']))
+      $modules['overview'] .= "<h1>".$strings['last_match']."</h1>".match_card($report['last_match']['mid']);
+    if(isset($report['records']['stomp']))
+      $modules['overview'] .= "<h1>".$strings['records'].": ".$strings['stomp']."</h1>".match_card($report['records']['stomp']['matchid']);
+    if(isset($report['records']['comeback']))
+      $modules['overview'] .= "<h1>".$strings['records'].": ".$strings['comeback']."</h1>".match_card($report['records']['comeback']['matchid']);
+
+    $modules['overview'] .= "</div>";
+
+    $modules['overview'] .= "<div class=\"content-header\">".$strings['random']."</div>";
 
     $modules['overview'] .= "<table class=\"list\" id=\"overview-table\">";
     foreach($report['random'] as $key => $value) {
@@ -397,8 +645,8 @@ $level_codes = array(
     }
     $modules['overview'] .= "</table>";
   }
-  # records
 
+  # records
   if (isset($modules['records']) && check_module("records")) {
     $modules['records'] .= "<table id=\"records-module-table\" class=\"list\">
                               <tr class=\"thead\">
@@ -422,10 +670,7 @@ $level_codes = array(
                                             $report['players'][$record['playerid']]
                                           ) :
                                      "")."</td>
-                                <td>".($record['heroid'] ?
-                                  "<img class=\"hero_portrait\" src=\"res/heroes/".$meta['heroes'][$record['heroid']]['tag'].
-                                  ".png\" alt=\"".$meta['heroes'][$record['heroid']]['tag']."\" /> ".
-                                  $meta['heroes'][$record['heroid']]['name'] : "").
+                                <td>".($record['heroid'] ? hero_full($record['heroid']) : "").
                                "</td>
                             </tr>";
     }
@@ -451,10 +696,7 @@ $level_codes = array(
                                                       </tr>";
           foreach($avg as $hero) {
             $modules['heroes']['averages_heroes'] .= "<tr>
-                                                        <td>".($hero['heroid'] ?
-                                                          "<img class=\"hero_portrait\" src=\"res/heroes/".$meta['heroes'][$hero['heroid']]['tag'].
-                                                          ".png\" alt=\"".$meta['heroes'][$hero['heroid']]['tag']."\" /> ".
-                                                          $meta['heroes'][$hero['heroid']]['name'] : "").
+                                                        <td>".($hero['heroid'] ? hero_full($hero['heroid']) : "").
                                                        "</td><td>".number_format($hero['value'],2)."</td></tr>";
           }
           $modules['heroes']['averages_heroes'] .= "</table>";
@@ -479,10 +721,7 @@ $level_codes = array(
           foreach($report['pickban'] as $hid => $hero) {
             unset($heroes[$hid]);
             $modules['heroes']['pickban'] .=  "<tr>
-                                                  <td>".($hid ?
-                                                    "<img class=\"hero_portrait\" src=\"res/heroes/".$meta['heroes'][$hid]['tag'].
-                                                    ".png\" alt=\"".$meta['heroes'][$hid]['tag']."\" /> ".
-                                                    $meta['heroes'][$hid]['name'] : "").
+                                                  <td>".($hid ? hero_full($hid) : "").
                                                  "</td>
                                                   <td>".$hero['matches_total']."</td>
                                                   <td>".$hero['matches_picked']."</td>
@@ -525,10 +764,7 @@ $level_codes = array(
 
             foreach($report['draft'][$i][$j] as $hero) {
               $modules['heroes']['draft'][($i ? "pick" : "ban")."_stages"] .= "<tr>
-                                                  <td>".($hero['heroid'] ?
-                                                    "<img class=\"hero_portrait\" src=\"res/heroes/".$meta['heroes'][$hero['heroid']]['tag'].
-                                                    ".png\" alt=\"".$meta['heroes'][$hero['heroid']]['tag']."\" /> ".
-                                                    $meta['heroes'][$hero['heroid']]['name'] : "").
+                                                  <td>".($hero['heroid'] ? hero_full($hero['heroid']) : "").
                                                  "</td>
                                                   <td>".$hero['matches']."</td>
                                                   <td>".number_format($hero['winrate']*100,2)."%</td>
@@ -583,10 +819,7 @@ $level_codes = array(
                                                                   " onclick=\"showModal('".htmlspecialchars(join_matches($report['hero_positions_matches'][$i][$j][$hero['heroid']])).
                                                                           "', '".$meta['heroes'][ $hero['heroid'] ]['name']." - ".
                                                                           $strings["positions_$i"."_$j"]." - ".$strings['matches']."');\"" : "").">
-                                                    <td>".($hero['heroid'] ?
-                                                      "<img class=\"hero_portrait\" src=\"res/heroes/".$meta['heroes'][ $hero['heroid'] ]['tag'].
-                                                      ".png\" alt=\"".$meta['heroes'][ $hero['heroid'] ]['tag']."\" /> ".
-                                                      $meta['heroes'][ $hero['heroid'] ]['name'] : "").
+                                                    <td>".($hero['heroid'] ? hero_full($hero['heroid']) : "").
                                                    "</td>
                                                     <td>".$hero['matches_s']."</td>
                                                     <td>".number_format($hero['winrate_s']*100,1)."%</td>";
@@ -626,10 +859,7 @@ $level_codes = array(
 
           foreach($report['hero_sides'][$side] as $hero) {
             $modules['heroes']['hero_sides'][$side ? 'dire' : 'radiant'] .= "<tr>
-                                                <td>".($hero['heroid'] ?
-                                                  "<img class=\"hero_portrait\" src=\"res/heroes/".$meta['heroes'][ $hero['heroid'] ]['tag'].
-                                                  ".png\" alt=\"".$meta['heroes'][ $hero['heroid'] ]['tag']."\" /> ".
-                                                  $meta['heroes'][ $hero['heroid'] ]['name'] : "").
+                                                <td>".($hero['heroid'] ? hero_full($hero['heroid']) : "").
                                                "</td>".
                                                "<td>".$hero['matches']."</td>".
                                                "<td>".number_format($hero['winrate']*100,2)."%</td>";
@@ -648,7 +878,7 @@ $level_codes = array(
 
       if (check_module($parent."hero_combo_graph") && isset($report['pickban'])) {
         if(isset($report['hero_combos_graph'])) {
-          $use_graph = true;
+          $use_visjs = true;
 
           $modules['heroes']['hero_combo_graph'] .= "<div id=\"hero-combos-graph\" class=\"graph\"></div><script type=\"text/javascript\">";
 
@@ -710,14 +940,8 @@ $level_codes = array(
             $modules['heroes']['hero_combos'] .= "<tr".(isset($report['hero_pairs_matches']) ?
                                                 " onclick=\"showModal('".htmlspecialchars(join_matches($report['hero_pairs_matches'][$pair['heroid1'].'-'.$pair['heroid2']])).
                                                                       "', '".$strings['matches']."');\"" : "").">
-                                                  <td>".($pair['heroid1'] ?
-                                                    "<img class=\"hero_portrait\" src=\"res/heroes/".$meta['heroes'][ $pair['heroid1'] ]['tag'].
-                                                    ".png\" alt=\"".$meta['heroes'][ $pair['heroid1'] ]['tag']."\" /> ".
-                                                    $meta['heroes'][ $pair['heroid1'] ]['name'] : "").
-                                                 "</td><td>".($pair['heroid2'] ?
-                                                   "<img class=\"hero_portrait\" src=\"res/heroes/".$meta['heroes'][ $pair['heroid2'] ]['tag'].
-                                                   ".png\" alt=\"".$meta['heroes'][ $pair['heroid2'] ]['tag']."\" /> ".
-                                                   $meta['heroes'][ $pair['heroid2'] ]['name'] : "").
+                                                  <td>".($pair['heroid1'] ? hero_full($pair['heroid1']) : "").
+                                                 "</td><td>".($pair['heroid2'] ? hero_full($pair['heroid2'])  : "").
                                                  "</td>
                                                  <td>".$pair['matches']."</td>
                                                  <td>".number_format($pair['winrate']*100,2)."</td>
@@ -742,18 +966,9 @@ $level_codes = array(
                                                 " onclick=\"showModal('".
                                                 implode($report['hero_pairs_matches'][$pair['heroid1'].'-'.$pair['heroid2'].'-'.$pair['heroid3']], ", ").
                                                                       "', '".$strings['matches']."');\"" : "").">
-                                                  <td>".($pair['heroid1'] ?
-                                                    "<img class=\"hero_portrait\" src=\"res/heroes/".$meta['heroes'][ $pair['heroid1'] ]['tag'].
-                                                    ".png\" alt=\"".$meta['heroes'][ $pair['heroid1'] ]['tag']."\" /> ".
-                                                    $meta['heroes'][ $pair['heroid1'] ]['name'] : "").
-                                                 "</td><td>".($pair['heroid2'] ?
-                                                   "<img class=\"hero_portrait\" src=\"res/heroes/".$meta['heroes'][ $pair['heroid2'] ]['tag'].
-                                                   ".png\" alt=\"".$meta['heroes'][ $pair['heroid2'] ]['tag']."\" /> ".
-                                                   $meta['heroes'][ $pair['heroid2'] ]['name'] : "").
-                                                 "</td><td>".($pair['heroid3'] ?
-                                                   "<img class=\"hero_portrait\" src=\"res/heroes/".$meta['heroes'][ $pair['heroid3'] ]['tag'].
-                                                   ".png\" alt=\"".$meta['heroes'][ $pair['heroid3'] ]['tag']."\" /> ".
-                                                   $meta['heroes'][ $pair['heroid3'] ]['name'] : "").
+                                                  <td>".($pair['heroid1'] ? hero_full($pair['heroid1']) : "").
+                                                 "</td><td>".($pair['heroid2'] ? hero_full($pair['heroid2']) : "").
+                                                 "</td><td>".($pair['heroid3'] ? hero_full($pair['heroid3']) : "").
                                                  "</td>
                                                  <td>".$pair['matches']."</td>
                                                  <td>".number_format($pair['winrate']*100,2)."</td>
@@ -954,7 +1169,7 @@ $level_codes = array(
 
       if (check_module($parent."players_combo_graph")) {
         if(isset($report['players_combo_graph'])) {
-          $use_graph = true;
+          $use_visjs = true;
 
           $modules['players']['players_combo_graph'] .= "<div id=\"players-combos-graph\" class=\"graph\"></div><script type=\"text/javascript\">";
 
@@ -1104,6 +1319,7 @@ $level_codes = array(
       }
     }
   }
+
   # teams
   if (isset($modules['teams']) && check_module("teams")) {
     if($mod == "teams") $unset_module = true;
@@ -1147,7 +1363,7 @@ $level_codes = array(
             foreach($report['teams'][$tid]['pickban'] as $hid => $hero) {
               unset($heroes[$hid]);
               $modules['teams']["team_".$tid."_stats"]['pickban'] .=  "<tr>
-                                                    <td>".($hid ? hero_full($hid, $meta) : "").
+                                                    <td>".($hid ? hero_full($hid) : "").
                                                    "</td>
                                                     <td>".$hero['matches_total']."</td>
                                                     <td>".$hero['matches_picked']."</td>
@@ -1189,7 +1405,7 @@ $level_codes = array(
 
                 foreach($report['teams'][$tid]['draft'][$i][$j] as $hero) {
                   $modules['teams']["team_".$tid."_stats"]['draft'] .= "<tr>
-                                                      <td>".($hero['heroid'] ? hero_full($hero['heroid'], $meta) : "").
+                                                      <td>".($hero['heroid'] ? hero_full($hero['heroid']) : "").
                                                      "</td>
                                                       <td>".$hero['matches']."</td>
                                                       <td>".number_format($hero['winrate']*100,2)."%</td>
@@ -1247,10 +1463,7 @@ $level_codes = array(
                                                                         " onclick=\"showModal('".htmlspecialchars(join_matches($report['teams'][$tid]['hero_positions_matches'][$i][$j][$hero['heroid']])).
                                                                                 "', '".$meta['heroes'][ $hero['heroid'] ]['name']." - ".
                                                                                 $strings["positions_$i"."_$j"]." - ".$strings['matches']."');\"" : "").">
-                                                          <td>".($hero['heroid'] ?
-                                                            "<img class=\"hero_portrait\" src=\"res/heroes/".$meta['heroes'][ $hero['heroid'] ]['tag'].
-                                                            ".png\" alt=\"".$meta['heroes'][ $hero['heroid'] ]['tag']."\" /> ".
-                                                            $meta['heroes'][ $hero['heroid'] ]['name'] : "").
+                                                          <td>".($hero['heroid'] ? hero_full($hero['heroid']) : "").
                                                          "</td>
                                                           <td>".$hero['matches_s']."</td>
                                                           <td>".number_format($hero['winrate_s']*100,1)."%</td>";
@@ -1272,7 +1485,7 @@ $level_codes = array(
           $modules['teams']["team_".$tid."_stats"]['hero_combo_graph'] = "";
 
           if (check_module($parent."team_".$tid."_stats-hero_combo_graph") && isset($report['teams'][$tid]['pickban'])) {
-            $use_graph = true;
+            $use_visjs = true;
 
             $modules['teams']["team_".$tid."_stats"]['hero_combo_graph'] .= "<div id=\"team$tid-combos-graph\" class=\"graph\"></div><script type=\"text/javascript\">";
 
@@ -1334,8 +1547,8 @@ $level_codes = array(
                                                   " onclick=\"showModal('".
                                                             htmlspecialchars(join_matches($report['teams'][$tid]['hero_pairs_matches'][$pair['heroid1'].'-'.$pair['heroid2']])).
                                                                         "', '".$strings['matches']."');\"" : "").">
-                                                    <td>".($pair['heroid1'] ? hero_full($pair['heroid1'], $meta) : "").
-                                                   "</td><td>".($pair['heroid2'] ? hero_full($pair['heroid2'], $meta) : "").
+                                                    <td>".($pair['heroid1'] ? hero_full($pair['heroid1']) : "").
+                                                   "</td><td>".($pair['heroid2'] ? hero_full($pair['heroid2']) : "").
                                                    "</td>
                                                    <td>".$pair['matches']."</td>
                                                    <td>".number_format($pair['winrate']*100,2)."</td>
@@ -1358,9 +1571,9 @@ $level_codes = array(
                                                     " onclick=\"showModal('".
                                                     implode($report['hero_pairs_matches'][$pair['heroid1'].'-'.$pair['heroid2'].'-'.$pair['heroid3']], ", ").
                                                                           "', '".$strings['matches']."');\"" : "").">
-                                                      <td>".($pair['heroid1'] ? hero_full($pair['heroid1'], $meta) : "").
-                                                     "</td><td>".($pair['heroid2'] ? hero_full($pair['heroid2'], $meta) : "").
-                                                     "</td><td>".($pair['heroid3'] ? hero_full($pair['heroid3'], $meta) : "").
+                                                      <td>".($pair['heroid1'] ? hero_full($pair['heroid1']) : "").
+                                                     "</td><td>".($pair['heroid2'] ? hero_full($pair['heroid2']) : "").
+                                                     "</td><td>".($pair['heroid3'] ? hero_full($pair['heroid3']) : "").
                                                      "</td>
                                                      <td>".$pair['matches']."</td>
                                                      <td>".number_format($pair['winrate']*100,2)."</td>
@@ -1376,7 +1589,7 @@ $level_codes = array(
           if(check_module($parent."team_".$tid."_stats-matches")) {
             $modules['teams']["team_".$tid."_stats"]['matches'] = "<div class=\"content-cards\">";
             foreach($report['teams'][$tid]['matches'] as $matchid => $match) {
-              $modules['teams']["team_".$tid."_stats"]['matches'] .= match_card($matchid, $report, $meta, $strings);
+              $modules['teams']["team_".$tid."_stats"]['matches'] .= match_card($matchid);
             }
             $modules['teams']["team_".$tid."_stats"]['matches'] .= "</div>";
           }
@@ -1390,18 +1603,18 @@ $level_codes = array(
 
     $modules['summary_teams'] .= "<tr class=\"thead\">".
                     "<th onclick=\"sortTable(0,'teams-sum');\">".$strings['team_name']."</th>".
-                    "<th onclick=\"sortTable(1,'teams-sum');\">".$strings['matches_s']."</th>".
-                    "<th onclick=\"sortTable(2,'teams-sum');\">".$strings['winrate_s']."</th>".
-                    "<th onclick=\"sortTable(3,'teams-sum');\">".$strings['hero_pool']."</th>".
-                    "<th onclick=\"sortTable(4,'teams-sum');\">".$strings['kills']."</th>".
-                    "<th onclick=\"sortTable(5,'teams-sum');\">".$strings['deaths']."</th>".
-                    "<th onclick=\"sortTable(6,'teams-sum');\">".$strings['assists']."</th>".
-                    "<th onclick=\"sortTable(7,'teams-sum');\">".$strings['gpm']."</th>".
-                    "<th onclick=\"sortTable(8,'teams-sum');\">".$strings['xpm']."</th>".
-                    "<th onclick=\"sortTable(9,'teams-sum');\">".$strings['wards_placed_s']."</th>".
-                    "<th onclick=\"sortTable(10,'teams-sum');\">".$strings['sentries_placed_s']."</th>".
-                    "<th onclick=\"sortTable(11,'teams-sum');\">".$strings['wards_destroyed_s']."</th>".
-                    "<th onclick=\"sortTable(11,'teams-sum');\">".$strings['duration']."</th>".
+                    "<th onclick=\"sortTableNum(1,'teams-sum');\">".$strings['matches_s']."</th>".
+                    "<th onclick=\"sortTableNum(2,'teams-sum');\">".$strings['winrate_s']."</th>".
+                    "<th onclick=\"sortTableNum(3,'teams-sum');\">".$strings['hero_pool']."</th>".
+                    "<th onclick=\"sortTableNum(4,'teams-sum');\">".$strings['kills']."</th>".
+                    "<th onclick=\"sortTableNum(5,'teams-sum');\">".$strings['deaths']."</th>".
+                    "<th onclick=\"sortTableNum(6,'teams-sum');\">".$strings['assists']."</th>".
+                    "<th onclick=\"sortTableNum(7,'teams-sum');\">".$strings['gpm']."</th>".
+                    "<th onclick=\"sortTableNum(8,'teams-sum');\">".$strings['xpm']."</th>".
+                    "<th onclick=\"sortTableNum(9,'teams-sum');\">".$strings['wards_placed_s']."</th>".
+                    "<th onclick=\"sortTableNum(10,'teams-sum');\">".$strings['sentries_placed_s']."</th>".
+                    "<th onclick=\"sortTableNum(11,'teams-sum');\">".$strings['wards_destroyed_s']."</th>".
+                    "<th onclick=\"sortTableNum(11,'teams-sum');\">".$strings['duration']."</th>".
               "</tr>";
 
     foreach($report['teams'] as $team_id => $team) {
@@ -1424,11 +1637,84 @@ $level_codes = array(
     $modules['summary_teams'] .= "</table>";
   }
 
+  if (isset($modules['tvt']) && check_module("tvt")) {
+    $tvt = array();
+
+      foreach($report['teams'] as $tid => $team) {
+        $tvt[$tid] = array();
+      }
+      $team_ids = array_keys($report['teams']);
+
+        $modules['tvt'] = "";
+
+        $modules['tvt'] .= "<table  class=\"pvp wide\">";
+
+        $modules['tvt'] .= "<tr class=\"thead\"><th></th>";
+        foreach($report['teams'] as $tid => $team) {
+          $modules['tvt'] .= "<th><span>".$team['tag']."</span></th>";
+        }
+        $modules['tvt'] .= "</tr>";
+
+      foreach($tvt as $team_id => $team) {
+        foreach($team_ids as $tid) {
+          $tvt[$team_id][$tid] = array(
+            "winrate" => 0,
+            "matches" => 0,
+            "won" => 0,
+            "lost" => 0
+          );
+        }
+      }
+
+      foreach($team_ids as $tid) {
+        for($i=0, $end = sizeof($report['tvt']); $i<$end; $i++) {
+          if($report['tvt'][$i]['teamid1'] == $tid) {
+            $tvt[$tid][$report['tvt'][$i]['teamid2']] = array(
+              "winrate" => ($report['tvt'][$i]['t1won']/$report['tvt'][$i]['matches'] ),
+              "matches" => $report['tvt'][$i]['matches'],
+              "won" => $report['tvt'][$i]['t1won'],
+              "lost" => $report['tvt'][$i]['matches'] - $report['tvt'][$i]['t1won'],
+            );
+          }
+          if($report['tvt'][$i]['teamid2'] == $tid) {
+            $tvt[$tid][$report['tvt'][$i]['teamid1']] = array(
+              "winrate" => ($report['tvt'][$i]['matches']-$report['tvt'][$i]['t1won'])/$report['tvt'][$i]['matches'],
+              "matches" => $report['tvt'][$i]['matches'],
+              "won" => $report['tvt'][$i]['matches'] - $report['tvt'][$i]['t1won'],
+              "lost" => $report['tvt'][$i]['t1won']
+            );
+          }
+        }
+      }
+
+      foreach($tvt as $tid => $teamline) {
+        $modules['tvt'] .= "<tr><td>".$report['teams'][$tid]['name']."</td>";
+        for($i=0, $end = sizeof($team_ids); $i<$end; $i++) {
+          if($tid == $team_ids[$i]) {
+            $modules['tvt'] .= "<td class=\"transparent\"></td>";
+          } else if($teamline[$team_ids[$i]]['matches'] == 0) {
+            $modules['tvt'] .= "<td>-</td>";
+          } else {
+            $modules['tvt'] .= "<td".
+                    ($teamline[$team_ids[$i]]['winrate'] > 0.55 ? " class=\"high-wr\"" : (
+                          $teamline[$team_ids[$i]]['winrate'] < 0.45 ? " class=\"low-wr\"" : ""
+                        )
+                      ).">".number_format($teamline[$team_ids[$i]]['winrate']*100,0)."</td>";
+          }
+        }
+        $modules['tvt'] .= "</tr>";
+      }
+
+      $modules['tvt'] .= "</table>";
+
+      unset($tvt);
+  }
+
   # matches
   if (isset($modules['matches']) && check_module("matches")) {
     $modules['matches'] = "<div class=\"content-cards\">";
     foreach($report['matches'] as $matchid => $match) {
-      $modules['matches'] .= match_card($matchid, $report, $meta, $strings);
+      $modules['matches'] .= match_card($matchid);
     }
     $modules['matches'] .= "</div>";
   }
@@ -1453,7 +1739,7 @@ $level_codes = array(
     if(check_module($parent."players")) {
       $modules['participants']['players'] = "<div class=\"content-cards\">";
       foreach($report['players'] as $player_id => $player) {
-        $modules['participants']['players'] .= player_card($player_id, $report, $meta, $strings);
+        $modules['participants']['players'] .= player_card($player_id);
       }
       $modules['participants']['players'] .= "</div>";
     }
@@ -1468,9 +1754,15 @@ $level_codes = array(
       <title>League Report</title>
       <link href="res/valve_mimic.css" rel="stylesheet" type="text/css" />
       <link href="res/reports.css" rel="stylesheet" type="text/css" />
-      <?php if(isset($report['settings']['custom_style']) && file_exists("res/custom_styles/".$report['settings']['custom_style'].".css"))
+      <?php
+            if(isset($override_style) && file_exists("res/custom_styles/".$override_style.".css"))
+                echo "<link href=\"res/custom_styles/".$override_style.".css\" rel=\"stylesheet\" type=\"text/css\" />";
+            else if(isset($report['settings']['custom_style']) && file_exists("res/custom_styles/".$report['settings']['custom_style'].".css"))
                 echo "<link href=\"res/custom_styles/".$report['settings']['custom_style'].".css\" rel=\"stylesheet\" type=\"text/css\" />";
-            if($use_graph) {
+            if($use_graphjs) {
+              echo "<script type=\"text/javascript\" src=\"https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.bundle.min.js\"></script>";
+            }
+            if($use_visjs) {
               echo "<script type=\"text/javascript\" src=\"http://visjs.org/dist/vis.js\"></script>";
               echo "<link href=\"http://visjs.org/dist/vis-network.min.css\" rel=\"stylesheet\" type=\"text/css\" />";
             }
@@ -1479,7 +1771,7 @@ $level_codes = array(
     <body>
       <header class="navBar">
         <span class="navItem dotalogo"><a href="http://spectralalliance.ru/dota"></a></span>
-        <span class="navItem"><a href="http://spectralalliance.ru/dota-reports" target="_blank" alt="Dota 2 League Reports">League Reports</a></span>
+        <span class="navItem"><a href="." alt="Dota 2 League Reports">League Reports</a></span>
         <span class="navItem"><a href="https://vk.com/spectraldota" target="_blank" alt="SpectrAl /Dota VK">VK</a></span>
         <span class="navItem"><a href="https://vk.com/thecybersport" target="_blank" alt="TheCyberSport">TheCyberSport</a></span>
         <div class="share-links">
@@ -1499,10 +1791,6 @@ $level_codes = array(
           <h3><?php echo $strings[$h3].": ".$report['random'][$h3]; ?></h3>
         </div>
         <div id="main-section" class="content-section">
-          <div id="content-top">
-            <div class="content-header"><?php echo $random_caption; ?></div>
-            <div class="content-text"><?php echo $random_text; ?></div>
-          </div>
 <?php
 
 $output = join_selectors($modules, 0);
@@ -1521,6 +1809,24 @@ echo $output;
             <div class="content-header"><?php echo $strings['noleague_cap']; ?></div>
             <div class="content-text"><?php echo $strings['noleague_desc']; ?></div>
           </div>
+          <?php
+          echo "<table class=\"list\"><tr class=\"thead\"><th>".$strings['league_tag']."</th><th>".$strings['league_name']."</th><th>".$strings['league_desc']."</th>";
+          $reports = scandir("reports");
+
+          foreach($reports as $report) {
+              if($report[0] == ".")
+                  continue;
+              $name = str_replace("report_", "", $report);
+              $name = str_replace(".json", "", $name);
+              echo "<tr><td><a href=\"?league=$name\">$name</a></td>";
+              $f = fopen("reports/report_".$name.".json","r");
+              $head = fread($f, 200);
+              $head = preg_replace("/{\"league_name\":\"(.+)\"\,\"league_desc\":\"(.+)\",\"league_id\":(.+),\"league_tag(.*)/", "$1 ($3)</td><td>$2", $head);
+
+              echo "<td>".$head."</td></tr>";
+          }
+          echo "</table>";
+          ?>
         </div>
       <?php } ?>
         <footer>

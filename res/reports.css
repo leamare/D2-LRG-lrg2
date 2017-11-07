@@ -248,6 +248,12 @@ table .hero_portrait {
   font-size: 24px;
   line-height: 36px;
 }
+.match-team-nw {
+  text-align: center;
+  font-size: 18px;
+  line-height: 24px;
+  opacity: 0.8;
+}
 .match-add-info {
   float: right;
   width: 20%;
@@ -394,4 +400,11 @@ table .hero_portrait {
 
 .content-text .hero-list {
   line-height: 0px;
+}
+
+.chart-pie {
+  width: 50%;
+  margin: 0%;
+  height: auto;
+  display: inline-block;
 }

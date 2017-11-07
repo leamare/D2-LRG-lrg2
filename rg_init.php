@@ -23,32 +23,36 @@ $lg_settings = array(
 $lg_settings['league_tag'] = "fpl_sept_2017";
 $lg_settings['league_name'] = "FPL - September 2017";
 $lg_settings['league_desc'] = "FPL - September 2017";
-$lg_settings['league_id'] = "custom";
+$lg_settings['league_id'] = null;
 $lg_settings['time_limit_after'] = false;
 $lg_settings['time_limit_before'] = false;
 
-/* STARLADDER */
+/* STARLADDER *
 
-$lg_settings['league_tag'] = "sl_ileague_s3_minor_oct_2017";
-$lg_settings['league_name'] = "SL i-League Invitational Season 3 Minor";
+$lg_settings['league_tag'] = "sl_ileague_s3_minor_oct_2017_finals";
+$lg_settings['league_name'] = "SL i-League Invitational Season 3 Minor LAN Finals";
 $lg_settings['league_desc'] = "Dota 2 Minor";
 $lg_settings['league_id'] = 5579;
-$lg_settings['time_limit_after'] = false;
-$lg_settings['time_limit_before'] = false;
-/*/
-/* PGL OPEN *
-
-$lg_settings['league_tag'] = "pgl_open_bucharest_minor";
-$lg_settings['league_name'] = "PGL Open Bucharest Minor";
-$lg_settings['league_desc'] = "Dota 2 Minor";
-$lg_settings['league_id'] = 5616;
-$lg_settings['time_limit_after'] = false;
-$lg_settings['time_limit_before'] = false;
+$lg_settings['time_limit_after'] = null;
+$lg_settings['time_limit_before'] = null;
+$lg_settings['match_limit_after'] = null;
+$lg_settings['match_limit_before'] = null;
 */
+/* PGL OPEN */
+
+$lg_settings['league_tag'] = "workshop_bots_707";
+$lg_settings['league_name'] = "Workshop Bots - Patch 7.07";
+$lg_settings['league_desc'] = "Battle between workshop botscripts";
+$lg_settings['league_id'] = 5683;
+$lg_settings['time_limit_after'] = null;
+$lg_settings['time_limit_before'] = null;
+$lg_settings['match_limit_after'] = 3530896329;
+$lg_settings['match_limit_before'] = null;
+/* */
 
 # League Parameters
 
-$lg_settings['main']['teams'] = true; # set team or player mix competition
+$lg_settings['main']['teams'] = false; # set team or player mix competition
                     # false = players competition
                     # true  = teams competition
 
@@ -127,7 +131,8 @@ $lg_settings['ana']['teams']['team_vs_team']   = true; # TODO
 $lg_settings['web'] = array(
   //"custom_style" => "sa",
   //"custom_style" => "fpl",
-  "custom_style" => "sl-minor-17",
+  //"custom_style" => "sl-minor-17",
+  "custom_style" => "bots",
   "pvp_grid" => false,
 
   "heroes_combo_graph" => true,
@@ -318,7 +323,7 @@ fclose($f);
 echo "[ ] Opening matchlist file\n";
 
 $f = fopen("matchlists/".$lg_settings['league_tag'].".list", "w") or die("[F] Couldn't open file to save results. Check working directory for `reports` folder.\n");
-if($lg_settings['league_id'] == "custom") $out = "";
+if($lg_settings['league_id'] == null) $out = "";
 else {
     $request = "https://api.steampowered.com/IDOTA2Match_570/GetMatchHistory/v0001/?key=".$steamapikey."&league_id=".$lg_settings['league_id'];
     echo "[ ] Requested...";
@@ -329,9 +334,22 @@ else {
     do {
       echo "OK [".sizeof($response['result']['matches'])."] ";
       foreach($response['result']['matches'] as $r_match) {
-        if(!in_array($r_match['match_id'], $matches)) $matches[] = $r_match['match_id'];
+        $last_matchid = $r_match['match_id'];
+
+        if($lg_settings['time_limit_after'] != null && $lg_settings['time_limit_after'] > $r_match['start_time'])
+          continue;
+        if($lg_settings['time_limit_after'] != null && $lg_settings['time_limit_before'] < $r_match['start_time'])
+          continue;
+        if($lg_settings['match_limit_after'] != null && $lg_settings['match_limit_after'] > $r_match['match_id'])
+          continue;
+        if($lg_settings['match_limit_before'] != null && $lg_settings['match_limit_before'] < $r_match['match_id'])
+          continue;
+
+
+        if(!in_array($r_match['match_id'], $matches)) {
+          $matches[] = $r_match['match_id'];
+        }
       }
-      $last_matchid = $matches[sizeof($matches)-1];
       $response = json_decode(file_get_contents($request."&start_at_match_id=".$last_matchid), true);
     } while (sizeof($response['result']['matches']) > 2);
 
