@@ -1,5 +1,9 @@
 /* background-color: #192023;*/
 
+#header-image {
+  background-image: url('header_procircuit.jpg');
+}
+
 table.list td, table.pvp td {
     background-color: #233339;
 }

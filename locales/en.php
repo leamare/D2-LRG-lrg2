@@ -164,7 +164,9 @@
     "taken_damage_per_min_s" => "Taken HD/min",
 
     "noleague_cap" => "League Reports List",
-    "noleague_desc" => "This instance containce these reports:",
+    "noleague_desc" => "This instance contains these reports:",
+    "start_date" => "Start date",
+    "end_date" => "End date",
 
     "over-pregen-report" => "This is automatically generated report for",
     "over-league" => "league",

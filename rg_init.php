@@ -52,7 +52,7 @@ $lg_settings['match_limit_before'] = null;
 
 # League Parameters
 
-$lg_settings['main']['teams'] = false; # set team or player mix competition
+$lg_settings['main']['teams'] = true; # set team or player mix competition
                     # false = players competition
                     # true  = teams competition
 
@@ -180,7 +180,7 @@ if ($conn->select_db($lrg_db_prefix."_".$lg_settings['league_tag'])) {
 
   $conn->query("CREATE TABLE `matchlines` (
     `matchid` int(11) UNSIGNED NOT NULL,
-    `playerid` int(11) UNSIGNED NOT NULL,
+    `playerid` int(11) NOT NULL,
     `heroid` smallint(6) NOT NULL,
     `level` tinyint(3) UNSIGNED NOT NULL,
     `isRadiant` tinyint(1) NOT NULL,
@@ -201,7 +201,7 @@ if ($conn->select_db($lrg_db_prefix."_".$lg_settings['league_tag'])) {
 
   $conn->query("CREATE TABLE `adv_matchlines` (
     `matchid` int(10) UNSIGNED NOT NULL,
-    `playerid` int(10) UNSIGNED NOT NULL,
+    `playerid` int(10) NOT NULL,
     `heroid` smallint(5) UNSIGNED NOT NULL,
     `lh_at10` tinyint(3) UNSIGNED NOT NULL,
     `isCore` tinyint(1) NOT NULL,
