@@ -1,5 +1,5 @@
 body {
-  min-width: 1100px;
+  min-width: 1200px;
 }
 
 table.list , table.pvp {
@@ -19,13 +19,13 @@ table.list-fixed {
 table.list-small {
   width: 34%;
   float: left;
-  min-width: 250px;
+  /* min-width: 250px; */
 }
 table.list-small:nth-child(2n-1) {
-  margin: 0 1% 30px 15%;
+  margin: 0 1% 30px 14%;
 }
 table.list-small:nth-child(2n) {
-  margin: 0 15% 30px 1%;
+  margin: 0 14% 30px 1%;
 }
 
 table.list , table.pvp * {
@@ -245,8 +245,11 @@ table .hero_portrait {
 }
 .match-team-name {
   text-align: center;
-  font-size: 24px;
+  font-size: 20px;
   line-height: 36px;
+  letter-spacing: -1px;
+  height: 36px;
+  overflow: hidden;
 }
 .match-team-nw {
   text-align: center;
@@ -267,7 +270,16 @@ table .hero_portrait {
   font-weight: bold;
   font-size: inherit;
 }
-
+.match-team-score {
+  font-size: 18px;
+  line-height: 36px;
+}
+.radiant .match-team-score {
+  float: right;
+}
+.dire .match-team-score {
+  float: left;
+}
 
 .player-name {
   font-size: 28px;
@@ -407,4 +419,45 @@ table .hero_portrait {
   margin: 0%;
   height: auto;
   display: inline-block;
+}
+
+
+.content-text.overview:first-of-type {
+    margin-top: 60px;
+}
+.content-text.overview {
+    margin: 0;
+    padding: 30px 10% 30px 10%;
+    line-height: 28px;
+    font-size: 18px;
+    color: #fff;
+    background-position: right center;
+    background-size: auto;
+    background-repeat: no-repeat;
+}
+.content-text.overview .content-header {
+    /* margin: 0; */
+    margin-bottom: 30px;
+}
+.content-text.overview.overview-head {
+    /* background-image: url('555.png'); */
+    background-size: cover;
+}
+
+.overview-head .block-content:first-of-type {
+    color: #fff;
+}
+.content-text.overview.overview-head .block-content {
+    font-size: inherit;
+    line-height: inherit;
+    margin-bottom: 10px;
+}
+.content-text.overview.overview-head .block-content:last-of-type {
+    margin: 0;
+}
+.content-text.overview.overview-graphs {
+    padding: 30px 25% 30px 25%;
+}
+.left-placing {
+    text-align: left;
 }

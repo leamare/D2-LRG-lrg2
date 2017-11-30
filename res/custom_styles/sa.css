@@ -1,11 +1,11 @@
 /* background-color: #192023;*/
 
 #header-image {
-	/* background-image: url('header_procircuit.jpg'); */
   background-image: url('header_sa.jpg');
 }
+
 .content-section {
-	background-image: url('main_bg_sa.jpg');
+    background-image: url('main_bg_sa.jpg');
 }
 
 table.list td, table.pvp td {

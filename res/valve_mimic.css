@@ -51,7 +51,9 @@ a:hover {
 }
 
 #header-image {
-  background-image: url('header.jpg');
+  /* background-image: url('header.jpg'); */
+  background-image: url('header_grafenium.jpg');
+  background-size: cover;
 }
 
 .section-header h1 {
@@ -217,11 +219,13 @@ a:hover {
   display: inline-block;
 }
 .select-selectors {
-  background: transparent;
-  color: inherit;
+  background: #323232;
+  color: #fff;
   line-height: inherit;
   font-family: inherit;
   font-size: inherit;
+  border: none;
+  padding: 5px 20px;
 }
 .selector a {
   font-size: inherit;
@@ -273,7 +277,7 @@ header.navBar {
     height: 64px;
     position: relative;
     z-index: 10001;
-    background-image: url(http://cdn.dota2.com/apps/dota2/images/header/header_bg.png);
+    background-image: url(header_bg.png);
     font-family: 'Radiance';
     box-shadow: 0 0 10px #000;
     text-align: center;
