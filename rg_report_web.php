@@ -704,7 +704,7 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
       $modules['records'] .= "<tr>
                                 <td>".$strings[$key]."</td>
                                 <td>". ($record['matchid'] ?
-                                          "<a href=\"https://opendota.com/matches/".$record['matchid']."\" alt=\"Match ".$record['matchid']." on OpenDota\" target=\"_blank\">".$record['matchid']."</a>" :
+                                          "<a href=\"https://opendota.com/matches/".$record['matchid']."\" title=\"".$strings['match']." ".$record['matchid']." on OpenDota\" target=\"_blank\">".$record['matchid']."</a>" :
                                           //"<a onclick=\"showModal('".htmlspecialchars(match_card($record['matchid'], $report['matches'][$record['matchid']], $report, $meta))."','');\" alt=\"Match ".$record['matchid']." on OpenDota\" target=\"_blank\">".$record['matchid']."</a>" :
                                      "")."</td>
                                 <td>".number_format($record['value'],2)."</td>
@@ -1841,9 +1841,9 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
     <body>
       <header class="navBar">
         <span class="navItem dotalogo"><a href="http://spectralalliance.ru/dota"></a></span>
-        <span class="navItem"><a href="." alt="Dota 2 League Reports">League Reports</a></span>
-        <span class="navItem"><a href="https://vk.com/spectraldota" target="_blank" alt="SpectrAl /Dota VK">VK</a></span>
-        <span class="navItem"><a href="https://vk.com/thecybersport" target="_blank" alt="TheCyberSport">TheCyberSport</a></span>
+        <span class="navItem"><a href="." title="Dota 2 League Reports">League Reports</a></span>
+        <span class="navItem"><a href="https://vk.com/spectraldota" target="_blank" title="SpectrAl /Dota VK">VK</a></span>
+        <span class="navItem"><a href="https://vk.com/thecybersport" target="_blank" title="TheCyberSport">TheCyberSport</a></span>
         <div class="share-links">
           <?php
             echo '<div class="share-link reddit"><a href="http://www.reddit.com/submit?url='.'http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'].'?'.$_SERVER['QUERY_STRING'].'" target="_blank">Share on Reddit</a></div>';
@@ -1869,7 +1869,6 @@ echo $output;
 
 ?>
           </div>
-        </div>
       <?php } else { ?>
         <div id="header-image" class="section-header">
           <h1>League Report Generator</h1>
@@ -1908,6 +1907,7 @@ echo $output;
           ?>
         </div>
       <?php } ?>
+      </div>
         <footer>
           Dota 2 is a registered trademark of Valve Corporation.<br />
           Match replay data analyzed by OpenDota.<br />
