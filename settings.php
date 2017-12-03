@@ -1,5 +1,8 @@
 <?php
+
+
 # global settings
+  $lrg_version = array(1, 0, 0, 0, 0) # 1.0.0-release-r0
 
 # SQL Connection information
 
@@ -16,7 +19,7 @@ if(isset($argv)) {
     if(isset($options['l'])) {
       $lrg_league_tag = $options['l'];
     }
-  } 
+  }
   if(!isset($lrg_league_tag))
   #$lrg_league_tag = "test";
   #$lrg_league_desc = "Test Test Test";

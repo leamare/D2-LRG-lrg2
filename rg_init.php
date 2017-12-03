@@ -137,15 +137,52 @@ $lg_settings['web'] = array(
 
   "heroes_combo_graph" => true,
   "players_combo_graph" => true,
+
+  "overview_versions" => true,
+  "overview_versions_chart" => true,
+  "overview_last_match_winners" => true,
   "overview_charts" => true,
   "overview_regions" => true,
   "overview_modes" => true,
-  "overview_records" => true,
+  "overview_sides_graph" => true,
+  "overview_time_limits" => true,
+  "overview_heroes_contested_graph" => true,
+  "overview_days_graph" => true,
+
   "overview_top_contested" => true,
-  "overview_top_1st_stage" => true,
-  "overview_top_positions" => true
+  "overview_top_contested_count" => 10,
+  "overview_top_picked" => true,
+  "overview_top_picked_count" => 5,
+  "overview_top_bans" => true,
+  "overview_top_bans_count" => 5,
+
+  "overview_top_hero_pairs" => true,
+  "overview_top_hero_pairs_count" => 5,
+
+  "overview_mathes" => true,
+  "overview_first_match" => true,
+  "overview_last_match" => true,
+  "overview_records_duration" => true,
+  "overview_records_stomp" => true,
+  "overview_records_comeback" => true,
+
+  "overview_random_stats" => true,
+
+  "overview_draft_1_1" => true,
+  "overview_draft_1_1_count" => 5,
+  "overview_draft_1_2" => true,
+  "overview_draft_1_2_count" => 3,
+  "overview_draft_1_3" => true,
+  "overview_draft_1_3_count" => 3,
+  "overview_draft_0_1" => true,
+  "overview_draft_0_1_count" => 5,
+  "overview_draft_0_2" => true,
+  "overview_draft_0_2_count" => 3,
+  "overview_draft_0_3" => true,
+  "overview_draft_0_3_count" => 4,
 );
 
+$lg_settings['version'] = $lrg_version;
 
 echo "[ ] Creating database...";
 

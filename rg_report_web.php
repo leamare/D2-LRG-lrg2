@@ -452,58 +452,71 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
 
     $modules['overview'] .= "</div><div class=\"block-content\">";
 
-    $mode = reset($report['versions']);
-    if ($mode/$report['random']['matches_total'] > 0.99)
-      $modules['overview'] .= $strings['over-one-version-left'].$meta['versions'][ key($report['versions']) ].$strings['over-one-version-right']." ";
-    else $modules['overview'] .= $mode.$strings['over-most-version-left'].$meta['versions'][ key($report['versions']) ].$strings['over-most-version-right']." ";
-
-    $mode = reset($report['modes']);
-    if ($mode/$report['random']['matches_total'] > 0.99)
-      $modules['overview'] .= $strings['over-one-mode-left'].$meta['modes'][ key($report['modes']) ].$strings['over-one-mode-right']." ";
-    else $modules['overview'] .= $mode.$strings['over-most-mode-left'].$meta['modes'][ key($report['modes']) ].$strings['over-most-mode-right']." ";
-
-    $regions_matches = array();
-    foreach ($report['regions'] as $mode => $data) {
-      $region = $meta['regions'][ $meta['clusters'][$mode] ];
-      if(isset($regions_matches[$region])) $regions_matches[$region] += $data;
-      else $regions_matches[$region] = $data;
+    if($report['settings']['overview_versions']) {
+      $mode = reset($report['versions']);
+      if ($mode/$report['random']['matches_total'] > 0.99)
+        $modules['overview'] .= $strings['over-one-version-left'].$meta['versions'][ key($report['versions']) ].$strings['over-one-version-right']." ";
+      else $modules['overview'] .= $mode.$strings['over-most-version-left'].$meta['versions'][ key($report['versions']) ].$strings['over-most-version-right']." ";
     }
-    arsort($regions_matches);
-    $mode = reset($regions_matches);
-    if ($mode/$report['random']['matches_total'] > 0.99)
-      $modules['overview'] .= $strings['over-one-region-left'].key($regions_matches).$strings['over-one-region-right']." ";
-    else
-      $modules['overview'] .= $mode.$strings['over-most-region-left'].key($regions_matches).$strings['over-most-region-right']." ";
 
-    $modules['overview'] .= "</div><div class=\"block-content\">";
+    if($report['settings']['overview_modes']) {
+      $mode = reset($report['modes']);
+      if ($mode/$report['random']['matches_total'] > 0.99)
+        $modules['overview'] .= $strings['over-one-mode-left'].$meta['modes'][ key($report['modes']) ].$strings['over-one-mode-right']." ";
+      else $modules['overview'] .= $mode.$strings['over-most-mode-left'].$meta['modes'][ key($report['modes']) ].$strings['over-most-mode-right']." ";
+    }
 
-    $modules['overview'] .= $strings['over-first-match']." ".date($strings['date_format'], $report['first_match']['date'])."<br />";
-    $modules['overview'] .= $strings['over-last-match']." ".date($strings['date_format'], $report['last_match']['date'])."<br />";
-    if(isset($report['teams'])) {
-      if( $report['matches_additional'][ $report['last_match']['mid'] ]['radiant_win'] ) {
-        if(isset($report['teams'][ $report['match_participants_teams'][ $report['last_match']['mid'] ]['radiant'] ]['name']))
-          $modules['overview'] .= $report['teams'][ $report['match_participants_teams'][ $report['last_match']['mid'] ]['radiant'] ]['name'];
-        else $modules['overview'] .= "Radiant";
-      } else {
-        if(isset($report['teams'][ $report['match_participants_teams'][ $report['last_match']['mid'] ]['dire'] ]['name']))
-          $modules['overview'] .= $report['teams'][ $report['match_participants_teams'][ $report['last_match']['mid'] ]['dire'] ]['name'];
-        else $modules['overview'] .= "Dire";
+    if($report['settings']['overview_regions']) {
+      $regions_matches = array();
+      foreach ($report['regions'] as $mode => $data) {
+        $region = $meta['regions'][ $meta['clusters'][$mode] ];
+        if(isset($regions_matches[$region])) $regions_matches[$region] += $data;
+        else $regions_matches[$region] = $data;
       }
-
-      $modules['overview'] .= $strings['over-last-match-winner']."<br />";
+      arsort($regions_matches);
+      $mode = reset($regions_matches);
+      if ($mode/$report['random']['matches_total'] > 0.99)
+        $modules['overview'] .= $strings['over-one-region-left'].key($regions_matches).$strings['over-one-region-right']." ";
+      else
+        $modules['overview'] .= $mode.$strings['over-most-region-left'].key($regions_matches).$strings['over-most-region-right']." ";
     }
 
-    $modules['overview'] .= "</div></div>";
+    $modules['overview'] .= "</div>";
 
+    if($report['overview_time_limits']) {
+      $modules['overview'] .= "<div class=\"block-content\">";
 
-    $use_graphjs = true;
+      $modules['overview'] .= $strings['over-first-match']." ".date($strings['date_format'], $report['first_match']['date'])."<br />";
+      $modules['overview'] .= $strings['over-last-match']." ".date($strings['date_format'], $report['last_match']['date'])."<br />";
+      if(isset($report['teams'])) {
+        if( $report['matches_additional'][ $report['last_match']['mid'] ]['radiant_win'] ) {
+          if(isset($report['teams'][ $report['match_participants_teams'][ $report['last_match']['mid'] ]['radiant'] ]['name']))
+            $modules['overview'] .= $report['teams'][ $report['match_participants_teams'][ $report['last_match']['mid'] ]['radiant'] ]['name'];
+          else $modules['overview'] .= $strings['radiant'];
+        } else {
+          if(isset($report['teams'][ $report['match_participants_teams'][ $report['last_match']['mid'] ]['dire'] ]['name']))
+            $modules['overview'] .= $report['teams'][ $report['match_participants_teams'][ $report['last_match']['mid'] ]['dire'] ]['name'];
+          else $modules['overview'] .= $strings['dire'];
+        }
+      }
+      $modules['overview'] .= "</div>";
+    }
+
+    if($report['settings']['overview_last_match_winners']) {
+      $modules['overview'] .= "<div class=\"block-content\">".$strings['over-last-match-winner']."</div>";
+    }
+
+    $modules['overview'] .= "</div>";
+
 
     if($report['settings']['overview_charts']) {
+      $use_graphjs = true;
+
       $modules['overview'] .= "<div class=\"content-text overview overview-graphs\">";
 
-      $mode = reset($report['versions']);
+      if ($report['settings']['overview_versions'] && $mode/$report['random']['matches_total'] < 0.99) {
+        $mode = reset($report['versions']);
 
-      if ($mode/$report['random']['matches_total'] < 0.99) {
         $converted_modes = array();
         foreach ($report['versions'] as $mode => $data) {
           $converted_modes[] = $meta['versions'][$mode];
@@ -522,8 +535,8 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
                               });</script></div>";
       }
 
-      $mode = reset($report['modes']);
       if ($report['settings']['overview_modes'] && $mode/$report['random']['matches_total'] < 0.99) {
+        $mode = reset($report['modes']);
         $converted_modes = array();
         foreach ($report['modes'] as $mode => $data) {
           $converted_modes[] = $meta['modes'][$mode];
@@ -542,8 +555,9 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
                               });</script></div>";
       }
 
-      $mode = reset($report['regions']);
       if ($report['settings']['overview_regions'] && $mode/$report['random']['matches_total'] < 0.99) {
+        $mode = reset($report['regions']);
+
         $region_names = array_keys($regions_matches);
         $colors = array_slice($charts_colors, 0, sizeof($region_names));
         $modules['overview'] .= "<div class=\"chart-pie\"><canvas id=\"overview-regions\" width=\"undefined\" height=\"undefined\"></canvas><script>".
@@ -561,57 +575,62 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
       }
       unset($regions_matches);
 
-      $modules['overview'] .= "<div class=\"chart-pie\"><canvas id=\"overview-sides\" width=\"undefined\" height=\"undefined\"></canvas><script>".
-                            "var modes_chart_el = document.getElementById('overview-sides'); ".
-                            "var modes_chart = new Chart(modes_chart_el, {
-                              type: 'pie',
-                              data: {
-                                labels: [ '".$strings['radiant']."','".$strings['dire']."' ],
-                                datasets: [{data: [ ".$report['random']['radiant_wr'].",".$report['random']['dire_wr']." ],
-                                borderWidth: 0,
-                                backgroundColor:['#6af','#f66']}]
-                              }
-                            });</script></div>";
-
-      $modules['overview'] .= "<div class=\"chart-pie\"><canvas id=\"overview-heroes\" width=\"undefined\" height=\"undefined\"></canvas><script>".
-                            "var modes_chart_el = document.getElementById('overview-heroes'); ".
-                            "var modes_chart = new Chart(modes_chart_el, {
-                              type: 'pie',
-                              data: {
-                                labels: [ '".$strings['heroes_contested']."','".$strings['heroes_uncontested']."' ],
-                                datasets: [{data: [ ".$report['random']['heroes_contested'].",".(sizeof($meta['heroes'])-$report['random']['heroes_contested'])." ],
-                                borderWidth: 0,
-                                backgroundColor:['#6af','#f66']}]
-                              }
-                            });</script></div>";
-
-      $converted_modes = array();
-      $matchcount = array();
-      foreach($report['days'] as $dn => $day) {
-        $converted_modes[] = date("j M Y", $day['timestamp'])." (".($dn+1).")";
-        $matchcount[] = sizeof($day['matches']);
+      if ($report['settings']['overview_sides_graph']) {
+        $modules['overview'] .= "<div class=\"chart-pie\"><canvas id=\"overview-sides\" width=\"undefined\" height=\"undefined\"></canvas><script>".
+                              "var modes_chart_el = document.getElementById('overview-sides'); ".
+                              "var modes_chart = new Chart(modes_chart_el, {
+                                type: 'pie',
+                                data: {
+                                  labels: [ '".$strings['radiant']."','".$strings['dire']."' ],
+                                  datasets: [{data: [ ".$report['random']['radiant_wr'].",".$report['random']['dire_wr']." ],
+                                  borderWidth: 0,
+                                  backgroundColor:['#6af','#f66']}]
+                                }
+                              });</script></div>";
       }
-      $colors = array_slice($charts_colors, 0, sizeof($converted_modes));
-      $modules['overview'] .= "<h1>".$strings['matches_per_day']."</h1>".
-                            "<div class=\"chart-bars\"><canvas id=\"overview-days\" width=\"undefined\" height=\"undefined\"></canvas><script>".
-                            "var modes_chart_el = document.getElementById('overview-days'); ".
-                            "var modes_chart = new Chart(modes_chart_el, {
-                              type: 'horizontalBar',
-                              data: {
-                                labels: [ '','".implode($converted_modes,"','")."' ],
-                                datasets: [{label:'".$strings['matches_per_day']."',data: [ 0,".implode($matchcount,",")." ],
-                                backgroundColor:'#999'}]
-                              }
-                            });</script></div>";
 
+      if ($report['settings']['overview_heroes_contested_graph']) {
+        $modules['overview'] .= "<div class=\"chart-pie\"><canvas id=\"overview-heroes\" width=\"undefined\" height=\"undefined\"></canvas><script>".
+                              "var modes_chart_el = document.getElementById('overview-heroes'); ".
+                              "var modes_chart = new Chart(modes_chart_el, {
+                                type: 'pie',
+                                data: {
+                                  labels: [ '".$strings['heroes_contested']."','".$strings['heroes_uncontested']."' ],
+                                  datasets: [{data: [ ".$report['random']['heroes_contested'].",".(sizeof($meta['heroes'])-$report['random']['heroes_contested'])." ],
+                                  borderWidth: 0,
+                                  backgroundColor:['#6af','#f66']}]
+                                }
+                              });</script></div>";
+      }
 
+      if ($report['settings']['overview_days_graph']) {
+        $converted_modes = array();
+        $matchcount = array();
+        foreach($report['days'] as $dn => $day) {
+          $converted_modes[] = date("j M Y", $day['timestamp'])." (".($dn+1).")";
+          $matchcount[] = sizeof($day['matches']);
+        }
+        $colors = array_slice($charts_colors, 0, sizeof($converted_modes));
+        $modules['overview'] .= "<h1>".$strings['matches_per_day']."</h1>".
+                              "<div class=\"chart-bars\"><canvas id=\"overview-days\" width=\"undefined\" height=\"undefined\"></canvas><script>".
+                              "var modes_chart_el = document.getElementById('overview-days'); ".
+                              "var modes_chart = new Chart(modes_chart_el, {
+                                type: 'horizontalBar',
+                                data: {
+                                  labels: [ '','".implode($converted_modes,"','")."' ],
+                                  datasets: [{label:'".$strings['matches_per_day']."',data: [ 0,".implode($matchcount,",")." ],
+                                  backgroundColor:'#999'}]
+                                }
+                              });</script></div>";
+
+        }
       $modules['overview'] .= "</div>";
     }
 
-    if($report['settings']['overview_top_contested'] && isset($report['pickban'])) {
-        $modules['overview'] .= "<div class=\"content-header\">".$strings['top_contested_heroes']."</div>";
+    $modules['overview'] .= "<div class=\"content-header\">".$strings['heroes']."</div>";
 
-        $modules['overview'] .=  "<table id=\"over-heroes-pickban\" class=\"list\">
+    if($report['settings']['overview_top_contested'] && isset($report['pickban'])) {
+        $modules['overview'] .=  "<table id=\"over-heroes-pickban\" class=\"list\"><caption>".$strings['top_contested_heroes']."</caption>
                                               <tr class=\"thead\">
                                                 <th>".$strings['hero']."</th>
                                                 <th>".$strings['matches_total']."</th>
@@ -627,7 +646,7 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
           else return ($a['matches_total'] < $b['matches_total']) ? 1 : -1;
         });
 
-        $counter = 5;
+        $counter = $report['settings']['overview_top_contested_count'];
         foreach($workspace as $hid => $hero) {
           if($counter == 0) break;
           $modules['overview'] .=  "<tr>
@@ -645,7 +664,103 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
         $modules['overview'] .= "</table>";
     }
 
-    if(isset($report['hero_pairs']) && !empty($report['hero_pairs'])) {
+    if($report['settings']['overview_top_picked'] && isset($report['pickban'])) {
+        $modules['overview'] .=  "<table id=\"over-heroes-pick\" class=\"list\"><caption>".$strings['top_picked_heroes']."</caption>
+                                              <tr class=\"thead\">
+                                                <th>".$strings['hero']."</th>
+                                                <th>".$strings['matches_total']."</th>
+                                                <th>".$strings['matches_picked']."</th>
+                                                <th>".$strings['winrate_picked']."</th>
+                                              </tr>";
+
+        $workspace = $report['pickban'];
+        uasort($workspace, function($a, $b) {
+          if($a['matches_picked'] == $b['matches_picked']) return 0;
+          else return ($a['matches_picked'] < $b['matches_picked']) ? 1 : -1;
+        });
+
+        $counter = $report['settings']['overview_top_picked_count'];
+        foreach($workspace as $hid => $hero) {
+          if($counter == 0) break;
+          $modules['overview'] .=  "<tr>
+                                      <td>".($hid ? hero_full($hid) : "").
+                                     "</td>
+                                      <td>".$hero['matches_total']."</td>
+                                      <td>".$hero['matches_banned']."</td>
+                                      <td>".number_format($hero['winrate_banned']*100,2)."%</td>
+                                    </tr>";
+          $counter--;
+        }
+        unset($workspace);
+        $modules['overview'] .= "</table>";
+    }
+
+    if($report['settings']['overview_top_banned'] && isset($report['pickban'])) {
+        $modules['overview'] .=  "<table id=\"over-heroes-ban\" class=\"list\"><caption>".$strings['top_banned_heroes']."</caption>
+                                              <tr class=\"thead\">
+                                                <th>".$strings['hero']."</th>
+                                                <th>".$strings['matches_total']."</th>
+                                                <th>".$strings['matches_banned']."</th>
+                                                <th>".$strings['winrate_banned']."</th>
+                                              </tr>";
+
+        $workspace = $report['pickban'];
+        uasort($workspace, function($a, $b) {
+          if($a['matches_banned'] == $b['matches_banned']) return 0;
+          else return ($a['matches_banned'] < $b['matches_banned']) ? 1 : -1;
+        });
+
+        $counter = $report['settings']['overview_top_banned_count'];
+        foreach($workspace as $hid => $hero) {
+          if($counter == 0) break;
+          $modules['overview'] .=  "<tr>
+                                      <td>".($hid ? hero_full($hid) : "").
+                                     "</td>
+                                      <td>".$hero['matches_total']."</td>
+                                      <td>".$hero['matches_banned']."</td>
+                                      <td>".number_format($hero['winrate_banned']*100,2)."%</td>
+                                    </tr>";
+          $counter--;
+        }
+        unset($workspace);
+        $modules['overview'] .= "</table>";
+    }
+
+    if($report['settings']['overview_top_draft']) {
+      $modules['overview'] .= "<div class=\"content-header\">".$strings['draft']."</div>";
+
+      for ($i=0; $i<2; $i++) {
+        for ($j=1; $j<4; $j++) {
+          if($report['settings']["overview_draft_".$i."_".$j] && isset($report['draft'])) {
+
+
+              $modules['overview'] .=  "<table id=\"over-draft-$i-$j\" class=\"list\">
+                                          <caption>".$strings['stage_num_1']." $j ".$strings['stage_num_2']." ".($i ? $strings['picks'] : $strings['bans'])."</caption>
+                                                    <tr class=\"thead\">
+                                                      <th>".$strings['hero']."</th>
+                                                      <th>".$strings['matches']."</th>
+                                                      <th>".$strings['winrate']."</th>
+                                                    </tr>";
+
+              $counter = $report['settings']["overview_draft_".$i."_".$j."_count"];
+              foreach($report['draft'][$i][$j] as $hero) {
+                if($counter == 0) break;
+                $modules['overview'] .=  "<tr>
+                                            <td>".($hid ? hero_full($hid) : "").
+                                           "</td>
+                                            <td>".$hero['matches_total']."</td>
+                                            <td>".$hero['matches_banned']."</td>
+                                            <td>".number_format($hero['winrate_banned']*100,2)."%</td>
+                                          </tr>";
+                $counter--;
+              }
+              $modules['overview'] .= "</table>";
+          }
+        }
+      }
+    }
+
+    if($report['settings']['overview_top_hero_pairs'] && isset($report['hero_pairs']) && !empty($report['hero_pairs'])) {
         $modules['overview'] .= "<div class=\"content-header\">".$strings['top_pick_pairs']."</div>";
 
         $modules['overview'] .= "<table id=\"over-hero-pairs\" class=\"list\">
@@ -655,7 +770,7 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
                                     <th>".$strings['matches']."</th>
                                     <th>".$strings['winrate']."</th>
                                   </tr>";
-        $counter = 3;
+        $counter = $report['settings']['overview_top_hero_pairs_count'];
         foreach($report['hero_pairs'] as $pair) {
           if($counter == 0) break;
           $modules['overview'] .= "<tr>
@@ -670,24 +785,32 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
         $modules['overview'] .= "</table>";
     }
 
-    $modules['overview'] .= "<div class=\"content-header\">".$strings['notable_matches']."</div>";
-    $modules['overview'] .= "<div class=\"content-cards\">";
-    if(isset($report['teams']))
-      $modules['overview'] .= "<h1>".$strings['last_match']."</h1>".match_card($report['last_match']['mid']);
-    if(isset($report['records']['stomp']))
-      $modules['overview'] .= "<h1>".$strings['records'].": ".$strings['stomp']."</h1>".match_card($report['records']['stomp']['matchid']);
-    if(isset($report['records']['comeback']))
-      $modules['overview'] .= "<h1>".$strings['records'].": ".$strings['comeback']."</h1>".match_card($report['records']['comeback']['matchid']);
 
-    $modules['overview'] .= "</div>";
+    if($report['settings']['overview_matches']) {
+      $modules['overview'] .= "<div class=\"content-header\">".$strings['notable_matches']."</div>";
+      $modules['overview'] .= "<div class=\"content-cards\">";
+      if($report['settings']['overview_first_match'])
+        $modules['overview'] .= "<h1>".$strings['first_match']."</h1>".match_card($report['first_match']['mid']);
+      if($report['settings']['overview_last_match'])
+        $modules['overview'] .= "<h1>".$strings['last_match']."</h1>".match_card($report['last_match']['mid']);
+      if($report['settings']['overview_records_stomp'])
+        $modules['overview'] .= "<h1>".$strings['match_stomp']."</h1>".match_card($report['records']['stomp']['matchid']);
+      if($report['settings']['overview_records_comeback'])
+        $modules['overview'] .= "<h1>".$strings['match_comeback']."</h1>".match_card($report['records']['comeback']['matchid']);
+      if($report['settings']['overview_records_duration'])
+        $modules['overview'] .= "<h1>".$strings['longest_match']."</h1>".match_card($report['records']['duration']['matchid']);
 
-    $modules['overview'] .= "<div class=\"content-header\">".$strings['random']."</div>";
-
-    $modules['overview'] .= "<table class=\"list\" id=\"overview-table\">";
-    foreach($report['random'] as $key => $value) {
-      $modules['overview'] .= "<tr><td>".$strings[$key]."</td><td>".$value."</td></tr>";
+      $modules['overview'] .= "</div>";
     }
-    $modules['overview'] .= "</table>";
+
+    if($report['settings']['overview_random_stats']) {
+      $modules['overview'] .= "<div class=\"content-header\">".$strings['random']."</div>";
+      $modules['overview'] .= "<table class=\"list\" id=\"overview-table\">";
+      foreach($report['random'] as $key => $value) {
+        $modules['overview'] .= "<tr><td>".$strings[$key]."</td><td>".$value."</td></tr>";
+      }
+      $modules['overview'] .= "</table>";
+    }
   }
 
   # records
@@ -797,7 +920,7 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
           if(!check_module($parent."draft-".($i ? "pick" : "ban")."_stages")) continue;
 
 
-          for ($j=1; $j<4; $j++, isset($report['draft'][$i][$j])) {
+          for ($j=1; $j<4; $j++) {
             if(empty($report['draft'][$i][$j])) continue;
             uasort($report['draft'][$i][$j], function($a, $b) {
               if($a['matches'] == $b['matches']) return 0;
@@ -805,7 +928,7 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
             });
 
             $modules['heroes']['draft'][($i ? "pick" : "ban")."_stages"] .= "<table id=\"heroes-draft-$i-$j\" class=\"list list-small\">
-                                              <caption> Stage $j of ".($i ? $strings['picks'] : $strings['bans'])."</caption>
+                                              <caption>".$strings['stage_num_1']." $j ".$strings['stage_num_2']." ".($i ? $strings['picks'] : $strings['bans'])."</caption>
                                               <tr class=\"thead\">
                                                 <th onclick=\"sortTable(0,'heroes-draft-$i-$j');\">".$strings['hero']."</th>
                                                 <th onclick=\"sortTableNum(1,'heroes-draft-$i-$j');\">".$strings['matches']."</th>
@@ -1846,10 +1969,18 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
         <span class="navItem"><a href="https://vk.com/thecybersport" target="_blank" title="TheCyberSport">TheCyberSport</a></span>
         <div class="share-links">
           <?php
-            echo '<div class="share-link reddit"><a href="http://www.reddit.com/submit?url='.'http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'].'?'.$_SERVER['QUERY_STRING'].'" target="_blank">Share on Reddit</a></div>';
-            echo '<div class="share-link twitter"><a href="http://twitter.com/share?text=League Report: '.$leaguetag.' - '.'http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'].'?'.$_SERVER['QUERY_STRING'].'" target="_blank">Share on Twitter</a></div>';
-            echo '<div class="share-link vk"><a href="https://vk.com/share.php?url='.'http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'].'?'.$_SERVER['QUERY_STRING'].'" target="_blank">Share on VK</a></div>';
-            echo '<div class="share-link fb"><a href="https://www.facebook.com/sharer/sharer.php?u='.'http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'].'?'.$_SERVER['QUERY_STRING'].'" target="_blank">Share on Facebook</a></div>';
+            echo '<div class="share-link reddit"><a href="http://www.reddit.com/submit?url='.htmlspecialchars('http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'].
+              (empty($_SERVER['QUERY_STRING']) ? "" : '?'.$_SERVER['QUERY_STRING'])
+            ).'" target="_blank">Share on Reddit</a></div>';
+            echo '<div class="share-link twitter"><a href="http://twitter.com/share?text=League Report: '.$leaguetag.' - '.htmlspecialchars('http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'].
+              (empty($_SERVER['QUERY_STRING']) ? "" : '?'.$_SERVER['QUERY_STRING'])
+            ).'" target="_blank">Share on Twitter</a></div>';
+            echo '<div class="share-link vk"><a href="https://vk.com/share.php?url='.htmlspecialchars('http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'].
+              (empty($_SERVER['QUERY_STRING']) ? "" : '?'.$_SERVER['QUERY_STRING'])
+            ).'" target="_blank">Share on VK</a></div>';
+            echo '<div class="share-link fb"><a href="https://www.facebook.com/sharer/sharer.php?u='.htmlspecialchars('http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'].
+              (empty($_SERVER['QUERY_STRING']) ? "" : '?'.$_SERVER['QUERY_STRING'])
+            ).'" target="_blank">Share on Facebook</a></div>';
           ?>
         </div>
       </header>
