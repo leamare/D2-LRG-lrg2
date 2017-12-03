@@ -386,10 +386,9 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
     }
   }
 
-  if(file_exists('locales/'.$locale.'.php'))
+  require_once('locales/en.php');
+  if(strtolower($locale) != "en" && file_exists('locales/'.$locale.'.php'))
     require_once('locales/'.$locale.'.php');
-  else
-    require_once('locales/en.php');
 
   $use_visjs = false;
   $use_graphjs = false;
