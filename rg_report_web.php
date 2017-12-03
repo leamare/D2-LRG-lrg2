@@ -386,10 +386,9 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
     }
   }
 
-  if(file_exists('locales/'.$locale.'.php'))
+  require_once('locales/en.php');
+  if(strtolower($locale) != "en" && file_exists('locales/'.$locale.'.php'))
     require_once('locales/'.$locale.'.php');
-  else
-    require_once('locales/en.php');
 
   $use_visjs = false;
   $use_graphjs = false;
@@ -483,7 +482,7 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
 
     $modules['overview'] .= "</div>";
 
-    if($report['overview_time_limits']) {
+    if($report['settings']['overview_time_limits']) {
       $modules['overview'] .= "<div class=\"block-content\">";
 
       $modules['overview'] .= $strings['over-first-match']." ".date($strings['date_format'], $report['first_match']['date'])."<br />";
@@ -695,7 +694,7 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
         $modules['overview'] .= "</table>";
     }
 
-    if($report['settings']['overview_top_banned'] && isset($report['pickban'])) {
+    if($report['settings']['overview_top_bans'] && isset($report['pickban'])) {
         $modules['overview'] .=  "<table id=\"over-heroes-ban\" class=\"list\"><caption>".$strings['top_banned_heroes']."</caption>
                                               <tr class=\"thead\">
                                                 <th>".$strings['hero']."</th>
@@ -710,7 +709,7 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
           else return ($a['matches_banned'] < $b['matches_banned']) ? 1 : -1;
         });
 
-        $counter = $report['settings']['overview_top_banned_count'];
+        $counter = $report['settings']['overview_top_bans_count'];
         foreach($workspace as $hid => $hero) {
           if($counter == 0) break;
           $modules['overview'] .=  "<tr>
@@ -743,14 +742,19 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
                                                     </tr>";
 
               $counter = $report['settings']["overview_draft_".$i."_".$j."_count"];
+
+              if(empty($report['draft'][$i][$j])) continue;
+              uasort($report['draft'][$i][$j], function($a, $b) {
+                if($a['matches'] == $b['matches']) return 0;
+                else return ($a['matches'] < $b['matches']) ? 1 : -1;
+              });
               foreach($report['draft'][$i][$j] as $hero) {
                 if($counter == 0) break;
                 $modules['overview'] .=  "<tr>
-                                            <td>".($hid ? hero_full($hid) : "").
+                                            <td>".($hid ? hero_full($hero['heroid']) : "").
                                            "</td>
-                                            <td>".$hero['matches_total']."</td>
-                                            <td>".$hero['matches_banned']."</td>
-                                            <td>".number_format($hero['winrate_banned']*100,2)."%</td>
+                                            <td>".$hero['matches']."</td>
+                                            <td>".number_format($hero['winrate']*100,2)."%</td>
                                           </tr>";
                 $counter--;
               }
@@ -1056,7 +1060,8 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
         unset($keys);
       }
     }
-    if (isset($report['hero_combos_graph']) && $report['settings']['heroes_combo_graph']) {
+    if (//isset($report['hero_combos_graph']) && 
+    $report['settings']['heroes_combo_graph']) {
       $modules['heroes']['hero_combo_graph'] = "";
 
       if (check_module($parent."hero_combo_graph") && isset($report['pickban'])) {
