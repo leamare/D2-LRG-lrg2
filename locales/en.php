@@ -55,6 +55,8 @@
     "bans" => "Bans",
     "pick_stages" => "Pick stages",
     "ban_stages" => "Ban stages",
+    "stage_num_1" => "Stage",
+    "stage_num_2" => "of"
     "draft" => "Draft stages",
     "hero_positions" => "Positions stats",
     "hero_sides" => "Sides",
@@ -90,7 +92,9 @@
     "player_nickname" => "Nickname",
     "active_roster" => "Active roster",
     "top_pick_heroes" => "Favorite heroes",
-    "top_contested_heroes" => "Contested heroes",
+    "top_contested_heroes" => "Most contested heroes",
+    "top_picked_heroes" => "Most picked heroes",
+    "top_ban_heroes" => "Most banned heroes",
     "top_pick_pairs" => "Favorite pairs",
 
     "gpm" => "GPM",
@@ -194,7 +198,11 @@
     "over-last-match-winner" => " won the last match.",
     "matches_per_day" => "Matches per day",
     "first_match" => "First match",
-    "last_match" => "Last match"
+    "last_match" => "Last match",
+
+    "match_stomp" => "Match with highest stomp",
+    "match_comeback" => "Match with highest comeback",
+    "longest_match" => "Longest match"
   );
 
  ?>
