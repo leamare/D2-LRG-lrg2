@@ -56,7 +56,7 @@
     "pick_stages" => "Pick stages",
     "ban_stages" => "Ban stages",
     "stage_num_1" => "Stage",
-    "stage_num_2" => "of"
+    "stage_num_2" => "of",
     "draft" => "Draft stages",
     "hero_positions" => "Positions stats",
     "hero_sides" => "Sides",
@@ -94,7 +94,7 @@
     "top_pick_heroes" => "Favorite heroes",
     "top_contested_heroes" => "Most contested heroes",
     "top_picked_heroes" => "Most picked heroes",
-    "top_ban_heroes" => "Most banned heroes",
+    "top_banned_heroes" => "Most banned heroes",
     "top_pick_pairs" => "Favorite pairs",
 
     "gpm" => "GPM",
