@@ -56,7 +56,7 @@
     "pick_stages" => "Pick stages",
     "ban_stages" => "Ban stages",
     "stage_num_1" => "Stage",
-    "stage_num_2" => "of"
+    "stage_num_2" => "of",
     "draft" => "Draft stages",
     "hero_positions" => "Positions stats",
     "hero_sides" => "Sides",
