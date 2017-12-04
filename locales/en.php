@@ -59,7 +59,7 @@
     "stage_num_2" => "of",
     "draft" => "Draft stages",
     "hero_positions" => "Positions stats",
-    "hero_sides" => "Sides",
+    "hero_sides" => "Factions",
     "hero_pairs" => "Pairs",
     "hero_triplets" => "Triplets",
     "hero_combos" => "Combinations",
