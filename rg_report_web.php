@@ -1,12 +1,5 @@
 <?php
-/* SETTINGS */
-
-$lrg_use_get = true;
-$lrg_get_depth = 3;
-$locale = "en";
-$max_tabs = 10;
-
-$mod = "";
+require_once("rg_report_out_settings.php");
 
 /* FUNCTIONS */  {
   function check_module($module) {
@@ -58,7 +51,7 @@ $mod = "";
     $pname = $report['players'][$player_id];
     $pinfo = $report['players_additional'][$player_id];
 
-    $output = "<div class=\"player-card\"><div class=\"player-name\"><a href=\"http://opendota.com/players/$player_id\" target=\"_blank\">".$pname." (".$player_id.")</a></div>";
+    $output = "<div class=\"player-card\"><div class=\"player-name\"><a href=\"http://opendota.com/players/$player_id\" target=\"_blank\" rel=\"noopener\">".$pname." (".$player_id.")</a></div>";
     if(isset($report['teams']))
       $output .= "<div class=\"player-team\">".team_name($pinfo['team'])." (".$pinfo['team'].")</div>";
     $output .= "<div class=\"player-add-info\">".
@@ -252,7 +245,7 @@ $mod = "";
   }
 
   function match_link($mid) {
-    return "<a href=\"https://opendota.com/matches/$mid\" target=\"_blank\">$mid</a>";
+    return "<a href=\"https://opendota.com/matches/$mid\" target=\"_blank\" rel=\"noopener\">$mid</a>";
   }
 
   function join_selectors($modules, $level, $parent="") {
@@ -831,7 +824,7 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
       $modules['records'] .= "<tr>
                                 <td>".$strings[$key]."</td>
                                 <td>". ($record['matchid'] ?
-                                          "<a href=\"https://opendota.com/matches/".$record['matchid']."\" title=\"".$strings['match']." ".$record['matchid']." on OpenDota\" target=\"_blank\">".$record['matchid']."</a>" :
+                                          "<a href=\"https://opendota.com/matches/".$record['matchid']."\" title=\"".$strings['match']." ".$record['matchid']." on OpenDota\" target=\"_blank\" rel=\"noopener\">".$record['matchid']."</a>" :
                                           //"<a onclick=\"showModal('".htmlspecialchars(match_card($record['matchid'], $report['matches'][$record['matchid']], $report, $meta))."','');\" alt=\"Match ".$record['matchid']." on OpenDota\" target=\"_blank\">".$record['matchid']."</a>" :
                                      "")."</td>
                                 <td>".number_format($record['value'],2)."</td>
@@ -1060,7 +1053,7 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
         unset($keys);
       }
     }
-    if (//isset($report['hero_combos_graph']) && 
+    if (//isset($report['hero_combos_graph']) &&
     $report['settings']['heroes_combo_graph']) {
       $modules['heroes']['hero_combo_graph'] = "";
 
@@ -1947,6 +1940,11 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
   <!DOCTYPE html>
   <html>
     <head>
+      <!--
+        League Report Generator
+        Spectral Alliance
+        leamare/d2_lrg on github
+       -->
       <link rel="shortcut icon" href="/favicon.ico" />
       <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
       <title>League Report</title>
@@ -1964,28 +1962,34 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
               echo "<script type=\"text/javascript\" src=\"http://visjs.org/dist/vis.js\"></script>";
               echo "<link href=\"http://visjs.org/dist/vis-network.min.css\" rel=\"stylesheet\" type=\"text/css\" />";
             }
-       ?>
+
+       if (!empty($custom_head)) echo "<br />".$custom_head; ?>
     </head>
     <body>
+      <?php if (!empty($custom_body)) echo "<br />".$custom_body; ?>
       <header class="navBar">
-        <span class="navItem dotalogo"><a href="http://spectralalliance.ru/dota"></a></span>
+        <!-- these shouldn't be spans, but I was mimicking Valve pro circuit style in everything, so I copied that too. -->
+        <span class="navItem dotalogo"><a href="<?php echo $main_path; ?>"></a></span>
         <span class="navItem"><a href="." title="Dota 2 League Reports">League Reports</a></span>
-        <span class="navItem"><a href="https://vk.com/spectraldota" target="_blank" title="SpectrAl /Dota VK">VK</a></span>
-        <span class="navItem"><a href="https://vk.com/thecybersport" target="_blank" title="TheCyberSport">TheCyberSport</a></span>
+        <?php
+          foreach($title_links as $link) {
+            echo "<span class=\"navItem\"><a href=\"".$link['link']."\" target=\"_blank\" rel=\"noopener\" title=\"".$link['title']."\">".$link['text']."</a></span>";
+          }
+         ?>
         <div class="share-links">
           <?php
             echo '<div class="share-link reddit"><a href="http://www.reddit.com/submit?url='.htmlspecialchars('http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'].
               (empty($_SERVER['QUERY_STRING']) ? "" : '?'.$_SERVER['QUERY_STRING'])
-            ).'" target="_blank">Share on Reddit</a></div>';
+            ).'" target="_blank" rel="noopener">Share on Reddit</a></div>';
             echo '<div class="share-link twitter"><a href="http://twitter.com/share?text=League Report: '.$leaguetag.' - '.htmlspecialchars('http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'].
               (empty($_SERVER['QUERY_STRING']) ? "" : '?'.$_SERVER['QUERY_STRING'])
-            ).'" target="_blank">Share on Twitter</a></div>';
+            ).'" target="_blank" rel="noopener">Share on Twitter</a></div>';
             echo '<div class="share-link vk"><a href="https://vk.com/share.php?url='.htmlspecialchars('http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'].
               (empty($_SERVER['QUERY_STRING']) ? "" : '?'.$_SERVER['QUERY_STRING'])
-            ).'" target="_blank">Share on VK</a></div>';
+            ).'" target="_blank" rel="noopener">Share on VK</a></div>';
             echo '<div class="share-link fb"><a href="https://www.facebook.com/sharer/sharer.php?u='.htmlspecialchars('http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'].
               (empty($_SERVER['QUERY_STRING']) ? "" : '?'.$_SERVER['QUERY_STRING'])
-            ).'" target="_blank">Share on Facebook</a></div>';
+            ).'" target="_blank" rel="noopener">Share on Facebook</a></div>';
           ?>
         </div>
       </header>
@@ -1998,6 +2002,8 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
         </div>
         <div id="main-section" class="content-section">
 <?php
+
+if (!empty($custom_content)) echo "<br />".$custom_content;
 
 $output = join_selectors($modules, 0);
 
@@ -2051,6 +2057,7 @@ echo $output;
           Made by Spectral Alliance with support of TheCyberSport.<br />
           Klozi is a registered trademark of Grafensky.<br />
           All changes can be discussed on Spectral Alliance discord channel and on github.
+          <?php if (!empty($custom_footer)) echo "<br />".$custom_footer; ?>
         </footer>
         <div class="modal" id="modal-box">
           <div class="modal-content">

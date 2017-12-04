@@ -19,7 +19,7 @@ This module is included by rg_init, rg_fetcher and rg_analyzer
 
 === rg_init
 
-=== rg_fetcher 
+=== rg_fetcher
 
 === rg_analyzer
 
@@ -39,14 +39,9 @@ It can also be used from command line as "php rg_report_web.php > index.html" wi
 * -dVALUE -- Force module depth, force-sets `$lrg_get_depth` to VALUE
 * -mVALUE -- Generate module VALUE, equivalent to `?mod=VALUE` in GET request
 
-TODO
 
-- update metadata
-- backup metadata
-- backup database & restore (JSON?)
-- clone
-- time limits for reports (leaguetag._matchid1._matchid2_.json)
-- initialiser
-- report generator (on-fly)
-- report generator (markdown or simple html)
-- proper readme
+**What do I need to use it?**
+
+MySQL database server and PHP interpreter. Nothing really special, you can use regular XAMPP for it.
+
+I also recommend using PHPMyAdmin for manual data change.
