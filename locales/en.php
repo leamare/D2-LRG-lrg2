@@ -1,6 +1,7 @@
 <?php
   $strings = array(
-    "date_format" => "h:i:s j M Y",
+    "date_format" => "j M Y",
+    "time_format" => "h:i:s",
 
     "league_name" => "League name",
     "league_tag" => "League tag",
@@ -72,6 +73,7 @@
     "player_combos" => "Player combos",
     "players_combo_graph" => "Player Combos Graph (Wins)",
     "position" => "Position",
+    "rad_ratio" => "Radiant Ratio",
 
     "core" => "Core",
     "support" => "Support",
@@ -200,8 +202,8 @@
     "first_match" => "First match",
     "last_match" => "Last match",
 
-    "match_stomp" => "Match with highest stomp",
-    "match_comeback" => "Match with highest comeback",
+    "match_stomp" => "Match with biggest stomp",
+    "match_comeback" => "Match with biggest comeback",
     "longest_match" => "Longest match"
   );
 
