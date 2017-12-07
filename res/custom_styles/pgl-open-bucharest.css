@@ -46,3 +46,11 @@ table.pvp .thead th  {
     color: #fff;
     background-color: #26412a;
 }
+
+.team-card .team-name, .player-card .player-name {
+  background-color: #286c3d;
+}
+
+.player-card .player-team {
+  background-color: #286543;
+}

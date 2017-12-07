@@ -251,6 +251,9 @@ table .hero_portrait {
   height: 36px;
   overflow: hidden;
 }
+.match-team-name.winner {
+  text-decoration: underline;
+}
 .match-team-nw {
   text-align: center;
   font-size: 18px;

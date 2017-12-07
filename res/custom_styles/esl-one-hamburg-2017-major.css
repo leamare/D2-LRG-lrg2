@@ -78,3 +78,11 @@ table.list td, table.pvp td {
 table.list tr:hover td, table.pvp tr:hover td {
     background-color: #5a1941;
 }
+
+.team-card .team-name, .player-card .player-name {
+  background-color: #483d52;
+}
+
+.player-card .player-team {
+  background-color: #403d52;
+}

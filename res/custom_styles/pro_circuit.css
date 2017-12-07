@@ -30,3 +30,11 @@ table.pvp .thead th  {
 .content-section .content-header {
 	background-color: #3d5251;
 }
+
+.team-card .team-name, .player-card .player-name {
+  background-color: #3d5251;
+}
+
+.player-card .player-team {
+  background-color: #3d5251;
+}
