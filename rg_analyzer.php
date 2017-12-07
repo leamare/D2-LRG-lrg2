@@ -420,7 +420,7 @@
       $row = $query_res->fetch_row();
       $result["averages_heroes"][$row[0]] = array();
 
-      for ($i=0; $i<5 && $row != null; $i++, $row = $query_res->fetch_row()) {
+      for ($i=0; $i<$lg_settings['ana']['avg_limit'] && $row != null; $i++, $row = $query_res->fetch_row()) {
         $result["averages_heroes"][$row[0]][$i] = array (
           "heroid" => $row[1],
           "value"  => $row[2]
@@ -474,9 +474,17 @@
     $sql .= "SELECT \"courier_kills\", playerid, SUM(couriers_killed)/SUM(1) value, SUM(1) mtch FROM adv_matchlines
               GROUP BY playerid HAVING $limiter < mtch ORDER BY value DESC;";
     # roshan kills by hero's team
-    $sql .= "SELECT \"roshan_kills_with_team\", playerid, SUM(rs.rshs)/SUM(1) value, SUM(1) mtch FROM matchlines JOIN (
-      SELECT matchid, SUM(roshans_killed) rshs FROM adv_matchlines GROUP BY matchid
-    ) rs ON matchlines.matchid = rs.matchid GROUP BY playerid HAVING $limiter < mtch ORDER BY value DESC;";
+    if ($lg_settings['main']['teams'])
+      $sql .= "SELECT \"roshan_kills_by_team\", teams_matches.teamid, SUM(rs.rshs)/SUM(1) value, SUM(1) mtch FROM matchlines JOIN (
+        SELECT matchid, SUM(roshans_killed) rshs FROM adv_matchlines GROUP BY matchid
+      ) rs ON matchlines.matchid = rs.matchid
+      JOIN teams_matches ON matchlines.matchid = teams_matches.matchid and matchlines.isradiant = teams_matches.is_radiant
+      GROUP BY teams_matches.teamid HAVING $limiter < mtch ORDER BY value DESC;";
+    else
+      $sql .= "SELECT \"roshan_kills_with_team\", playerid, SUM(rs.rshs)/SUM(1) value, SUM(1) mtch FROM matchlines JOIN (
+        SELECT matchid, SUM(roshans_killed) rshs FROM adv_matchlines GROUP BY matchid
+      ) rs ON matchlines.matchid = rs.matchid
+      GROUP BY playerid HAVING $limiter < mtch ORDER BY value DESC;";
     # wards destroyed
     $sql .= "SELECT \"wards_destroyed\", playerid, SUM(wards_destroyed)/SUM(1) value, SUM(1) mtch FROM adv_matchlines
             GROUP BY playerid HAVING $limiter < mtch ORDER BY value DESC;";
@@ -486,6 +494,8 @@
               GROUP BY playerid HAVING $limiter < mtch ORDER BY value DESC;";
     # stacks
     $sql .= "SELECT \"stacks\", playerid, SUM(stacks)/SUM(1) value, SUM(1) mtch FROM adv_matchlines GROUP BY playerid ORDER BY value DESC;";
+    # wards
+    $sql .= "SELECT \"wards_placed\", playerid, SUM(stacks)/SUM(1) value, SUM(1) mtch FROM adv_matchlines GROUP BY playerid ORDER BY value DESC;";
     # pings per minute
     $sql .= "SELECT \"pings\", adv_matchlines.playerid playerid, SUM(adv_matchlines.pings/(matches.duration/60))/SUM(1)
                value, SUM(1) mtch FROM adv_matchlines JOIN matches ON adv_matchlines.matchid = matches.matchid
@@ -507,7 +517,7 @@
      $row = $query_res->fetch_row();
      $result["averages_players"][$row[0]] = array();
 
-     for ($i=0; $i<5 && $row != null; $i++, $row = $query_res->fetch_row()) {
+     for ($i=0; $i<$lg_settings['ana']['avg_limit'] && $row != null; $i++, $row = $query_res->fetch_row()) {
          $result["averages_players"][$row[0]][$i] = array (
          "playerid" => $row[1],
          "value"  => $row[2]

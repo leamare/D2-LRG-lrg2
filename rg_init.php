@@ -59,6 +59,7 @@ $lg_settings['main']['teams'] = true; # set team or player mix competition
 $lg_settings['main']['fantasy'] = false; # not implemented yet TODO
 
 $lg_settings['ana']['records']     = true; # records
+$lg_settings['ana']['avg_limit']   = 5;
 $lg_settings['ana']['avg_heroes']  = true; # averages for heroes
 $lg_settings['ana']['avg_players'] = true; # averages for players
 
@@ -160,7 +161,7 @@ $lg_settings['web'] = array(
   "overview_top_hero_pairs_count" => 5,
 
   "overview_matches" => true,
-  "overview_first_match" => true,
+  "overview_first_match" => false,
   "overview_last_match" => true,
   "overview_records_duration" => true,
   "overview_records_stomp" => true,
@@ -171,15 +172,15 @@ $lg_settings['web'] = array(
   "overview_top_draft" => true,
   "overview_draft_1_1" => true,
   "overview_draft_1_1_count" => 5,
-  "overview_draft_1_2" => true,
+  "overview_draft_1_2" => false,
   "overview_draft_1_2_count" => 3,
-  "overview_draft_1_3" => true,
+  "overview_draft_1_3" => false,
   "overview_draft_1_3_count" => 3,
   "overview_draft_0_1" => true,
   "overview_draft_0_1_count" => 5,
-  "overview_draft_0_2" => true,
+  "overview_draft_0_2" => false,
   "overview_draft_0_2_count" => 3,
-  "overview_draft_0_3" => true,
+  "overview_draft_0_3" => false,
   "overview_draft_0_3_count" => 4,
 );
 

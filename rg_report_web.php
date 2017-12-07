@@ -191,9 +191,9 @@ require_once("rg_report_out_settings.php");
       $team_dire = "Dire";
     }
     $radiant .= "<div class=\"match-team-score\">".$report['matches_additional'][$mid]['radiant_score']."</div>".
-                "<div class=\"match-team-name\">".$team_radiant."</div>";
+                "<div class=\"match-team-name".($report['matches_additional'][$mid]['radiant_win'] ? " winner" : "")."\">".$team_radiant."</div>";
     $dire .= "<div class=\"match-team-score\">".$report['matches_additional'][$mid]['dire_score']."</div>".
-             "<div class=\"match-team-name\">".$team_dire."</div>";
+             "<div class=\"match-team-name".($report['matches_additional'][$mid]['radiant_win'] ? "" : " winner")."\">".$team_dire."</div>";
 
     $radiant .= "<div class=\"match-players\">".$players_radi."</div><div class=\"match-heroes\">".$heroes_radi."</div>".
                 "<div class=\"match-team-nw\">".$report['matches_additional'][$mid]['radiant_nw']."</div></div>";
@@ -618,6 +618,62 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
         }
       $modules['overview'] .= "</div>";
     }
+
+    $modules['overview'] .= "<div class=\"content-header\">".$strings['notable_paricipans']."</div>";
+    $modules['overview'] .= "<div class=\"content-cards\">";
+    if (isset($report['teams'])) {
+      $modules['overview'] .= "<h1>".$strings["np_winner"]."</h1>";
+      if($report['matches_additional'][ $report['last_match']['mid'] ]['radiant_win']) {
+        $tid = $report['match_participants_teams'][ $report['last_match']['mid'] ]['radiant'];
+      } else {
+        $tid = $report['match_participants_teams'][ $report['last_match']['mid'] ]['dire'];
+      }
+      $modules['overview'] .= team_card($tid);
+      unset($tid);
+
+      if (isset($report['records'])) {
+        $modules['overview'] .= "<h1>".$strings["widest_hero_pool_team"]."</h1>";
+        $modules['overview'] .= team_card($report['records']['widest_hero_pool_team']['playerid']);
+      }
+
+      $max_wr = 0;
+      $max_matches = 0;
+      foreach ($report['teams'] as $team_id => $team) {
+          if(!$max_matches || $report['teams'][$max_wr]['matches_total'] < $team['matches_total'] )
+            $max_matches = $team_id;
+          if(!$max_wr || $report['teams'][$max_wr]['wins']/$report['teams'][$max_wr]['matches_total'] < $team['wins']/$team['matches_total'] )
+            $max_wr = $team_id;
+      }
+
+      $modules['overview'] .= "<h1>".$strings["most_matches"]."</h1>";
+      $modules['overview'] .= team_card($max_matches);
+
+      $modules['overview'] .= "<h1>".$strings["highest_winrate"]."</h1>";
+      $modules['overview'] .= team_card($max_wr);
+    } else {
+      if (isset($report['records'])) {
+        $modules['overview'] .= "<h1>".$strings["widest_hero_pool"]."</h1>";
+        $modules['overview'] .= player_card($report['records']['widest_hero_pool']['playerid']);
+
+        $max_wr = 0;
+        $max_matches = 0;
+        foreach ($report['players_additional'] as $pid => $player) {
+            if(!$max_matches || $report['players_additional'][$max_wr]['matches'] < $player['matches'] )
+              $max_matches = $pid;
+            if(!$max_wr || $report['players_additional'][$max_wr]['won']/$report['players_additional'][$max_wr]['matches'] < $player['won']/$player['matches'] )
+              $max_wr = $pid;
+        }
+
+        $modules['overview'] .= "<h1>".$strings["most_matches"]."</h1>";
+        $modules['overview'] .= player_card($max_matches);
+
+        $modules['overview'] .= "<h1>".$strings["highest_winrate"]."</h1>";
+        $modules['overview'] .= player_card($max_wr);
+      }
+
+
+    }
+    $modules['overview'] .= "</div>";
 
     $modules['overview'] .= "<div class=\"content-header\">".$strings['heroes']."</div>";
 
@@ -1238,9 +1294,12 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
                                                         <th>".$strings['value']."</th>
                                                       </tr>";
           foreach($avg as $player) {
-            $modules['players']['averages_players'] .= "<tr>
-                                                        <td>".$report['players'][$player['playerid']].
-                                                       "</td><td>".number_format($player['value'],2)."</td></tr>";
+            if(strrpos($key, "by_team") === FALSE) {
+              $modules['players']['averages_players'] .= "<tr><td>".player_name($player['playerid']);
+            } else {
+              $modules['players']['averages_players'] .= "<tr><td>".team_name($player['playerid']);
+            }
+            $modules['players']['averages_players'] .= "</td><td>".number_format($player['value'],2)."</td></tr>";
           }
           $modules['players']['averages_players'] .= "</table>";
         }

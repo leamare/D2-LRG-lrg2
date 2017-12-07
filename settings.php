@@ -36,4 +36,6 @@ if(isset($argv)) {
 
     $lrg_use_cache = true;
   }
+
+  # module-wide functions
 ?>
