@@ -433,6 +433,11 @@ if ($lg_settings['main']['teams']) {
   $sql = "INSERT INTO teams_matches (matchid, teamid, is_radiant) VALUES ";
 
   foreach($t_team_matches as $match) {
+      if($match['is_radiant'] > 1) {
+        echo "[W] Error when adding teams-matches data: is_radiant flag has higher value than 1\n".
+            ."[ ]\t".$match['matchid']." - ".$match['teamid']." - ".$match['is_radiant']."\n";
+            continue;
+      }
       $sql .= "(".$match['matchid'].",".$match['teamid'].",".$match['is_radiant']."),";
   }
   $sql[strlen($sql)-1] = ";";

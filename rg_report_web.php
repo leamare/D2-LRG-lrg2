@@ -1856,6 +1856,9 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
                     "<th onclick=\"sortTable(0,'teams-sum');\">".$strings['team_name']."</th>".
                     "<th onclick=\"sortTableNum(1,'teams-sum');\">".$strings['matches_s']."</th>".
                     "<th onclick=\"sortTableNum(2,'teams-sum');\">".$strings['winrate_s']."</th>".
+                    "<th onclick=\"sortTableNum(2,'teams-sum');\">".$strings['rad_ratio']."</th>".
+                    "<th onclick=\"sortTableNum(2,'teams-sum');\">".$strings['rad_wr']."</th>".
+                    "<th onclick=\"sortTableNum(2,'teams-sum');\">".$strings['dire_wr']."</th>".
                     "<th onclick=\"sortTableNum(3,'teams-sum');\">".$strings['hero_pool']."</th>".
                     "<th onclick=\"sortTableNum(4,'teams-sum');\">".$strings['kills']."</th>".
                     "<th onclick=\"sortTableNum(5,'teams-sum');\">".$strings['deaths']."</th>".
@@ -1873,6 +1876,9 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
                     "<td>".team_name($team_id)."</td>".
                     "<td>".$team['matches_total']."</td>".
                     "<td>".number_format($team['wins']*100/$team['matches_total'],2)."%</td>".
+                    "<td>".number_format($team['averages']['rad_ratio']*100,2)."%</td>".
+                    "<td>".number_format($team['averages']['rad_wr']*100,2)."%</td>".
+                    "<td>".number_format($team['averages']['dire_wr']*100,2)."%</td>".
                     "<td>".$team['averages']['hero_pool']."</td>".
                     "<td>".number_format($team['averages']['kills'],1)."</td>".
                     "<td>".number_format($team['averages']['deaths'],1)."</td>".
