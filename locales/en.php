@@ -74,6 +74,8 @@
     "players_combo_graph" => "Player Combos Graph (Wins)",
     "position" => "Position",
     "rad_ratio" => "Radiant Ratio",
+    "rad_wr" => "Radiant WR",
+    "dire_wr" => "Dire WR",
 
     "core" => "Core",
     "support" => "Support",

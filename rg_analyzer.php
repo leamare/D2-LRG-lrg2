@@ -1152,6 +1152,23 @@
                   AND matchlines.isRadiant = teams_matches.is_radiant
                   WHERE teams_matches.teamid = ".$id.";";
 
+        # radiant ratio
+        $sql .= "SELECT \"rad_ratio\", SUM(is_radiant)/COUNT(DISTINCT matchid)
+                  FROM teams_matches
+                  WHERE teamid = ".$id.";";
+
+        # radiant wr
+        $sql .= "SELECT \"rad_wr\", SUM(matches.radiantWin)/COUNT(DISTINCT matches.matchid) FROM matches JOIN teams_matches
+                  ON matches.matchid = teams_matches.matchid
+                  AND teams_matches.is_radiant = 1
+                  WHERE teams_matches.teamid = ".$id.";";
+
+        # dire wr
+        $sql .= "SELECT \"dire_wr\", SUM(matches.radiantWin)/COUNT(DISTINCT matches.matchid) FROM matches JOIN teams_matches
+                  ON matches.matchid = teams_matches.matchid
+                  AND teams_matches.is_radiant = 0
+                  WHERE teams_matches.teamid = ".$id.";";
+
         # duration
         $sql .= "SELECT \"duration\", (SUM(matches.duration)/60)/COUNT(DISTINCT matches.matchid) FROM matches JOIN teams_matches
                   ON matches.matchid = teams_matches.matchid WHERE teams_matches.teamid = ".$id.";";
