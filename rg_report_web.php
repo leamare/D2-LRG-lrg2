@@ -229,7 +229,7 @@ require_once("rg_report_out_settings.php");
                     <div class=\"match-info-line\"><span class=\"caption\">".$strings['winner'].":</span> ".
                       ($report['matches_additional'][$mid]['radiant_win'] ? $team_radiant : $team_dire)."</div>
                     <div class=\"match-info-line\"><span class=\"caption\">".$strings['date'].":</span> ".
-                      date($strings['date_format'], $report['matches_additional'][$mid]['date'])."</div>
+                      date($strings['time_format']." ".$strings['date_format'], $report['matches_additional'][$mid]['date'])."</div>
                 </div>";
 
     return $output."</div>";
@@ -478,24 +478,26 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
     if($report['settings']['overview_time_limits']) {
       $modules['overview'] .= "<div class=\"block-content\">";
 
-      $modules['overview'] .= $strings['over-first-match']." ".date($strings['date_format'], $report['first_match']['date'])."<br />";
-      $modules['overview'] .= $strings['over-last-match']." ".date($strings['date_format'], $report['last_match']['date'])."<br />";
-      if(isset($report['teams'])) {
-        if( $report['matches_additional'][ $report['last_match']['mid'] ]['radiant_win'] ) {
-          if(isset($report['teams'][ $report['match_participants_teams'][ $report['last_match']['mid'] ]['radiant'] ]['name']))
-            $modules['overview'] .= $report['teams'][ $report['match_participants_teams'][ $report['last_match']['mid'] ]['radiant'] ]['name'];
-          else $modules['overview'] .= $strings['radiant'];
-        } else {
-          if(isset($report['teams'][ $report['match_participants_teams'][ $report['last_match']['mid'] ]['dire'] ]['name']))
-            $modules['overview'] .= $report['teams'][ $report['match_participants_teams'][ $report['last_match']['mid'] ]['dire'] ]['name'];
-          else $modules['overview'] .= $strings['dire'];
-        }
-      }
+      $modules['overview'] .= $strings['over-first-match']." ".date($strings['time_format']." ".$strings['date_format'], $report['first_match']['date'])."<br />";
+      $modules['overview'] .= $strings['over-last-match']." ".date($strings['time_format']." ".$strings['date_format'], $report['last_match']['date'])."<br />";
+
       $modules['overview'] .= "</div>";
     }
 
     if($report['settings']['overview_last_match_winners']) {
-      $modules['overview'] .= "<div class=\"block-content\">".$strings['over-last-match-winner']."</div>";
+      $modules['overview'] .= "<div class=\"block-content\">";
+
+      if( $report['matches_additional'][ $report['last_match']['mid'] ]['radiant_win'] ) {
+        if(isset($report['teams'][ $report['match_participants_teams'][ $report['last_match']['mid'] ]['radiant'] ]['name']))
+          $modules['overview'] .= $report['teams'][ $report['match_participants_teams'][ $report['last_match']['mid'] ]['radiant'] ]['name'];
+        else $modules['overview'] .= $strings['radiant'];
+      } else {
+        if(isset($report['teams'][ $report['match_participants_teams'][ $report['last_match']['mid'] ]['dire'] ]['name']))
+          $modules['overview'] .= $report['teams'][ $report['match_participants_teams'][ $report['last_match']['mid'] ]['dire'] ]['name'];
+        else $modules['overview'] .= $strings['dire'];
+      }
+
+      $modules['overview'] .= $strings['over-last-match-winner']."</div>";
     }
 
     $modules['overview'] .= "</div>";
@@ -506,9 +508,8 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
 
       $modules['overview'] .= "<div class=\"content-text overview overview-graphs\">";
 
+      $mode = reset($report['versions']);
       if ($report['settings']['overview_versions'] && $mode/$report['random']['matches_total'] < 0.99) {
-        $mode = reset($report['versions']);
-
         $converted_modes = array();
         foreach ($report['versions'] as $mode => $data) {
           $converted_modes[] = $meta['versions'][$mode];
@@ -547,9 +548,8 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
                               });</script></div>";
       }
 
+      $mode = reset($report['regions']);
       if ($report['settings']['overview_regions'] && $mode/$report['random']['matches_total'] < 0.99) {
-        $mode = reset($report['regions']);
-
         $region_names = array_keys($regions_matches);
         $colors = array_slice($charts_colors, 0, sizeof($region_names));
         $modules['overview'] .= "<div class=\"chart-pie\"><canvas id=\"overview-regions\" width=\"undefined\" height=\"undefined\"></canvas><script>".
@@ -1023,6 +1023,66 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
               $keys = array_keys($report['hero_sides'][$i][0]);
               break;
             }
+        }
+
+        $modules['heroes']['hero_sides']['overview'] = "";
+        if(check_module($parent."hero_sides-overview")) {
+          $heroes = array();
+
+          for ($side = 0; $side < 2; $side++) {
+            foreach($report['hero_sides'][$side] as $hero) {
+              if (!isset($heroes[$hero['heroid']])) {
+                $heroes[$hero['heroid']] = array(
+                  "matches" => $hero['matches'],
+                  "side".$side."matches" => $hero['matches'],
+                  "side".$side."winrate" => $hero['winrate']
+                );
+              } else {
+                $heroes[$hero['heroid']]["matches"] += $hero['matches'];
+                $heroes[$hero['heroid']]["side".$side."matches"] = $hero['matches'];
+                $heroes[$hero['heroid']]["side".$side."winrate"] = $hero['winrate'];
+              }
+            }
+          }
+
+          uasort($heroes, function($a, $b) {
+            if($a['matches'] == $b['matches']) return 0;
+            else return ($a['matches'] < $b['matches']) ? 1 : -1;
+          });
+
+
+          $modules['heroes']['hero_sides']['overview'] .= "<table id=\"hero-sides-overiew\" class=\"list\">
+                                        <tr class=\"thead\">
+                                          <th onclick=\"sortTable(0,'hero-sides-overview');\">".$strings['hero']."</th>
+                                          <th onclick=\"sortTableNum(1,'hero-sides-overview');\">".$strings['matches']."</th>
+                                          <th onclick=\"sortTableNum(2,'hero-sides-overview');\">".$strings['rad_ratio']."</th>
+                                          <th onclick=\"sortTableNum(3,'hero-sides-overview');\">".$strings['radiant']." ".$strings['matches']."</th>
+                                          <th onclick=\"sortTableNum(4,'hero-sides-overview');\">".$strings['radiant']." ".$strings['winrate']."</th>
+                                          <th onclick=\"sortTableNum(5,'hero-sides-overview');\">".$strings['dire']." ".$strings['matches']."</th>
+                                          <th onclick=\"sortTableNum(6,'hero-sides-overview');\">".$strings['dire']." ".$strings['winrate']."</th>
+                                        </tr>";
+          foreach ($heroes as $hid => $hero) {
+            if(!isset($hero["side0matches"])) {
+              $hero["side0matches"] = 0;
+              $hero["side0winrate"] = 0;
+            }
+            if(!isset($hero["side1matches"])) {
+              $hero["side1matches"] = 0;
+              $hero["side1winrate"] = 0;
+            }
+
+            $modules['heroes']['hero_sides']['overview'] .= "<tr>
+                                                <td>".($hid ? hero_full($hid) : "")."</td>".
+                                                "<td>".$hero['matches']."</td>".
+                                                "<td>".number_format($hero["side0matches"]*100/$hero["matches"],2)."%</td>".
+                                                "<td>".$hero["side0matches"]."</td>".
+                                                "<td>".number_format($hero["side0winrate"]*100,2)."%</td>".
+                                                "<td>".$hero["side1matches"]."</td>".
+                                                "<td>".number_format($hero["side1winrate"]*100,2)."%</td>".
+                                              "</tr>";
+          }
+          $modules['heroes']['hero_sides']['overview'] .= "</table>";
+          unset($heroes);
         }
 
         for ($side = 0; $side < 2; $side++) {
