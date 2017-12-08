@@ -144,10 +144,8 @@ table.pvp .thead th span:hover {
   width: auto;
   opacity:1;
   overflow:initial;
-  background-color: #525353;
   padding: 0 10px;
   margin: 0;
-  box-shadow: 0 0 5px #000;
 }
 table.pvp td {
     cursor: pointer;

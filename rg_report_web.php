@@ -1340,12 +1340,12 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
       }
     }
     if (isset($report['pvp'])) {
-      if($mod == $parent."pvp") $unset_module = true;
-
       $pvp = array();
       $modules['players']['pvp'] = array();
 
       if (check_module($parent."pvp")) {
+        if($mod == $parent."pvp") $unset_module = true;
+        
         foreach($report['players'] as $pid => $pname) {
           $pvp[$pid] = array();
         }
@@ -1394,7 +1394,7 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
           }
         }
 
-        if($report['settings']['pvp_grid'] && check_module($parent."hero_sides-"."grid")) {
+        if($report['settings']['pvp_grid'] && check_module($parent."pvp-grid")) {
           $modules['players']['pvp']['grid'] .= "<table  class=\"pvp wide\">";
 
           $modules['players']['pvp']['grid'] .= "<tr class=\"thead\"><th></th>";
@@ -1439,7 +1439,7 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
           $strings['pid'.$pid] = $report['players'][$pid];
 
           $modules['players']['pvp']['pid'.$pid] = "";
-          if(!check_module($parent."hero_sides-".'pid'.$pid)) continue;
+          if(!check_module($parent."pvp-pid".$pid)) continue;
 
           $modules['players']['pvp']['pid'.$pid] = "<table id=\"player-pvp-$pid\" class=\"list\">";
 
