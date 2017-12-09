@@ -399,6 +399,9 @@ footer {
   margin: auto;
   width: 70%;
 }
+footer a, footer a:active, footer a:visited, footer a:focus {
+  color: #948787;
+}
 .share-links {
   margin: 15px 0;
   float: right;

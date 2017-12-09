@@ -4,6 +4,7 @@
     "time_format" => "h:i:s",
 
     "league_name" => "League name",
+    "league_id" => "LID",
     "league_tag" => "League tag",
     "league_desc" => "Description",
 
@@ -100,6 +101,7 @@
     "top_picked_heroes" => "Most picked heroes",
     "top_banned_heroes" => "Most banned heroes",
     "top_pick_pairs" => "Favorite pairs",
+    "top_player_pairs" => "Best friends",
 
     "gpm" => "GPM",
     "xpm" => "XPM",
@@ -201,6 +203,7 @@
     "over-first-match" => "First match was played on ",
     "over-last-match" => "Last match was played on ",
     "over-last-match-winner" => " won the last match.",
+    "ana_version" => "Analyzer version",
     "matches_per_day" => "Matches per day",
     "first_match" => "First match",
     "last_match" => "Last match",
@@ -211,7 +214,40 @@
 
     "match_stomp" => "Match with biggest stomp",
     "match_comeback" => "Match with biggest comeback",
-    "longest_match" => "Longest match"
+    "longest_match" => "Longest match",
+
+    "desc_overview" => "This page only contains general information about league and small amount of available stats. Look throughout other sections for advanced data.",
+    "desc_records" => "This section contains data about highest or lowest values across all matches.",
+    "desc_heroes_avg" => "This section contains highest average values among heroes. Minimum amount of matches is set to higher limiter.",
+    "desc_heroes_pickban" => "This table contains stats for heroes' picks and bans.",
+    "desc_heroes_draft" => "This section contains stats for heroes' picks and bans at various draft stages.",
+    "desc_heroes_positions" => "This section contains stats for heroes' performance on various positions. Positions are determined based on players performance (core or support) and lane. Supports across all lanes (including roamers) are considered as one role. Roaming cores (who were dedicated to farming and didn't help on other lanes early) are considered jungling cores. Lanes and positions may not be accurate.",
+    "desc_heroes_sides" => "This section contains stats for heroes' performance for different factions.",
+    "desc_heroes_combo_graph" => "This graph represents how often heroes were picked together. Bolder line means more matches in pair, bigger node means hero was picked more often. Minimum match count for a pair is set to higher limiter (lower limiter for teams). Heroes without pairs aren't displayed.",
+    "desc_heroes_combos" => "This section contains stats for most common hero pairs and triplets. Minimum amount of matches for pairs and triplets is set to higher and lower limiters respectively.",
+    "desc_players_avg" => "This section contains highest average values among players. Minimum amount of matches is set to higher limiter.<br /><br />* Player Diversity priortises players with higher hero pool and same percentage of unique heroes picked.",
+    "desc_players_summary" => "This table contains players' average stats and their most common positions.",
+    "desc_players_positions" => "This section contains stats for players' performance on various positions. Positions are determined based on players performance (core or support) and lane. Supports across all lanes (including roamers) are considered as one role. Roaming cores (who were dedicated to farming and didn't help on other lanes early) are considered jungling cores. Lanes and positions may not be accurate.",
+    "desc_players_pvp" => "Choose a player to see his performance against other league participants.",
+    "desc_players_pvp_grid" => "This grid represents player's winrate against another player. Click on a cell to see detailed information.",
+    "desc_players_combos" => "This section contains stats for most common player pairs and triplets. Minimum amount of matches for pairs and triplets is set to higher and lower limiters respectively.",
+    "desc_players_combo_graph" => "This graph represents how often players were matched together. Bolder line means more matches were won in pair, bigger node means more matches were played by player. Minimum match count for a pair is set to higher limiter. Players without pairs with amount of matches higher than limiter aren't shown.",
+    "desc_teams" => "Choose a team to see its detailed stats.",
+    "desc_teams_summary" => "This table contains teams' average stats across the tournament.",
+    "desc_tvt" => "This grid represents team's winrate against another team.",
+    "desc_participants" => "This page contains all basic data about league participants (players or teams) as cards. To find match with specific player or team use document inner search (usually Ctrl+F).",
+    "desc_matches" => "All basic data about matches in this league is available as match cards on this page. To find match with specific team, player, hero or region use document inner search (usually Ctrl+F).",
+
+    "limiter_h" => "Higher limiter",
+    "limiter_l" => "Lower limiter",
+
+    "full" => "Full section",
+    "full_participants" => "All participants",
+    "full_pickban" => "Full picks and bans stats",
+    "full_draft" => "Full draft stages stats",
+    "full_hero_combos" => "Full hero combinations stats",
+    "full_player_combos" => "Full player combinations stats",
+    "full_matches" => "All matches"
   );
 
  ?>

@@ -1,7 +1,19 @@
 <?php
 require_once("rg_report_out_settings.php");
+require_once("modules/mod_versions.php");
+
+$lg_version = array( 1, 0, 0, 0, getlastmod() );
 
 /* FUNCTIONS */  {
+  function has_pair($hid, $pairs) {
+    foreach($pairs as $pair) {
+      if(!isset($keys)) $keys = array_keys($pair);
+      if ($pair[$keys[0]] == $hid) return true;
+      if ($pair[$keys[1]] == $hid) return true;
+    }
+    return false;
+  }
+
   function check_module($module) {
     global $lrg_get_depth;
     global $lrg_use_get;
@@ -294,8 +306,7 @@ require_once("rg_report_out_settings.php");
             (empty($linkvars) ? "" : "&".$linkvars)
             ."\">".$strings[$modname]."</option>";
           else
-            $selectors[] = "<option".($unset_selector ? "selected=\"selected\"" : "")." value=\"?league=".$leaguetag."&mod=".(empty($parent) ? "" : $parent."-" ).$modname."&".
-            (empty($linkvars) ? "" : "&".$linkvars)
+            $selectors[] = "<option".($unset_selector ? "selected=\"selected\"" : "")." value=\"?league=".$leaguetag."&mod=".(empty($parent) ? "" : $parent."-" ).$modname.(empty($linkvars) ? "" : "&".$linkvars)
             ."\">".$strings[$modname]."</option>";
         } else {
           $selectors[] = "<option value=\"module-".(empty($parent) ? "" : $parent."-" ).$modname."\">".$strings[$modname]."</option>";
@@ -422,9 +433,6 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
 
     $h3 = array_rand($report['random']);
 
-    $random_caption = "placeholder";
-    $random_text = "Some random text...";
-
   # overview
   if ( check_module("overview") ) {
     $modules['overview'] .= "<div class=\"content-text overview overview-head\">";
@@ -488,11 +496,11 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
       $modules['overview'] .= "<div class=\"block-content\">";
 
       if( $report['matches_additional'][ $report['last_match']['mid'] ]['radiant_win'] ) {
-        if(isset($report['teams'][ $report['match_participants_teams'][ $report['last_match']['mid'] ]['radiant'] ]['name']))
+        if(isset($report['teams']) && isset($report['teams'][ $report['match_participants_teams'][ $report['last_match']['mid'] ]['radiant'] ]['name']))
           $modules['overview'] .= $report['teams'][ $report['match_participants_teams'][ $report['last_match']['mid'] ]['radiant'] ]['name'];
         else $modules['overview'] .= $strings['radiant'];
       } else {
-        if(isset($report['teams'][ $report['match_participants_teams'][ $report['last_match']['mid'] ]['dire'] ]['name']))
+        if(isset($report['teams']) && isset($report['teams'][ $report['match_participants_teams'][ $report['last_match']['mid'] ]['dire'] ]['name']))
           $modules['overview'] .= $report['teams'][ $report['match_participants_teams'][ $report['last_match']['mid'] ]['dire'] ]['name'];
         else $modules['overview'] .= $strings['dire'];
       }
@@ -673,6 +681,8 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
 
 
     }
+    $modules['overview'] .= "<div class=\"content-text\"><a href=\"http://".$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']."?league".$leaguetag.
+      (empty($linkvars) ? "" : "&".$linkvars)."&mod=participants\">".$strings['full_participants']."</a></div>";
     $modules['overview'] .= "</div>";
 
     $modules['overview'] .= "<div class=\"content-header\">".$strings['heroes']."</div>";
@@ -774,12 +784,15 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
         $modules['overview'] .= "</table>";
     }
 
+    $modules['overview'] .= "<div class=\"content-text\"><a href=\"http://".$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']."?league".$leaguetag.
+      (empty($linkvars) ? "" : "&".$linkvars)."&mod=heroes-pickban\">".$strings['full_pickban']."</a></div>";
+
     if($report['settings']['overview_top_draft']) {
       $modules['overview'] .= "<div class=\"content-header\">".$strings['draft']."</div>";
 
       for ($i=0; $i<2; $i++) {
         for ($j=1; $j<4; $j++) {
-          if($report['settings']["overview_draft_".$i."_".$j] && isset($report['draft'])) {
+          if($report['settings']["overview_draft_".$i."_".$j] && isset($report['draft']) && !empty($report['draft'][$i][$j])) {
 
 
               $modules['overview'] .=  "<table id=\"over-draft-$i-$j\" class=\"list\">
@@ -792,7 +805,6 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
 
               $counter = $report['settings']["overview_draft_".$i."_".$j."_count"];
 
-              if(empty($report['draft'][$i][$j])) continue;
               uasort($report['draft'][$i][$j], function($a, $b) {
                 if($a['matches'] == $b['matches']) return 0;
                 else return ($a['matches'] < $b['matches']) ? 1 : -1;
@@ -811,6 +823,8 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
           }
         }
       }
+      $modules['overview'] .= "<div class=\"content-text\"><a href=\"http://".$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']."?league".$leaguetag.
+        (empty($linkvars) ? "" : "&".$linkvars)."&mod=heroes-draft\">".$strings['full_draft']."</a></div>";
     }
 
     if($report['settings']['overview_top_hero_pairs'] && isset($report['hero_pairs']) && !empty($report['hero_pairs'])) {
@@ -836,6 +850,37 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
           $counter--;
         }
         $modules['overview'] .= "</table>";
+
+        $modules['overview'] .= "<div class=\"content-text\"><a href=\"http://".$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']."?league".$leaguetag.
+          (empty($linkvars) ? "" : "&".$linkvars)."&mod=heroes-hero_combos\">".$strings['full_hero_combos']."</a></div>";
+    }
+
+    if(!isset($report['teams']) && $report['settings']['overview_top_player_pairs'] && isset($report['player_pairs']) && !empty($report['player_pairs'])) {
+        $modules['overview'] .= "<div class=\"content-header\">".$strings['top_player_pairs']."</div>";
+
+        $modules['overview'] .= "<table id=\"over-player-pairs\" class=\"list\">
+                                  <tr class=\"thead\">
+                                    <th>".$strings['player']." 1</th>
+                                    <th>".$strings['player']." 2</th>
+                                    <th>".$strings['matches']."</th>
+                                    <th>".$strings['winrate']."</th>
+                                  </tr>";
+        $counter = $report['settings']['overview_top_player_pairs_count'];
+        foreach($report['player_pairs'] as $pair) {
+          if($counter == 0) break;
+          $modules['overview'] .= "<tr>
+                                    <td>".$report['players'][ $pair['playerid1'] ].
+                                   "</td><td>".$report['players'][ $pair['playerid2'] ].
+                                   "</td>
+                                   <td>".$pair['matches']."</td>
+                                   <td>".number_format($pair['winrate']*100,2)."</td>
+                                  </tr>";
+          $counter--;
+        }
+        $modules['overview'] .= "</table>";
+
+        $modules['overview'] .= "<div class=\"content-text\"><a href=\"http://".$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']."?league".$leaguetag.
+          (empty($linkvars) ? "" : "&".$linkvars)."&mod=players-player_combos\">".$strings['full_player_combos']."</a></div>";
     }
 
 
@@ -853,6 +898,9 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
       if($report['settings']['overview_records_duration'])
         $modules['overview'] .= "<h1>".$strings['longest_match']."</h1>".match_card($report['records']['duration']['matchid']);
 
+      $modules['overview'] .= "<div class=\"content-text\"><a href=\"http://".$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']."?league".$leaguetag.
+        (empty($linkvars) ? "" : "&".$linkvars)."&mod=matches\">".$strings['full_matches']."</a></div>";
+
       $modules['overview'] .= "</div>";
     }
 
@@ -863,6 +911,12 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
         $modules['overview'] .= "<tr><td>".$strings[$key]."</td><td>".$value."</td></tr>";
       }
       $modules['overview'] .= "</table>";
+
+      $modules['overview'] .= "<div class=\"content-text\">".$strings['desc_overview']."</div>";
+      $modules['overview'] .= "<div class=\"content-text\">".$strings['ana_version'].": ".parse_ver($report['ana_version'])."</div>";
+      $modules['overview'] .= "<div class=\"content-text\">".
+        $strings['limiter_h'].": ".$report['settings']['limiter']."<br />".
+        $strings['limiter_l'].": ".$report['settings']['limiter_triplets']."</div>";
     }
   }
 
@@ -896,6 +950,7 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
     }
 
     $modules['records'] .= "</table>";
+    $modules['records'] .= "<div class=\"content-text\">".$strings['desc_records']."</div>";
   }
 
   # heroes
@@ -907,6 +962,7 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
       $modules['heroes']['averages_heroes'] = "";
 
       if (check_module($parent."averages_heroes")) {
+        $modules['heroes']['averages_heroes'] .= "<div class=\"small-list-wrapper\">";
         foreach($report['averages_heroes'] as $key => $avg) {
           $modules['heroes']['averages_heroes'] .= "<table id=\"avgs-heroes-".$key."\" class=\"list list-fixed list-small\">
                                                       <caption>".$strings[$key]."</caption>
@@ -921,6 +977,8 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
           }
           $modules['heroes']['averages_heroes'] .= "</table>";
         }
+        $modules['heroes']['averages_heroes'] .= "</div>";
+        $modules['heroes']['averages_heroes'] .= "<div class=\"content-text\">".$strings['desc_heroes_avg']."</div>";
       }
     }
     if (isset($report['pickban'])) {
@@ -960,6 +1018,7 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
                 $hero['name']."</span></div>";
           }
           $modules['heroes']['pickban'] .= "</div></div>";
+          $modules['heroes']['pickban'] .= "<div class=\"content-text\">".$strings['desc_heroes_pickban']."</div>";
         }
     }
     if (isset($report['draft'])) {
@@ -997,10 +1056,12 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
                                                 </tr>";
             }
             $modules['heroes']['draft'][($i ? "pick" : "ban")."_stages"] .= "</table>";
-
           }
           if(empty($modules['heroes']['draft'][($i ? "pick" : "ban")."_stages"]))
             unset($modules['heroes']['draft'][($i ? "pick" : "ban")."_stages"]);
+
+
+          $modules['heroes']['draft'][($i ? "pick" : "ban")."_stages"] .= "<div class=\"content-text\">".$strings['desc_heroes_draft']."</div>";
         }
       }
     }
@@ -1061,6 +1122,8 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
                 $modules['heroes']['hero_positions']["positions_$i"."_$j"] .= "</tr>";
               }
               $modules['heroes']['hero_positions']["positions_$i"."_$j"] .= "</table>";
+
+              $modules['heroes']['hero_positions']["positions_$i"."_$j"] .= "<div class=\"content-text\">".$strings['desc_heroes_positions']."</div>";
             }
             if (!$i) { break; }
           }
@@ -1106,7 +1169,6 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
             else return ($a['matches'] < $b['matches']) ? 1 : -1;
           });
 
-
           $modules['heroes']['hero_sides']['overview'] .= "<table id=\"hero-sides-overiew\" class=\"list\">
                                         <tr class=\"thead\">
                                           <th onclick=\"sortTable(0,'hero-sides-overview');\">".$strings['hero']."</th>
@@ -1138,6 +1200,8 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
                                               "</tr>";
           }
           $modules['heroes']['hero_sides']['overview'] .= "</table>";
+
+          $modules['heroes']['hero_sides']["overview"] .= "<div class=\"content-text\">".$strings['desc_heroes_sides']."</div>";
           unset($heroes);
         }
 
@@ -1165,15 +1229,18 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
             $modules['heroes']['hero_sides'][$side ? 'dire' : 'radiant'] .= "</tr>";
           }
           $modules['heroes']['hero_sides'][$side ? 'dire' : 'radiant'] .= "</table>";
+
+          $modules['heroes']['hero_sides'][$side ? 'dire' : 'radiant'] .= "<div class=\"content-text\">".$strings['desc_heroes_sides']."</div>";
         }
         unset($keys);
       }
     }
-    if (//isset($report['hero_combos_graph']) &&
+    if (isset($report['hero_combos_graph']) &&
     $report['settings']['heroes_combo_graph']) {
       $modules['heroes']['hero_combo_graph'] = "";
 
       if (check_module($parent."hero_combo_graph") && isset($report['pickban'])) {
+        $modules['heroes']['hero_combo_graph'] .= "<div class=\"content-text\">".$strings['desc_heroes_combo_graph']."</div>";
         if(isset($report['hero_combos_graph'])) {
           $use_visjs = true;
 
@@ -1181,8 +1248,8 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
 
           $nodes = "";
           foreach($meta['heroes'] as $hid => $hero) {
-            $nodes .= "{id: $hid, value: ".
-              (isset($report['pickban'][$hid]['matches_picked']) ? $report['pickban'][$hid]['matches_picked'] : 0).
+            if(!has_pair($hid, $report['hero_combos_graph'])) continue;
+            $nodes .= "{id: $hid, value: ".$report['pickban'][$hid]['matches_picked'].
               ", label: '".addslashes($hero['name'])."'},";
           }
           $modules['heroes']['hero_combo_graph'] .= "var nodes = [".$nodes."];";
@@ -1272,6 +1339,8 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
                                                 </tr>";
           }
           $modules['heroes']['hero_combos'] .= "</table>";
+
+          $modules['heroes']['hero_combos'] .= "<div class=\"content-text\">".$strings['desc_heroes_combos']."</div>";
         }
       }
     }
@@ -1286,6 +1355,7 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
       $modules['players']['averages_players'] = "";
 
       if(check_module($parent."averages_players")) {
+        $modules['players']['averages_players'] .= "<div class=\"small-list-wrapper\">";
         foreach($report['averages_players'] as $key => $avg) {
           $modules['players']['averages_players'] .= "<table id=\"avgs-players-".$key."\" class=\"list list-fixed list-small\">
                                                       <caption>".$strings[$key]."</caption>
@@ -1303,6 +1373,8 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
           }
           $modules['players']['averages_players'] .= "</table>";
         }
+        $modules['players']['averages_players'] .= "</div>";
+        $modules['players']['averages_players'] .= "<div class=\"content-text\">".$strings['desc_players_avg']."</div>";
       }
     }
     if (isset($report['players_summary'])) {
@@ -1336,6 +1408,8 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
           $modules['players']['summary'] .= "</tr>";
         }
         $modules['players']['summary'] .= "</table>";
+
+        $modules['players']['summary'] .= "<div class=\"content-text\">".$strings['desc_players_summary']."</div>";
         unset($keys);
       }
     }
@@ -1345,7 +1419,7 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
 
       if (check_module($parent."pvp")) {
         if($mod == $parent."pvp") $unset_module = true;
-        
+
         foreach($report['players'] as $pid => $pname) {
           $pvp[$pid] = array();
         }
@@ -1431,6 +1505,8 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
           }
 
           $modules['players']['pvp']['grid'] .= "</table>";
+
+          $modules['players']['pvp']['grid'] .= "<div class=\"content-text\">".$strings['desc_players_pvp_grid']."</div>";
         }
 
 
@@ -1466,6 +1542,8 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
             }
           }
           $modules['players']['pvp']['pid'.$pid] .= "</table>";
+
+          $modules['players']['pvp']['pid'.$pid] .= "<div class=\"content-text\">".$strings['desc_players_pvp']."</div>";
         }
         unset($pvp);
       }
@@ -1474,6 +1552,7 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
       $modules['players']['players_combo_graph'] = "";
 
       if (check_module($parent."players_combo_graph")) {
+        $modules['players']['players_combo_graph'] .= "<div class=\"content-text\">".$strings['desc_players_combo_graph']."</div>";
         if(isset($report['players_combo_graph'])) {
           $use_visjs = true;
 
@@ -1481,6 +1560,7 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
 
           $nodes = "";
           foreach($report['players'] as $pid => $player) {
+            if (!has_pair($pid, $report['players_combo_graph'])) continue;
             $nodes .= "{id: $pid, value: ".$report['players_additional'][$pid]['matches'].", label: '".addslashes($player)."'},";
           }
           $modules['players']['players_combo_graph'] .= "var nodes = [".$nodes."];";
@@ -1564,6 +1644,8 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
                                                 </tr>";
           }
           $modules['players']['player_combos'] .= "</table>";
+
+          $modules['players']['player_combos'] .= "<div class=\"content-text\">".$strings['desc_players_combos']."</div>";
         }
       }
     }
@@ -1621,6 +1703,8 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
                 $modules['players']['player_positions']["positions_$i"."_$j"] .= "</tr>";
               }
               $modules['players']['player_positions']["positions_$i"."_$j"] .= "</table>";
+
+              $modules['players']['player_positions']["positions_$i"."_$j"] .= "<div class=\"content-text\">".$strings['desc_players_positions']."</div>";
             }
             if (!$i) { break; }
           }
@@ -1643,9 +1727,10 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
         if($mod == $parent."team_".$tid."_stats") $unset_module = true;
 
         if (isset($report['teams'][$tid]['averages'])) {
-          $modules['teams']["team_".$tid."_stats"]['overview'] = "<div class=\"content-cards\">".team_card($tid)."</div>";
+          $modules['teams']["team_".$tid."_stats"]['overview'] = "";
 
           if(check_module($parent."team_".$tid."_stats-overview")) {
+            $modules['teams']["team_".$tid."_stats"]['overview'] .= "<div class=\"content-cards\">".team_card($tid)."</div>";
             $modules['teams']["team_".$tid."_stats"]['overview'] .= "<table id=\"teams-$tid-avg-table\" class=\"list\"> ";
 
             foreach ($report['teams'][$tid]['averages'] as $key => $value) {
@@ -1653,6 +1738,8 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
             }
 
             $modules['teams']["team_".$tid."_stats"]['overview'] .= "</table>";
+
+            $modules['teams']["team_".$tid."_stats"]['overview'] .= "<div class=\"content-text\">".$strings['desc_teams']."</div>";
           }
         }
         if (isset($report['teams'][$tid]['pickban'])) {
@@ -1692,6 +1779,8 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
                   $hero['name']."</span></div>";
             }
             $modules['teams']["team_".$tid."_stats"]['pickban'] .= "</div></div>";
+
+            $modules['teams']["team_".$tid."_stats"]['pickban'] .= "<div class=\"content-text\">".$strings['desc_heroes_pickban']."</div>";
           }
         }
         if (isset($report['teams'][$tid]['draft'])) {
@@ -1723,6 +1812,7 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
                 }
                 $modules['teams']["team_".$tid."_stats"]['draft'] .= "</table>";
 
+                $modules['teams']["team_".$tid."_stats"]['draft'] .= "<div class=\"content-text\">".$strings['desc_heroes_draft']."</div>";
               }
             }
           }
@@ -1785,6 +1875,8 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
                     $modules['teams']["team_".$tid."_stats"]['hero_positions']["positions_$i"."_$j"] .= "</table>";
                   }
                 }
+                $modules['teams']["team_".$tid."_stats"]['hero_positions']["positions_$i"."_$j"] .= "<div class=\"content-text\">".$strings['desc_heroes_positions']."</div>";
+
                 if (!$i) { break; }
               }
             }
@@ -1801,8 +1893,8 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
 
             $nodes = "";
             foreach($meta['heroes'] as $hid => $hero) {
-              $nodes .= "{id: $hid, value: ".
-                (isset($report['teams'][$tid]['pickban'][$hid]['matches_picked']) ? $report['pickban'][$hid]['matches_picked'] : 0).
+              if(!has_pair($hid, $report['teams'][$tid]['hero_graph'])) continue;
+              $nodes .= "{id: $hid, value: ".$report['pickban'][$hid]['matches_picked'].
                 ", label: '".addslashes($hero['name'])."'},";
             }
             $modules['teams']["team_".$tid."_stats"]['hero_combo_graph'] .= "var nodes = [".$nodes."];";
@@ -1838,6 +1930,8 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
                                                          };\n".
                                                         "var network = new vis.Network(container, data, options);\n".
                                                         "</script>";
+
+              $modules['teams']["team_".$tid."_stats"]['hero_combo_graph'] .= "<div class=\"content-text\">".$strings['desc_heroes_combo_graph']."</div>";
           }
         }
         if (isset($report['teams'][$tid]['hero_pairs']) || isset($report['teams'][$tid]['hero_triplets'])) {
@@ -1890,6 +1984,8 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
                                                     </tr>";
               }
               $modules['teams']["team_".$tid."_stats"]['hero_combos'] .= "</table>";
+
+              $modules['teams']["team_".$tid."_stats"]['hero_combos'] .= "<div class=\"content-text\">".$strings['desc_heroes_combos']."</div>";
             }
           }
         }
@@ -1897,6 +1993,7 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
           $modules['teams']["team_".$tid."_stats"]['matches'] = "";
 
           if(check_module($parent."team_".$tid."_stats-matches")) {
+            $modules['teams']["team_".$tid."_stats"]['matches'] = "<div class=\"content-text\">".$strings['desc_matches']."</div>";
             $modules['teams']["team_".$tid."_stats"]['matches'] = "<div class=\"content-cards\">";
             foreach($report['teams'][$tid]['matches'] as $matchid => $match) {
               $modules['teams']["team_".$tid."_stats"]['matches'] .= match_card($matchid);
@@ -1909,7 +2006,7 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
   }
 
   if (isset($modules['summary_teams']) && check_module("summary_teams")) {
-    $modules['summary_teams'] = "<table id=\"teams-sum\" class=\"list wide\">";
+    $modules['summary_teams'] .= "<table id=\"teams-sum\" class=\"list wide\">";
 
     $modules['summary_teams'] .= "<tr class=\"thead\">".
                     "<th onclick=\"sortTable(0,'teams-sum');\">".$strings['team_name']."</th>".
@@ -1951,6 +2048,8 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
               "</tr>";
     }
     $modules['summary_teams'] .= "</table>";
+
+    $modules['summary_teams'] .= "<div class=\"content-text\">".$strings['desc_teams_summary']."</div>";
   }
 
   if (isset($modules['tvt']) && check_module("tvt")) {
@@ -2023,12 +2122,15 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
 
       $modules['tvt'] .= "</table>";
 
+      $modules['tvt'] .= "<div class=\"content-text\">".$strings['desc_tvt']."</div>";
+
       unset($tvt);
   }
 
   # matches
   if (isset($modules['matches']) && check_module("matches")) {
-    $modules['matches'] = "<div class=\"content-cards\">";
+    $modules['matches'] = "<div class=\"content-text\">".$strings['desc_matches']."</div>";
+    $modules['matches'] .= "<div class=\"content-cards\">";
     foreach($report['matches'] as $matchid => $match) {
       $modules['matches'] .= match_card($matchid);
     }
@@ -2043,7 +2145,8 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
     if(isset($report['teams'])) {
       $modules['participants']['teams'] = "";
       if(check_module($parent."teams")) {
-        $modules['participants']['teams'] = "<div class=\"content-cards\">";
+        $modules['participants']['teams'] .= "<div class=\"content-text\">".$strings['desc_participants']."</div>";
+        $modules['participants']['teams'] .= "<div class=\"content-cards\">";
         foreach($report['teams'] as $team_id => $team) {
           $modules['participants']['teams'] .= team_card($team_id);
         }
@@ -2053,7 +2156,8 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
 
     $modules['participants']['players'] = "";
     if(check_module($parent."players")) {
-      $modules['participants']['players'] = "<div class=\"content-cards\">";
+      $modules['participants']['players'] .= "<div class=\"content-text\">".$strings['desc_participants']."</div>";
+      $modules['participants']['players'] .= "<div class=\"content-cards\">";
       foreach($report['players'] as $player_id => $player) {
         $modules['participants']['players'] .= player_card($player_id);
       }
@@ -2146,43 +2250,66 @@ echo $output;
             <div class="content-text"><?php echo $strings['noleague_desc']; ?></div>
           </div>
           <?php
-          echo "<table class=\"list\"><tr class=\"thead\">
-            <th>".$strings['league_name']."</th>
+          echo "<table id=\"leagues-list\" class=\"list wide\"><tr class=\"thead\">
+            <th onclick=\"sortTable(0,'leagues-list');\">".$strings['league_name']."</th>
+            <th onclick=\"sortTableNum(1,'leagues-list');\">".$strings['league_id']."</th>
             <th>".$strings['league_desc']."</th>
-            <th>".$strings['matches_total']."</th>
-            <th>".$strings['start_date']."</th>,
-            <th>".$strings['end_date']."</th></tr>";
-          $reports = scandir("reports");
+            <th onclick=\"sortTableNum(3,'leagues-list');\">".$strings['matches_total']."</th>
+            <th onclick=\"sortTableValue(4,'leagues-list');\">".$strings['start_date']."</th>,
+            <th onclick=\"sortTableValue(5,'leagues-list');\">".$strings['end_date']."</th></tr>";
+          $dir = scandir("reports");
 
-          foreach($reports as $report) {
+          $reports = array();
+
+          foreach($dir as $report) {
               if($report[0] == ".")
                   continue;
               $name = str_replace("report_", "", $report);
               $name = str_replace(".json", "", $name);
-              echo "<tr><td><a href=\"?league=$name".(empty($linkvars) ? "" : "&".$linkvars)."\">";
+
               $f = fopen("reports/report_".$name.".json","r");
               $file = fread($f, 700);
-              $head = preg_replace("/{\"league_name\":\"(.+)\"\,\"league_desc\":\"(.+)\",\"league_id\":(.+),\"league_tag(.*)/", "$1 ($3)</a></td><td>$2", $file);
-              $std = (int)preg_replace("/(.*)\"first_match\":\{(.*)\"date\":\"(\d+)\"\},\"last_match\"(.*)/i", "$3 ", $file);
-              $end = (int)preg_replace("/(.*)\"last_match\":\{(.*)\"date\":\"(\d+)\"\},\"random\"(.*)/i", "$3 ", $file);
-              $total = (int)preg_replace("/(.*)\"random\":\{(.*)\"matches_total\":\"(\d+)\",\"(.*)/i", "$3 ", $file);
 
-              echo $head."</td><td>$total</td><td>".date($strings['date_format'], $std).
-                "</td><td>".date($strings['date_format'], $end)."</td></tr>";
+              $reports[] = array(
+                "name" => $name,
+                "head" => preg_replace("/{\"league_name\":\"(.+)\"\,\"league_desc\":(.*)/", "$1", $file),
+                "desc" => preg_replace("/{\"league_name\":\"(.+)\"\,\"league_desc\":\"(.+)\",\"league_id\":(.+),\"league_tag\":(.*)/", "$2", $file),
+                "id" => preg_replace("/{\"league_name\":\"(.+)\"\,\"league_desc\":\"(.+)\",\"league_id\":(.+),\"league_tag\":(.*)/", "$3", $file),
+                "std" => (int)preg_replace("/(.*)\"first_match\":\{(.*)\"date\":\"(\d+)\"\},\"last_match\"(.*)/i", "$3 ", $file),
+                "end" => (int)preg_replace("/(.*)\"last_match\":\{(.*)\"date\":\"(\d+)\"\},\"random\"(.*)/i", "$3 ", $file),
+                "total" => (int)preg_replace("/(.*)\"random\":\{(.*)\"matches_total\":\"(\d+)\",\"(.*)/i", "$3 ", $file)
+              );
           }
+
+          uasort($reports, function($a, $b) {
+            if($a['std'] == $b['std']) return 0;
+            else return ($a['std'] < $b['std']) ? 1 : -1;
+          });
+
+          foreach($reports as $report) {
+            echo "<tr><td><a href=\"?league=".$report['name'].(empty($linkvars) ? "" : "&".$linkvars)."\">".$report['head']."</a></td>".
+              "<td>".($report['id'] == "null" ? " - " : $report['id'])."</td>".
+              "<td>".$report['desc']."</td>".
+              "<td>".$report['total']."</td>".
+              "<td value=\"".$report['std']."\">".date($strings['date_format'], $report['std'])."</td>".
+              "<td value=\"".$report['end']."\">".date($strings['date_format'], $report['end'])."</td></tr>";
+          }
+
           echo "</table>";
           ?>
         </div>
       <?php } ?>
       </div>
         <footer>
-          Dota 2 is a registered trademark of Valve Corporation.<br />
-          Match replay data analyzed by OpenDota.<br />
-          Graphs are made with vis.js and chart.js.<br />
-          Made by Spectral Alliance with support of TheCyberSport.<br />
-          Klozi is a registered trademark of Grafensky.<br />
-          All changes can be discussed on Spectral Alliance discord channel and on github.
-          <?php if (!empty($custom_footer)) echo "<br />".$custom_footer; ?>
+          <a href="https://dota2.com" target="_blank" rel="noopener">Dota 2</a> is a registered trademark of <a href="https://valvesoftware.com" target="_blank" rel="noopener">Valve Corporation.</a>
+          Match replay data analyzed by <a href="https://opendota.com" target="_blank" rel="noopener">OpenDota</a>.<br />
+          Graphs are made with <a href="https://visjs.org" target="_blank" rel="noopener">vis.js</a> and <a href="https://chartjs.org" target="_blank" rel="noopener">chart.js</a>.<br />
+          Made by <a href="https://spectralalliance.ru" target="_blank" rel="noopener">Spectral Alliance</a>
+          with support of <a href="https://vk.com/thecybersport" target="_blank" rel="noopener">TheCyberSport</a>. Klozi is a registered trademark of Grafensky.<br />
+          <?php if (!empty($custom_footer)) echo $custom_footer."<br />";
+            echo "LRG web version: <a>".parse_ver($lg_version)."</a>. ";
+          ?>
+          All changes can be discussed on Spectral Alliance discord channel and on <a href="https://github.org/leamare/d2_lrg" target="_blank" rel="noopener">github</a>.
         </footer>
         <div class="modal" id="modal-box">
           <div class="modal-content">

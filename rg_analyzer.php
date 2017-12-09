@@ -862,6 +862,7 @@
               ON m1.matchid = m2.matchid and m1.isRadiant = m2.isRadiant and m1.heroid < m2.heroid
               JOIN matches ON m1.matchid = matches.matchid
             GROUP BY m1.heroid, m2.heroid
+            HAVING match_count > $limiter
             ORDER BY match_count DESC, winrate DESC;";
     # wins data is available, altho it's more like "just in case"
     # with graph we care only about popularity
@@ -1368,6 +1369,7 @@
                   JOIN teams_matches ON m1.matchid = teams_matches.matchid
                 WHERE teams_matches.teamid = ".$id."
                 GROUP BY m1.heroid, m2.heroid
+                HAVING match_count > $limiter_lower
                 ORDER BY match_count DESC;";
         # limiting match count for hero pair to 3:
         # 1 match = every possible pair
@@ -1569,11 +1571,11 @@
     if ($lg_settings['ana']['players_combo_graph']) {
       $result["players_combo_graph"] = array();
 
-      $sql = "SELECT m1.playerid, m2.playerid, SUM(NOT matches.radiantWin XOR m1.isRadiant) wins
+      $sql = "SELECT m1.playerid, m2.playerid, SUM(NOT matches.radiantWin XOR m1.isRadiant) wins, SUM(1) match_count
               FROM matchlines m1 JOIN matchlines m2
                 ON m1.matchid = m2.matchid and m1.isRadiant = m2.isRadiant and m1.playerid < m2.playerid
                 JOIN matches ON m1.matchid = matches.matchid
-              GROUP BY m1.playerid, m2.playerid HAVING match_count > $limiter_lower;";
+              GROUP BY m1.playerid, m2.playerid HAVING match_count > $limiter;";
       # only wis makes more sense for players combo graph
 
       if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for PLAYER PAIRS.\n";
@@ -1961,6 +1963,7 @@
  $result['settings'] = $lg_settings['web'];
  $result['settings']['limiter'] = $limiter;
  $result['settings']['limiter_triplets'] = $limiter_lower;
+ $result['ana_version'] = $lrg_version;
 
  echo("[ ] Encoding results to JSON\n");
  $output = json_encode($result);

@@ -160,6 +160,9 @@ $lg_settings['web'] = array(
   "overview_top_hero_pairs" => true,
   "overview_top_hero_pairs_count" => 5,
 
+  "overview_top_player_pairs" => true,
+  "overview_top_player_pairs_count" => 5,
+
   "overview_matches" => true,
   "overview_first_match" => false,
   "overview_last_match" => true,
