@@ -7,7 +7,7 @@ table.list , table.pvp {
   width: 70%;
   border-spacing: 0px;
   text-align: left;
-  margin-top: 60px;
+  margin-top: 30px;
   margin-left: auto;
 	margin-right: auto;
   color: #fff;
@@ -21,11 +21,17 @@ table.list-small {
   float: left;
   /* min-width: 250px; */
 }
+table.list-small:last-of-type {
+  margin: 0 auto;
+  float: none;
+}
 table.list-small:nth-child(2n-1) {
   margin: 0 1% 30px 14%;
+  float: left;
 }
 table.list-small:nth-child(2n) {
   margin: 0 14% 30px 1%;
+  float: left;
 }
 
 table.list , table.pvp * {
@@ -95,6 +101,12 @@ table.wide .thead {
   height: 52px;
 }
 
+.small-list-wrapper {
+  margin-top: 30px;
+  overflow: hidden;
+}
+
+
 
 table.list tr:hover td {
     opacity: 1;
@@ -146,6 +158,7 @@ table.pvp .thead th span:hover {
   overflow:initial;
   padding: 0 10px;
   margin: 0;
+  background-color: inherit;
 }
 table.pvp td {
     cursor: pointer;

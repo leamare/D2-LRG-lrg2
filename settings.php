@@ -38,4 +38,5 @@ if(isset($argv)) {
   }
 
   # module-wide functions
+  require_once("modules/mod_versions.php");
 ?>
