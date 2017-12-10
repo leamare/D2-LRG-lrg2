@@ -536,8 +536,8 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
                               });</script></div>";
       }
 
+      $mode = reset($report['modes']);
       if ($report['settings']['overview_modes'] && $mode/$report['random']['matches_total'] < 0.99) {
-        $mode = reset($report['modes']);
         $converted_modes = array();
         foreach ($report['modes'] as $mode => $data) {
           $converted_modes[] = $meta['modes'][$mode];
@@ -556,7 +556,7 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
                               });</script></div>";
       }
 
-      $mode = reset($report['regions']);
+      $mode = reset($regions_matches);
       if ($report['settings']['overview_regions'] && $mode/$report['random']['matches_total'] < 0.99) {
         $region_names = array_keys($regions_matches);
         $colors = array_slice($charts_colors, 0, sizeof($region_names));
@@ -2176,7 +2176,7 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
        -->
       <link rel="shortcut icon" href="/favicon.ico" />
       <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-      <title>League Report</title>
+      <title>LRG<?php if (!empty($leaguetag)) echo " - ".$report['league_name']; ?></title>
       <link href="res/valve_mimic.css" rel="stylesheet" type="text/css" />
       <link href="res/reports.css" rel="stylesheet" type="text/css" />
       <?php
@@ -2245,57 +2245,66 @@ echo $output;
           <h1>League Report Generator</h1>
         </div>
         <div id="main-section" class="content-section">
-          <div id="content-top">
-            <div class="content-header"><?php echo $strings['noleague_cap']; ?></div>
-            <div class="content-text"><?php echo $strings['noleague_desc']; ?></div>
-          </div>
           <?php
-          echo "<table id=\"leagues-list\" class=\"list wide\"><tr class=\"thead\">
-            <th onclick=\"sortTable(0,'leagues-list');\">".$strings['league_name']."</th>
-            <th onclick=\"sortTableNum(1,'leagues-list');\">".$strings['league_id']."</th>
-            <th>".$strings['league_desc']."</th>
-            <th onclick=\"sortTableNum(3,'leagues-list');\">".$strings['matches_total']."</th>
-            <th onclick=\"sortTableValue(4,'leagues-list');\">".$strings['start_date']."</th>,
-            <th onclick=\"sortTableValue(5,'leagues-list');\">".$strings['end_date']."</th></tr>";
           $dir = scandir("reports");
 
-          $reports = array();
+          if (sizeof($dir) < 3) {
+            echo "<div id=\"content-top\">".
+              "<div class=\"content-header\">".$strings['empty_instance_cap']."</div>".
+              "<div class=\"content-text\">".$strings['empty_instance_desc'].".</div>".
+            "</div>";
+          } else {
+            echo "<div id=\"content-top\">".
+              "<div class=\"content-header\">".$strings['noleague_cap']."</div>".
+              "<div class=\"content-text\">".$strings['noleague_desc'].":</div>".
+            "</div>";
 
-          foreach($dir as $report) {
-              if($report[0] == ".")
-                  continue;
-              $name = str_replace("report_", "", $report);
-              $name = str_replace(".json", "", $name);
+            echo "<table id=\"leagues-list\" class=\"list wide\"><tr class=\"thead\">
+              <th onclick=\"sortTable(0,'leagues-list');\">".$strings['league_name']."</th>
+              <th onclick=\"sortTableNum(1,'leagues-list');\">".$strings['league_id']."</th>
+              <th>".$strings['league_desc']."</th>
+              <th onclick=\"sortTableNum(3,'leagues-list');\">".$strings['matches_total']."</th>
+              <th onclick=\"sortTableValue(4,'leagues-list');\">".$strings['start_date']."</th>,
+              <th onclick=\"sortTableValue(5,'leagues-list');\">".$strings['end_date']."</th></tr>";
 
-              $f = fopen("reports/report_".$name.".json","r");
-              $file = fread($f, 700);
+            $reports = array();
 
-              $reports[] = array(
-                "name" => $name,
-                "head" => preg_replace("/{\"league_name\":\"(.+)\"\,\"league_desc\":(.*)/", "$1", $file),
-                "desc" => preg_replace("/{\"league_name\":\"(.+)\"\,\"league_desc\":\"(.+)\",\"league_id\":(.+),\"league_tag\":(.*)/", "$2", $file),
-                "id" => preg_replace("/{\"league_name\":\"(.+)\"\,\"league_desc\":\"(.+)\",\"league_id\":(.+),\"league_tag\":(.*)/", "$3", $file),
-                "std" => (int)preg_replace("/(.*)\"first_match\":\{(.*)\"date\":\"(\d+)\"\},\"last_match\"(.*)/i", "$3 ", $file),
-                "end" => (int)preg_replace("/(.*)\"last_match\":\{(.*)\"date\":\"(\d+)\"\},\"random\"(.*)/i", "$3 ", $file),
-                "total" => (int)preg_replace("/(.*)\"random\":\{(.*)\"matches_total\":\"(\d+)\",\"(.*)/i", "$3 ", $file)
-              );
+            foreach($dir as $report) {
+                if($report[0] == ".")
+                    continue;
+                $name = str_replace("report_", "", $report);
+                $name = str_replace(".json", "", $name);
+
+                $f = fopen("reports/report_".$name.".json","r");
+                $file = fread($f, 700);
+
+                $reports[] = array(
+                  "name" => $name,
+                  "head" => preg_replace("/{\"league_name\":\"(.+)\"\,\"league_desc\":(.*)/", "$1", $file),
+                  "desc" => preg_replace("/{\"league_name\":\"(.+)\"\,\"league_desc\":\"(.+)\",\"league_id\":(.+),\"league_tag\":(.*)/", "$2", $file),
+                  "id" => preg_replace("/{\"league_name\":\"(.+)\"\,\"league_desc\":\"(.+)\",\"league_id\":(.+),\"league_tag\":(.*)/", "$3", $file),
+                  "std" => (int)preg_replace("/(.*)\"first_match\":\{(.*)\"date\":\"(\d+)\"\},\"last_match\"(.*)/i", "$3 ", $file),
+                  "end" => (int)preg_replace("/(.*)\"last_match\":\{(.*)\"date\":\"(\d+)\"\},\"random\"(.*)/i", "$3 ", $file),
+                  "total" => (int)preg_replace("/(.*)\"random\":\{(.*)\"matches_total\":\"(\d+)\",\"(.*)/i", "$3 ", $file)
+                );
+            }
+
+            uasort($reports, function($a, $b) {
+              if($a['std'] == $b['std']) return 0;
+              else return ($a['std'] < $b['std']) ? 1 : -1;
+            });
+
+            foreach($reports as $report) {
+              echo "<tr><td><a href=\"?league=".$report['name'].(empty($linkvars) ? "" : "&".$linkvars)."\">".$report['head']."</a></td>".
+                "<td>".($report['id'] == "null" ? " - " : $report['id'])."</td>".
+                "<td>".$report['desc']."</td>".
+                "<td>".$report['total']."</td>".
+                "<td value=\"".$report['std']."\">".date($strings['date_format'], $report['std'])."</td>".
+                "<td value=\"".$report['end']."\">".date($strings['date_format'], $report['end'])."</td></tr>";
+            }
+
+            echo "</table>";
           }
-
-          uasort($reports, function($a, $b) {
-            if($a['std'] == $b['std']) return 0;
-            else return ($a['std'] < $b['std']) ? 1 : -1;
-          });
-
-          foreach($reports as $report) {
-            echo "<tr><td><a href=\"?league=".$report['name'].(empty($linkvars) ? "" : "&".$linkvars)."\">".$report['head']."</a></td>".
-              "<td>".($report['id'] == "null" ? " - " : $report['id'])."</td>".
-              "<td>".$report['desc']."</td>".
-              "<td>".$report['total']."</td>".
-              "<td value=\"".$report['std']."\">".date($strings['date_format'], $report['std'])."</td>".
-              "<td value=\"".$report['end']."\">".date($strings['date_format'], $report['end'])."</td></tr>";
-          }
-
-          echo "</table>";
           ?>
         </div>
       <?php } ?>

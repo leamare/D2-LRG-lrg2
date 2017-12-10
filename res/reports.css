@@ -81,6 +81,12 @@ table.list-small tr th:first-child {
 table.wide {
   width: 90%;
 }
+table.wide td, table.wide th {
+    padding-left: 15px;
+}
+table.wide tr td {
+    font-size: 16px;
+}
 
 table.list .thead {
     height: 26px;
@@ -203,6 +209,17 @@ table .hero_portrait {
 .match-card, .player-card, .team-card {
   overflow: hidden;
   padding-bottom: 20px;
+  max-height: 500px;
+  transition: all 300ms ease;
+}
+.team-card {
+  max-height: 300px;
+  transition: all 300ms ease;
+  margin-bottom: 20px;
+}
+.team-card:hover {
+  max-height: 4000px;
+  /* TODO any better ideas? */
 }
 .match-card *, .player-card *, .team-card * {
   font-size: inherit;
