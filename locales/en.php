@@ -78,9 +78,6 @@
     "rad_wr" => "Radiant WR",
     "dire_wr" => "Dire WR",
 
-    "core" => "Core",
-    "support" => "Support",
-
     "averages" => "Average values",
     "participants" => "Participants",
 
@@ -90,7 +87,7 @@
     "heroes" => "Heroes",
     "records" => "Records",
     "players" => "Players",
-    "Roster"  => "Active players",
+    "roster"  => "Active players",
 
     "team_name" => "Team Name",
     "team_tag" => "Tag",
@@ -239,6 +236,7 @@
     "desc_tvt" => "This grid represents team's winrate against another team.",
     "desc_participants" => "This page contains all basic data about league participants (players or teams) as cards. To find match with specific player or team use document inner search (usually Ctrl+F).",
     "desc_matches" => "All basic data about matches in this league is available as match cards on this page. To find match with specific team, player, hero or region use document inner search (usually Ctrl+F).",
+    "desc_roster" => "This page contains basic information about the team's active roster.",
 
     "limiter_h" => "Higher limiter",
     "limiter_l" => "Lower limiter",
