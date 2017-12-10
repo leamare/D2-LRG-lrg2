@@ -439,7 +439,7 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
     $modules['overview'] .= "<div class=\"content-header\">".$strings['summary']."</div><div class=\"block-content\">";
     $modules['overview'] .= $strings['over-pregen-report'];
     if ($report['league_id'] == null || $report['league_id'] == "custom")
-      $modules['overview'] .= " ".$strings['over-custom-league']." ".$report['league_name'].") — ".$report['league_desc'].".";
+      $modules['overview'] .= " ".$strings['over-custom-league']." ".$report['league_name']." — ".$report['league_desc'].".";
     else
       $modules['overview'] .= " ".$report['league_name']." (".$report['league_id'].") — ".$report['league_desc'].".";
 
@@ -1994,11 +1994,23 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
 
           if(check_module($parent."team_".$tid."_stats-matches")) {
             $modules['teams']["team_".$tid."_stats"]['matches'] = "<div class=\"content-text\">".$strings['desc_matches']."</div>";
-            $modules['teams']["team_".$tid."_stats"]['matches'] = "<div class=\"content-cards\">";
+            $modules['teams']["team_".$tid."_stats"]['matches'] .= "<div class=\"content-cards\">";
             foreach($report['teams'][$tid]['matches'] as $matchid => $match) {
               $modules['teams']["team_".$tid."_stats"]['matches'] .= match_card($matchid);
             }
             $modules['teams']["team_".$tid."_stats"]['matches'] .= "</div>";
+          }
+        }
+        if (isset($modules['participants'])) {
+          $modules['teams']["team_".$tid."_stats"]['roster'] = "";
+
+          if(check_module($parent."team_".$tid."_stats-roster")) {
+            $modules['teams']["team_".$tid."_stats"]['roster'] = "<div class=\"content-text\">".$strings['desc_roster']."</div>";
+            $modules['teams']["team_".$tid."_stats"]['roster'] .= "<div class=\"content-cards\">";
+            foreach($report['teams'][$tid]['active_roster'] as $player) {
+              $modules['teams']["team_".$tid."_stats"]['roster'] .= player_card($player);
+            }
+            $modules['teams']["team_".$tid."_stats"]['roster'] .= "</div>";
           }
         }
       }
@@ -2199,7 +2211,7 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
       <header class="navBar">
         <!-- these shouldn't be spans, but I was mimicking Valve pro circuit style in everything, so I copied that too. -->
         <span class="navItem dotalogo"><a href="<?php echo $main_path; ?>"></a></span>
-        <span class="navItem"><a href="." title="Dota 2 League Reports">League Reports</a></span>
+        <span class="navItem"><a href=".<?php if(!empty($linkvars)) echo "?".$linkvars; ?>" title="Dota 2 League Reports">League Reports</a></span>
         <?php
           foreach($title_links as $link) {
             echo "<span class=\"navItem\"><a href=\"".$link['link']."\" target=\"_blank\" rel=\"noopener\" title=\"".$link['title']."\">".$link['text']."</a></span>";
