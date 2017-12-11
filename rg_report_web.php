@@ -2,7 +2,7 @@
 require_once("rg_report_out_settings.php");
 require_once("modules/mod_versions.php");
 
-$lg_version = array( 1, 0, 0, 0, getlastmod() );
+$lg_version = array( 1, 0, 3, 0 );
 
 /* FUNCTIONS */  {
   function has_pair($hid, $pairs) {
@@ -2292,8 +2292,8 @@ echo $output;
 
                 $reports[] = array(
                   "name" => $name,
-                  "head" => preg_replace("/{\"league_name\":\"(.+)\"\,\"league_desc\":(.*)/", "$1", $file),
-                  "desc" => preg_replace("/{\"league_name\":\"(.+)\"\,\"league_desc\":\"(.+)\",\"league_id\":(.+),\"league_tag\":(.*)/", "$2", $file),
+                  "head" => array_pop(json_decode("[\"".preg_replace("/{\"league_name\":\"(.+)\"\,\"league_desc\":(.*)/", "$1", $file)."\"]")),
+                  "desc" => array_pop(json_decode("[\"".preg_replace("/{\"league_name\":\"(.+)\"\,\"league_desc\":\"(.+)\",\"league_id\":(.+),\"league_tag\":(.*)/", "$2", $file)."\"]")),
                   "id" => preg_replace("/{\"league_name\":\"(.+)\"\,\"league_desc\":\"(.+)\",\"league_id\":(.+),\"league_tag\":(.*)/", "$3", $file),
                   "std" => (int)preg_replace("/(.*)\"first_match\":\{(.*)\"date\":\"(\d+)\"\},\"last_match\"(.*)/i", "$3 ", $file),
                   "end" => (int)preg_replace("/(.*)\"last_match\":\{(.*)\"date\":\"(\d+)\"\},\"random\"(.*)/i", "$3 ", $file),
