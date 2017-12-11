@@ -28,8 +28,6 @@ function parse_ver($ver) {
     $res .= "-r".$ver[3];
   }
 
-  if($ver[3]) $res .= "-".$ver[4];
-
   return $res;
 }
 
