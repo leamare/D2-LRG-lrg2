@@ -1,0 +1,68 @@
+/* background-color: #192023;*/
+
+#header-image {
+  background-image: url('header_midas.jpg');
+    box-shadow: black 0 0 50px 6px;
+    position: relative;
+}
+
+.content-section {
+    background-image: url('bg_midas.png');
+    background-repeat: repeat;
+}
+
+table.list td, table.pvp td {
+    background-color: #4e1c37;
+}
+
+table.list .thead {
+    background-color: #7e313d !important;
+}
+
+table.pvp tr td:first-child {
+  background-color: #7b2031 !important;
+}
+table.pvp .thead th  {
+  background-color: #7b2031 !important;
+}
+
+
+.section-header h1 {
+	display: none;
+}
+.section-header h2 {
+	color: #e3b641;
+    padding-top: 360px;
+}
+
+.section-header h3 {
+	color: #e3b641;
+}
+
+.content-section .content-header {
+	background-color: #b08633;
+}
+
+
+.modal-content {
+    background-color: #7e313d;
+}
+.modal-text {
+    color: #fff;
+}
+.modal-sublevel {
+    color: #fff;
+    background-color: #b13c70;
+}
+.modal-header {
+    color: #fff;
+    background-color: #4e1c37;
+}
+
+.team-card .team-name, .player-card .player-name {
+  background-color: #7e313d;
+}
+
+.player-card .player-team {
+  background-color: #7b2031;
+}

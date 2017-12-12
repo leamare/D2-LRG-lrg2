@@ -103,6 +103,7 @@ a:hover {
 	background-color: #000000;
 	padding-bottom: 80px;
   overflow: hidden;
+  overflow-x: auto;
 }
 .content-section div:first-child {
   margin-top: 0;

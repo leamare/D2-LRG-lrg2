@@ -7,6 +7,7 @@
     "league_id" => "LID",
     "league_tag" => "League tag",
     "league_desc" => "Description",
+    "leag_reports" => "League Reports",
 
     "random" => "Random stats",
     "notable_matches" => "Notable matches",
