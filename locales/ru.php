@@ -7,6 +7,7 @@
     "league_id" => "LID",
     "league_tag" => "Тег лиги",
     "league_desc" => "Описание",
+    "leag_reports" => "Отчёты по лигам",
 
     "random" => "Прочие данные",
     "notable_matches" => "Примечательные матчи",

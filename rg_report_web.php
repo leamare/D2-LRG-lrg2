@@ -1266,13 +1266,13 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
                                                       "var options={
                                                         physics:{
                                                           barnesHut:{
-                                                            avoidOverlap:0.8,
+                                                            avoidOverlap:0.7,
                                                             centralGravity:0.05,
                                                             springLength:90,
-                                                            springConstant:0.001,
-                                                            gravitationalConstant:-500
+                                                            springConstant:0.005,
+                                                            gravitationalConstant:-200
                                                           },
-                                                          timestep: 0.01
+                                                          timestep: 0.05,
                                                         }, nodes: {
                                                            shape: 'dot',
                                                            font: {color:'#ccc',size:14},
@@ -2197,11 +2197,11 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
             else if(isset($report['settings']['custom_style']) && file_exists("res/custom_styles/".$report['settings']['custom_style'].".css"))
                 echo "<link href=\"res/custom_styles/".$report['settings']['custom_style'].".css\" rel=\"stylesheet\" type=\"text/css\" />";
             if($use_graphjs) {
-              echo "<script type=\"text/javascript\" src=\"https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.bundle.min.js\"></script>";
+              echo "<script type=\"text/javascript\" src=\"res/dependencies/Chart.bundle.min.js\"></script>";
             }
             if($use_visjs) {
-              echo "<script type=\"text/javascript\" src=\"http://visjs.org/dist/vis.js\"></script>";
-              echo "<link href=\"http://visjs.org/dist/vis-network.min.css\" rel=\"stylesheet\" type=\"text/css\" />";
+              echo "<script type=\"text/javascript\" src=\"res/dependencies/vis.js\"></script>";
+              echo "<link href=\"res/dependencies/vis-network.min.css\" rel=\"stylesheet\" type=\"text/css\" />";
             }
 
        if (!empty($custom_head)) echo $custom_head; ?>
@@ -2211,7 +2211,7 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
       <header class="navBar">
         <!-- these shouldn't be spans, but I was mimicking Valve pro circuit style in everything, so I copied that too. -->
         <span class="navItem dotalogo"><a href="<?php echo $main_path; ?>"></a></span>
-        <span class="navItem"><a href=".<?php if(!empty($linkvars)) echo "?".$linkvars; ?>" title="Dota 2 League Reports">League Reports</a></span>
+        <span class="navItem"><a href=".<?php if(!empty($linkvars)) echo "?".$linkvars; ?>" title="Dota 2 League Reports"><?php echo $strings['leag_reports']?></a></span>
         <?php
           foreach($title_links as $link) {
             echo "<span class=\"navItem\"><a href=\"".$link['link']."\" target=\"_blank\" rel=\"noopener\" title=\"".$link['title']."\">".$link['text']."</a></span>";
@@ -2222,7 +2222,8 @@ $charts_colors = array( "#6af","#f66","#fa6","#6f6","#66f","#6fa","#a6f","#62f",
             echo '<div class="share-link reddit"><a href="http://www.reddit.com/submit?url='.htmlspecialchars('http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'].
               (empty($_SERVER['QUERY_STRING']) ? "" : '?'.$_SERVER['QUERY_STRING'])
             ).'" target="_blank" rel="noopener">Share on Reddit</a></div>';
-            echo '<div class="share-link twitter"><a href="http://twitter.com/share?text=League Report: '.$leaguetag.' - '.htmlspecialchars('http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'].
+            echo '<div class="share-link twitter"><a href="http://twitter.com/share?text=League '.
+            htmlspecialchars('Report: '.$leaguetag.' - http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'].
               (empty($_SERVER['QUERY_STRING']) ? "" : '?'.$_SERVER['QUERY_STRING'])
             ).'" target="_blank" rel="noopener">Share on Twitter</a></div>';
             echo '<div class="share-link vk"><a href="https://vk.com/share.php?url='.htmlspecialchars('http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'].
@@ -2276,7 +2277,7 @@ echo $output;
               <th onclick=\"sortTableNum(1,'leagues-list');\">".$strings['league_id']."</th>
               <th>".$strings['league_desc']."</th>
               <th onclick=\"sortTableNum(3,'leagues-list');\">".$strings['matches_total']."</th>
-              <th onclick=\"sortTableValue(4,'leagues-list');\">".$strings['start_date']."</th>,
+              <th onclick=\"sortTableValue(4,'leagues-list');\">".$strings['start_date']."</th>
               <th onclick=\"sortTableValue(5,'leagues-list');\">".$strings['end_date']."</th></tr>";
 
             $reports = array();
