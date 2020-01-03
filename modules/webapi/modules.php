@@ -22,7 +22,7 @@ if (isset($report)) {
   // hvh
   // haverages
 
-  $endpoints['fallback'] = function() use (&$endpoints) {
+  $endpoints['__fallback'] = function() use (&$endpoints) {
     return $endpoints['overview'];
   };
 } else {
@@ -47,7 +47,7 @@ foreach ($modline as $ml) {
   if (strpos($ml, "team") && $ml != "teams") $vars['team'] = (int)str_replace("team", "", $ml);
 }
 if (empty($endp))
-  $endp = $endpoints['fallback']();
+  $endp = $endpoints['__fallback']();
 
 try {
   $result = $endp($modline, $vars, $report);
