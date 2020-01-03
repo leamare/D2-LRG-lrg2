@@ -13,7 +13,7 @@ include_once("modules/view/functions/modules.php");
 
 include_once("modules/webapi/functions/player_card.php");
 include_once("modules/webapi/functions/team_card.php");
-// FIXME: include_once("modules/view/functions/match_card.php");
+include_once("modules/webapi/functions/match_card.php");
 
 include_once("modules/view/functions/join_selectors.php");
 include_once("modules/view/functions/links.php");
