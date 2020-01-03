@@ -11,8 +11,8 @@ include_once("modules/commons/metadata.php");
 # FUNCTIONS
 include_once("modules/view/functions/modules.php");
 
-// FIXME: include_once("modules/webapi/functions/player_card.php");
-// FIXME: include_once("modules/view/functions/team_card.php");
+include_once("modules/webapi/functions/player_card.php");
+include_once("modules/webapi/functions/team_card.php");
 // FIXME: include_once("modules/view/functions/match_card.php");
 
 include_once("modules/view/functions/join_selectors.php");

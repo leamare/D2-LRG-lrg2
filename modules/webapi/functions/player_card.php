@@ -1,4 +1,5 @@
 <?php
+
 function player_card($player_id) {
   global $report;
   $pname = player_name($player_id);
@@ -50,4 +51,3 @@ function player_card($player_id) {
 
   return $player;
 }
-?>
