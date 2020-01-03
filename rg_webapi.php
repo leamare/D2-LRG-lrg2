@@ -32,11 +32,16 @@ include_once("modules/view/__preset.php");
 
 $root = dirname(__FILE__);
 
-$linkvars = [];
+if(isset($_GET['mod'])) $mod = strtolower($_GET['mod']);
+else $mod = "";
 
-for($i=0,$sz=sizeof($linkvars); $i<$sz; $i++)
-  $linkvars[$i] = implode($linkvars[$i], "=");
-$linkvars = implode($linkvars, "&");
+if(isset($_GET['cat']) && !empty($_GET['cat'])) {
+  $cat = $_GET['cat'];
+}
+
+if(isset($_GET['league']) && !empty($_GET['league'])) {
+  $leaguetag = $_GET['league'];
+} else $leaguetag = "";
 
 if (!empty($leaguetag)) {
   if(file_exists($reports_dir."/".$report_mask_search[0].$leaguetag.$report_mask_search[1])) {
