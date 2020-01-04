@@ -8,9 +8,9 @@ if (isset($report)) {
 
   if(empty($mod)) $mod = "";
 
-  // records
-  // participants
-  // matches
+  include_once(__DIR__ . "modules/records.php");
+  include_once(__DIR__ . "modules/participants.php");
+  // matches list/cards
   // overview
   // combos
   // pickban
@@ -21,6 +21,8 @@ if (isset($report)) {
   // pvp
   // hvh
   // haverages
+  // teams-cards
+  // teams-t123-roster
 
   $endpoints['__fallback'] = function() use (&$endpoints) {
     return $endpoints['overview'];
@@ -29,9 +31,11 @@ if (isset($report)) {
   // basic response
   // list of matches + category
   // metadata
+  // locale
   // cache
 }
 
+$mod = str_replace("/", "-", $mod);
 $modline = array_reverse(explode("-", $mod));
 $vars = [];
 
