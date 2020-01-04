@@ -10,7 +10,7 @@ if (isset($report)) {
 
   include_once(__DIR__ . "modules/records.php");
   include_once(__DIR__ . "modules/participants.php");
-  // matches list/cards
+  include_once(__DIR__ . "modules/matches.php");
   // overview
   // combos
   // pickban
