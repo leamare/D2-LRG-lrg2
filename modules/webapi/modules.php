@@ -8,11 +8,11 @@ if (isset($report)) {
 
   if(empty($mod)) $mod = "";
 
+  // overview
   include_once(__DIR__ . "modules/records.php");
   include_once(__DIR__ . "modules/participants.php");
   include_once(__DIR__ . "modules/matches.php");
-  // overview
-  // combos
+  include_once(__DIR__ . "modules/combos.php");
   // pickban
   // draft
   // positions
