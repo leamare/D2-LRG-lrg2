@@ -1,6 +1,6 @@
 <?php 
 
-$endpoints['neta_graph'] = function($mods, $vars, &$report) {
+$endpoints['meta_graph'] = function($mods, $vars, &$report) {
   if (isset($vars['team'])) {
     $context =& $report['teams'][ $vars['team'] ];
   } else if (isset($vars['region'])) {
@@ -19,6 +19,14 @@ $endpoints['neta_graph'] = function($mods, $vars, &$report) {
   $limiter = $context['settings']['limiter_graph']
       ?? $context['settings']['limiter_combograph']
       ?? ceil($report['settings']['limiter_triplets'] * $context['matches_total'] / $report['random']['matches_total']);
+
+  $max_wr = 0; $max_games = 0;
+  foreach($pairs as $combo) {
+    $diff = abs(($combo['winrate'] ?? $combo['wins']/$combo['matches'])-0.5);
+    $max_wr = $diff > $max_wr ? $diff : $max_wr;
+    $max_games = $combo['matches'] > $max_games ? $combo['matches'] : $max_games;
+  }
+  $max_wr *= 2;
 
   foreach($context_pickban as $k => $v) {
     if(isset($v['winrate_picked'])) break;
@@ -43,7 +51,7 @@ $endpoints['neta_graph'] = function($mods, $vars, &$report) {
 
   $nodes = [];
   foreach($context_pickban as $elid => $el) {
-    if($counter++ >= $endp && !has_pair($elid, $context)) {
+    if($counter++ >= $endp && !has_pair($elid, $pairs)) {
         continue;
     }
     $nodes[] = [
@@ -56,6 +64,8 @@ $endpoints['neta_graph'] = function($mods, $vars, &$report) {
 
   $res = [
     "limiter" => $limiter,
+    "max_wr" => $max_wr,
+    "max_games" => $max_games,
     "nodes" => $nodes,
     "pairs" => $pairs
   ];

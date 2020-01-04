@@ -14,10 +14,10 @@ if (isset($report)) {
   include_once(__DIR__ . "/modules/matches.php");
   include_once(__DIR__ . "/modules/combos.php");
   include_once(__DIR__ . "/modules/meta_graph.php");
+  include_once(__DIR__ . "/modules/party_graph.php");
   // pickban
   // draft
   // positions
-  // party_graph
   // pvp
   // hvh
   // haverages
