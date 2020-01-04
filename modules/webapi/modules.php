@@ -9,20 +9,22 @@ if (isset($report)) {
   if(empty($mod)) $mod = "";
 
   // overview
-  include_once(__DIR__ . "modules/records.php");
-  include_once(__DIR__ . "modules/participants.php");
-  include_once(__DIR__ . "modules/matches.php");
-  include_once(__DIR__ . "modules/combos.php");
+  include_once(__DIR__ . "/modules/records.php");
+  include_once(__DIR__ . "/modules/participants.php");
+  include_once(__DIR__ . "/modules/matches.php");
+  include_once(__DIR__ . "/modules/combos.php");
+  include_once(__DIR__ . "/modules/meta_graph.php");
   // pickban
   // draft
   // positions
   // party_graph
-  // meta_graph
   // pvp
   // hvh
   // haverages
   // teams-cards
   // teams-t123-roster
+
+  // raw
 
   $endpoints['__fallback'] = function() use (&$endpoints) {
     return $endpoints['overview'];
@@ -33,6 +35,7 @@ if (isset($report)) {
   // metadata
   // locale
   // cache
+  // dw
 }
 
 $mod = str_replace("/", "-", $mod);
