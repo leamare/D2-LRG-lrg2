@@ -10,6 +10,7 @@ if (isset($report)) {
 
   // overview
   include_once(__DIR__ . "/modules/records.php");
+  include_once(__DIR__ . "/modules/haverages.php");
   include_once(__DIR__ . "/modules/participants.php");
   include_once(__DIR__ . "/modules/matches.php");
   include_once(__DIR__ . "/modules/combos.php");
@@ -20,7 +21,7 @@ if (isset($report)) {
   // positions
   // pvp
   // hvh
-  // haverages
+
   // teams-cards
   // teams-t123-roster
 
