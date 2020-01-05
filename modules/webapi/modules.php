@@ -20,7 +20,7 @@ if (isset($report)) {
   // draft
   // positions
   // pvp
-  // hvh
+  include_once(__DIR__ . "/modules/hvh.php");
 
   // teams-cards
   // teams-t123-roster

@@ -25,6 +25,8 @@ include_once("modules/view/functions/hero_name.php");
 
 include_once("modules/view/functions/has_pair.php");
 
+include_once("modules/view/generators/pvp_unwrap_data.php");
+
 # PRESETS
 include_once("modules/view/__preset.php");
 
