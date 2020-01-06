@@ -16,7 +16,7 @@ if (isset($report)) {
   include_once(__DIR__ . "/modules/combos.php");
   include_once(__DIR__ . "/modules/meta_graph.php");
   include_once(__DIR__ . "/modules/party_graph.php");
-  // pickban
+  include_once(__DIR__ . "/modules/pickban.php");
   // draft
   // positions
   include_once(__DIR__ . "/modules/pvp.php");
