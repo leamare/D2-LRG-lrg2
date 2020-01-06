@@ -19,7 +19,7 @@ if (isset($report)) {
   // pickban
   // draft
   // positions
-  // pvp
+  include_once(__DIR__ . "/modules/pvp.php");
   include_once(__DIR__ . "/modules/hvh.php");
 
   // teams-cards
