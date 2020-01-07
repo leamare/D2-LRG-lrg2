@@ -39,10 +39,10 @@ if (isset($report)) {
   include_once(__DIR__ . "/modules/metadata.php");
   include_once(__DIR__ . "/modules/locales.php");
   // TODO: cache
-  // TODO: dw full report
+  include_once(__DIR__ . "/modules/raw.php");
 }
 
-$mod = str_replace("/", "-", $mod);
+$mod = strtolower(str_replace("/", "-", $mod));
 $modline = array_reverse(explode("-", $mod));
 $vars = [];
 
@@ -56,8 +56,8 @@ foreach ($modline as $ml) {
   if (strpos($ml, "heroid")) $vars['heroid'] = (int)str_replace("heroid", "", $ml);
   if (strpos($ml, "playerid")) $vars['playerid'] = (int)str_replace("playerid", "", $ml);
   if (strpos($ml, "team") && $ml != "teams") $vars['team'] = (int)str_replace("team", "", $ml);
-  if (isset($_GET['gets'])) $vars['gets'] = explode(",", $_GET['gets']);
-  if (isset($_GET['rep'])) $vars['rep'] = $_GET['rep'];
+  if (isset($_GET['gets'])) $vars['gets'] = explode(",", strtolower($_GET['gets']));
+  if (isset($_GET['rep'])) $vars['rep'] = strtolower($_GET['rep']);
 }
 if (empty($endp))
   $endp = $endpoints['__fallback']();
