@@ -18,6 +18,7 @@ if (isset($report)) {
   include_once(__DIR__ . "/modules/party_graph.php");
   include_once(__DIR__ . "/modules/pickban.php");
   include_once(__DIR__ . "/modules/draft.php");
+  include_once(__DIR__ . "/modules/vsdraft.php");
   include_once(__DIR__ . "/modules/positions.php");
   include_once(__DIR__ . "/modules/positions_matches.php");
   include_once(__DIR__ . "/modules/pvp.php");
@@ -27,7 +28,7 @@ if (isset($report)) {
   include_once(__DIR__ . "/modules/teams_raw.php");
   // TODO: teams-cards
   // TODO: teams-t123-roster
-  // vsdraft
+  include_once(__DIR__ . "/modules/roster.php");
 
   $endpoints['__fallback'] = function() use (&$endpoints) {
     return $endpoints['overview'];
