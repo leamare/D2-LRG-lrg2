@@ -38,7 +38,7 @@ if (isset($report)) {
   // TODO: list of reports + category
   include_once(__DIR__ . "/modules/metadata.php");
   include_once(__DIR__ . "/modules/locales.php");
-  // TODO: cache
+  include_once(__DIR__ . "/modules/getcache.php");
   include_once(__DIR__ . "/modules/raw.php");
 }
 
