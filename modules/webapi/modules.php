@@ -36,8 +36,8 @@ if (isset($report)) {
 } else {
   // TODO: fallback basic response
   // TODO: list of reports + category
-  // TODO: metadata
-  // TODO: locale
+  include_once(__DIR__ . "/modules/metadata.php");
+  include_once(__DIR__ . "/modules/locales.php");
   // TODO: cache
   // TODO: dw full report
 }
