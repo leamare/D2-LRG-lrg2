@@ -26,7 +26,7 @@ if (isset($report)) {
   include_once(__DIR__ . "/modules/summary.php");
   include_once(__DIR__ . "/modules/matchcards.php");
   include_once(__DIR__ . "/modules/teams_raw.php");
-  // TODO: teams-cards
+  include_once(__DIR__ . "/modules/teams.php");
   include_once(__DIR__ . "/modules/roster.php");
 
   $endpoints['__fallback'] = function() use (&$endpoints) {
