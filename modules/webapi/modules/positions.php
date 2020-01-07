@@ -8,13 +8,13 @@ $endpoints['positions'] = function($mods, $vars, &$report) {
 
   // positions context
   if (isset($vars['team'])) {
-    $context = $report['teams'][ $vars['team'] ][$type.'hero_positions'];
+    $context =& $report['teams'][ $vars['team'] ][$type.'hero_positions'];
     $context_total_matches = $report['teams'][ $vars['team'] ]['matches_total'];
   } else if (isset($vars['region'])) {
-    $context = $report['regions_data'][ $vars['region'] ][$type.'_positions'];
+    $context =& $report['regions_data'][ $vars['region'] ][$type.'_positions'];
     $context_total_matches = $report['regions_data'][ $vars['region'] ]['main']["matches_total"];
   } else {
-    $context = $report[$type.'_positions'];
+    $context =& $report[$type.'_positions'];
     $context_total_matches = $report["random"]["matches_total"];
   }
 

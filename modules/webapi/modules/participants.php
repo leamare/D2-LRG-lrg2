@@ -11,15 +11,15 @@ $endpoints['participants'] = function($mods, $vars, &$report) {
 
   if (isset($vars['region'])) {
     if ($teams) {
-      $context = $report['regions_data'][ $vars['region'] ]['teams'];
+      $context =& $report['regions_data'][ $vars['region'] ]['teams'];
     } else {
-      $context = $report['regions_data'][ $vars['region'] ]['players_summary'];
+      $context =& $report['regions_data'][ $vars['region'] ]['players_summary'];
     }
   } else {
     if ($teams) {
-      $context = $report['teams'];
+      $context =& $report['teams'];
     } else {
-      $context = $report['players'];
+      $context =& $report['players'];
     }
   }
 

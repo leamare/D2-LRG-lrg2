@@ -4,11 +4,11 @@ $endpoints['matches'] = function($mods, $vars, &$report) {
   $res = [];
 
   if (isset($vars['team'])) {
-    $context = $report['teams'][ $vars['team'] ]['matches'];
+    $context =& $report['teams'][ $vars['team'] ]['matches'];
   } else if (isset($vars['region'])) {
-    $context = $report['regions_data'][ $vars['region'] ]['matches'];
+    $context =& $report['regions_data'][ $vars['region'] ]['matches'];
   } else {
-    $context = $report['matches'];
+    $context =& $report['matches'];
   }
 
   $res['matches'] = [];

@@ -22,12 +22,11 @@ if (isset($report)) {
   include_once(__DIR__ . "/modules/positions_matches.php");
   include_once(__DIR__ . "/modules/pvp.php");
   include_once(__DIR__ . "/modules/hvh.php");
-  // TODO: summary
+  include_once(__DIR__ . "/modules/summary.php");
   include_once(__DIR__ . "/modules/matchcards.php");
 
   // TODO: teams-cards
   // TODO: teams-raw
-  // TODO: teams-summary
   // TODO: teams-t123-roster
 
   $endpoints['__fallback'] = function() use (&$endpoints) {

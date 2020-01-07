@@ -8,11 +8,11 @@ $endpoints['positions_matches'] = function($mods, $vars, &$report) {
 
   // positions context
   if (isset($vars['team'])) {
-    $context = $report['teams'][ $vars['team'] ][$type.'hero_positions_matches'];
+    $context =& $report['teams'][ $vars['team'] ][$type.'hero_positions_matches'];
   } else if (isset($vars['region'])) {
-    $context = $report['regions_data'][ $vars['region'] ][$type.'_positions_matches'];
+    $context =& $report['regions_data'][ $vars['region'] ][$type.'_positions_matches'];
   } else {
-    $context = $report[$type.'_positions'];
+    $context =& $report[$type.'_positions'];
   }
 
   if (!isset($vars[$type.'id']))
