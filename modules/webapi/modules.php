@@ -18,7 +18,8 @@ if (isset($report)) {
   include_once(__DIR__ . "/modules/party_graph.php");
   include_once(__DIR__ . "/modules/pickban.php");
   include_once(__DIR__ . "/modules/draft.php");
-  // positions
+  include_once(__DIR__ . "/modules/positions.php");
+  // positions_matches
   include_once(__DIR__ . "/modules/pvp.php");
   include_once(__DIR__ . "/modules/hvh.php");
 
@@ -32,7 +33,7 @@ if (isset($report)) {
   };
 } else {
   // basic response
-  // list of matches + category
+  // list of reports + category
   // metadata
   // locale
   // cache
@@ -53,6 +54,8 @@ foreach ($modline as $ml) {
   if (strpos($ml, "heroid")) $vars['heroid'] = (int)str_replace("heroid", "", $ml);
   if (strpos($ml, "playerid")) $vars['playerid'] = (int)str_replace("playerid", "", $ml);
   if (strpos($ml, "team") && $ml != "teams") $vars['team'] = (int)str_replace("team", "", $ml);
+  if (isset($_GET['gets'])) $vars['gets'] = explode(",", $_GET['gets']);
+  if (isset($_GET['rep'])) $vars['rep'] = $_GET['rep'];
 }
 if (empty($endp))
   $endp = $endpoints['__fallback']();
@@ -72,7 +75,7 @@ header('Access-Control-Allow-Methods: GET, POST');
 header('Access-Control-Allow-Headers: token, Content-Type');
 
 
-echo json_encode($response, (isset($_REQUEST['pretty']) ? JSON_PRETTY_PRINT : 0) 
+echo json_encode($result, (isset($_REQUEST['pretty']) ? JSON_PRETTY_PRINT : 0) 
   | JSON_INVALID_UTF8_SUBSTITUTE 
   | JSON_UNESCAPED_UNICODE
   //| JSON_THROW_ON_ERROR
