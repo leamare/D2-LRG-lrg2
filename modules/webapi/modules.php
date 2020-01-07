@@ -23,7 +23,7 @@ if (isset($report)) {
   include_once(__DIR__ . "/modules/pvp.php");
   include_once(__DIR__ . "/modules/hvh.php");
   // TODO: summary
-  // TODO: matchcards
+  include_once(__DIR__ . "/modules/matchcards.php");
 
   // TODO: teams-cards
   // TODO: teams-raw
@@ -63,7 +63,7 @@ if (empty($endp))
   $endp = $endpoints['__fallback']();
 
 try {
-  $result = $endp($modline, $vars, $report);
+  $result = $endp($modline, $vars, $report ?? []);
 } catch (\Throwable $e) {
   $result = [
     'error' => $e->getMessage()
