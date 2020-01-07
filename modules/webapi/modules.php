@@ -8,7 +8,7 @@ if (isset($report)) {
 
   if(empty($mod)) $mod = "";
 
-  // overview
+  include_once(__DIR__ . "/modules/overview.php");
   include_once(__DIR__ . "/modules/records.php");
   include_once(__DIR__ . "/modules/haverages.php");
   include_once(__DIR__ . "/modules/participants.php");
@@ -22,22 +22,24 @@ if (isset($report)) {
   include_once(__DIR__ . "/modules/positions_matches.php");
   include_once(__DIR__ . "/modules/pvp.php");
   include_once(__DIR__ . "/modules/hvh.php");
+  // TODO: summary
+  // TODO: matchcards
 
-  // teams-cards
-  // teams-t123-roster
-
-  // raw
+  // TODO: teams-cards
+  // TODO: teams-raw
+  // TODO: teams-summary
+  // TODO: teams-t123-roster
 
   $endpoints['__fallback'] = function() use (&$endpoints) {
     return $endpoints['overview'];
   };
 } else {
-  // basic response
-  // list of reports + category
-  // metadata
-  // locale
-  // cache
-  // dw
+  // TODO: fallback basic response
+  // TODO: list of reports + category
+  // TODO: metadata
+  // TODO: locale
+  // TODO: cache
+  // TODO: dw full report
 }
 
 $mod = str_replace("/", "-", $mod);
