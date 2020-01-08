@@ -33,12 +33,15 @@ if (isset($report)) {
     return $endpoints['overview'];
   };
 } else {
-  // TODO: fallback basic response
-  // TODO: list of reports + category
+  include_once(__DIR__ . "/modules/list.php");
   include_once(__DIR__ . "/modules/metadata.php");
   include_once(__DIR__ . "/modules/locales.php");
   include_once(__DIR__ . "/modules/getcache.php");
   include_once(__DIR__ . "/modules/raw.php");
+
+  $endpoints['__fallback'] = function() use (&$endpoints) {
+    return $endpoints['list'];
+  };
 }
 
 $mod = strtolower(str_replace("/", "-", $mod));
@@ -57,6 +60,7 @@ foreach ($modline as $ml) {
   if (strpos($ml, "team") && $ml != "teams") $vars['team'] = (int)str_replace("team", "", $ml);
   if (isset($_GET['gets'])) $vars['gets'] = explode(",", strtolower($_GET['gets']));
   if (isset($_GET['rep'])) $vars['rep'] = strtolower($_GET['rep']);
+  //if(isset($_GET['cat']) && !empty($_GET['cat'])) $vars['cat'] = $_GET['cat'];
 }
 if (empty($endp))
   $endp = $endpoints['__fallback']();

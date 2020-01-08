@@ -24,6 +24,7 @@ include_once("modules/view/functions/player_name.php");
 include_once("modules/view/functions/hero_name.php");
 
 include_once("modules/view/functions/has_pair.php");
+include_once("modules/view/functions/check_filters.php");
 
 include_once("modules/view/generators/pvp_unwrap_data.php");
 
@@ -39,7 +40,7 @@ else $mod = "";
 
 if(isset($_GET['cat']) && !empty($_GET['cat'])) {
   $cat = $_GET['cat'];
-}
+} else $cat = null;
 
 if(isset($_GET['league']) && !empty($_GET['league'])) {
   $leaguetag = $_GET['league'];
