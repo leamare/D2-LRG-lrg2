@@ -1,5 +1,7 @@
 <?php 
 
+include_once(__DIR__ . "/../../view/functions/ranking.php");
+
 function rgapi_generator_pickban_overview($context, $context_total_matches, $limiter = 10, $heroes_flag = true) {
   $compound_ranking_sort = function($a, $b) use ($context_total_matches) {
     return compound_ranking_sort($a, $b, $context_total_matches);

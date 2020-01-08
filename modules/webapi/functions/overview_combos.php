@@ -1,6 +1,6 @@
 <?php 
 
-function rgapi_generator_overview_combos($table_id, $caption, $context, $limiter = 10, $heroes_flag = true) {
+function rgapi_generator_overview_combos($context, $limiter = 10, $heroes_flag = true) {
   if(empty($context)) return [];
 
   # Figuring out what kind of context we have here

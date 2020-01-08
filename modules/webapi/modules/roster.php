@@ -1,9 +1,9 @@
 <?php 
 
 $endpoints['roster'] = function($mods, $vars, &$report) {
-  if (isset($vars['teamid']) && isset($report['teams'][ $vars['teamid'] ])) {
+  if (isset($vars['team']) && isset($report['teams'][ $vars['team'] ])) {
     $res = [];
-    foreach($report['teams'][ $vars['teamid'] ]['active_roster'] as $player) {
+    foreach($report['teams'][ $vars['team'] ]['active_roster'] as $player) {
       $res[] = player_card($player);
     }
     return $res;

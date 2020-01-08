@@ -19,10 +19,6 @@ include_once("modules/view/functions/join_selectors.php");
 include_once("modules/view/functions/links.php");
 include_once("modules/view/functions/join_matches.php");
 
-include_once("modules/view/functions/team_name.php");
-include_once("modules/view/functions/player_name.php");
-include_once("modules/view/functions/hero_name.php");
-
 include_once("modules/view/functions/has_pair.php");
 include_once("modules/view/functions/check_filters.php");
 
@@ -60,5 +56,10 @@ if (!empty($leaguetag)) {
       $report = json_decode($report, true);
     } else $leaguetag = "";
   }
-}
+} else $report = [];
 
+include_once("modules/view/functions/team_name.php");
+include_once("modules/view/functions/player_name.php");
+include_once("modules/view/functions/hero_name.php");
+
+include_once(__DIR__ . "/modules/webapi/modules.php");

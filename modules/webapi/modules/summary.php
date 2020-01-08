@@ -10,7 +10,7 @@ $endpoints['summary'] = function($mods, $vars, &$report) {
   }
 
   if (in_array("teams", $mods)) {
-    $context_k = array_keys($context);
+    $context_k = array_keys($context['teams']);
     foreach($context_k as $team_id) {
       if (isset($report['teams_interest']) && !in_array($team_id, $report['teams_interest'])) continue;
       $t = [

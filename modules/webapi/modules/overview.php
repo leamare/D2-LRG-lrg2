@@ -46,8 +46,9 @@ $endpoints['overview'] = function($mods, $vars, &$report) use (&$meta, &$endpoin
 
   if(isset($context['regions'])) {
     $regions_matches = [];
+    $meta['clusters'];
     foreach ($context['regions'] as $mode => $data) {
-      $region = $meta['regions'][ $meta['clusters'][$mode] ];
+      $region = $meta['clusters'][$mode] ?? 0;
       if(isset($regions_matches[$region])) $regions_matches[$region] += $data;
       else $regions_matches[$region] = $data;
     }
@@ -59,7 +60,7 @@ $endpoints['overview'] = function($mods, $vars, &$report) use (&$meta, &$endpoin
     if(isset($context['first_match']))
       $res['first_match'] = match_card($context['first_match']['mid']);
     if(isset($context['last_match']))
-      $res['last_match'] = match_card($context['last_matches']['mid']);
+      $res['last_match'] = match_card($context['last_match']['mid']);
   }
 
   if($context['settings']['overview_last_match_winners'] || !isset($context['settings'])) {
@@ -203,7 +204,9 @@ $endpoints['overview'] = function($mods, $vars, &$report) use (&$meta, &$endpoin
   }
 
   if(isset($context['teams']) && $report['settings']['overview_teams_summary_short']) {
-    $res['teams_summary'] = $endpoints['teams_summary']($mods, $vars, $report);
+    $mods_cpy = $mods;
+    $mods_cpy[] = "teams";
+    $res['teams_summary'] = $endpoints['summary']($mods_cpy, $vars, $report);
   }
 
   // heroes stats

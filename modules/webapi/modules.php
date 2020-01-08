@@ -3,8 +3,8 @@
 $meta = new lrg_metadata;
 $endpoints = [];
 
-if (isset($report)) {
-  include_once("modules/view/__post_load.php");
+if (!empty($report)) {
+  include_once(__DIR__ . "/../../modules/view/__post_load.php");
 
   if(empty($mod)) $mod = "";
 
@@ -44,34 +44,37 @@ if (isset($report)) {
   };
 }
 
-$mod = strtolower(str_replace("/", "-", $mod));
+$mod = str_replace("/", "-", $mod);
 $modline = array_reverse(explode("-", $mod));
 $vars = [];
 
 foreach ($modline as $ml) {
-  if (!isset($endp) && isset($endpoints[$ml])) {
-    $endp = $endpoints[$ml];
-    break;
+  if (!isset($endp_name) && isset($endpoints[$ml])) {
+    $endp_name = $ml;
   }
-  if (strpos($ml, "region") && $ml != "regions") $vars['region'] = (int)str_replace("region", "", $ml);
-  if (strpos($ml, "position_")) $vars['position'] = str_replace("position_", "", $ml);
-  if (strpos($ml, "heroid")) $vars['heroid'] = (int)str_replace("heroid", "", $ml);
-  if (strpos($ml, "playerid")) $vars['playerid'] = (int)str_replace("playerid", "", $ml);
-  if (strpos($ml, "team") && $ml != "teams") $vars['team'] = (int)str_replace("team", "", $ml);
-  if (isset($_GET['gets'])) $vars['gets'] = explode(",", strtolower($_GET['gets']));
-  if (isset($_GET['rep'])) $vars['rep'] = strtolower($_GET['rep']);
-  //if(isset($_GET['cat']) && !empty($_GET['cat'])) $vars['cat'] = $_GET['cat'];
+  if (strpos($ml, "region") !== FALSE && $ml != "regions") $vars['region'] = (int)str_replace("region", "", $ml);
+  if (strpos($ml, "position_") !== FALSE) $vars['position'] = str_replace("position_", "", $ml);
+  if (strpos($ml, "heroid") !== FALSE) $vars['heroid'] = (int)str_replace("heroid", "", $ml);
+  if (strpos($ml, "playerid") !== FALSE) $vars['playerid'] = (int)str_replace("playerid", "", $ml);
+  if (strpos($ml, "team") !== FALSE && $ml != "teams") $vars['team'] = (int)str_replace("team", "", $ml);
+  if (strpos($ml, "teamid") !== FALSE) $vars['team'] = (int)str_replace("teamid", "", $ml);
+  //if (isset($vars['team'])) $vars['teamid'] = $vars['team']; 
 }
-if (empty($endp))
-  $endp = $endpoints['__fallback']();
+if (isset($_GET['gets'])) $vars['gets'] = explode(",", strtolower($_GET['gets']));
+if (isset($_GET['rep'])) $vars['rep'] = strtolower($_GET['rep']);
+if(isset($_GET['cat']) && !empty($_GET['cat'])) $vars['cat'] = $_GET['cat'];
 
-try {
-  $result = $endp($modline, $vars, $report ?? []);
-} catch (\Throwable $e) {
-  $result = [
-    'error' => $e->getMessage()
-  ];
-}
+if (empty($endp_name)) {
+  $endp = $endpoints['__fallback']();
+  $endp_name = array_search($endp, $endpoints);
+} else $endp = $endpoints[$endp_name];
+// try {
+  $result = $endp($modline, $vars, $report);
+// } catch (\Throwable $e) {
+//   $result = [
+//     'error' => $e->getMessage()
+//   ];
+// }
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
@@ -79,8 +82,15 @@ header('Access-Control-Allow-Methods: GET, POST');
 //header("Access-Control-Allow-Headers: X-Requested-With");
 header('Access-Control-Allow-Headers: token, Content-Type');
 
+$response = [
+  "modline" => $mod,
+  "vars" => $vars,
+  "endpoint" => $endp_name,
+  "version" => parse_ver($lg_version),
+  "result" => $result,
+];
 
-echo json_encode($result, (isset($_REQUEST['pretty']) ? JSON_PRETTY_PRINT : 0) 
+echo json_encode($response, (isset($_REQUEST['pretty']) ? JSON_PRETTY_PRINT : 0) 
   | JSON_INVALID_UTF8_SUBSTITUTE 
   | JSON_UNESCAPED_UNICODE
   //| JSON_THROW_ON_ERROR

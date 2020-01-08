@@ -1,6 +1,6 @@
 <?php 
 
-function rgapi_generator_overview_positions_section($tables_prefix, $context, &$pickban, $count = 5, $sort_param = "matches") {
+function rgapi_generator_overview_positions_section($context, &$pickban, $count = 5, $sort_param = "matches") {
   if(!sizeof($context)) return "";
 
   for ($i=1; $i>=0 && !isset($keys); $i--) {

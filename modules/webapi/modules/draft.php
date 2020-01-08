@@ -2,33 +2,42 @@
 
 $endpoints['draft'] = function($mods, $vars, &$report) {
   if (in_array("players", $mods))
-    $type = "players";
+    $type = "player";
   else 
-    $type = "heroes";
+    $type = "hero";
 
   if (isset($vars['team'])) {
-    $context =& $type == "heroes" ? $report['teams'][ $vars['team'] ]['pickban'] : $report['teams'][ $vars['team'] ]['players_draft_pb'];
-    $context_draft =& $type == "heroes" ? $report['teams'][ $vars['team'] ]['draft'] : $report['teams'][ $vars['team'] ]['players_draft'];
+    if ($type == "hero") {
+      $context =& $report['teams'][ $vars['team'] ]['pickban'];
+      $context_draft =& $report['teams'][ $vars['team'] ]['draft'];
+    } else {
+      $context =& $report['teams'][ $vars['team'] ]['players_draft_pb'];
+      $context_draft =& $report['teams'][ $vars['team'] ]['players_draft'];
+    }
     $context_total_matches = $report['teams'][ $vars['team'] ]['matches_total'];
   } else if (isset($vars['region'])) {
-    $context_draft =& $type == "heroes" 
-      ? $report['regions_data'][ $vars['region'] ]['draft'] 
-      : $report['regions_data'][ $vars['region'] ]['players_draft'];
-    if ($type == "heroes")
+    if ($type == "hero")
+      $context_draft =& $report['regions_data'][ $vars['region'] ]['draft'];
+    else 
+      $context_draft =& $report['regions_data'][ $vars['region'] ]['players_draft'];
+    if ($type == "hero")
       $context =& $report['regions_data'][ $vars['region'] ]['pickban'];
     else 
       $rep =& $report['regions_data'][ $vars['region'] ];
     $context_total_matches = $report['regions_data'][ $vars['region'] ]['main']["matches_total"];
   } else {
-    $context_draft =& $type == "heroes" ? $report['draft'] : $report['players_draft'];
-    if ($type == "heroes")
+    if ($type == "hero")
+      $context_draft =& $report['draft'];
+    else 
+      $context_draft =& $report['players_draft'];
+    if ($type == "hero")
       $context =& $report['pickban'];
     else 
       $rep =& $report;
     $context_total_matches = $report["random"]["matches_total"];
   }
 
-  if (empty($context) && $type == "players") {
+  if (empty($context) && $type == "player") {
     $context = [];
     foreach($rep['players_summary'] as $id => $el) {
       $context[ $id ] = [
@@ -75,7 +84,7 @@ $endpoints['draft'] = function($mods, $vars, &$report) {
   }
 
   $draft = [];
-  $id_name = $type."_id";
+  $id_name = $type."id";
   $draft_template = [
     "matches_total" => 0,
     "matches_picked" => 0,
@@ -87,7 +96,7 @@ $endpoints['draft'] = function($mods, $vars, &$report) {
   for ($i=0; $i<2; $i++) {
     $stage_type = $i ? "picked" : "banned";
     $max_stage = 1;
-    if(!isset($context_draft[$i])) continue;
+    if(empty($context_draft[$i])) continue;
     foreach($context_draft[$i] as $stage_num => $stage) {
       if ($stage_num > $max_stage) $max_stage = $stage_num;
       foreach($stage as $el) {

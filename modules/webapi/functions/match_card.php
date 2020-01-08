@@ -7,6 +7,8 @@ function match_card($mid) {
   $match = [
     "match_id" => $mid
   ];
+  
+  if (!isset($report['matches'])) return $match;
 
   $clusters = $meta['clusters'];
   $regions = $meta['regions'];

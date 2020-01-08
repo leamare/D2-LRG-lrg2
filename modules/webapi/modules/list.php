@@ -1,7 +1,7 @@
 <?php 
 
 $endpoints['list'] = function($mods, $vars, &$report) use (&$endpoints, $cat, $cats_file, $hidden_cat) {
-  $cache = $endpoints['getcache'];
+  $cache = $endpoints['getcache']($mods, $vars, $report);
   $reps = [];
 
   if (file_exists($cats_file)) {
@@ -38,6 +38,7 @@ $endpoints['list'] = function($mods, $vars, &$report) use (&$endpoints, $cat, $c
     $reps = $cache["reps"];
   }
 
+  if(isset($cats[$hidden_cat])) unset($cats[$hidden_cat]);
   $cats_list = array_keys($cats);
   $cats_list[] = "all";
   $cats_list[] = "main";

@@ -58,7 +58,7 @@ $endpoints['meta_graph'] = function($mods, $vars, &$report) {
       "hero_id" => $elid,
       "matches" => $el['matches_total'],
       "matches_picked" => $el['matches_picked'],
-      "winrate_picked" => $el['winrate_total'],
+      "winrate_picked" => (float)$el['winrate_picked'],
     ];
   }
 

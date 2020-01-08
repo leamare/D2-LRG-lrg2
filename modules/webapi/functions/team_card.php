@@ -21,7 +21,7 @@ function team_card($tid) {
 
   if(isset($report['teams'][$tid]['regions'])) {
     asort($report['teams'][$tid]['regions']);
-    $team['regions'] = region_link( array_keys($report['teams'][$tid]['regions'])[0] );
+    $team['regions'] = array_keys($report['teams'][$tid]['regions'])[0];
   }
 
   $roster = [];
@@ -52,7 +52,7 @@ function team_card($tid) {
       $top_heroes[] = [
         "hero_id" => $hid,
         "matches_picked" => $stats['matches_picked'],
-        "wins_picked" => $stats['wins_picked']
+        "winrate_picked" => round(($stats['winrate_picked'] ?? $stats['wins_picked']/$stats['matches_picked'])*100, 2)
       ];
       $counter++;
     }

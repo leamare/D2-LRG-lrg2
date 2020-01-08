@@ -19,7 +19,7 @@ $endpoints['haverages'] = function($mods, $vars, &$report) {
 
   $res = [
     "type" => $type,
-    "date" => $context['averages_'.$type] ?? $context['haverages_'.$type]
+    "data" => $context['averages_'.$type] ?? $context['haverages_'.$type]
   ];
 
   return $res;

@@ -55,15 +55,17 @@ function positions_ranking(&$context, $total_matches) {
     return positions_ranking_sort($a, $b, $total_matches);
   });
 
-  $increment = 100 / sizeof($context_copy); $i = 0;
+  if (!empty($context_copy)) {
+    $increment = 100 / sizeof($context_copy); $i = 0;
 
-  foreach ($context_copy as $id => $el) {
-    if(isset($last) && $el['matches_s'] == $last['matches_s'] && $el['winrate_s'] == $last['winrate_s']) {
-      $i++;
-      $context[$id]['rank'] = $last_rank;
-    } else
-    $context[$id]['rank'] = 100 - $increment*$i++;
-    $last = $el;
-    $last_rank = $context[$id]['rank'];
+    foreach ($context_copy as $id => $el) {
+      if(isset($last) && $el['matches_s'] == $last['matches_s'] && $el['winrate_s'] == $last['winrate_s']) {
+        $i++;
+        $context[$id]['rank'] = $last_rank;
+      } else
+      $context[$id]['rank'] = 100 - $increment*$i++;
+      $last = $el;
+      $last_rank = $context[$id]['rank'];
+    }
   }
 }
