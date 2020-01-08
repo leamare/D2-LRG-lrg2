@@ -68,13 +68,13 @@ if (empty($endp_name)) {
   $endp = $endpoints['__fallback']();
   $endp_name = array_search($endp, $endpoints);
 } else $endp = $endpoints[$endp_name];
-// try {
+try {
   $result = $endp($modline, $vars, $report);
-// } catch (\Throwable $e) {
-//   $result = [
-//     'error' => $e->getMessage()
-//   ];
-// }
+} catch (\Throwable $e) {
+  $result = [
+    'error' => $e->getMessage()
+  ];
+}
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
