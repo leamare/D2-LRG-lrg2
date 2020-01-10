@@ -78,7 +78,7 @@ $endpoints['overview'] = function($mods, $vars, &$report) use (&$meta, &$endpoin
 
   if (isset($context['days'])) {
     $res['days'] = $context['days'];
-    if (!$descriptor['matches_additional']) {
+    if (!$descriptor['matches_details']) {
       foreach ($res['days'] as &$day) {
         if (isset($day['matches'])) {
           $day['matches_num'] = sizeof($day['matches']);
