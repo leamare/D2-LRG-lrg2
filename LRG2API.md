@@ -23,7 +23,7 @@ One major GET parameter is `report`. It specifies a tag of a report to load. If 
 ### Variables
 
 * (GET) `league` – report tag for report endpoints
-* (GET) `gets` – a list of parameters (for non-report endpoints)
+* (GET) `gets` – a comma-delimited list of parameters (for non-report endpoints)
 * (GET) `mod` – Modpath to execute. It’s readed from last to read to find the next specified method. Think of modline as of a path to a file with directory names. You can use `/` or `-` as separators.
   * Modline examples: `heroes-positions-position_1.1`, `regions/region2/heroes/meta_graph`
   * The modline if being read right to left so you can specify a very long modline, but as soon as it finds a correct endpoint, it gets executed regardless of everything else.
@@ -37,6 +37,39 @@ One major GET parameter is `report`. It specifies a tag of a report to load. If 
 * (GET) `pretty` – flag, if it’s used response will be nicely formatted
 
 ### Typical data objects
+
+#### Report Descriptor
+
+```json
+{
+    "tag": "league_tag",
+    "name": "Report Name",
+    "desc": "Report Description",
+    "id": 1234, // league ID of a report if specified, null otherwise
+    "first_match": {
+        "mid": "123455678", // match id
+        "date": "15231231313" // unix timestamp
+    },
+    "last_match": {
+        "mid": "123455678", // match id
+        "date": "15231231313" // unix timestamp
+    },
+    "matches": 123, // number of matches
+    "ver": [4,2,0,0,0], // version of the report generator
+    "days": 10, // number of days of the report
+    "anonymous_players": true/false, // shows if player data is in the report
+    "matches_additional": true/false, // true if additional matches data is in the report
+    "tvt": true/false, // true if it's team vs team league
+    "teams": [...], // if tvt is true - array of team IDs (not set if false)
+    "players": [...], // if tvt is false and report is not anonymous - array of player IDs
+    "regions": [...], // array of region IDs if there are regions in the report
+    "style": "...", // custom style name if set
+    "logo": "...", // custom logo name if set
+    "endpoints": [...] // array of correct endpoints (only shows up in `info` endpoint)
+}
+```
+
+
 
 #### Match Card
 
@@ -74,6 +107,8 @@ One major GET parameter is `report`. It specifies a tag of a report to load. If 
     "date": "12345678901" // unix timestamp
 }
 ```
+
+
 
 #### Team Card
 
@@ -150,13 +185,16 @@ One major GET parameter is `report`. It specifies a tag of a report to load. If 
 }
 ```
 
+
+
 #### Summary
 
 It’s fairly simple to explain. It doesn’t have a structure and is used in `summary`-like modules (positions for example). It’s just an object without any fixed structure, every key corresponds for a value. That’s pretty much it.
 
 ### Report is loaded
 
-* `overview` (may use `region`, is a fallback endpoint)
+* `info` (returns report information, fallback endpoint)
+* `overview` (may use `region`)
 * `records` (may use `region`)
 * `heroes/haverages` (may use `region`)
 * `players/haverages` (may use `region`, may return `null` for some reports, like immortal rank meta ones)
@@ -179,9 +217,11 @@ It’s fairly simple to explain. It doesn’t have a structure and is used in `s
 * `hvh` (requires `heroid`, returns full data otherwise)
 * `heroes/summary` (may use `region`)
 * `players/summary` (may use `region`)
+* `heroes/sides` (may use `region`)
+* `players/sides` (usually doesn't exist in a report, may use `region`)
 * `teams/summary`
-* [EXCL] matchcards (gets=mid1,mid2…)
-* [EXCL] teams_raw (teamid)
+* [EXCL] `matchcards` (requires `gets`, returns match cards for matches listed in `gets`)
+* [EXCL] `teams_raw` (requires `team`, returns raw team object from report)
 * `teams/cards`
 * `teams/roster` (may use `team`)
 * `teams/grid` (may use `region`)
