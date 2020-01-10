@@ -8,6 +8,7 @@ if (!empty($report)) {
 
   if(empty($mod)) $mod = "";
 
+  include_once(__DIR__ . "/modules/info.php");
   include_once(__DIR__ . "/modules/overview.php");
   include_once(__DIR__ . "/modules/records.php");
   include_once(__DIR__ . "/modules/haverages.php");
@@ -30,7 +31,7 @@ if (!empty($report)) {
   include_once(__DIR__ . "/modules/roster.php");
 
   $endpoints['__fallback'] = function() use (&$endpoints) {
-    return $endpoints['overview'];
+    return $endpoints['info'];
   };
 } else {
   include_once(__DIR__ . "/modules/list.php");
