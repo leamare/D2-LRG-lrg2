@@ -19,23 +19,41 @@ $query_res = $conn->store_result();
 for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
   $result["days"][$row[1]] = array(
     "timestamp" => $start_timestamp + 86400*$row[1],
-    "matches" => array()
+    "matches_num" => 0
   );
 }
 
 $query_res->free_result();
 
-foreach($result["days"] as $day => $date) {
-  $sql = "SELECT matchid FROM matches WHERE start_date >= ".$date['timestamp']." AND start_date < ".($date['timestamp']+86400).";";
+if ($lg_settings['ana']['matchlist']) {
+  foreach($result["days"] as $day => $date) {
+    $result["days"][$day]['matches'] = [];
+    $sql = "SELECT matchid FROM matches WHERE start_date >= ".$date['timestamp']." AND start_date < ".($date['timestamp']+86400).";";
 
-  if ($conn->multi_query($sql) === FALSE) die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+    if ($conn->multi_query($sql) === FALSE) die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
 
-  $query_res = $conn->store_result();
+    $query_res = $conn->store_result();
 
-  for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
-    $result["days"][$day]['matches'][] = $row[0];
+    for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+      $result["days"][$day]['matches'][] = $row[0];
+      $result["days"][$day]['matches_num']++;
+    }
+
+    $query_res->free_result();
   }
+} else {
+  foreach($result["days"] as $day => $date) {
+    $sql = "SELECT COUNT(DISTINCT matchid) FROM matches WHERE start_date >= ".$date['timestamp']." AND start_date < ".($date['timestamp']+86400).";";
 
-  $query_res->free_result();
+    if ($conn->multi_query($sql) === FALSE) die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+
+    $query_res = $conn->store_result();
+
+    for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+      $result["days"][$day]['matches_num'] += $row[0];
+    }
+
+    $query_res->free_result();
+  }
 }
 ?>

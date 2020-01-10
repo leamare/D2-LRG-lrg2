@@ -9,6 +9,8 @@ include_once(__DIR__ . "/../functions/overview_combos.php");
 $endpoints['overview'] = function($mods, $vars, &$report) use (&$meta, &$endpoints) {
   $res = [];
 
+  $descriptor = get_report_descriptor($report);
+
   if (isset($vars['region'])) {
     $context =& $report['regions_data'][ $vars['region'] ];
   } else {
@@ -76,6 +78,14 @@ $endpoints['overview'] = function($mods, $vars, &$report) use (&$meta, &$endpoin
 
   if (isset($context['days'])) {
     $res['days'] = $context['days'];
+    if (!$descriptor['matches_additional']) {
+      foreach ($res['days'] as &$day) {
+        if (isset($day['matches'])) {
+          $day['matches_num'] = sizeof($day['matches']);
+          unset($day['matches']);
+        }
+      }
+    }
   }
 
   $res['main'] = $context['main'];

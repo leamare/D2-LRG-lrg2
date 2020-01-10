@@ -184,7 +184,7 @@ function rg_view_generator_overview($modlink, $context, $foreword = "") {
       $matchcount = array();
       foreach($context['days'] as $dn => $day) {
         $converted_modes[] = date("j M Y", $day['timestamp'])." (".($dn+1).")";
-        $matchcount[] = sizeof($day['matches']);
+        $matchcount[] = $day['matches_num'] ?? sizeof($day['matches']);
       }
       $colors = array_slice($charts_colors, 0, sizeof($converted_modes));
       $res .= "<h1>".locale_string("matches_per_day")."</h1>".
