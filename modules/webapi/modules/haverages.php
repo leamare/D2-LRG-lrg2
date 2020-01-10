@@ -17,10 +17,7 @@ $endpoints['haverages'] = function($mods, $vars, &$report) {
     throw new \Exception("No module specified");
   }
 
-  $res = [
-    "type" => $type,
-    "data" => $context['averages_'.$type] ?? $context['haverages_'.$type]
-  ];
+  $res = $context['averages_'.$type] ?? $context['haverages_'.$type];
 
   return $res;
 };
