@@ -94,5 +94,6 @@ $response = [
 echo json_encode($response, (isset($_REQUEST['pretty']) ? JSON_PRETTY_PRINT : 0) 
   | JSON_INVALID_UTF8_SUBSTITUTE 
   | JSON_UNESCAPED_UNICODE
+  | JSON_NUMERIC_CHECK 
   //| JSON_THROW_ON_ERROR
 );
