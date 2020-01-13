@@ -31,7 +31,7 @@ function rg_query_hero_positions(&$conn, $team = null, $cluster = null) {
                     ON am.matchid = ml.matchid AND am.heroid = ml.heroid
                   JOIN matches m
                     ON m.matchid = am.matchid ". 
-              ($team === null ? "" : "JOIN teams_matches ON ml.matchid = teams_matches.matchid AND ml.is_radiant = teams_matches.is_radiant ").
+              ($team === null ? "" : "JOIN teams_matches ON ml.matchid = teams_matches.matchid AND ml.isRadiant = teams_matches.is_radiant ").
             " WHERE ".
              ($core == 0 ? "am.isCore = 0" : "am.isCore = 1 AND am.lane = $lane").
              ($cluster !== null ? " AND matches.cluster IN (".implode(",", $cluster).") " : "").
