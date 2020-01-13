@@ -15,7 +15,7 @@ function rg_query_player_draft(&$conn, $cluster = null, $team = null) {
               JOIN matchlines ON matches.matchid = matchlines.matchid AND draft.hero_id = matchlines.heroid ".
               ($team !== null ? " JOIN teams_matches ON teams_matches.matchid = draft.matchid AND draft.is_radiant = teams_matches.is_radiant " : "").
               " WHERE is_pick = ".($pick ? "true" : "false")." AND stage = ".$stage.
-              ($cluster !== null ? " AND matches.cluster IN (".implode(",", $clusters).")" : "").
+              ($cluster !== null ? " AND matches.cluster IN (".implode(",", $cluster).")" : "").
               ($team !== null ? " AND teams_matches.teamid = $team " : "").
               " GROUP BY player_id ORDER BY winrate DESC, matches DESC";
       if ($conn->multi_query($sql) === TRUE);# echo "[S] Requested data for PLAYERS DRAFT STAGE $pick $stage.\n";
