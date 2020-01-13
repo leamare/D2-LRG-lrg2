@@ -4,6 +4,6 @@ echo "[S] Requested data for PLAYER POSITIONS.\n";
 
 
 if($lg_settings['ana']['player_positions_matches']) {
-  $result["player_positions_matches"][$core][$lane] = rg_query_player_positions_matches($conn, $result["player_positions"]);
+  $result["player_positions_matches"] = rg_query_player_positions_matches($conn, $result["player_positions"]);
 }
 ?>
