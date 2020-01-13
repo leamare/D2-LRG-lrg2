@@ -25,7 +25,7 @@ function rg_query_hero_summary(&$conn, $cluster = null) {
                 ON am.matchid = ml.matchid AND am.heroid = ml.heroid
               JOIN matches m
                 ON m.matchid = am.matchid ".
-          ($cluster !== null ? "WHERE m.cluster IN (".implode(",", $clusters).")" : "").
+          ($cluster !== null ? "WHERE m.cluster IN (".implode(",", $cluster).")" : "").
         " GROUP BY hid
           ORDER BY matches DESC, winrate DESC;";
 
