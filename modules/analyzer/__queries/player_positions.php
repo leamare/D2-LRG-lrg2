@@ -37,7 +37,7 @@ function rg_query_player_positions(&$conn, $team = null, $cluster = null) {
                 ) mhpt 
               WHERE ".
              ($core == 0 ? "am.isCore = 0" : "am.isCore = 1 AND am.lane = $lane").
-             ($cluster !== null ? " AND matches.cluster IN (".implode(",", $cluster).") " : "").
+             ($cluster !== null ? " AND m.cluster IN (".implode(",", $cluster).") " : "").
              ($team === null ? "" : " AND teams_matches.teamid = $team ").
              " GROUP BY am.playerid
               ORDER BY matches DESC, winrate DESC;";

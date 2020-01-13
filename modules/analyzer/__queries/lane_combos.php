@@ -67,7 +67,7 @@ function rg_query_player_lane_combos(&$conn, $limiter = 0, $cluster = null) {
           ON fm1.matchid = fm2.matchid and fm1.isRadiant = fm2.isRadiant and fm1.playerid < fm2.playerid
           JOIN matches ON fm1.matchid = matches.matchid
           WHERE fm1.lane = fm2.lane ".
-          ($cluster !== null ? " WHERE matches.cluster IN (".implode(",", $cluster).") " : "").
+          ($cluster !== null ? " AND matches.cluster IN (".implode(",", $cluster).") " : "").
         " GROUP BY fm1.playerid, fm2.playerid
           HAVING match_count > $limiter_lower
           ORDER BY match_count DESC, winrate DESC;";
