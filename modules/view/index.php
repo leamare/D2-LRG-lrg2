@@ -138,6 +138,11 @@ if (sizeof($cache['reps']) === 0) {
       $index_list--;
     }
 
+    if (isset($latest) && $latest) {
+      header("Location: ?league=".$report['tag'].(empty($linkvars) ? "" : "&".$linkvars), true, 302);
+      exit();
+    }
+
     $event_type = $report['tvt'] ? 'tvt' : (
       isset($report['players']) ? 'pvp' : 'ranked'
     );

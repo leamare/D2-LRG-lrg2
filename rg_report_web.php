@@ -57,6 +57,8 @@ if ($lrg_use_get) {
     $cat = $_GET['cat'];
     //$linkvars[] = array("cat", $_GET['cat']);
   } //else $cat = "";
+
+  if(isset($_GET['latest'])) $latest = true;
 }
 
 require_once('locales/en.php');
