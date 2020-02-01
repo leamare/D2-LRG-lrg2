@@ -139,7 +139,12 @@ if (sizeof($cache['reps']) === 0) {
     }
 
     if (isset($latest) && $latest) {
-      header("Location: ?league=".$report['tag'].(empty($linkvars) ? "" : "&".$linkvars), true, 302);
+      header("Location: ?league=".$report['tag'].
+        (empty($linkvars) ? "" : "&".$linkvars).
+        (empty($mod) ? "" : "&mod=".$mod),
+        true, 
+        302
+      );
       exit();
     }
 

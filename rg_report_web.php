@@ -37,12 +37,11 @@ $linkvars = [];
 if ($lrg_use_get) {
   $locale = GetLanguageCodeISO6391();
 
+  if(isset($_GET['mod'])) $mod = $_GET['mod'];
+  else $mod = "";
+
   if(isset($_GET['league']) && !empty($_GET['league'])) {
     $leaguetag = $_GET['league'];
-    if($lrg_get_depth > 0) {
-      if(isset($_GET['mod'])) $mod = $_GET['mod'];
-      else $mod = "";
-    }
   } else $leaguetag = "";
 
   if(isset($_GET['loc']) && !empty($_GET['loc'])) {
