@@ -111,7 +111,7 @@ if (isset($report)) {
       isset($report['hero_sides']) || isset($report['hero_pairs']) || isset($report['hero_triplets']))
         include_once("modules/view/heroes.php");
 
-  if (isset($report['players']))
+  if (isset($report['players']) || isset($report['players_summary']))
     include_once("modules/view/players.php");
 
   if (isset($report['teams'])) {
