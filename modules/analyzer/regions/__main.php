@@ -11,10 +11,10 @@ if(sizeof($result["regions"]) == 1 ||
 
 $reg_matches = [];
 foreach($result["regions"] as $clid => $matches) {
-  if(!isset($reg_matches[ $meta['clusters'][$clid] ]))
-    $reg_matches[ $meta['clusters'][$clid] ] = $matches;
+  if(!isset($reg_matches[ $meta['clusters'][$clid] ?? 0]))
+    $reg_matches[ $meta['clusters'][$clid] ?? 0] = $matches;
   else
-    $reg_matches[ $meta['clusters'][$clid] ] += $matches;
+    $reg_matches[ $meta['clusters'][$clid] ?? 0] += $matches;
 }
 
 if(sizeof($reg_matches) == 1 ||

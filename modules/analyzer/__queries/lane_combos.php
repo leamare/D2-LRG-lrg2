@@ -69,7 +69,7 @@ function rg_query_player_lane_combos(&$conn, $limiter = 0, $cluster = null) {
           WHERE fm1.lane = fm2.lane ".
           ($cluster !== null ? " AND matches.cluster IN (".implode(",", $cluster).") " : "").
         " GROUP BY fm1.playerid, fm2.playerid
-          HAVING match_count > $limiter_lower
+          HAVING match_count > $limiter
           ORDER BY match_count DESC, winrate DESC;";
 
   if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for PLAYER LANE COMBOS.\n";

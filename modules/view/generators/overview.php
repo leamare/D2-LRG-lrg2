@@ -76,7 +76,7 @@ function rg_view_generator_overview($modlink, $context, $foreword = "") {
   if($report['settings']['overview_regions'] && isset($context['regions'])) {
     $regions_matches = [];
     foreach ($context['regions'] as $mode => $data) {
-      $region = $meta['regions'][ $meta['clusters'][$mode] ];
+      $region = $meta['regions'][ $meta['clusters'][$mode] ?? 0 ] ?? 'unknown';
       if(isset($regions_matches[$region])) $regions_matches[$region] += $data;
       else $regions_matches[$region] = $data;
     }

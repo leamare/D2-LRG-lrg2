@@ -8,7 +8,7 @@ else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n"
 $query_res = $conn->store_result();
 
 for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
-  $result["players"][$row[0]] = $row[1];
+  $result["players"][$row[0]] = ($lg_settings['ana']['players_names'] ?? true) ? $row[1] : "PID ".$row[0];
 }
 
 $query_res->free_result();
@@ -141,4 +141,8 @@ foreach ($result['players'] as $pid => &$name) {
 
   $query_res->free_result();
 }
+
+if (!($lg_settings['ana']['players_names'] ?? true))
+  unset($result['players']);
+
 ?>

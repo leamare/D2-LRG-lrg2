@@ -24,9 +24,9 @@ function rg_query_player_trios(&$conn, &$psummary, $matches_total, $limiter = 0,
   $query_res = $conn->store_result();
 
   for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
-    $p1_matchrate = $psummary[$row[0]]['matches_s'] / $matches_total;
-    $p2_matchrate = $psummary[$row[1]]['matches_s'] / $matches_total;
-    $p3_matchrate = $psummary[$row[2]]['matches_s'] / $matches_total;
+    $p1_matchrate = ($psummary[$row[0]]['matches_s'] ?? 0) / $matches_total;
+    $p2_matchrate = ($psummary[$row[1]]['matches_s'] ?? 0) / $matches_total;
+    $p3_matchrate = ($psummary[$row[2]]['matches_s'] ?? 0) / $matches_total;
     $expected_pair  = $p1_matchrate * $p2_matchrate * $p3_matchrate * ($matches_total/3);
 
     $res[] = array (

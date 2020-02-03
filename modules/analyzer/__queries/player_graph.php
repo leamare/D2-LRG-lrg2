@@ -17,14 +17,14 @@ function rg_query_player_graph(&$conn, &$psummary, $matches_total, $limiter = 0,
   $query_res = $conn->store_result();
 
   for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
-    $rate1 = $psummary[$row[0]]['matches_s'] / $matches_total;
-    $rate2 = $psummary[$row[1]]['matches_s'] / $matches_total;
+    $rate1 = ($psummary[$row[0]]['matches_s'] ?? 0) / $matches_total;
+    $rate2 = ($psummary[$row[1]]['matches_s'] ?? 0) / $matches_total;
     $expected_pair  = round($rate1 * $rate2 * ($matches_total/2));
 
     if($row[2]-$expected_pair < $row[3]*0.1) //min deviation 10% of total matches
       continue;
 
-    $wr_diff = ($psummary[$row[0]]['winrate_s'] + $psummary[$row[1]]['winrate_s'])/2 - $row[2]/$row[3];
+    $wr_diff = ( ($psummary[$row[0]]['winrate_s'] ?? 0.5) + ($psummary[$row[1]]['winrate_s'] ?? 0.5) )/2 - $row[2]/$row[3];
     $dev_pct = $expected_pair ? $row[2]/$expected_pair - 1 : 1;
 
     $result[] = array (
