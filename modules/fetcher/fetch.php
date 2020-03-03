@@ -8,7 +8,7 @@
 function fetch($match) {
   global $opendota, $conn, $rnum, $failed_matches, $scheduled, $scheduled_stratz, $t_teams, $t_players, $use_stratz, $require_stratz,
   $request_unparsed, $meta, $stratz_timeout_retries, $force_adding, $cache_dir, $lg_settings, $lrg_use_cache, $first_scheduled,
-  $use_full_stratz, $scheduled_wait_period, $steamapikey, $force_await, $players_list, $rank_limit;
+  $use_full_stratz, $scheduled_wait_period, $steamapikey, $force_await, $players_list, $rank_limit, $stratztoken;
 
   $t_match = [];
   $t_matchlines = [];
@@ -50,7 +50,7 @@ function fetch($match) {
     echo("Requesting.");
 
     if (!empty($players_list) || !empty($rank_limit)) {
-      $request = "https://api.stratz.com/api/v1/match?include=Player,PickBan&matchid=$match";
+      $request = "https://api.stratz.com/api/v1/match?include=Player,PickBan&matchid=$match".(!empty($stratztoken) ? "&token=$stratztoken" : "");
       $json = false;
       do {
         $json = @file_get_contents($request);
@@ -147,7 +147,7 @@ function fetch($match) {
       // so there will be kind of workaround for it.
 
       if (empty($stratz)) {
-        $request = "https://api.stratz.com/api/v1/match?include=Player,PickBan&matchid=$match";
+        $request = "https://api.stratz.com/api/v1/match?include=Player,PickBan&matchid=$match".(!empty($stratztoken) ? "&token=$stratztoken" : "");
 
         $json = @file_get_contents($request);
 
@@ -201,7 +201,7 @@ function fetch($match) {
           echo ", retrying.";
 
           if (!isset($stratz[0]['pickBans'])) {
-              $request = "https://api.stratz.com/api/v1/match/$match";
+              $request = "https://api.stratz.com/api/v1/match/$match".(!empty($stratztoken) ? "?token=$stratztoken" : "");
               $full_request = true;
           }
 

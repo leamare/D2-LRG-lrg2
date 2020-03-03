@@ -172,6 +172,9 @@ if ( $update_settings ) {
             $settings['odapikey'] = readline_rg();
         } while (empty($settings['odapikey']));
 
+        echo("[I] Stratz Token (empty for none): ");
+        $settings['stratztoken'] = readline_rg();
+
         echo("[I] MySQL host: ");
         do {
             $settings['mysql_host'] = readline_rg();

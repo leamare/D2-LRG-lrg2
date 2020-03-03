@@ -33,12 +33,13 @@ if(isset($argv)) {
 
   $settings = json_decode(file_get_contents("rg_settings.json"), true);
 
-  $lrg_sql_host  = $settings['mysql_host'];
-  $lrg_sql_user  = $settings['mysql_user'];
-  $lrg_sql_pass  = $settings['mysql_pass'];
-  $lrg_db_prefix = $settings['mysql_prefix'];
-  $steamapikey   = $settings['steamapikey'];
-  $odapikey      = $settings['odapikey'];
+  $lrg_sql_host  = $settings['mysql_host'] ?? '';
+  $lrg_sql_user  = $settings['mysql_user'] ?? '';
+  $lrg_sql_pass  = $settings['mysql_pass'] ?? '';
+  $lrg_db_prefix = $settings['mysql_prefix'] ?? '';
+  $steamapikey   = $settings['steamapikey'] ?? '';
+  $stratztoken   = $settings['stratztoken'] ?? '';
+  $odapikey      = $settings['odapikey'] ?? '';
 
   unset($settings);
 
