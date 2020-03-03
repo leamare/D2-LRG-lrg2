@@ -37,6 +37,7 @@ if (!empty($options['N'])) {
 $use_stratz = isset($options['S']) || isset($options['s']);
 $require_stratz = isset($options['S']);
 $use_full_stratz = isset($options['Z']);
+$ignore_stratz = isset($options['Q']);
 
 $request_unparsed = isset($options['R']);
 

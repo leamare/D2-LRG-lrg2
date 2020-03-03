@@ -8,7 +8,7 @@
 function fetch($match) {
   global $opendota, $conn, $rnum, $failed_matches, $scheduled, $scheduled_stratz, $t_teams, $t_players, $use_stratz, $require_stratz,
   $request_unparsed, $meta, $stratz_timeout_retries, $force_adding, $cache_dir, $lg_settings, $lrg_use_cache, $first_scheduled,
-  $use_full_stratz, $scheduled_wait_period, $steamapikey, $force_await, $players_list, $rank_limit, $stratztoken;
+  $use_full_stratz, $scheduled_wait_period, $steamapikey, $force_await, $players_list, $rank_limit, $stratztoken, $ignore_stratz;
 
   $t_match = [];
   $t_matchlines = [];
@@ -49,7 +49,7 @@ function fetch($match) {
   } else {
     echo("Requesting.");
 
-    if (!empty($players_list) || !empty($rank_limit)) {
+    if (!$ignore_stratz && (!empty($players_list) || !empty($rank_limit))) {
       $request = "https://api.stratz.com/api/v1/match?include=Player,PickBan&matchid=$match".(!empty($stratztoken) ? "&token=$stratztoken" : "");
       $json = false;
       do {
@@ -140,7 +140,7 @@ function fetch($match) {
   }
 
   if(!file_exists("$cache_dir/".$match.".json") || ( $bad_replay && !file_exists("$cache_dir/unparsed_".$match.".json") )) {
-    if($matchdata['lobby_type'] != 1 && $matchdata['lobby_type'] != 2 && $use_stratz) {
+    if($matchdata['lobby_type'] != 1 && $matchdata['lobby_type'] != 2 && $use_stratz && !$ignore_stratz) {
       echo("..Requesting STRATZ.");
 
       // Not all matches in Stratz database have PickBan support for /match? endpoint
