@@ -583,13 +583,23 @@ function fetch($match) {
             if    (++$stages[$stage_sum] < 3) $draft_stage = 1;
             else if ($stages[$stage_sum] < 5) $draft_stage = 2;
             else $draft_stage = 3;
-          } else {
-            if($draft_instance['is_pick'] ?? $draft_instance['pick']) {
+          } else if ($matchdata['version'] < 44) {
+            if($pick) {
               if    (++$stages[$stage_sum] < 3) $draft_stage = 1;
               else if ($stages[$stage_sum] < 5) $draft_stage = 2;
               else $draft_stage = 3;
             } else {
               if    (++$stages[$stage_sum] < 4) $draft_stage = 1;
+              else if ($stages[$stage_sum] < 6) $draft_stage = 2;
+              else $draft_stage = 3;
+            }
+          } else {
+            if($pick) {
+              if    (++$stages[$stage_sum] < 3) $draft_stage = 1;
+              else if ($stages[$stage_sum] < 5) $draft_stage = 2;
+              else $draft_stage = 3;
+            } else {
+              if    (++$stages[$stage_sum] < 5) $draft_stage = 1;
               else if ($stages[$stage_sum] < 6) $draft_stage = 2;
               else $draft_stage = 3;
             }
