@@ -558,56 +558,44 @@ function fetch($match) {
 
 
   if ($matchdata['game_mode'] == 2 || $matchdata['game_mode'] == 9) {
-      $stages = array (
-          # (isPick + 1)*((-1)*isRadiant)
-          1 => 0, # dire bans
-          2 => 0, # dire picks
-          -1 => 0,# radi bans
-          -2 => 0 # radi bans
-      );
       if (isset($matchdata['picks_bans']))
         $drafts =& $matchdata['picks_bans'];
       else 
         $drafts =& $matchdata['draft_timings'];
+
+      $stage = 0;
+      $last_stage_pick = null;
+
+      uasort($drafts, function($a, $b) {
+        if ($a == $b) {
+          $pick_a = $a['is_pick'] ?? $a['pick'];
+          $pick_b = $b['is_pick'] ?? $b['pick'];
+          if (!$pick_a && $pick_b) return -1;
+          else if ($pick_a && !$pick_b) return 1;
+          return 0;
+        }
+        return ($a['order'] < $b['order']) ? -1 : 1;
+      });
+
       foreach ($drafts as $draft_instance) {
           if (!isset($draft_instance['hero_id']) || !$draft_instance['hero_id'])
             continue;
           
-          $ispick = $draft_instance['is_pick'] ?? $draft_instance['pick'];
+          $pick = $draft_instance['is_pick'] ?? $draft_instance['pick'];
           $team = $draft_instance['team'] ?? $draft_instance['active_team']-2;
 
-          $stage_sum = (1+(int)$ispick)*($team ? 1 : -1);
-          $draft_stage = 0;
-
-          if ($matchdata['version'] < 21) {
-            if    (++$stages[$stage_sum] < 3) $draft_stage = 1;
-            else if ($stages[$stage_sum] < 5) $draft_stage = 2;
-            else $draft_stage = 3;
-          } else if ($matchdata['version'] < 44) {
-            if($pick) {
-              if    (++$stages[$stage_sum] < 3) $draft_stage = 1;
-              else if ($stages[$stage_sum] < 5) $draft_stage = 2;
-              else $draft_stage = 3;
-            } else {
-              if    (++$stages[$stage_sum] < 4) $draft_stage = 1;
-              else if ($stages[$stage_sum] < 6) $draft_stage = 2;
-              else $draft_stage = 3;
-            }
-          } else {
-            if($pick) {
-              if    (++$stages[$stage_sum] < 3) $draft_stage = 1;
-              else if ($stages[$stage_sum] < 5) $draft_stage = 2;
-              else $draft_stage = 3;
-            } else {
-              if    (++$stages[$stage_sum] < 5) $draft_stage = 1;
-              else if ($stages[$stage_sum] < 6) $draft_stage = 2;
-              else $draft_stage = 3;
-            }
+          // if it's the first draft stage or  a switch from bans to picks was made
+          if ($last_stage_pick !== $pick && !$pick) {
+            $stage++;
           }
+
+          $draft_stage = $stage;
+          
+          $last_stage_pick = $pick;
 
           $t_draft[$i]['matchid'] = $match;
           $t_draft[$i]['is_radiant'] = $team ? 0 : 1;
-          $t_draft[$i]['is_pick'] = $ispick;
+          $t_draft[$i]['is_pick'] = $pick;
           $t_draft[$i]['hero_id'] = $draft_instance['hero_id'];
           $t_draft[$i]['stage'] = $draft_stage;
 
