@@ -34,6 +34,10 @@ if (!empty($options['N'])) {
   $rank_limit = (int)$options['N'];
 }
 
+if (!empty($options['d'])) {
+  $api_cooldown = ((int)$options['d'])*1000;
+}
+
 $use_stratz = isset($options['S']) || isset($options['s']);
 $require_stratz = isset($options['S']);
 $use_full_stratz = isset($options['Z']);
@@ -42,9 +46,9 @@ $ignore_stratz = isset($options['Q']);
 $request_unparsed = isset($options['R']);
 
 if(!empty($odapikey) && !isset($ignore_api_key))
-  $opendota = new \SimpleOpenDotaPHP\odota_api(false, "", 0, $odapikey);
+  $opendota = new \SimpleOpenDotaPHP\odota_api(false, "", $api_cooldown ?? 0, $odapikey);
 else
-  $opendota = new \SimpleOpenDotaPHP\odota_api();
+  $opendota = new \SimpleOpenDotaPHP\odota_api(false, "", $api_cooldown ?? 0);
 
 if ($conn->connect_error) die("[F] Connection to SQL server failed: ".$conn->connect_error."\n");
 
