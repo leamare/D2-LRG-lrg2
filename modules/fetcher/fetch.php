@@ -625,6 +625,7 @@ function fetch($match) {
       // I'm skipping opendota picks_bans information since it lacks information on
       // who nominated hero to ban and is missing pick order info
       // altho I guess I should reconsider adding it later
+      if (!isset($draft_instance['isRadiant'])) continue;
       if (!$draft_instance['isPick']) {
         if(!$draft_instance['wasBannedSuccessfully']) continue;
         $t_draft[$i]['matchid'] = $match;
