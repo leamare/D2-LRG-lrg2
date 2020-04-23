@@ -41,11 +41,11 @@ function fetch($match) {
     echo("Reusing cache.");
     $json = file_get_contents("$cache_dir/".$match.".json");
     $matchdata = json_decode($json, true);
-  } else if($lrg_use_cache && file_exists("$cache_dir/unparsed_".$match.".json") && $force_adding) {
-    echo("Reusing unparsed cache.");
-    $json = file_get_contents("$cache_dir/unparsed_".$match.".json");
-    $matchdata = json_decode($json, true);
-    $bad_replay = true;
+  // } else if($lrg_use_cache && file_exists("$cache_dir/".$match.".json") && file_exists("$cache_dir/unparsed_".$match.".json") && $force_adding) {
+  //   echo("Reusing unparsed cache.");
+  //   $json = file_get_contents("$cache_dir/unparsed_".$match.".json");
+  //   $matchdata = json_decode($json, true);
+  //   $bad_replay = true;
   } else {
     echo("Requesting.");
 
