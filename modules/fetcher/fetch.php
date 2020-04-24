@@ -23,6 +23,8 @@ function fetch($match) {
     $t_team_matches = [];
   }
 
+  $conn->ping();
+
   if (empty($match) || $match[0] == "#" || strlen($match) < 2) return true;
 
   $match_rules = processRules($match);
