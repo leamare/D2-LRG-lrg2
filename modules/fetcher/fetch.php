@@ -5,8 +5,15 @@
  * Even I would rather not look inside of what's hidden here.
  */
 
+function conn_restart(&$conn) {
+  global $lrg_sql_host, $lrg_sql_user, $lrg_sql_pass, $lrg_sql_db;
+  $conn->close();
+  $conn = new mysqli($lrg_sql_host, $lrg_sql_user, $lrg_sql_pass, $lrg_sql_db);
+  $conn->set_charset('utf8mb4');
+}
+
 function fetch($match) {
-  global $opendota, $conn, $rnum, $failed_matches, $scheduled, $scheduled_stratz, $t_teams, $t_players, $use_stratz, $require_stratz,
+  global $opendota, $conn, $rnum, $matches, $failed_matches, $scheduled, $scheduled_stratz, $t_teams, $t_players, $use_stratz, $require_stratz,
   $request_unparsed, $meta, $stratz_timeout_retries, $force_adding, $cache_dir, $lg_settings, $lrg_use_cache, $first_scheduled,
   $use_full_stratz, $scheduled_wait_period, $steamapikey, $force_await, $players_list, $rank_limit, $stratztoken, $ignore_stratz;
 
@@ -687,7 +694,10 @@ function fetch($match) {
     else {
       echo $conn->error."\n";
       if ($conn->error === "MySQL server has gone away") {
-        sleep(300); // if MySQL server is not responding and got carried away - wait for five minutes and go on
+        sleep(30);
+        conn_restart();
+        $matches[] = $match;
+        return false;
       }
     }
   }
@@ -702,12 +712,15 @@ function fetch($match) {
   else {
     echo "ERROR (".$conn->error."), reverting match.\n$sql\n";
     if ($conn->error === "MySQL server has gone away") {
-      sleep(300);
+      sleep(30);
+      conn_restart();
+      $matches[] = $match;
     }
     $conn->multi_query($err_query);
     do {
       $conn->store_result();
     } while($conn->next_result());
+    
     return null;
   }
 
@@ -729,7 +742,9 @@ function fetch($match) {
   else {
     echo "ERROR (".$conn->error."), reverting match.\n";
     if ($conn->error === "MySQL server has gone away") {
-      sleep(300);
+      sleep(30);
+      conn_restart();
+      $matches[] = $match;
     }
     $conn->multi_query($err_query);
     do {
@@ -758,6 +773,11 @@ function fetch($match) {
     if ($conn->multi_query($sql) === TRUE);
     else {
       echo "ERROR (".$conn->error."), reverting match.\n";
+      if ($conn->error === "MySQL server has gone away") {
+        sleep(30);
+        conn_restart();
+        $matches[] = $match;
+      }
       $conn->multi_query($err_query);
       do {
         $conn->store_result();
@@ -781,6 +801,11 @@ function fetch($match) {
       if ($conn->multi_query($sql) === TRUE);
       else {
         echo "ERROR (".$conn->error."), reverting match.\n";
+        if ($conn->error === "MySQL server has gone away") {
+          sleep(30);
+          conn_restart();
+          $matches[] = $match;
+        }
         $conn->multi_query($err_query);
         do {
           $conn->store_result();
@@ -807,6 +832,11 @@ function fetch($match) {
     if ($conn->multi_query($sql) === TRUE);
     else {
       echo "ERROR (".$conn->error."), reverting match.\n";
+      if ($conn->error === "MySQL server has gone away") {
+        sleep(30);
+        conn_restart();
+        $matches[] = $match;
+      }
       $conn->multi_query($err_query);
       do {
         $conn->store_result();
