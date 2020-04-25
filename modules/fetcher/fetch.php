@@ -5,8 +5,8 @@
  * Even I would rather not look inside of what's hidden here.
  */
 
-function conn_restart(&$conn) {
-  global $lrg_sql_host, $lrg_sql_user, $lrg_sql_pass, $lrg_sql_db;
+function conn_restart() {
+  global $conn, $lrg_sql_host, $lrg_sql_user, $lrg_sql_pass, $lrg_sql_db;
   $conn->close();
   $conn = new mysqli($lrg_sql_host, $lrg_sql_user, $lrg_sql_pass, $lrg_sql_db);
   $conn->set_charset('utf8mb4');
