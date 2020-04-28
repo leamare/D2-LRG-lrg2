@@ -22,7 +22,6 @@ $endpoints['pickban'] = function($mods, $vars, &$report) {
   });
 
   $ranks = [];
-  $context_copy = $context;
 
   $compound_ranking_sort = function($a, $b) use ($context_total_matches) {
     return compound_ranking_sort($a, $b, $context_total_matches);
