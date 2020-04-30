@@ -1,6 +1,6 @@
 # Dota 2 League Report Generator (D2-LRG-lrg2)
 
-## Current version: 2.4.2
+## Current version: 2.4.4
 
 This is the **lrg2** version that won't be updated any further.
 
@@ -52,6 +52,8 @@ D2LRG is made of four scripts, divided into smaller modules:
 - `fetcher` reads matches from .matchlist and requests OpenDota analysis data for every match in it. After that every match is added to database
 - `analyzer` makes series of SQL requests to get ready-to-use data and saves it as .report file as JSON data. It can be transferred to another D2LRG instance from now on and not linked to MySQL anymore
 - `view` is standalone module that reads .report file and allows easy to use basic web interface for it
+- `webapi` is the same as view, but for WebAPI calls
+- `backup` creates a tarball with all report data
 
 ### Why PHP and Why migrate to LRG-Simon
 
@@ -118,6 +120,19 @@ Parameters:
 * `-N / --name=` - specify league's name (if empty it will be asked anyway)
 * `-D / --desc=` - specify league's description (if empty it will be asked anyway)
 * `-S / --settings=` - set specific parameters for the league. You can check default template to see all the parameters that you can change
+
+### rg_backup
+
+Creates/restores backup.
+Backups are saved to `backups` folder.
+
+Parameters:
+* `-R` - restore mode, requires following parameters:
+  * `-l` - league tag
+  * `-f` - source tar.gz file
+* `-r` - generate report and add it to backup
+* `-F` - remove data after creating backup
+* `-o` - path for output file
 
 ### rg_fetcher
 

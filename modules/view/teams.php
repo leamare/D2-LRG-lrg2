@@ -14,10 +14,12 @@ function rg_view_generate_teams() {
     $res['summary'] = rg_view_generator_teams_summary();
   }
 
-  $res['grid'] = "";
-  if (check_module($parent."grid")) {
-    include_once("teams/grid.php");
-    $res['grid'] = rg_view_generate_teams_grid();
+  if (!empty($report['tvt'])) {
+    $res['grid'] = "";
+    if (check_module($parent."grid")) {
+      include_once("teams/grid.php");
+      $res['grid'] = rg_view_generate_teams_grid();
+    }
   }
 
   $res['profiles'] = [];
