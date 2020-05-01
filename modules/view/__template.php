@@ -1,4 +1,4 @@
-<?php  $__postfix = "?v=24042"; ?>
+<?php  $__postfix = "?v=24044"; ?>
 <!DOCTYPE html>
 <html lang="<?php echo $locale; ?>">
   <head>
@@ -9,17 +9,34 @@
      -->
     <?php
        if(file_exists("res/favicon.ico")) echo "<link rel=\"shortcut icon\" href=\"res/favicon.ico\" />";
+       $rep_sm_title = $instance_title;
+       if (!empty($leaguetag)) {
+            $rep_sm_title .= " - ".$report['league_name'];
+            $rep_sm_desc = ($report['league_name'] ?? "Tournaments")." Stats";
+        } else {
+            $rep_sm_desc = $instance_title;
+        }
+       
+       $host_link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 
+                "https" : "http") . "://" . $_SERVER['HTTP_HOST'] .  
+                dirname($_SERVER['REQUEST_URI']); 
     ?>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="Description" content="Dota 2 Statistics hub at Spectral.GG, made by Leamare<?php
-      if (isset($report['league_name'])) 
-        echo ", ".$report['league_name']." report"; ?>">
-    <title><?php
-      echo $instance_title;
-      if (!empty($leaguetag))
-          echo " - ".$report['league_name'];
-      ?></title>
+    <meta name="viewport" content="width=1200px, initial-scale=1.0">
+    <?php
+      echo "<meta name=\"title\" content=\"$rep_sm_title\">";
+      echo "<meta name=\"description\" content=\"$rep_sm_desc\">";
+      echo "<meta name=\"og:title\" content=\"$rep_sm_title\">";
+      echo "<meta name=\"og:description\" content=\"$rep_sm_title\">";
+      echo "<meta name=\"og:image\" content=\"".$host_link."/res/header_grafenium.jpg\">";
+      echo "<meta name=\"twitter:title\" content=\"$rep_sm_title\">";
+      echo "<meta name=\"twitter:description\" content=\"$rep_sm_title\">";
+      echo "<meta name=\"twitter:image\" content=\"".$host_link."/res/header_grafenium.jpg\">";
+      
+      echo "<title>$rep_sm_title</title>";
+      
+    ?>
+    
     <link href="res/valve_mimic.css<?php echo $__postfix; ?>" rel="stylesheet" type="text/css" />
     <link href="res/reports.css<?php echo $__postfix; ?>" rel="stylesheet" type="text/css" />
     <?php

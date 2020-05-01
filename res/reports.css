@@ -84,26 +84,24 @@ table.list-small:last-of-type:not(:nth-child(2n)) {
 
 table.list , table.pvp * {
 	font-size: 18px;
-	line-height: 34px;
+  line-height: 34px;
+  border-collapse: separate;
 }
 table.list td, table.list th {
-  padding-left: 30px;
+  padding-left: 25px;
 }
 
 table.list tr, table.pvp tr {
     height: 45px;
-}
-table.list td, table.pvp td {
-    border-bottom: 1px solid var(--table-border);
-    border-top: 1px solid var(--table-border);
     background-color: var(--table-bg);
-    opacity: 0.6;
+    opacity: 0.7;
 }
 table.list tr td {
   font-size: 18px;
   font-family: 'Radiance-SemiBold';
   letter-spacing: 1px;
   padding-top: 5px;
+  border-bottom: 1px solid var(--table-border);
 }
 
 table.list caption, table.pvp caption {
@@ -162,7 +160,7 @@ table thead tr:nth-of-type(2) {
   height: 26px !important;
 }
 table .separator {
-  border-left: 2px solid rgba(0,0,0,0.1);
+  border-left: 2px solid var(--table-border);
   margin-left: 2px;
 }
 
@@ -173,12 +171,12 @@ table .separator {
 
 
 
-table.list tr:hover td {
+table.list tbody tr:hover {
     opacity: 0.85;
 }
 
-table.list tr.highlighted td {
-    opacity: 1;
+table.list tr.highlighted {
+    opacity: 1 !important;
 }
 
 table.pvp {
