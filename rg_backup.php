@@ -3,7 +3,7 @@
 include_once("head.php");
 ini_set('memory_limit', '4000M');
 
-$options = getopt("RrFf:o:");
+$options = getopt("l:RrFf:o:");
 
 $restore = isset($options['R']);
 
