@@ -161,10 +161,14 @@ if ($restore) {
     $files[$t.'.csv'] = $fname;
 
     echo "OK.\n";
+    
+    $conn->close();
+    $conn = new mysqli($lrg_sql_host, $lrg_sql_user, $lrg_sql_pass, $lrg_sql_db);
   }
 
   unset($lines);
   unset($buffer);
+  $conn->close();
 
   if ($make_report) {
     echo "[ ] Generating report...";
@@ -179,11 +183,13 @@ if ($restore) {
   echo "OK.\n";
 
   if ($remove) {
+    $conn = new mysqli($lrg_sql_host, $lrg_sql_user, $lrg_sql_pass);
     echo "[ ] Removing database...";
     $sql = "DROP DATABASE $lrg_sql_db;";
     if ($conn->multi_query($sql) === FALSE)
       die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
     echo "OK.\n";
+    $conn->close();
   }
 
   $files['descriptor.json'] = "leagues/$lrg_league_tag.json";
