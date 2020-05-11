@@ -227,6 +227,7 @@
     "empty_instance_cap" => "Нет отчётов",
     "empty_instance_desc" => "На этом сервере нет отчётов",
     "main_reports" => "Список отчётов",
+    "recent_reports" => "Последние обновлённые",
     "all_reports" => "Все отчёты",
     "show_tags" => "Показать категории",
     "noreports" => "Нет отчётов",

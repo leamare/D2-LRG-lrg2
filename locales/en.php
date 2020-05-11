@@ -223,6 +223,7 @@
     "empty_instance_cap" => "Empty instance",
     "empty_instance_desc" => "This instance contains no reports",
     "main_reports" => "Reports List",
+    "recent_reports" => "Last updated",
     "all_reports" => "All Reports",
     "show_tags" => "Show Tags List",
     "noreports" => "No Reports",
