@@ -11,6 +11,8 @@ $locales = [
 
 $max_tabs = 12;
 
+$recent_last_limit = time() - 14*24*3600;
+
 $custom_head = "";
 
 $custom_body = "";

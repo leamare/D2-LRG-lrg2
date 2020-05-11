@@ -31,6 +31,21 @@ $endpoints['list'] = function($mods, $vars, &$report) use (&$endpoints, $cat, $c
       }
     } else if ($cat == "all") {
       $reps = $cache["reps"];
+    } else if ($cat == "recent") {
+      $reps = $cache["reps"];
+      usort($reps, function($a, $b) {
+        return $b['last_update'] - $a['last_update'];
+      });
+      if ($recent_last_limit ?? false) {
+        $limit = null;
+        foreach($reps as $k => $v) {
+          if ($v['last_update'] < $recent_last_limit) {
+            $limit = $k;
+            break;
+          }
+        }
+        $reps = array_slice($reps, 0, $limit);
+      }
     } else {
       throw new \Exception("No such category.");
     }
@@ -42,6 +57,7 @@ $endpoints['list'] = function($mods, $vars, &$report) use (&$endpoints, $cat, $c
   $cats_list = array_keys($cats);
   $cats_list[] = "all";
   $cats_list[] = "main";
+  $cats_list[] = "recent";
 
   return [
     "cat_selected" => $cat,

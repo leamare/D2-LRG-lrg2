@@ -50,6 +50,23 @@ if(!empty($cats)) {
   } else if ($cat == "all") {
     $head_name = $instance_name;
     $reps = $cache["reps"];
+  } else if ($cat == "recent") {
+    $head_name = locale_string("recent_reports");
+    // $recent_last_limit;
+    $reps = $cache["reps"];
+    usort($reps, function($a, $b) {
+      return $b['last_update'] - $a['last_update'];
+    });
+    if ($recent_last_limit ?? false) {
+      $limit = null;
+      foreach($reps as $k => $v) {
+        if ($v['last_update'] < $recent_last_limit) {
+          $limit = $k;
+          break;
+        }
+      }
+      $reps = array_slice($reps, 0, $limit);
+    }
   } else {
     $head_name = $cat;
     $reps = [];
@@ -72,6 +89,9 @@ if(isset($cats) && !empty($cats)) {
   $modules .= "<a class=\"category".(isset($cat) && "main" == $cat ? " active" : "").
               "\" href=\"?cat=main".(empty($linkvars) ? "" : "&".$linkvars).
               "\">".locale_string("main_reports")."</a>";
+  $modules .= "<a class=\"category".(isset($cat) && "recent" == $cat ? " active" : "").
+              "\" href=\"?cat=recent".(empty($linkvars) ? "" : "&".$linkvars).
+              "\">".locale_string("recent_reports")."</a>";
 
   foreach($cats as $tag => $desc) {
     if($tag == $hidden_cat || (isset($desc['hidden']) && $desc['hidden'])) continue;
@@ -124,12 +144,14 @@ if (sizeof($cache['reps']) === 0) {
     "<th>".locale_string("end_date")."</th>".
     "</tr></thead>";
 
-  uasort($reps, function($a, $b) {
-    if($a['last_match']['date'] == $b['last_match']['date']) {
-      if($a['first_match']['date'] == $b['first_match']['date']) return 0;
-      else return ($a['first_match']['date'] < $b['first_match']['date']) ? -1 : 1;
-    } else return ($a['last_match']['date'] < $b['last_match']['date']) ? 1 : -1;
-  });
+  if ($cat !== "recent") {
+    uasort($reps, function($a, $b) {
+      if($a['last_match']['date'] == $b['last_match']['date']) {
+        if($a['first_match']['date'] == $b['first_match']['date']) return 0;
+        else return ($a['first_match']['date'] < $b['first_match']['date']) ? -1 : 1;
+      } else return ($a['last_match']['date'] < $b['last_match']['date']) ? 1 : -1;
+    });
+  }
 
   foreach($reps as $report) {
     if ($report['short_fname'][0] == '!') continue;
