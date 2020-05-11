@@ -144,7 +144,7 @@ if (sizeof($cache['reps']) === 0) {
     "<th>".locale_string("end_date")."</th>".
     "</tr></thead>";
 
-  if ($cat !== "recent") {
+  if (!isset($cat) && $cat !== "recent") {
     uasort($reps, function($a, $b) {
       if($a['last_match']['date'] == $b['last_match']['date']) {
         if($a['first_match']['date'] == $b['first_match']['date']) return 0;
