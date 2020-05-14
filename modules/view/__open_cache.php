@@ -16,10 +16,6 @@ if (file_exists($cache_file)) {
     if(compare_release_ver($cache['ver'], $lg_version) < 0) {
       throw(new Exception("Old cache version"));
     }
-
-    foreach($cache['reps'] as &$r) {
-      $r['last_update'] = $cache['files'][ $r['file'] ][2];
-    }
   } catch (Exception $e) {
     $cache_update = true;
     $cache = [

@@ -25,6 +25,11 @@ foreach($dir as $fname) {
           filesize($full_fname),
           filemtime($full_fname)
         ];
+        // It's kind of overhead to store last_update time here
+        // but honestly I don't want to inject it later every time
+        // and I kind of need it
+        // so whatever
+        $tmp['last_update'] = $cache['files'][ $a['file'] ][2];
         $cache['reps'][ $cache['files'][$fname][0] ] = $tmp;
         unset($tmp);
       }
