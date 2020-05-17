@@ -29,7 +29,7 @@ foreach($dir as $fname) {
         // but honestly I don't want to inject it later every time
         // and I kind of need it
         // so whatever
-        $tmp['last_update'] = $cache['files'][ $a['file'] ][2];
+        $tmp['last_update'] = $cache['files'][ $tmp['file'] ][2];
         $cache['reps'][ $cache['files'][$fname][0] ] = $tmp;
         unset($tmp);
       }
