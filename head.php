@@ -2,6 +2,7 @@
 //ini_set('memory_limit', '1024M');
 require_once("modules/commons/versions.php");
 require_once("modules/commons/readline.php");
+require_once("modules/commons/instaquery.php");
 
 if(isset($argv)) {
     $options = getopt("l:m:d:FfKT:o:c:SsRrZQw:LAP:N:");
@@ -50,4 +51,4 @@ if(isset($argv)) {
     $lg_settings = json_decode($lg_settings, true);
   }
   $lrg_use_cache = true;
-?>
+
