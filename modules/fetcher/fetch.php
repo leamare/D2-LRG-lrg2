@@ -46,7 +46,32 @@ function fetch($match) {
       return true;
   }
 
-  if($lrg_use_cache && file_exists("$cache_dir/".$match.".json")) {
+  if($lrg_use_cache && file_exists("$cache_dir/".$match.".lrgcache.json")) {
+    echo("Reusing cache.");
+    $json = file_get_contents("$cache_dir/".$match.".lrgcache.json");
+    $matchdata = json_decode($json, true);
+    $t_match = $matchdata['matches'];
+    $t_matchlines = $matchdata['matchlines'];
+    $t_draft = $matchdata['draft'];
+    $t_adv_matchlines = $matchdata['adv_matchlines'];
+    foreach($matchdata['players'] as $p) {
+      if(!isset($t_players[$p['playerid']])) {
+        $t_new_players[$p['playerid']] = $p['nickname'];
+      }
+    }
+    if (isset($t_team_matches)) {
+      $t_team_matches = $matchdata['teams_matches'];
+      foreach($matchdata['teams'] as $t) {
+        if (!isset($t_teams[$t['teamid']])) {
+          $t_teams[$matchdata['teams']['teamid']] = array(
+            "name" => $t['name'],
+            "tag" => $t['tag'],
+            "added" => false
+          );
+        }
+      }
+    }
+  } elseif($lrg_use_cache && file_exists("$cache_dir/".$match.".json")) {
     echo("Reusing cache.");
     $json = file_get_contents("$cache_dir/".$match.".json");
     $matchdata = json_decode($json, true);
@@ -317,354 +342,358 @@ function fetch($match) {
 
   unset($json);
 
-  for($i=0; $i<2; $i++, $teamid = null) {
-    $tag = $i ? 'radiant_team' : 'dire_team';
-    $teamid = null;
-  
-    if (!empty($teamid) && isset($match_rules['team'][ $matchdata[$tag."_id"] ]))
-      $teamid = (int)$match_rules['team'][ $teamid ];
-  
-    if (isset($match_rules['side'][ $tag ]) || isset($match_rules['side'][ $i ? 'radiant' : 'dire' ]) || isset($match_rules['side'][ $i ]))
-      $teamid = (int) ($match_rules['side'][ $tag ] ?? $match_rules['side'][ $i ? 'radiant' : 'dire' ] ?? $match_rules['side'][ $i ] ?? $teamid);
-  
-    if(empty($teamid)) continue;
+  if (empty($t_match)) {
+    for($i=0; $i<2; $i++, $teamid = null) {
+      $tag = $i ? 'radiant_team' : 'dire_team';
+      $teamid = null;
+    
+      if (!empty($teamid) && isset($match_rules['team'][ $matchdata[$tag."_id"] ]))
+        $teamid = (int)$match_rules['team'][ $teamid ];
+    
+      if (isset($match_rules['side'][ $tag ]) || isset($match_rules['side'][ $i ? 'radiant' : 'dire' ]) || isset($match_rules['side'][ $i ]))
+        $teamid = (int) ($match_rules['side'][ $tag ] ?? $match_rules['side'][ $i ? 'radiant' : 'dire' ] ?? $match_rules['side'][ $i ] ?? $teamid);
+    
+      if(empty($teamid)) continue;
 
-    $json = file_get_contents('https://api.steampowered.com/IDOTA2Match_570/GetTeamInfoByTeamID/v001/?key='.$steamapikey.'&teams_requested=1&start_at_team_id='.$teamid);
-    $team = json_decode($json, true);
+      $json = file_get_contents('https://api.steampowered.com/IDOTA2Match_570/GetTeamInfoByTeamID/v001/?key='.$steamapikey.'&teams_requested=1&start_at_team_id='.$teamid);
+      $team = json_decode($json, true);
 
-    $matchdata[$tag] = [
-      'team_id' => $teamid,
-      'name' => $team['result']['teams'][0]['name'],
-      'tag' => $team['result']['teams'][0]['tag'] ?? generate_tag($team['result']['teams'][0]['name']),
-    ];
-  }
+      $matchdata[$tag] = [
+        'team_id' => $teamid,
+        'name' => $team['result']['teams'][0]['name'],
+        'tag' => $team['result']['teams'][0]['tag'] ?? generate_tag($team['result']['teams'][0]['name']),
+      ];
+    }
 
-  $t_match['matchid'] = $match;
-  $t_match['version'] = get_patchid($matchdata['start_time'], $matchdata['patch'], $meta);
-  $t_match['radiantWin'] = $matchdata['radiant_win'];
-  $t_match['duration'] = $matchdata['duration'];
-  $t_match['modeID'] = $matchdata['game_mode'];
-  $t_match['leagueID'] = $matchdata['leagueid'];
-  $t_match['cluster']  = $matchdata['cluster'] ?? 0;
-  $t_match['date'] = $matchdata['start_time'];
-  if (isset($matchdata['stomp']))
-      $t_match['stomp'] = $matchdata['stomp'];
-  else $t_match['stomp'] = $bad_replay ? 0 : $matchdata['loss'];
-  if (isset($matchdata['comeback']))
-      $t_match['comeback'] = $matchdata['comeback'];
-  else $t_match['comeback'] = $bad_replay ? 0 : $matchdata['throw'];
+    $t_match['matchid'] = $match;
+    $t_match['version'] = get_patchid($matchdata['start_time'], $matchdata['patch'], $meta);
+    $t_match['radiantWin'] = $matchdata['radiant_win'];
+    $t_match['duration'] = $matchdata['duration'];
+    $t_match['modeID'] = $matchdata['game_mode'];
+    $t_match['leagueID'] = $matchdata['leagueid'];
+    $t_match['cluster']  = $matchdata['cluster'] ?? 0;
+    $t_match['date'] = $matchdata['start_time'];
+    if (isset($matchdata['stomp']))
+        $t_match['stomp'] = $matchdata['stomp'];
+    else $t_match['stomp'] = $bad_replay ? 0 : $matchdata['loss'];
+    if (isset($matchdata['comeback']))
+        $t_match['comeback'] = $matchdata['comeback'];
+    else $t_match['comeback'] = $bad_replay ? 0 : $matchdata['throw'];
 
-  if ($lg_settings['main']['teams'] && (isset($matchdata['radiant_team']) || isset($matchdata['dire_team']))) {
-    for($i=0; $i<2; $i++) {
-      $tag = !$i ? 'dire_team' : 'radiant_team';
-      if(!isset($matchdata[$tag])) continue;
+    if ($lg_settings['main']['teams'] && (isset($matchdata['radiant_team']) || isset($matchdata['dire_team']))) {
+      for($i=0; $i<2; $i++) {
+        $tag = !$i ? 'dire_team' : 'radiant_team';
+        if(!isset($matchdata[$tag])) continue;
 
-      $t_team_matches[] = array(
-        "matchid" => $match,
-        "teamid"  => $matchdata[$tag]['team_id'],
-        "is_radiant" => $i,
-      );
-      if (!isset($t_teams[$matchdata[$tag]['team_id']])) {
-        $t_teams[$matchdata[$tag]['team_id']] = array(
-          "name" => $matchdata[$tag]['name'],
-          "tag" => $matchdata[$tag]['tag'],
-          "added" => false
+        $t_team_matches[] = array(
+          "matchid" => $match,
+          "teamid"  => $matchdata[$tag]['team_id'],
+          "is_radiant" => $i,
         );
+        if (!isset($t_teams[$matchdata[$tag]['team_id']])) {
+          $t_teams[$matchdata[$tag]['team_id']] = array(
+            "name" => $matchdata[$tag]['name'],
+            "tag" => $matchdata[$tag]['tag'],
+            "added" => false
+          );
+        }
       }
     }
   }
   
-  
-  
-  $i = sizeof($t_matchlines);
-  for ($j=0, $sz=10; $j<$sz; $j++) {
-      $t_matchlines[$i]['matchid'] = $match;
+  if (empty($t_matchlines)) {
+    $i = sizeof($t_matchlines);
+    for ($j=0, $sz=10; $j<$sz; $j++) {
+        $t_matchlines[$i]['matchid'] = $match;
 
-      # for wrong numbers of players in opendota response
-      if (!isset($matchdata['players'][$j]['hero_id'])) {
-        $sz++;
-        continue;
-      }
-      
-      # support for botmatches
-      if ($matchdata['players'][$j]['account_id'] != null)
-        $t_matchlines[$i]['playerid'] = $matchdata['players'][$j]['account_id'];
-      else {
-        if (isset($matchdata['radiant_team'])) {
-          if($matchdata['players'][$j]['isRadiant'])
-              $matchdata['players'][$j]['account_id'] = $matchdata['radiant_team']['team_id'];
-          else
-              $matchdata['players'][$j]['account_id'] = $matchdata['dire_team']['team_id'];
-        } else $matchdata['players'][$j]['account_id'] = 1;
-
-        $matchdata['players'][$j]['account_id'] *= (-1)*$matchdata['players'][$j]['hero_id'];
-        $t_matchlines[$i]['playerid'] = $matchdata['players'][$j]['account_id'];
-      }
-
-      $pid = (int)$matchdata['players'][$j]['account_id'];
-      if(!isset($t_players[$pid])) {
-        if ($pid < 0) {
-          $t_new_players[$pid] = $meta['heroes'][$matchdata['players'][$j]['hero_id']]['name']." Player";
-        } else {
-          if (isset($matchdata['players'][$j]["name"]) && $matchdata['players'][$j]["name"] != null) {
-            $t_new_players[$pid] = $matchdata['players'][$j]["name"];
-          } else if ($matchdata['players'][$j]["personaname"] != null) {
-            $t_new_players[$pid] = $matchdata['players'][$j]["personaname"];
-          } else
-            $t_new_players[$pid] = "Player ".$pid;
-        }
-
-      }
-
-      // using fetcher rules
-      if (isset($match_rules['player'][ $t_matchlines[$i]['playerid'] ]))
-        $t_matchlines[$i]['playerid'] = (int)$match_rules['player'][ $t_matchlines[$i]['playerid'] ];
-
-      if (isset($match_rules['pslot'][$i]))
-        $t_matchlines[$i]['playerid'] = (int)$match_rules['pslot'][$i];
-
-      $t_matchlines[$i]['heroid'] = $matchdata['players'][$j]['hero_id'];
-      $t_matchlines[$i]['isRadiant'] = $matchdata['players'][$j]['isRadiant'];
-      $t_matchlines[$i]['level'] = $matchdata['players'][$j]['level'];
-      $t_matchlines[$i]['kills'] = $matchdata['players'][$j]['kills'];
-      $t_matchlines[$i]['deaths'] = $matchdata['players'][$j]['deaths'];
-      $t_matchlines[$i]['assists'] = $matchdata['players'][$j]['assists'];
-      $t_matchlines[$i]['networth'] = $matchdata['players'][$j]['total_gold'];
-      $t_matchlines[$i]['gpm'] = $matchdata['players'][$j]['gold_per_min'];
-      $t_matchlines[$i]['xpm'] = $matchdata['players'][$j]['xp_per_min'];
-      $t_matchlines[$i]['heal'] = $matchdata['players'][$j]['hero_healing'];
-      $t_matchlines[$i]['heroDamage'] = $matchdata['players'][$j]['hero_damage'];
-      $t_matchlines[$i]['towerDamage'] = $matchdata['players'][$j]['tower_damage'];
-      $t_matchlines[$i]['lasthits'] = $matchdata['players'][$j]['last_hits'];
-      $t_matchlines[$i]['denies'] = $matchdata['players'][$j]['denies'];
-
-
-      $t_adv_matchlines[$i]['matchid'] = $match;
-      $t_adv_matchlines[$i]['playerid'] = $matchdata['players'][$j]['account_id'];
-      $t_adv_matchlines[$i]['heroid'] = $matchdata['players'][$j]['hero_id'];
-
-      if (!$bad_replay) {
-        $t_adv_matchlines[$i]['lh10'] = $matchdata['players'][$j]['lh_t'][10];
-        if ($matchdata['players'][$j]['lane_role'] == 5)
-            $matchdata['players'][$j]['lane_role'] = 4; # we don't care about different jungles
-        //if ($matchdata['players'][$j]['is_roaming'])
-        //    $matchdata['players'][$j]['lane_role'] = 5;
-        $t_adv_matchlines[$i]['lane'] = $matchdata['players'][$j]['lane_role'];
-      }
-
-      # trying to decide, is it a core
-      $support_indicators = 0;
-      //if ($matchdata['players'][$j]['lane_role'] == 4) $support_indicators+=2;
-      if (!$bad_replay) {
-        if ($matchdata['players'][$j]['lh_t'][5] <= 6) $support_indicators++;
-        if ($matchdata['players'][$j]['lh_t'][3] <= 2) $support_indicators++;
-
-        if ($matchdata['players'][$j]['obs_placed'] > 0) $support_indicators++;
-        if ($matchdata['players'][$j]['obs_placed'] > 3) $support_indicators++;
-        if ($matchdata['players'][$j]['obs_placed'] > 8) $support_indicators++;
-        if ($matchdata['players'][$j]['obs_placed'] > 12) $support_indicators++;
-        if ($matchdata['players'][$j]['sen_placed'] > 6) $support_indicators++;
-
-        if ($matchdata['players'][$j]['lane_efficiency'] < 0.55 && $matchdata['players'][$j]['win']) $support_indicators++;
-        if ($matchdata['players'][$j]['lane_efficiency'] < 0.50) $support_indicators++;
-        if ($matchdata['players'][$j]['lane_efficiency'] < 0.35) $support_indicators++;
-        if ($matchdata['players'][$j]['is_roaming'] || $matchdata['players'][$j]['lane_role'] == 4) $support_indicators+=5;
-      }
-
-      if ($matchdata['players'][$j]['gold_per_min'] < 420 && $matchdata['players'][$j]['win']) $support_indicators++;
-      if ($matchdata['players'][$j]['gold_per_min'] < 355) $support_indicators++;
-      if ($matchdata['players'][$j]['gold_per_min'] < 290) $support_indicators++;
-
-      if ($matchdata['players'][$j]['hero_damage']*60/$matchdata['duration'] < 375 && $matchdata['players'][$j]['win']) $support_indicators++;
-      if ($matchdata['players'][$j]['hero_damage']*60/$matchdata['duration'] < 275 && !$matchdata['players'][$j]['win']) $support_indicators++;
-
-      if ($matchdata['players'][$j]['last_hits']*60/$matchdata['duration'] < 2.5) $support_indicators++;
-
-      # TODO compare to teammates on the same lane/role
-
-      if (!$bad_replay && $support_indicators > 4) $t_adv_matchlines[$i]['is_core'] = 0;
-      else if ($bad_replay && $support_indicators > 2) $t_adv_matchlines[$i]['is_core'] = 0;
-      else $t_adv_matchlines[$i]['is_core'] = 1;
-
-      if (!$bad_replay) {
-        if ($t_adv_matchlines[$i]['is_core'] && $matchdata['players'][$j]['is_roaming'])
-          $t_adv_matchlines[$i]['lane'] = $matchdata['players'][$j]['lane_role'];
-        else if (!$t_adv_matchlines[$i]['is_core'] && $matchdata['players'][$j]['is_roaming'])
-          $t_adv_matchlines[$i]['lane'] = 5;
-        # Gonna put roaming cores into junglers for now
-      } else {
-        # We can't determine hero's lane, so we're going to set it as the most popular value for that hero
-        # if it's core. Supports are going to be roaming.
-        if ($t_adv_matchlines[$i]['is_core']) {
-          #$t_adv_matchlines[$i]['heroid']
-          $sql = "SELECT a.lane, COUNT(DISTINCT matchid) mc FROM".
-                  "(select * from `adv_matchlines` WHERE heroid=".$t_adv_matchlines[$i]['heroid']." limit 35) a ".
-                  "GROUP BY a.lane ORDER BY mc DESC";
-
-          if ($conn->multi_query($sql) !== TRUE) die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
-
-          $query_res = $conn->store_result();
-
-          $row = $query_res->fetch_row();
-          $t_adv_matchlines[$i]['lane'] = $row[0];
-          if($row[0] == 5 || $row[0] == 4)
-            $t_adv_matchlines[$i]['is_core'] = 0;
-
-          $query_res->free_result();
-          # It's not ideal, but it works for now.
-        } else {
-          $t_adv_matchlines[$i]['lane'] = 4;
-        }
-
-      }
-
-
-      if (!$bad_replay) {
-        $t_adv_matchlines[$i]['lane_efficiency'] = $matchdata['players'][$j]['lane_efficiency'];
-        $t_adv_matchlines[$i]['observers'] = $matchdata['players'][$j]['obs_placed'];
-        $t_adv_matchlines[$i]['sentries'] = $matchdata['players'][$j]['sen_placed'];
-        $t_adv_matchlines[$i]['couriers_killed'] = $matchdata['players'][$j]['courier_kills'];
-        $t_adv_matchlines[$i]['roshans_killed'] = $matchdata['players'][$j]['roshan_kills'];
-        $t_adv_matchlines[$i]['wards_destroyed'] = $matchdata['players'][$j]['observer_kills'];
-        if (count($matchdata['players'][$j]['multi_kills']) == 0) $t_adv_matchlines[$i]['max_multikill'] = 0;
-        else {
-            $tmp = array_keys($matchdata['players'][$j]['multi_kills']);
-            $t_adv_matchlines[$i]['max_multikill'] = end($tmp);
-            unset($tmp);
-        }
-        if (count($matchdata['players'][$j]['kill_streaks']) == 0) $t_adv_matchlines[$i]['max_streak'] = 0;
-        else {
-            $tmp = array_keys($matchdata['players'][$j]['kill_streaks']);
-            $t_adv_matchlines[$i]['max_streak'] = end($tmp);
-            unset($tmp);
-        }
-        $t_adv_matchlines[$i]['stacks'] = $matchdata['players'][$j]['camps_stacked'];
-        $t_adv_matchlines[$i]['time_dead'] = $matchdata['players'][$j]['life_state_dead'];
-        $t_adv_matchlines[$i]['buybacks'] = $matchdata['players'][$j]['buyback_count'];
-        $t_adv_matchlines[$i]['pings'] = isset($matchdata['players'][$j]['pings']) ? $matchdata['players'][$j]['pings'] : 0;
-        $t_adv_matchlines[$i]['stuns'] = $matchdata['players'][$j]['stuns'];
-        $t_adv_matchlines[$i]['teamfight_part'] = $matchdata['players'][$j]['teamfight_participation'];
-        $t_adv_matchlines[$i]['damage_taken'] = 0;
-        foreach($matchdata['players'][$j]['damage_inflictor_received'] as $key => $instance) {
-          $t_adv_matchlines[$i]['damage_taken'] += $instance;
-        }
-      }
-      $i++;
-  }
-
-  $i = sizeof($t_draft);
-
-  # OpenDota doesn't have information about draft for Ranked All Pick
-  # Game Mode IDs:
-  # 2  = Captain's Mode
-  # 9  = Reverse Captain's Mode
-  # 16 = Captain's Draft
-  #
-  # versions:
-  # <= 20 = before 7.07
-  # > 20 = after 7.07
-  # TODO Draft information from Stratz for ranked all pick (22)
-
-
-  if ($matchdata['game_mode'] == 2 || $matchdata['game_mode'] == 9) {
-      if (isset($matchdata['picks_bans']))
-        $drafts =& $matchdata['picks_bans'];
-      else 
-        $drafts =& $matchdata['draft_timings'];
-
-      $stage = 0;
-      $last_stage_pick = null;
-
-      uasort($drafts, function($a, $b) {
-        if ($a == $b) {
-          $pick_a = $a['is_pick'] ?? $a['pick'];
-          $pick_b = $b['is_pick'] ?? $b['pick'];
-          if (!$pick_a && $pick_b) return -1;
-          else if ($pick_a && !$pick_b) return 1;
-          return 0;
-        }
-        return ($a['order'] < $b['order']) ? -1 : 1;
-      });
-
-      foreach ($drafts as $draft_instance) {
-          if (!isset($draft_instance['hero_id']) || !$draft_instance['hero_id'])
-            continue;
-          
-          $pick = $draft_instance['is_pick'] ?? $draft_instance['pick'];
-          $team = $draft_instance['team'] ?? $draft_instance['active_team']-2;
-
-          // if it's the first draft stage or  a switch from bans to picks was made
-          if ($last_stage_pick !== $pick && !$pick) {
-            $stage++;
-          }
-
-          $draft_stage = $stage;
-          
-          $last_stage_pick = $pick;
-
-          $t_draft[$i]['matchid'] = $match;
-          $t_draft[$i]['is_radiant'] = $team ? 0 : 1;
-          $t_draft[$i]['is_pick'] = $pick;
-          $t_draft[$i]['hero_id'] = $draft_instance['hero_id'];
-          $t_draft[$i]['stage'] = $draft_stage;
-
-          $i++;
-      }
-  } else if ($matchdata['game_mode'] == 16) {
-      foreach ($matchdata['picks_bans'] as $draft_instance) {
-          if (!isset($draft_instance['hero_id']) || !$draft_instance['hero_id'])
-            continue;
-      
-          $t_draft[$i]['matchid'] = $match;
-          $t_draft[$i]['is_radiant'] = $draft_instance['team'] ? 0 : 1;
-          $t_draft[$i]['is_pick'] = $draft_instance['is_pick'];
-          $t_draft[$i]['hero_id'] = $draft_instance['hero_id'];
-
-          if ($draft_instance['is_pick']) {
-              if ($draft_instance['order'] < 11) $t_draft[$i]['stage'] = 1;
-              else if ($draft_instance['order'] < 15) $t_draft[$i]['stage'] = 2;
-              else $t_draft[$i]['stage'] = 3;
-          } else {
-              $t_draft[$i]['stage'] = 1;
-          }
-          $i++;
-      }
-  } else if (!empty($matchdata['picks_bans_stratz']) && ($matchdata['game_mode'] == 22 || $matchdata['game_mode'] == 3)) {
-    foreach ($matchdata['picks_bans_stratz'] as $draft_instance) {
-      // I'm skipping opendota picks_bans information since it lacks information on
-      // who nominated hero to ban and is missing pick order info
-      // altho I guess I should reconsider adding it later
-      if (!isset($draft_instance['isRadiant'])) continue;
-      if (!$draft_instance['isPick']) {
-        if(!$draft_instance['wasBannedSuccessfully']) continue;
-        $t_draft[$i]['matchid'] = $match;
-        $t_draft[$i]['is_radiant'] = $draft_instance['isRadiant'];
-        $t_draft[$i]['is_pick'] = 0;
-        $t_draft[$i]['hero_id'] = $draft_instance['bannedHeroId'];
-        $t_draft[$i]['stage'] = 1;
-      } else {
-        $t_draft[$i]['matchid'] = $match;
-        $t_draft[$i]['is_radiant'] = $draft_instance['isRadiant'];
-        $t_draft[$i]['is_pick'] = 1;
-        $t_draft[$i]['hero_id'] = $draft_instance['heroId'];
-        if ($draft_instance['order'] < 4) $t_draft[$i]['stage'] = 1;
-        else if ($draft_instance['order'] < 8) $t_draft[$i]['stage'] = 2;
-        else $t_draft[$i]['stage'] = 3;
-      }
-      $i++;
-    }
-  }
-  
-  if (empty($t_draft)) {
-    foreach($matchdata['players'] as $draft_instance) {
-        if (!isset($draft_instance['hero_id']) || !$draft_instance['hero_id'])
+        # for wrong numbers of players in opendota response
+        if (!isset($matchdata['players'][$j]['hero_id'])) {
+          $sz++;
           continue;
-        $t_draft[$i]['matchid'] = $match;
-        $t_draft[$i]['is_radiant'] = $draft_instance['isRadiant'];
-        $t_draft[$i]['is_pick'] = 1;
-        $t_draft[$i]['hero_id'] = $draft_instance['hero_id'];
-        $t_draft[$i]['stage'] = 1;
+        }
+        
+        # support for botmatches
+        if ($matchdata['players'][$j]['account_id'] != null)
+          $t_matchlines[$i]['playerid'] = $matchdata['players'][$j]['account_id'];
+        else {
+          if (isset($matchdata['radiant_team'])) {
+            if($matchdata['players'][$j]['isRadiant'])
+                $matchdata['players'][$j]['account_id'] = $matchdata['radiant_team']['team_id'];
+            else
+                $matchdata['players'][$j]['account_id'] = $matchdata['dire_team']['team_id'];
+          } else $matchdata['players'][$j]['account_id'] = 1;
+
+          $matchdata['players'][$j]['account_id'] *= (-1)*$matchdata['players'][$j]['hero_id'];
+          $t_matchlines[$i]['playerid'] = $matchdata['players'][$j]['account_id'];
+        }
+
+        $pid = (int)$matchdata['players'][$j]['account_id'];
+        if(!isset($t_players[$pid])) {
+          if ($pid < 0) {
+            $t_new_players[$pid] = $meta['heroes'][$matchdata['players'][$j]['hero_id']]['name']." Player";
+          } else {
+            if (isset($matchdata['players'][$j]["name"]) && $matchdata['players'][$j]["name"] != null) {
+              $t_new_players[$pid] = $matchdata['players'][$j]["name"];
+            } else if ($matchdata['players'][$j]["personaname"] != null) {
+              $t_new_players[$pid] = $matchdata['players'][$j]["personaname"];
+            } else
+              $t_new_players[$pid] = "Player ".$pid;
+          }
+
+        }
+
+        // using fetcher rules
+        if (isset($match_rules['player'][ $t_matchlines[$i]['playerid'] ]))
+          $t_matchlines[$i]['playerid'] = (int)$match_rules['player'][ $t_matchlines[$i]['playerid'] ];
+
+        if (isset($match_rules['pslot'][$i]))
+          $t_matchlines[$i]['playerid'] = (int)$match_rules['pslot'][$i];
+
+        $t_matchlines[$i]['heroid'] = $matchdata['players'][$j]['hero_id'];
+        $t_matchlines[$i]['isRadiant'] = $matchdata['players'][$j]['isRadiant'];
+        $t_matchlines[$i]['level'] = $matchdata['players'][$j]['level'];
+        $t_matchlines[$i]['kills'] = $matchdata['players'][$j]['kills'];
+        $t_matchlines[$i]['deaths'] = $matchdata['players'][$j]['deaths'];
+        $t_matchlines[$i]['assists'] = $matchdata['players'][$j]['assists'];
+        $t_matchlines[$i]['networth'] = $matchdata['players'][$j]['total_gold'];
+        $t_matchlines[$i]['gpm'] = $matchdata['players'][$j]['gold_per_min'];
+        $t_matchlines[$i]['xpm'] = $matchdata['players'][$j]['xp_per_min'];
+        $t_matchlines[$i]['heal'] = $matchdata['players'][$j]['hero_healing'];
+        $t_matchlines[$i]['heroDamage'] = $matchdata['players'][$j]['hero_damage'];
+        $t_matchlines[$i]['towerDamage'] = $matchdata['players'][$j]['tower_damage'];
+        $t_matchlines[$i]['lasthits'] = $matchdata['players'][$j]['last_hits'];
+        $t_matchlines[$i]['denies'] = $matchdata['players'][$j]['denies'];
+
+
+        $t_adv_matchlines[$i]['matchid'] = $match;
+        $t_adv_matchlines[$i]['playerid'] = $matchdata['players'][$j]['account_id'];
+        $t_adv_matchlines[$i]['heroid'] = $matchdata['players'][$j]['hero_id'];
+
+        if (!$bad_replay) {
+          $t_adv_matchlines[$i]['lh10'] = $matchdata['players'][$j]['lh_t'][10];
+          if ($matchdata['players'][$j]['lane_role'] == 5)
+              $matchdata['players'][$j]['lane_role'] = 4; # we don't care about different jungles
+          //if ($matchdata['players'][$j]['is_roaming'])
+          //    $matchdata['players'][$j]['lane_role'] = 5;
+          $t_adv_matchlines[$i]['lane'] = $matchdata['players'][$j]['lane_role'];
+        }
+
+        # trying to decide, is it a core
+        $support_indicators = 0;
+        //if ($matchdata['players'][$j]['lane_role'] == 4) $support_indicators+=2;
+        if (!$bad_replay) {
+          if ($matchdata['players'][$j]['lh_t'][5] <= 6) $support_indicators++;
+          if ($matchdata['players'][$j]['lh_t'][3] <= 2) $support_indicators++;
+
+          if ($matchdata['players'][$j]['obs_placed'] > 0) $support_indicators++;
+          if ($matchdata['players'][$j]['obs_placed'] > 3) $support_indicators++;
+          if ($matchdata['players'][$j]['obs_placed'] > 8) $support_indicators++;
+          if ($matchdata['players'][$j]['obs_placed'] > 12) $support_indicators++;
+          if ($matchdata['players'][$j]['sen_placed'] > 6) $support_indicators++;
+
+          if ($matchdata['players'][$j]['lane_efficiency'] < 0.55 && $matchdata['players'][$j]['win']) $support_indicators++;
+          if ($matchdata['players'][$j]['lane_efficiency'] < 0.50) $support_indicators++;
+          if ($matchdata['players'][$j]['lane_efficiency'] < 0.35) $support_indicators++;
+          if ($matchdata['players'][$j]['is_roaming'] || $matchdata['players'][$j]['lane_role'] == 4) $support_indicators+=5;
+        }
+
+        if ($matchdata['players'][$j]['gold_per_min'] < 420 && $matchdata['players'][$j]['win']) $support_indicators++;
+        if ($matchdata['players'][$j]['gold_per_min'] < 355) $support_indicators++;
+        if ($matchdata['players'][$j]['gold_per_min'] < 290) $support_indicators++;
+
+        if ($matchdata['players'][$j]['hero_damage']*60/$matchdata['duration'] < 375 && $matchdata['players'][$j]['win']) $support_indicators++;
+        if ($matchdata['players'][$j]['hero_damage']*60/$matchdata['duration'] < 275 && !$matchdata['players'][$j]['win']) $support_indicators++;
+
+        if ($matchdata['players'][$j]['last_hits']*60/$matchdata['duration'] < 2.5) $support_indicators++;
+
+        # TODO compare to teammates on the same lane/role
+
+        if (!$bad_replay && $support_indicators > 4) $t_adv_matchlines[$i]['is_core'] = 0;
+        else if ($bad_replay && $support_indicators > 2) $t_adv_matchlines[$i]['is_core'] = 0;
+        else $t_adv_matchlines[$i]['is_core'] = 1;
+
+        if (!$bad_replay) {
+          if ($t_adv_matchlines[$i]['is_core'] && $matchdata['players'][$j]['is_roaming'])
+            $t_adv_matchlines[$i]['lane'] = $matchdata['players'][$j]['lane_role'];
+          else if (!$t_adv_matchlines[$i]['is_core'] && $matchdata['players'][$j]['is_roaming'])
+            $t_adv_matchlines[$i]['lane'] = 5;
+          # Gonna put roaming cores into junglers for now
+        } else {
+          # We can't determine hero's lane, so we're going to set it as the most popular value for that hero
+          # if it's core. Supports are going to be roaming.
+          if ($t_adv_matchlines[$i]['is_core']) {
+            #$t_adv_matchlines[$i]['heroid']
+            $sql = "SELECT a.lane, COUNT(DISTINCT matchid) mc FROM".
+                    "(select * from `adv_matchlines` WHERE heroid=".$t_adv_matchlines[$i]['heroid']." limit 35) a ".
+                    "GROUP BY a.lane ORDER BY mc DESC";
+
+            if ($conn->multi_query($sql) !== TRUE) die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+
+            $query_res = $conn->store_result();
+
+            $row = $query_res->fetch_row();
+            $t_adv_matchlines[$i]['lane'] = $row[0];
+            if($row[0] == 5 || $row[0] == 4)
+              $t_adv_matchlines[$i]['is_core'] = 0;
+
+            $query_res->free_result();
+            # It's not ideal, but it works for now.
+          } else {
+            $t_adv_matchlines[$i]['lane'] = 4;
+          }
+
+        }
+
+
+        if (!$bad_replay) {
+          $t_adv_matchlines[$i]['lane_efficiency'] = $matchdata['players'][$j]['lane_efficiency'];
+          $t_adv_matchlines[$i]['observers'] = $matchdata['players'][$j]['obs_placed'];
+          $t_adv_matchlines[$i]['sentries'] = $matchdata['players'][$j]['sen_placed'];
+          $t_adv_matchlines[$i]['couriers_killed'] = $matchdata['players'][$j]['courier_kills'];
+          $t_adv_matchlines[$i]['roshans_killed'] = $matchdata['players'][$j]['roshan_kills'];
+          $t_adv_matchlines[$i]['wards_destroyed'] = $matchdata['players'][$j]['observer_kills'];
+          if (count($matchdata['players'][$j]['multi_kills']) == 0) $t_adv_matchlines[$i]['max_multikill'] = 0;
+          else {
+              $tmp = array_keys($matchdata['players'][$j]['multi_kills']);
+              $t_adv_matchlines[$i]['max_multikill'] = end($tmp);
+              unset($tmp);
+          }
+          if (count($matchdata['players'][$j]['kill_streaks']) == 0) $t_adv_matchlines[$i]['max_streak'] = 0;
+          else {
+              $tmp = array_keys($matchdata['players'][$j]['kill_streaks']);
+              $t_adv_matchlines[$i]['max_streak'] = end($tmp);
+              unset($tmp);
+          }
+          $t_adv_matchlines[$i]['stacks'] = $matchdata['players'][$j]['camps_stacked'];
+          $t_adv_matchlines[$i]['time_dead'] = $matchdata['players'][$j]['life_state_dead'];
+          $t_adv_matchlines[$i]['buybacks'] = $matchdata['players'][$j]['buyback_count'];
+          $t_adv_matchlines[$i]['pings'] = isset($matchdata['players'][$j]['pings']) ? $matchdata['players'][$j]['pings'] : 0;
+          $t_adv_matchlines[$i]['stuns'] = $matchdata['players'][$j]['stuns'];
+          $t_adv_matchlines[$i]['teamfight_part'] = $matchdata['players'][$j]['teamfight_participation'];
+          $t_adv_matchlines[$i]['damage_taken'] = 0;
+          foreach($matchdata['players'][$j]['damage_inflictor_received'] as $key => $instance) {
+            $t_adv_matchlines[$i]['damage_taken'] += $instance;
+          }
+        }
         $i++;
+    }
+  }
+
+  if (empty($t_draft)) {
+    $i = sizeof($t_draft);
+
+    # OpenDota doesn't have information about draft for Ranked All Pick
+    # Game Mode IDs:
+    # 2  = Captain's Mode
+    # 9  = Reverse Captain's Mode
+    # 16 = Captain's Draft
+    #
+    # versions:
+    # <= 20 = before 7.07
+    # > 20 = after 7.07
+    # TODO Draft information from Stratz for ranked all pick (22)
+
+
+    if ($matchdata['game_mode'] == 2 || $matchdata['game_mode'] == 9) {
+        if (isset($matchdata['picks_bans']))
+          $drafts =& $matchdata['picks_bans'];
+        else 
+          $drafts =& $matchdata['draft_timings'];
+
+        $stage = 0;
+        $last_stage_pick = null;
+
+        uasort($drafts, function($a, $b) {
+          if ($a == $b) {
+            $pick_a = $a['is_pick'] ?? $a['pick'];
+            $pick_b = $b['is_pick'] ?? $b['pick'];
+            if (!$pick_a && $pick_b) return -1;
+            else if ($pick_a && !$pick_b) return 1;
+            return 0;
+          }
+          return ($a['order'] < $b['order']) ? -1 : 1;
+        });
+
+        foreach ($drafts as $draft_instance) {
+            if (!isset($draft_instance['hero_id']) || !$draft_instance['hero_id'])
+              continue;
+            
+            $pick = $draft_instance['is_pick'] ?? $draft_instance['pick'];
+            $team = $draft_instance['team'] ?? $draft_instance['active_team']-2;
+
+            // if it's the first draft stage or  a switch from bans to picks was made
+            if ($last_stage_pick !== $pick && !$pick) {
+              $stage++;
+            }
+
+            $draft_stage = $stage;
+            
+            $last_stage_pick = $pick;
+
+            $t_draft[$i]['matchid'] = $match;
+            $t_draft[$i]['is_radiant'] = $team ? 0 : 1;
+            $t_draft[$i]['is_pick'] = $pick;
+            $t_draft[$i]['hero_id'] = $draft_instance['hero_id'];
+            $t_draft[$i]['stage'] = $draft_stage;
+
+            $i++;
+        }
+    } else if ($matchdata['game_mode'] == 16) {
+        foreach ($matchdata['picks_bans'] as $draft_instance) {
+            if (!isset($draft_instance['hero_id']) || !$draft_instance['hero_id'])
+              continue;
+        
+            $t_draft[$i]['matchid'] = $match;
+            $t_draft[$i]['is_radiant'] = $draft_instance['team'] ? 0 : 1;
+            $t_draft[$i]['is_pick'] = $draft_instance['is_pick'];
+            $t_draft[$i]['hero_id'] = $draft_instance['hero_id'];
+
+            if ($draft_instance['is_pick']) {
+                if ($draft_instance['order'] < 11) $t_draft[$i]['stage'] = 1;
+                else if ($draft_instance['order'] < 15) $t_draft[$i]['stage'] = 2;
+                else $t_draft[$i]['stage'] = 3;
+            } else {
+                $t_draft[$i]['stage'] = 1;
+            }
+            $i++;
+        }
+    } else if (!empty($matchdata['picks_bans_stratz']) && ($matchdata['game_mode'] == 22 || $matchdata['game_mode'] == 3)) {
+      foreach ($matchdata['picks_bans_stratz'] as $draft_instance) {
+        // I'm skipping opendota picks_bans information since it lacks information on
+        // who nominated hero to ban and is missing pick order info
+        // altho I guess I should reconsider adding it later
+        if (!isset($draft_instance['isRadiant'])) continue;
+        if (!$draft_instance['isPick']) {
+          if(!$draft_instance['wasBannedSuccessfully']) continue;
+          $t_draft[$i]['matchid'] = $match;
+          $t_draft[$i]['is_radiant'] = $draft_instance['isRadiant'];
+          $t_draft[$i]['is_pick'] = 0;
+          $t_draft[$i]['hero_id'] = $draft_instance['bannedHeroId'];
+          $t_draft[$i]['stage'] = 1;
+        } else {
+          $t_draft[$i]['matchid'] = $match;
+          $t_draft[$i]['is_radiant'] = $draft_instance['isRadiant'];
+          $t_draft[$i]['is_pick'] = 1;
+          $t_draft[$i]['hero_id'] = $draft_instance['heroId'];
+          if ($draft_instance['order'] < 4) $t_draft[$i]['stage'] = 1;
+          else if ($draft_instance['order'] < 8) $t_draft[$i]['stage'] = 2;
+          else $t_draft[$i]['stage'] = 3;
+        }
+        $i++;
+      }
+    }
+    
+    if (empty($t_draft)) {
+      foreach($matchdata['players'] as $draft_instance) {
+          if (!isset($draft_instance['hero_id']) || !$draft_instance['hero_id'])
+            continue;
+          $t_draft[$i]['matchid'] = $match;
+          $t_draft[$i]['is_radiant'] = $draft_instance['isRadiant'];
+          $t_draft[$i]['is_pick'] = 1;
+          $t_draft[$i]['hero_id'] = $draft_instance['hero_id'];
+          $t_draft[$i]['stage'] = 1;
+          $i++;
+      }
     }
   }
 
