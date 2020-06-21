@@ -41,9 +41,14 @@ $endpoints['pickban'] = function($mods, $vars, &$report) {
     $last_rank = $ranks[$id];
   }
 
+  $median_picks = $context['random']['heroes_median_picks'] ?? $context['main']['heroes_median_picks'] ?? null;
+  $median_bans = $context['random']['heroes_median_bans'] ?? $context['main']['heroes_median_bans'] ?? null;
+
   foreach($context as $id => &$el) {
     $el['rank'] = round($ranks[$id], 2);
-    $el['contest_rate'] = $el['matches_total']/$context_total_matches;
+    $el['contest_rate'] = round($el['matches_total']/$context_total_matches, 5);
+    $el['picks_to_median'] = isset($median_picks) ? round($el['matches_picked']/$median_picks, 3) : null;
+    $el['bans_to_median'] = isset($median_bans) ? round($el['matches_banned']/$median_bans, 3) : null;
   }
 
   return [
