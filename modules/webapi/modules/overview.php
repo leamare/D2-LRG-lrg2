@@ -224,9 +224,14 @@ $endpoints['overview'] = function($mods, $vars, &$report) use (&$meta, &$endpoin
   $res['draft_is_accurate'] = rgapi_draft_accuracy_test($context['pickban'], $context['draft']);
 
   if($report['settings']['overview_top_contested']) {
-    $res['pickban_overview'] = rgapi_generator_pickban_overview($context['pickban'],
+    $res['pickban_overview'] = rgapi_generator_pickban_overview(
+      $context['pickban'],
       $context_total_matches, 
-      $report['settings']['overview_top_contested_count']
+      $report['settings']['overview_top_contested_count'],
+      [
+        'median_picks' => $context['random']['heroes_median_picks'] ?? $context['main']['heroes_median_picks'] ?? null,
+        'median_bans' => $context['random']['heroes_median_bans'] ?? $context['main']['heroes_median_bans'] ?? null,
+      ]
     );
   }
 
