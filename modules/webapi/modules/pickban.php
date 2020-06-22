@@ -4,12 +4,15 @@ $endpoints['pickban'] = function($mods, $vars, &$report) {
   if (!in_array("heroes", $mods)) throw new \Exception("This module is only available for heroes");
 
   if (isset($vars['team'])) {
+    $parent =& $report['teams'][ $vars['team'] ]; 
     $context =& $report['teams'][ $vars['team'] ]['pickban'];
     $context_total_matches = $report['teams'][ $vars['team'] ]['matches_total'];
   } else if (isset($vars['region'])) {
+    $parent =& $report['regions_data'][ $vars['region'] ]; 
     $context =& $report['regions_data'][ $vars['region'] ]['pickban'];
     $context_total_matches = $report['regions_data'][ $vars['region'] ]['main']["matches_total"];
   } else {
+    $parent =& $report;
     $context =& $report['pickban'];
     $context_total_matches = $report["random"]["matches_total"];
   }
@@ -41,8 +44,8 @@ $endpoints['pickban'] = function($mods, $vars, &$report) {
     $last_rank = $ranks[$id];
   }
 
-  $median_picks = $context['random']['heroes_median_picks'] ?? $context['main']['heroes_median_picks'] ?? null;
-  $median_bans = $context['random']['heroes_median_bans'] ?? $context['main']['heroes_median_bans'] ?? null;
+  $median_picks = $parent['random']['heroes_median_picks'] ?? $parent['main']['heroes_median_picks'] ?? null;
+  $median_bans = $parent['random']['heroes_median_bans'] ?? $parent['main']['heroes_median_bans'] ?? null;
 
   foreach($context as $id => &$el) {
     $el['rank'] = round($ranks[$id], 2);
