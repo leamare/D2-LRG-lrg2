@@ -8,20 +8,30 @@ $endpoints['positions'] = function($mods, $vars, &$report) {
 
   // positions context
   if (isset($vars['team'])) {
+    $parent =& $report['teams'][ $vars['team'] ]; 
     $context =& $report['teams'][ $vars['team'] ][$type.'hero_positions'];
     $context_total_matches = $report['teams'][ $vars['team'] ]['matches_total'];
   } else if (isset($vars['region'])) {
+    $parent =& $report['regions_data'][ $vars['region'] ]; 
     $context =& $report['regions_data'][ $vars['region'] ][$type.'_positions'];
     $context_total_matches = $report['regions_data'][ $vars['region'] ]['main']["matches_total"];
   } else {
+    $parent =& $report;
     $context =& $report[$type.'_positions'];
     $context_total_matches = $report["random"]["matches_total"];
   }
+
+  $median_picks = $parent['random']['heroes_median_picks'] ?? $parent['main']['heroes_median_picks'] ?? null;
 
   if (isset($vars['position'])) {
     $position = explode(".", $vars['position']);
     $res = $context[ (int)$position[0] ][ (int)$position[1] ];
     positions_ranking($res, $context_total_matches);
+    
+    foreach ($res as $id => $data) {
+      $res[$id]['picks_to_median'] = isset($median_picks) ? round($el['matches_s']/$median_picks, 3) : null;
+    }
+
     return [
       $vars['position'] => $res
     ];
@@ -36,6 +46,7 @@ $endpoints['positions'] = function($mods, $vars, &$report) {
       foreach ($pos_summary as $id => $data) {
         if (isset($res['total'][$id])) $res['total'][$id] += $data['matches_s'];
         else $res['total'][$id] = $data['matches_s'];
+        $pos_summary[$id]['picks_to_median'] = isset($median_picks) ? round($el['matches_s']/$median_picks, 3) : null;
       }
       $res["$i.$j"] = $pos_summary;
     }
@@ -62,8 +73,9 @@ function positions_ranking(&$context, $total_matches) {
       if(isset($last) && $el['matches_s'] == $last['matches_s'] && $el['winrate_s'] == $last['winrate_s']) {
         $i++;
         $context[$id]['rank'] = $last_rank;
-      } else
-      $context[$id]['rank'] = 100 - $increment*$i++;
+      } else {
+        $context[$id]['rank'] = 100 - $increment*$i++;
+      }
       $last = $el;
       $last_rank = $context[$id]['rank'];
     }
