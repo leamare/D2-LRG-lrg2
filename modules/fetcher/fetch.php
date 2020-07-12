@@ -885,6 +885,9 @@ function fetch($match) {
     if(sizeof($newteams)) {
       $sql = "INSERT INTO teams (teamid, name, tag) VALUES \n";
       foreach ($newteams as $id => $team) {
+        $team['name'] = substr($team['name'], 0, 48); // 48 = team name field length -2
+        $team['tag'] = substr($team['tag'], 0, 23); // 232 = team tag field length -2
+        // I shouldn't use fixed varchar size in first place though
         $sql .= "\n\t(".$id.",\"".addslashes($team['name'])."\",\"".addslashes($team['tag'])."\"),";
       }
       $sql[strlen($sql)-1] = ";";
