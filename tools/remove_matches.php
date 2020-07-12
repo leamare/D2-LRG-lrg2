@@ -1,7 +1,7 @@
 <?php
 require_once("head.php");
 
-$options = getopt("f:");
+$options = getopt("l:f:");
 
 if(isset($options['f']))
   $file = $options['f'];
