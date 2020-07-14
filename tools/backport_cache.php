@@ -16,7 +16,9 @@ for ($matches = [], $row = $query_res->fetch_row(); $row != null; $row = $query_
 }
 $query_res->free_result();
 
-foreach ($matches as $m) {
+$sz = sizeof($matches);
+
+foreach ($matches as $i => $m) {
   $match = [];
 
   $q = "select * from matches where matchid = $m;";
@@ -54,5 +56,8 @@ foreach ($matches as $m) {
 
 
   $out = json_encode($match, JSON_PRETTY_PRINT);
+  if (empty($out)) continue;
+  
   file_put_contents("cache/$m.lrgcache.json", $out);
+  echo "[ ] ($i/$sz) backported $m to cache/$m.lrgcache.json\n";
 }
