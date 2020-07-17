@@ -1,24 +1,51 @@
 <?php
 
 require_once('head.php');
+include_once("modules/commons/utf8ize.php");
 $conn = new mysqli($lrg_sql_host, $lrg_sql_user, $lrg_sql_pass, $lrg_sql_db);
 
 if ($conn->connect_error) die("[F] Connection to SQL server failed: ".$conn->connect_error."\n");
 
-$sql = "SELECT matchid FROM matches;";
+if(isset($options['c'])) {
+  $file = $options['c'];
+  $matches = explode("\n", file_get_contents($file));
+} else {
+  if(isset($options['T'])) {
+    $endt = isset($options['e']) ? $options['e'] : 0;
+    $tp = strtotime($options['T'], 0);
 
-if ($conn->multi_query($sql) === TRUE) echo "[S] Requested MatchIDs.\n";
-else die("[F] Unexpected problems when recording to database.\n".$conn->error."\n");
+    if (!$endt) {
+      $sql = "select max(start_date) from matches;";
 
-$query_res = $conn->store_result();
-for ($matches = [], $row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
-  $matches[] = $row[0];
+      if ($conn->multi_query($sql) !== TRUE) die("[F] Unexpected problems when recording to database.\n".$conn->error."\n");
+
+      $query_res = $conn->store_result();
+      $row = $query_res->fetch_row();
+      if (!$row) $endt = time();
+      else $endt = (int)$row[0];
+      $query_res->free_result();
+    }
+
+    $sql = "SELECT matchid FROM matches WHERE start_date >= ".($endt-$tp)." AND start_date <= $endt".";";
+  } else {
+    $sql = "SELECT matchid FROM matches;";
+  }
+
+  if ($conn->multi_query($sql) === TRUE) echo "[S] Requested MatchIDs.\n";
+  else die("[F] Unexpected problems when recording to database.\n".$conn->error."\n");
+
+  $query_res = $conn->store_result();
+  for ($matches = [], $row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+    $matches[] = $row[0];
+  }
+  $query_res->free_result();
 }
-$query_res->free_result();
 
 $sz = sizeof($matches);
 
-foreach ($matches as $i => $m) {
+for ($i = 0; $i < $sz; $i++) {
+  $m = $matches[$i];
+  if (empty($m) || $m[0] === '#') continue;
   $match = [];
 
   $q = "select * from matches where matchid = $m;";
@@ -54,10 +81,14 @@ foreach ($matches as $i => $m) {
     $match['teams_rosters'] = instaquery($conn, $q);
   }
 
+  $out = json_encode(utf8ize($match), JSON_PRETTY_PRINT);
+  if (empty($out)) {
+    echo "[E] ($i/$sz) Empty response for match $m\n";
+    $sz++;
+    $matches[] = $m;
+    continue;
+  }
 
-  $out = json_encode($match, JSON_PRETTY_PRINT);
-  if (empty($out)) continue;
-  
   file_put_contents("cache/$m.lrgcache.json", $out);
   echo "[ ] ($i/$sz) backported $m to cache/$m.lrgcache.json\n";
 }
