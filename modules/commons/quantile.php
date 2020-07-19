@@ -21,7 +21,9 @@ function quantile(array $arr, float $val): float {
     $high = $arr[$quantile_val+1] ?? reset($arr);
     $quantile = (($low+$high)/2);
   } else if ($count*$val < $quantile_val+1) {
-    $quantile = $arr[$quantile_val];
+    $diff = (($count-1)*$val) - $quantile_val;
+    $abs_diff = isset($arr[$quantile_val+1]) ? round(($arr[$quantile_val+1]-$arr[$quantile_val])*$diff, 2) : 0;
+    $quantile = $arr[$quantile_val] + $abs_diff;
   } else {
     $quantile = $arr[$quantile_val+1] ?? reset($arr);
   }
