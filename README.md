@@ -1,6 +1,6 @@
 # Dota 2 League Report Generator (D2-LRG-lrg2)
 
-## Current version: 2.4.4
+## Current version: 2.4.6
 
 This is the **lrg2** version that won't be updated any further.
 
@@ -250,7 +250,7 @@ All category filters types are listed in `modules/view/functions/check_filters.p
 Tools are additional scripts that can be used for specific things. All of them should be executed from the main directory with command similar to `php tools/%TOOL%.php %PARAMETERS%`.
 
 * `remove_match` - removes match from a league's database. Uses only `-l%TAG%` and `-m%MATCH%` parameters. Example: `php tools/remove_match.php -ltestleague -m1234567891`
-* `remove_matches` - removes matches from a league's database. Uses only `-l%TAG%` and `-f%FNAME%` parameters. Example: `php tools/remove_match.php -ltestleague -flist`
+* `remove_matches` - removes matches from a league's database. Uses only `-l%TAG%` and `-f%FNAME%` parameters. Example: `php tools/remove_match.php -ltestleague -flist`. Can also remove matches that don't fit into a specified time period (`-Tperiod` specifies a time period script, like `-T-1day` and `-eTIME` specifies endpoint timestamp (current unix time by default)) -- if you need a specific subset using filters - use backport_matchlist first and then -f param
 * `replay_request` - sends API commands to OpenDota and Stratz, requesting every match from a file. Accepts only one arguement: `-f%FILENAME%`. You can use failed matches dump files (from fetcher) with it
 * `replay_request_od` - same as `replay_request`, but strictly requesting match analysis with OpenDota
 * `replay_request_stratz` - same as `replay_request`, but strictly requesting match analysis with Stratz
@@ -258,5 +258,6 @@ Tools are additional scripts that can be used for specific things. All of them s
 * `update_league` - updates league parameters to new D2LRG API/leaguefile format. Accepts only `-l%LEAGUETAG%`
 * `remove_cached` - removes cached matches listed in `-f%FNAME%` file.
 * `update_all_reports` - updates all reports
-* `backport_matchlist` - generates full matchlist based on league's database
+* `backport_matchlist` - generates full matchlist based on league's database. Args: `-l%LEAGUETAG%`, `-Tperiod`, `-P4601` where 4601 is ID of a patch, `-r` to fetch only unparsed matches, `-R` to reverse filters (get every match that doesn't fit the filters)
+* `backport_cache` - backports all matches from a league database as .lrgcache.json files to cache folder. Args: `-l%LEAGUETAG%`, `-c%FNAME%` for a list of matches, `-Tperiod` if -c is not specified -- if you need a specific subset using filters - use backport_matchlist first and then -c param
 * `update_rosters` - updates official rosters for all teams in report. Args: `-l%LEAGUETAG%`
