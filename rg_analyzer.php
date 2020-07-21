@@ -199,6 +199,7 @@ if ($lg_settings['ana']['players'])  {
 
 $result['settings'] = $lg_settings['web'];
 $result['settings']['limiter'] = $limiter;
+$result['settings']['limiter_middle'] = $limiter_middle;
 $result['settings']['limiter_triplets'] = $limiter_lower;
 $result['settings']['limiter_combograph'] = $limiter_graph;
 $result['ana_version'] = $lrg_version;
