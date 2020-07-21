@@ -30,6 +30,7 @@
     "matches_total" => "Всего сыграно матчей",
     "players_on_event" => "Игроков в лиге",
     "teams_on_event" => "Команд в лиге",
+    "matches_unparsed" => "Матчей без детального анализа",
 
     "heroes_median_picks" => "Медиана выборов героев",
     "heroes_median_bans" => "Медиана запретов героев",

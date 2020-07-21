@@ -30,6 +30,7 @@
     "matches_total" => "Total matches played",
     "players_on_event" => "Players in league",
     "teams_on_event" => "Teams on event",
+    "matches_unparsed" => "Matches without detailed analysis",
 
     "heroes_median_picks" => "Median hero picks",
     "heroes_median_bans" => "Median hero bans",
