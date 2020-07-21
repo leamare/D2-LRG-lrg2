@@ -21,59 +21,62 @@ for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row(
 
 $query_res->free_result();
 
-foreach($result['teams'] as $id => $team) {
-  # main information
-  $err = require("overview.php");
+if ($lg_settings['ana']['teams'])
+    foreach($result['teams'] as $id => $team) {
+      # main information
+      $err = require("overview.php");
 
-  if ($err) {
-    unset($result['teams'][$id]);
-    continue;
-  }
-  $multiplier = $result["teams"][$id]['matches_total'] / $result["random"]['matches_total'];
+      if ($err) {
+        unset($result['teams'][$id]);
+        continue;
+      }
+      $multiplier = $result["teams"][$id]['matches_total'] / $result["random"]['matches_total'];
 
-  # averages
-  require("averages.php");
-  # heroes pickbans
-  require("pickban.php");
+      if ($lg_settings['ana']['teams']['limiter'] && $result["teams"][$id]['matches_total'] < $limiter_middle)
+        continue;
 
-  if ($lg_settings['ana']['teams']['draft']) {
-    # heroes draft
-    require("heroes/draft.php");
-  }
+      # averages
+      require("averages.php");
+      # heroes pickbans
+      require("pickban.php");
 
-  if ($lg_settings['ana']['teams']['draft_against']) {
-    # heroes draft againt team
-    require("heroes/draft_vs.php");
-  }
+      if ($lg_settings['ana']['teams']['draft']) {
+        # heroes draft
+        require("heroes/draft.php");
+      }
 
-  if ($lg_settings['ana']['teams']['heropos']) {
-    # heroes positions
-    require("heroes/positions.php");
-  }
+      if ($lg_settings['ana']['teams']['draft_against']) {
+        # heroes draft againt team
+        require("heroes/draft_vs.php");
+      }
 
-  if ($lg_settings['ana']['teams']['pairs']) {
-    # heroes pairs
-    require("heroes/pairs.php");
-  }
+      if ($lg_settings['ana']['teams']['heropos']) {
+        # heroes positions
+        require("heroes/positions.php");
+      }
 
-  if ($lg_settings['ana']['teams']['hero_graph']) {
-    # heroes graph
-    require("heroes/graph.php");
-  }
+      if ($lg_settings['ana']['teams']['pairs']) {
+        # heroes pairs
+        require("heroes/pairs.php");
+      }
 
-  if ($lg_settings['ana']['teams']['triplets']) {
-    # heroes trios
-    require("heroes/trios.php");
-  }
+      if ($lg_settings['ana']['teams']['hero_graph']) {
+        # heroes graph
+        require("heroes/graph.php");
+      }
 
-  if ($lg_settings['ana']['teams']['players_draft']) {
-    # players draft
-    require("players/draft.php");
-  }
+      if ($lg_settings['ana']['teams']['triplets']) {
+        # heroes trios
+        require("heroes/trios.php");
+      }
 
-  if ($lg_settings['ana']['teams']['matches']) {
-    # matches
-    require("matches.php");
-  }
-}
-?>
+      if ($lg_settings['ana']['teams']['players_draft']) {
+        # players draft
+        require("players/draft.php");
+      }
+
+      if ($lg_settings['ana']['teams']['matches']) {
+        # matches
+        require("matches.php");
+      }
+    }

@@ -4,6 +4,8 @@ $result["random"] = [];
 
 # matches total
 $sql  = "SELECT \"matches_total\", COUNT(matchid) FROM matches;";
+# matches without analysis
+$sql  = "SELECT \"matches_unparsed\", COUNT(DISTINCT matchid) FROM adv_matchlines;";
 # players on event
 $sql .= "SELECT \"players_on_event\", COUNT(playerID) FROM players;";
 if($lg_settings['main']['teams']) # teams on event
