@@ -75,7 +75,8 @@
       "pairs": true,
       "triplets": true,
       "matches": true,
-      "team_vs_team" : true
+      "team_vs_team" : true,
+      "limiter": false
     },
     "regions": {
       "use_limiter": true,

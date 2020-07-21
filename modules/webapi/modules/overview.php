@@ -362,6 +362,7 @@ $endpoints['overview'] = function($mods, $vars, &$report) use (&$meta, &$endpoin
 
   $res['technical'] = [
     'limiter_lower' => $context['settings']['limiter_lower'],
+    'limiter_middle' => $context['settings']['limiter_middle'] ?? $context['settings']['limiter_graph'],
     'limiter_higher' => $context['settings']['limiter_higher'],
     'limiter_graph' => $context['settings']['limiter_graph'],
     'version' => parse_ver($report['ana_version'])
