@@ -48,7 +48,7 @@ function fetch($match) {
       $match_parsed = isset($query->num_rows) && $query->num_rows;
     }
 
-    if ($match_parsed || !$update_unparsed) {
+    if (!$update_unparsed || $match_parsed) {
       echo("Already in database, skipping\n");
       return true;
     }
@@ -727,13 +727,13 @@ function fetch($match) {
 
   if ($match_exists && !$match_parsed) {
     // remove match before readding it
-    $sql = "DELETE from matchlines where matchid = $mid;".
-      "DELETE from draft where matchid = $mid; ".
-      ( $lg_settings['main']['teams'] ? "delete from teams_matches where matchid = $mid;" : "").
-      "delete from matches where matchid = $mid;";
+    $sql = "DELETE from matchlines where matchid = $match;".
+      "DELETE from draft where matchid = $match; ".
+      ( $lg_settings['main']['teams'] ? "delete from teams_matches where matchid = $match;" : "").
+      "delete from matches where matchid = $match;";
 
-    if ($conn->multi_query($sql) === TRUE) echo "$mid\n";
-    else echo("# [F] Unexpected problems when quering database.\n".$conn->error."\n");
+    if ($conn->multi_query($sql) === TRUE);
+    else echo("[F] Unexpected problems when quering database.\n".$conn->error."\n");
 
     do {
         $conn->store_result();
