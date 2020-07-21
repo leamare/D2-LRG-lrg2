@@ -15,7 +15,8 @@ function conn_restart() {
 function fetch($match) {
   global $opendota, $conn, $rnum, $matches, $failed_matches, $scheduled, $scheduled_stratz, $t_teams, $t_players, $use_stratz, $require_stratz,
   $request_unparsed, $meta, $stratz_timeout_retries, $force_adding, $cache_dir, $lg_settings, $lrg_use_cache, $first_scheduled,
-  $use_full_stratz, $scheduled_wait_period, $steamapikey, $force_await, $players_list, $rank_limit, $stratztoken, $ignore_stratz;
+  $use_full_stratz, $scheduled_wait_period, $steamapikey, $force_await, $players_list, $rank_limit, $stratztoken, $ignore_stratz,
+  $update_unparsed;
 
   $t_match = [];
   $t_matchlines = [];
@@ -42,8 +43,19 @@ function fetch($match) {
   $query = $conn->query("SELECT matchid FROM matches WHERE matchid = ".$match.";");
 
   if (isset($query->num_rows) && $query->num_rows) {
+    if ($update_unparsed) {
+      $query = $conn->query("SELECT matchid FROM adv_matchlines WHERE matchid = ".$match.";");
+      $match_parsed = isset($query->num_rows) && $query->num_rows;
+    }
+
+    if ($match_parsed || !$update_unparsed) {
       echo("Already in database, skipping\n");
       return true;
+    }
+
+    $match_exists = true;
+  } else {
+    $match_exists = false;
   }
 
   if($lrg_use_cache && file_exists("$cache_dir/".$match.".lrgcache.json")) {
@@ -712,6 +724,21 @@ function fetch($match) {
 
 
   echo "..Recording.";
+
+  if ($match_exists && !$match_parsed) {
+    // remove match before readding it
+    $sql = "DELETE from matchlines where matchid = $mid;".
+      "DELETE from draft where matchid = $mid; ".
+      ( $lg_settings['main']['teams'] ? "delete from teams_matches where matchid = $mid;" : "").
+      "delete from matches where matchid = $mid;";
+
+    if ($conn->multi_query($sql) === TRUE) echo "$mid\n";
+    else echo("# [F] Unexpected problems when quering database.\n".$conn->error."\n");
+
+    do {
+        $conn->store_result();
+    } while($conn->next_result());
+  }
 
   $sql = ""; $err_query = "";
 

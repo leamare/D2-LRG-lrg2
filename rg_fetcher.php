@@ -39,6 +39,9 @@ if (!empty($options['d'])) {
   $api_cooldown = ((int)$options['d'])*1000;
 }
 
+
+$update_unparsed = isset($options['u']) || isset($options['U']);
+
 $use_stratz = isset($options['S']) || isset($options['s']);
 $require_stratz = isset($options['S']);
 $use_full_stratz = isset($options['Z']);
@@ -70,9 +73,22 @@ $force_await = isset($options['A']);
 $scheduled_stratz = [];
 
 if (!$listen) {
-  $input_cont = file_get_contents($lrg_input);
-  $input_cont = str_replace("\r\n", "\n", $input_cont);
-  $matches    = explode("\n", trim($input_cont));
+  if (isset($options['U'])) {
+    $sql = "SELECT matchid FROM matches;";
+    
+    if ($conn->multi_query($sql) === TRUE) echo "[S] Requested MatchIDs.\n";
+    else die("[F] Unexpected problems when recording to database.\n".$conn->error."\n");
+
+    $query_res = $conn->store_result();
+    for ($matches = [], $row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+      $matches[] = $row[0];
+    }
+    $query_res->free_result();
+  } else {
+    $input_cont = file_get_contents($lrg_input);
+    $input_cont = str_replace("\r\n", "\n", $input_cont);
+    $matches    = explode("\n", trim($input_cont));
+  }
   $matches = array_unique($matches);
 } else {
   $matches = [];
