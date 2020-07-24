@@ -33,10 +33,11 @@ function rg_query_hero_pairs(&$conn, &$pickban, $matches_total, $limiter = 0, $c
   $query_res = $conn->store_result();
   
   for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
-    $expected_pair  = ( ($pickban[$row[0]]['matches_picked']/$matches_total)
+    $expected_pair  = $matches_total ? ( ($pickban[$row[0]]['matches_picked']/$matches_total)
          * ($pickban[$row[1]]['matches_picked']/$matches_total) 
          * $matches_total )
-         / 2;
+         / 2
+         : 0;
     $wr_diff = $row[3]/$row[2] - ($pickban[$row[0]]['winrate_picked'] + $pickban[$row[1]]['winrate_picked'])/2;
   
     $result[] = [

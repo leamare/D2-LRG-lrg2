@@ -4,8 +4,9 @@
         if($prompt){
             echo $prompt;
         }
-        $fp = fopen("php://stdin","r");
-        $line = rtrim(fgets($fp, 1024));
+        
+        //$fp = fopen("php://stdin","r");
+        $line = rtrim(fgets(STDIN));
         return $line;
     }
 //} else {

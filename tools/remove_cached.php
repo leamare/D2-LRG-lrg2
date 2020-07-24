@@ -15,6 +15,8 @@ foreach ($matches as $match) {
     //`rm cache/$match.json`;
     if(file_exists("cache/$match.json"))
       unlink("cache/$match.json");
+    if(file_exists("cache/$match.lrgcache.json"))
+      unlink("cache/$match.lrgcache.json");
     echo "[ ] RM $match\n";
 }
 

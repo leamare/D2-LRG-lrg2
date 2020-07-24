@@ -2,12 +2,19 @@
 # team competitions placeholder
 $result['teams'] = [];
 
-$sql = "SELECT teamid, name, tag FROM teams;";
+$sql = "SELECT teams.teamid, teams.name, teams.tag, count(distinct teams_matches.matchid) ms
+  FROM teams join teams_matches on teams.teamid = teams_matches.teamid 
+  group by teams.teamid
+  having ms > 0;";
 
 if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for TEAMS LIST.\n";
 else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
 
 $query_res = $conn->store_result();
+
+// if ($lg_settings['ana']['teams']['limiter']) {
+//   $tm_set = [];
+// }
 
 for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
   $result['teams'][$row[0]] = array(
@@ -17,7 +24,16 @@ for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row(
   if(empty($result['teams'][$row[0]]['tag'])) {
     $result['teams'][$row[0]]['tag'] = generate_tag($result['teams'][$row[0]]['name']);
   }
+  // if ($lg_settings['ana']['teams']['limiter']) {
+  //   if ($row[3] > 1)
+  //     $tm_set[] = (int)$row[3];
+  // }
 }
+
+// if ($lg_settings['ana']['teams']['limiter']) {
+//   $tm_limiters = calculate_limiters($tm_set, null);
+//   var_dump($tm_limiters); die();
+// }
 
 $query_res->free_result();
 
@@ -30,10 +46,16 @@ if ($lg_settings['ana']['teams'])
         unset($result['teams'][$id]);
         continue;
       }
-      $multiplier = $result["teams"][$id]['matches_total'] / $result["random"]['matches_total'];
+      $multiplier = ($result["teams"][$id]['matches_total'] ?? 0) / ($result["random"]['matches_total'] ?? 1);
 
-      if ($lg_settings['ana']['teams']['limiter'] && $result["teams"][$id]['matches_total'] < $limiter_middle)
-        continue;
+      if ($lg_settings['ana']['teams']['limiter']) {
+        if (!isset($interest)) $interest = [];
+        if ($result["teams"][$id]['matches_total'] < $limiter) {
+          continue;
+        } else {
+          $interest[] = $id;
+        }
+      }
 
       # averages
       require("averages.php");
@@ -80,3 +102,6 @@ if ($lg_settings['ana']['teams'])
         require("matches.php");
       }
     }
+    
+  if (!empty($interest))
+    $result["teams_interest"] = $interest;

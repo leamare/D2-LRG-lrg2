@@ -55,13 +55,13 @@ if(isset($argv)) {
 
 $lg_settings['version'] = $lrg_version;
 
-$f = fopen("leagues/".$lg_settings['league_tag'].".json", "w") or die("[F] Couldn't open file to save results. Check working directory for `reports` folder.\n");
+$f = fopen("leagues/".$lg_settings['league_tag'].".json", "w") or die("[F] Couldn't open file to save results. Check working directory for `leagues` folder.\n");
 fwrite($f, json_encode($lg_settings, JSON_PRETTY_PRINT));
 fclose($f);
 
 echo "[ ] Opening matchlist file\n";
 
-$f = fopen("matchlists/".$lg_settings['league_tag'].".list", "w") or die("[F] Couldn't open file to save results. Check working directory for `reports` folder.\n");
+$f = fopen("matchlists/".$lg_settings['league_tag'].".list", "w") or die("[F] Couldn't open file to save results. Check working directory for `matchlists` folder.\n");
 if($lg_settings['league_id'] == null) $out = "";
 else {
     $request = "https://api.steampowered.com/IDOTA2Match_570/GetMatchHistory/v0001/?key=".$steamapikey."&league_id=".$lg_settings['league_id'];
