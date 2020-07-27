@@ -94,6 +94,22 @@ if (!$listen) {
   $matches = [];
 }
 
+// workaround for matches that have teams data, but report has teams disabled
+// and there's a teams table still remaining
+// teams data will be recorded regardless UNLESS you manually remove the table
+if (!$lg_settings['main']['teams']) {
+  $sql = "SELECT COUNT(*)
+  FROM information_schema.tables WHERE table_schema = '$lrg_sql_db' 
+  AND table_name = 'teams_matches';";
+  var_dump($sql);
+
+  $query = $conn->query($sql);
+  if (isset($query->num_rows) && $query->num_rows) {
+    echo "true";
+    $lg_settings['main']['teams'] = true;
+  }
+}
+
 $json = "";
 if ($lg_settings['main']['teams']) {
     $t_teams = [];

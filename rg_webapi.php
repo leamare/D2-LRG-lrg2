@@ -10,6 +10,7 @@ include_once("modules/commons/metadata.php");
 
 # FUNCTIONS
 include_once("modules/view/functions/modules.php");
+include_once("modules/view/functions/report_descriptor.php");
 
 include_once("modules/webapi/functions/player_card.php");
 include_once("modules/webapi/functions/team_card.php");

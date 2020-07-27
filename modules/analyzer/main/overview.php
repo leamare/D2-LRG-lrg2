@@ -85,4 +85,9 @@ do {
   }
 } while($conn->next_result());
 
+if (isset($result['random']['matches_unparsed'])) {
+  // it doesn't really work as intended since it shows PARSED matches, so here's this small hotfix
+  $result['random']['matches_unparsed'] = $result['random']['matches_total']-$result['random']['matches_unparsed'];
+}
+
 ?>
