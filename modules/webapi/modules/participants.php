@@ -23,6 +23,8 @@ $endpoints['participants'] = function($mods, $vars, &$report) {
     }
   }
 
+  if (empty($context)) return $res;
+
   $res[$teams ? 'teams' : 'players'] = [];
   foreach ($context as $id => $data) {
     if ($teams) {

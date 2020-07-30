@@ -274,11 +274,11 @@ $endpoints['overview'] = function($mods, $vars, &$report) use (&$meta, &$endpoin
     $counter = $report['settings']['overview_top_bans_count'];
     foreach($workspace as $hid => $hero) {
       if($counter == 0) break;
-      $res['draft_top_picked'][] = [
+      $res['draft_top_banned'][] = [
         "hero_id" => $hid,
         "matches_total" => $hero['matches_total'],
-        "matches_picked" => $hero['matches_banned'],
-        "winrate_picked" => round($hero['winrate_banned']*100,2)
+        "matches_banned" => $hero['matches_banned'],
+        "winrate_banned" => round($hero['winrate_banned']*100,2)
       ];
       $counter--;
     }

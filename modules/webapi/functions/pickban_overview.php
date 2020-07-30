@@ -17,5 +17,11 @@ function rgapi_generator_pickban_overview(&$context, $context_total_matches, $li
     $context[$id]['bans_to_median'] = isset($params['median_bans']) ? round($el['matches_banned']/$params['median_bans'], 3) : null;
   }
 
-  return $context;
+  $context_b = $context;
+  $k = array_keys($context_b);
+
+  $r = array_splice($context_b, 0, $limiter);
+  $k = array_splice($k, 0, $limiter);
+  
+  return array_combine($k, $r);
 }

@@ -72,28 +72,6 @@ if (empty($endp_name)) {
 try {
   $result = $endp($modline, $vars, $report);
 } catch (\Throwable $e) {
-  $result = [
-    'error' => $e->getMessage()
-  ];
+  if (!isset($resp['errors'])) $resp['errors'] = [];
+    $resp['errors'][] = $e->getMessage();
 }
-
-header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST');
-//header("Access-Control-Allow-Headers: X-Requested-With");
-header('Access-Control-Allow-Headers: token, Content-Type');
-
-$response = [
-  "modline" => $mod,
-  "vars" => $vars,
-  "endpoint" => $endp_name,
-  "version" => parse_ver($lg_version),
-  "result" => $result,
-];
-
-echo json_encode($response, (isset($_REQUEST['pretty']) ? JSON_PRETTY_PRINT : 0) 
-  | JSON_INVALID_UTF8_SUBSTITUTE 
-  | JSON_UNESCAPED_UNICODE
-  | JSON_NUMERIC_CHECK 
-  //| JSON_THROW_ON_ERROR
-);
