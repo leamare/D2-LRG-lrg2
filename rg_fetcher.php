@@ -30,6 +30,8 @@ if($cache_dir === "NULL") $cache_dir = "";
 if (!empty($options['P'])) {
   $players_list = file_get_contents($options['P']);
   $players_list = json_decode($players_list);
+} else if (!empty($lg_settings['players_allowlist'])) {
+  $players_list = $lg_settings['players_allowlist'];
 }
 if (!empty($options['N'])) {
   $rank_limit = (int)$options['N'];

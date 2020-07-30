@@ -39,6 +39,11 @@ if(isset($argv)) {
     echo "[ ] Enter parameters below in format \"Parameter = value\".\n    Divide parameters subcategories by a \".\", empty line to exit.\n";
     while (!empty($st = readline_rg(" >  "))) {
       $st = explode("=", trim($st));
+      $st[0] = trim($st[0]);
+      $st[1] = trim($st[1]);
+      if ($st[1][0] === '[' && $st[1][0] === '[') {
+        $st[1] = explode(',', substr($st[1], 1, -1));
+      }
       $val = &$lg_settings;
       $st[0] = explode(".", $st[0]);
 

@@ -106,7 +106,11 @@ function fetch($match) {
       $players = $stratz[0]['players'];
       foreach ($players as $pl) {
         if (!empty($players_list) && !in_array($pl['steamId'], $players_list)) {
-          echo "Not in players list, skipping.\n";
+          echo "Player(s) are not in allow list, skipping.\n";
+          return true;
+        }
+        if (!empty($lg_settings['players_denylist']) && in_array($pl['steamId'], $lg_settings['players_denylist'])) {
+          echo "Player(s) are in deny list, skipping.\n";
           return true;
         }
         if (!empty($rank_limit) && isset($pl['steamAccount']['seasonRank']) && $pl['steamAccount']['seasonRank'] < $rank_limit) {
@@ -412,6 +416,38 @@ function fetch($match) {
       }
     }
   }
+
+  // teams / players allow/deny lists block 
+
+  if ($lg_settings['main']['teams']) {
+    if (!empty($lg_settings['teams_allowlist'])) {
+      if (!empty($t_team_matches)) {
+        echo("..No teams to allow, skipping...\n");
+        return true;
+      }
+      foreach ($t_team_matches as $tm) {
+        if (!in_array($tm['teamid'], $lg_settings['teams_allowlist'])) {
+          echo("..Team ${$tm['teamid']} is not in allowlist, skipping...\n");
+          return true;
+        }
+      }
+    } else if (!empty($lg_settings['teams_allowlist'])) {
+      if (!empty($t_team_matches)) {
+        echo("..No teams to allow, skipping...\n");
+        return true;
+      }
+      foreach ($t_team_matches as $tm) {
+        if (in_array($tm['teamid'], $lg_settings['teams_denylist'])) {
+          echo("..Team ${$tm['teamid']} is in denylist, skipping...\n");
+          return true;
+        }
+      }
+    } 
+
+    
+  }
+
+  
   
   if (empty($t_matchlines)) {
     $i = sizeof($t_matchlines);
