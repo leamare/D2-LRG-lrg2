@@ -421,7 +421,7 @@ function fetch($match) {
 
   if ($lg_settings['main']['teams']) {
     if (!empty($lg_settings['teams_allowlist'])) {
-      if (!empty($t_team_matches)) {
+      if (empty($t_team_matches)) {
         echo("..No teams to allow, skipping...\n");
         return true;
       }
