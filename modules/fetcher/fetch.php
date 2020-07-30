@@ -427,7 +427,7 @@ function fetch($match) {
       }
       foreach ($t_team_matches as $tm) {
         if (!in_array($tm['teamid'], $lg_settings['teams_allowlist'])) {
-          echo("..Team ${$tm['teamid']} is not in allowlist, skipping...\n");
+          echo("..Team ".$tm['teamid']." is not in allowlist, skipping...\n");
           return true;
         }
       }
@@ -438,7 +438,7 @@ function fetch($match) {
       }
       foreach ($t_team_matches as $tm) {
         if (in_array($tm['teamid'], $lg_settings['teams_denylist'])) {
-          echo("..Team ${$tm['teamid']} is in denylist, skipping...\n");
+          echo("..Team ".$tm['teamid']." is in denylist, skipping...\n");
           return true;
         }
       }
