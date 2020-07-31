@@ -75,7 +75,7 @@ function fetch($match) {
       $t_team_matches = $matchdata['teams_matches'];
       foreach($matchdata['teams'] as $t) {
         if (!isset($t_teams[$t['teamid']])) {
-          $t_teams[$matchdata['teams']['teamid']] = array(
+          $t_teams[ $t['teamid'] ] = array(
             "name" => $t['name'],
             "tag" => $t['tag'],
             "added" => false
