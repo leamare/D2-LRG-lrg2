@@ -30,15 +30,15 @@ function calculate_limiters(array $dataset, int $teams = null): array {
   }
 
   return [
-    "sq_dev" => $sq_dev,
+    "sq_dev" => unzero($sq_dev),
     "limiter_quantile" => $q1,
-    "median" => $median,
-    "limiter_higher" => quantile($dataset, $q1),
-    "limiter_middle" => round(quantile($dataset, $q2)),
-    "limiter_graph" => round(quantile($dataset, $q2m)),
-    "limiter_lower" => round($teams ? 
+    "median" => unzero($median),
+    "limiter_higher" => unzero(quantile($dataset, $q1)),
+    "limiter_middle" => unzero(round(quantile($dataset, $q2))),
+    "limiter_graph" => unzero(round(quantile($dataset, $q2m))),
+    "limiter_lower" => unzero(round($teams ? 
       ceil(quantile($dataset, $q1)/$teams) :
-      quantile($dataset, $q3))
+      quantile($dataset, $q3)))
   ];
 }
 
