@@ -158,7 +158,7 @@ if ($conn->select_db($lrg_db_prefix."_".$lg_settings['league_tag'])) {
     `xpm` smallint(6) NOT NULL,
     `heal` mediumint(9) NOT NULL,
     `heroDamage` mediumint(9) NOT NULL,
-    `towerDamage` smallint(6) NOT NULL,
+    `towerDamage` mediumint(9) NOT NULL,
     `lastHits` smallint(6) NOT NULL,
     `denies` smallint(6) NOT NULL,
     KEY `matchlines_matchid_heroid_IDX` (`matchid`,`heroid`) USING BTREE,
