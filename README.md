@@ -1,6 +1,6 @@
 # Dota 2 League Report Generator (D2-LRG-lrg2)
 
-## Current version: 2.4.7
+## Current version: 2.6.0
 
 This is the **lrg2** version that won't be updated any further.
 
@@ -154,6 +154,8 @@ Parameters:
 * `-d123` - Specify a custom API cooldown (in seconds)
 * `-u` - try to update matches without adv_matchlines data (unparsed matches)
 * `-U` - try to update all the matches, finding unparsed ones. Automatically enables `-u`
+* `-p` - counts matches with negative player ids are required for data update
+* `-Q` - disables unparsed matches in -U mode (to only work with matches without detailed player data)
 
 Fetcher has two modes: "listen" mode and the regular one. Fetcher is using matchlist from `matchlists` follder by default, listen mode changes it to STDIN. It's not async because of time limitation on OpenDota side (basically you can't be too fast with your requests anyway, so there's no need to be asynchronous).
 
