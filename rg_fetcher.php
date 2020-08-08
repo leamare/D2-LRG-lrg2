@@ -50,6 +50,7 @@ $use_full_stratz = isset($options['Z']);
 $ignore_stratz = isset($options['Q']);
 
 $request_unparsed = isset($options['R']);
+$request_unparsed_players = isset($options['p']);
 
 if(!empty($odapikey) && !isset($ignore_api_key))
   $opendota = new \SimpleOpenDotaPHP\odota_api(false, "", $api_cooldown ?? 0, $odapikey);
@@ -86,12 +87,50 @@ if (!$listen) {
       $matches[] = $row[0];
     }
     $query_res->free_result();
+
+    $parsed_matches = [];
+    if (!isset($options['Q'])) {
+      $sql = "SELECT matchid FROM adv_matchlines GROUP BY matchid;";
+      
+      if ($conn->multi_query($sql) === TRUE);
+      else die("[F] Unexpected problems when recording to database.\n".$conn->error."\n");
+
+      $query_res = $conn->store_result();
+      for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+        $parsed_matches[] = $row[0];
+      }
+      $query_res->free_result();
+    }
+
+    $pmatches = [];
+    if (isset($options['p'])) {
+      $sql = "SELECT matchid FROM matchlines where playerid < 0 GROUP BY matchid;";
+    
+      if ($conn->multi_query($sql) === TRUE);
+      else die("[F] Unexpected problems when recording to database.\n".$conn->error."\n");
+
+      $query_res = $conn->store_result();
+      for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+        $pmatches[] = $row[0];
+      }
+      $query_res->free_result();
+    }
+
+    $matches = array_diff($matches, $parsed_matches);
+    if (isset($options['Q'])) {
+      $matches = array_intersect($matches, $pmatches);
+    } else {
+      $matches = array_merge($matches, $pmatches);
+    }
+    unset($parsed_matches);
+    unset($pmatches);
   } else {
     $input_cont = file_get_contents($lrg_input);
     $input_cont = str_replace("\r\n", "\n", $input_cont);
     $matches    = explode("\n", trim($input_cont));
   }
   $matches = array_unique($matches);
+  echo "[ ] Total: ".count($matches)."\n";
 } else {
   $matches = [];
 }
