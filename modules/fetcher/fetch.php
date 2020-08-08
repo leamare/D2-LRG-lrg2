@@ -16,7 +16,7 @@ function fetch($match) {
   global $opendota, $conn, $rnum, $matches, $failed_matches, $scheduled, $scheduled_stratz, $t_teams, $t_players, $use_stratz, $require_stratz,
   $request_unparsed, $meta, $stratz_timeout_retries, $force_adding, $cache_dir, $lg_settings, $lrg_use_cache, $first_scheduled,
   $use_full_stratz, $scheduled_wait_period, $steamapikey, $force_await, $players_list, $rank_limit, $stratztoken, $ignore_stratz,
-  $update_unparsed;
+  $update_unparsed, $request_unparsed_players;
 
   $t_match = [];
   $t_matchlines = [];
@@ -25,6 +25,7 @@ function fetch($match) {
   $t_new_players = [];
   $bad_replay = false;
 
+  $players_update = false;
   $match_skip = false;
 
   if ($lg_settings['main']['teams']) {
@@ -47,6 +48,14 @@ function fetch($match) {
       $query = $conn->query("SELECT matchid FROM adv_matchlines WHERE matchid = ".$match.";");
       $match_parsed = isset($query->num_rows) && $query->num_rows;
     }
+    if ($request_unparsed_players) {
+      $query = $conn->query("SELECT matchid FROM matchlines WHERE matchid = ".$match." and playerid < 0;");
+      $match_parsed = $match_parsed && !(isset($query->num_rows) && $query->num_rows);
+      $players_update = true;
+      if (!$match_parsed) {
+        echo("Players data is incomplete, updating...");
+      }
+    }
 
     if (!$update_unparsed || $match_parsed) {
       echo("Already in database, skipping\n");
@@ -58,8 +67,29 @@ function fetch($match) {
     $match_exists = false;
   }
 
-  if($lrg_use_cache && file_exists("$cache_dir/".$match.".lrgcache.json")) {
-    echo("Reusing cache.");
+  $data = [
+    'query' => "query MatchPlayers {
+      match(id: $match) { 
+        parsedDateTime, players { steamAccount { id, isAnonymous, name, seasonRank, proSteamAccount { name } } },
+        stats { pickBans {
+            heroId,
+            bannedHeroId,
+            order,
+            playerIndex,
+            isPick,
+            isRadiant,
+            wasBannedSuccessfully
+          }
+        }
+      } 
+    }",
+  ];
+  if (!empty($stratztoken)) $data['token'] = $stratztoken;
+  
+  $stratz_request = "https://api.stratz.com/graphql?".http_build_query($data);
+
+  if($lrg_use_cache && file_exists("$cache_dir/".$match.".lrgcache.json") && !$players_update) {
+    echo("Reusing LRG cache.");
     $json = file_get_contents("$cache_dir/".$match.".lrgcache.json");
     $matchdata = json_decode($json, true);
     $t_match = $matchdata['matches'];
@@ -83,7 +113,7 @@ function fetch($match) {
         }
       }
     }
-  } elseif($lrg_use_cache && file_exists("$cache_dir/".$match.".json")) {
+  } elseif($lrg_use_cache && file_exists("$cache_dir/".$match.".json") && !$players_update) {
     echo("Reusing cache.");
     $json = file_get_contents("$cache_dir/".$match.".json");
     $matchdata = json_decode($json, true);
@@ -96,20 +126,19 @@ function fetch($match) {
     echo("Requesting.");
 
     if (!$ignore_stratz && (!empty($players_list) || !empty($rank_limit))) {
-      $request = "https://api.stratz.com/api/v1/match?include=Player,PickBan&matchid=$match".(!empty($stratztoken) ? "&token=$stratztoken" : "");
       $json = false;
       do {
-        $json = @file_get_contents($request);
+        $json = @file_get_contents($stratz_request);
       } while (!$json);
       $stratz = empty($json) ? [] : json_decode($json, true);
 
-      $players = $stratz[0]['players'];
+      $players = $stratz['players'];
       foreach ($players as $pl) {
-        if (!empty($players_list) && !in_array($pl['steamId'], $players_list)) {
+        if (!empty($players_list) && !in_array($pl['steamAccount']['id'], $players_list)) {
           echo "Player(s) are not in allow list, skipping.\n";
           return true;
         }
-        if (!empty($lg_settings['players_denylist']) && in_array($pl['steamId'], $lg_settings['players_denylist'])) {
+        if (!empty($lg_settings['players_denylist']) && in_array($pl['steamAccount']['id'], $lg_settings['players_denylist'])) {
           echo "Player(s) are in deny list, skipping.\n";
           return true;
         }
@@ -189,22 +218,44 @@ function fetch($match) {
     }
   }
 
-  if(!file_exists("$cache_dir/".$match.".lrgcache.json") && !file_exists("$cache_dir/".$match.".json") || ( $bad_replay && !file_exists("$cache_dir/unparsed_".$match.".json") )) {
-    if($matchdata['lobby_type'] != 1 && $matchdata['lobby_type'] != 2 && $use_stratz && !$ignore_stratz) {
+  if((!file_exists("$cache_dir/".$match.".lrgcache.json") && !file_exists("$cache_dir/".$match.".json")) 
+        || $bad_replay
+        || $players_update) {
+
+    if(!isset($matchdata['lobby_type']) || $players_update || ($matchdata['lobby_type'] != 1 && $matchdata['lobby_type'] != 2 && $use_stratz && !$ignore_stratz)) {
       echo("..Requesting STRATZ.");
 
-      // Not all matches in Stratz database have PickBan support for /match? endpoint
-      // so there will be kind of workaround for it.
-
       if (empty($stratz)) {
-        $request = "https://api.stratz.com/api/v1/match?include=Player,PickBan&matchid=$match".(!empty($stratztoken) ? "&token=$stratztoken" : "");
+        $json = @file_get_contents($stratz_request);
 
-        $json = @file_get_contents($request);
-
-        $stratz = empty($json) ? [] : json_decode($json, true);
+        $stratz = empty($json) ? [] : json_decode($json, true)['data']['match'];
       }
 
-      if(!isset($stratz[0]['parsedDateTime'])) {
+      if (!empty($stratz['players'])) {
+        for($i=0, $j=0, $sz=sizeof($matchdata['players']); $i<$sz; $i++) {
+          if(!isset($matchdata['players'][$i]['hero_id']) || !$matchdata['players'][$i]['hero_id'] || $j>9) {
+            unset($matchdata['players'][$i]);
+            continue;
+          }
+          if(!isset($matchdata['players'][$i]['account_id']) || !$matchdata['players'][$i]['account_id']) {
+            $matchdata['players'][$i]['account_id'] = $stratz['players'][$j]['steamAccount']['id'];
+
+            // TODO:
+            if (!isset($t_players[ $matchdata['players'][$i]['account_id'] ])) {
+              //$tmp = $opendota->player($matchdata['players'][$i]['account_id']);
+
+              $matchdata['players'][$i]["name"] = !empty($stratz['players'][$j]['steamAccount']['proSteamAccount']) ? 
+                $stratz['players'][$j]['steamAccount']['name'] : $stratz['players'][$j]['steamAccount']['name'] ?? null;
+              $matchdata['players'][$i]["personaname"] = $stratz['players'][$j]['steamAccount']['name'] ?? null;
+            } else {
+              $matchdata['players'][$i]["name"] = $t_players[ $matchdata['players'][$i]['account_id'] ];
+            }
+          }
+          $j++;
+        }
+      }
+
+      if(empty($stratz['parsedDateTime'])) {
         unset($stratz);
 
         if($request_unparsed && !in_array($match, $scheduled_stratz)) {
@@ -217,51 +268,32 @@ function fetch($match) {
         }
       }
 
-      if (!empty($stratz[0]['players'])) {
-        for($i=0, $j=0, $sz=sizeof($matchdata['players']); $i<$sz; $i++) {
-          if(!isset($matchdata['players'][$i]['hero_id']) || !$matchdata['players'][$i]['hero_id'] || $j>9) {
-            unset($matchdata['players'][$i]);
-            continue;
-          }
-          if(!isset($matchdata['players'][$i]['account_id']) || !$matchdata['players'][$i]['account_id']) {
-            $matchdata['players'][$i]['account_id'] = $stratz[0]['players'][$j]['steamAccount']['id'];
-
-            // TODO
-            if (!isset($t_players[ $matchdata['players'][$i]['account_id'] ])) {
-              $tmp = $opendota->player($matchdata['players'][$i]['account_id']);
-
-              $matchdata['players'][$i]["name"] = $tmp['profile']['name'] ?? null;
-              $matchdata['players'][$i]["personaname"] = $tmp['profile']['personaname'] ?? null;
-            } else {
-              $matchdata['players'][$i]["name"] = $t_players[ $matchdata['players'][$i]['account_id'] ];
-            }
-          }
-          $j++;
-        }
-      }
-
+      // this block of code is outdated and is supposed to work only in emergency situations
+      // I'll still change it to use graphql though
       $full_request = false;
       if(($matchdata['game_mode'] == 22 || $matchdata['game_mode'] == 3 || empty($matchdata['picks_bans'])) && 
-          (!in_array($match, $failed_matches) || false)) {
+          (!in_array($match, $failed_matches))) {
         $stratz_retries = $stratz_timeout_retries+1;
-        while ((!isset($stratz[0]['pickBans']) || $stratz[0]['pickBans'] === NULL || empty($stratz)) && $use_full_stratz) {
+        
+        while ((empty($stratz['stats']['pickBans']) || empty($stratz['stats']['pickBans']) || empty($stratz)) && $use_full_stratz) {
           $stratz_retries--;
           echo "..STRATZ ERROR";
           sleep(5);
           echo ", retrying.";
 
-          if (!isset($stratz[0]['pickBans'])) {
-              $request = "https://api.stratz.com/api/v1/match/$match".(!empty($stratztoken) ? "?token=$stratztoken" : "");
+          if (empty($stratz['stats']['pickBans'])) {
+              // $request = "https://api.stratz.com/api/v1/match/$match".(!empty($stratztoken) ? "?token=$stratztoken" : "");
               $full_request = true;
           }
 
-          $json = file_get_contents($request);
+          $json = file_get_contents($stratz_request);
+          $stratz = json_decode($json, true);
 
-          if($full_request && strlen($json) < 6500 || !$stratz_retries) {
+          if($full_request && empty($stratz) || !$stratz_retries) {
               echo("..ERROR: Missing STRATZ analysis, skipping.\n");
 
               if($request_unparsed && !in_array($match, $scheduled_stratz)) {
-                @file_get_contents($request);
+                @file_get_contents($stratz_request);
                 `php tools/replay_request_stratz.php -m$match`;
                 echo "[\t] Requested and scheduled $match\n";
                 $first_scheduled[$match] = time();
@@ -274,22 +306,23 @@ function fetch($match) {
                 break;
               }
           } else {
-            $stratz = json_decode($json, true);
-            if ($full_request) $stratz = [ $stratz ];
+            if ($full_request) $stratz = [ $stratz['data']['match'] ];
           }
         }
 
-        if(!isset($stratz) && $require_stratz)
+        if(empty($stratz) && $require_stratz) {
+          echo "..Problems when requesting Stratz.\n";
           return null;
+        }
 
-        if(isset($stratz[0]['pickBans'])) {
-          $matchdata['picks_bans_stratz'] = $stratz[0]['pickBans'];
+        if(!empty($stratz['stats']['pickBans'])) {
+          $matchdata['picks_bans_stratz'] = $stratz['stats']['pickBans'];
         } 
       }
       
       $matchdata['players'] = array_values($matchdata['players']);
       
-      if (isset($matchdata['picks_bans_stratz'])) {
+      if (!empty($matchdata['picks_bans_stratz'])) {
         echo("..Stratz data merged.");
         unset($stratz);
       } else {
@@ -764,6 +797,7 @@ function fetch($match) {
   if ($match_exists && !$match_parsed) {
     // remove match before readding it
     $sql = "DELETE from matchlines where matchid = $match;".
+      "DELETE from adv_matchlines where matchid = $match;".
       "DELETE from draft where matchid = $match; ".
       ( $lg_settings['main']['teams'] ? "delete from teams_matches where matchid = $match;" : "").
       "delete from matches where matchid = $match;";
