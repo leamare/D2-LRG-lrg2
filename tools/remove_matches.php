@@ -47,6 +47,18 @@ if(isset($options['T'])) {
 
 if( !is_array($mids) ) $mids = [$mids];
 
+if (!$lg_settings['main']['teams']) {
+  $sql = "SELECT COUNT(*) z
+  FROM information_schema.tables WHERE table_schema = '$lrg_sql_db' 
+  AND table_name = 'teams_matches' HAVING z > 0;";
+
+  $query = $conn->query($sql);
+  if (isset($query->num_rows) && $query->num_rows) {
+    $lg_settings['main']['teams'] = true;
+  }
+  echo "[N] Set &settings.teams to true.\n";
+}
+
 foreach ($mids as $mid) {
   if (empty($mid) || $mid[0] == '#') continue;
 
