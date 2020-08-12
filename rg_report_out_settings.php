@@ -41,6 +41,9 @@ $noleague_style = "";
 
 $instance_title = "LRG";
 $instance_name = "League Report Generator Instance";
+$instance_title_postfix = "Title postfix";
+$instance_long_desc = "Long description";
+$title_separator = "-";
 
 # main page settings
 $reports_dir = "reports";
