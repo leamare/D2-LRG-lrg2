@@ -189,6 +189,20 @@ function fetch($match) {
           return true;
       }
 
+      if (!empty($lg_settings['cluster_allowlist'])) {
+        if (!in_array($matchdata['cluster'] ?? 0, $lg_settings['cluster_allowlist'])) {
+          echo("..Cluster ".($matchdata['cluster'] ?? 0)." is not in allowlist, skipping...\n");
+          return true;
+        }
+      }
+
+      if (!empty($lg_settings['cluster_denylist'])) {
+        if (in_array($matchdata['cluster'] ?? 0, $lg_settings['cluster_denylist'])) {
+          echo("..Cluster ".($matchdata['cluster'] ?? 0)." is in denylist, skipping...\n");
+          return true;
+        }
+      }
+
       if ($matchdata['players'][0]['lh_t'] == null) {
         if($request_unparsed && !in_array($match, $scheduled)) {
           $opendota->request_match($match);
@@ -420,7 +434,7 @@ function fetch($match) {
     $t_match['duration'] = $matchdata['duration'];
     $t_match['modeID'] = $matchdata['game_mode'];
     $t_match['leagueID'] = $matchdata['leagueid'];
-    $t_match['cluster']  = $matchdata['cluster'] ?? 0;
+    $t_match['cluster']  = $match_rules['cluster']['rep'] ?? $lg_settings['force_cluster'] ?? $matchdata['cluster'] ?? 0;
     $t_match['start_date'] = $matchdata['start_time'];
     if (isset($matchdata['stomp']))
         $t_match['stomp'] = $matchdata['stomp'];

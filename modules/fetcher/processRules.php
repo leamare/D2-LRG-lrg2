@@ -7,6 +7,7 @@ const RULES_TYPES = [
   "pslot",
   "team",
   "side",
+  "cluster",
 ];
 
 function processRules(&$matchstring) {
@@ -29,4 +30,3 @@ function processRules(&$matchstring) {
 
   return $match_rules;
 }
-?>

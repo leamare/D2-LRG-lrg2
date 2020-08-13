@@ -174,6 +174,16 @@ Rules types:
 * `pslot` - replaces player steam ID of a player in a given slot (`player:0:1234`)
 * `team` - replaces one team ID with another (`team:1:2`)
 * `side` - replaces team ID of a team based on it's side, given sides are either `radiant_team` or `dire_team` (`side:dire_team:1234`)
+* `cluster` - replaces current cluster (`cluster:rep:123`)
+
+Additional parameters to inject in league json descriptor:
+* `teams_allowlist`
+* `teams_denylist`
+* `players_allowlist`
+* `players_denylist`
+* `force_cluster`
+* `cluster_allowlist`
+* `cluster_denylist`
 
 And some things about the listen mode:
 
