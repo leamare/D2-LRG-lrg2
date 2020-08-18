@@ -23,6 +23,8 @@ test*.php
 output
 gi_*
 .htaccess
+test.sh
+test2.sh
 
 # Custom Styles
 res/custom_styles/

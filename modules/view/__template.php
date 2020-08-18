@@ -13,11 +13,12 @@
        if (!empty($leaguetag)) {
           $rep_sm_title .= " $title_separator ".$report['league_name'];
           $rep_sm_desc = ($report['league_name'] ?? "Tournaments")." Stats";
+          $rep_sm_desc .= " $title_separator ".$report['league_desc'];
         } else {
           $rep_sm_title .= " $title_separator $instance_title_postfix";
           $rep_sm_desc = $instance_title;
+          $rep_sm_desc .= " $title_separator $instance_long_desc";
         }
-        $rep_sm_desc .= " $title_separator $instance_long_desc";
        
        $host_link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 
                 "https" : "http") . "://" . $_SERVER['HTTP_HOST'] .  
