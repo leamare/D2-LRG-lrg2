@@ -53,9 +53,11 @@ foreach ($result['players'] as $pid => &$name) {
   $query_res = $conn->store_result();
 
   $row = $query_res->fetch_row();
-  $result["players_additional"][$pid]['won'] = $row[0];
-  $result["players_additional"][$pid]['gpm'] = $row[1];
-  $result["players_additional"][$pid]['xpm'] = $row[2];
+  if ($row) {
+    $result["players_additional"][$pid]['won'] = $row[0];
+    $result["players_additional"][$pid]['gpm'] = $row[1];
+    $result["players_additional"][$pid]['xpm'] = $row[2];
+  }
 
   $query_res->free_result();
 
@@ -68,7 +70,9 @@ foreach ($result['players'] as $pid => &$name) {
   $query_res = $conn->store_result();
 
   $row = $query_res->fetch_row();
-  $result["players_additional"][$pid]['hero_pool_size'] = $row[0];
+  if ($row) {
+    $result["players_additional"][$pid]['hero_pool_size'] = $row[0];
+  }
 
   $query_res->free_result();
 
