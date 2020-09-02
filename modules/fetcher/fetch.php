@@ -393,17 +393,17 @@ function fetch($match) {
     unset($matchdata['chat']);
     unset($matchdata['cosmetics']);
 
-    $json = json_encode($matchdata);
-    if(!empty($cache_dir) && $lrg_use_cache) {
-      $f = fopen("$cache_dir/".($bad_replay ? "unparsed_" : "").$match.".json", "w");
-      fwrite($f, $json);
-      fclose($f);
+    // $json = json_encode($matchdata);
+    // if(!empty($cache_dir) && $lrg_use_cache) {
+    //   $f = fopen("$cache_dir/".($bad_replay ? "unparsed_" : "").$match.".json", "w");
+    //   fwrite($f, $json);
+    //   fclose($f);
 
-      echo("..Saved to cache.");
-    }
+    //   echo("..Saved to cache.");
+    // }
   }
 
-  unset($json);
+  // unset($json);
 
   if (empty($t_match)) {
     for($i=0; $i<2; $i++, $teamid = null) {
@@ -822,6 +822,44 @@ function fetch($match) {
     do {
         $conn->store_result();
     } while($conn->next_result());
+  }
+
+  // TODO:
+  if(!empty($cache_dir) && $lrg_use_cache && !$bad_replay && !file_exists("$cache_dir/".$match.".lrgcache.json")) {
+    //$f = fopen("$cache_dir/".($bad_replay ? "unparsed_" : "").$match.".json", "w");
+    //fwrite($f, $json);
+    //fclose($f);
+
+    $matchdata = [
+      'matches' => $t_match,
+      'matchlines' => $t_matchlines,
+      'draft' => $t_draft,
+      'adv_matchlines' => $t_adv_matchlines,
+    ];
+
+    $matchdata['players'] = [];
+    foreach ($t_matchlines as $ml) {
+      $matchdata['players'][] = [
+        'playerID' => $ml['playerid'],
+        'nickname' => $t_players[ $ml['playerid'] ] ?? $t_new_players[ $ml['playerid'] ],
+      ];
+    }
+
+    if (isset($t_team_matches) && isset($matchdata['teams'])) {
+      $matchdata['teams_matches'] = $t_team_matches;
+      $matchdata['teams'] = [];
+
+      foreach ($t_team_matches as $t) {
+        $matchdata['teams'][] = [
+          'teamid' => $t['teamid'],
+          'name' => $t_teams[ $t['teamid'] ]['name'],
+          'tag' => $t_teams[ $t['teamid'] ]['tag'],
+        ];
+      }
+    }
+
+    file_put_contents("$cache_dir/".$match.".lrgcache.json", json_encode($matchdata));
+    echo("..Saved LRG cache.");
   }
 
   $sql = ""; $err_query = "";
