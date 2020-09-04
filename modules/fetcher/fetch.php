@@ -845,7 +845,7 @@ function fetch($match) {
       ];
     }
 
-    if (isset($t_team_matches) && isset($matchdata['teams'])) {
+    if (!empty($t_team_matches)) {
       $matchdata['teams_matches'] = $t_team_matches;
       $matchdata['teams'] = [];
 
