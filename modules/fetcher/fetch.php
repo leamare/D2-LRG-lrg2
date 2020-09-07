@@ -88,7 +88,7 @@ function fetch($match) {
   
   $stratz_request = "https://api.stratz.com/graphql?".http_build_query($data);
 
-  if($lrg_use_cache && file_exists("$cache_dir/".$match.".lrgcache.json") && !$players_update) {
+  if($lrg_use_cache && file_exists("$cache_dir/".$match.".lrgcache.json") && (!$players_update || !empty($match_rules))) {
     echo("Reusing LRG cache.");
     $json = file_get_contents("$cache_dir/".$match.".lrgcache.json");
     $matchdata = json_decode($json, true);
@@ -434,7 +434,7 @@ function fetch($match) {
     $t_match['duration'] = $matchdata['duration'];
     $t_match['modeID'] = $matchdata['game_mode'];
     $t_match['leagueID'] = $matchdata['leagueid'];
-    $t_match['cluster']  = $match_rules['cluster']['rep'] ?? $lg_settings['force_cluster'] ?? $matchdata['cluster'] ?? 0;
+    $t_match['cluster']  = $matchdata['cluster'] ?? null;
     $t_match['start_date'] = $matchdata['start_time'];
     if (isset($matchdata['stomp']))
         $t_match['stomp'] = $matchdata['stomp'];
@@ -861,6 +861,8 @@ function fetch($match) {
     file_put_contents("$cache_dir/".$match.".lrgcache.json", json_encode($matchdata));
     echo("..Saved LRG cache.");
   }
+
+  $t_match['cluster']  = $match_rules['cluster']['rep'] ?? $lg_settings['force_cluster'] ?? $t_match['cluster'] ?? null;
 
   $sql = ""; $err_query = "";
 
