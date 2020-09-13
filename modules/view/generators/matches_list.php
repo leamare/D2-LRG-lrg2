@@ -3,7 +3,7 @@
 include_once($root."/modules/view/functions/hero_name.php");
 include_once($root."/modules/view/functions/player_name.php");
 
-function rg_generator_matches_list($table_id, $context) {
+function rg_generator_matches_list($table_id, &$context) {
   global $report;
   if(!sizeof($context)) return "";
   $matches = array_keys($context);

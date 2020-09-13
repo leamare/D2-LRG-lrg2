@@ -3,7 +3,7 @@ include_once($root."/modules/view/functions/hero_name.php");
 include_once($root."/modules/view/functions/player_name.php");
 include_once($root."/modules/view/functions/ranking.php");
 
-function rg_generator_pickban($table_id, $context, $context_total_matches, $heroes_flag = true) {
+function rg_generator_pickban($table_id, &$context, $context_total_matches, $heroes_flag = true) {
   if(!sizeof($context)) return "";
 
   uasort($context, function($a, $b) {

@@ -3,8 +3,10 @@ include_once($root."/modules/view/functions/hero_name.php");
 include_once($root."/modules/view/functions/player_name.php");
 include_once($root."/modules/view/functions/convert_time.php");
 
-function rg_generator_summary($table_id, $context, $hero_flag = true, $rank = false) {
+function rg_generator_summary($table_id, &$context, $hero_flag = true, $rank = false) {
   if(!sizeof($context)) return "";
+
+  if (is_wrapped($context)) $context = unwrap_data($context);
 
   global $report;
 

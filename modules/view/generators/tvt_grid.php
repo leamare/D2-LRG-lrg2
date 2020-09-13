@@ -1,7 +1,7 @@
 <?php
 include_once("$root/modules/view/functions/team_name.php");
 
-function rg_generator_tvt_grid($table_id, $context, $teams_interest = []) {
+function rg_generator_tvt_grid($table_id, &$context, $teams_interest = []) {
   if(!sizeof($context)) return "";
   
   $team_ids = array_keys($context);

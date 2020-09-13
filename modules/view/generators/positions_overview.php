@@ -3,8 +3,10 @@
 include_once($root."/modules/view/functions/hero_name.php");
 include_once($root."/modules/view/functions/player_name.php");
 
-function rg_generator_positions_overview($table_id, $context, $hero_flag = true) {
+function rg_generator_positions_overview($table_id, &$context, $hero_flag = true) {
   if(!sizeof($context)) return "";
+
+  if (is_wrapped($context)) $context = unwrap_data($context);
 
   $position_overview_template = array("total" => 0);
   for ($i=1; $i>=0 && !isset($keys); $i--) {

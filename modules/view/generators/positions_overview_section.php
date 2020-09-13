@@ -3,8 +3,10 @@
 include_once($root."/modules/view/functions/hero_name.php");
 include_once($root."/modules/view/functions/player_name.php");
 
-function rg_generator_overview_positions_section($tables_prefix, $context, &$pickban, $count = 5, $sort_param = "matches") {
+function rg_generator_overview_positions_section($tables_prefix, &$context, &$pickban, $count = 5, $sort_param = "matches") {
   if(!sizeof($context)) return "";
+
+  if (is_wrapped($context)) $context = unwrap_data($context);
 
   for ($i=1; $i>=0 && !isset($keys); $i--) {
     for ($j=1; $j<6 && $j>0; $j++) {

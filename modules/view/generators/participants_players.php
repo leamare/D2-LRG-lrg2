@@ -1,7 +1,7 @@
 <?php
 include_once("$root/modules/view/functions/player_card.php");
 
-function rg_generator_participants_players($context) {
+function rg_generator_participants_players(&$context) {
   if(!sizeof($context)) return "";
   
   $res = "<div class=\"content-cards\">";

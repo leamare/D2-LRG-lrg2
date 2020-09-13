@@ -1,7 +1,7 @@
 <?php
 include_once("$root/modules/view/functions/team_card.php");
 
-function rg_generator_participants_teams($context) {
+function rg_generator_participants_teams(&$context) {
   global $report;
   if(!sizeof($context)) return "";
 

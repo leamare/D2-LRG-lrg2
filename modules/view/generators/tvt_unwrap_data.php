@@ -1,6 +1,6 @@
 <?php
 
-function rg_generator_tvt_unwrap_data($context, $context_teams) {
+function rg_generator_tvt_unwrap_data(&$context, &$context_teams) {
   if(!sizeof($context)) return [];
 
   $tvt = [];

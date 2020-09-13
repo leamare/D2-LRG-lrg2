@@ -1,9 +1,12 @@
 <?php
 include_once($root."/modules/view/functions/ranking.php");
 
-function rg_generator_draft($table_id, $context_pickban, $context_draft, $context_total_matches, $hero_flag = true) {
+function rg_generator_draft($table_id, &$context_pickban, &$context_draft, $context_total_matches, $hero_flag = true) {
   $res = ""; $draft = [];
   $id_name = $hero_flag ? "heroid" : "playerid";
+
+  if (is_wrapped($context_pickban)) $context_pickban = unwrap_data($context_pickban);
+  if (is_wrapped($context_draft)) $context_draft = unwrap_data($context_draft);
 
   if(!sizeof($context_pickban)) return "";
 

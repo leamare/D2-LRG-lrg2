@@ -3,7 +3,7 @@
 include_once($root."/modules/view/functions/hero_name.php");
 include_once($root."/modules/view/functions/player_name.php");
 
-function rg_generator_combos($table_id, $context, $context_matches, $heroes_flag = true) {
+function rg_generator_combos($table_id, &$context, $context_matches, $heroes_flag = true) {
   $id = $heroes_flag ? "heroid" : "playerid";
 
   if(!sizeof($context))
