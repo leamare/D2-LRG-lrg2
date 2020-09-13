@@ -61,6 +61,10 @@ function wrap_data ($array, $with_keys = false, $deep = false, $explicit = false
     }
   }
 
+  // foreach ($r['data'] as &$l)
+  //   $l = implode('||', $l);
+  // $r['data'] = json_encode($r['data']);
+
   return $r;
 }
 
@@ -86,4 +90,6 @@ function unwrap_data ($array) {
   return $r;
 }
 
-?>
+function is_wrapped ($array) {
+  return is_array($array) && isset($array['head']) && isset($array['data']);
+}
