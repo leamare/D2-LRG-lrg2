@@ -35,6 +35,11 @@ function rg_query_hero_summary(&$conn, $cluster = null) {
   $query_res = $conn->store_result();
 
   for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+    foreach($row as $k => $v) {
+      if (!$k) continue;
+      $row[$k] = round($row[$k], 4);
+    }
+
     $res[$row[0]] = [
       "matches_s"=> $row[1],
       "winrate_s"=> $row[2],
@@ -55,6 +60,8 @@ function rg_query_hero_summary(&$conn, $cluster = null) {
   }
 
   $query_res->free_result();
+
+  $res = wrap_data($res, true, true);
 
   return $res;
 }

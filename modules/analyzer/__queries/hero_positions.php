@@ -45,6 +45,11 @@ function rg_query_hero_positions(&$conn, $team = null, $cluster = null) {
       $query_res = $conn->store_result();
   
       for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+        foreach($row as $k => $v) {
+          if (!$k) continue;
+          $row[$k] = round($row[$k], 4);
+        }
+        
         $res[$core][$lane][$row[0]] = array (
           "matches_s"=> $row[1],
           "winrate_s"=> $row[2],
@@ -68,6 +73,8 @@ function rg_query_hero_positions(&$conn, $team = null, $cluster = null) {
       if (!$core) { break; }
     }
   }
+
+  $res = wrap_data($res, true, true, true);
 
   return $res;
 }

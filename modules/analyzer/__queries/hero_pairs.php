@@ -44,11 +44,11 @@ function rg_query_hero_pairs(&$conn, &$pickban, $matches_total, $limiter = 0, $c
       "heroid1" => $row[0],
       "heroid2" => $row[1],
       "matches" => $row[2],
-      "winrate" => $row[3]/$row[2],
+      "winrate" => round($row[3]/$row[2] , 4),
       "wins" => $row[3],
       "expectation" => round($expected_pair),
       "lane_rate" => $row[4],
-      "wr_diff" => $wr_diff,
+      "wr_diff" => round($wr_diff, 5),
     ];
   }
   

@@ -30,5 +30,7 @@ function rg_query_hero_draft(&$conn, $cluster = null, $team = null) {
     }
   }
 
+  // $result = wrap_data($result, true, true, true);
+
   return $result;
 }
