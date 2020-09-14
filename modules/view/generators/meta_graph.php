@@ -55,7 +55,7 @@ function rg_generator_meta_graph($div_id, &$context, &$context_pickban, $heroes_
         $el['matches_picked']." ".locale_string("matches_picked").", ".
         number_format($el['winrate_picked']*100, 1)." ".locale_string("winrate_picked")."'".
         ", shape:'circularImage', ".
-        "image: 'res/heroes/".$meta['heroes'][$elid]['tag'].".png', ".
+        "image: '".hero_icon_link($elid)."', ".
         "color:{ border:'rgba(".number_format(255-255*$el['winrate_picked'], 0).",124,".
         number_format(255*$el['winrate_picked'], 0).")' }},";
     }
