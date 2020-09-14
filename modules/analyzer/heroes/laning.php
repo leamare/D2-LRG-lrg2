@@ -1,6 +1,6 @@
 <?php
 
-echo "[S] Requested data for HERO LANING STATS\n";
+echo "[S] Requested data for HERO LANING STATS - ";
 
 $result["hero_laning"] = wrap_data(
   rg_query_hero_laning($conn, null, null),
@@ -9,3 +9,4 @@ $result["hero_laning"] = wrap_data(
   true
 );
 
+echo "\n";

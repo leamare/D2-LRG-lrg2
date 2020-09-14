@@ -156,7 +156,7 @@ function rg_query_hero_laning(&$conn, $cluster = null, $team = null) {
 
     $result[ $hid ] = $r;
 
-    echo "\n";
+    echo " ";
   }
 
   return $result;
