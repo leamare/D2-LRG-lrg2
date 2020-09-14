@@ -62,12 +62,31 @@ function compound_ranking_sort($a, $b, $total_matches) {
   else return ($a_rank < $b_rank) ? 1 : -1;
 }
 
-function compound_ranking_laning_sort($a, $b, $total_matches) {
+function compound_ranking_laning_sort($a, $b, $total_matches, $median_adv, $median_disadv) {
   $a_popularity = $a['matches']/$total_matches;
   $b_popularity = $b['matches']/$total_matches;
 
-  $a_rank = wilson_rating( $a['matches']*$a['lane_wr'], $a['matches'], 1-$a_popularity );
-  $b_rank = wilson_rating( $b['matches']*$b['lane_wr'], $b['matches'], 1-$b_popularity );
+  $a_adv_factor = ($a['avg_advantage']/$median_adv)+($median_disadv/$a['avg_disadvantage']);
+  $b_adv_factor = ($b['avg_advantage']/$median_adv)*+($median_disadv/$b['avg_disadvantage']);
+
+  if ($a['matches']) {
+    $a_m = $a['matches'] * $a['lane_wr'] * (
+      (($a['won_from_won']+$a['won_from_tie']+$a['won_from_behind'])/$a['matches'])/4
+    ) * (
+      $a_adv_factor > 1 ? $a_adv_factor : 1
+    );
+  } else $a_m = 0;
+
+  if ($b['matches']) {
+    $b_m = $b['matches'] * $b['lane_wr'] * (
+      (($b['won_from_won']+$b['won_from_tie']+$b['won_from_behind'])/$b['matches'])/4
+    ) * (
+      $b_adv_factor > 1 ? $b_adv_factor : 1
+    );
+  } else $b_m = 0;
+
+  $a_rank = wilson_rating( $a_m, $a['matches'], 1-$a_popularity );
+  $b_rank = wilson_rating( $b_m, $b['matches'], 1-$b_popularity );
 
   if($a_rank == $b_rank) return 0;
   else return ($a_rank < $b_rank) ? 1 : -1;
