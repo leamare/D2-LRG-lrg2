@@ -64,6 +64,7 @@ function get_report_descriptor(&$report, $generate_endpoints = false) {
   if (isset($report['hero_positions_matches'])) $desc['endpoints'][] = "heroes-positions_matches";
   if (isset($report['hvh'])) $desc['endpoints'][] = "heroes-hvh";
   if (isset($report['hero_summary'])) $desc['endpoints'][] = "heroes-summary";
+  if (isset($report['hero_laning'])) $desc['endpoints'][] = "heroes-laning";
 
   if (isset($report['players_draft'])) $desc['endpoints'][] = "players-draft";
   if (isset($report['averages_players']) || isset($report['haverages_players'])) $desc['endpoints'][] = "players-haverages";
