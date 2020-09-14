@@ -9,6 +9,9 @@ function rg_view_generate_heroes_positions() {
 
   $res = [];
   $res["overview"] = "";
+  
+  if (is_wrapped($report['hero_positions'])) $report['hero_positions'] = unwrap_data($report['hero_positions']);
+
   for ($i=1; $i>=0; $i--) {
     for ($j=1; $j<6 && $j>0; $j++) {
       if (!$i) { $j = 0; }
