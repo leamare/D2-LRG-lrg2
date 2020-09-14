@@ -215,6 +215,7 @@ It’s fairly simple to explain. It doesn’t have a structure and is used in `s
 * [EXCL] `players/positions_matches`  (may use `region`, `team` and requires `playerid`, returns null if this data is not in the report)
 * `pvp` (requires `playerid`, returns full data otherwise, not available for teams reports)
 * `hvh` (requires `heroid`, returns full data otherwise)
+* `laning` (requires `heroid`, returns total data otherwise, not available for teams/regions)
 * `heroes/summary` (may use `region`)
 * `players/summary` (may use `region`)
 * `heroes/sides` (may use `region`)

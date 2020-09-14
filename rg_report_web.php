@@ -1,12 +1,13 @@
 <?php
 include_once("rg_report_out_settings.php");
 include_once("modules/commons/versions.php");
-$lg_version = array( 2, 4, 3, 0, 0 );
+$lg_version = array( 2, 8, 0, 0, 0 );
 
 include_once("modules/commons/locale_strings.php");
 include_once("modules/commons/get_language_code_iso6391.php");
 include_once("modules/commons/merge_mods.php");
 include_once("modules/commons/metadata.php");
+include_once("modules/commons/wrap_data.php");
 
 # FUNCTIONS
 include_once("modules/view/functions/modules.php");
