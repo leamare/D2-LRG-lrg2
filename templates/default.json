@@ -26,6 +26,7 @@
     "hvh_matches" : false,
 
     "hero_summary" : true,
+    "hero_laning": false,
 
     "draft_stages" : true,
 
@@ -43,6 +44,7 @@
 
     "player_positions" : true,
     "player_positions_matches" : true,
+    "player_laning": false,
 
     "players_draft": true,
 

@@ -4,6 +4,7 @@
   },
   "ana": {
     "records":true,
+    "hero_laning": true,
     "players":false,
     "matchlist":false,
     "avg_limit": 10,
