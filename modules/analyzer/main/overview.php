@@ -90,4 +90,7 @@ if (isset($result['random']['matches_unparsed'])) {
   $result['random']['matches_unparsed'] = $result['random']['matches_total']-$result['random']['matches_unparsed'];
 }
 
+echo "[ ] Matches: ".$result['random']['matches_total']."\n".
+  "[ ] Unparsed: ".$result['random']['matches_unparsed']."\n";
+
 ?>

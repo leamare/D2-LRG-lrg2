@@ -18,7 +18,7 @@ foreach($result["hero_pairs"] as $pair) {
     "heroid2" => $pair['heroid2'],
     "matches" => $pair['matches'],
     "wins" => $pair['wins'],
-    "dev_pct" => ($pair['matches']-$pair['expectation'])/$pair['matches'],
+    "dev_pct" => round( ($pair['matches']-$pair['expectation'])/$pair['matches'] , 5),
   ];
 }
 

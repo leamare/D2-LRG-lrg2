@@ -50,4 +50,9 @@ if ($lg_settings['ana']['hero_summary']) {
   require_once("modules/analyzer/heroes/summary.php");
 }
 
+if ($lg_settings['ana']['hero_laning']) {
+  # heroes laning
+  require_once("modules/analyzer/heroes/laning.php");
+}
+
 ?>
