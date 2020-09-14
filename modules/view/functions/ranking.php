@@ -62,6 +62,17 @@ function compound_ranking_sort($a, $b, $total_matches) {
   else return ($a_rank < $b_rank) ? 1 : -1;
 }
 
+function compound_ranking_laning_sort($a, $b, $total_matches) {
+  $a_popularity = $a['matches']/$total_matches;
+  $b_popularity = $b['matches']/$total_matches;
+
+  $a_rank = wilson_rating( $a['matches']*$a['lane_wr'], $a['matches'], 1-$a_popularity );
+  $b_rank = wilson_rating( $b['matches']*$b['lane_wr'], $b['matches'], 1-$b_popularity );
+
+  if($a_rank == $b_rank) return 0;
+  else return ($a_rank < $b_rank) ? 1 : -1;
+}
+
 function positions_ranking_sort($a, $b, $total_matches) {
   $a_popularity = $a['matches_s']/$total_matches;
   $b_popularity = $b['matches_s']/$total_matches;
