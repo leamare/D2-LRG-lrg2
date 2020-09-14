@@ -2,17 +2,20 @@
 
 $modules['heroes'] = [];
 
-if (isset($report['averages_heroes']) )
-  include("heroes/haverages.php");
-
 if (isset($report['pickban']))
   include("heroes/pickban.php");
+
+if (isset($report['averages_heroes']) )
+  include("heroes/haverages.php");
 
 if (isset($report['draft']))
   include("heroes/draft.php");
 
 if (isset($report['hero_positions']))
   include("heroes/positions.php");
+
+if (isset($report['hero_laning']))
+  include("heroes/laning.php");
 
 if (isset($report['hero_sides']))
   include("heroes/sides.php");
@@ -53,6 +56,11 @@ function rg_view_generate_heroes() {
   if (isset($report['hero_positions'])) {
     if(check_module($parent."positions")) {
       $res['positions'] = rg_view_generate_heroes_positions();
+    }
+  }
+  if (isset($report['hero_laning'])) {
+    if(check_module($parent."laning")) {
+      $res['laning'] = rg_view_generate_heroes_laning();
     }
   }
   if (isset($report['hero_sides'])) {
