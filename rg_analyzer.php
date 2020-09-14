@@ -2,10 +2,20 @@
 include_once("head.php");
 ini_set('memory_limit', '4000M');
 
+ini_set('mysqli.allow_persistent', '1');
+ini_set('mysql.allow_persistent', '1');
+
+ini_set('mysql.connect_timeout', '3600');
+ini_set('default_socket_timeout', '3600');
+
+ini_set('mysqli.reconnect', '1');
+ini_set('mysqlnd.net_read_timeout', '3600');
+
 include_once("modules/commons/utf8ize.php");
 include_once("modules/commons/quantile.php");
 include_once("modules/commons/generate_tag.php");
 include_once("modules/commons/metadata.php");
+include_once("modules/commons/wrap_data.php");
 
 echo("\nConnecting to database...\n");
 
@@ -27,6 +37,7 @@ include_once("modules/analyzer/__queries/hero_trios.php");
 include_once("modules/analyzer/__queries/lane_combos.php");
 include_once("modules/analyzer/__queries/hero_positions.php");
 include_once("modules/analyzer/__queries/hero_summary.php");
+include_once("modules/analyzer/__queries/hero_laning.php");
 
 include_once("modules/analyzer/__queries/player_summary.php");
 include_once("modules/analyzer/__queries/player_draft.php");
