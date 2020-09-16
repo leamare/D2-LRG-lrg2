@@ -66,8 +66,8 @@ function compound_ranking_laning_sort($a, $b, $total_matches, $median_adv, $medi
   $a_popularity = $a['matches']/$total_matches;
   $b_popularity = $b['matches']/$total_matches;
 
-  $a_adv_factor = ($a['avg_advantage']/$median_adv)+($median_disadv/$a['avg_disadvantage']);
-  $b_adv_factor = ($b['avg_advantage']/$median_adv)*+($median_disadv/$b['avg_disadvantage']);
+  $a_adv_factor = ($a['avg_advantage'] > 0 && $median_adv > 0 ? $a['avg_advantage']/$median_adv : 0)+($a['avg_disadvantage'] > 1 ? $median_disadv/$a['avg_disadvantage'] : 0);
+  $b_adv_factor = ($b['avg_advantage'] > 0 && $median_adv > 0 ? $b['avg_advantage']/$median_adv : 0)+($b['avg_disadvantage'] > 1 ? $median_disadv/$b['avg_disadvantage'] : 0);
 
   if ($a['matches']) {
     $a_m = $a['matches'] * $a['lane_wr'] * (

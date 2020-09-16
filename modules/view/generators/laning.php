@@ -24,19 +24,22 @@ function rg_generator_laning_profile($table_id, &$context, $id_o, $heroes_flag =
     // });
 
     $mm = 0;
-    foreach ($context[$id] as $h) {
+    foreach ($context[$id] as $k => $h) {
       if ($h['matches'] > $mm) $mm = $h['matches'];
+      if (!isset($h['matches']) || $h['matches'] == 0) unset($context[$id][$k]);
     }
 
     uasort($context[$id], function($a, $b) {
       return $a['avg_advantage'] <=> $b['avg_advantage'];
     });
-    $median_adv = $context[$id][ floor( sizeof($context[$id])/2 ) ]['avg_advantage'];
+    $mk = array_keys($context[$id]);
+    $median_adv = $context[$id][ $mk[ floor( count($mk)/2 ) ] ]['avg_advantage'];
 
     uasort($context[$id], function($a, $b) {
       return $a['avg_disadvantage'] <=> $b['avg_disadvantage'];
     });
-    $median_disadv = $context[$id][ floor( sizeof($context[$id])/2 ) ]['avg_disadvantage'];
+    $mk = array_keys($context[$id]);
+    $median_disadv = $context[$id][ $mk[ floor( count($mk)/2 ) ] ]['avg_disadvantage'];
 
     $compound_ranking_sort = function($a, $b) use ($mm, $median_adv, $median_disadv) {
       if ($a['matches'] == 0) return 1;
@@ -89,6 +92,7 @@ function rg_generator_laning_profile($table_id, &$context, $id_o, $heroes_flag =
         "</tr></thead>";
 
     $data = $context[0][$id_o];
+    $data['matches'] = $data['matches'] ?? 0;
     $res .= "<tr>".
       ($heroes_flag ? "<td>".hero_portrait($id_o)."</td>" : '').
       "<td>".($heroes_flag ? hero_name($id_o) : player_name($id_o))."</td>".
@@ -138,6 +142,7 @@ function rg_generator_laning_profile($table_id, &$context, $id_o, $heroes_flag =
         "</tr></thead>";
 
   foreach($context[$id_o] as $elid => $data) {
+    $data['matches'] = $data['matches'] ?? 0;
     $res .= "<tr class=\"row\">".
       ($heroes_flag ? "<td>".hero_portrait($elid)."</td>" : '').
       "<td>".($heroes_flag ? hero_name($elid) : player_name($elid))."</td>".
