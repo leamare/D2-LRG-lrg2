@@ -182,6 +182,7 @@
     "bloodbath" => "Bloodbath",
     "kills_combined" => "Kills Combined",
     "closest_match" => "Closest match",
+    "biggest_nw_difference" => "Biggest difference in gold earned",
 
     "stomp" => "Networth stomp by a team",
     "comeback" => "Networth comeback by a team",
@@ -291,7 +292,7 @@
     "desc_heroes_pairs" => "This section contains stats for most common hero pairs. Winrate difference is calculated based on average expected win rate of the heroes together. Expected matches is calculated number of matches the heroes would be picked together randomly based on their pick rates. Deviation is difference between expected number of matches and the actual number (higher number is better and means the heroes are usually picked together intentionally, negative values mean otherwise). Percentage is how much of actual matches is the deviation number. Minimum amount of matches for pairs is set to %limh%.",
     "desc_heroes_trios" => "This section contains stats for most common hero trios. Winrate difference is calculated based on average expected win rate of the heroes together. Expected matches is calculated number of matches the heroes would be picked together randomly based on their pick rates. Deviation is difference between expected number of matches and the actual number (higher number is better and means the heroes are usually picked together intentionally, negative values mean otherwise). Percentage is how much of actual matches is the deviation number. Minimum amount of matches for trios is set to %liml%.",
     "desc_heroes_lane_combos" => "This section contains stats for most common hero pairs on a same lane. Minimum amount of matches for pairs is set to %liml%.",
-    "desc_heroes_hvh" => "Choose a hero to see his performance against other heroes.",
+    "desc_heroes_hvh" => "Choose a hero to see his performance against other heroes",
     "desc_players_avg" => "This section contains highest average values among players. Minimum amount of matches is set to %lim%.",
     "desc_players_summary" => "This table contains players' average stats and their most common positions.",
     "desc_players_positions" => "This section contains stats for players' performance on various positions. Positions are determined based on players performance (core or support) and lane. Supports across all lanes (including roamers) are considered as one role. Lanes and positions may not be accurate.",
