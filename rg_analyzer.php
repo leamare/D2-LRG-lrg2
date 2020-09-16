@@ -5,11 +5,11 @@ ini_set('memory_limit', '4000M');
 ini_set('mysqli.allow_persistent', '1');
 ini_set('mysql.allow_persistent', '1');
 
-ini_set('mysql.connect_timeout', '3600');
-ini_set('default_socket_timeout', '3600');
+ini_set('mysql.connect_timeout', '7200');
+ini_set('default_socket_timeout', '7200');
 
 ini_set('mysqli.reconnect', '1');
-ini_set('mysqlnd.net_read_timeout', '3600');
+ini_set('mysqlnd.net_read_timeout', '7200');
 
 include_once("modules/commons/utf8ize.php");
 include_once("modules/commons/quantile.php");
