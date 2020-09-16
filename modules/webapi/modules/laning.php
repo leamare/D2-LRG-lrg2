@@ -18,19 +18,28 @@ $endpoints['laning'] = function($mods, $vars, &$report) {
   $context =& $report['hero_laning'];
 
   foreach ($ids as $id) {
-    uasort($context[$id], function($a, $b) {
-      $aa = (float)($a['lane_wr']);
-      $bb = (float)($b['lane_wr']);
-      return $bb <=> $aa;
-    });
-
     $mm = 0;
-    foreach ($context[$id] as $h) {
+    foreach ($context[$id] as $k => $h) {
       if ($h['matches'] > $mm) $mm = $h['matches'];
+      if (!isset($h['matches']) || $h['matches'] == 0) unset($context[$id][$k]);
     }
 
-    $compound_ranking_sort = function($a, $b) use ($mm) {
-      return compound_ranking_laning_sort($a, $b, $mm);
+    uasort($context[$id], function($a, $b) {
+      return $a['avg_advantage'] <=> $b['avg_advantage'];
+    });
+    $mk = array_keys($context[$id]);
+    $median_adv = $context[$id][ $mk[ floor( count($mk)/2 ) ] ]['avg_advantage'];
+
+    uasort($context[$id], function($a, $b) {
+      return $a['avg_disadvantage'] <=> $b['avg_disadvantage'];
+    });
+    $mk = array_keys($context[$id]);
+    $median_disadv = $context[$id][ $mk[ floor( count($mk)/2 ) ] ]['avg_disadvantage'];
+
+    $compound_ranking_sort = function($a, $b) use ($mm, $median_adv, $median_disadv) {
+      if ($a['matches'] == 0) return 1;
+      if ($b['matches'] == 0) return -1;
+      return compound_ranking_laning_sort($a, $b, $mm, $median_adv, $median_disadv);
     };
     uasort($context[$id], $compound_ranking_sort);
 
