@@ -54,6 +54,7 @@ foreach($dir as $fname) {
         filesize($full_fname),
         filemtime($full_fname)
       ];
+      $tmp['last_update'] = $cache['files'][$fname][2];
       if(!isset($cache['reps'][ $cache['files'][$fname][0] ]))
         $cache['reps'][ $cache['files'][$fname][0] ] = $tmp;
       else {

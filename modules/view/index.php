@@ -55,12 +55,12 @@ if(!empty($cats)) {
     // $recent_last_limit;
     $reps = $cache["reps"];
     usort($reps, function($a, $b) {
-      return $b['last_update'] - $a['last_update'];
+      return ($b['last_update'] ?? 0) - ($a['last_update'] ?? 0);
     });
     if ($recent_last_limit ?? false) {
       $limit = null;
       foreach($reps as $k => $v) {
-        if ($v['last_update'] < $recent_last_limit) {
+        if (($v['last_update'] ?? 0) < $recent_last_limit) {
           $limit = $k;
           break;
         }
