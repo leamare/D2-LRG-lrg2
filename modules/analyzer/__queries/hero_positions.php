@@ -74,7 +74,7 @@ function rg_query_hero_positions(&$conn, $team = null, $cluster = null) {
     }
   }
 
-  $res = wrap_data($res, true, true, true);
+  //$res = wrap_data($res, true, true, true);
 
   return $res;
 }

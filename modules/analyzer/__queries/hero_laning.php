@@ -70,12 +70,13 @@ function rg_query_hero_laning(&$conn, $cluster = null, $team = null) {
 
   $query_res->free_result();
 
-  foreach ($result['0'] as $hid => $d) {
-    echo $hid;
+  // foreach ($result['0'] as $hid => $d) {
+  //   echo $hid;
 
-    $r = [];
+    // $r = [];
 
     $sql = "SELECT
+    ams_heroid,
     amr_heroid hero,
     COUNT(DISTINCT ams_q.matchid) matches,
     SUM((ams_efficiency_at10 - amr_efficiency_at10) >= $tie_factor) lanes_won,
@@ -102,11 +103,9 @@ function rg_query_hero_laning(&$conn, $cluster = null, $team = null) {
       JOIN (
         SELECT MAX(adv_matchlines.efficiency_at10) core_lane_eff, matchlines.isRadiant isRadiant, matchlines.matchid matchid, IF(adv_matchlines.lane > 3, 3, adv_matchlines.lane) lane_c
         FROM adv_matchlines JOIN matchlines ON adv_matchlines.matchid = matchlines.matchid AND adv_matchlines.heroid = matchlines.heroid
-        WHERE matchlines.matchid IN ( SELECT matchid from matchlines where heroid = $hid )
         GROUP BY matchlines.matchid, matchlines.isRadiant, lane_c
       ) se ON ml.matchid = se.matchid AND ml.isRadiant = se.isRadiant AND se.lane_c = IF(ams.lane > 3, 3, ams.lane)
     
-      WHERE ams.heroid = $hid
       GROUP BY ml.matchid, ams_heroid
     ) ams_q
     JOIN 
@@ -123,7 +122,6 @@ function rg_query_hero_laning(&$conn, $cluster = null, $team = null) {
       JOIN (
         SELECT MAX(adv_matchlines.efficiency_at10) core_lane_eff, matchlines.isRadiant isRadiant, matchlines.matchid matchid, IF(adv_matchlines.lane > 3, 3, adv_matchlines.lane) lane_c
         FROM adv_matchlines JOIN matchlines ON adv_matchlines.matchid = matchlines.matchid AND adv_matchlines.heroid = matchlines.heroid
-        WHERE matchlines.matchid IN ( SELECT matchid from matchlines where heroid = $hid )
         GROUP BY matchlines.matchid, matchlines.isRadiant, lane_c
       ) se ON ml.matchid = se.matchid AND ml.isRadiant = se.isRadiant AND se.lane_c = IF(ams.lane > 3, 3, ams.lane)
     
@@ -135,29 +133,32 @@ function rg_query_hero_laning(&$conn, $cluster = null, $team = null) {
     ($team !== null || $cluster !== null ? " WHERE " : "").
     ($cluster === null ? "" : " AND m.cluster IN (".implode(",", $cluster).") ").
     ($team === null ? "" : " AND teams_matches.teamid = ".$team." ").
-  " GROUP BY hero";
+  " GROUP BY ams_heroid, hero";
 
     if ($conn->multi_query($sql) !== TRUE) throw new \Exception($conn->error);
 
-    $r = [];
-
     $query_res = $conn->store_result();
     for ($row = $query_res->fetch_assoc(); $row != null; $row = $query_res->fetch_assoc()) {
+      if (!isset($result[ $row['ams_heroid'] ]))
+        $result[ $row['ams_heroid'] ] = [];
+
+      $ams = $row['ams_heroid'];
+      unset($row['ams_heroid']);
       $row['avg_advantage'] = round($row['avg_advantage'], 4);
       $row['avg_disadvantage'] = round($row['avg_disadvantage'], 4);
       $row['lane_wr'] = round( ( $row['lanes_won']*2+$row['lanes_tied'] )/($row['matches']*2) , 4);
       // $row['wr_from_behind'] = round( $row['lanes_lost'] ? ($row['won_from_behind']/$row['lanes_lost']) : 0, 4);
       // $row['wr_from_tie'] = round( $row['lanes_tied'] ? ($row['won_from_tie']/$row['lanes_tied']) : 0, 4);
       // $row['wr_from_won'] = round( $row['lanes_won'] ? ($row['won_from_won']/$row['lanes_won']) : 0, 4);
-      $r[ $row['hero'] ] = $row;
+      $result[ $ams ][ $row['hero'] ] = $row;
     }
 
     $query_res->free_result();
 
-    $result[ $hid ] = $r;
+    // $result[ $hid ] = $r;
 
-    echo " ";
-  }
+    // echo " ";
+  // }
 
   return $result;
 }
