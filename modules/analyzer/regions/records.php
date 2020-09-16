@@ -129,6 +129,13 @@ $sql .= "SELECT \"closest_match\" cap, matchid,
       0 playerid, 0 heroid FROM matches 
       WHERE matches.cluster IN (".implode(",", $clusters).") AND stomp <> 0 AND comeback <> 0 
       ORDER BY val ASC, matchid DESC LIMIT 1;";
+# biggest nw difference
+$sql .= "SELECT \"biggest_nw_difference\" cap, ml.matchid matchid, ABS(SUM(IF(ml.isRadiant, 1, -1)*ml.networth)) val, 0 playerid, 0 heroid
+        from matchlines ml
+        join matches m on ml.matchid = m.matchid
+        WHERE m.cluster IN (".implode(",", $clusters).")
+        group by ml.matchid
+        order by val desc limit 1; ";
 # length
 $sql .= "SELECT \"longest_match\" cap, matchid, duration/60, 0 playerid, 0 heroid FROM matches
           WHERE matches.cluster IN (".implode(",", $clusters).") ORDER BY duration DESC LIMIT 1;";
