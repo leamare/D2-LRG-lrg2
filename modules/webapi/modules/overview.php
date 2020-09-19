@@ -209,7 +209,7 @@ $endpoints['overview'] = function($mods, $vars, &$report) use (&$meta, &$endpoin
     }
   }
 
-  if (isset($context['records']) && isset($report['settings']['overview_include_records']) && $report['settings']['overview_include_records']) {
+  if (isset($context['records'])) { //&& isset($report['settings']['overview_include_records']) && $report['settings']['overview_include_records']) {
     $res['records'] = $endpoints['records']($mods, $vars, $report);
   }
 
