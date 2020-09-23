@@ -104,6 +104,9 @@ $resp['endpoint'] = $endp_name;
 $resp['version'] = parse_ver($lg_version);
 $resp['result'] = $result ?? [];
 
+if (!empty($report)) {
+  $resp['report_desc'] = get_report_descriptor($report, true);
+}
 
 echo json_encode($resp, (isset($_REQUEST['pretty']) ? JSON_PRETTY_PRINT : 0) 
   | JSON_INVALID_UTF8_SUBSTITUTE 
