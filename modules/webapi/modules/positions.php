@@ -29,7 +29,7 @@ $endpoints['positions'] = function($mods, $vars, &$report) {
     positions_ranking($res, $context_total_matches);
     
     foreach ($res as $id => $data) {
-      $res[$id]['picks_to_median'] = isset($median_picks) ? round($el['matches_s']/$median_picks, 3) : null;
+      $res[$id]['picks_to_median'] = isset($median_picks) ? round($data['matches_s']/$median_picks, 3) : null;
     }
 
     return [
