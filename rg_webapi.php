@@ -10,7 +10,7 @@ $resp = [
 
 include_once("rg_report_out_settings.php");
 include_once("modules/commons/versions.php");
-$lg_version = [ 2, 8, 0, 0, 0 ];
+$lg_version = [ 2, 9, 0, 0, 0 ];
 
 include_once("modules/commons/locale_strings.php");
 include_once("modules/commons/merge_mods.php");

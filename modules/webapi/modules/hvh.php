@@ -9,8 +9,43 @@ $endpoints['hvh'] = function($mods, $vars, &$report) {
 
   $hvh = rg_generator_pvp_unwrap_data($report['hvh'], $report['pickban']);
 
+  foreach ($hvh as $srcid => &$pvp_context) {
+    if (isset($vars['heroid']) && $vars['heroid'] != $srcid) continue;
+
+    $dt = [
+      'ms' => $report['pickban'][ $srcid ]['matches_picked']
+    ];
+
+    $compound_ranking_sort = function($a, $b) use ($dt) {
+      return positions_ranking_sort($a, $b, $dt['ms']);
+    };
+    uasort($pvp_context, $compound_ranking_sort);
+  
+    $increment = 100 / sizeof($pvp_context); $i = 0;
+  
+    foreach ($pvp_context as $elid => $el) {
+      if(isset($last) && $el == $last) {
+        $i++;
+        $pvp_context[$elid]['rank'] = $last_rank;
+      } else
+        $pvp_context[$elid]['rank'] = round(100 - $increment*$i++, 2);
+      $last = $el;
+      $last_rank = $pvp_context[$elid]['rank'];
+    }
+  
+    unset($last);
+  }
+
   if (isset($vars['heroid'])) {
-    return $hvh[ $vars['heroid'] ];
+    return [
+      'reference' => [
+        'id' => $vars['heroid'],
+        'matches' => $report['pickban'][ $vars['heroid'] ]['matches_picked'],
+        'wins' => round($report['pickban'][ $vars['heroid'] ]['matches_picked'] * $report['pickban'][ $vars['heroid'] ]['winrate_picked']),
+        'winrate' => $report['pickban'][ $vars['heroid'] ]['winrate_picked'],
+      ],
+      'opponents' => $hvh[ $vars['heroid'] ]
+    ];
   }
   return $hvh;
 };
