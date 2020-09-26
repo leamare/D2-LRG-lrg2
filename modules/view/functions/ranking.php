@@ -93,11 +93,16 @@ function compound_ranking_laning_sort($a, $b, $total_matches, $median_adv, $medi
 }
 
 function positions_ranking_sort($a, $b, $total_matches) {
-  $a_popularity = $a['matches_s']/$total_matches;
-  $b_popularity = $b['matches_s']/$total_matches;
+  $a_matches = $a['matches_s'] ?? $a['matches'];
+  $a_winrate = $a['winrate_s'] ?? $a['winrate'];
+  $b_matches = $b['matches_s'] ?? $b['matches'];
+  $b_winrate = $b['winrate_s'] ?? $b['winrate'];
 
-  $a_rank = wilson_rating( $a['matches_s']*$a['winrate_s'], $a['matches_s'], 1-$a_popularity );
-  $b_rank = wilson_rating( $b['matches_s']*$b['winrate_s'], $b['matches_s'], 1-$b_popularity );
+  $a_popularity = $a_matches/$total_matches;
+  $b_popularity = $b_matches/$total_matches;
+
+  $a_rank = wilson_rating( $a_matches*$a_winrate, $a_matches, 1-$a_popularity );
+  $b_rank = wilson_rating( $b_matches*$b_winrate, $b_matches, 1-$b_popularity );
 
   if($a_rank == $b_rank) return 0;
   else return ($a_rank < $b_rank) ? 1 : -1;

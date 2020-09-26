@@ -13,6 +13,7 @@ function rg_view_generate_players_pvp() {
   $winrates = [];
   if (isset($report['players_additional'])) {
     foreach($report['players_additional'] as $id => $player) {
+      $winrates[$id]['matches'] = $player['matches'];
       $winrates[$id]['winrate'] = $player['won']/$player['matches'];
     }
   }
@@ -47,7 +48,7 @@ function rg_view_generate_players_pvp() {
 
     if(check_module($parent_module.($report['settings']['pvp_grid'] ? "profiles-" : "")."playerid".$id)) {
       $out["playerid".$id] = "<div class=\"content-text\">".locale_string("desc_players_pvp")."</div>";
-      $out["playerid".$id] .= rg_generator_pvp_profile("player-pvp-$id", $pvp[$id], false);
+      $out["playerid".$id] .= rg_generator_pvp_profile("player-pvp-$id", $pvp[$id], $winrates, $id, false);
     }
   }
 

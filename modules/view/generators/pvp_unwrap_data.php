@@ -20,20 +20,20 @@ function rg_generator_pvp_unwrap_data(&$context, &$context_wrs, $heroes_flag = t
       $pvp[ $line[$id.'2'] ] = [];
 
     $pvp[ $line[$id.'1'] ][ $line[$id.'2'] ] = [
-      "winrate" => $line[$sid.'1winrate'],
+      "winrate" => round($line[$sid.'1winrate'], 5),
       "matches" => $line['matches'],
       "won" => $line[$sid.'1won'],
       "lost" => $line['matches']-$line[$sid.'1won']
     ];
-    if(!$nodiff) $pvp[ $line[$id.'1'] ][ $line[$id.'2'] ]['diff'] = $line[$sid.'1winrate']-$context_wrs[$line[$id.'1']][$wr_id];
+    if(!$nodiff) $pvp[ $line[$id.'1'] ][ $line[$id.'2'] ]['diff'] = round($line[$sid.'1winrate']-$context_wrs[$line[$id.'1']][$wr_id], 5);
 
     $pvp[ $line[$id.'2'] ][ $line[$id.'1'] ] = [
-      "winrate" => 1-$line[$sid.'1winrate'],
+      "winrate" => round(1-$line[$sid.'1winrate'], 5),
       "matches" => $line['matches'],
       "won" => $line['matches']-$line[$sid.'1won'],
       "lost" => $line[$sid.'1won']
     ];
-    if(!$nodiff) $pvp[ $line[$id.'2'] ][ $line[$id.'1'] ]['diff'] = 1-$line[$sid.'1winrate']-$context_wrs[$line[$id.'2']][$wr_id];
+    if(!$nodiff) $pvp[ $line[$id.'2'] ][ $line[$id.'1'] ]['diff'] = round(1-$line[$sid.'1winrate']-$context_wrs[$line[$id.'2']][$wr_id], 5);
   }
 
   return $pvp;

@@ -12,6 +12,7 @@ $parent_module = $parent_mod."pvp-";
 $winrates = [];
 if (isset($report['players_additional'])) {
   foreach($reg_report['players_summary'] as $id => $player) {
+    $winrates[$id]['matches'] = $report['players_additional'][$id]['matches'];
     $winrates[$id]['winrate'] = $report['players_additional'][$id]['won']/$report['players_additional'][$id]['matches'];
   }
 }
@@ -63,7 +64,7 @@ foreach($names as $id => $name) {
 
   if(check_module($parent_module.($reg_report['settings']['pvp_grid'] ? "profiles-" : "")."playerid".$id)) {
     $out["playerid".$id] = "<div class=\"content-text\">".locale_string("desc_players_pvp")."</div>";
-    $out["playerid".$id] .= rg_generator_pvp_profile("player-pvp-$id", $pvp[$id], false);
+    $out["playerid".$id] .= rg_generator_pvp_profile("player-pvp-$id", $pvp[$id], $winrates, $id, false);
   }
 }
 
