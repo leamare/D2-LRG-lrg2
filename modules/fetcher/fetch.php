@@ -408,9 +408,9 @@ function fetch($match) {
   if (empty($t_match)) {
     for($i=0; $i<2; $i++, $teamid = null) {
       $tag = $i ? 'radiant_team' : 'dire_team';
-      $teamid = null;
+      $teamid = $matchdata[$tag.'_id'] ?? null;
     
-      if (!empty($teamid) && isset($match_rules['team'][ $matchdata[$tag."_id"] ]))
+      if (!empty($teamid) && !empty($match_rules['team']) && isset($match_rules['team'][ $teamid ]))
         $teamid = (int)$match_rules['team'][ $teamid ];
     
       if (isset($match_rules['side'][ $tag ]) || isset($match_rules['side'][ $i ? 'radiant' : 'dire' ]) || isset($match_rules['side'][ $i ]))
@@ -421,13 +421,38 @@ function fetch($match) {
       $json = file_get_contents('https://api.steampowered.com/IDOTA2Match_570/GetTeamInfoByTeamID/v001/?key='.$steamapikey.'&teams_requested=1&start_at_team_id='.$teamid);
       $team = json_decode($json, true);
 
+      $matchdata[$tag.'_id'] = $teamid;
       $matchdata[$tag] = [
         'team_id' => $teamid,
         'name' => $team['result']['teams'][0]['name'],
         'tag' => $team['result']['teams'][0]['tag'] ?? generate_tag($team['result']['teams'][0]['name']),
       ];
     }
+  } else {
+    foreach ($t_team_matches as &$tm) {
+      $tag = $tm['is_radiant'] ? 'radiant_team' : 'dire_team';
+      
+      if (!empty($match_rules['team']) && isset($match_rules['team'][ $tm['teamid'] ])) {
+        $tm['teamid'] = (int)$match_rules['team'][ $tm['teamid'] ];
+      }
+    
+      if (!empty($match_rules['side']) && (isset($match_rules['side'][ $tag ]) || isset($match_rules['side'][ $tm['is_radiant'] ? 'radiant' : 'dire' ]) || isset($match_rules['side'][ $tm['is_radiant'] ])))
+        $tm['teamid'] = (int) ($match_rules['side'][ $tag ] ?? $match_rules['side'][ $tm['is_radiant'] ? 'radiant' : 'dire' ] ?? $match_rules['side'][ $tm['is_radiant'] ] ?? $tm['teamid']);
 
+      if (!isset($t_teams[ $tm['teamid'] ])) {
+        $json = file_get_contents('https://api.steampowered.com/IDOTA2Match_570/GetTeamInfoByTeamID/v001/?key='.$steamapikey.'&teams_requested=1&start_at_team_id='.$tm['teamid']);
+        $team = json_decode($json, true);
+
+        $t_teams[ $tm['teamid'] ] = [
+          'name' => $team['result']['teams'][0]['name'],
+          'tag' => $team['result']['teams'][0]['tag'] ?? generate_tag($team['result']['teams'][0]['name']),
+          'added' => false
+        ];
+      }
+    }
+  }
+
+  if (empty($t_match)) {
     $t_match['matchid'] = $match;
     $t_match['version'] = get_patchid($matchdata['start_time'], $matchdata['patch'], $meta);
     $t_match['radiantWin'] = $matchdata['radiant_win'];
