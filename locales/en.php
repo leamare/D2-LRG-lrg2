@@ -105,6 +105,7 @@
     "averages" => "Average values",
     "participants" => "Participants",
     "ranked" => "Ranked",
+    "type" => "Type",
 
     "overview" => "Overview",
     "teams" => "Teams",
