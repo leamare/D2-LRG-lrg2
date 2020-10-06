@@ -1,13 +1,13 @@
 <?php
 $regions = [];
-foreach($meta['clusters'] as $cluster => $region) {
-  if(!isset($regions[$region])) $regions[$region] = [];
-  $regions[$region][] = $cluster;
-}
 
 if(sizeof($result["regions"]) == 1 ||
-    (sizeof($result["regions"]) == 2 && min($result["regions"]) < $limiter*2) )
+    (sizeof($result["regions"]) == 2 && min($result["regions"]) < $limiter*2) ) {
   unset($lg_settings['ana']['regions']);
+  return false;
+}
+
+$meta['clusters'];
 
 $reg_matches = [];
 foreach($result["regions"] as $clid => $matches) {
@@ -22,6 +22,32 @@ if(sizeof($reg_matches) == 1 ||
   unset($lg_settings['ana']['regions']);
   return false;
 }
+
+$lg_settings['ana']['regions']['groups'] = $lg_settings['ana']['regions']['groups_overwrite'] ?? $lg_settings['ana']['regions']['groups'] ?? null;
+
+foreach($meta['clusters'] as $cluster => $region) {
+  if ( ($lg_settings['ana']['regions']['group_regions'] ?? false) && !empty($lg_settings['ana']['regions']['groups']) ) {
+    foreach ($lg_settings['ana']['regions']['groups'] as $gid => $rs) {
+      if (in_array((int)$region, $rs)) {
+        $region = (int)$gid;
+        break;
+      }
+    }
+    if ($region < 100) $region = $lg_settings['ana']['regions']['fallback_group'] ?? $region;
+  }
+
+  if (($region < 100) && (!isset($result['regions'][$region]) || ( ($lg_settings['ana']['regions']['use_limiter'] ?? false) && $reg_matches[$region] < $limiter_median )) ) {
+    if (($lg_settings['ana']['regions']['group_regions_when_lower_than_limiter'] ?? false) && isset($lg_settings['ana']['regions']['fallback_group'])) 
+      $region = $lg_settings['ana']['regions']['fallback_group'] ?? $region;
+    else 
+      continue;
+  }
+
+  if(!isset($regions[$region])) $regions[$region] = [];
+  $regions[$region][] = $cluster;
+}
+
+ksort($regions);
 
 foreach ($regions as $region => $clusters) {
     # main stats
