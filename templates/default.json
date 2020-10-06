@@ -81,7 +81,18 @@
       "limiter": false
     },
     "regions": {
+      "group_regions": false,
       "use_limiter": true,
+      "group_regions_when_lower_than_limiter": false,
+      "fallback_group": 199,
+      "groups": {
+        "101": [1, 2],
+        "102": [3, 8, 9],
+        "103": [4, 5, 6, 16, 19],
+        "105": [14, 15, 10],
+        "107": [12, 13, 17, 18, 20, 25],
+        "199": []
+      },
       "records" : true,
       "heroes": {
         "haverages": true,

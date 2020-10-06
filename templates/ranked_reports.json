@@ -26,6 +26,17 @@
 
     "overview_heroes_contested_graph" : false,
     "regions": {
+      "group_regions": true,
+      "use_limiter": true,
+      "group_regions_when_lower_than_limiter": true,
+      "fallback_group": 199,
+      "groups_overwrite": {
+        "108": [1, 2, 14, 15, 10],
+        "102": [3, 8, 9],
+        "103": [4, 5, 6, 16, 19],
+        "107": [12, 13, 17, 18, 20, 25],
+        "199": []
+      },
       "overview_last_match": false,
       "overview_first_match": false,
       "overview_last_match_winners": false
