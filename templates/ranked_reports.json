@@ -27,7 +27,8 @@
     "overview_heroes_contested_graph" : false,
     "regions": {
       "group_regions": true,
-      "use_limiter": true,
+      "use_limiter": false,
+      "use_limiter_grouping": true,
       "group_regions_when_lower_than_limiter": true,
       "fallback_group": 199,
       "groups_overwrite": {
