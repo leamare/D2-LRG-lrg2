@@ -13,7 +13,8 @@ function rg_view_generate_regions() {
   foreach ($report['regions_data'] as $region => $reg_report) {
     $modstr = $parent."region".$region;
     $res["region".$region] = [];
-    $strings['en']["region".$region] = $meta['regions'][$region];
+    if (!isset($strings['en']["region".$region]))
+      $strings['en']["region".$region] = $meta['regions'][$region];
 
     if(check_module($modstr)) {
       if($mod == $modstr) $unset_module = true;

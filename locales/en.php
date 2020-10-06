@@ -351,7 +351,15 @@
     "region14" => "Chili",
     "region15" => "Peru",
     "region16" => "India",
-    "region19" => "Japan"
+    "region19" => "Japan",
+    
+    "region101" => "North America",
+    "region102" => "Europe and CIS",
+    "region103" => "Asia",
+    "region105" => "South America",
+    "region107" => "China",
+    "region108" => "Americas",
+    "region199" => "Others"
   );
 
  ?>
