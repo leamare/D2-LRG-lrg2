@@ -39,6 +39,7 @@ if(!empty($cats)) {
     else if(isset($cats[$cat]['desc'])) $head_desc = $cats[$cat]['desc'];
   } else if(!isset($cat) || $cat == "main") {
     $head_name = $instance_name;
+    $head_desc = $instance_desc;
     if(isset($cats[$hidden_cat])) {
       foreach($cache["reps"] as $tag => $rep) {
         if(!check_filters($rep, $cats[$hidden_cat]['filters']))
@@ -49,6 +50,7 @@ if(!empty($cats)) {
     }
   } else if ($cat == "all") {
     $head_name = $instance_name;
+    $head_desc = $instance_desc;
     $reps = $cache["reps"];
   } else if ($cat == "recent") {
     $head_name = locale_string("recent_reports");
@@ -73,6 +75,7 @@ if(!empty($cats)) {
   }
 } else {
   $head_name = $instance_name;
+  $head_desc = $instance_desc;
   $reps = $cache["reps"];
 }
 
