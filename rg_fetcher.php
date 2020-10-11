@@ -7,6 +7,7 @@ include_once("head.php");
 include_once("modules/fetcher/get_patchid.php");
 include_once("modules/fetcher/processRules.php");
 include_once("modules/fetcher/fetch.php");
+include_once("modules/fetcher/stratz.php");
 include_once("modules/commons/generate_tag.php");
 include_once("modules/commons/metadata.php");
 
@@ -47,6 +48,7 @@ $update_unparsed = isset($options['u']) || isset($options['U']);
 $use_stratz = isset($options['S']) || isset($options['s']);
 $require_stratz = isset($options['S']);
 $use_full_stratz = isset($options['Z']);
+$stratz_graphql = isset($options['G']);
 $ignore_stratz = isset($options['Q']);
 
 $request_unparsed = isset($options['R']);
@@ -74,6 +76,34 @@ $force_await = isset($options['A']);
 //$force_await_retries = (int)$options['A'] ? (int)$options['A'] : 0;
 
 $scheduled_stratz = [];
+
+if ($stratz_graphql) {
+  $stratz_patches = \file_get_contents("https://api.stratz.com/api/v1/GameVersion");
+  $stratz_patches = \json_decode($stratz_patches, true);
+
+  // Altho we are using Stratz API for patches list, we are using OpenDota format
+  // which is using new IDs only for major (non-letter) patches
+  $stratz_patches = \array_values(
+    \array_filter($stratz_patches, function($v) {
+      return (strlen($v['name']) < 5) || ($v['name'][ 4 ] == 'a');
+    })
+  );
+  usort($stratz_patches, function($a, $b) { return $a['id'] <=> $b['id']; });
+
+  function convert_patch_id($start_time) {
+    global $stratz_patches; 
+    foreach ($stratz_patches as $i => $patch) {
+      $p = $i;
+      if (\strtotime($patch['startDate']) >= $start_time) {
+        break;
+      }
+    }
+
+    //$d = $stratz_pid - $stratz_patches[$p-1]['id'];
+
+    return ($p - 3);
+  }
+}
 
 if (!$listen) {
   if (isset($options['U'])) {

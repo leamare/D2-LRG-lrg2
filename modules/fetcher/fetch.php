@@ -16,7 +16,7 @@ function fetch($match) {
   global $opendota, $conn, $rnum, $matches, $failed_matches, $scheduled, $scheduled_stratz, $t_teams, $t_players, $use_stratz, $require_stratz,
   $request_unparsed, $meta, $stratz_timeout_retries, $force_adding, $cache_dir, $lg_settings, $lrg_use_cache, $first_scheduled,
   $use_full_stratz, $scheduled_wait_period, $steamapikey, $force_await, $players_list, $rank_limit, $stratztoken, $ignore_stratz,
-  $update_unparsed, $request_unparsed_players;
+  $update_unparsed, $request_unparsed_players, $stratz_graphql;
 
   $t_match = [];
   $t_matchlines = [];
@@ -113,19 +113,104 @@ function fetch($match) {
         }
       }
     }
+
+    if (!empty($lg_settings['cluster_allowlist'])) {
+      if (!in_array($matchdata['matches']['cluster'] ?? 0, $lg_settings['cluster_allowlist'])) {
+        echo("..Cluster ".($matchdata['matches']['cluster'] ?? 0)." is not in allowlist, skipping...\n");
+        return true;
+      }
+    }
+    if (!empty($lg_settings['cluster_denylist'])) {
+      if (in_array($matchdata['matches']['cluster'] ?? 0, $lg_settings['cluster_denylist'])) {
+        echo("..Cluster ".($matchdata['matches']['cluster'] ?? 0)." is in denylist, skipping...\n");
+        return true;
+      }
+    }
   } elseif($lrg_use_cache && file_exists("$cache_dir/".$match.".json") && !$players_update) {
     echo("Reusing cache.");
     $json = file_get_contents("$cache_dir/".$match.".json");
-    $matchdata = json_decode($json, true);
+    $matchdata_od = json_decode($json, true);
   // } else if($lrg_use_cache && file_exists("$cache_dir/".$match.".json") && file_exists("$cache_dir/unparsed_".$match.".json") && $force_adding) {
   //   echo("Reusing unparsed cache.");
   //   $json = file_get_contents("$cache_dir/unparsed_".$match.".json");
   //   $matchdata = json_decode($json, true);
   //   $bad_replay = true;
-  } else {
+  }
+  
+  if(empty($matchdata) && $stratz_graphql) {
+    echo("Requesting STRATZ GraphQL.");
+    $matchdata = get_stratz_response($match);
+    if (!empty($matchdata)) {
+      if($matchdata['matches']['duration'] < 600) {
+        echo("..Duration is less than 10 minutes, skipping...\n");
+        return true;
+      }
+      if($matchdata['payload']['score_radiant'] < 5 && $matchdata['payload']['score_dire'] < 5) {
+        echo("..Low score, skipping.\n");
+        return true;
+      }
+      if ($matchdata['payload']['leavers']) {
+        echo("..Abandon detected, skipping.\n");
+        return true;
+      }
+
+      if (!empty($lg_settings['cluster_allowlist'])) {
+        if (!in_array($matchdata['matches']['cluster'] ?? 0, $lg_settings['cluster_allowlist'])) {
+          echo("..Cluster ".($matchdata['matches']['cluster'] ?? 0)." is not in allowlist, skipping...\n");
+          return true;
+        }
+      }
+      if (!empty($lg_settings['cluster_denylist'])) {
+        if (in_array($matchdata['matches']['cluster'] ?? 0, $lg_settings['cluster_denylist'])) {
+          echo("..Cluster ".($matchdata['matches']['cluster'] ?? 0)." is in denylist, skipping...\n");
+          return true;
+        }
+      }
+
+      if (empty($matchdata['adv_matchlines'])) {
+        echo "..Incomplete stratz data, requesting OD...";
+
+        if($request_unparsed && !in_array($match, $scheduled)) {
+          @file_get_contents($request);
+          `php tools/replay_request_stratz.php -m$match`;
+          echo "..Requested and scheduled $match\n";
+          $first_scheduled[$match] = time();
+          $scheduled_stratz[] = $match;
+        }
+
+        unset($matchdata);
+      }
+
+      if (isset($matchdata)) {
+        $t_match = $matchdata['matches'];
+        $t_matchlines = $matchdata['matchlines'];
+        $t_draft = $matchdata['draft'];
+        $t_adv_matchlines = $matchdata['adv_matchlines'];
+        foreach($matchdata['players'] as $p) {
+          if(!isset($t_players[$p['playerID']])) {
+            $t_new_players[$p['playerID']] = $p['nickname'];
+          }
+        }
+        if (isset($t_team_matches) && isset($matchdata['teams'])) {
+          $t_team_matches = $matchdata['teams_matches'];
+          foreach($matchdata['teams'] as $t) {
+            if (!isset($t_teams[$t['teamid']])) {
+              $t_teams[ $t['teamid'] ] = array(
+                "name" => $t['name'],
+                "tag" => $t['tag'],
+                "added" => false
+              );
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  if (empty($matchdata)) {
     echo("Requesting.");
 
-    if (!$ignore_stratz && (!empty($players_list) || !empty($rank_limit))) {
+    if (!$ignore_stratz && !$stratz_graphql && (!empty($players_list) || !empty($rank_limit))) {
       $json = false;
       do {
         $json = @file_get_contents($stratz_request);
@@ -149,7 +234,7 @@ function fetch($match) {
       }
     }
 
-    $matchdata = $opendota->match($match);
+    $matchdata = empty($matchdata_od) ? $opendota->match($match) : $matchdata_od;
     echo("..OK.");
     if (empty($matchdata) || empty($matchdata['duration']) || empty($matchdata['players'])) {
         echo("..ERROR: Unable to read JSON skipping.\n");
