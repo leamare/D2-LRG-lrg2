@@ -59,6 +59,7 @@ function get_stratz_response($match) {
             pureDamage
           }
           dealtTotal {
+            stunDuration
             disableDuration
           }
         }
@@ -284,11 +285,10 @@ Q
       $aml['buybacks'] = !empty($pl['playbackData']['buyBackEvents']) ? count($pl['playbackData']['buyBackEvents']) : 0;
       $aml['pings'] = $pl['stats']['actionReport']['pingUsed'] ?? 0;
       
-      // "stuns": 104.37604,
-      $aml['stuns'] = 0;
+      $aml['stuns'] = ($pl['stats']['heroDamageReport']['stunDuration'] + $pl['stats']['heroDamageReport']['disableDuration'])/100;
 
       $aml['teamfight_part'] = $pl['kills'] / ( $pl['isRadiant'] ? array_sum($stratz['data']['match']['stats']['radiantKills']) : array_sum($stratz['data']['match']['stats']['direKills']));
-      $aml['damage_taken'] = array_sum($pl['stats']['heroDamageReport']);
+      $aml['damage_taken'] = array_sum($pl['stats']['heroDamageReport']['receivedTotal']);
 
       $r['adv_matchlines'][] = $aml;
     }
