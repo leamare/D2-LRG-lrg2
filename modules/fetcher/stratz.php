@@ -74,6 +74,11 @@ function get_stratz_response($match) {
         }
         deathEvents {
           timeDead
+          time
+          goldFed
+        }
+        killEvents {
+          time
         }
         farmDistributionReport {
           creepType {
@@ -106,11 +111,6 @@ function get_stratz_response($match) {
       towerDamage
       roleBasic
       playbackData {
-        streakEvents {
-          heroId
-          value
-          type
-        }
         buyBackEvents {
           time
         }
@@ -225,7 +225,7 @@ Q
       'nickname' => $pl['steamAccount']['name']
     ];
 
-    if ($stratz['data']['match']['parsedDateTime'] && !empty($pl['playbackData'])) {
+    if ($stratz['data']['match']['parsedDateTime']) {
       $aml = [];
 
       $aml['matchid'] = $stratz['data']['match']['id'];
@@ -267,27 +267,62 @@ Q
         }
       }
       
+      $kde = [];
+      foreach ($pl['stats']['killEvents'] as $s) {
+        $kde[] = [
+          'time' => $s['time'],
+          'kill' => true
+        ];
+      }
+      foreach ($pl['stats']['deathEvents'] as $s) {
+        if (!$s['goldFed']) continue;
+        $kde[] = [
+          'time' => $s['time'],
+          'kill' => false
+        ];
+      }
+      usort($kde, function($a, $b) { return $a['time'] <=> $b['time']; });
+
       $streaks = [];
       $multis = [];
-      foreach ($pl['playbackData']['streakEvents'] as $s) {
-        if ($s['type'] == 'MULTI_KILL')
-          $multis[] = $s['value'];
-        else 
-          $streaks[] = $s['value'];
+      $cur_streak = 0;
+      $cur_multi = 1;
+      $last = 0;
+      foreach ($kde as $e) {
+        if ($e['kill']) {
+          $cur_streak++;
+
+          if ($e['time'] - $last < 18) {
+            $cur_multi++;
+          } else {
+            $multis[] = $cur_multi;
+            $cur_multi = 1;
+          }
+
+          $last = $e['time'];
+        } else {
+          $streaks[] = $cur_streak;
+          $cur_streak = 0;
+        }
       }
+      $streaks[] = $cur_streak;
+      $multis[] = count($kde) ? $cur_multi : 0;
 
       $aml['multi_kill'] = !empty($multis) ? max($multis) : 0;
+      var_dump($multis);
       $aml['streak'] = !empty($streaks) ? max($streaks) : 0;
+      var_dump($streaks);
+      var_dump("");
       
       $aml['stacks'] = max($pl['stats']['campStack']);
       
       $aml['time_dead'] = array_reduce($pl['stats']['deathEvents'], function($c, $a) { return $c + $a['timeDead']; }, 0);
-      $aml['buybacks'] = !empty($pl['playbackData']['buyBackEvents']) ? count($pl['playbackData']['buyBackEvents']) : 0;
+      $aml['buybacks'] = 0;//!empty($pl['playbackData']['buyBackEvents']) ? count($pl['playbackData']['buyBackEvents']) : 0;
       $aml['pings'] = $pl['stats']['actionReport']['pingUsed'] ?? 0;
       
-      $aml['stuns'] = ($pl['stats']['heroDamageReport']['stunDuration'] + $pl['stats']['heroDamageReport']['disableDuration'])/100;
+      $aml['stuns'] = ($pl['stats']['heroDamageReport']['dealtTotal']['stunDuration'] + $pl['stats']['heroDamageReport']['dealtTotal']['disableDuration'])/100;
 
-      $aml['teamfight_part'] = $pl['kills'] / ( $pl['isRadiant'] ? array_sum($stratz['data']['match']['stats']['radiantKills']) : array_sum($stratz['data']['match']['stats']['direKills']));
+      $aml['teamfight_part'] = ($pl['kills']+$pl['assists']) / ( $pl['isRadiant'] ? array_sum($stratz['data']['match']['stats']['radiantKills']) : array_sum($stratz['data']['match']['stats']['direKills']));
       $aml['damage_taken'] = array_sum($pl['stats']['heroDamageReport']['receivedTotal']);
 
       $r['adv_matchlines'][] = $aml;
