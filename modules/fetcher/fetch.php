@@ -140,6 +140,8 @@ function fetch($match) {
   if(empty($matchdata) && $stratz_graphql) {
     echo("Requesting STRATZ GraphQL.");
     $matchdata = get_stratz_response($match);
+
+    $stratz_request = null;
     if (!empty($matchdata)) {
       if($matchdata['matches']['duration'] < 600) {
         echo("..Duration is less than 10 minutes, skipping...\n");
@@ -169,8 +171,10 @@ function fetch($match) {
 
       if (empty($matchdata['adv_matchlines'])) {
         echo "..Incomplete stratz data, requesting OD...";
+        $bad_replay = true;
 
-        if($request_unparsed && !in_array($match, $scheduled)) {
+        // 14*24*3600 = two weeks
+        if($request_unparsed && !in_array($match, $scheduled) && (time() - $match['matches']['start_date'] < 1209600)) {
           @file_get_contents($request);
           `php tools/replay_request_stratz.php -m$match`;
           echo "..Requested and scheduled $match\n";
@@ -178,7 +182,7 @@ function fetch($match) {
           $scheduled_stratz[] = $match;
         }
 
-        unset($matchdata);
+        //unset($matchdata);
       }
 
       if (isset($matchdata)) {
@@ -317,9 +321,9 @@ function fetch($match) {
     }
   }
 
-  if((!file_exists("$cache_dir/".$match.".lrgcache.json") && !file_exists("$cache_dir/".$match.".json")) 
+  if(!empty($stratz_request) && ( (!file_exists("$cache_dir/".$match.".lrgcache.json") && !file_exists("$cache_dir/".$match.".json")) 
         || $bad_replay
-        || $players_update) {
+        || $players_update) ) {
 
     if(!isset($matchdata['lobby_type']) || $players_update || ($matchdata['lobby_type'] != 1 && $matchdata['lobby_type'] != 2 && $use_stratz && !$ignore_stratz)) {
       echo("..Requesting STRATZ.");
