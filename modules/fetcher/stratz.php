@@ -1,11 +1,12 @@
 <?php 
 
+const ROSHAN = [133, 134, 135, 263, 264, 265, 324, 325, 326, 371, 593, 594, 595, 640];
+const OBS = [110, 499, 768];
+const SENTRY = [500, 769, 111];
+const LEVELS_RESPAWN = [5,7,9,13,16,26,28,30,32,34,36,44,46,48,50,52,54,65,70,75,80,85,90,95,100,100,100,100,100,100];
+
 function get_stratz_response($match) {
   global $stratztoken, $meta;
-
-  $ROSHAN = [133, 134, 135, 263, 264, 265, 324, 325, 326, 371, 593, 594, 595, 640];
-  $OBS = [110, 499, 768];
-  $SENTRY = [500, 769, 111];
 
   $data = [
     'query' => <<<Q
@@ -76,6 +77,7 @@ function get_stratz_response($match) {
           timeDead
           time
           goldFed
+          byAbility
         }
         killEvents {
           time
@@ -93,6 +95,7 @@ function get_stratz_response($match) {
         actionReport {
           pingUsed
         }
+        level
       }
       assists
       deaths
@@ -114,6 +117,11 @@ function get_stratz_response($match) {
         buyBackEvents {
           time
         }
+        streakEvents {
+          time
+          type
+          value
+      }
       }
       steamAccount {
         name
@@ -198,7 +206,7 @@ Q
   foreach ($stratz['data']['match']['players'] as $i => $pl) {
     $r['payload']['score_radiant'] += $pl['isRadiant'] ? $pl['kills'] : 0;
     $r['payload']['score_dire'] += !$pl['isRadiant'] ? $pl['kills'] : 0;
-    $r['payload']['leavers'] += $pl['leaverStatus'];
+    $r['payload']['leavers'] += $pl['leaverStatus'] > 1 ? 1 : 0;
 
     $ml = [];
     $ml['matchid'] = $stratz['data']['match']['id'];
@@ -249,7 +257,7 @@ Q
       $aml['wards'] = count(
         array_filter($pl['stats']['wards'], function($a) { return !$a['type']; })
       );
-      $aml['wards'] = count(
+      $aml['sentries'] = count(
         array_filter($pl['stats']['wards'], function($a) { return $a['type']; })
       );
 
@@ -260,10 +268,10 @@ Q
 
       foreach ($pl['stats']['farmDistributionReport'] as $f) {
         foreach ($f['creepType'] as $fc) {
-          if (in_array($fc['id'], $ROSHAN)) $aml['roshans_killed'] += $fc['count'];
+          if (in_array($fc['id'], ROSHAN)) $aml['roshans_killed'] += $fc['count'];
         }
         foreach ($f['other'] as $fc) {
-          if (in_array($fc['id'], $OBS)) $aml['wards_destroyed'] += $fc['count'];
+          if (in_array($fc['id'], OBS)) $aml['wards_destroyed'] += $fc['count'];
         }
       }
       
