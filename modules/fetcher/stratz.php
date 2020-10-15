@@ -338,20 +338,25 @@ Q
   }
 
   $r['draft'] = [];
-  if (!empty($pl['stats']['pickBans'])) {
-    foreach ($pl['stats']['pickBans'] as $dr) {
+  if (!empty($stratz['data']['match']['stats']['pickBans'])) {
+    $stage = 0;
+    $last_stage_pick = null;
+
+    foreach ($stratz['data']['match']['stats']['pickBans'] as $dr) {
       $d = [];
 
       $d['matchid'] = $match;
       $d['is_radiant'] = $dr['isRadiant'] ? 1 : 0;
       $d['is_pick'] = $dr['isPick'] ? 1 : 0;
-      $d['hero_id'] = $dr['heroId'];
+      $d['hero_id'] = $dr['isPick'] || !isset($dr['heroId']) ? $dr['heroId'] : $dr['bannedHeroId'];
+      if (empty($d['hero_id'])) continue;
 
       if ($r['matches']['modeID'] == 2 || $r['matches']['modeID'] == 9) {
         $last_stage_pick = null;
-        if ($last_stage_pick !== $pick && !$pick) {
+        if ($last_stage_pick != $d['is_pick'] && !$d['is_pick']) {
           $stage++;
         }
+        $last_stage_pick = $d['is_pick'];
         $d['stage'] = $stage;
       } else if ($r['matches']['modeID'] == 16) {
         if ($dr['isPick']) {
@@ -375,7 +380,7 @@ Q
     }
   } else {
     foreach($stratz['data']['match']['players'] as $draft_instance) {
-      if (!isset($draft_instance['hero_id']) || !$draft_instance['hero_id'])
+      if (!isset($draft_instance['heroId']) || !$draft_instance['heroId'])
         continue;
       $d['matchid'] = $match;
       $d['is_radiant'] = $draft_instance['isRadiant'];
