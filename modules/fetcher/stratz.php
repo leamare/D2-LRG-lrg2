@@ -391,7 +391,7 @@ Q
     $r['teams_matches'] = [];
     $r['teams'] = [];
 
-    if (!empty($stratz['data']['match']['direTeamId'])) {
+    if (!empty($stratz['data']['match']['direTeamId']) && $stratz['data']['match']['direTeamId'] > 0) {
       $r['teams_matches'][] = [
         'matchid' => $stratz['data']['match']['id'],
         'teamid' => $stratz['data']['match']['direTeamId'],
@@ -405,7 +405,7 @@ Q
       ];
     }
 
-    if (!empty($stratz['data']['match']['radiantTeamId'])) {
+    if (!empty($stratz['data']['match']['radiantTeamId']) && $stratz['data']['match']['radiantTeamId'] > 0) {
       $r['teams_matches'][] = [
         'matchid' => $stratz['data']['match']['id'],
         'teamid' => $stratz['data']['match']['radiantTeamId'],
