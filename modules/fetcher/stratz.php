@@ -121,7 +121,7 @@ function get_stratz_response($match) {
           time
           type
           value
-      }
+        }
       }
       steamAccount {
         name
@@ -291,41 +291,77 @@ Q
       }
       usort($kde, function($a, $b) { return $a['time'] <=> $b['time']; });
 
-      $streaks = [];
-      $multis = [];
-      $cur_streak = 0;
-      $cur_multi = 1;
-      $last = 0;
-      foreach ($kde as $e) {
-        if ($e['kill']) {
-          $cur_streak++;
+      if (!empty($pl['playbackData']) && !empty($pl['playbackData']['streakEvents'])) {
+        $streaks = [];
+        $multis = [];
+        foreach ($pl['playbackData']['streakEvents'] as $s) {
+          if ($s['type'] == 'MULTI_KILL')
+            $multis[] = $s['value'];
+          else
+            $streaks[] = $s['value'];
+        }
+      } else {
+        $streaks = [];
+        $multis = [];
+        $cur_streak = 0;
+        $cur_multi = 1;
+        $last = 0;
+        foreach ($kde as $e) {
+          if ($e['kill']) {
+            $cur_streak++;
 
-          if ($e['time'] - $last < 18) {
-            $cur_multi++;
+            if ($e['time'] - $last < 18) {
+              $cur_multi++;
+            } else {
+              $multis[] = $cur_multi;
+              $cur_multi = 1;
+            }
+
+            $last = $e['time'];
           } else {
-            $multis[] = $cur_multi;
-            $cur_multi = 1;
+            $streaks[] = $cur_streak;
+            $cur_streak = 0;
+          }
+        }
+        $streaks[] = $cur_streak;
+        $multis[] = count($kde) ? $cur_multi : 0;
+      }
+      $aml['multi_kill'] = !empty($multis) ? max($multis) : 0;
+      $aml['streak'] = !empty($streaks) ? max($streaks) : 0;
+      
+      if (!empty($pl['playbackData']) && isset($pl['playbackData']['buyBackEvents'])) {
+        $aml['buybacks'] = count($pl['playbackData']['buyBackEvents']);
+      } else {
+        // This implementation is going to be replaced rather soon
+        // This method of calculating buybacks is not reliable, but
+        // it's all we have for now
+        $aml['buybacks'] = 0;
+        foreach ($pl['stats']['deathEvents'] as $s) {
+          $level = 24;
+          foreach ($pl['stats']['level'] as $i => $time) {
+            if ($time > $s['time']) {
+              $level = $i;
+              break;
+            }
+          }
+          $diff = $s['timeDead'] - LEVELS_RESPAWN[$level-1];
+          if ($diff > 10 && ($s['byAbility'] !== 5161 || $diff > 5+ceil(($level - $level % 18) / 6)*10 )) {
+            $aml['buybacks']++;
           }
 
-          $last = $e['time'];
-        } else {
-          $streaks[] = $cur_streak;
-          $cur_streak = 0;
+          // implementation to be used later
+          // when timeDead will be fixed
+          // FIXME: 
+          // $diff = $s['timeDead'] - LEVELS_RESPAWN[$level] - ($s['byAbility'] == 5161 ? $diff > 5+ceil(($level - $level % 18) / 6)*10 : 0 );
+          // if ($diff < 0) {
+          //   $aml['buybacks']++;
+          // }
         }
       }
-      $streaks[] = $cur_streak;
-      $multis[] = count($kde) ? $cur_multi : 0;
-
-      $aml['multi_kill'] = !empty($multis) ? max($multis) : 0;
-      var_dump($multis);
-      $aml['streak'] = !empty($streaks) ? max($streaks) : 0;
-      var_dump($streaks);
-      var_dump("");
       
       $aml['stacks'] = max($pl['stats']['campStack']);
       
       $aml['time_dead'] = array_reduce($pl['stats']['deathEvents'], function($c, $a) { return $c + $a['timeDead']; }, 0);
-      $aml['buybacks'] = 0;//!empty($pl['playbackData']['buyBackEvents']) ? count($pl['playbackData']['buyBackEvents']) : 0;
       $aml['pings'] = $pl['stats']['actionReport']['pingUsed'] ?? 0;
       
       $aml['stuns'] = ($pl['stats']['heroDamageReport']['dealtTotal']['stunDuration'] + $pl['stats']['heroDamageReport']['dealtTotal']['disableDuration'])/100;
