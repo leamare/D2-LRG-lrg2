@@ -16,7 +16,7 @@ function fetch($match) {
   global $opendota, $conn, $rnum, $matches, $failed_matches, $scheduled, $scheduled_stratz, $t_teams, $t_players, $use_stratz, $require_stratz,
   $request_unparsed, $meta, $stratz_timeout_retries, $force_adding, $cache_dir, $lg_settings, $lrg_use_cache, $first_scheduled,
   $use_full_stratz, $scheduled_wait_period, $steamapikey, $force_await, $players_list, $rank_limit, $stratztoken, $ignore_stratz,
-  $update_unparsed, $request_unparsed_players, $stratz_graphql;
+  $update_unparsed, $request_unparsed_players, $stratz_graphql, $api_cooldown_seconds;
 
   $t_match = [];
   $t_matchlines = [];
@@ -140,6 +140,7 @@ function fetch($match) {
   if(empty($matchdata) && $stratz_graphql) {
     echo("Requesting STRATZ GraphQL.");
     $matchdata = get_stratz_response($match);
+    sleep($api_cooldown_seconds-1);
 
     $stratz_request = null;
     if (!empty($matchdata)) {
@@ -789,7 +790,7 @@ function fetch($match) {
   }
 
   if (empty($t_draft)) {
-    $i = sizeof($t_draft);
+    $i = 0;
 
     # OpenDota doesn't have information about draft for Ranked All Pick
     # Game Mode IDs:

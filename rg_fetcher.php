@@ -40,6 +40,9 @@ if (!empty($options['N'])) {
 
 if (!empty($options['d'])) {
   $api_cooldown = ((int)$options['d'])*1000;
+  $api_cooldown_seconds = ((int)$options['d']);
+} else {
+  $api_cooldown_seconds = 2;
 }
 
 
