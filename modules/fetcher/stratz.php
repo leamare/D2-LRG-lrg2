@@ -243,8 +243,11 @@ Q
       $aml['lh_at10'] = array_sum(
         array_slice($pl['stats']['lastHitsPerMinute'], 0, 10)
       );
-      $aml['lane'] = $pl['lane'] > 3 || !$pl['lane'] ? 4 : $pl['lane'];
-      $aml['isCore'] = $pl['roleBasic'] ? 0 : 1;
+      
+      $aml['lane'] = ($pl['lane'] > 3 || !$pl['lane']) ? 4 : $pl['lane'];
+
+      if ($aml['lane'] == 4) $aml['isCore'] = 0;
+      else $aml['isCore'] = $pl['roleBasic'] ? 0 : 1;
       
       $melee = (40 * 60);
       $ranged = (45 * 20);
