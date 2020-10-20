@@ -59,6 +59,11 @@ $hidden_cat = "hidden";
 $index_list = 5; #-1 all, 0 none, other - number of reports on main page
 
 $link_provider = "stratz.com"; //opendota.com dotabuff.com
+$links_providers = [
+  'DB' => "dotabuff.com",
+  'Stratz' => "stratz.com",
+  'OD' => "opendota.com",
+];
 
 $portraits_provider = "https://courier.spectral.gg/images/dota/portraits/%HERO%.png";
 $icons_provider = "https://courier.spectral.gg/images/dota/icons/%HERO%.png";

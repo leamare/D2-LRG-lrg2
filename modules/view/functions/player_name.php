@@ -17,8 +17,15 @@ function player_name($pid, $tt = true) {
 }
 
 function player_link($pid, $tt = true) {
-  global $link_provider;
-  return "<a target=\"_blank\" href=\"https://$link_provider/players/$pid\">".player_name($pid, $tt)."</a>";
+  global $link_provider, $links_providers;
+  if (empty($links_providers))
+    return "<a target=\"_blank\" href=\"https://$link_provider/players/$pid\">".player_name($pid, $tt)."</a>";
+  
+  $r = player_name($pid, $tt)." ";
+  foreach ($links_providers as $lpn => $lpl) {
+    $r .= "<a target=\"_blank\" href=\"https://$lpl/players/$pid\">$lpn</a> ";
+  }
+  return $r;
 }
 
 ?>
