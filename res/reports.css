@@ -304,13 +304,9 @@ table .hero_portrait {
   font-size: 24px;
   text-transform: uppercase;
   letter-spacing: 4px;
-  margin-left: auto;
-  margin-right: auto;
-  text-align: center;
+  text-align: left;
   font-weight: bold;
   color: var(--caption);
-  float: left;
-  width: 4%;
 }
 .match-id a {
   font-size: inherit;
@@ -324,7 +320,7 @@ table .hero_portrait {
 }
 .match-team {
   width: 34%;
-  margin: 30px 2% 0;
+  margin: 10px 2% 0;
   font-size: inherit;
   line-height: inherit;
 }
@@ -624,4 +620,8 @@ table .hero_portrait {
 .ads-block-main {
   text-align: center;
   max-height: 100px;
+}
+
+img.rf_icon {
+  vertical-align: middle;
 }

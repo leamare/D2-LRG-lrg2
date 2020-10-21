@@ -4,7 +4,7 @@ function match_link($mid) {
   global $link_provider, $links_providers;
 
   if (empty($links_providers))
-  return "<a href=\"https://$link_provider/matches/$mid\" target=\"_blank\" rel=\"noopener\">$mid</a>";
+    return "<a href=\"https://$link_provider/matches/$mid\" target=\"_blank\" rel=\"noopener\">$mid</a>";
   
   $r = $mid." - ";
   foreach ($links_providers as $lpn => $lpl) {
@@ -16,7 +16,9 @@ function match_link($mid) {
 
 function link_provider($lpn) {
   global $link_provider_icon;
+
   if (empty($link_provider_icon)) return $lpn;
+  return "<img class=\"rf_icon\" src=\"".str_replace("%LPN%", strtolower($lpn), $link_provider_icon)."\" />";
 }
 
 function team_link($tid) {
