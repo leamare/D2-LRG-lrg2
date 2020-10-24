@@ -49,6 +49,8 @@ if (!$row[1] || ( ($lg_settings['ana']['regions']['use_limiter'] ?? false) && $r
   $sql .= "SELECT \"dire_wr\", (1-(SUM(radiantWin)/SUM(1)))*100 FROM matches WHERE matches.cluster IN (".implode(",", $clusters).");";
   # average match length
   $sql .= "SELECT \"avg_match_len\", SUM(duration)/(60*COUNT(DISTINCT matchid)) FROM matches WHERE matches.cluster IN (".implode(",", $clusters).");";
+  # rampages total
+  $sql .= "SELECT \"rampages_total\", SUM(am.multi_kill > 4) FROM matches JOIN adv_matchlines am ON matches.matchid = am.matchid WHERE matches.cluster IN (".implode(",", $clusters).");";
 
 
   if ($conn->multi_query($sql) === TRUE);# echo "[S] Requested data for REGION STATS.\n";

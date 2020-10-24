@@ -68,6 +68,8 @@ $sql .= "SELECT \"couriers_killed_total\", SUM(couriers_killed) FROM adv_matchli
 $sql .= "SELECT \"roshans_killed_total\", SUM(roshans_killed) FROM adv_matchlines;";
 # buybacks total
 $sql .= "SELECT \"buybacks_total\", SUM(buybacks) FROM adv_matchlines;";
+# rampages total
+$sql .= "SELECT \"rampages_total\", SUM(multi_kill > 4) FROM adv_matchlines;";
 # average match length
 $sql .= "SELECT \"avg_match_len\", SUM(duration)/(60*COUNT(DISTINCT matchid)) FROM matches;";
 
