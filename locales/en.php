@@ -31,6 +31,7 @@
     "players_on_event" => "Players in league",
     "teams_on_event" => "Teams on event",
     "matches_unparsed" => "Matches without detailed analysis",
+    "rampages_total" => "Rampages total",
 
     "heroes_median_picks" => "Median hero picks",
     "heroes_median_bans" => "Median hero bans",
@@ -184,6 +185,8 @@
     "kills_combined" => "Kills Combined",
     "closest_match" => "Closest match",
     "biggest_nw_difference" => "Biggest difference in gold earned",
+    "lowest_rampage" => "Rampage with lowest team networth difference",
+    "highest_rampage" => "Rampage with highest team networth difference",
 
     "stomp" => "Networth stomp by a team",
     "comeback" => "Networth comeback by a team",
