@@ -74,6 +74,12 @@ $sql .= "SELECT \"kills_combined\" cap, m.matchid, SUM(ml.kills) val, 0 playerid
 # kills per minute
 $sql .= "SELECT \"bloodbath\" cap, m.matchid, SUM(ml.kills)/(m.duration / 60) val, 0 playerid, 0 heroid
           FROM matches m JOIN matchlines ml ON m.matchid = ml.matchid GROUP BY m.matchid ORDER BY val DESC LIMIT 1;";
+# rampage with lowest nw difference
+$sql .= "SELECT \"lowest_rampage\" cap, m.matchid, (CASE WHEN ABS(comeback) > ABS(stomp) THEN ABS(comeback) ELSE ABS(stomp) END) val, am.playerid playerid, am.heroid heroid 
+          FROM matches m JOIN adv_matchlines am ON m.matchid = am.matchid WHERE am.multi_kill > 4 GROUP BY m.matchid ORDER BY val ASC, m.matchid DESC LIMIT 1;";
+# rampage with highest nw difference
+$sql .= "SELECT \"highest_rampage\" cap, m.matchid, (CASE WHEN ABS(comeback) > ABS(stomp) THEN ABS(comeback) ELSE ABS(stomp) END) val, am.playerid playerid, am.heroid heroid 
+          FROM matches m JOIN adv_matchlines am ON m.matchid = am.matchid WHERE am.multi_kill > 4 GROUP BY m.matchid ORDER BY val DESC, m.matchid DESC LIMIT 1;";
 
 # widest hero pool
 $sql .= "SELECT \"widest_hero_pool\" cap, 0 matchid, COUNT(distinct heroid) val, playerid, 0 heroid FROM matchlines GROUP BY playerid ORDER BY val DESC LIMIT 1;";
@@ -102,12 +108,13 @@ do {
 
   $row = $query_res->fetch_row();
 
-  $result["records"][$row[0]] = array (
-    "matchid"  => $row[1],
-    "value"    => $row[2],
-    "playerid" => $row[3],
-    "heroid"   => $row[4]
-  );
+  if (!empty($row) && !empty($row[1]))
+    $result["records"][$row[0]] = array (
+      "matchid"  => $row[1],
+      "value"    => $row[2],
+      "playerid" => $row[3],
+      "heroid"   => $row[4]
+    );
 
   $query_res->free_result();
 } while($conn->next_result());

@@ -152,6 +152,17 @@ $sql .= "SELECT \"bloodbath\" cap, m.matchid, SUM(ml.kills)/(m.duration / 60) va
           WHERE m.cluster IN (".implode(",", $clusters).")
           GROUP BY m.matchid ORDER BY val DESC LIMIT 1;";
 
+# rampage with lowest nw difference
+$sql .= "SELECT \"lowest_rampage\" cap, m.matchid, (CASE WHEN ABS(comeback) > ABS(stomp) THEN ABS(comeback) ELSE ABS(stomp) END) val, am.playerid playerid, am.heroid heroid 
+          FROM matches m JOIN adv_matchlines am ON m.matchid = am.matchid
+          WHERE m.cluster IN (".implode(",", $clusters).") AND am.multi_kill > 4 
+          GROUP BY m.matchid ORDER BY val ASC, m.matchid DESC LIMIT 1;";
+# rampage with highest nw difference
+$sql .= "SELECT \"highest_rampage\" cap, m.matchid, (CASE WHEN ABS(comeback) > ABS(stomp) THEN ABS(comeback) ELSE ABS(stomp) END) val, am.playerid playerid, am.heroid heroid 
+          FROM matches m JOIN adv_matchlines am ON m.matchid = am.matchid
+          WHERE m.cluster IN (".implode(",", $clusters).") AND am.multi_kill > 4 
+          GROUP BY m.matchid ORDER BY val DESC, m.matchid DESC LIMIT 1;";
+
 # widest hero pool
 $sql .= "SELECT \"widest_hero_pool\" cap, 0 matchid, COUNT(distinct ml.heroid) val, ml.playerid, 0 heroid FROM matchlines ml
         JOIN matches on ml.matchid = matches.matchid
