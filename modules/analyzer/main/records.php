@@ -108,7 +108,7 @@ do {
 
   $row = $query_res->fetch_row();
 
-  if (!empty($row) && !empty($row[1]))
+  if (!empty($row) && !empty($row[2]))
     $result["records"][$row[0]] = array (
       "matchid"  => $row[1],
       "value"    => $row[2],

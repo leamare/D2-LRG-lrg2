@@ -202,12 +202,13 @@ do {
 
   $row = $query_res->fetch_row();
 
-  $result["regions_data"][$region]["records"][$row[0]] = [
-    "matchid"  => $row[1],
-    "value"    => $row[2],
-    "playerid" => $row[3],
-    "heroid"   => $row[4]
-  ];
+  if (!empty($row) && !empty($row[2]))
+    $result["regions_data"][$region]["records"][$row[0]] = [
+      "matchid"  => $row[1],
+      "value"    => $row[2],
+      "playerid" => $row[3],
+      "heroid"   => $row[4]
+    ];
 
   $query_res->free_result();
 } while($conn->next_result());
