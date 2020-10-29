@@ -112,13 +112,16 @@ do {
   $query_res = $conn->store_result();
 
   $row = $query_res->fetch_row();
-  $result["regions_data"][$region]["haverages_heroes"][$row[0]] = array();
+  
+  if (!empty($row)) {
+    $result["regions_data"][$region]["haverages_heroes"][$row[0]] = array();
 
-  for ($i=0; $i<$avg_limit && $row != null; $i++, $row = $query_res->fetch_row()) {
-    $result["regions_data"][$region]["haverages_heroes"][$row[0]][$i] = [
-      "heroid" => $row[1],
-      "value"  => $row[2]
-    ];
+    for ($i=0; $i<$avg_limit && $row != null; $i++, $row = $query_res->fetch_row()) {
+      $result["regions_data"][$region]["haverages_heroes"][$row[0]][$i] = [
+        "heroid" => $row[1],
+        "value"  => $row[2]
+      ];
+    }
   }
 
   $query_res->free_result();
