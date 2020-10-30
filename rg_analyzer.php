@@ -53,6 +53,11 @@ $result["league_name"]  = $lg_settings['league_name'];
 $result["league_desc"] = $lg_settings['league_desc'];
 $result['league_id'] = $lg_settings['league_id'];
 $result["league_tag"] = $lg_settings['league_tag'];
+
+$result["sponsors"] = $lg_settings['sponsors'] ?? null;
+$result["orgs"] = $lg_settings['orgs'] ?? null;
+$result["links"] = $lg_settings['links'] ?? null;
+
 $avg_limit = $lg_settings['ana']['avg_limit'];
 
 if (isset($lg_settings['teams']))

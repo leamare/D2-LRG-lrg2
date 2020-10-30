@@ -42,9 +42,9 @@ function get_report_descriptor(&$report, $generate_endpoints = false) {
   if(isset($report['settings']['custom_logo'])) {
     $desc["logo"] = $report['settings']['custom_logo'];
   }
-  $desc["sponsors"] = $report['settings']['sponsors'] ?? null;
-  $desc["orgs"] = $report['settings']['orgs'] ?? null;
-  $desc["links"] = $report['settings']['links'] ?? null;
+  $desc["sponsors"] = $report['sponsors'] ?? null;
+  $desc["orgs"] = $report['orgs'] ?? null;
+  $desc["links"] = $report['links'] ?? null;
   
   if (!$generate_endpoints)
     return $desc;
