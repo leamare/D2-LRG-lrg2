@@ -64,7 +64,7 @@ foreach ($regions as $region => $clusters) {
         $picks[] = $hero["matches_total"];
     $median = calculate_median($picks);
 
-    $result["regions_data"][$region]['settings'] = calculate_limiters($picks, $result["regions_data"][$region]['main']['teams_on_event'] ?? null);
+    $result["regions_data"][$region]['settings'] = calculate_limiters($picks, $result["regions_data"][$region]['main']['teams_on_event'] ?? null, $result['regions_data'][$region]['main']['matches']);
 
     # records
     if ($lg_settings['ana']['records'] && isset($lg_settings['ana']['regions']['records'])) {
