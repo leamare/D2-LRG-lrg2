@@ -54,6 +54,8 @@ function rg_query_player_draft_pickban(&$conn, $team = null) {
 
   $query_res = $conn->store_result();
 
+  $res = [];
+
   for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
     if(!isset($res[$row[0]])) {
       $res[$row[0]] = array(

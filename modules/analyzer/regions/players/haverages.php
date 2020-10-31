@@ -146,14 +146,17 @@ do {
  $query_res = $conn->store_result();
 
  $row = $query_res->fetch_row();
- $result["regions_data"][$region]["haverages_players"][$row[0]] = array();
 
- for ($i=0; $i<$avg_limit && $row != null; $i++, $row = $query_res->fetch_row()) {
-     $result["regions_data"][$region]["haverages_players"][$row[0]][$i] = array (
-     "playerid" => $row[1],
-     "value"  => $row[2]
-   );
- }
+ if (!empty($row)) {
+  $result["regions_data"][$region]["haverages_players"][$row[0]] = array();
+
+  for ($i=0; $i<$avg_limit && $row != null; $i++, $row = $query_res->fetch_row()) {
+      $result["regions_data"][$region]["haverages_players"][$row[0]][$i] = array (
+      "playerid" => $row[1],
+      "value"  => $row[2]
+    );
+  }
+}
 
  $query_res->free_result();
 

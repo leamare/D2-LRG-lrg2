@@ -82,7 +82,8 @@ do {
 
   if(!is_bool($query_res)) {
     $row = $query_res->fetch_row();
-    $result["random"][$row[0]] = $row[1];
+    if (!empty($row))
+      $result["random"][$row[0]] = $row[1];
     $query_res->free_result();
   }
 } while($conn->next_result());
