@@ -7,7 +7,10 @@ $modules['overview'] = "";
 function rg_view_generate_overview() {
   global $report;
 
-  $res = "<div class=\"content-header\">".locale_string("summary")."</div><div class=\"block-content\">";
+  $res = "<div class=\"content-header\">".locale_string("summary")."</div>";
+
+  $res .= "<div class=\"block-content\">";
+
   $res .= locale_string("over-pregen-report");
   if ($report['league_id'] == null || $report['league_id'] == "custom")
     $res .= " ".locale_string("over-custom-league")." ".$report['league_name']." — ".$report['league_desc'].".";
@@ -15,6 +18,30 @@ function rg_view_generate_overview() {
     $res .= " ".$report['league_name']." (".$report['league_id'].") — ".$report['league_desc'].".";
 
   $res .= "</div>";
+
+  if (!empty($report['orgs'])) {
+    $res .= "<div class=\"block-content\"><a target=\"_blank\" href=\"".$report['orgs']."\">".locale_string("website_long")."</a></div>";
+  }
+
+  if (!empty($report['links'])) {
+    $res .= "<div class=\"block-content\">";
+    $links = [];
+    foreach($report['links'] as $type => $link) {
+      $links[] = "<a target=\"_blank\" href=\"".$link."\">".$type."</a>";
+    }
+    $res .= implode(" - ", $links);
+    $res .= "</div>";
+  }
+
+  if (!empty($report['sponsors'])) {
+    $res .= "<div class=\"block-content\">".locale_string("sponsors").": ";
+    $links = [];
+    foreach($report['sponsors'] as $type => $link) {
+      $links[] = "<a target=\"_blank\" href=\"".$link."\">".$type."</a>";
+    }
+    $res .= implode(", ", $links);
+    $res .= "</div>";
+  }
 
   return rg_view_generator_overview("", $report, $res);
 }
