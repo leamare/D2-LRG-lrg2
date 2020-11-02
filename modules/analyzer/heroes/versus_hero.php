@@ -15,12 +15,19 @@ else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n"
 $query_res = $conn->store_result();
 
 for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+  $expected_pair  = $result['random']['matches_total'] ? ( $result['pickban'][$row[0]]['matches_picked']
+  * $result['pickban'][$row[1]]['matches_picked']
+  / $result['random']['matches_total'] )
+  / 2
+  : 0;
+
   $result["hvh"][] = array (
     "heroid1" => $row[0],
     "heroid2" => $row[1],
     "matches" => $row[2],
     "h1won" => $row[3],
-    "h1winrate" => $row[4]
+    "h1winrate" => $row[4],
+    "exp" => round($expected_pair)
   );
 }
 

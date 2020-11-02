@@ -34,6 +34,12 @@ function rg_generator_pvp_unwrap_data(&$context, &$context_wrs, $heroes_flag = t
       "lost" => $line[$sid.'1won']
     ];
     if(!$nodiff) $pvp[ $line[$id.'2'] ][ $line[$id.'1'] ]['diff'] = round(1-$line[$sid.'1winrate']-$context_wrs[$line[$id.'2']][$wr_id], 5);
+
+    if(isset($line['exp'])) {
+      $pvp[ $line[$id.'2'] ][ $line[$id.'1'] ]['expectation'] = $line['exp'];
+
+      $pvp[ $line[$id.'1'] ][ $line[$id.'2'] ]['expectation'] = $line['exp'];
+    }
   }
 
   return $pvp;

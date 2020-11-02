@@ -31,7 +31,14 @@ $endpoints['hvh'] = function($mods, $vars, &$report) {
         $pvp_context[$elid]['rank'] = round(100 - $increment*$i++, 2);
       $last = $el;
       $last_rank = $pvp_context[$elid]['rank'];
+
+      if (isset($el['expectation'])) {
+        $pvp_context[$elid]['deviation'] = $el['matches']-$el['expectation'];
+        $pvp_context[$elid]['deviation_pct'] = round(($el['matches']-$el['expectation'])*100/$el['matches'], 2);
+      }
     }
+
+    
   
     unset($last);
   }
