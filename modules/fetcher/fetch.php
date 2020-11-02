@@ -186,7 +186,7 @@ function fetch($match) {
         //unset($matchdata);
       }
 
-      if (isset($matchdata)) {
+      if (!empty($matchdata) && !$bad_replay) {
         $t_match = $matchdata['matches'];
         $t_matchlines = $matchdata['matchlines'];
         $t_draft = $matchdata['draft'];
@@ -208,6 +208,14 @@ function fetch($match) {
             }
           }
         }
+      } else if (isset($matchdata)) {
+        $match_players = $matchdata['players'];
+        foreach($matchdata['players'] as $p) {
+          if(!isset($t_players[$p['playerID']])) {
+            $t_new_players[$p['playerID']] = $p['nickname'];
+          }
+        }
+        unset($matchdata);
       }
     }
   }
@@ -623,6 +631,11 @@ function fetch($match) {
           $sz++;
           continue;
         }
+
+        if (isset($match_players)) {
+          $matchdata['players'][$j]['account_id'] = $match_players[$i]['playerID'];
+          $matchdata['players'][$j]["name"] = $match_players[$i]['nickname'];
+        }
         
         # support for botmatches
         if ($matchdata['players'][$j]['account_id'] != null)
@@ -942,7 +955,7 @@ function fetch($match) {
   }
 
   // TODO:
-  if(!empty($cache_dir) && $lrg_use_cache && !$bad_replay && !file_exists("$cache_dir/".$match.".lrgcache.json")) {
+  if(!empty($cache_dir) && !empty($matchdata) && $lrg_use_cache && !$bad_replay && !file_exists("$cache_dir/".$match.".lrgcache.json")) {
     //$f = fopen("$cache_dir/".($bad_replay ? "unparsed_" : "").$match.".json", "w");
     //fwrite($f, $json);
     //fclose($f);
