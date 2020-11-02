@@ -14,6 +14,7 @@ function get_stratz_response($match) {
     clusterId
     gameMode
     gameVersionId
+    statsDateTime
     startDateTime
     leagueId
     durationSeconds
@@ -182,7 +183,7 @@ Q
   $r['matches']['leagueID'] = $stratz['data']['match']['leagueId'] ?? 0;
   $r['matches']['version'] = get_patchid($r['matches']['start_date'], convert_patch_id($r['matches']['start_date']), $meta);
 
-  if ($stratz['data']['match']['parsedDateTime']) {
+  if ($stratz['data']['match']['statsDateTime']) {
     $throwVal = $stratz['data']['match']['didRadiantWin'] ? max($stratz['data']['match']['stats']['radiantNetworthLeads']) : min($stratz['data']['match']['stats']['radiantNetworthLeads']) * -1;
     $comebackVal = $stratz['data']['match']['didRadiantWin'] ? min($stratz['data']['match']['stats']['radiantNetworthLeads']) * -1 : max($stratz['data']['match']['stats']['radiantNetworthLeads']);
   
@@ -233,7 +234,7 @@ Q
       'nickname' => $pl['steamAccount']['name']
     ];
 
-    if ($stratz['data']['match']['parsedDateTime']) {
+    if ($stratz['data']['match']['statsDateTime']) {
       $aml = [];
 
       $aml['matchid'] = $stratz['data']['match']['id'];

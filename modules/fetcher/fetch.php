@@ -88,7 +88,7 @@ function fetch($match) {
   
   $stratz_request = "https://api.stratz.com/graphql?".http_build_query($data);
 
-  if($lrg_use_cache && file_exists("$cache_dir/".$match.".lrgcache.json") && (!$players_update || !empty($match_rules))) {
+  if($lrg_use_cache && file_exists("$cache_dir/".$match.".lrgcache.json")  && filesize("$cache_dir/".$match.".lrgcache.json") && (!$players_update || !empty($match_rules))) {
     echo("Reusing LRG cache.");
     $json = file_get_contents("$cache_dir/".$match.".lrgcache.json");
     $matchdata = json_decode($json, true);
@@ -175,7 +175,7 @@ function fetch($match) {
         $bad_replay = true;
 
         // 14*24*3600 = two weeks
-        if($request_unparsed && !in_array($match, $scheduled) && (time() - $match['matches']['start_date'] < 1209600)) {
+        if($request_unparsed && !in_array($match, $scheduled) && !empty($match) && (time() - $match['matches']['start_date'] < 1209600)) {
           @file_get_contents($request);
           `php tools/replay_request_stratz.php -m$match`;
           echo "..Requested and scheduled $match\n";
@@ -757,9 +757,15 @@ function fetch($match) {
             $query_res = $conn->store_result();
 
             $row = $query_res->fetch_row();
-            $t_adv_matchlines[$i]['lane'] = $row[0];
-            if($row[0] == 5 || $row[0] == 4)
-              $t_adv_matchlines[$i]['isCore'] = 0;
+            if (!empty($row)) {
+              $t_adv_matchlines[$i]['lane'] = $row[0];
+              if($row[0] == 5 || $row[0] == 4)
+                $t_adv_matchlines[$i]['isCore'] = 0;
+            } else {
+              $t_adv_matchlines[$i]['lane'] = 0;
+              if($row[0] == 5 || $row[0] == 4)
+                $t_adv_matchlines[$i]['isCore'] = 0;
+            }
 
             $query_res->free_result();
             # It's not ideal, but it works for now.
@@ -988,8 +994,11 @@ function fetch($match) {
       }
     }
 
-    file_put_contents("$cache_dir/".$match.".lrgcache.json", json_encode($matchdata));
-    echo("..Saved LRG cache.");
+    $json = json_encode($matchdata);
+    if (!empty($json)) {
+      file_put_contents("$cache_dir/".$match.".lrgcache.json", $json);
+      echo("..Saved LRG cache.");
+    }
   }
 
   $t_match['cluster']  = $match_rules['cluster']['rep'] ?? $lg_settings['force_cluster'] ?? $t_match['cluster'] ?? null;
