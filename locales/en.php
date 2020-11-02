@@ -8,6 +8,9 @@
     "league_tag" => "Report tag",
     "league_desc" => "Description",
     "leag_reports" => "Reports",
+    "website" => "Website",
+    "website_long" => "Official Website",
+    "sponsors" => "Partners",
 
     "random" => "Random stats",
     "notable_matches" => "Notable matches",
@@ -292,7 +295,7 @@
     "desc_heroes_summary" => "This table contains heroes' average stats.",
 
     "desc_meta_graph" => "This graph represents how often heroes were picked together. Bolder line means more matches in pair, bigger node means hero was picked more often. Color of a node or an edge represents winrate, red being closer to 0%, blue being closer to 100% and grey being around 50%. Minimum match count for a pair is set to %lim%.",
-    "desc_meta_graph_add" => "Meta graph includes only hero pairs with amount of matches higher than %lim% treshhold, also including top %per% of contested heroes, with or without a pair. For more detailed hero picks overview, look over \"Picks and Bans\" or \"Draft\" tab. Team specific meta graphs can be found in teams' profiles.",
+    "desc_meta_graph_add" => "Meta graph includes only top 20% of hero pairs, also including top %per% of contested heroes, with or without a pair. For more detailed hero picks overview, look over \"Picks and Bans\" or \"Draft\" tab. Team specific meta graphs can be found in teams' profiles.",
     "desc_heroes_pairs" => "This section contains stats for most common hero pairs. Winrate difference is calculated based on average expected win rate of the heroes together. Expected matches is calculated number of matches the heroes would be picked together randomly based on their pick rates. Deviation is difference between expected number of matches and the actual number (higher number is better and means the heroes are usually picked together intentionally, negative values mean otherwise). Percentage is how much of actual matches is the deviation number. Minimum amount of matches for pairs is set to %limh%.",
     "desc_heroes_trios" => "This section contains stats for most common hero trios. Winrate difference is calculated based on average expected win rate of the heroes together. Expected matches is calculated number of matches the heroes would be picked together randomly based on their pick rates. Deviation is difference between expected number of matches and the actual number (higher number is better and means the heroes are usually picked together intentionally, negative values mean otherwise). Percentage is how much of actual matches is the deviation number. Minimum amount of matches for trios is set to %liml%.",
     "desc_heroes_lane_combos" => "This section contains stats for most common hero pairs on a same lane. Minimum amount of matches for pairs is set to %liml%.",
