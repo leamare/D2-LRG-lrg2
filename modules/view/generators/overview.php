@@ -39,7 +39,7 @@ function rg_view_generator_overview($modlink, &$context, $foreword = "") {
 
   $res = "<div class=\"content-text overview overview-head\">";
   $res .= $foreword;
-  $res .= "<div class=\"block-content\">";
+  $res .= "<div class=\"block-content separated\">";
 
   $res .= locale_string("over-matches", ["num" => $context_total_matches ] )." ";
   if(isset($report['teams']))

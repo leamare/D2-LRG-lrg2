@@ -185,11 +185,11 @@ if (sizeof($cache['reps']) === 0) {
       $report['desc'] .= " - <a target=\"_blank\" href=\"".$report['orgs']."\">".locale_string("website")."</a>";
     }
 
-    if (!empty($report['links'])) {
-      foreach($report['links'] as $type => $link) {
-        $report['desc'] .= " - <a target=\"_blank\" href=\"".$link."\">".$type."</a>";
-      }
-    }
+    // if (!empty($report['links'])) {
+    //   foreach($report['links'] as $type => $link) {
+    //     $report['desc'] .= " - <a target=\"_blank\" href=\"".$link."\">".$type."</a>";
+    //   }
+    // }
 
     $modules .= "<tr><td><a href=\"?league=".$report['tag'].(empty($linkvars) ? "" : "&".$linkvars)."\">".$report['name']."</a></td>".
       "<td>".($report['id'] == "" ? "-" : $report['id'])."</td>".

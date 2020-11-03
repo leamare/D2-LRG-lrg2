@@ -565,6 +565,10 @@ table .hero_portrait {
 .content-text.overview.overview-head .block-content:last-of-type {
     margin: 0;
 }
+.content-text.overview.overview-head .block-content.separated {
+  border-top: 1px solid var(--section-border);
+  padding-top: 10px;
+}
 .content-text.overview.overview-graphs {
     padding: 30px 15% 30px 15%;
     text-align: center;
