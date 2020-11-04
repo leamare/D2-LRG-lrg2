@@ -347,9 +347,9 @@ $endpoints['overview'] = function($mods, $vars, &$report) use (&$meta, &$endpoin
       $res['notable_matches']['last_match'] = match_card($context['last_match']['mid']);
 
     if(isset($context['records'])) {
-      if($report['settings']['overview_records_stomp'])
+      if($report['settings']['overview_records_stomp'] && !empty($context['records']['stomp']['matchid']))
         $res['notable_matches']['match_stomp'] = match_card($context['records']['stomp']['matchid']);
-      if($report['settings']['overview_records_comeback'])
+      if($report['settings']['overview_records_comeback'] && !empty($context['records']['comeback']['matchid']))
         $res['notable_matches']['match_comeback'] = match_card($context['records']['comeback']['matchid']);
       if($report['settings']['overview_records_duration']) {
         $res['notable_matches']['longest_match'] = match_card($context['records']['longest_match']['matchid']);

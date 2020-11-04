@@ -500,9 +500,9 @@ function rg_view_generator_overview($modlink, &$context, $foreword = "") {
       $res .= "<h1>".locale_string("last_match")."</h1>".match_card($context['last_match']['mid']);
 
     if(isset($context['records'])) {
-      if($report['settings']['overview_records_stomp'])
+      if($report['settings']['overview_records_stomp'] && !empty($context['records']['stomp']['matchid']))
         $res .= "<h1>".locale_string("match_stomp")."</h1>".match_card($context['records']['stomp']['matchid']);
-      if($report['settings']['overview_records_comeback'])
+      if($report['settings']['overview_records_comeback'] && !empty($context['records']['comeback']['matchid']))
         $res .= "<h1>".locale_string("match_comeback")."</h1>".match_card($context['records']['comeback']['matchid']);
       if($report['settings']['overview_records_duration']) {
         $res .= "<h1>".locale_string("longest_match")."</h1>".match_card($context['records']['longest_match']['matchid']);

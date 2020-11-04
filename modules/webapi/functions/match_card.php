@@ -8,6 +8,8 @@ function match_card($mid) {
     "match_id" => $mid
   ];
   
+  if (empty($mid)) return null;
+
   if (!isset($report['matches'])) return $match;
 
   $clusters = $meta['clusters'];
