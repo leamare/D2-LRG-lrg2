@@ -56,8 +56,15 @@ function rg_generator_meta_graph($div_id, &$context, &$context_pickban, $heroes_
         number_format($el['winrate_picked']*100, 1)." ".locale_string("winrate_picked")."'".
         ", shape:'circularImage', ".
         "image: '".hero_icon_link($elid)."', ".
-        "color:{ border:'rgba(".number_format(255-255*$el['winrate_picked'], 0).",124,".
-        number_format(255*$el['winrate_picked'], 0).")' }},";
+        "color:{ background:'rgba(".number_format(255-255*$el['winrate_picked'], 0).",124,".
+          number_format(255*$el['winrate_picked'], 0).")', ".
+        "border:'rgba(".number_format(255-255*$el['winrate_picked'], 0).",124,".
+        number_format(255*$el['winrate_picked'], 0).")',
+        highlight: { background:'rgba(".number_format(255-255*$el['winrate_picked'], 0).",124,".
+          number_format(255*$el['winrate_picked'], 0).")', ".
+        "border:'rgba(".number_format(255-255*$el['winrate_picked'], 0).",124,".
+        number_format(255*$el['winrate_picked'], 0).")' }
+        } },";
     }
   } else {
     foreach($context_pickban as $elid => $el) {
@@ -78,11 +85,15 @@ function rg_generator_meta_graph($div_id, &$context, &$context_pickban, $heroes_
   foreach($context as $combo) {
     if(!isset($combo['winrate']))
       $combo['winrate'] = $combo['wins']/$combo['matches'];
+    $color = "'rgba(".
+      round(126-255*($max_wr ? ($combo['winrate']-0.5)/$max_wr : 0)).",124,".
+      round(126+255*($max_wr ? ($combo['winrate']-0.5)/$max_wr : 0)).",".(($combo['matches']/$max_games)*0.85+0.15).")'";
+    $color_hi = "'rgba(".
+      round(176-205*($max_wr ? ($combo['winrate']-0.5)/$max_wr : 0)).",174,".
+      round(176+205*($max_wr ? ($combo['winrate']-0.5)/$max_wr : 0)).",".(($combo['matches']/$max_games)*0.85+0.15).")'";
     $nodes .= "{from: ".$combo[$id.'1'].", to: ".$combo[$id.'2'].", value:".$combo['matches'].", title:\"".
       $combo['matches']." ".locale_string("matches").", ".number_format($combo['winrate']*100, 2)."% ".locale_string("winrate").
-      (isset($combo['dev_pct']) ? ", ".number_format($combo['dev_pct']*100, 2)."% ".locale_string("deviation") : "")."\", color:{color:'rgba(".
-      round(126-255*($max_wr ? ($combo['winrate']-0.5)/$max_wr : 0)).",124,".
-      round(126+255*($max_wr ? ($combo['winrate']-0.5)/$max_wr : 0)).",".(($combo['matches']/$max_games)*0.85+0.15).")'}},";
+      (isset($combo['dev_pct']) ? ", ".number_format($combo['dev_pct']*100, 2)."% ".locale_string("deviation") : "")."\", color:{color:$color, highlight: $color_hi}},";
   }
 
   $res .= "var edges = [".$nodes."];";

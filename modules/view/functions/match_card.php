@@ -6,6 +6,8 @@ function match_card($mid) {
   global $strings;
   global $linkvars;
   global $leaguetag;
+  if (empty($mid)) return "";
+
   $output = "<div class=\"match-card\"><div class=\"match-id\">".match_link($mid)."</div>";
   $radiant = "<div class=\"match-team radiant\">";
   $dire = "<div class=\"match-team dire\">";
