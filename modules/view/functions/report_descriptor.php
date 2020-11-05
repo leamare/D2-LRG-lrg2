@@ -14,7 +14,8 @@ function get_report_descriptor(&$report, $generate_endpoints = false) {
     "ver" => $report['ana_version'],
     "days" => sizeof($report['days']),
     "anonymous_players" => empty($report['players_additional']),
-    "matches_details" => !empty($report['players_additional'])
+    "matches_details" => !empty($report['players_additional']),
+    "patches" => $report['versions'] ?? null
   ];
 
   if(isset($report['teams'])) {
@@ -45,6 +46,12 @@ function get_report_descriptor(&$report, $generate_endpoints = false) {
   $desc["sponsors"] = $report['sponsors'] ?? null;
   $desc["orgs"] = $report['orgs'] ?? null;
   $desc["links"] = $report['links'] ?? null;
+
+  if (isset($report['provider_override']))
+    $desc["provider_override"] = $report['provider_override'];
+
+  if (isset($report['localized']))
+    $desc["localized"] = $report['localized'];
   
   if (!$generate_endpoints)
     return $desc;
@@ -66,6 +73,10 @@ function get_report_descriptor(&$report, $generate_endpoints = false) {
   if (isset($report['hero_positions'])) $desc['endpoints'][] = "heroes-positions";
   if (isset($report['hero_positions_matches'])) $desc['endpoints'][] = "heroes-positions_matches";
   if (isset($report['hvh'])) $desc['endpoints'][] = "heroes-hvh";
+  if (isset($report['hvh']) && compare_ver($desc['ver'], [2, 9, 1, 0, 0]) >= 0) {
+    $desc['endpoints'][] = "heroes-counters-pairs";
+    $desc['endpoints'][] = "heroes-counters-graph";
+  }
   if (isset($report['hero_summary'])) $desc['endpoints'][] = "heroes-summary";
   if (isset($report['hero_laning'])) $desc['endpoints'][] = "heroes-laning";
 
