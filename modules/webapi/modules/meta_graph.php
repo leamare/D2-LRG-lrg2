@@ -21,7 +21,7 @@ $endpoints['meta_graph'] = function($mods, $vars, &$report) {
       ?? ceil($report['settings']['limiter_triplets'] * $context['matches_total'] / $report['random']['matches_total']);
 
   $max_wr = 0; $max_games = 0;
-  foreach($pairs as $combo) {
+  foreach($pairs as &$combo) {
     $diff = abs(($combo['winrate'] ?? $combo['wins']/$combo['matches'])-0.5);
     $max_wr = $diff > $max_wr ? $diff : $max_wr;
     $max_games = $combo['matches'] > $max_games ? $combo['matches'] : $max_games;

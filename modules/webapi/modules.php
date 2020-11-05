@@ -30,6 +30,7 @@ if (!empty($report)) {
   include_once(__DIR__ . "/modules/teams.php");
   include_once(__DIR__ . "/modules/roster.php");
   include_once(__DIR__ . "/modules/laning.php");
+  include_once(__DIR__ . "/modules/counters.php");
 
   $endpoints['__fallback'] = function() use (&$endpoints) {
     return $endpoints['info'];
