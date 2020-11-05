@@ -6,6 +6,7 @@ if (file_exists($cats_file)) {
 
 include_once("modules/view/__open_cache.php");
 include_once("modules/view/__update_cache.php");
+include_once("$root/modules/view/functions/convert_patch.php");
 
 /*
 function: checktag($reportdata, $tag),
@@ -138,11 +139,12 @@ if (sizeof($cache['reps']) === 0) {
   $modules .= "<th>".locale_string("league_name")."</th>".
     "<th>".locale_string("league_id")."</th>".
     "<th>".locale_string("league_desc")."</th>".
-    "<th>".locale_string("matches_total")."</th>".
-    "<th>".locale_string("days")."</th>".
-    "<th>".locale_string("participants")."</th>".
     "<th>".locale_string("type")."</th>".
+    "<th>".locale_string("matches_total")."</th>".
+    "<th>".locale_string("patches")."</th>".
+    "<th>".locale_string("participants")."</th>".
     "<th>".locale_string("regions")."</th>".
+    "<th>".locale_string("days")."</th>".
     "<th>".locale_string("start_date")."</th>".
     "<th>".locale_string("end_date")."</th>".
     "</tr></thead>";
@@ -191,19 +193,31 @@ if (sizeof($cache['reps']) === 0) {
     //   }
     // }
 
+    if (isset($report['localized']) && isset($report['localized'][$locale])) {
+      $report['name'] = $report['localized'][$locale]['name'];
+      $report['desc'] = $report['localized'][$locale]['desc'];
+    }
+
     $modules .= "<tr><td><a href=\"?league=".$report['tag'].(empty($linkvars) ? "" : "&".$linkvars)."\">".$report['name']."</a></td>".
       "<td>".($report['id'] == "" ? "-" : $report['id'])."</td>".
       "<td>".$report['desc']."</td>".
-      "<td>".$report['matches']."</td>".
-      "<td>".$report['days']."</td>".
-      "<td>".$participants."</td>".
       "<td>".locale_string($event_type)."</td>".
+      "<td>".$report['matches']."</td>".
+      "<td>".(
+        empty($report['patches']) ? '- (1)' : (
+          sizeof($report['patches']) == 1 ?
+            convert_patch( array_keys($report['patches'])[0] ).' (1)' : 
+            convert_patch( min(array_keys($report['patches'])) ).' - '.convert_patch( max(array_keys($report['patches'])) ).' ('.sizeof($report['patches']).')'
+        )
+      )."</td>".
+      "<td>".$participants."</td>".
       "<td>".(isset($report['regions']) ? sizeof($report['regions']) : ' - ')."</td>".
+      "<td>".$report['days']."</td>".
       "<td value=\"".$report['first_match']['date']."\" data-matchid=\"".$report['first_match']['mid']."\">".date(locale_string("date_format"), $report['first_match']['date'])."</td>".
       "<td value=\"".$report['last_match']['date']."\" data-matchid=\"".$report['last_match']['mid']."\">".date(locale_string("date_format"), $report['last_match']['date'])."</td></tr>";
   }
   if(!$index_list ) {
-    $modules .= "<tr><td></td><td></td><td>...</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>";
+    $modules .= "<tr><td></td><td></td><td>...</td><td colspan=\"8\"></td></tr>";
   }
 
   $modules .= "</table>";

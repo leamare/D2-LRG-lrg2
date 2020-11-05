@@ -44,4 +44,21 @@ if(isset($report['versions'])) {
   }
 }
 
+if (isset($report['provider_override'])) {
+  if (isset($report['provider_override']['_icons'])) {
+    $icons_provider = $report['provider_override']['_icons'];
+    unset($report['provider_override']['_icons']);
+  }
+  if (isset($report['provider_override']['_portraits'])) {
+    $portraits_provider = $report['provider_override']['_portraits'];
+    unset($report['provider_override']['_portraits']);
+  }
+  $links_providers = $report['provider_override'];
+}
+
+if (isset($report['localized']) && isset($report['localized'][$locale])) {
+  $report['league_name'] = $report['localized'][$locale]['name'];
+  $report['league_desc'] = $report['localized'][$locale]['desc'];
+}
+
 ?>
