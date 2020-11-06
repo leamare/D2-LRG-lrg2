@@ -58,6 +58,8 @@ $result["sponsors"] = $lg_settings['sponsors'] ?? null;
 $result["orgs"] = $lg_settings['orgs'] ?? null;
 $result["links"] = $lg_settings['links'] ?? null;
 
+$result["localized"] = $lg_settings['localized'] ?? null;
+
 $avg_limit = $lg_settings['ana']['avg_limit'];
 
 if (isset($lg_settings['teams']))

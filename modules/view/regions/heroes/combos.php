@@ -26,7 +26,7 @@ function rg_view_generate_regions_heroes_combos($region, $reg_report, $modstr) {
     $res['trios'] = "";
     if (check_module($parent_module."trios")) {
       $res['trios'] =  "<div class=\"content-text\">".
-                        locale_string("desc_heroes_trios", [ "liml"=>$reg_report['settings']['limiter_lower']+1 ] )."</div>";
+                        locale_string("desc_heroes_trios", [ "liml"=>ceil($reg_report['settings']['limiter_graph']*0.25)+1 ] )."</div>";
       $res['trios'] .= rg_generator_combos("region$region-hero-trios",
                                          $reg_report['hero_trios'],
                                          []
@@ -37,7 +37,7 @@ function rg_view_generate_regions_heroes_combos($region, $reg_report, $modstr) {
     $res['lane_combos'] = "";
     if (check_module($parent_module."lane_combos")) {
       $res['lane_combos'] =  "<div class=\"content-text\">".
-                              locale_string("desc_heroes_lane_combos", [ "liml"=>$reg_report['settings']['limiter_lower']+1 ] )."</div>";
+                              locale_string("desc_heroes_lane_combos", [ "liml"=>round($reg_report['settings']['limiter_graph']*0.5)+1 ] )."</div>";
       $res['lane_combos'] .=  rg_generator_combos("region$region-hero-lanecombos", $reg_report['hero_lane_combos'], []);
     }
   }
