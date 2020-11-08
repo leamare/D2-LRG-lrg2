@@ -60,7 +60,7 @@ function switchTab(evt, moduleID, className) {
 
 function select_modules_link(a) {
   if(a.value)
-    window.location=a.value;
+    setLocale(a.value);
 }
 
 $(".tagsshow .category").on("click", () => {
@@ -71,3 +71,31 @@ $(".tagsshow .category").on("click", () => {
         $(".tagslist").slideUp(300, () => $(".tagslist").toggleClass("hidden"));
     }
 });
+
+function setCookie(name, value, options = {}) {
+    options = {
+      path: '/',
+      ...options
+    };
+  
+    if (options.expires instanceof Date) {
+      options.expires = options.expires.toUTCString();
+    }
+  
+    let updatedCookie = encodeURIComponent(name) + "=" + encodeURIComponent(value);
+  
+    for (let optionKey in options) {
+      updatedCookie += "; " + optionKey;
+      let optionValue = options[optionKey];
+      if (optionValue !== true) {
+        updatedCookie += "=" + optionValue;
+      }
+    }
+  
+    document.cookie = updatedCookie;
+}
+
+function setLocale(loc) {
+    setCookie('loc', loc, { 'max-age': 86400 * 90 });
+    location.reload();
+}

@@ -1,4 +1,4 @@
-<?php  $__postfix = "?v=24049"; ?>
+<?php  $__postfix = "?v=24050"; ?>
 <!DOCTYPE html>
 <html lang="<?php echo $locale; ?>">
   <head>
@@ -88,13 +88,7 @@
             if($loc == $locale)
              echo '<option selected>'.$lname.'</option>';
             else
-             echo '<option value="'.(
-                 empty($link) ? "?loc=$loc" : (
-                     preg_match("/([\&\?])loc=(.+?)/", $link) ?
-                     str_replace("loc=$locale", "loc=$loc", $link) :
-                     $link."&loc=$loc"
-                   )
-               ).'">'.$lname.'</option>';
+             echo '<option value="'.$loc.'">'.$lname.'</option>';
           }
           echo '</select></label>';
 

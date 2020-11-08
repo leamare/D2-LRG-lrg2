@@ -3,7 +3,7 @@
 include_once("modules/commons/locale_strings.php");
 include_once("modules/commons/get_language_code_iso6391.php");
 
-$locale = GetLanguageCodeISO6391();
+$locale = $_COOKIE['loc'] ?? GetLanguageCodeISO6391();
 
 $linkvars = [];
 
