@@ -29,6 +29,9 @@ if (isset($report['hero_pairs']) || isset($report['hero_triplets']) || isset($re
 if (isset($report['hvh']))
   include("heroes/hero_vs_hero.php");
 
+if (isset($report['hvh']))
+  include("heroes/counters.php");
+
 if (isset($report['hero_summary']))
   include("heroes/summary.php");
 
@@ -81,6 +84,11 @@ function rg_view_generate_heroes() {
   if (isset($report['hvh'])) {
     if (check_module($parent."hvh")) {
       $res['hvh'] = rg_view_generate_heroes_hvh();
+    }
+  }
+  if (isset($report['hvh'])) {
+    if (check_module($parent."counters")) {
+      $res['counters'] = rg_view_generate_heroes_counters();
     }
   }
   if (isset($report['hero_summary'])) {
