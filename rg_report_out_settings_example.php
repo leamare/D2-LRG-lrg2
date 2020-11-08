@@ -3,7 +3,8 @@
 
 $lrg_use_get = true;
 $lrg_get_depth = 6;
-$locale = "en";
+$def_locale = "en";
+$locale = $locale ?? $def_locale;
 $locales = [
   "en" => "English",
   "ru" => "Русский"
@@ -34,16 +35,42 @@ $title_links = array(
  //)
 );
 
-$main_path = "/";
+$main_path = "/rg_report_web.php";
 
 $default_style = "";
 $noleague_style = "";
 
-$instance_title = "LRG";
-$instance_name = "League Report Generator Instance";
-$instance_desc = "Header description";
-$instance_title_postfix = "Title postfix";
-$instance_long_desc = "Long description";
+$postfixes = [
+  'en' => "Title postfix",
+  'ru' => "Постфикс заголовка"
+];
+
+$long_descriptions = [
+  'en' => "Long description",
+  'ru' => "Длинное описание заголовка"
+];
+
+$instance_titles = [
+  'en' => "LRG",
+  //'ru' => "Длинное описание заголовка"
+];
+
+$instance_names = [
+  'en' => "League Report Generator Instance",
+  'ru' => "Инстанс генератора отчётов"
+];
+
+$instance_descs = [
+  'en' => "Header description",
+  'ru' => "Описание в шапке"
+];
+
+$instance_title = $instance_titles[ $locale ] ?? $instance_titles[ $def_locale ];
+$instance_name = $instance_names[ $locale ] ?? $instance_names[ $def_locale ];
+$instance_desc = $instance_descs[ $locale ] ?? $instance_descs[ $def_locale ];
+
+$instance_title_postfix = $postfixes[ $locale ] ?? $postfixes[ $def_locale ];
+$instance_long_desc = $long_descriptions[ $locale ] ?? $long_descriptions[ $def_locale ];
 $title_separator = "-";
 
 # main page settings
@@ -68,4 +95,3 @@ $links_providers = [
 $portraits_provider = "https://courier.spectral.gg/images/dota/portraits/%HERO%.png";
 $icons_provider = "https://courier.spectral.gg/images/dota/icons/%HERO%.png";
 
-?>

@@ -25,6 +25,7 @@ gi_*
 .htaccess
 test.sh
 test2.sh
+rg_report_out_settings.php
 
 # Custom Styles
 res/custom_styles/
