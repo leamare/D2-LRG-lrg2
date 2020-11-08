@@ -1,10 +1,27 @@
 <?php
-include_once("rg_report_out_settings.php");
-include_once("modules/commons/versions.php");
-$lg_version = array( 2, 10, 0, 0, 0 );
 
 include_once("modules/commons/locale_strings.php");
 include_once("modules/commons/get_language_code_iso6391.php");
+
+$locale = GetLanguageCodeISO6391();
+
+$linkvars = [];
+
+if(isset($_REQUEST['loc']) && !empty($_REQUEST['loc'])) {
+  $locale = $_REQUEST['loc'];
+  $linkvars[] = array("loc", $_REQUEST['loc']);
+}
+
+require_once('locales/en.php');
+if(strtolower($locale) != "en" && file_exists('locales/'.$locale.'.php'))
+  require_once('locales/'.$locale.'.php');
+else $locale = "en";
+
+include_once("rg_report_out_settings.php");
+
+include_once("modules/commons/versions.php");
+$lg_version = array( 2, 11, 0, 0, 0 );
+
 include_once("modules/commons/merge_mods.php");
 include_once("modules/commons/metadata.php");
 include_once("modules/commons/wrap_data.php");
@@ -36,8 +53,6 @@ $root = dirname(__FILE__);
 $linkvars = [];
 
 if ($lrg_use_get) {
-  $locale = GetLanguageCodeISO6391();
-
   if(isset($_GET['mod'])) $mod = $_GET['mod'];
   else $mod = "";
 
@@ -60,11 +75,6 @@ if ($lrg_use_get) {
 
   if(isset($_GET['latest'])) $latest = true;
 }
-
-require_once('locales/en.php');
-if(strtolower($locale) != "en" && file_exists('locales/'.$locale.'.php'))
-  require_once('locales/'.$locale.'.php');
-else $locale = "en";
 
 $use_visjs = false;
 $use_graphjs = false;
@@ -90,10 +100,10 @@ if (!empty($leaguetag)) {
   }
 }
 
+$meta = new lrg_metadata;
+
 if (isset($report)) {
   $output = "";
-
-  $meta = new lrg_metadata;
 
   include_once("modules/view/__post_load.php");
 

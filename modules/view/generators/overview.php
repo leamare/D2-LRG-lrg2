@@ -2,6 +2,7 @@
 include "overview_sections.php";
 include_once("$root/modules/view/generators/teams_summary.php");
 include_once("$root/modules/view/functions/convert_time.php");
+include_once("$root/modules/view/functions/convert_patch.php");
 
 function rg_view_generator_overview($modlink, &$context, $foreword = "") {
   if(!sizeof($context)) return "";
@@ -53,11 +54,7 @@ function rg_view_generator_overview($modlink, &$context, $foreword = "") {
   if($report['settings']['overview_versions'] && isset($context['versions'])) {
     $mode = reset($context['versions']);
 
-    $ver = $meta['versions'][ (int) (key($context['versions'])/100) ].(
-        key($context['versions']) % 100 ?
-        chr( ord('a') + key($context['versions']) % 100 ) :
-        ""
-      );
+    $ver = convert_patch( key($context['versions']) );
 
     if ($mode/$context_total_matches > 0.99)
       $res .= locale_string("over-one-version", ["ver"=>$ver])." ";

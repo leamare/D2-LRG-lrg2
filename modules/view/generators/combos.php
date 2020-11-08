@@ -41,13 +41,7 @@ function rg_generator_combos($table_id, &$context, $context_matches, $heroes_fla
   unset($combo);
 
   $res = "<table id=\"$table_id\" class=\"list wide sortable\"><thead><tr class=\"thead\">".
-         ($heroes_flag ? "<th colspan=\"4\">".locale_string("heroes")."</th>" : "<th colspan=\"2\">".locale_string("players")."</th>").
-         (
-           $trios ?
-           (($heroes_flag) ? "<th width=\"1%\"></th>" : "").
-           "<th data-sortInitialOrder=\"asc\">".locale_string($heroes_flag ? "hero" : "player")." 3</th>" :
-           ""
-           ).
+         ($heroes_flag ? "<th colspan=\"".($trios ? 6 : 4)."\">".locale_string("heroes")."</th>" : "<th colspan=\"".($trios ? 3 : 2)."\">".locale_string("players")."</th>").
          "<th>".locale_string("matches")."</th>".
          "<th>".locale_string("winrate")."</th>".
          ($wr_diff ? "<th>".locale_string("winrate_diff")."</th>" : "").
