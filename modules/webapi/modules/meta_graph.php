@@ -7,6 +7,39 @@ $endpoints['meta_graph'] = function($mods, $vars, &$report) {
     $context =& $report['regions_data'][ $vars['region'] ];
   } else {
     $context =& $report;
+
+    if (empty($report['hero_combos_graph']) && ( isset($report['hero_pairs']) || isset($report['hph']) ) ) {
+      if (!empty($report['hph']) && is_wrapped($report['hph'])) {
+        $report['hph'] = unwrap_data($report['hph']);
+      }
+  
+      if (empty($report['hero_pairs'])) {
+        $context['hero_pairs'] = rg_generate_hero_pairs($report['hph'], $report['settings']['limiter_combograph']);
+      }
+  
+      $context['hero_combos_graph'] = [];
+      $dev = [];
+  
+      foreach ($context['hero_pairs'] as &$pair) {
+        $pair['dev_pct'] = ($pair['matches'] - $pair['expectation'])/$pair['matches'];
+        $dev[] = $pair['dev_pct'];
+      }
+      sort($dev);
+      $lim = $dev[ round( count($dev)*0.6 ) ];
+      
+      foreach ($context['hero_pairs'] as $pair) {
+        if ($pair['dev_pct'] < $lim) continue;
+  
+        $context['hero_combos_graph'][] = [
+          'heroid1' => $pair['heroid1'],
+          'heroid2' => $pair['heroid2'],
+          'matches' => $pair['matches'],
+          'wins' => $pair['wins'] ?? round($pair['matches']*$pair['winrate']),
+          'winrate' => $pair['winrate'],
+          'dev_pct' => $pair['dev_pct'],
+        ];
+      }
+    }
   }
 
   $pairs = $context['hero_combos_graph'] 

@@ -48,6 +48,7 @@ function rg_generator_meta_graph($div_id, &$context, &$context_pickban, $heroes_
       if($counter++ >= $endp && !has_pair($elid, $context)) {
           continue;
       }
+      
       $nodes .= "{id: $elid, value: ".$el['matches_total'].
         ", label: '".addslashes(hero_name($elid))."'".
         ", title: '".addslashes(hero_name($elid)).", ".

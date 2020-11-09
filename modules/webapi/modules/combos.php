@@ -1,5 +1,27 @@
 <?php 
 
+function rg_generate_hero_pairs(&$context, $limiter) {
+  $r = [];
+
+  foreach ($context as $hid1 => $heroes) {
+    foreach ($heroes as $hid2 => $line) {
+      if (empty($line) || $line === true)
+        continue;
+      if ($line['matches'] <= $limiter)
+        continue;
+      
+      $line['heroid1'] = $hid1;
+      $line['heroid2'] = $hid2;
+      $line['expectation'] = $line['exp'];
+      unset($line['exp']);
+
+      $r[] = $line;
+    }
+  }
+
+  return $r;
+}
+
 $endpoints['combos'] = function($mods, $vars, &$report) {
   $res = [];
 
@@ -9,6 +31,14 @@ $endpoints['combos'] = function($mods, $vars, &$report) {
     $context =& $report['regions_data'][ $vars['region'] ];
   } else {
     $context =& $report;
+
+    if (!empty($report['hph']) && is_wrapped($report['hph'])) {
+      $report['hph'] = unwrap_data($report['hph']);
+    }
+
+    if (in_array("heroes", $mods) && empty($report['hero_pairs']) && isset($report['hph'])) {
+      $context['hero_pairs'] = rg_generate_hero_pairs($report['hph'], $report['settings']['limiter_combograph']);
+    }
   }
 
   if (in_array("heroes", $mods)) {
