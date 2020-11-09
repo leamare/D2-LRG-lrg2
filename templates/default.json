@@ -32,6 +32,7 @@
 
     "hero_pairs" : true,
     "hero_pairs_matches": true,
+    "full_hero_pairs" : false,
 
     "hero_triplets" : true,
     "hero_triplets_matches" : true,
