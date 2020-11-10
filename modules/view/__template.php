@@ -1,4 +1,4 @@
-<?php  $__postfix = "?v=24050"; ?>
+<?php  $__postfix = "?v=24051"; ?>
 <!DOCTYPE html>
 <html lang="<?php echo $locale; ?>">
   <head>
@@ -82,7 +82,7 @@
       <div class="locale-changer">
         <?php
         $link = substr($_SERVER['REQUEST_URI'], strrpos($_SERVER['REQUEST_URI'], "/")+1);
-          echo '<label><select onchange="select_modules_link(this);" class="select-locale">';
+          echo '<label><select onchange="setLocale(this.value);" class="select-locale">';
           foreach($locales as $loc => $lname) {
             $loc = str_replace(".json", "", $loc);
             if($loc == $locale)
