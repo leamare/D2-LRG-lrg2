@@ -8,7 +8,7 @@ function rg_generator_pvp_profile($table_id, &$pvp_context, &$context_wrs, $srci
   $i = 0;
   $isrank = false;
 
-  if(!sizeof($pvp_context)) return "";
+  if(empty($pvp_context)) return "";
 
   if (isset( array_values($pvp_context)[0]['diff'] ))
     $nodiff = false;

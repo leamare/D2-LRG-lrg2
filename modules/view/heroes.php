@@ -20,11 +20,14 @@ if (isset($report['hero_laning']))
 if (isset($report['hero_sides']))
   include("heroes/sides.php");
 
-if (isset($report['hero_combos_graph']) && $report['settings']['heroes_combo_graph'])
+if (( isset($report['hero_combos_graph']) || isset($report['hph']) ) && $report['settings']['heroes_combo_graph'])
   include("heroes/meta_graph.php");
 
-if (isset($report['hero_pairs']) || isset($report['hero_triplets']) || isset($report['hero_lane_combos']))
+if (isset($report['hero_pairs']) || isset($report['hero_triplets']) || isset($report['hero_lane_combos']) || isset($report['hph']))
   include("heroes/combos.php");
+
+if (isset($report['hph']))
+  include("heroes/hero_plus_hero.php");
 
 if (isset($report['hvh']))
   include("heroes/hero_vs_hero.php");
@@ -41,14 +44,14 @@ function rg_view_generate_heroes() {
   if($mod == "heroes") $unset_module = true;
   $parent = "heroes-";
 
-  if (isset($report['averages_heroes']) ) {
-    if (check_module($parent."haverages")) { // FUNCTION SET
-      $res['haverages'] = rg_view_generate_heroes_haverages();
-    }
-  }
   if (isset($report['pickban'])) {
     if (check_module($parent."pickban")) {
       $res['pickban'] = rg_view_generate_heroes_pickban();
+    }
+  }
+  if (isset($report['averages_heroes']) ) {
+    if (check_module($parent."haverages")) { // FUNCTION SET
+      $res['haverages'] = rg_view_generate_heroes_haverages();
     }
   }
   if (isset($report['draft'])) {
@@ -71,7 +74,7 @@ function rg_view_generate_heroes() {
       $res['sides'] = rg_view_generate_heroes_sides();
     }
   }
-  if (isset($report['hero_combos_graph']) && $report['settings']['heroes_combo_graph']) {
+  if (( isset($report['hero_combos_graph']) || isset($report['hph']) ) && $report['settings']['heroes_combo_graph']) {
     if (check_module($parent."meta_graph")) {
       $res['meta_graph'] = rg_view_generate_heroes_meta_graph();
     }
@@ -89,6 +92,11 @@ function rg_view_generate_heroes() {
   if (isset($report['hvh'])) {
     if (check_module($parent."counters")) {
       $res['counters'] = rg_view_generate_heroes_counters();
+    }
+  }
+  if (isset($report['hph'])) {
+    if (check_module($parent."hph")) {
+      $res['hph'] = rg_view_generate_heroes_hph();
     }
   }
   if (isset($report['hero_summary'])) {
