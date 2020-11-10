@@ -60,8 +60,10 @@ function switchTab(evt, moduleID, className) {
 
 function select_modules_link(a) {
   if(a.value)
-    setLocale(a.value);
+    window.location=a.value;
 }
+
+
 
 $(".tagsshow .category").on("click", () => {
     if ($(".tagslist").hasClass("hidden")) {
