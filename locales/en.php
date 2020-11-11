@@ -99,6 +99,7 @@
     "graph" => "Graph",
     "pvp" => "Player vs Player",
     "hvh" => "Hero vs Hero",
+    "hph" => "Full Hero Pairs",
     "tvt" => "Team vs Team",
     "party_graph" => "Parties Graph",
     "position" => "Position",
@@ -324,6 +325,8 @@
     "desc_inaccurate_draft" => "Draft stages data may be incorrect due to replay analysis issues.",
     "desc_heroes_counters_pairs" => "This page shows pairs of heroes on opposite teams that were met the most. Higher deviation means that one hero is more likely to be picked specifically counter the other. Winrates and winrate differences are shown relative to the first (left) hero of the pair. <br />Deviation is difference between expected number of matches and the actual number (higher number is better and means the heroes are usually picked together intentionally, negative values mean otherwise). Percentage is how much of actual matches is the deviation number. Minimum match count for a pair is set to %lim%.",
     "desc_heroes_counters_pairs_graph" => "This page shows counter pick connections between heroes, based on the most popular counter-pairs. See pairs section for more detailed data about winrates and deviations. Minimum match count for a pair is set to %lim%, minimum deviation is 0.",
+    "desc_heroes_hph" => "Choose a hero to see his performance with other heroes",
+    "pairs_desc" => "Winrate difference is calculated relative to selected hero's win rate. Expected matches is calculated number of matches the heroes would be picked together randomly based on their pick rates. Deviation is difference between expected number of matches and the actual number (higher number is better and means the heroes are usually picked together intentionally, negative values mean otherwise). Percentage is how much of actual matches is the deviation number.",
 
     "limiter_h" => "Higher limiter",
     "limiter_l" => "Lower limiter",
