@@ -57,8 +57,8 @@ if (isset($report['provider_override'])) {
 }
 
 if (isset($report['localized']) && isset($report['localized'][$locale])) {
-  $report['league_name'] = $report['localized'][$locale]['name'];
-  $report['league_desc'] = $report['localized'][$locale]['desc'];
+  $report['league_name'] = $report['localized'][$locale]['name'] ?? $report['league_name'];
+  $report['league_desc'] = $report['localized'][$locale]['desc'] ?? $report['league_desc'];
 }
 
 ?>

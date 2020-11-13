@@ -194,8 +194,8 @@ if (sizeof($cache['reps']) === 0) {
     // }
 
     if (isset($report['localized']) && isset($report['localized'][$locale])) {
-      $report['name'] = $report['localized'][$locale]['name'];
-      $report['desc'] = $report['localized'][$locale]['desc'];
+      $report['name'] = $report['localized'][$locale]['name'] ?? $report['name'];
+      $report['desc'] = $report['localized'][$locale]['desc'] ?? $report['desc'];
     }
 
     $modules .= "<tr><td><a href=\"?league=".$report['tag'].(empty($linkvars) ? "" : "&".$linkvars)."\">".$report['name']."</a></td>".

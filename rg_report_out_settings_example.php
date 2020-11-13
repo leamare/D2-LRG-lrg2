@@ -94,4 +94,4 @@ $links_providers = [
 
 $portraits_provider = "https://courier.spectral.gg/images/dota/portraits/%HERO%.png";
 $icons_provider = "https://courier.spectral.gg/images/dota/icons/%HERO%.png";
-
+$link_provider_icon = "https://courier.spectral.gg/images/other/link_providers/%LPN%.png?size=smaller";

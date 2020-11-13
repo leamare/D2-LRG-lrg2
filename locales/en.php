@@ -64,6 +64,7 @@
     "ratio" => "Ratio",
     "none" => "None",
     "vs" => "vs",
+    "days" => "Days",
 
     "radiant" => "Radiant",
     "radiant_wr" => "Radiant winrate",
