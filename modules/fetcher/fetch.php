@@ -528,15 +528,15 @@ function fetch($match) {
     }
   } else {
     if (!empty($t_team_matches))
-      foreach ($t_team_matches as &$tm) {
+      foreach ($t_team_matches as $i => $tm) {
         $tag = $tm['is_radiant'] ? 'radiant_team' : 'dire_team';
         
         if (!empty($match_rules['team']) && isset($match_rules['team'][ $tm['teamid'] ])) {
-          $tm['teamid'] = (int)$match_rules['team'][ $tm['teamid'] ];
+          $t_team_matches[$i]['teamid'] = (int)$match_rules['team'][ $tm['teamid'] ];
         }
       
         if (!empty($match_rules['side']) && (isset($match_rules['side'][ $tag ]) || isset($match_rules['side'][ $tm['is_radiant'] ? 'radiant' : 'dire' ]) || isset($match_rules['side'][ $tm['is_radiant'] ])))
-          $tm['teamid'] = (int) ($match_rules['side'][ $tag ] ?? $match_rules['side'][ $tm['is_radiant'] ? 'radiant' : 'dire' ] ?? $match_rules['side'][ $tm['is_radiant'] ] ?? $tm['teamid']);
+          $t_team_matches[$i]['teamid'] = (int) ($match_rules['side'][ $tag ] ?? $match_rules['side'][ $tm['is_radiant'] ? 'radiant' : 'dire' ] ?? $match_rules['side'][ $tm['is_radiant'] ] ?? $tm['teamid']);
 
         if (!isset($t_teams[ $tm['teamid'] ])) {
           $json = file_get_contents('https://api.steampowered.com/IDOTA2Match_570/GetTeamInfoByTeamID/v001/?key='.$steamapikey.'&teams_requested=1&start_at_team_id='.$tm['teamid']);
@@ -615,11 +615,9 @@ function fetch($match) {
         }
       }
     } 
-
-    
   }
 
-  
+  var_dump($t_team_matches);
   
   if (empty($t_matchlines)) {
     $i = sizeof($t_matchlines);
@@ -1029,7 +1027,7 @@ function fetch($match) {
 
   if ($conn->multi_query($sql) === TRUE);
   else {
-    echo "ERROR (".$conn->error."), reverting match.\n$sql\n";
+    echo "ERROR matches (".$conn->error."), reverting match.\n$sql\n";
     if ($conn->error === "MySQL server has gone away") {
       sleep(30);
       conn_restart();
@@ -1059,7 +1057,7 @@ function fetch($match) {
 
   if ($conn->multi_query($sql) === TRUE);
   else {
-    echo "ERROR (".$conn->error."), reverting match.\n$sql\n";
+    echo "ERROR matchlines (".$conn->error."), reverting match.\n$sql\n";
     if ($conn->error === "MySQL server has gone away") {
       sleep(30);
       conn_restart();
@@ -1091,7 +1089,7 @@ function fetch($match) {
 
     if ($conn->multi_query($sql) === TRUE);
     else {
-      echo "ERROR (".$conn->error."), reverting match.\n$sql\n";
+      echo "ERROR adv_matchlines (".$conn->error."), reverting match.\n$sql\n";
       if ($conn->error === "MySQL server has gone away") {
         sleep(30);
         conn_restart();
@@ -1119,7 +1117,7 @@ function fetch($match) {
 
       if ($conn->multi_query($sql) === TRUE);
       else {
-        echo "ERROR (".$conn->error."), reverting match.\n";
+        echo "ERROR draft (".$conn->error."), reverting match.\n";
         if ($conn->error === "MySQL server has gone away") {
           sleep(30);
           conn_restart();
@@ -1150,7 +1148,7 @@ function fetch($match) {
 
     if ($conn->multi_query($sql) === TRUE);
     else {
-      echo "ERROR (".$conn->error."), reverting match.\n";
+      echo "ERROR teams_matches (".$conn->error."), reverting match.\n";
       if ($conn->error === "MySQL server has gone away") {
         sleep(30);
         conn_restart();
