@@ -616,8 +616,6 @@ function fetch($match) {
       }
     } 
   }
-
-  var_dump($t_team_matches);
   
   if (empty($t_matchlines)) {
     $i = sizeof($t_matchlines);
