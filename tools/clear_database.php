@@ -48,6 +48,8 @@ if($lg_settings['main']['teams']) {
 $sql = "TRUNCATE TABLE `adv_matchlines`; TRUNCATE TABLE `draft`; TRUNCATE TABLE `matchlines`;";
 if($lg_settings['main']['teams'])
   $sql .= "TRUNCATE TABLE `teams_matches`; TRUNCATE TABLE `teams_rosters`;";
+if($lg_settings['main']['items'])
+  $sql .= "TRUNCATE TABLE `items`;";
 
 
 if ($conn->multi_query($sql) === TRUE) echo "[S] Cleared tables.\n";

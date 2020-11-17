@@ -81,6 +81,11 @@ for ($i = 0; $i < $sz; $i++) {
     $match['teams_rosters'] = instaquery($conn, $q);
   }
 
+  if($lg_settings['main']['items']) {
+    $q = "select * from items where matchid = $m;";
+    $match['items'] = instaquery($conn, $q);
+  }
+
   $out = json_encode(utf8ize($match));
   if (empty($out)) {
     echo "[E] ($i/$sz) Empty response for match $m\n";
