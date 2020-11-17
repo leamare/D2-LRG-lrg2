@@ -200,6 +200,7 @@ if ($conn->select_db($lrg_db_prefix."_".$lg_settings['league_tag'])) {
     KEY `advmatchlines_playerid_heroid_IDX` (`playerid`,`heroid`) USING BTREE
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
     if ($conn->connect_error) die("[F] Can't create table `adv_matchlines`: ".$conn->connect_error."\n");
+
   echo "OK\n[ ] Creating table `draft`...";
 
   // - draft: matchid, heroid; matchid, playerid U, matchid, stage, matchid, is_pick, matchid, is_radiant
@@ -218,6 +219,26 @@ if ($conn->select_db($lrg_db_prefix."_".$lg_settings['league_tag'])) {
     KEY `draft_heroid_stage_IDX` (`hero_id`,`stage`) USING BTREE
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
     if ($conn->connect_error) die("[F] Can't create table `draft`: ".$conn->connect_error."\n");
+
+
+    echo "OK\n[ ] Creating table `items`...";
+
+  // - draft: matchid, heroid; matchid, playerid U, matchid, stage, matchid, is_pick, matchid, is_radiant
+  $conn->query("CREATE TABLE `items` (
+    `matchid` bigint(20) UNSIGNED NOT NULL,
+    `hero_id` smallint(5) UNSIGNED NOT NULL,
+    `playerid` bigint(20) NOT NULL,
+    `item_id` smallint(5) UNSIGNED NOT NULL,
+    `category_id` smallint(5) UNSIGNED NOT NULL,
+    `time` int(11) NOT NULL,
+    KEY `items_matchid_heroid_IDX` (`matchid`,`hero_id`) USING BTREE,
+    KEY `items_matchid_player_IDX` (`matchid`,`playerid`) USING BTREE,
+    KEY `items_matchid_item_IDX` (`matchid`,`item_id`) USING BTREE,
+    KEY `items_matchid_category_IDX` (`matchid`,`category_id`) USING BTREE,
+    KEY `items_matchid_time_IDX` (`matchid`,`time`) USING BTREE
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+    if ($conn->connect_error) die("[F] Can't create table `items`: ".$conn->connect_error."\n");
+
   echo "OK\n[ ] Creating table `players`...";
 
   $conn->query("CREATE TABLE `players` (
@@ -244,6 +265,8 @@ if ($conn->select_db($lrg_db_prefix."_".$lg_settings['league_tag'])) {
     if ($conn->connect_error) die("[F] Can't link `matchlines` to `matches`: ".$conn->connect_error."\n");
   $conn->query("ALTER TABLE `draft` ADD CONSTRAINT `draft` FOREIGN KEY (`matchid`) REFERENCES `matches` (`matchid`);");
     if ($conn->connect_error) die("[F] Can't link `draft` to `matches`: ".$conn->connect_error."\n");
+  $conn->query("ALTER TABLE `items` ADD CONSTRAINT `items` FOREIGN KEY (`matchid`) REFERENCES `matches` (`matchid`);");
+    if ($conn->connect_error) die("[F] Can't link `items` to `matches`: ".$conn->connect_error."\n");
   $conn->query("ALTER TABLE `adv_matchlines` ADD CONSTRAINT `adv_matchlines_pl` FOREIGN KEY (`playerID`) REFERENCES `players` (`playerID`);");
     if ($conn->connect_error) die("[F] Can't link `adv_matchlines` to `players`: ".$conn->connect_error."\n");
   $conn->query("ALTER TABLE `matchlines` ADD CONSTRAINT `matchlines_pl` FOREIGN KEY (`playerID`) REFERENCES `players` (`playerID`);");
