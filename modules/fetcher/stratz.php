@@ -83,6 +83,10 @@ function get_stratz_response($match) {
         killEvents {
           time
         }
+        itemPurchases {
+          time
+          itemId
+        }
         farmDistributionReport {
           creepType {
             count
@@ -202,6 +206,7 @@ Q
 
   $r['matchlines'] = [];
   $r['adv_matchlines'] = [];
+  $r['items'] = [];
   $r['players'] = [];
 
   foreach ($stratz['data']['match']['players'] as $i => $pl) {
@@ -374,6 +379,39 @@ Q
       $aml['damage_taken'] = array_sum($pl['stats']['heroDamageReport']['receivedTotal']);
 
       $r['adv_matchlines'][] = $aml;
+
+      $meta['items'];
+      $meta['item_categories'];
+      foreach ($pl['stats']['itemPurchases'] as $e) {
+        if ($r['matches']['duration'] - $e['time'] < 60) continue;
+
+        $it = [
+          'matchid' => $stratz['data']['match']['id'],
+          'playerid' => $pl['steamAccountId'],
+          'hero_id' => $pl['heroId']
+        ];
+
+        $item_id = $e['itemId'];
+        if (!$item_id) continue;
+
+        foreach($meta['item_categories'] as $category_name => $items) {
+          if (in_array($item_id, $items)) {
+            $category = $category_name;
+            break;
+          }
+        }
+
+        // should I disable consumables?
+        if (in_array($category, ['support', 'consumables', 'parts', 'recipes', 'event']) ) { //&& $e['time'] > 0) {
+          continue;
+        }
+
+        $it['item_id'] = $item_id;
+        $it['category_id'] = array_search($category, array_keys($meta['item_categories']));
+        $it['time'] = $e['time'];
+
+        $r['items'][] = $it;
+      }
     }
   }
 
