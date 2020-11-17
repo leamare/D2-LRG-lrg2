@@ -22,6 +22,7 @@ function fetch($match) {
   $t_matchlines = [];
   $t_adv_matchlines = [];
   $t_draft = [];
+  $t_items = [];
   $t_new_players = [];
   $bad_replay = false;
 
@@ -96,6 +97,7 @@ function fetch($match) {
     $t_matchlines = $matchdata['matchlines'];
     $t_draft = $matchdata['draft'];
     $t_adv_matchlines = $matchdata['adv_matchlines'];
+    $t_items = $matchdata['items'] ?? [];
     foreach($matchdata['players'] as $p) {
       if(!isset($t_players[$p['playerID']])) {
         $t_new_players[$p['playerID']] = $p['nickname'];
@@ -191,6 +193,7 @@ function fetch($match) {
         $t_matchlines = $matchdata['matchlines'];
         $t_draft = $matchdata['draft'];
         $t_adv_matchlines = $matchdata['adv_matchlines'];
+        $t_items = $matchdata['items'];
         foreach($matchdata['players'] as $p) {
           if(!isset($t_players[$p['playerID']])) {
             $t_new_players[$p['playerID']] = $p['nickname'];
@@ -924,6 +927,61 @@ function fetch($match) {
     }
   }
 
+  if (empty($t_items) && $lg_settings['main']['items']) {
+    $t_items = [];
+    $meta['items'];
+    $meta['item_categories'];
+
+    if (!$bad_replay) {
+      $i = sizeof($t_matchlines);
+      for ($j=0, $sz=10; $j<$sz; $j++) {
+        if (!isset($matchdata['players'][$j]['hero_id'])) {
+          $sz++;
+          continue;
+        }
+
+        foreach ($matchdata['players'][$j]['purchase_log'] as $e) {
+          if ($matchdata['duration'] - $e['time'] < 60) continue;
+
+          $r = [
+            'matchid' => $match,
+            'playerid' => $matchdata['players'][$j]['account_id'],
+            'hero_id' => $matchdata['players'][$j]['hero_id']
+          ];
+
+          $item_id = 0;
+          foreach ($meta['items'] as $id => $item_tag) {
+            if ($item_tag == $e['key']) {
+              $item_id = $id;
+              break;
+            }
+          }
+          if (!$item_id) continue;
+
+          foreach($meta['item_categories'] as $category_name => $items) {
+            if (in_array($item_id, $items)) {
+              $category = $category_name;
+              break;
+            }
+          }
+
+          // should I disable consumables?
+          if (in_array($category, ['support', 'consumables', 'parts', 'recipes', 'event']) ) { //&& $e['time'] > 0) {
+            continue;
+          }
+
+          $r['item_id'] = $item_id;
+          $r['category_id'] = array_search($category, array_keys($meta['item_categories']));
+          $r['time'] = $e['time'];
+
+          $t_items[] = $r;
+        }
+
+        $i++;
+      }
+    }
+  }
+
   $n = array_search($match, $scheduled);
   if ($n !== FALSE) {
     unset($scheduled[$n]);
@@ -967,6 +1025,7 @@ function fetch($match) {
       'matchlines' => $t_matchlines,
       'draft' => $t_draft,
       'adv_matchlines' => $t_adv_matchlines,
+      'items' => $t_items ?? []
     ];
 
     $matchdata['players'] = [];
@@ -1127,6 +1186,37 @@ function fetch($match) {
         } while($conn->next_result());
         return null;
       }
+  }
+
+  if(!empty($t_items)) {
+    $sql = " INSERT INTO items (matchid, hero_id, playerid, item_id, category_id, time) VALUES ";
+    $len = sizeof($t_items);
+    for($i = 0; $i < $len; $i++) {
+        $sql .= "\n\t(".$t_items[$i]['matchid'].",".
+            $t_items[$i]['hero_id'].",".
+            $t_items[$i]['playerid'].",".
+            $t_items[$i]['item_id'].",".
+            $t_items[$i]['category_id'].",".
+            $t_items[$i]['time']."),";
+    }
+    $sql[strlen($sql)-1] = ";";
+
+    $err_query = "DELETE from items where matchid = ".$t_match['matchid'].";".$err_query;
+
+    if ($conn->multi_query($sql) === TRUE);
+    else {
+      echo "ERROR items (".$conn->error."), reverting match.\n";
+      if ($conn->error === "MySQL server has gone away") {
+        sleep(30);
+        conn_restart();
+        $matches[] = $match;
+      }
+      $conn->multi_query($err_query);
+      do {
+        $conn->store_result();
+      } while($conn->next_result());
+      return null;
+    }
   }
 
   if ($lg_settings['main']['teams'] && sizeof($t_team_matches)) {

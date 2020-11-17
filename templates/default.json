@@ -6,7 +6,8 @@
   "match_limit_before": null,
   "main": {
     "teams": true,
-    "fantasy": false
+    "fantasy": false,
+    "items": true
   },
   "ana": {
     "records": true,
@@ -119,7 +120,9 @@
         "summary": true,
         "cards": true
       }
-    }
+    },
+
+    "items": true
   },
   "web": {
     "custom_style" : "",

@@ -179,8 +179,19 @@ if (!$lg_settings['main']['teams']) {
   $query = $conn->query($sql);
   if (isset($query->num_rows) && $query->num_rows) {
     $lg_settings['main']['teams'] = true;
+    echo "[N] Set &settings.teams to true.\n";
   }
-  echo "[N] Set &settings.teams to true.\n";
+}
+
+// items support detection
+$sql = "SELECT COUNT(*) z
+FROM information_schema.tables WHERE table_schema = '$lrg_sql_db' 
+AND table_name = 'items' HAVING z > 0;";
+
+$query = $conn->query($sql);
+if (!isset($query->num_rows) || !$query->num_rows) {
+  $lg_settings['main']['items'] = false;
+  echo "[N] Set &settings.items to false.\n";
 }
 
 $json = "";
