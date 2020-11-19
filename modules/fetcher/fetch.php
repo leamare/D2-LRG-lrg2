@@ -22,7 +22,7 @@ function fetch($match) {
   $t_matchlines = [];
   $t_adv_matchlines = [];
   $t_draft = [];
-  $t_items = [];
+  $t_items = null;
   $t_new_players = [];
   $bad_replay = false;
 
@@ -927,7 +927,7 @@ function fetch($match) {
     }
   }
 
-  if (empty($t_items) && $lg_settings['main']['items']) {
+  if (!isset($t_items) && $lg_settings['main']['items']) {
     $t_items = [];
     $meta['items'];
     $meta['item_categories'];
