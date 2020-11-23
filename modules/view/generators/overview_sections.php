@@ -15,10 +15,10 @@ function rg_generator_overview_chart($name, $labels, $context) {
                         "var modes_chart = new Chart(modes_chart_el, {
                           type: 'pie',
                           data: {
-                            labels: [ '".implode($labels,"','")."' ],
-                            datasets: [{data: [ ".implode($context,",")." ],
+                            labels: [ '".implode("','", $labels)."' ],
+                            datasets: [{data: [ ".implode(",", $context)." ],
                             borderWidth: 0,
-                            backgroundColor:['".implode($colors,"','")."']}]
+                            backgroundColor:['".implode("','", $colors)."']}]
                           }
                         });</script></div>";
 

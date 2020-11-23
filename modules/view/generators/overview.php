@@ -191,8 +191,8 @@ function rg_view_generator_overview($modlink, &$context, $foreword = "") {
               "var modes_chart = new Chart(modes_chart_el, {
                 type: 'horizontalBar',
                 data: {
-                  labels: [ '','".implode($converted_modes,"','")."' ],
-                  datasets: [{label:'".locale_string("matches_per_day")."',data: [ 0,".implode($matchcount,",")." ],
+                  labels: [ '','".implode("','", $converted_modes)."' ],
+                  datasets: [{label:'".locale_string("matches_per_day")."',data: [ 0,".implode(",", $matchcount)." ],
                   backgroundColor:'#ccc'}]
                 }
               });</script></div>";
