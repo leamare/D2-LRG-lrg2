@@ -108,4 +108,10 @@ function positions_ranking_sort($a, $b, $total_matches) {
   else return ($a_rank < $b_rank) ? 1 : -1;
 }
 
-?>
+function items_ranking_sort($a, $b) {
+  $a_rank = wilson_rating( $a['wins'], $a['purchases'], 1-$a['prate'] );
+  $b_rank = wilson_rating( $b['wins'], $b['purchases'], 1-$b['prate'] );
+
+  if($a_rank == $b_rank) return 0;
+  else return ($a_rank < $b_rank) ? 1 : -1;
+}
