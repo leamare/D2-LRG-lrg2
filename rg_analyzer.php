@@ -215,6 +215,12 @@ if ($lg_settings['ana']['players'])  {
   require_once("modules/analyzer/players/additional_data.php");
 }
 
+// ITEMS
+
+require_once("modules/analyzer/items/__main.php");
+
+// ...
+
 $result['settings'] = $lg_settings['web'];
 $result['settings']['limiter'] = $limiter;
 $result['settings']['limiter_middle'] = $limiter_middle;
