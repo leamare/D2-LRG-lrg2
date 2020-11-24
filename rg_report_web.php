@@ -80,14 +80,14 @@ $use_visjs = false;
 $use_graphjs = false;
 
 for($i=0,$sz=sizeof($linkvars); $i<$sz; $i++)
-  $linkvars[$i] = implode($linkvars[$i], "=");
-$linkvars = implode($linkvars, "&");
+  $linkvars[$i] = implode("=", $linkvars[$i]);
+$linkvars = implode("&", $linkvars);
 
 
 if (!empty($leaguetag)) {
   if(file_exists($reports_dir."/".$report_mask_search[0].$leaguetag.$report_mask_search[1])) {
     $report = file_get_contents($reports_dir."/".$report_mask_search[0].$leaguetag.$report_mask_search[1])
-        or die("[F] Can't open $teaguetag, probably no such report\n");
+        or die("[F] Can't open $leaguetag, probably no such report\n");
     $report = json_decode($report, true);
   } else {
     $lightcache = true;
@@ -121,6 +121,9 @@ if (isset($report)) {
   if (isset($report['averages_heroes']) || isset($report['pickban']) || isset($report['draft']) || isset($report['hero_positions']) ||
       isset($report['hero_sides']) || isset($report['hero_pairs']) || isset($report['hero_triplets']))
         include_once("modules/view/heroes.php");
+
+  if (isset($report['items']))
+    include_once("modules/view/items.php");
 
   if (isset($report['players']) || isset($report['players_summary']))
     include_once("modules/view/players.php");
@@ -158,6 +161,11 @@ if (isset($report)) {
   # heroes
   if (isset($modules['heroes']) && check_module("heroes")) {
     merge_mods($modules['heroes'], rg_view_generate_heroes());
+  }
+
+  # items
+  if (isset($modules['items']) && check_module("items")) {
+    merge_mods($modules['items'], rg_view_generate_items());
   }
 
   # players
