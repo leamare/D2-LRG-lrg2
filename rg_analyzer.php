@@ -117,6 +117,18 @@ if(compare_ver($lg_settings['version'], $lrg_version) < 0) {
   $query_res->free_result();
 }
 
+// items support detection
+$sql = "SELECT COUNT(*) z
+FROM information_schema.tables WHERE table_schema = '$lrg_sql_db' 
+AND table_name = 'items' HAVING z > 0;";
+
+$query = $conn->query($sql);
+if (!isset($query->num_rows) || !$query->num_rows) {
+  $lg_settings['main']['items'] = false;
+  echo "[N] Set &settings.items to false.\n";
+}
+
+
 # Random stats
 require_once("modules/analyzer/main/overview.php");
 
@@ -217,7 +229,9 @@ if ($lg_settings['ana']['players'])  {
 
 // ITEMS
 
-require_once("modules/analyzer/items/__main.php");
+if ($lg_settings['main']['items'])  {
+  require_once("modules/analyzer/items/__main.php");
+}
 
 // ...
 
