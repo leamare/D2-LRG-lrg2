@@ -107,6 +107,13 @@ $sql .= "SELECT \"hero_pool\", COUNT(DISTINCT matchlines.heroid) FROM matchlines
           AND matchlines.isRadiant = teams_matches.is_radiant
           WHERE teams_matches.teamid = ".$id.";";
 
+# pings
+$sql .= "SELECT \"pings\", SUM(adv_matchlines.pings)/COUNT(DISTINCT matchlines.matchid) FROM matchlines JOIN teams_matches
+          ON matchlines.matchid = teams_matches.matchid
+          AND matchlines.isRadiant = teams_matches.is_radiant
+          JOIN adv_matchlines ON adv_matchlines.matchid = matchlines.matchid AND adv_matchlines.playerid = matchlines.playerid
+          WHERE teams_matches.teamid = ".$id.";";
+
 # diversity
 # (COUNT(DISTINCT heroid)/mhpt.mhp) * (COUNT(DISTINCT heroid)/COUNT(DISTINCT matchid))
 $sql .= "SELECT \"diversity\", (COUNT(DISTINCT matchlines.heroid)/mhpt.mhp)*(COUNT(DISTINCT matchlines.heroid)/COUNT(DISTINCT matchlines.matchid))
