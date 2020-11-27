@@ -151,6 +151,9 @@ if (sizeof($cache['reps']) === 0) {
 
   if (!isset($cat) || $cat !== "recent") {
     uasort($reps, function($a, $b) {
+      if (empty($a) && empty($b)) return 0;
+      if (empty($a)) return 1;
+      if (empty($b)) return -1;
       if($a['last_match']['date'] == $b['last_match']['date']) {
         if($a['first_match']['date'] == $b['first_match']['date']) return 0;
         else return ($a['first_match']['date'] < $b['first_match']['date']) ? -1 : 1;
@@ -159,6 +162,7 @@ if (sizeof($cache['reps']) === 0) {
   }
 
   foreach($reps as $report) {
+    if (empty($report)) continue;
     if ($report['short_fname'][0] == '!') continue;
     if(!isset($cat) && $index_list < sizeof($reps)) {
       if(!$index_list) break;

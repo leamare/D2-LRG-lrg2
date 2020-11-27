@@ -33,7 +33,7 @@ function rg_view_generate_heroes_meta_graph() {
         'heroid1' => $pair['heroid1'],
         'heroid2' => $pair['heroid2'],
         'matches' => $pair['matches'],
-        'wins' => $pair['wins'],
+        'wins' => $pair['wins'] ?? round($pair['matches'] * $pair['winrate']),
         'winrate' => $pair['winrate'],
         'dev_pct' => $pair['dev_pct'],
       ];

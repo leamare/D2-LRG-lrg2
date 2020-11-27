@@ -86,17 +86,17 @@ function join_selectors($modules, $level, $parent="") {
     }
   }
   if ($selectors_num < $max_tabs)
-    return "<div class=\"selector-modules".(empty($level_codes[$level][0]) ? "" : "-".$level_codes[$level][0])."\">".implode($selectors, " | ")."</div>".$out;
+    return "<div class=\"selector-modules".(empty($level_codes[$level][0]) ? "" : "-".$level_codes[$level][0])."\">".implode(" | ", $selectors)."</div>".$out;
   else
   if($lrg_use_get && $lrg_get_depth > $level)
     return "<div class=\"selector-modules".(empty($level_codes[$level][0]) ? "" : "-".$level_codes[$level][0])."\">".
         "<select onchange=\"select_modules_link(this);\" class=\"select-selectors select-selectors".(empty($level_codes[$level][0]) ? "" : "-".$level_codes[$level][0])."\">".
-        implode($selectors, "")."</select></div>".$out;
+        implode("", $selectors)."</select></div>".$out;
     else
     return "<div class=\"selector-modules".(empty($level_codes[$level][0]) ? "" : "-".$level_codes[$level][0])."\">".
         "<select onchange=\"switchTab(event, this.value, 'mod-".$level_codes[$level][1]."');\" class=\"select-selectors select-selectors".
         (empty($level_codes[$level][0]) ? "" : "-".$level_codes[$level][0])."\">".
-        implode($selectors, "")."</select></div>".$out;
+        implode("", $selectors)."</select></div>".$out;
 }
 
 ?>
