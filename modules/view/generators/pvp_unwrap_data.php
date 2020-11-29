@@ -7,6 +7,10 @@ function rg_generator_pvp_unwrap_data(&$context, &$context_wrs, $heroes_flag = t
   $id = $heroes_flag ? "heroid" : "playerid";
   $sid = $heroes_flag ? "h" : "p";
 
+  if (is_wrapped($context)) {
+    $context = unwrap_data($context);
+  }
+
   if(empty($context_wrs)) $nodiff = true;
   else {
     $nodiff = false;

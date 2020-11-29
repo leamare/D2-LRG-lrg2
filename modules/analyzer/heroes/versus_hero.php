@@ -55,4 +55,5 @@ if ($lg_settings['ana']['hvh_matches']) {
     $query_res->free_result();
   }
 }
-?>
+
+$result["hvh"] = wrap_data($result["hvh"], true, true, true);

@@ -26,8 +26,12 @@ function rg_view_generate_heroes_hph() {
 
     if(check_module($parent_module."heroid".$hid)) {
       foreach ($report['hph'][$hid] as $id => $line) {
+        if ($id == '_h') {
+          unset($report['hph'][$hid][$id]);
+          continue;
+        }
         if ($line === null) unset($report['hph'][$hid][$id]);
-        if ($line === true) $report['hph'][$hid][$id] = $report['hph'][$id][$hid];
+        if (is_array($line) && $line['matches'] === -1) $report['hph'][$hid][$id] = $report['hph'][$id][$hid];
       }
 
       $res["heroid".$hid] = "<div class=\"content-text\">".locale_string("desc_heroes_hph")."</div>";

@@ -25,6 +25,10 @@ function rg_generator_laning_profile($table_id, &$context, $id_o, $heroes_flag =
 
     $mm = 0;
     foreach ($context[$id] as $k => $h) {
+      if ($h === null) {
+        unset($context[$id][$k]);
+        continue;
+      }
       if ($h['matches'] > $mm) $mm = $h['matches'];
       if (!isset($h['matches']) || $h['matches'] == 0) unset($context[$id][$k]);
     }

@@ -36,8 +36,8 @@ function wrap_data ($array, $with_keys = false, $deep = false, $explicit = false
   $r['data'] = [];
 
   foreach($array as $a) {
-    if ($a === null) {
-      $r['data'][] = null;
+    if (!is_array($a) || $a === null) {
+      $r['data'][] = $a;
       continue;
     }
     if ($explicit) {
@@ -81,6 +81,8 @@ function unwrap_data ($array) {
     $array['head'] = array_splice($array['head'], 1);
   } else $head = $array['head'];
 
+  $head_sz = sizeof($head);
+
   foreach ($array['data'] as $data) {
     if ($data === null) {
       $r[] = null;
@@ -90,6 +92,10 @@ function unwrap_data ($array) {
       $data = unwrap_data([ 'head' => $array['head'], 'data' => $data ]);
     }
     
+
+    if (is_array($data) && sizeof($data) < $head_sz) {
+      $data = array_merge( $data, array_fill(0, $head_sz - sizeof($data), null) );
+    }
     $r[] = is_array($data) ? array_combine($head, $data) : $data;
   }
   if(isset($array['keys']))

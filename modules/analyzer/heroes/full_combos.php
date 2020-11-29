@@ -25,6 +25,17 @@ $res = [];
 
 $query_res = $conn->store_result();
 
+$em = [
+  // "heroid1" => $row[0],
+  // "heroid2" => $row[1],
+  "matches" => -1,
+  "won" => 0,
+  "winrate" => 0,
+  "exp" => 0,
+  "lane_rate" => 0,
+  "wr_diff" => 0
+];
+
 for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
   $expected_pair  = $result['random']['matches_total'] ? ( $result['pickban'][$row[0]]['matches_picked']
   * $result['pickban'][$row[1]]['matches_picked']
@@ -35,10 +46,10 @@ for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row(
   $wr_diff = $row[3]/$row[2] - ($result['pickban'][$row[0]]['winrate_picked'] + $result['pickban'][$row[1]]['winrate_picked'])/2;
 
   if (!isset($res[ $row[0] ]))
-    $res[ $row[0] ] = [];
+    $res[ $row[0] ] = [ '_h' => $em ];
 
   if (!isset($res[ $row[1] ]))
-    $res[ $row[1] ] = [];
+    $res[ $row[1] ] = [ '_h' => $em ];
 
   $p = [
     // "heroid1" => $row[0],
@@ -52,7 +63,7 @@ for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row(
   ];
 
   $res[ $row[0] ][ $row[1] ] = $p;
-  $res[ $row[1] ][ $row[0] ] = true;
+  $res[ $row[1] ][ $row[0] ] = [ 'matches' => -1 ];
   // $res[] = $p;
 }
 
