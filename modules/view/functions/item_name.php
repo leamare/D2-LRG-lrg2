@@ -5,6 +5,11 @@ function item_icon($iid) {
   return "<img class=\"hero_portrait\" src=\"".str_replace("%HERO%", item_tag($iid), $item_icons_provider)."\" alt=\"".item_tag($iid)."\" />";
 }
 
+function item_icon_link($iid) {
+  global $item_icons_provider;
+  return str_replace("%HERO%", item_tag($iid), $item_icons_provider);
+}
+
 function item_tag($iid) {
   global $meta;
   if (isset($meta->items[ $iid ]))
