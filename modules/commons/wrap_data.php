@@ -53,6 +53,14 @@ function wrap_data ($array, $with_keys = false, $deep = false, $explicit = false
       $r['data'][] = array_values($a);
   }
 
+  $lastval = 0;
+  foreach ($r['data'] as $i => $v) {
+    if ($v !== null) $lastval = $i;
+  }
+  if ($lastval < sizeof($r['data'])-1) {
+    $r['data'] = array_slice($r['data'], 0, $lastval+1);
+  }
+
   if ($deep && isset($r['data'][0][0]) && is_array($r['data'][0][0])) {
     $r['head'] = [ $r['head'] ];
 
