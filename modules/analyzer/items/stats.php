@@ -191,11 +191,4 @@ foreach ($r as $hid => $items) {
 
 echo "\n";
 
-//$result['items']['stats'] = $r;
-
-$result['items']['stats'] = wrap_data(
-  $r,
-  true,
-  true,
-  true
-);
+$result['items']['stats'] = $r;
