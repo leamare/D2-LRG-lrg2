@@ -21,7 +21,7 @@ END
 (@last := matchid) AS lastmatchvar,
 (@lasthero := hero_id) AS lastherovar
 FROM items
-WHERE ((NOT @hero) OR (@hero = hero_id)) AND category_id <> 2
+WHERE ((NOT @hero) OR (@hero = hero_id)) AND ((category_id = 2 AND @lastmin <= 12) OR category_id <> 2) AND (category_id NOT IN (3, 4, 6, 7, 8, 9, 10, 11, 12, 13))
 
 SQL;
 
@@ -39,7 +39,7 @@ SELECT
 	oi1.category_id item1_cat,
 	oi2.item_id item2,
 	oi2.category_id item2_cat,
-	oi2.purmin - oi1.purmin min_diff,
+	SUM(oi2.purmin - oi1.purmin)/SUM(1) min_diff,
 	SUM(1) total,
 	SUM( NOT ml.isRadiant XOR m.radiantWin ) wins
 FROM
@@ -65,24 +65,37 @@ while (is_bool($query_res)) {
 }
 
 $ar = [];
+$_matches = [];
 
 for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
-  if (!isset($ar[ $row[0] ])) $ar[ $row[0] ] = [];
+  if (!isset($ar[ $row[0] ])) {
+		$ar[ $row[0] ] = [];
+		$_matches[ $row[0] ] = [];
+	}
 
   $ar[ $row[0] ][] = [
-		'item1' => $row[1],
-		'item1_cat' => $row[2],
-		'item2' => $row[3],
-		'item2_cat' => $row[4],
-		'min_diff' => $row[5],
-		'total' => $row[6],
-		'wins' => $row[7],
+		'item1' => (int)$row[1],
+		'item1_cat' => (int)$row[2],
+		'item2' => (int)$row[3],
+		'item2_cat' => (int)$row[4],
+		'min_diff' => (float)$row[5],
+		'total' => (int)$row[6],
+		'wins' => (int)$row[7],
 		'winrate' => round($row[7]/$row[6], 4)
-  ];
+	];
+	$_matches[ $row[0] ][] = (int)$row[6];
 }
 
 $query_res->free_result();
 
+foreach ($ar as $hero => $pairs) {
+	$q1matches = quantile($_matches[ $hero ], 0.25);
+	$ar[ $hero ] = array_filter($pairs, function($v) use ($q1matches) {
+		if ($v['total'] <= $q1matches) return false;
+		return true;
+	});
+	$ar[ $hero ] = array_values($ar[ $hero ]);
+}
 
 echo "\n";
 
