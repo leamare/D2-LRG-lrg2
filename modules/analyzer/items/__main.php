@@ -31,8 +31,15 @@ for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row(
 $query_res->free_result();
 
 require_once("modules/analyzer/items/stats.php");
-// require_once("modules/analyzer/items/combos.php"); + limiters
+require_once("modules/analyzer/items/combos.php"); //+ limiters
 // require_once("modules/analyzer/items/counters.php"); + limiters
-// require_once("modules/analyzer/items/progression.php"); + limiters
+require_once("modules/analyzer/items/progression.php"); //+ limiters
 // require_once("modules/analyzer/items/hero_counters.php"); + limiters
 // require_once("modules/analyzer/items/records.php");
+
+$result['items']['stats'] = wrap_data(
+  $result['items']['stats'],
+  true,
+  true,
+  true
+);
