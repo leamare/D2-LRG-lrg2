@@ -63,6 +63,7 @@ function rg_generator_pickban($table_id, &$context, $context_total_matches, $her
 }
 
 function rg_generator_uncontested($context, $contested, $small = false, $heroes_flag = true) {
+  global $portraits_provider;
   if ($heroes_flag) {
     // uncontested
     // unpicked : matches_picked 0
@@ -112,7 +113,7 @@ function rg_generator_uncontested($context, $contested, $small = false, $heroes_
 
     if ($heroes_flag)
       foreach($context as $el) {
-        $res .= "<div class=\"hero\"><img src=\"res/heroes/".$el['tag'].".png\" alt=\"".$el['tag']."\" />".
+        $res .= "<div class=\"hero\"><img src=\"".str_replace("%HERO%", $el['tag'], $portraits_provider)."\" alt=\"".$el['tag']."\" />".
                 "<span class=\"hero_name\">".$el['name']."</span></div>";
       }
     else

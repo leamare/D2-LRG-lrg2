@@ -4,7 +4,7 @@ function join_matches($matches) {
   foreach($matches as $match) {
     $output[] = match_link($match);
   }
-  return implode($output, ", ");
+  return implode(", ", $output);
 
 }
 ?>
