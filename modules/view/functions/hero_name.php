@@ -13,8 +13,19 @@ function hero_icon_link($hid) {
   return str_replace("%HERO%", 'default', $icons_provider);
 }
 
+function hero_icon($hid) {
+  global $meta, $icons_provider;
+  if (isset($meta->heroes[ $hid ]['tag']))
+    return "<img class=\"hero_icon\" src=\"".hero_icon_link($hid)."\" alt=\"".$meta['heroes'][ $hid ]['tag']."\" />";
+  else return "<img class=\"hero_icon\" alt=\"undefined\" />";
+}
+
 function hero_full($hid) {
   return hero_portrait($hid)." ".hero_name($hid);
+}
+
+function hero_full_icon($hid) {
+  return hero_icon($hid)." ".hero_name($hid);
 }
 
 function hero_name($hid) {
@@ -22,4 +33,9 @@ function hero_name($hid) {
   if (isset($meta->heroes[ $hid ]['name'])) return $meta->heroes[ $hid ]['name'];
   return "undefined";
 }
-?>
+
+function hero_tag($hid) {
+  global $meta;
+  if (isset($meta->heroes[ $hid ]['tag'])) return $meta->heroes[ $hid ]['tag'];
+  return "undefined";
+}

@@ -1,12 +1,17 @@
 <?php
 
 function match_link($mid) {
-  global $link_provider, $links_providers;
+  global $link_provider, $links_providers, $report;
+  $midText = $mid;
+
+  if (!empty($report['match_parts_strings'])) {
+    $midText .= ' - '.$report['match_parts_strings'][$mid];
+  }
 
   if (empty($links_providers))
-    return "<a href=\"https://$link_provider/matches/$mid\" target=\"_blank\" rel=\"noopener\">$mid</a>";
+    return "<a href=\"https://$link_provider/matches/$mid\" target=\"_blank\" rel=\"noopener\">$midText</a>";
   
-  $r = $mid." - ";
+  $r = $midText." - ";
   foreach ($links_providers as $lpn => $lpl) {
     $r .= "<a target=\"_blank\" href=\"https://$lpl/matches/$mid\">".link_provider($lpn)."</a> ";
   }
