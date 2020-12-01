@@ -9,7 +9,9 @@ $visjs_settings = "physics:{
     gravitationalConstant:-900
   },
   timestep: 0.1,
-}, nodes: {
+}, 
+
+nodes: {
    borderWidth:3,
    shape: 'dot',
    font: {color:'#ccc', background: 'rgba(0,0,0,0.5)',size:12},

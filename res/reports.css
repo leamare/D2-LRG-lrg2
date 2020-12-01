@@ -270,6 +270,22 @@ table .hero_portrait {
   border: none;
 }
 
+.unique-heroes-card {
+  text-align: left;
+}
+.unique-heroes-card .line img, .hero_icon {
+  vertical-align: middle;
+}
+.unique-heroes-card .line {
+  margin: 7px;
+  line-height: 24px;
+  font-size: 20px;
+}
+.unique-heroes-card .line .caption {
+  font-size: inherit;
+  font-weight: bold;
+}
+
 .match-card, .player-card, .team-card {
   overflow: hidden;
   padding-bottom: 20px;
@@ -302,7 +318,7 @@ table .hero_portrait {
 
 .match-id {
   font-size: 24px;
-  text-transform: uppercase;
+  /* text-transform: uppercase; */
   letter-spacing: 4px;
   text-align: left;
   font-weight: bold;
@@ -462,7 +478,7 @@ table .hero_portrait {
   font-size: inherit;
   line-height: inherit;
 }
-.team-info-block .hero_portrait {
+.team-info-block .hero_portrait, .team-info-block .hero_icon {
   height: 18px;
   display: inline-block;
   vertical-align: sub;
