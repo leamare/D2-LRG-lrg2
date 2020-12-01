@@ -61,4 +61,20 @@ if (isset($report['localized']) && isset($report['localized'][$locale])) {
   $report['league_desc'] = $report['localized'][$locale]['desc'] ?? $report['league_desc'];
 }
 
-?>
+if (!empty($report['teams']) && !empty($report['matches']) && !empty($report['match_participants_teams'])) {
+  $partCnts = [];
+  $report['match_parts_strings'] = [];
+  $mids = array_keys($report['matches']);
+  sort($mids);
+
+  foreach ($mids as $mid) {
+    $teams = [ $report['match_participants_teams'][$mid]['radiant'] ?? 0, $report['match_participants_teams'][$mid]['dire'] ?? 0 ];
+    $teamsStr = team_tag( min($teams) ).' ⚔ '.team_tag( max($teams) );
+
+    if (!isset($partCnts[$teamsStr])) $partCnts[$teamsStr] = 0;
+    $partCnts[$teamsStr]++;
+    $cnt = 0;
+    
+    $report['match_parts_strings'][$mid] = $teamsStr.' - '.locale_string('game_num').' '.$cnt;
+  }
+}
