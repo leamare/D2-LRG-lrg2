@@ -1,7 +1,7 @@
 <?php
 
 function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "") {
-  global $mod, $root, $strings, $unset_module, $report;
+  global $mod, $root, $strings, $unset_module, $report, $icons_provider;
   $res = [];
   if($mod == substr($context_mod, 0, strlen($context_mod)-1)) $unset_module = true;
 
@@ -37,11 +37,57 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
 
           $res["team".$tid]['overview'] .= $foreword;
           $res["team".$tid]['overview'] .= "<div class=\"content-cards\">".team_card($tid, true)."</div>";
+
+          if (!empty($report['match_participants_teams'])) {
+            $matches = [];
+            $player_pos = [];
+            foreach($context[$tid]['active_roster'] as $player) {
+              if (!isset($report['players'][$player])) continue;
+              if (!empty($report['players_additional']))
+                $player_pos[$player] = reset($report['players_additional'][$player]['positions']);
+              $matches[ $player ] = [];
+            }
+            if (!empty($report['players_additional'])) {
+              uksort($matches, function($a, $b) use ($player_pos) {
+                if ($player_pos[$a]['core'] > $player_pos[$b]['core']) return -1;
+                if ($player_pos[$a]['core'] < $player_pos[$b]['core']) return 1;
+                if ($player_pos[$a]['lane'] < $player_pos[$b]['lane']) return -1;
+                if ($player_pos[$a]['lane'] > $player_pos[$b]['lane']) return 1;
+                return 0;
+              });
+            }
+
+            foreach($context[$tid]['matches'] as $match => $v) {
+              $radiant = ( $report['match_participants_teams'][$match]['radiant'] ?? 0 ) == $tid ? 1 : 0;
+              foreach ($report['matches'][$match] as $l) {
+                if ($l['radiant'] != $radiant) continue;
+                if (!isset($matches[ $l['player'] ])) continue;
+                $matches[ $l['player'] ][ $l['hero'] ] = ( $matches[ $l['player'] ][ $l['hero'] ] ?? 0 ) + 1;
+              }
+            }
+
+            $res["team".$tid]['overview'] .= "<div class=\"content-cards unique-heroes-card\">".
+              "<h1>".locale_string("team_players_unique_heroes")."</h1>";
+            
+            foreach ($matches as $player => $heroes) {
+              arsort($heroes);
+              $res["team".$tid]['overview'] .= "<div class=\"line\"><span class=\"caption\">".player_name($player)."</span>: ";
+              foreach ($heroes as $hero => $num) {
+                $res["team".$tid]['overview'] .= "<a title=\"".hero_name($hero)." - ".locale_string('matches_s')." ".$num." - ".locale_string('total')." ".$context[$tid]['pickban'][$hero]['matches_picked']." - ".
+                  locale_string('winrate_s')." ".($context[$tid]['pickban'][$hero]['winrate_picked']*100)."%\">".
+                  hero_icon($hero)."</a>";
+              }
+              $res["team".$tid]['overview'] .= "</div>";
+            }
+            
+            "</div>";
+          }
+
           $res["team".$tid]['overview'] .= "<div class=\"content-text\">".
-              "<a href=\"https://www.dotabuff.com/esports/teams/$tid\">Dotabuff</a> / ".
-              "<a href=\"https://www.opendota.com/teams/$tid\">OpenDota</a>".
-              //"<a href=\"https://www.opendota.com/teams/$tid\">Stratz</a> / ".
-              "</div>";
+            "<a href=\"https://www.dotabuff.com/esports/teams/$tid\">Dotabuff</a> / ".
+            "<a href=\"https://www.opendota.com/teams/$tid\">OpenDota</a>".
+            //"<a href=\"https://www.opendota.com/teams/$tid\">Stratz</a> / ".
+          "</div>";
 
           if(isset($report['teams'][$tid]['regions'])) {
             asort($report['teams'][$tid]['regions']);
@@ -120,6 +166,29 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
                 if (!check_module($parent_module."position_$i.$j") || empty($context[$tid]['hero_positions'][$i][$j])) {
                   if (!$i) { break; }
                   continue;
+                }
+
+                if(isset($report['hero_positions_matches']) && isset($context[$tid]['matches']) && isset($report['matches'])) {
+                  foreach($context[$tid]['hero_positions'][$i][$j] as $hid => $matches) {
+                    if (!isset($context[$tid]['hero_positions'][$i][$j][$hid])) continue;
+                    
+                    $matches = [];
+                    foreach($context[$tid]['matches'] as $match => $v) {
+                      $radiant = ( $report['match_participants_teams'][$match]['radiant'] ?? 0 ) == $tid ? 1 : 0;
+                      foreach ($report['matches'][$match] as $l) {
+                        if ($l['radiant'] != $radiant) continue;
+                        if ($l['hero'] == $hid) {
+                          $matches[] = $match;
+                          break;
+                        }
+                      }
+                    }
+
+                    $context[$tid]['hero_positions'][$i][$j][$hid]['matchlinks'] = "<a onclick=\"showModal('".
+                        htmlspecialchars(join_matches($matches)).
+                        "', '".locale_string("matches")." - ".hero_name($hid)." - ".locale_string("position_$i.$j")."');\">".
+                        locale_string("matches")."</a>";
+                  }
                 }
 
                 $res["team".$tid]['heroes']['positions']["position_$i.$j"] = rg_generator_summary("team$tid-heroes-positions-$i-$j", $context[$tid]['hero_positions'][$i][$j], true, true);
