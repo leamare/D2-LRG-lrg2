@@ -11,6 +11,10 @@ function rg_view_generate_heroes_counters() {
 
   $hvh = []; 
   $devs = [];
+
+  if (is_wrapped($report['hvh'])) {
+    $report['hvh'] = unwrap_data($report['hvh']);
+  }
   
   foreach ($report['hvh'] as $line) {
     if ($line['matches'] < $report['settings']['limiter_combograph']) 
