@@ -153,6 +153,12 @@ a:hover {
 
 	margin: 30px 20% 0;
 }
+.content-text span {
+  font-size: 18px;
+}
+.content-text span.caption {
+  font-weight: bold;
+}
 .content-text.small {
   font-size: 12px;
   line-height: 14px;

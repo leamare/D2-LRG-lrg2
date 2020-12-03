@@ -80,7 +80,7 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
               $res["team".$tid]['overview'] .= "</div>";
             }
             
-            "</div>";
+            $res["team".$tid]['overview'] .= "</div>";
           }
 
           $res["team".$tid]['overview'] .= "<div class=\"content-text\">".
@@ -152,8 +152,32 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
 
           if (check_module($parent_module."overview")) {
             generate_positions_strings();
+            $res["team".$tid]['heroes']['positions']["overview"] = "";
+
+            $res["team".$tid]['heroes']['positions']["overview"] .= "<div class=\"content-text\"><span class=\"caption\">".locale_string("active_roster").":</span> ";
+            $player_pos = [];
+            foreach($context[$tid]['active_roster'] as $player) {
+              if (!isset($report['players'][$player])) continue;
+              $player_pos[$player] = reset($report['players_additional'][$player]['positions']);
+            }
+            uasort($context[$tid]['active_roster'], function($a, $b) use ($player_pos) {
+              if ($player_pos[$a]['core'] > $player_pos[$b]['core']) return -1;
+              if ($player_pos[$a]['core'] < $player_pos[$b]['core']) return 1;
+              if ($player_pos[$a]['lane'] < $player_pos[$b]['lane']) return -1;
+              if ($player_pos[$a]['lane'] > $player_pos[$b]['lane']) return 1;
+              return 0;
+            });
+            $pl = [];
+            foreach($context[$tid]['active_roster'] as $player) {
+              if (!isset($report['players'][$player])) continue;
+              $position = $player_pos[$player];
+              $pl[] = "<span class=\"player\">".player_name($player)." (".($position['core'] ? locale_string("core")." " : locale_string("support")).
+                            locale_string( "lane_".$position['lane'] ).")</span>";
+            }
+            $res["team".$tid]['heroes']['positions']["overview"] .= implode(', ', $pl)."</div>";
+
             include_once($root."/modules/view/generators/positions_overview.php");
-            $res["team".$tid]['heroes']['positions']["overview"] = rg_generator_positions_overview("team$tid-heroes-positions-overview", $context[$tid]['hero_positions']);
+            $res["team".$tid]['heroes']['positions']["overview"] .= rg_generator_positions_overview("team$tid-heroes-positions-overview", $context[$tid]['hero_positions']);
             $res["team".$tid]['heroes']['positions']["overview"] .= "<div class=\"content-text\">".locale_string("desc_heroes_positions")."</div>";
           }
           {
@@ -167,6 +191,31 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
                   if (!$i) { break; }
                   continue;
                 }
+
+                $res["team".$tid]['heroes']['positions']["position_$i.$j"] = "";
+
+                $player_pos = [];
+                foreach($context[$tid]['active_roster'] as $player) {
+                  if (!isset($report['players'][$player])) continue;
+                  foreach ($report['players_additional'][$player]['positions'] as $pos) {
+                    if ($pos['core'] == $i && $pos['lane'] == $j) {
+                      $player_pos[$player] = $pos;
+                      break;
+                    }
+                  }
+                }
+                uasort($player_pos, function($a, $b) {
+                  return $b['matches'] <=> $a['matches'];
+                });
+
+                $res["team".$tid]['heroes']['positions']["position_$i.$j"] .= "<div class=\"content-text\"><span class=\"caption\">".locale_string("team_roster_position").":</span> ";
+                $pl = [];
+                foreach ($player_pos as $player => $pos) {
+                  if (!isset($report['players'][$player])) continue;
+                  $pl[] = "<span class=\"player\">".player_name($player)." (".($pos['matches']).' '.
+                            locale_string( "matches" ).")</span>";
+                }
+                $res["team".$tid]['heroes']['positions']["position_$i.$j"] .= implode(', ', $pl)."</div>";
 
                 if(isset($report['hero_positions_matches']) && isset($context[$tid]['matches']) && isset($report['matches'])) {
                   foreach($context[$tid]['hero_positions'][$i][$j] as $hid => $matches) {
@@ -191,7 +240,7 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
                   }
                 }
 
-                $res["team".$tid]['heroes']['positions']["position_$i.$j"] = rg_generator_summary("team$tid-heroes-positions-$i-$j", $context[$tid]['hero_positions'][$i][$j], true, true);
+                $res["team".$tid]['heroes']['positions']["position_$i.$j"] .= rg_generator_summary("team$tid-heroes-positions-$i-$j", $context[$tid]['hero_positions'][$i][$j], true, true);
                 $res["team".$tid]['heroes']['positions']["position_$i.$j"] .= "<div class=\"content-text\">".locale_string("desc_heroes_positions")."</div>";
                 if (!$i) { break; }
               }
