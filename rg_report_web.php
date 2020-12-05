@@ -78,6 +78,7 @@ if ($lrg_use_get) {
 
 $use_visjs = false;
 $use_graphjs = false;
+$use_graphjs_boxplots = false;
 
 for($i=0,$sz=sizeof($linkvars); $i<$sz; $i++)
   $linkvars[$i] = implode("=", $linkvars[$i]);

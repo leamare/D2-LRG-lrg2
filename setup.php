@@ -114,10 +114,18 @@ if ( $check_libs ) {
 
     # Chart.JS
     if ( !file_exists("res/dependencies/Chart.bundle.min.js") ) {
-      echo "[ ] Pulling chart.js 2.7.2 bundle\n";
+      echo "[ ] Pulling chart.js 2.9.1 bundle\n";
       file_put_contents(
         "res/dependencies/Chart.bundle.min.js",
-        file_get_contents("https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js")
+        file_get_contents("https://unpkg.com/chart.js@2.9.1/dist/Chart.min.js")
+      );
+    }
+    # Chart.JS Chart Boxplot
+    if ( !file_exists("res/dependencies/Chart.BoxPlot.min.js") ) {
+      echo "[ ] Pulling Chart.BoxPlot.min.js 2.3.2 bundle\n";
+      file_put_contents(
+        "res/dependencies/Chart.BoxPlot.min.js",
+        file_get_contents("https://unpkg.com/@sgratzl/chartjs-chart-boxplot@2.3.2/build/Chart.BoxPlot.min.js")
       );
     }
 }

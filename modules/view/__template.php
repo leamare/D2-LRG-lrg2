@@ -1,4 +1,4 @@
-<?php  $__postfix = "?v=24052"; ?>
+<?php  $__postfix = "?v=24053"; ?>
 <!DOCTYPE html>
 <html lang="<?php echo $locale; ?>">
   <head>
@@ -45,6 +45,9 @@
     <?php
       if($use_graphjs) {
         echo "<script type=\"text/javascript\" src=\"res/dependencies/Chart.bundle.min.js$__postfix\"></script>";
+      }
+      if($use_graphjs_boxplots) {
+        echo "<script type=\"text/javascript\" src=\"res/dependencies/Chart.BoxPlot.min.js$__postfix\"></script>";
       }
       if($use_visjs) {
         echo "<script type=\"text/javascript\" src=\"res/dependencies/vis.min.js$__postfix\"></script>";
