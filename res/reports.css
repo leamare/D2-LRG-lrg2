@@ -508,8 +508,9 @@ table .hero_portrait {
 }
 
 .graph {
-  width: 1200px;
-  height: 900px;
+  width: 80%;
+  min-height: 1200px;
+  height: 90vmin;
   margin: 0 auto;
 }
 
