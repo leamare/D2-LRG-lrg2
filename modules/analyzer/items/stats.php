@@ -3,6 +3,8 @@
 echo "[S] Requested data for ITEMS STATS";
 
 $r = [];
+$purchases_i = [];
+$purchases_h = [ 'total' => [] ];
 
 $q = <<<SQL
 SELECT 
@@ -41,6 +43,8 @@ for ($row = $query_res->fetch_assoc(); $row != null; $row = $query_res->fetch_as
   $item = $row['item'];
   unset($row['item']);
   $r['total'][$item] = $row;
+
+  $purchases_h['total'][] = (int)$row['purchases'];
 }
 
 $query_res->free_result();
@@ -86,6 +90,11 @@ for ($row = $query_res->fetch_assoc(); $row != null; $row = $query_res->fetch_as
   unset($row['item']);
   if (!isset($r[$hid])) $r[$hid] = [];
   $r[$hid][$item] = $row;
+
+  if (!isset($purchases_i[$item])) $purchases_i[$item] = [];
+  $purchases_i[$item][] = (int)$row['purchases'];
+  if (!isset($purchases_h[$hid])) $purchases_h[$hid] = [];
+  $purchases_h[$hid][] = (int)$row['purchases'];
 }
 
 $query_res->free_result();
@@ -119,6 +128,21 @@ for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row(
 
 $query_res->free_result();
 
+foreach ($purchases_i as $iid => $dt) {
+  $purchases_i[$iid] = [
+    'q1' => quantile($dt, 0.25),
+    'med' => quantile($dt, 0.5),
+    'q3' => quantile($dt, 0.75),
+  ];
+}
+foreach ($purchases_h as $hid => $dt) {
+  $purchases_h[$hid] = [
+    'q1' => quantile($dt, 0.25),
+    'med' => quantile($dt, 0.5),
+    'q3' => quantile($dt, 0.75),
+  ];
+}
+
 foreach ($r as $hid => $items) {
   foreach ($items as $iid => $data) {
     $sz = count($dataset[$iid][$hid]);
@@ -134,6 +158,7 @@ foreach ($r as $hid => $items) {
       $r[$hid][$iid]['early_wr'] = $r[$hid][$iid]['winrate'];
       $r[$hid][$iid]['late_wr'] = $r[$hid][$iid]['winrate'];
       $r[$hid][$iid]['wo_wr'] = $r[$hid][$iid]['winrate'];
+      $r[$hid][$iid]['grad'] = 0;
 
       continue;
     }
@@ -181,6 +206,12 @@ foreach ($r as $hid => $items) {
     $r[$hid][$iid]['early_wr'] = $total_q1 ? round($wins_q1/$total_q1, 4) : $r[$hid][$iid]['winrate'];
     $r[$hid][$iid]['late_wr'] = $total_q3 ? round($wins_q3/$total_q3, 4) : $r[$hid][$iid]['winrate'];
     $r[$hid][$iid]['wo_wr'] = $total_wo ? round($wins_wo/$total_wo, 4) : 0;
+
+    if ($sz > $purchases_h[$hid]['med'] && ($q3-$q1)) {
+      $min = (abs($q3)-abs($q1))/60;
+      $r[$hid][$iid]['grad'] = ($r[$hid][$iid]['late_wr']-$r[$hid][$iid]['early_wr'])/($min > 1 ? $min : 1);
+    } else 
+    $r[$hid][$iid]['grad'] = 0;
   }
 }
 
@@ -192,3 +223,5 @@ foreach ($r as $hid => $items) {
 echo "\n";
 
 $result['items']['stats'] = $r;
+$result['items']['pi'] = $purchases_i;
+$result['items']['ph'] = $purchases_h;
