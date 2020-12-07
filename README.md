@@ -1,6 +1,6 @@
 # Dota 2 League Report Generator (D2-LRG-lrg2)
 
-## Current version: 2.11.0
+## Current version: 2.13.0
 
 This is the **lrg2** version that won't be updated any further.
 
@@ -76,8 +76,9 @@ It would be nice to have bash on your system. For Windows it's recommended to ha
 * cURL
 
 After getting D2LRG code to your computer, run `php setup.php`. It will install the rest of dependencies:
-* Vis.js
-* Graph.js
+* Vis.js @ 4.21.0
+* Chart.js @ 2.9.1
+* Chart.js Boxplot @ 2.3.2
 * jQuery
 * jquery-tablesorter
 * Simple PHP OpenDota SDK
