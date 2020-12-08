@@ -223,8 +223,10 @@ if ($lg_settings['ana']['matchlist']) {
 }
 
 # players metadata
-if ($lg_settings['ana']['players'])  {
+if ($lg_settings['ana']['players']) {
   require_once("modules/analyzer/players/additional_data.php");
+} else {
+  require_once("modules/analyzer/players/unset_nm.php");
 }
 
 // ITEMS
