@@ -42,3 +42,5 @@ $result['items']['stats'] = wrap_data(
   true,
   true
 );
+$result['items']['pi'] = wrap_data($purchases_i, true, true, true);
+$result['items']['ph'] = wrap_data($purchases_h, true, true, true);

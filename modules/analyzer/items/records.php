@@ -17,7 +17,8 @@ SELECT
   items.matchid,
   it.item_id,
   it.hero_id,
-  it.tm
+  it.tm,
+  it.purchases
 FROM (
   SELECT 
     item_id,
@@ -39,6 +40,8 @@ $query_res = $conn->store_result();
 $r = [];
 
 for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+  if ($row[4] < $purchases_h[ $row[2] ]['q3']) continue;
+
   if (!isset($r[ $row[1] ])) $r[ $row[1] ] = [];
   $r[ $row[1] ][ $row[2] ] = [ 
     'match' => $row[0], 

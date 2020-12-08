@@ -118,5 +118,3 @@ do {
 
   $query_res->free_result();
 } while($conn->next_result());
-
-?>
