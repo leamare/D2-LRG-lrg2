@@ -69,12 +69,13 @@ if (!empty($report['teams']) && !empty($report['matches']) && !empty($report['ma
 
   foreach ($mids as $mid) {
     $teams = [ $report['match_participants_teams'][$mid]['radiant'] ?? 0, $report['match_participants_teams'][$mid]['dire'] ?? 0 ];
-    $teamsStr = team_tag( min($teams) ).' ⚔ '.team_tag( max($teams) );
+    $teamsStr = team_tag( min($teams) ).' '.locale_string('versus').' '.team_tag( max($teams) );
 
     if (!isset($partCnts[$teamsStr])) $partCnts[$teamsStr] = 0;
     $partCnts[$teamsStr]++;
-    $cnt = 0;
+    $cnt = $partCnts[$teamsStr];
     
     $report['match_parts_strings'][$mid] = $teamsStr.' - '.locale_string('game_num').' '.$cnt;
+    $report['match_parts_game_num'][$mid] = $cnt;
   }
 }
