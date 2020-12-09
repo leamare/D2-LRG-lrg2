@@ -9,6 +9,8 @@ function player_name($pid, $tt = true) {
       }
       $res .= htmlspecialchars($report['players'][$pid]);
     } else $res = "null";
+  } else if (isset($report['players_unset_nm']) && isset($report['players_unset_nm'][$pid])) {
+    $res = $report['players_unset_nm'][$pid];
   } else {
     $res = "PID $pid";
   }
@@ -32,4 +34,3 @@ function player_link($pid, $tt = true) {
   return $r;
 }
 
-?>

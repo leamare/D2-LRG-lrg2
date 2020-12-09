@@ -8,11 +8,23 @@ $resp = [
   "result" => null,
 ];
 
+//$locale = $_COOKIE['loc'] ?? GetLanguageCodeISO6391();
+
+if(isset($_REQUEST['loc']) && !empty($_REQUEST['loc'])) {
+  $locale = $_REQUEST['loc'];
+}
+
 include_once("rg_report_out_settings.php");
 include_once("modules/commons/versions.php");
 $lg_version = [ 2, 12, 0, 0, 0 ];
 
 include_once("modules/commons/locale_strings.php");
+
+require_once('locales/en.php');
+if(strtolower($locale) != "en" && file_exists('locales/'.$locale.'.php'))
+  require_once('locales/'.$locale.'.php');
+else $locale = "en";
+
 include_once("modules/commons/merge_mods.php");
 include_once("modules/commons/metadata.php");
 include_once("modules/commons/wrap_data.php");
@@ -20,6 +32,10 @@ include_once("modules/commons/wrap_data.php");
 # FUNCTIONS
 include_once("modules/view/functions/modules.php");
 include_once("modules/view/functions/report_descriptor.php");
+
+include_once("modules/view/functions/team_name.php");
+include_once("modules/view/functions/player_name.php");
+include_once("modules/view/functions/hero_name.php");
 
 include_once("modules/webapi/functions/player_card.php");
 include_once("modules/webapi/functions/team_card.php");
@@ -78,10 +94,6 @@ set_error_handler(
     throw new ErrorException($message, $severity, $severity, $file, $line);
   }
 );
-
-include_once("modules/view/functions/team_name.php");
-include_once("modules/view/functions/player_name.php");
-include_once("modules/view/functions/hero_name.php");
 
 include_once(__DIR__ . "/modules/webapi/modules.php");
 
