@@ -9,7 +9,7 @@ $endpoints['positions'] = function($mods, $vars, &$report) {
   // positions context
   if (isset($vars['team'])) {
     $parent =& $report['teams'][ $vars['team'] ]; 
-    $context =& $report['teams'][ $vars['team'] ][$type.'hero_positions'];
+    $context =& $report['teams'][ $vars['team'] ][$type.'_positions'];
     $context_total_matches = $report['teams'][ $vars['team'] ]['matches_total'];
   } else if (isset($vars['region'])) {
     $parent =& $report['regions_data'][ $vars['region'] ]; 
