@@ -84,6 +84,7 @@ $cats_file = "res/meowslist.json";
 $hidden_cat = "hidden";
 
 $index_list = 5; #-1 all, 0 none, other - number of reports on main page
+$title_slice_max = 4;
 
 $link_provider = "stratz.com"; //opendota.com dotabuff.com
 $links_providers = [
@@ -94,4 +95,5 @@ $links_providers = [
 
 $portraits_provider = "https://courier.spectral.gg/images/dota/portraits/%HERO%.png";
 $icons_provider = "https://courier.spectral.gg/images/dota/icons/%HERO%.png";
+$item_icons_provider = "https://courier.spectral.gg/images/dota/items/%HERO%.png";
 $link_provider_icon = "https://courier.spectral.gg/images/other/link_providers/%LPN%.png?size=smaller";

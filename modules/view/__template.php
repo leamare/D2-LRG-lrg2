@@ -14,10 +14,24 @@
           $rep_sm_title .= " $title_separator ".$report['league_name'];
           $rep_sm_desc = ($report['league_name'] ?? "Tournaments")." Stats";
           $rep_sm_desc .= " $title_separator ".$report['league_desc'];
+
+          $title = explode("-", $mod);
+          if ($title_slice_max) $title = array_slice($title, 0, $title_slice_max);
+          $loc_titles = [];
+          foreach ($title as $m) {
+            $loc_titles[] = locale_string($m);
+          }
+          $rep_sm_title .= ' '.$title_separator.' '.implode(' '.$title_separator.' ', $loc_titles);
         } else {
           $rep_sm_title .= " $title_separator $instance_title_postfix";
           $rep_sm_desc = $instance_title;
           $rep_sm_desc .= " $title_separator $instance_long_desc";
+
+          if (isset($cat) && $cat != 'main') {
+            $rep_sm_title .= ' '.$title_separator.' '.$head_name;
+            if (!empty($head_desc))
+              $rep_sm_desc .= ' '.$title_separator.' '.$head_desc;
+          }
         }
        
        $host_link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 
@@ -137,8 +151,7 @@
         <a href="https://dota2.com" target="_blank" rel="noopener">Dota 2</a> is a registered trademark of <a href="https://valvesoftware.com" target="_blank" rel="noopener">Valve Corporation.</a>
         Match replay data provided by <a href="https://stratz.com/" target="_blank" rel="noopener">STRATZ</a> and <a href="https://opendota.com" target="_blank" rel="noopener">OpenDota</a>.<br />
         Graphs are made with <a href="https://visjs.org" target="_blank" rel="noopener">vis.js</a> and <a href="http://www.chartjs.org/" target="_blank" rel="noopener">chart.js</a>.<br />
-        Made by Leamare @ <a href="https://spectral.gg" target="_blank" rel="noopener">Spectral.GG</a>
-        with support of <a href="https://vk.com/thecybersport" target="_blank" rel="noopener">TheCyberSport</a>. Klozi is a registered trademark of Grafensky.<br />
+        Made by Spectral Leamare.<br /> Klozi is a registered trademark of Grafensky.<br />
         <?php if (!empty($custom_footer)) echo $custom_footer."<br />";
           echo "LRG web version: <a>".parse_ver($lg_version)."</a>. ";
         ?>
