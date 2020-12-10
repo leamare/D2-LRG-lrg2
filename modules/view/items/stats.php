@@ -123,7 +123,7 @@ function rg_view_generate_items_stats() {
   $res[$tag] .= "<thead><tr class=\"overhead\">".
       "<th width=\"12%\" colspan=\"2\"></th>".
       "<th width=\"18%\" colspan=\"3\"></th>".
-      "<th class=\"separator\" width=\"18%\" colspan=\"4\">".locale_string("items_winrate_shifts")."</th>".
+      "<th class=\"separator\" width=\"18%\" colspan=\"5\">".locale_string("items_winrate_shifts")."</th>".
       "<th class=\"separator\" colspan=\"7\">".locale_string("items_timings")."</th>".
     "</tr><tr>".
     "<th></th>".
@@ -135,6 +135,7 @@ function rg_view_generate_items_stats() {
     "<th data-sorter=\"digit\">".locale_string("items_wo_wr_shift")."</th>".
     "<th data-sorter=\"digit\">".locale_string("items_early_wr_shift")."</th>".
     "<th data-sorter=\"digit\">".locale_string("items_late_wr_shift")."</th>".
+    "<th data-sorter=\"digit\">".locale_string("items_wr_gradient")."</th>".
     "<th class=\"separator\" data-sorter=\"time\">".locale_string("item_time_mean")."</th>".
     "<th data-sorter=\"time\">".locale_string("item_time_min")."</th>".
     "<th data-sorter=\"time\">".locale_string("item_time_q1")."</th>".
@@ -155,6 +156,7 @@ function rg_view_generate_items_stats() {
       "<td>".($line['wo_wr'] < $line['winrate'] ? '+' : '').number_format(($line['winrate']-$line['wo_wr'])*100, 2)."%</td>".
       "<td>".($line['early_wr'] > $line['winrate'] ? '+' : '').number_format(($line['early_wr']-$line['winrate'])*100, 2)."%</td>".
       "<td>".($line['late_wr'] > $line['winrate'] ? '+' : '').number_format(($line['late_wr']-$line['winrate'])*100, 2)."%</td>".
+      "<td>".number_format($line['grad']*100, 2)."%</td>".
       "<td class=\"separator\">".convert_time_seconds($line['avg_time'])."</td>".
       "<td>".convert_time_seconds($line['min_time'])."</td>".
       "<td>".convert_time_seconds($line['q1'])."</td>".
