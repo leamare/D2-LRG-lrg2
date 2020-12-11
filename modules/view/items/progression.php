@@ -17,7 +17,9 @@ function rg_view_generate_items_progression() {
     $report['items']['stats'] = unwrap_data($report['items']['stats']);
   }
 
-  $res = [];
+  $res = [
+    'overview' => ''
+  ];
 
   $hnames = $meta["heroes"];
 
@@ -26,6 +28,10 @@ function rg_view_generate_items_progression() {
     else return ($a['name'] > $b['name']) ? 1 : -1;
   });
 
+  if(check_module($parent_module."overview")) {
+    $hero = 'total';
+    $tag = "overview";
+  }
   foreach($hnames as $hid => $name) {
     $strings['en']["heroid".$hid] = hero_name($hid);
     $res["heroid".$hid] = "";
@@ -65,19 +71,9 @@ function rg_view_generate_items_progression() {
     return $res;
   }
 
-  $res[$tag] = "<div id=\"items-progr-$tag\" class=\"graph\"></div><script type=\"text/javascript\">";
+  $res[$tag] .= "<div class=\"content-text\">".locale_string("items_progression_desc")."</div>";
 
-  // foreach ($pairs as $line) {
-  //   $res[$tag] .= "<tr>".
-  //     "<td>".item_icon($line['item1'])."</td>".
-  //     "<td>".item_name($line['item1'])."</td>".
-  //     "<td>".item_icon($line['item2'])."</td>".
-  //     "<td>".item_name($line['item2'])."</td>".
-  //     "<td>".$line['total']."</td>".
-  //     "<td>".number_format(100*$line['winrate'], 2)."%</td>".
-  //     "<td>".$line['min_diff']."</td>".
-  //   "</tr>";
-  // }
+  $res[$tag] = "<div id=\"items-progr-$tag\" class=\"graph\"></div><script type=\"text/javascript\">";
 
   $nodes = '';
   $edges = '';
@@ -152,7 +148,7 @@ function rg_view_generate_items_progression() {
           shakeTowards: 'leaves',
           nodeSpacing: 15,
           avoidOverlap: 1,
-          levelSeparation: 80,
+          levelSeparation: 100,
         },
       }
     };\n".
