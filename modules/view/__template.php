@@ -125,6 +125,10 @@
         <h1><?php echo $report['league_name']; ?></h1>
         <h2><?php echo $report['league_desc']; ?></h2>
         <h3><?php echo locale_string($h3).": ".$report['random'][$h3]; ?></h3>
+        <?php 
+          if (isset($report['league_id']) && isset($league_logo_provider)) 
+            echo "<div class=\"league-banner\"><img src=\"".str_replace('%LID%', $report['league_id'], $league_logo_provider)."\" alt=\"league_banner\" /></div>"
+        ?>
       <?php } else { ?>
         <div id="image-logo"></div>
       <?php } ?>

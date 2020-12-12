@@ -158,6 +158,7 @@ Parameters:
 * `-p` - counts matches with negative player ids are required for data update
 * `-Q` - disables unparsed matches in -U mode (to only work with matches without detailed player data)
 * `-G` - use Stratz GraphQL to populate data
+* `-n` - force update player names
 
 Fetcher has two modes: "listen" mode and the regular one. Fetcher is using matchlist from `matchlists` follder by default, listen mode changes it to STDIN. It's not async because of time limitation on OpenDota side (basically you can't be too fast with your requests anyway, so there's no need to be asynchronous).
 
