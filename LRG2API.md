@@ -31,10 +31,12 @@ One major GET parameter is `report`. It specifies a tag of a report to load. If 
 * (MODL) `region#` – sets `region` variable to `#` value (expected region codes listed in metadata)
 * (MODL) `position_C.L` – sets position to `C.L` code, where `C` is Core flag (0/1) and `L` is lane flag
 * (MODL) `heroid#` – sets `heroid` to `#` value (based on in-game hero IDs)
-* (MODL) `playerd#` – sets `playerid` to `#` value (steam userid 3 expected)
+* (MODL) `playerid#` – sets `playerid` to `#` value (steam userid 3 expected)
 * (MODL) `team#` – sets `team` to `#` value (expected dota team ID), alias `teamid#`
+* (MODL) `itemid#` – sets `item` to `#` value (expected dota item ID)
 * (GET) `rep` – report tag (for non-report endpoints)
 * (GET) `pretty` – flag, if it’s used response will be nicely formatted
+* (GET) `desc` - flag, adds report descriptor to the response if set
 
 ### Typical data objects
 
@@ -228,6 +230,12 @@ It’s fairly simple to explain. It doesn’t have a structure and is used in `s
 * `teams/grid` (may use `region`)
 * [EXCL] `teams/grid/raw` (same as regular grid, but returns raw TVT data object)
 * [EXCL] `teams/grid/source` (same as regular grid, but returns unpacked TVT data)
+* `items/overview`
+* `items/stats` and `items/boxplots` (identical) - may use `item` variable, returns `total` if not set
+* `items/heroes` and `items/heroboxplots` (identical) - may use `hero` variable
+* `items/icombos` - may use `item` variable, returns `total` if not set
+* `items/irecords` - may use `item` variable, returns `overview` if not set
+* `items/progression` and `items/proglist` (identical) - may use `hero` variable, returns `overview` if not set
 
 ### Non-report endpoints
 
