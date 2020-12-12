@@ -48,6 +48,10 @@ function fetch($match) {
     if ($update_unparsed) {
       $query = $conn->query("SELECT matchid FROM adv_matchlines WHERE matchid = ".$match.";");
       $match_parsed = isset($query->num_rows) && $query->num_rows;
+      if ($lg_settings['main']['items'] && $match_parsed) {
+        $query = $conn->query("SELECT matchid FROM items WHERE matchid = ".$match.";");
+        $match_parsed = isset($query->num_rows) && $query->num_rows;
+    }
     }
     if ($request_unparsed_players) {
       $query = $conn->query("SELECT matchid FROM matchlines WHERE matchid = ".$match." and playerid < 0;");
