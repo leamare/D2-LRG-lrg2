@@ -49,7 +49,8 @@ a:hover {
 	height: 438px;
 	background-position: center;
 	background-repeat: no-repeat;
-	background-color: var(--section-header);
+  background-color: var(--section-header);
+  position: relative;
 }
 
 #header-image {
@@ -74,19 +75,24 @@ a:hover {
 	padding-top: 158px;
 	margin-bottom: 0px;
 	font-family: 'Radiance-SemiBold';
-	text-shadow: 2px 2px 10px #000000;
+  text-shadow: 2px 2px 10px #000000;
+  position: relative;
+  z-index: 10;
 }
 
 .section-header h2 {
-	width: 100%;
+  /* width: 100%; */
+  width: 70%;
 	text-align: center;
 	font-size: 24px;
 	letter-spacing: 3px;
 	text-transform: uppercase;
 	color: var(--section-header-h2);
-	margin-top: 4px;
+	margin: 4px auto 0 auto;
 	font-family: 'Radiance-SemiBold';
-	text-shadow: 2px 2px 6px var(--text-shadow);
+  text-shadow: 0px 0px 6px var(--text-shadow), 0px 0px 6px var(--text-shadow), 0px 0px 6px var(--text-shadow);
+  position: relative;
+  z-index: 10;
 }
 
 .section-header h3 {
@@ -98,7 +104,28 @@ a:hover {
 	color: var(--section-header-h3);
 	margin-top: 8px;
 	font-family: 'Radiance-SemiBold';
-	text-shadow: 2px 2px 3px var(--text-shadow);
+  text-shadow: 0px 0px 3px var(--text-shadow), 0px 0px 3px var(--text-shadow), 0px 0px 3px var(--text-shadow);
+  position: relative;
+  z-index: 10;
+}
+
+.section-header .league-banner img {
+  height: 100%;
+  width: auto;
+}
+.section-header .league-banner {
+  position: absolute;
+  /* top: 60px;
+  left: 60px;
+  bottom: 60px; */
+  left: 60px;
+  top: 158px;
+  bottom: 158px;
+  z-index: 0;
+  opacity: 0.75;
+  /* height: 100%; */
+  -webkit-mask-image: linear-gradient(to right, rgba(0,0,0,1), rgba(0,0,0,1) 30%, rgba(0,0,0,0));
+  mask-image: linear-gradient(to right, rgba(0,0,0,1), rgba(0,0,0,1) 30%, rgba(0,0,0,0));
 }
 
 .content-section {

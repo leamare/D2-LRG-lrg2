@@ -38,7 +38,7 @@ html {
 }
 
 body {
-  min-width: 1200px;
+  min-width: 1300px;
 }
 
 table.list , table.pvp {
@@ -257,6 +257,7 @@ table .hero_portrait {
   vertical-align: sub;
 }
 
+
 .matchlist {
   display: table-row;
 }
@@ -322,7 +323,7 @@ table .hero_portrait {
   letter-spacing: 4px;
   text-align: left;
   font-weight: bold;
-  color: var(--caption);
+  color: var(--link);
 }
 .match-id a {
   font-size: inherit;
@@ -473,6 +474,14 @@ table .hero_portrait {
   margin-bottom: 10px;
   background-color: var(--name-bg);
   padding: 5px;
+}
+.team-name .hero_portrait {
+  height: 28px;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 5px;
+  margin-bottom: 4px;
+  margin-left: 7px;
 }
 .team-name a {
   font-size: inherit;
