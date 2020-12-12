@@ -54,6 +54,9 @@ $use_full_stratz = isset($options['Z']);
 $stratz_graphql = isset($options['G']);
 $ignore_stratz = isset($options['Q']);
 
+$update_names = isset($options['n']);
+if ($update_names) $updated_names = [];
+
 $request_unparsed = isset($options['R']);
 $request_unparsed_players = isset($options['p']);
 
