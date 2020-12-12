@@ -16,7 +16,7 @@ function fetch($match) {
   global $opendota, $conn, $rnum, $matches, $failed_matches, $scheduled, $scheduled_stratz, $t_teams, $t_players, $use_stratz, $require_stratz,
   $request_unparsed, $meta, $stratz_timeout_retries, $force_adding, $cache_dir, $lg_settings, $lrg_use_cache, $first_scheduled,
   $use_full_stratz, $scheduled_wait_period, $steamapikey, $force_await, $players_list, $rank_limit, $stratztoken, $ignore_stratz,
-  $update_unparsed, $request_unparsed_players, $stratz_graphql, $api_cooldown_seconds;
+  $update_unparsed, $request_unparsed_players, $stratz_graphql, $api_cooldown_seconds, $update_names, $updated_names;
 
   $t_match = [];
   $t_matchlines = [];
@@ -51,7 +51,7 @@ function fetch($match) {
       if ($lg_settings['main']['items'] && $match_parsed) {
         $query = $conn->query("SELECT matchid FROM items WHERE matchid = ".$match.";");
         $match_parsed = isset($query->num_rows) && $query->num_rows;
-    }
+      }
     }
     if ($request_unparsed_players) {
       $query = $conn->query("SELECT matchid FROM matchlines WHERE matchid = ".$match." and playerid < 0;");
@@ -103,7 +103,7 @@ function fetch($match) {
     $t_adv_matchlines = $matchdata['adv_matchlines'];
     $t_items = $matchdata['items'] ?? [];
     foreach($matchdata['players'] as $p) {
-      if(!isset($t_players[$p['playerID']])) {
+      if(!isset($t_players[$p['playerID']]) || ($update_names && !isset($updated_names[$p['playerID']])) ) {
         $t_new_players[$p['playerID']] = $p['nickname'];
       }
     }
@@ -199,7 +199,7 @@ function fetch($match) {
         $t_adv_matchlines = $matchdata['adv_matchlines'];
         $t_items = $matchdata['items'];
         foreach($matchdata['players'] as $p) {
-          if(!isset($t_players[$p['playerID']])) {
+          if(!isset($t_players[$p['playerID']]) || ($update_names && !isset($updated_names[$p['playerID']]) )) {
             $t_new_players[$p['playerID']] = $p['nickname'];
           }
         }
@@ -656,7 +656,7 @@ function fetch($match) {
         }
 
         $pid = (int)$matchdata['players'][$j]['account_id'];
-        if(!isset($t_players[$pid])) {
+        if(!isset($t_players[$pid]) || ($update_names && !isset($updated_names[$pid]))) {
           if ($pid < 0) {
             $t_new_players[$pid] = $meta['heroes'][$matchdata['players'][$j]['hero_id']]['name']." Player";
           } else {
@@ -1065,7 +1065,23 @@ function fetch($match) {
   $sql = ""; $err_query = "";
 
   foreach ($t_new_players as $id => $player) {
-    if (isset($t_players[$id])) continue;
+    if (isset($t_players[$id])) {
+      if ($update_names && !isset($updated_names[$id])) {
+        $sql = "UPDATE players SET nickname = \"".addslashes($player)."\" WHERE playerID = ".$id.";";
+        echo ".";
+        if ($conn->query($sql) === TRUE) $updated_names[$id] = $player;
+        else {
+          echo $conn->error."\n";
+          if ($conn->error === "MySQL server has gone away") {
+            sleep(30);
+            conn_restart();
+            $matches[] = $match;
+            return false;
+          }
+        }
+      }
+      continue;
+    }
     $player = mb_substr($player, 0, 127);
     $sql = "INSERT INTO players (playerID, nickname) VALUES (".$id.",\"".addslashes($player)."\");";
     if ($conn->query($sql) === TRUE) $t_players[$id] = $player;
