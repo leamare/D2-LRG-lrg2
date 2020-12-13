@@ -10,7 +10,8 @@ function team_card($tid, $full = false) {
   if(!isset($report['teams'])) return null;
 
   $output = "<div class=\"team-card".($full ? " full" : "")."\"><div class=\"team-name\">".
-            "<a href=\"?league=".$leaguetag."&mod=teams-profiles-team".$tid.
+            team_logo($tid).
+            " <a href=\"?league=".$leaguetag."&mod=teams-profiles-team".$tid.
             (empty($linkvars) ? "" : "&$linkvars")
             ."\" title=\"".team_name($tid)."\">".team_name($tid)." (".team_tag($tid).")</a></div>";
 
@@ -42,6 +43,7 @@ function team_card($tid, $full = false) {
     $player_pos[$player] = reset($report['players_additional'][$player]['positions']);
   }
   uasort($report['teams'][$tid]['active_roster'], function($a, $b) use ($player_pos) {
+    if (!isset($player_pos[$a]['core']) || !isset($player_pos[$b]['core'])) return 0;
     if ($player_pos[$a]['core'] > $player_pos[$b]['core']) return -1;
     if ($player_pos[$a]['core'] < $player_pos[$b]['core']) return 1;
     if ($player_pos[$a]['lane'] < $player_pos[$b]['lane']) return -1;
@@ -51,8 +53,10 @@ function team_card($tid, $full = false) {
   foreach($report['teams'][$tid]['active_roster'] as $player) {
     if (!isset($report['players'][$player])) continue;
     $position = $player_pos[$player];
-    $output .= "<div class=\"team-info-line\">".player_name($player)." (".($position['core'] ? locale_string("core")." " : locale_string("support")).
-                  locale_string( "lane_".$position['lane'] ).")</div>";
+    $output .= "<div class=\"team-info-line\">".player_name($player).
+      (isset($position['core']) ? " (".($position['core'] ? locale_string("core")." " : locale_string("support")).
+        locale_string( "lane_".$position['lane'] ).')' : ''
+      )."</div>";
   }
   $output .= "</div>";
 
