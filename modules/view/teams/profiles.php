@@ -49,6 +49,7 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
             }
             if (!empty($report['players_additional'])) {
               uksort($matches, function($a, $b) use ($player_pos) {
+                if (!isset($player_pos[$a]['core']) || !isset($player_pos[$b]['core'])) return 0;
                 if ($player_pos[$a]['core'] > $player_pos[$b]['core']) return -1;
                 if ($player_pos[$a]['core'] < $player_pos[$b]['core']) return 1;
                 if ($player_pos[$a]['lane'] < $player_pos[$b]['lane']) return -1;
@@ -161,6 +162,7 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
               $player_pos[$player] = reset($report['players_additional'][$player]['positions']);
             }
             uasort($context[$tid]['active_roster'], function($a, $b) use ($player_pos) {
+              if (!isset($player_pos[$a]['core']) || !isset($player_pos[$b]['core'])) return 0;
               if ($player_pos[$a]['core'] > $player_pos[$b]['core']) return -1;
               if ($player_pos[$a]['core'] < $player_pos[$b]['core']) return 1;
               if ($player_pos[$a]['lane'] < $player_pos[$b]['lane']) return -1;
@@ -171,8 +173,10 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
             foreach($context[$tid]['active_roster'] as $player) {
               if (!isset($report['players'][$player])) continue;
               $position = $player_pos[$player];
-              $pl[] = "<span class=\"player\">".player_name($player)." (".($position['core'] ? locale_string("core")." " : locale_string("support")).
-                            locale_string( "lane_".$position['lane'] ).")</span>";
+              $pl[] = "<span class=\"player\">".player_name($player).
+              (isset($position['core']) ? " (".($position['core'] ? locale_string("core")." " : locale_string("support")).
+                locale_string( "lane_".$position['lane'] ).')' : ''
+              )."</span>";
             }
             $res["team".$tid]['heroes']['positions']["overview"] .= implode(', ', $pl)."</div>";
 
