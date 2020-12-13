@@ -95,12 +95,45 @@ function get_report_descriptor(&$report, $generate_endpoints = false) {
   if (isset($report['pvp'])) $desc['endpoints'][] = "players-pvp";
   if (isset($report['players_summary'])) $desc['endpoints'][] = "players-summary";
 
+  if (isset($report['items'])) {
+    $desc['endpoints'][] = "items";
+    $desc['endpoints'][] = "items-overview";
+    if (isset($report['items']['stats'])) {
+      $desc['endpoints'][] = "items-stats";
+      // $desc['endpoints'][] = "items-boxplots";
+      $desc['endpoints'][] = "items-heroes";
+      // $desc['endpoints'][] = "items-heroboxplots";
+    }
+    if (isset($report['items']['combos'])) {
+      $desc['endpoints'][] = "items-icombos";
+    }
+    if (isset($report['items']['records'])) {
+      $desc['endpoints'][] = "items-irecords";
+    }
+    if (isset($report['items']['progr'])) {
+      $desc['endpoints'][] = "items-progression";
+      // $desc['endpoints'][] = "items-proglist";
+    }
+  }
+
   if ($desc['tvt']) {
     $desc['endpoints'][] = "teams-tvt-grid";
     $desc['endpoints'][] = "teams-profiles";
     $desc['endpoints'][] = "teams-cards";
-    $team_ref = reset($desc['teams']);
+
+    $team_ref = reset($report['teams']);
     if (isset($team_ref['draft_vs'])) $desc['endpoints'][] = "teams-team-vsdraft";
+    if (isset($team_ref['draft'])) $desc['endpoints'][] = "teams-team-draft";
+    if (isset($team_ref['hero_pairs'])) $desc['endpoints'][] = "teams-team-heroes-combos-pairs";
+    if (isset($team_ref['hero_triplets'])) $desc['endpoints'][] = "teams-team-heroes-combos-trios";
+    if (isset($team_ref['hero_graph'])) $desc['endpoints'][] = "teams-team-heroes-meta_graph";
+    if (isset($team_ref['hero_positions'])) $desc['endpoints'][] = "teams-team-heroes-positions";
+    if (isset($team_ref['players_draft'])) $desc['endpoints'][] = "teams-team-players-draft";
+
+    //$reg_ref = reset($report['regions_data']);
+    if (isset($report['regions_data'])) {
+      $desc['endpoints'][] = "regions-teams-softgen";
+    }
   }
 
   if ($desc['matches_details']) $desc['endpoints'][] = "matches";
