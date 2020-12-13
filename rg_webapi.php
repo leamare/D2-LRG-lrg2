@@ -14,9 +14,11 @@ if(isset($_REQUEST['loc']) && !empty($_REQUEST['loc'])) {
   $locale = $_REQUEST['loc'];
 }
 
+$include_descriptor = isset($_REQUEST['desc']);
+
 include_once("rg_report_out_settings.php");
 include_once("modules/commons/versions.php");
-$lg_version = [ 2, 12, 0, 0, 0 ];
+$lg_version = [ 2, 13, 0, 0, 0 ];
 
 include_once("modules/commons/locale_strings.php");
 
@@ -116,7 +118,7 @@ $resp['endpoint'] = $endp_name;
 $resp['version'] = parse_ver($lg_version);
 $resp['result'] = $result ?? [];
 
-if (!empty($report)) {
+if (!empty($report) && $include_descriptor) {
   $resp['report_desc'] = get_report_descriptor($report, true);
 }
 
