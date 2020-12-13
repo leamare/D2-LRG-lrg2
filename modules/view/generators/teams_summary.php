@@ -53,6 +53,7 @@ function rg_view_generator_teams_summary($context = null, $short_flag = false) {
   $i = 0;
 
   $res .= "<thead><tr>".
+            "<th></th>".
             "<th data-sortInitialOrder=\"asc\">".locale_string("team_name")."</th>".
             "<th>".locale_string("matches_s")."</th>".
             "<th>".locale_string("winrate")."</th>";
@@ -69,6 +70,7 @@ function rg_view_generator_teams_summary($context = null, $short_flag = false) {
   foreach($context as $team_id) {
     if (isset($report['teams_interest']) && !in_array($team_id, $report['teams_interest'])) continue;
     $res .= "<tr>".
+              "<td>".team_logo($team_id)."</td>".
               "<td>".team_link($team_id)."</td>".
               "<td>".$report['teams'][$team_id]['matches_total']."</td>".
               "<td>".number_format( $report['teams'][$team_id]['matches_total'] ? 
