@@ -12,4 +12,8 @@ function team_tag($tid) {
     return htmlspecialchars($report['teams'][ $tid ]['tag']);
   return "";
 }
-?>
+
+function team_logo($tid) {
+  global $meta, $team_logo_provider;
+  return "<img class=\"hero_portrait\" src=\"".str_replace('%TEAM%', $tid, $team_logo_provider)."\" alt=\"".team_name($tid)."\" />";
+}
