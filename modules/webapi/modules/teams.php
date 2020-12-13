@@ -3,8 +3,13 @@
 include_once(__DIR__ . "/../../view/generators/tvt_unwrap_data.php");
 
 $endpoints['teams'] = function($mods, $vars, &$report) use (&$endpoints) {
+  if (!isset($report['teams']))
+    throw new \Exception("No teams in the report ");
+
   if (in_array("cards", $mods)) {
-    $res = [];
+    $res = [
+      '__endp' => 'teams-cards',
+    ];
     $tids = array_keys($report['teams']);
     foreach($tids as $tid) {
       $res[] = team_card($tid);
@@ -24,7 +29,9 @@ $endpoints['teams'] = function($mods, $vars, &$report) use (&$endpoints) {
   
     $team_ids = array_keys($tvt);
 
-    $res = [];
+    $res = [
+      '__endp' => 'teams-grid',
+    ];
   
     foreach($tvt as $tid => $teamline) {
       if (!empty($report['teams_interest']) && !in_array($tid, $report['teams_interest'])) continue;
@@ -42,6 +49,78 @@ $endpoints['teams'] = function($mods, $vars, &$report) use (&$endpoints) {
             $res[$tid][ $team_ids[$i] ]['matches'] = $context[$tid][$team_ids[$i]]['matchids'];
         }
       }
+    }
+
+    return $res;
+  }
+
+  if (in_array("profiles", $mods)) {
+    $res = [
+      '__endp' => 'teams-profiles',
+      'teams_list' => array_keys($report['teams'])
+    ];
+    if (empty($vars['team'])) {
+      $vars['team'] = reset($res['teams_list']);
+    }
+
+    $res['card'] = team_card($vars['team']);
+    $res['averages'] = $report['teams'][ $vars['team'] ]['averages'];
+
+    if(isset($report['teams'][ $vars['team'] ]['regions'])) {
+      asort($report['teams'][ $vars['team'] ]['regions']);
+      $res['regions'] = $report['teams'][ $vars['team'] ]['regions'];
+    } else {
+      $res['regions'] = null;
+    }
+
+    if (!empty($report['match_participants_teams'])) {
+      $res['unique_heroes'] = [];
+
+      $matches = [];
+      $player_pos = [];
+      foreach($report['teams'][ $vars['team'] ]['active_roster'] as $player) {
+        if (!isset($report['players'][$player])) continue;
+        if (!empty($report['players_additional']))
+          $player_pos[$player] = reset($report['players_additional'][$player]['positions']);
+        $matches[ $player ] = [];
+      }
+      if (!empty($report['players_additional'])) {
+        uksort($matches, function($a, $b) use ($player_pos) {
+          if (!isset($player_pos[$a]['core']) || !isset($player_pos[$b]['core'])) return 0;
+          if ($player_pos[$a]['core'] > $player_pos[$b]['core']) return -1;
+          if ($player_pos[$a]['core'] < $player_pos[$b]['core']) return 1;
+          if ($player_pos[$a]['lane'] < $player_pos[$b]['lane']) return -1;
+          if ($player_pos[$a]['lane'] > $player_pos[$b]['lane']) return 1;
+          return 0;
+        });
+      }
+
+      foreach($report['teams'][ $vars['team'] ]['matches'] as $match => $v) {
+        $radiant = ( $report['match_participants_teams'][$match]['radiant'] ?? 0 ) == $vars['team'] ? 1 : 0;
+        foreach ($report['matches'][$match] as $l) {
+          if ($l['radiant'] != $radiant) continue;
+          if (!isset($matches[ $l['player'] ])) continue;
+          $matches[ $l['player'] ][ $l['hero'] ] = ( $matches[ $l['player'] ][ $l['hero'] ] ?? 0 ) + 1;
+        }
+      }
+
+      foreach ($matches as $player => $heroes) {
+        arsort($heroes);
+        $pl = [
+          'role' => $player_pos[ $player ],
+          'heroes' => []
+        ];
+        foreach ($heroes as $hero => $num) {
+          $pl['heroes'][$hero] = [
+            'played' => $num,
+            'total' => $report['teams'][ $vars['team'] ]['pickban'][$hero]['matches_picked'],
+            'winrate' => $report['teams'][ $vars['team'] ]['pickban'][$hero]['winrate_picked']
+          ];
+        }
+        $res['unique_heroes'][$player] = $pl;
+      }
+    } else {
+      $res['unique_heroes'] = null;
     }
 
     return $res;

@@ -62,6 +62,7 @@ foreach ($modline as $ml) {
   if (strpos($ml, "playerid") !== FALSE) $vars['playerid'] = (int)str_replace("playerid", "", $ml);
   if (strpos($ml, "team") !== FALSE && $ml != "teams") $vars['team'] = (int)str_replace("team", "", $ml);
   if (strpos($ml, "teamid") !== FALSE) $vars['team'] = (int)str_replace("teamid", "", $ml);
+  if (strpos($ml, "itemid") !== FALSE) $vars['item'] = (int)str_replace("itemid", "", $ml);
   //if (isset($vars['team'])) $vars['teamid'] = $vars['team']; 
 }
 if (isset($_GET['gets'])) $vars['gets'] = explode(",", strtolower($_GET['gets']));
@@ -77,4 +78,9 @@ try {
 } catch (\Throwable $e) {
   if (!isset($resp['errors'])) $resp['errors'] = [];
     $resp['errors'][] = $e->getMessage();
+}
+
+if (isset($result['__endp'])) {
+  $endp_name = $result['__endp'];
+  unset($result['__endp']);
 }

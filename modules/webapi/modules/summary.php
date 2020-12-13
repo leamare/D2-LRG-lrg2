@@ -22,6 +22,7 @@ $endpoints['summary'] = function($mods, $vars, &$report) {
       ];
       $res[] = array_merge($t, $report['teams'][$team_id]['averages']);
     }
+    $res['__endp'] = "teams-summary";
   } else if (in_array("players", $mods)) {
     if (isset($report['players_additional'])) {
       foreach($context['players_summary'] as $id => $player) {
@@ -31,8 +32,10 @@ $endpoints['summary'] = function($mods, $vars, &$report) {
       }
     }
     $res = $context['players_summary'];
+    $res['__endp'] = "players-summary";
   } else if (in_array("heroes", $mods)) {
     $res = $context['hero_summary'];
+    $res['__endp'] = "heroes-summary";
   } else {
     throw new \Exception("What kind of summary do you need?");
   }
