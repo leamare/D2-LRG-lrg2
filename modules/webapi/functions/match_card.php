@@ -12,6 +12,9 @@ function match_card($mid) {
 
   if (!isset($report['matches'])) return $match;
 
+  $match['string'] = isset($report['match_parts_strings']) ? $report['match_parts_strings'][$mid] ?? null : null;
+  $match['game_num'] = isset($report['match_parts_game_num']) ? $report['match_parts_game_num'][$mid] ?? null : null;
+
   $clusters = $meta['clusters'];
   $regions = $meta['regions'];
 
@@ -68,4 +71,25 @@ function match_card($mid) {
   return $match;
 }
 
-?>
+function match_card_min($match) {
+  global $report;
+
+  if(isset($report['teams']) && isset($report['match_participants_teams'][$match])) {
+    $teams = [];
+    if(isset($report['match_participants_teams'][$match]['radiant']) &&
+       isset($report['teams'][ $report['match_participants_teams'][$match]['radiant'] ]['name']))
+       $teams['radiant'] = $report['match_participants_teams'][$match]['radiant'];
+    else $team_radiant = $teams['radiant'] = null;
+    if(isset($report['match_participants_teams'][$match]['dire']) &&
+       isset($report['teams'][ $report['match_participants_teams'][$match]['dire'] ]['name']))
+      $teams['dire'] = $report['match_participants_teams'][$match]['dire'];
+    else $team_dire = $teams['dire'] = null;
+  }
+
+  return [
+    'match_id' => $match,
+    'string' => isset($report['match_parts_strings']) ? $report['match_parts_strings'][$match] ?? null : null,
+    'game_num' => isset($report['match_parts_game_num']) ? $report['match_parts_game_num'][$match] ?? null : null,
+    'teams' => $teams ?? []
+  ];
+}

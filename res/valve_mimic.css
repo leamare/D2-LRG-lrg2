@@ -124,8 +124,8 @@ a:hover {
   z-index: 0;
   opacity: 0.75;
   /* height: 100%; */
-  -webkit-mask-image: linear-gradient(to right, rgba(0,0,0,1), rgba(0,0,0,1) 30%, rgba(0,0,0,0));
-  mask-image: linear-gradient(to right, rgba(0,0,0,1), rgba(0,0,0,1) 30%, rgba(0,0,0,0));
+  -webkit-mask-image: linear-gradient(to right, rgba(0,0,0,1), rgba(0,0,0,1) 30%, rgba(0,0,0,0.5));
+  mask-image: linear-gradient(to right, rgba(0,0,0,1), rgba(0,0,0,1) 30%, rgba(0,0,0,0.5));
 }
 
 .content-section {
