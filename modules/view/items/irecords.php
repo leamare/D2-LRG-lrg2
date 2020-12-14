@@ -57,6 +57,8 @@ function rg_view_generate_items_irecords() {
   ];
 
   if ($item) {
+    $res[$tag] .= "<div class=\"content-text\">".locale_string("items_records_desc")."</div>";
+    
     $res[$tag] .= "<table id=\"items-records-itemid$item\" class=\"list sortable\"><caption>".item_name($item)."</caption><thead>
     <tr>
       <th>".locale_string("match")."</th>
@@ -76,14 +78,12 @@ function rg_view_generate_items_irecords() {
     }
 
     $res[$tag] .= "</tbody></table>";
-
-    $res[$tag] .= "<div class=\"content-text\">".locale_string("items_records_desc")."</div>";
   } else {
     if (is_wrapped($report['items']['ph'])) {
       $report['items']['ph'] = unwrap_data($report['items']['ph']);
     }
 
-    $res[$tag] .= "<div class=\"content-text\">".locale_string("items_records_overview_desc")."</div>";
+    $res[$tag] .= "<div class=\"content-text\">".locale_string("items_records_overview_desc")."</div><br />";
 
     $res[$tag] .= "<div class=\"selector-modules-level-4\">".
       "<span class=\"selector\">".locale_string("items_category_selector").":</span> ".

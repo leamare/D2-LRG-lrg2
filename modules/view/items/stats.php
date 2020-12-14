@@ -73,8 +73,6 @@ function rg_view_generate_items_stats() {
 
   $res[$tag] .= "<div class=\"selector-modules-level-4\">";
 
-  $res[$tag] .= "<div class=\"content-text\">".locale_string("items_stats_desc")."</div>";
-
   if ($hero !== 'total') {
     $data = $report['pickban'][$hero];
 
@@ -112,7 +110,11 @@ function rg_view_generate_items_stats() {
   foreach ($item_cats as $ic) {
     $res[$tag] .= "<option ".($cat == $ic ? "selected=\"selected\"" : "")." value=\"?league=".$leaguetag."&mod=".$mod.(empty($linkvars) ? "" : "&".$linkvars)."&item_cat=$ic\">".locale_string("items_category_$ic")."</option>";
   }
-  $res[$tag] .= "</select></div>";
+  $res[$tag] .= "</select>";
+  
+  $res[$tag] .= "<div class=\"content-text\">".locale_string("items_stats_desc")."</div>";
+  
+  $res[$tag] .= "</div>";
 
   if (empty($items)) {
     $res[$tag] .= "<div class=\"content-text\">".locale_string("items_stats_empty")."</div>";
@@ -123,7 +125,7 @@ function rg_view_generate_items_stats() {
   $res[$tag] .= "<thead><tr class=\"overhead\">".
       "<th width=\"12%\" colspan=\"2\"></th>".
       "<th width=\"18%\" colspan=\"3\"></th>".
-      "<th class=\"separator\" width=\"18%\" colspan=\"5\">".locale_string("items_winrate_shifts")."</th>".
+      "<th class=\"separator\" width=\"30%\" colspan=\"5\">".locale_string("items_winrate_shifts")."</th>".
       "<th class=\"separator\" colspan=\"7\">".locale_string("items_timings")."</th>".
     "</tr><tr>".
     "<th></th>".
@@ -139,10 +141,10 @@ function rg_view_generate_items_stats() {
     "<th class=\"separator\" data-sorter=\"time\">".locale_string("item_time_mean")."</th>".
     "<th data-sorter=\"time\">".locale_string("item_time_min")."</th>".
     "<th data-sorter=\"time\">".locale_string("item_time_q1")."</th>".
-    "<th data-sorter=\"time\">".locale_string("median")."</th>".
+    "<th data-sorter=\"time\">".locale_string("item_time_median")."</th>".
     "<th data-sorter=\"time\">".locale_string("item_time_q3")."</th>".
     "<th data-sorter=\"time\">".locale_string("item_time_max")."</th>".
-    "<th data-sorter=\"time\">".locale_string("std_dev")."</th>".
+    "<th data-sorter=\"time\">".locale_string("item_time_std_dev")."</th>".
   "</tr></thead><tbody>";
 
   foreach ($items as $iid => $line) {

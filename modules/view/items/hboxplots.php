@@ -49,8 +49,8 @@ function rg_view_generate_items_heroboxplots() {
   $res['itemid'.$item] .= "<table id=\"items-itemid$item-reference\" class=\"list wide\">";
   $res['itemid'.$item] .= "<thead><tr class=\"overhead\">".
       "<th width=\"12%\" colspan=\"2\"></th>".
-      "<th width=\"18%\" colspan=\"3\"></th>".
-      "<th class=\"separator\" width=\"18%\" colspan=\"4\">".locale_string("items_winrate_shifts")."</th>".
+      "<th width=\"18%\" colspan=\"2\"></th>".
+      "<th class=\"separator\" width=\"30%\" colspan=\"4\">".locale_string("items_winrate_shifts")."</th>".
       "<th class=\"separator\" colspan=\"7\">".locale_string("items_timings")."</th>".
     "</tr><tr>".
     "<th></th>".

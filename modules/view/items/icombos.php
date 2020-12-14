@@ -54,11 +54,11 @@ function rg_view_generate_items_icombos() {
         "<th width=\"18%\">".locale_string("item")."</th>".
         "<th>".locale_string("matches")."</th>".
         "<th>".locale_string("winrate")."</th>".
-        "<th>".locale_string("wr_diff")."</th>".
+        "<th>".locale_string("winrate_diff")."</th>".
         "<th>".locale_string("time_diff")."</th>".
-        "<th>".locale_string("expectation")."</th>".
+        "<th>".locale_string("pair_expectation")."</th>".
         "<th>".locale_string("deviation")."</th>".
-        "<th>".locale_string("deviation_pct")."</th>".
+        "<th>".locale_string("percentage")."</th>".
       "</tr></thead><tbody>";
 
     $items = [];
@@ -119,11 +119,11 @@ function rg_view_generate_items_icombos() {
         "<th width=\"18%\" colspan=\"2\">".locale_string("item")." 2</th>".
         "<th>".locale_string("matches")."</th>".
         "<th>".locale_string("winrate")."</th>".
-        "<th>".locale_string("wr_diff")."</th>".
+        "<th>".locale_string("winrate_diff")."</th>".
         "<th>".locale_string("time_diff")."</th>".
-        "<th>".locale_string("expectation")."</th>".
+        "<th>".locale_string("pair_expectation")."</th>".
         "<th>".locale_string("deviation")."</th>".
-        "<th>".locale_string("deviation_pct")."</th>".
+        "<th>".locale_string("percentage")."</th>".
       "</tr></thead><tbody>";
 
     uasort($pairs, function($a, $b) {

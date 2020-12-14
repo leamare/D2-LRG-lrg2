@@ -48,6 +48,8 @@ function rg_view_generate_items_proglist() {
     return $res;
   }
 
+  $res[$tag] .= "<div class=\"content-text\">".locale_string("items_progression_list_desc")."</div>";
+
   $res[$tag] .= "<div class=\"content-text\">".locale_string("total").": ".sizeof($pairs)."</div>";
 
   $res[$tag] .= "<table id=\"items-proglist-$tag\" class=\"list sortable\">";

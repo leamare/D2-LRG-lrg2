@@ -132,8 +132,8 @@ function rg_view_generate_items_overview() {
   $worst = array_slice($worst_a, 0, $limit);
 
   $res .= "<div class=\"content-text\"><h1>".locale_string("items_most_impactful_heroes_header")."</h1></div>";
-  $res .= "<div class=\"small-list-wrapper\">";
-  $res .=  "<table id=\"items-over-best\" class=\"list list-small\">
+  //$res .= "<div class=\"small-list-wrapper\">";
+  $res .=  "<table id=\"items-over-best\" class=\"list\">
     <thead><tr>
       <th colspan=\"2\">".locale_string("hero")."</th>
       <th colspan=\"2\">".locale_string("item")."</th>
@@ -148,13 +148,13 @@ function rg_view_generate_items_overview() {
       "<td>".item_icon($line['item'])."</td>".
       "<td>".item_name($line['item'])."</td>".
       "<td>".$line['purchases']."</td>".
-      "<td>".number_format($line['winrate']*100, 2)."%</td>".
-      "<td>".($line['winrate'] > $line['wo_wr'] ? '+' : '').number_format(($line['winrate']-$line['wo_wr'])*100, 2)."%</td>".
+      "<td>".number_format($line['winrate']*100, 1)."%</td>".
+      "<td>".($line['winrate'] > $line['wo_wr'] ? '+' : '').number_format(($line['winrate']-$line['wo_wr'])*100, 1)."%</td>".
     "</tr>";
   }
   $res .= "</tbody></table>";
 
-  $res .=  "<table id=\"items-over-worst\" class=\"list list-small\">
+  $res .=  "<table id=\"items-over-worst\" class=\"list\">
     <thead><tr>
       <th colspan=\"2\">".locale_string("hero")."</th>
       <th colspan=\"2\">".locale_string("item")."</th>
@@ -169,13 +169,13 @@ function rg_view_generate_items_overview() {
       "<td>".item_icon($line['item'])."</td>".
       "<td>".item_name($line['item'])."</td>".
       "<td>".$line['purchases']."</td>".
-      "<td>".number_format($line['winrate']*100, 2)."%</td>".
-      "<td>".($line['winrate'] > $line['wo_wr'] ? '+' : '').number_format(($line['winrate']-$line['wo_wr'])*100, 2)."%</td>".
+      "<td>".number_format($line['winrate']*100, 1)."%</td>".
+      "<td>".($line['winrate'] > $line['wo_wr'] ? '+' : '').number_format(($line['winrate']-$line['wo_wr'])*100, 1)."%</td>".
     "</tr>";
   }
   $res .= "</tbody></table>";
 
-  $res .= "</div>";
+  //$res .= "</div>";
   
   // critical timings on a hero
   // - highest gradient with more than q3 matches

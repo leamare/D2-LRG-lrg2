@@ -73,7 +73,7 @@ function rg_view_generate_items_progression() {
 
   $res[$tag] .= "<div class=\"content-text\">".locale_string("items_progression_desc")."</div>";
 
-  $res[$tag] = "<div id=\"items-progr-$tag\" class=\"graph\"></div><script type=\"text/javascript\">";
+  $res[$tag] .= "<div id=\"items-progr-$tag\" class=\"graph\"></div><script type=\"text/javascript\">";
 
   $nodes = '';
   $edges = '';
@@ -154,6 +154,9 @@ function rg_view_generate_items_progression() {
     };\n".
     "var network = new vis.Network(container, data, options);\n".
     "</script>";
+
+
+  $res[$tag] .= "<div class=\"content-text\">".locale_string("items_progression_list_desc")."</div>";
 
   return $res;
 }

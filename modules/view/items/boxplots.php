@@ -60,8 +60,6 @@ function rg_view_generate_items_boxplots() {
 
   $res[$tag] .= "<div class=\"selector-modules-level-4\">";
 
-  $res[$tag] .= "<div class=\"content-text\">".locale_string("items_boxplots_timings_desc")."</div>";
-
   if ($hero !== 'total') {
     $data = $report['pickban'][$hero];
 
@@ -99,7 +97,11 @@ function rg_view_generate_items_boxplots() {
   foreach ($item_cats as $ic) {
     $res[$tag] .= "<option ".($cat == $ic ? "selected=\"selected\"" : "")." value=\"?league=".$leaguetag."&mod=".$mod.(empty($linkvars) ? "" : "&".$linkvars)."&item_cat=$ic\">".locale_string("items_category_$ic")."</option>";
   }
-  $res[$tag] .= "</select></div>";
+  $res[$tag] .= "</select>";
+  
+  $res[$tag] .= "<div class=\"content-text\">".locale_string("items_boxplots_timings_desc")."</div>";
+  
+  $res[$tag] .= "</div>";
 
   if (empty($items)) {
     $res[$tag] .= "<div class=\"content-text\">".locale_string("items_stats_empty")."</div>";
