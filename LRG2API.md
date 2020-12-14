@@ -37,6 +37,7 @@ One major GET parameter is `report`. It specifies a tag of a report to load. If 
 * (GET) `rep` – report tag (for non-report endpoints)
 * (GET) `pretty` – flag, if it’s used response will be nicely formatted
 * (GET) `desc` - flag, adds report descriptor to the response if set
+* (GET) `teamcard` - flag, adds team card to the response if set
 
 ### Typical data objects
 

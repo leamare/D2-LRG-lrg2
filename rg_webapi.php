@@ -15,6 +15,7 @@ if(isset($_REQUEST['loc']) && !empty($_REQUEST['loc'])) {
 }
 
 $include_descriptor = isset($_REQUEST['desc']);
+$include_team = isset($_REQUEST['teamcard']);
 
 include_once("rg_report_out_settings.php");
 include_once("modules/commons/versions.php");
@@ -115,11 +116,15 @@ set_error_handler(
 $resp['modline'] = $mod;
 $resp['vars'] = $vars;
 $resp['endpoint'] = $endp_name;
+$resp['report'] = !empty($leaguetag) ? $leaguetag : null;
 $resp['version'] = parse_ver($lg_version);
 $resp['result'] = $result ?? [];
 
 if (!empty($report) && $include_descriptor) {
   $resp['report_desc'] = get_report_descriptor($report, true);
+}
+if (!empty($report) && $include_team && !empty($vars['team'])) {
+  $resp['team_card'] = team_card($vars['team']);
 }
 
 echo json_encode($resp, (isset($_REQUEST['pretty']) ? JSON_PRETTY_PRINT : 0) 
