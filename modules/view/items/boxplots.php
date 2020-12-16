@@ -99,9 +99,9 @@ function rg_view_generate_items_boxplots() {
   }
   $res[$tag] .= "</select>";
   
-  $res[$tag] .= "<div class=\"content-text\">".locale_string("items_boxplots_timings_desc")."</div>";
-  
   $res[$tag] .= "</div>";
+
+  $res[$tag] .= "<div class=\"content-text\">".locale_string("items_boxplots_timings_desc")."</div>";
 
   if (empty($items)) {
     $res[$tag] .= "<div class=\"content-text\">".locale_string("items_stats_empty")."</div>";

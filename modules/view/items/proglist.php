@@ -69,7 +69,7 @@ function rg_view_generate_items_proglist() {
       "<td>".item_name($line['item2'])."</td>".
       "<td>".$line['total']."</td>".
       "<td>".number_format(100*$line['winrate'], 2)."%</td>".
-      "<td>".$line['min_diff']."</td>".
+      "<td>".number_format($line['min_diff'], 1)."</td>".
     "</tr>";
   }
 
