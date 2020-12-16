@@ -307,7 +307,7 @@ $strings['ru'] = [
   "items_category_early" => "Ранние предметы",
 
   "items_most_impactful_header" => "Предметы с наибольшим влиянием",
-  "items_most_impactful_total_header" => "В общем",
+  "items_most_impactful_total_header" => "Общие",
   "items_most_impactful_heroes_header" => "Для героев",
   "items_overview_timings_header" => "Самые примечательные рекорды таймингов",
   "items_minute_diff" => "Разница во времени (минуты)",
