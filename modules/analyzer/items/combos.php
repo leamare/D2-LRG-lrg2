@@ -71,7 +71,7 @@ for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row(
     'wins' => (int)$row[3],
     'time_diff' => (int)$row[4],
     'exp' => round($expected_pair),
-    'wr_diff' => $wr_diff
+    'wr_diff' => round($wr_diff, 4)
   ];
   $ar[ $row[1] ][ $row[0] ] = [];
 }

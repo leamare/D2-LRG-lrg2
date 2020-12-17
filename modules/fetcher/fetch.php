@@ -1208,7 +1208,7 @@ function fetch($match) {
       }
   }
 
-  if(!empty($t_items)) {
+  if(!empty($t_items) && $lg_settings['main']['items']) {
     $sql = " INSERT INTO items (matchid, hero_id, playerid, item_id, category_id, time) VALUES ";
     $len = sizeof($t_items);
     for($i = 0; $i < $len; $i++) {

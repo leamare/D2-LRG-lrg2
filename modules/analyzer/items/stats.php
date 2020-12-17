@@ -209,7 +209,7 @@ foreach ($r as $hid => $items) {
 
     if ($sz > $purchases_h[$hid]['med'] && ($q3-$q1)) {
       $min = (abs($q3)-abs($q1))/60;
-      $r[$hid][$iid]['grad'] = ($r[$hid][$iid]['late_wr']-$r[$hid][$iid]['early_wr'])/($min > 1 ? $min : 1);
+      $r[$hid][$iid]['grad'] = round( ($r[$hid][$iid]['late_wr']-$r[$hid][$iid]['early_wr'])/($min > 1 ? $min : 1) , 4 );
     } else 
     $r[$hid][$iid]['grad'] = 0;
   }

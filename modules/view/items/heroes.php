@@ -42,7 +42,6 @@ function rg_view_generate_items_heroes() {
   // RANKING FOR REFERENCE TABLE
 
   $ranks = [];
-  $matches = [];
 
   $ranking_sort = function($a, $b) {
     return items_ranking_sort($a, $b);
