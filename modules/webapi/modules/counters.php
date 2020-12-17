@@ -17,6 +17,10 @@ $endpoints['counters'] = function($mods, $vars, &$report) {
   $devs = [];
   $games = [];
   $wr = [];
+
+  if (is_wrapped($report['hvh'])) {
+    $report['hvh'] = unwrap_data($report['hvh']);
+  }
   
   foreach ($report['hvh'] as $line) {
     if ($line['matches'] < $report['settings']['limiter_combograph']) 

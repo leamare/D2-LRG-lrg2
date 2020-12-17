@@ -37,6 +37,13 @@ $endpoints['draft'] = function($mods, $vars, &$report) {
     $context_total_matches = $report["random"]["matches_total"];
   }
 
+  if (is_wrapped($context)) {
+    $context = unwrap_data($context);
+  }
+  if (is_wrapped($context_draft)) {
+    $context_draft = unwrap_data($context_draft);
+  }
+
   if (empty($context) && $type == "player") {
     $context = [];
     foreach($rep['players_summary'] as $id => $el) {

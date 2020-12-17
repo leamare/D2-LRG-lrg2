@@ -17,6 +17,10 @@ $endpoints['pickban'] = function($mods, $vars, &$report) {
     $context_total_matches = $report["random"]["matches_total"];
   }
 
+  if (is_wrapped($context)) {
+    $context = unwrap_data($context);
+  }
+
   if(!sizeof($context)) return [];
 
   uasort($context, function($a, $b) {

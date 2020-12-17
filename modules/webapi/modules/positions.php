@@ -21,6 +21,8 @@ $endpoints['positions'] = function($mods, $vars, &$report) {
     $context_total_matches = $report["random"]["matches_total"];
   }
 
+  if (is_wrapped($context)) $context = unwrap_data($context);
+
   $median_picks = $parent['random']['heroes_median_picks'] ?? $parent['main']['heroes_median_picks'] ?? null;
 
   if (isset($vars['position'])) {
