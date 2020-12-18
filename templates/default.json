@@ -122,7 +122,7 @@
       }
     },
 
-    "items": true
+    "items": false
   },
   "web": {
     "custom_style" : "",
@@ -186,6 +186,8 @@
     "overview_draft_0_2_count" : 3,
     "overview_draft_0_3" : false,
     "overview_draft_0_3_count" : 4,
+
+    "overview_items_limit" : 10,
 
     "regions": {
       "detailed_overview": true,
