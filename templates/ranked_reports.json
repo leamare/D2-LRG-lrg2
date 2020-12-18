@@ -11,7 +11,8 @@
     "hero_positions_matches" : false,
     "hero_pairs_matches":false,
     "hero_triplets_matches":false,
-    "full_hero_pairs" : true
+    "full_hero_pairs" : true,
+    "items": true
   },
   "web": {
     "custom_style": "ranked",
