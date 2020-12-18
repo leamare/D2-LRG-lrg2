@@ -7,6 +7,13 @@ include_once(__DIR__ . "/../functions/overview_positions.php");
 include_once(__DIR__ . "/../functions/overview_combos.php");
 
 $endpoints['overview'] = function($mods, $vars, &$report) use (&$meta, &$endpoints) {
+
+  if (in_array('items', $mods)) {
+    $res = $endpoints['items-overview']($mods, $vars, $report);
+    $res['__endp'] = "items-overview";
+    return $res;
+  }
+
   $res = [];
 
   $descriptor = get_report_descriptor($report);

@@ -1,6 +1,12 @@
 <?php 
 
-$endpoints['records'] = function($mods, $vars, &$report) {
+$endpoints['records'] = function($mods, $vars, &$report) use (&$endpoints) {
+  if (in_array('items', $mods)) {
+    $res = $endpoints['items-records']($mods, $vars, $report);
+    $res['__endp'] = "items-records";
+    return $res;
+  }
+
   // parse mods for region ID
   // check if region persists
   if (isset($vars['region']) && isset($report['regions_data'][ $vars['region'] ])) {

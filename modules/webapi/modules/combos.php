@@ -22,7 +22,13 @@ function rg_generate_hero_pairs(&$context, $limiter) {
   return $r;
 }
 
-$endpoints['combos'] = function($mods, $vars, &$report) {
+$endpoints['combos'] = function($mods, $vars, &$report) use (&$endpoints) {
+  if (in_array('items', $mods)) {
+    $res = $endpoints['items-combos']($mods, $vars, $report);
+    $res['__endp'] = "items-combos";
+    return $res;
+  }
+
   $res = [];
 
   if (isset($vars['team'])) {

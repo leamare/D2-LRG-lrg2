@@ -32,6 +32,7 @@ if (!empty($report)) {
   include_once(__DIR__ . "/modules/roster.php");
   include_once(__DIR__ . "/modules/laning.php");
   include_once(__DIR__ . "/modules/counters.php");
+  include_once(__DIR__ . "/modules/items.php");
 
   $endpoints['__fallback'] = function() use (&$endpoints) {
     return $endpoints['info'];
@@ -67,7 +68,8 @@ foreach ($modline as $ml) {
 }
 if (isset($_GET['gets'])) $vars['gets'] = explode(",", strtolower($_GET['gets']));
 if (isset($_GET['rep'])) $vars['rep'] = strtolower($_GET['rep']);
-if(isset($_GET['cat']) && !empty($_GET['cat'])) $vars['cat'] = $_GET['cat'];
+if (isset($_GET['cat']) && !empty($_GET['cat'])) $vars['cat'] = $_GET['cat'];
+if (isset($_GET['item_cat']) && !empty($_GET['item_cat'])) $vars['item_cat'] = explode(',', $_GET['item_cat']);
 
 if (empty($endp_name)) {
   $endp = $endpoints['__fallback']();
