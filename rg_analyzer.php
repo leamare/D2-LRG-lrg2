@@ -231,7 +231,7 @@ if ($lg_settings['ana']['players']) {
 
 // ITEMS
 
-if ($lg_settings['main']['items'])  {
+if ($lg_settings['ana']['items'])  {
   require_once("modules/analyzer/items/__main.php");
 }
 
