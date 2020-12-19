@@ -82,7 +82,7 @@ function rg_view_generate_items_progression() {
     $minute_gr = round($report['items']['stats'][$hero][$item]['median']/240);
     $minute_gr = in_array($item, $meta['item_categories']['early']) && $minute_gr > 3 ? 3 : $minute_gr;
     $nodes .= "{ id: $item, value: ".$report['items']['stats'][$hero][$item]['purchases'].", label: '".addslashes(item_name($item))."'".
-      ", title: '".addslashes(item_name($item)).", ".locale_string('avg_time').": ".convert_time_seconds($report['items']['stats'][$hero][$item]['median']).", ".
+      ", title: '".addslashes(item_name($item)).", ".locale_string('avg_timing').": ".convert_time_seconds($report['items']['stats'][$hero][$item]['median']).", ".
       locale_string('purchases').": ".$report['items']['stats'][$hero][$item]['purchases'].", ".
       locale_string('winrate').": ".($report['items']['stats'][$hero][$item]['winrate']*100)."%".
       "'".

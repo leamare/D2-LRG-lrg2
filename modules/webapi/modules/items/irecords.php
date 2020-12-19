@@ -17,6 +17,10 @@ $endpoints['items-records'] = function($mods, $vars, &$report) use (&$endpoints,
     $res['records'] = [];
     foreach ($report['items']['records'][$item] as $hero => $line) {
       if (empty($line) || empty($line['match'])) continue;
+      if (!empty($report['match_participants_teams']))
+        $line['match_card_min'] = match_card_min($line['match']);
+      else 
+        $line['match_card_min'] = null;
       $res['records'][$hero] = $line;
     }
   } else {
@@ -46,6 +50,10 @@ $endpoints['items-records'] = function($mods, $vars, &$report) use (&$endpoints,
         if (empty($line) || empty($line['match'])) continue;
         $line['hero'] = $hero;
         $line['item'] = $iid;
+        if (!empty($report['match_participants_teams']))
+          $line['match_card_min'] = match_card_min($line['match']);
+        else 
+          $line['match_card_min'] = null;
         $overview[] = $line;
       }
     }
