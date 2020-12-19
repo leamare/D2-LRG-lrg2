@@ -215,6 +215,9 @@ foreach ($r as $hid => $items) {
   }
 }
 
+unset($dataset);
+unset($raw_dataset);
+
 // std_dev
 // q1 q3 median
 // winrate
