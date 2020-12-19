@@ -298,6 +298,7 @@ $strings['en'] = [
   "item_time_max" => "Max",
   "item_time_std_dev" => "Std.Dev",
   "best_timing_record" => "Games with the best timings",
+  "avg_timing" => "Average timing",
 
   "items_category_selector" => "Items category",
   "items_category_all" => "All",

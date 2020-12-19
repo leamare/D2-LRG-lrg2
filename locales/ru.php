@@ -299,6 +299,7 @@ $strings['ru'] = [
   "item_time_max" => "Максимальный",
   "item_time_std_dev" => "Станд.откл",
   "best_timing_record" => "Игры с лучшими таймингами",
+  "avg_timing" => "Средний тайминг",
 
   "items_category_selector" => "Категория предметов",
   "items_category_all" => "Все",
