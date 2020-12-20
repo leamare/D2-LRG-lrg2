@@ -99,35 +99,6 @@ for ($row = $query_res->fetch_assoc(); $row != null; $row = $query_res->fetch_as
 
 $query_res->free_result();
 
-// MEDIANS AND SHIT
-
-$q = "SELECT items.item_id, items.hero_id, min(items.time), (NOT matches.radiantWin XOR matchlines.isRadiant) win 
-  FROM items 
-  JOIN matchlines ON matchlines.matchid = items.matchid AND matchlines.heroid = items.hero_id 
-  JOIN matches ON matches.matchid = matchlines.matchid
-  GROUP BY items.matchid, items.item_id, items.hero_id;";
-$dataset = [];
-$raw_dataset = [];
-
-if ($conn->multi_query($q) === TRUE) echo ".";
-else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
-
-$query_res = $conn->store_result();
-
-for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
-  if (!isset($dataset[$row[0]])) $dataset[$row[0]] = [ 'total' => [] ];
-  if (!isset($dataset[$row[0]][$row[1]])) $dataset[$row[0]][$row[1]] = [];
-  $dataset[$row[0]][$row[1]][] = $row[2];
-  $dataset[$row[0]]['total'][] = $row[2];
-
-  if (!isset($raw_dataset[$row[0]])) $raw_dataset[$row[0]] = [ 'total' => [] ];
-  if (!isset($raw_dataset[$row[0]][$row[1]])) $raw_dataset[$row[0]][$row[1]] = [];
-  $raw_dataset[$row[0]][$row[1]][] = [ 't' => $row[2], 'w' => $row[3] ];
-  $raw_dataset[$row[0]]['total'][] = [ 't' => $row[2], 'w' => $row[3], 'i' => $row[1] ];
-}
-
-$query_res->free_result();
-
 foreach ($purchases_i as $iid => $dt) {
   $purchases_i[$iid] = [
     'q1' => quantile($dt, 0.25),
@@ -143,9 +114,106 @@ foreach ($purchases_h as $hid => $dt) {
   ];
 }
 
+// MEDIANS AND SHIT
+
+// separating timings/wins runs to reduce memory consumption
+
+// first run: get all the timings, generate q1/q3/medians
+$q = "SELECT items.item_id, items.hero_id, min(items.time)
+  FROM items 
+  JOIN matchlines ON matchlines.matchid = items.matchid AND matchlines.heroid = items.hero_id 
+  JOIN matches ON matches.matchid = matchlines.matchid
+  GROUP BY items.matchid, items.item_id, items.hero_id;";
+$dataset = [];
+
+if ($conn->multi_query($q) === TRUE) echo ".";
+else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+
+$query_res = $conn->store_result();
+
+for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+  if (!isset($dataset[$row[0]])) $dataset[$row[0]] = [ 'total' => [] ];
+  if (!isset($dataset[$row[0]][$row[1]])) $dataset[$row[0]][$row[1]] = [];
+  $dataset[$row[0]][$row[1]][] = $row[2];
+  $dataset[$row[0]]['total'][] = $row[2];
+}
+
+$query_res->free_result();
+
+foreach ($dataset as $i => $dti) {
+  foreach ($dti as $j => $dt) {
+    $dataset[$i][$j] = [
+      'q1' => quantile($dt, 0.25),
+      'm' => quantile($dt, 0.5),
+      'q3' => quantile($dt, 0.75)
+    ];
+    $dataset[$i][$j]['sz'] = sizeof($dt);
+    $dataset[$i][$j]['sum'] = 0;
+    foreach ($dt as $t) {
+      $dataset[$i][$j]['sum'] += pow($t-$r[$j][$i]['avg_time'], 2);
+    }
+  }
+}
+
+// second run: wins timings
+$raw_dataset = [];
+$rd_head = [ 
+  'q1t' => 0,
+  'q1w' => 0,
+  'q3t' => 0,
+  'q3w' => 0,
+  'w' => 0,
+  't' => 0
+];
+
+if ($conn->multi_query($q) === TRUE) echo ".";
+else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+
+$query_res = $conn->store_result();
+
+for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+  if (!isset($raw_dataset[$row[0]])) $raw_dataset[$row[0]] = [ 
+    'total' => $rd_head
+  ];
+  if (!isset($raw_dataset[$row[0]][$row[1]])) $raw_dataset[$row[0]][$row[1]] = $rd_head;
+
+  if ($row[2] <= $dataset[$row[0]][$row[1]]['q1']) {
+    $raw_dataset[$row[0]][$row[1]]['q1t']++;
+    $raw_dataset[$row[0]][$row[1]]['q1w'] += $row[3];
+  }
+
+  if ($row[2] <= $dataset[$row[0]]['total']['q1']) {
+    $raw_dataset[$row[0]]['total']['q1t']++;
+    $raw_dataset[$row[0]]['total']['q1w'] += $row[3];
+  }
+
+  if ($row[2] >= $dataset[$row[0]][$row[1]]['q3']) {
+    $raw_dataset[$row[0]][$row[1]]['q3t']++;
+    $raw_dataset[$row[0]][$row[1]]['q3w'] += $row[3];
+  }
+
+  if ($row[2] >= $dataset[$row[0]]['total']['q3']) {
+    $raw_dataset[$row[0]]['total']['q3t']++;
+    $raw_dataset[$row[0]]['total']['q3w'] += $row[3];
+  }
+
+  $raw_dataset[$row[0]][$row[1]]['w'] += $row[3];
+  $raw_dataset[$row[0]][$row[1]]['t'] += 1;
+
+  $raw_dataset[$row[0]]['total']['w'] += $row[3];
+  $raw_dataset[$row[0]]['total']['t'] += 1;
+
+  // //$raw_dataset[$row[0]][$row[1]][] = [ 't' => $row[2], 'w' => $row[3] ];
+  // $raw_dataset[$row[0]][$row[1]][] = [ $row[2], $row[3] ];
+  // //$raw_dataset[$row[0]]['total'][] = [ 't' => $row[2], 'w' => $row[3], 'i' => $row[1] ];
+  // $raw_dataset[$row[0]]['total'][] = [ $row[2], $row[3] ];
+}
+
+$query_res->free_result();
+
 foreach ($r as $hid => $items) {
   foreach ($items as $iid => $data) {
-    $sz = count($dataset[$iid][$hid]);
+    $sz = $dataset[$iid][$hid]['sz'];
 
     if ($sz < 2) {
       $r[$hid][$iid]['std_dev'] = 0;
@@ -164,15 +232,15 @@ foreach ($r as $hid => $items) {
     }
 
     $r[$hid][$iid]['std_dev'] = 0;
-    $sum = 0;
-    foreach ($dataset[$iid][$hid] as $v) {
-      $sum += pow($v-$data['avg_time'], 2);
-    }
+    // $sum = 0;
+    // foreach ($dataset[$iid][$hid] as $v) {
+    //   $sum += pow($v-$data['avg_time'], 2);
+    // }
 
-    $r[$hid][$iid]['std_dev'] = round(sqrt( $sum/($sz-1) ), 3);
-    $r[$hid][$iid]['q1'] = quantile($dataset[$iid][$hid], 0.25);
-    $r[$hid][$iid]['q3'] = quantile($dataset[$iid][$hid], 0.75);
-    $r[$hid][$iid]['median'] = quantile($dataset[$iid][$hid], 0.5);
+    $r[$hid][$iid]['std_dev'] = round(sqrt( $dataset[$iid][$hid]['sum']/($sz-1) ), 3);
+    $r[$hid][$iid]['q1'] = $dataset[$iid][$hid]['q1'];
+    $r[$hid][$iid]['q3'] = $dataset[$iid][$hid]['q3'];
+    $r[$hid][$iid]['median'] = $dataset[$iid][$hid]['m'];
     $r[$hid][$iid]['winrate'] = round($data['wins']/$data['purchases'], 4);
     $r[$hid][$iid]['prate'] = round($data['purchases']/$items_matches[$hid], 4);
 
@@ -181,26 +249,28 @@ foreach ($r as $hid => $items) {
     $q1 = $r[$hid][$iid]['q1'];//$r[$hid][$iid]['median'] - $r[$hid][$iid]['std_dev'];
     $q3 = $r[$hid][$iid]['q3'];//$r[$hid][$iid]['median'] + $r[$hid][$iid]['std_dev'];
 
-    foreach ($raw_dataset[$iid][$hid] as $v) {
-      if ($v['t'] <= $q1) {
-        $total_q1++;
-        $wins_q1 += $v['w'];
-      }
+    $total_q1 = $raw_dataset[$iid][$hid]['q1t'];
+    $wins_q1 = $raw_dataset[$iid][$hid]['q1w'];
+    $total_q3 = $raw_dataset[$iid][$hid]['q3t'];
+    $wins_q3 = $raw_dataset[$iid][$hid]['q3w'];
+    // foreach ($raw_dataset[$iid][$hid] as $v) {
+    //   if ($v[0] <= $q1) {
+    //     $total_q1++;
+    //     $wins_q1 += $v[1];
+    //   }
 
-      if ($v['t'] >= $q3) {
-        $total_q3++;
-        $wins_q3 += $v['w'];
-      }
-    }
+    //   if ($v[0] >= $q3) {
+    //     $total_q3++;
+    //     $wins_q3 += $v[1];
+    //   }
+    // }
 
     $total_wo = 0; $wins_wo = 0;
 
     foreach ($raw_dataset as $item => $lines) {
       if ($item == $iid || empty($lines[$hid])) continue;
-      foreach ($lines[$hid] as $v) {
-        $total_wo++;
-        $wins_wo += $v['w'];
-      }
+      $total_wo += $lines[$hid]['t'];
+      $wins_wo += $lines[$hid]['w'];
     }
 
     $r[$hid][$iid]['early_wr'] = $total_q1 ? round($wins_q1/$total_q1, 4) : $r[$hid][$iid]['winrate'];

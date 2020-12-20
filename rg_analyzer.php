@@ -1,6 +1,6 @@
 <?php
 include_once("head.php");
-ini_set('memory_limit', '4000M');
+ini_set('memory_limit', '2048M');
 
 ini_set('mysqli.allow_persistent', '1');
 ini_set('mysql.allow_persistent', '1');
