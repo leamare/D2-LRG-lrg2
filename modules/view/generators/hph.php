@@ -4,6 +4,8 @@ include_once($root."/modules/view/functions/hero_name.php");
 include_once($root."/modules/view/functions/player_name.php");
 
 function rg_generator_hph_profile($table_id, &$context, &$context_wrs, $srcid, $heroes_flag = true) {
+  global $report;
+  
   $res = "";
   $i = 0;
   $isrank = false;
@@ -28,6 +30,11 @@ function rg_generator_hph_profile($table_id, &$context, &$context_wrs, $srcid, $
         "<td>".number_format($dt['wr']*100,2)."%</td>".
         "</tr></tbody></table>";
 
+
+    foreach ($context as $id => $el) {
+      if ($el == null) unset($context[$id]);
+      if ($el === true) $context[$id] = $report['hph'][$id][$srcid];
+    }
 
     $compound_ranking_sort = function($a, $b) use ($dt) {
       return positions_ranking_sort($a, $b, $dt['ms']);
