@@ -119,7 +119,7 @@ foreach ($purchases_h as $hid => $dt) {
 // separating timings/wins runs to reduce memory consumption
 
 // first run: get all the timings, generate q1/q3/medians
-$q = "SELECT items.item_id, items.hero_id, min(items.time)
+$q = "SELECT items.item_id, items.hero_id, min(items.time), (NOT matches.radiantWin XOR matchlines.isRadiant) win 
   FROM items 
   JOIN matchlines ON matchlines.matchid = items.matchid AND matchlines.heroid = items.hero_id 
   JOIN matches ON matches.matchid = matchlines.matchid
