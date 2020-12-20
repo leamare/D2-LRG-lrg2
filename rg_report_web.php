@@ -20,7 +20,7 @@ else $locale = "en";
 include_once("rg_report_out_settings.php");
 
 include_once("modules/commons/versions.php");
-$lg_version = array( 2, 14, 0, 0, 0 );
+$lg_version = array( 2, 14, 1, 0, 0 );
 
 include_once("modules/commons/merge_mods.php");
 include_once("modules/commons/metadata.php");
@@ -116,32 +116,34 @@ if (isset($report)) {
   $modules = [];
   # module => array or ""
   include_once("modules/view/overview.php");
-  if (isset($report['records']))
-    include_once("modules/view/records.php");
 
-  if (isset($report['averages_heroes']) || isset($report['pickban']) || isset($report['draft']) || isset($report['hero_positions']) ||
-      isset($report['hero_sides']) || isset($report['hero_pairs']) || isset($report['hero_triplets']))
-        include_once("modules/view/heroes.php");
+  if ($report['random']['matches_total']) {
+    if (isset($report['records']))
+      include_once("modules/view/records.php");
 
-  if (isset($report['items']))
-    include_once("modules/view/items.php");
+    if (isset($report['averages_heroes']) || isset($report['pickban']) || isset($report['draft']) || isset($report['hero_positions']) ||
+        isset($report['hero_sides']) || isset($report['hero_pairs']) || isset($report['hero_triplets']))
+          include_once("modules/view/heroes.php");
 
-  if (isset($report['players']) || isset($report['players_summary']))
-    include_once("modules/view/players.php");
+    if (isset($report['items']))
+      include_once("modules/view/items.php");
 
-  if (isset($report['teams'])) {
-    include_once("modules/view/teams.php");
+    if (isset($report['players']) || isset($report['players_summary']))
+      include_once("modules/view/players.php");
+
+    if (isset($report['teams'])) {
+      include_once("modules/view/teams.php");
+    }
+
+    if (isset($report['regions_data']))
+      include_once("modules/view/regions.php");
+
+    if (isset($report['matches']))
+      include_once("modules/view/matches.php");
+
+    if (isset($report['players']))
+      include_once("modules/view/participants.php");
   }
-
-  if (isset($report['regions_data']))
-    include_once("modules/view/regions.php");
-
-  if (isset($report['matches']))
-    include_once("modules/view/matches.php");
-
-  if (isset($report['players']))
-    include_once("modules/view/participants.php");
-
 
   if(empty($mod)) $unset_module = true;
   else $unset_module = false;

@@ -30,7 +30,7 @@ function rg_view_generator_overview($modlink, &$context, $foreword = "") {
   if (!isset($context['settings']['overview_last_match_winners']))
     $context['settings']['overview_last_match_winners'] = $report['settings']['overview_last_match_winners'];
 
-  $context_total_matches = isset($context['main']['matches_total']) ? $context['main']['matches_total'] : $context['main']['matches'];
+  $context_total_matches = $context['main']['matches_total'] ?? $context['main']['matches'] ?? $context['random']['matches_total'];
 
   if (isset($context['overview'])) {
     foreach($context['overview'] as $k => $v) {
@@ -43,6 +43,9 @@ function rg_view_generator_overview($modlink, &$context, $foreword = "") {
   $res .= "<div class=\"block-content separated\">";
 
   $res .= locale_string("over-matches", ["num" => $context_total_matches ] )." ";
+
+  if (!$context_total_matches) return $res;
+
   if(isset($report['teams']))
     $res .= locale_string("over-teams", ["num" => $context['main']['teams_on_event'] ] )." ";
   else
@@ -285,23 +288,23 @@ function rg_view_generator_overview($modlink, &$context, $foreword = "") {
       }
 
       $res .= "<tr><td>".locale_string("most_matches")."</td><td>".
-        player_name($max_matches)."</td><td>".$report['players_additional'][$max_matches]['matches']."</td></tr>";
+        player_link($max_matches)."</td><td>".$report['players_additional'][$max_matches]['matches']."</td></tr>";
 
       if($max_wr)
         $res .= "<tr><td>".locale_string("highest_winrate")."</td><td>".
-            player_name($max_wr)."</td><td>".
-            number_format($report['players_additional'][$max_wr]['won']*100/$report['players_additional'][$max_wr]['matches'],2)."%</td></tr>";
+          player_link($max_wr)."</td><td>".
+          number_format($report['players_additional'][$max_wr]['won']*100/$report['players_additional'][$max_wr]['matches'],2)."%</td></tr>";
     }
       if (isset($context['records'])) {
         $res .= "<tr><td>".locale_string("widest_hero_pool")."</td><td>".
-          player_name($context['records']['widest_hero_pool']['playerid'])."</td><td>".$context['records']['widest_hero_pool']['value']."</td></tr>";
+          player_link($context['records']['widest_hero_pool']['playerid'])."</td><td>".$context['records']['widest_hero_pool']['value']."</td></tr>";
         $res .= "<tr><td>".locale_string("smallest_hero_pool")."</td><td>".
-          player_name($context['records']['smallest_hero_pool']['playerid'])."</td><td>".$context['records']['smallest_hero_pool']['value']."</td></tr>";
+          player_link($context['records']['smallest_hero_pool']['playerid'])."</td><td>".$context['records']['smallest_hero_pool']['value']."</td></tr>";
       }
 
       if (isset($context['averages_players']) && isset($context['averages_players']['diversity'])) {
         $res .= "<tr><td>".locale_string("diversity")."</td><td>".
-          player_name($context['averages_players']['diversity'][0]['playerid'])."</td><td>".
+          player_link($context['averages_players']['diversity'][0]['playerid'])."</td><td>".
           number_format($context['averages_players']['diversity'][0]['value']*100,2)."%</td></tr>";
       }
 

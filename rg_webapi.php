@@ -19,7 +19,7 @@ $include_team = isset($_REQUEST['teamcard']);
 
 include_once("rg_report_out_settings.php");
 include_once("modules/commons/versions.php");
-$lg_version = [ 2, 14, 0, 0, 0 ];
+$lg_version = [ 2, 14, 1, 0, 0 ];
 
 include_once("modules/commons/locale_strings.php");
 
