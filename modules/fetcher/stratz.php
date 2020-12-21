@@ -87,6 +87,11 @@ function get_stratz_response($match) {
           time
           itemId
         }
+        inventoryReport {
+          neutral0 {
+            itemId
+          }
+        }
         farmDistributionReport {
           creepType {
             count
@@ -412,6 +417,29 @@ Q
 
         $r['items'][] = $it;
       }
+
+      $last = null; 
+      //$neutrals = [];
+      foreach($pl['stats']['inventoryReport'] as $i => $e) {
+        if (!$e['neutral0'] || $e['neutral0']['itemId'] == $last) continue;
+        $last = $e['neutral0']['itemId'];
+
+        foreach($meta['item_categories'] as $category_name => $items) {
+          if (in_array($item_id, $items)) {
+            $category = $category_name;
+            break;
+          }
+        }
+
+        $r['items'][] = [
+          'matchid' => $stratz['data']['match']['id'],
+          'playerid' => $pl['steamAccountId'],
+          'hero_id' => $pl['heroId'],
+          'item_id' => $last, 
+          'category_id' => array_search($category, array_keys($meta['item_categories'])),
+          'time' => ($i-1)*60
+        ];
+      } 
     }
   }
 
