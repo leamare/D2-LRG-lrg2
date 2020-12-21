@@ -425,7 +425,7 @@ Q
         $last = $e['neutral0']['itemId'];
 
         foreach($meta['item_categories'] as $category_name => $items) {
-          if (in_array($item_id, $items)) {
+          if (in_array($last, $items)) {
             $category = $category_name;
             break;
           }
