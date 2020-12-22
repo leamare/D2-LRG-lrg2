@@ -22,7 +22,9 @@ FROM (
     sum(1) purchases,
     items.playerid playerid,
     items.category_id category_id
-  FROM items GROUP BY items.matchid, items.item_id, items.hero_id
+  FROM items 
+  WHERE category_id < 2
+  GROUP BY items.matchid, items.item_id, items.hero_id
 ) i1 JOIN (
   SELECT
     items.matchid matchid,
@@ -32,7 +34,9 @@ FROM (
     sum(1) purchases,
     items.playerid playerid,
     items.category_id category_id
-  FROM items GROUP BY items.matchid, items.item_id, items.hero_id
+  FROM items 
+  WHERE category_id < 2
+  GROUP BY items.matchid, items.item_id, items.hero_id
 ) i2 ON i1.hero_id = i2.hero_id AND i1.matchid = i2.matchid AND i1.item_id < i2.item_id
 	JOIN matchlines ON matchlines.matchid = i1.matchid AND matchlines.heroid = i1.hero_id
 	JOIN matches ON matchlines.matchid = matches.matchid
