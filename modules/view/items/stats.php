@@ -155,7 +155,8 @@ function rg_view_generate_items_stats() {
       "<td>".number_format($line['prate']*100, 2)."%</td>".
       "<td>".number_format($ranks[$iid], 1)."</td>".
       "<td class=\"separator\">".number_format($line['winrate']*100, 2)."%</td>".
-      "<td>".($line['wo_wr'] < $line['winrate'] ? '+' : '').number_format(($line['winrate']-$line['wo_wr'])*100, 2)."%</td>".
+      //"<td>".($line['wo_wr'] < $line['winrate'] ? '+' : '').number_format(($line['winrate']-$line['wo_wr'])*100, 2)."%</td>".
+      "<td>".number_format($line['wo_wr']*100, 2)."%</td>".
       "<td>".($line['early_wr'] > $line['winrate'] ? '+' : '').number_format(($line['early_wr']-$line['winrate'])*100, 2)."%</td>".
       "<td>".($line['late_wr'] > $line['winrate'] ? '+' : '').number_format(($line['late_wr']-$line['winrate'])*100, 2)."%</td>".
       "<td>".number_format($line['grad']*100, 2)."%</td>".
