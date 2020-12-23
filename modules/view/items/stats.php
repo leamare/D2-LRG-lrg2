@@ -17,6 +17,17 @@ function rg_view_generate_items_stats() {
 
   $res['total'] = '';
 
+  $neutral_items = array_unique(
+    array_merge(
+      $meta['item_categories']['neutral_tier_1'],
+      $meta['item_categories']['neutral_tier_2'],
+      $meta['item_categories']['neutral_tier_3'],
+      $meta['item_categories']['neutral_tier_4'],
+      $meta['item_categories']['neutral_tier_5']
+    )
+  );
+  $enable_neutrals = false;
+
   if(check_module($parent_module."total")) {
     $hero = "total";
     $tag = "total";
@@ -68,6 +79,10 @@ function rg_view_generate_items_stats() {
       $ranks[$id] = 100 - $increment*$i++;
     $last = $el;
     $last_rank = $ranks[$id];
+
+    if (!$enable_neutrals && in_array($id, $neutral_items)) {
+      $enable_neutrals = true;
+    }
   }
   unset($last);
 
@@ -93,8 +108,11 @@ function rg_view_generate_items_stats() {
 
   $item_cats = [
     'major', 'medium', 'early', 
-    // 'neutral_tier_1', 'neutral_tier_2', 'neutral_tier_3', 'neutral_tier_4', 'neutral_tier_5',
+    //'neutral_tier_1', 'neutral_tier_2', 'neutral_tier_3', 'neutral_tier_4', 'neutral_tier_5',
   ];
+  if ($enable_neutrals) {
+    $item_cats = array_merge($item_cats, [ 'neutral_tier_1', 'neutral_tier_2', 'neutral_tier_3', 'neutral_tier_4', 'neutral_tier_5' ]);
+  }
 
   $items = array_filter($report['items']['stats'][$hero], function($v, $k) use ($cat, &$meta) {
     if ($cat !== null) {

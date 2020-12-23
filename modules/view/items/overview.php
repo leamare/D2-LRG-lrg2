@@ -8,6 +8,17 @@ function rg_view_generate_items_overview() {
   $res = "";
   $meta['item_categories'];
 
+  $skip_items = array_unique(
+    array_merge(
+      $meta['item_categories']['early'], 
+      $meta['item_categories']['neutral_tier_1'],
+      $meta['item_categories']['neutral_tier_2'],
+      $meta['item_categories']['neutral_tier_3'],
+      $meta['item_categories']['neutral_tier_4'],
+      $meta['item_categories']['neutral_tier_5']
+    )
+  );
+
   if (is_wrapped($report['items']['stats'])) {
     $report['items']['stats'] = unwrap_data($report['items']['stats']);
   }
@@ -44,7 +55,7 @@ function rg_view_generate_items_overview() {
 
   for ($i = 0, $j = 0; $i < $sz && $j < $limit; $i++) {
     if (empty($keys[$i]) || empty($report['items']['stats']['total'][ $keys[$i] ])) continue;
-    if (in_array($keys[$i], $meta['item_categories']['early'])) continue;
+    if (in_array($keys[$i], $skip_items)) continue;
     if ($report['items']['stats']['total'][ $keys[$i] ]['purchases'] <= $report['items']['ph']['total']['q1']) continue;
     $worst[ $keys[$i] ] = $report['items']['stats']['total'][ $keys[$i] ];
     $j++;
@@ -52,7 +63,7 @@ function rg_view_generate_items_overview() {
 
   for ($i = $sz-1, $j = 0; $i > 0 && $j < $limit; $i--) {
     if (empty($keys[$i]) || empty($report['items']['stats']['total'][ $keys[$i] ])) continue;
-    if (in_array($keys[$i], $meta['item_categories']['early'])) continue;
+    if (in_array($keys[$i], $skip_items)) continue;
     if ($report['items']['stats']['total'][ $keys[$i] ]['purchases'] <= $report['items']['ph']['total']['q1']) continue;
     $best[ $keys[$i] ] = $report['items']['stats']['total'][ $keys[$i] ];
     $j++;
@@ -109,7 +120,7 @@ function rg_view_generate_items_overview() {
   foreach ($report['items']['stats'] as $hero => $items) {
     foreach ($items as $iid => $line) {
       if (empty($line)) continue;
-      if (in_array($iid, $meta['item_categories']['early'])) continue;
+      if (in_array($iid, $skip_items)) continue;
       if ($line['purchases'] <= $report['items']['ph'][$hero]['q3'] || $line['purchases'] <= $report['items']['pi'][$iid]['q3']) continue;
       $line['hero'] = $hero;
       $line['item'] = $iid;
