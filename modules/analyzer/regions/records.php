@@ -163,6 +163,12 @@ $sql .= "SELECT \"highest_rampage\" cap, m.matchid, (CASE WHEN ABS(comeback) > A
           WHERE m.cluster IN (".implode(",", $clusters).") AND am.multi_kill > 4 
           GROUP BY m.matchid ORDER BY val DESC, m.matchid DESC LIMIT 1;";
 
+# most_matches_player
+$sql .= "SELECT \"most_matches_player\" cap, 0 matchid, COUNT(distinct ml.matchid) val, ml.playerid, 0 heroid FROM matchlines ml
+        JOIN matches on ml.matchid = matches.matchid
+        WHERE matches.cluster IN (".implode(",", $clusters).")
+        GROUP BY ml.playerid
+        ORDER BY val DESC LIMIT 1;";
 # widest hero pool
 $sql .= "SELECT \"widest_hero_pool\" cap, 0 matchid, COUNT(distinct ml.heroid) val, ml.playerid, 0 heroid FROM matchlines ml
         JOIN matches on ml.matchid = matches.matchid
@@ -177,6 +183,12 @@ $sql .= "SELECT \"smallest_hero_pool\" cap, 0 matchid, COUNT(distinct ml.heroid)
         ORDER BY val ASC LIMIT 1;";
 
 if ($lg_settings['main']['teams']) {
+   # most_matches_team
+   $sql .= "SELECT \"most_matches_team\" cap, 0 matchid, COUNT(distinct ml.matchid) val, teams_matches.teamid, 0 heroid
+        FROM matchlines ml JOIN teams_matches ON ml.matchid = teams_matches.matchid AND teams_matches.is_radiant = ml.isRadiant
+        JOIN matches on ml.matchid = matches.matchid
+        WHERE matches.cluster IN (".implode(",", $clusters).")
+        GROUP BY teams_matches.teamid ORDER BY val DESC LIMIT 1;";
    # widest hero pool team
    $sql .= "SELECT \"widest_hero_pool_team\" cap, 0 matchid, COUNT(distinct ml.heroid) val, teams_matches.teamid, 0 heroid
             FROM matchlines ml JOIN teams_matches ON ml.matchid = teams_matches.matchid AND teams_matches.is_radiant = ml.isRadiant

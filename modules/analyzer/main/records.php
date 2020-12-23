@@ -81,12 +81,18 @@ $sql .= "SELECT \"lowest_rampage\" cap, m.matchid, (CASE WHEN ABS(comeback) > AB
 $sql .= "SELECT \"highest_rampage\" cap, m.matchid, (CASE WHEN ABS(comeback) > ABS(stomp) THEN ABS(comeback) ELSE ABS(stomp) END) val, am.playerid playerid, am.heroid heroid 
           FROM matches m JOIN adv_matchlines am ON m.matchid = am.matchid WHERE am.multi_kill > 4 GROUP BY m.matchid ORDER BY val DESC, m.matchid DESC LIMIT 1;";
 
+# most_matches_player
+$sql .= "SELECT \"most_matches_player\" cap, 0 matchid, COUNT(distinct matchlines.matchid) val, playerid, 0 heroid FROM matchlines GROUP BY playerid ORDER BY val DESC LIMIT 1;";
 # widest hero pool
 $sql .= "SELECT \"widest_hero_pool\" cap, 0 matchid, COUNT(distinct heroid) val, playerid, 0 heroid FROM matchlines GROUP BY playerid ORDER BY val DESC LIMIT 1;";
 # smallest hero pool
 $sql .= "SELECT \"smallest_hero_pool\" cap, 0 matchid, COUNT(distinct heroid) val, playerid, 0 heroid FROM matchlines GROUP BY playerid ORDER BY val LIMIT 1;";
 
 if ($lg_settings['main']['teams']) {
+   # most_matches_team
+   $sql .= "SELECT \"most_matches_team\" cap, 0 matchid, COUNT(distinct matchlines.matchid) val, teams_matches.teamid, 0 heroid
+            FROM matchlines JOIN teams_matches ON matchlines.matchid = teams_matches.matchid AND teams_matches.is_radiant = matchlines.isRadiant
+            GROUP BY teams_matches.teamid ORDER BY val DESC LIMIT 1;";
    # widest hero pool team
    $sql .= "SELECT \"widest_hero_pool_team\" cap, 0 matchid, COUNT(distinct heroid) val, teams_matches.teamid, 0 heroid
             FROM matchlines JOIN teams_matches ON matchlines.matchid = teams_matches.matchid AND teams_matches.is_radiant = matchlines.isRadiant
