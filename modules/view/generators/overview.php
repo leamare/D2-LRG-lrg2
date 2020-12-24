@@ -205,7 +205,7 @@ function rg_view_generator_overview($modlink, &$context, $foreword = "") {
   }
 
   if($report['settings']['overview_random_stats']) {
-    $res .= "<div class=\"content-header\">".locale_string("random")."</div>";
+    //$res .= "<div class=\"content-header\">".locale_string("random")."</div>";
     $res .= "<table class=\"list\" id=\"overview-table\">";
     foreach($context['main'] as $key => $value) {
       $res .= "<tr><td>".locale_string($key)."</td><td>".
@@ -296,6 +296,14 @@ function rg_view_generator_overview($modlink, &$context, $foreword = "") {
           number_format($report['players_additional'][$max_wr]['won']*100/$report['players_additional'][$max_wr]['matches'],2)."%</td></tr>";
     }
       if (isset($context['records'])) {
+        if (isset($context['records']['most_matches_player']) && empty($max_matches))
+          $res .= "<tr><td>".locale_string("most_matches")."</td><td>".
+            player_link($context['records']['most_matches_player']['playerid'])."</td><td>".$context['records']['most_matches_player']['value']."</td></tr>";
+
+        if (isset($context['records']['most_matches_team']) && empty($max_matches))
+          $res .= "<tr><td>".locale_string("most_matches_team")."</td><td>".
+            team_link($context['records']['most_matches_team']['playerid'])."</td><td>".$context['records']['most_matches_team']['value']."</td></tr>";
+
         $res .= "<tr><td>".locale_string("widest_hero_pool")."</td><td>".
           player_link($context['records']['widest_hero_pool']['playerid'])."</td><td>".$context['records']['widest_hero_pool']['value']."</td></tr>";
         $res .= "<tr><td>".locale_string("smallest_hero_pool")."</td><td>".
