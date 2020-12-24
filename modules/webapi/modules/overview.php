@@ -66,10 +66,14 @@ $endpoints['overview'] = function($mods, $vars, &$report) use (&$meta, &$endpoin
   }
 
   if($report['settings']['overview_time_limits']) {
-    if(isset($context['first_match']))
+    if(isset($context['first_match'])) {
       $res['first_match'] = match_card($context['first_match']['mid']);
-    if(isset($context['last_match']))
+      $res['first_match_date'] = $context['first_match']['date'];
+    }
+    if(isset($context['last_match'])) {
       $res['last_match'] = match_card($context['last_match']['mid']);
+      $res['last_match_date'] = $context['last_match']['date'];
+    }
   }
 
   if($context['settings']['overview_last_match_winners'] || !isset($context['settings'])) {
