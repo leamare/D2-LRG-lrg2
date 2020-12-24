@@ -195,9 +195,24 @@ $endpoints['overview'] = function($mods, $vars, &$report) use (&$meta, &$endpoin
     }
 
     if (isset($context['records'])) {
+      if (isset($context['records']['most_matches_player']) && empty($max_matches))
+        $res['participants']['most_matches_player'] = [
+          "player_id" => $context['records']['most_matches_player']['playerid'],
+          "player_name" => player_name($context['records']['most_matches_player']['playerid']),
+          "value" => $context['records']['most_matches_player']['value']
+        ];
+
+      if (isset($context['records']['most_matches_team']) && empty($max_matches))
+        $res['participants']['most_matches_team'] = [
+          "team_id" => $context['records']['most_matches_team']['playerid'],
+          "player_name" => player_name($context['records']['most_matches_team']['playerid']),
+          "value" => $context['records']['most_matches_team']['value']
+        ];
+
       $res['participants']['widest_hero_pool'] = [
         "player_id" => $context['records']['widest_hero_pool']['playerid'],
-        "player_name" => player_name($context['records']['widest_hero_pool']['playerid']),
+        "team_name" => team_name($context['records']['widest_hero_pool']['playerid']),
+        "team_tag" => team_tag($context['records']['widest_hero_pool']['playerid']),
         "value" => $context['records']['widest_hero_pool']['value']
       ];
       $res['participants']['smallest_hero_pool'] = [
