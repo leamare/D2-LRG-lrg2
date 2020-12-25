@@ -283,8 +283,8 @@ $strings['en'] = [
   "items_timings" => "Timings",
   "item_timing_diff" => "Difference from median",
   "purchase_rate" => "Purchase rate",
-  "purchases" => "Purchases",
-  "purchases_s" => "Pchs",
+  "purchases" => "Pickups",
+  "purchases_s" => "Pkups",
   "items_winrate_shifts" => "Winrate shifts",
   "items_wo_wr_shift" => "Not purchased",
   "items_early_wr_shift" => "Early",
@@ -305,6 +305,11 @@ $strings['en'] = [
   "items_category_medium" => "Medium items",
   "items_category_major" => "Major items",
   "items_category_early" => "Early game items",
+  "items_category_neutral_tier_1" => "Neutral Items - Tier 1",
+  "items_category_neutral_tier_2" => "Neutral Items - Tier 2",
+  "items_category_neutral_tier_3" => "Neutral Items - Tier 3",
+  "items_category_neutral_tier_4" => "Neutral Items - Tier 4",
+  "items_category_neutral_tier_5" => "Neutral Items - Tier 5",
 
   "items_most_impactful_header" => "Most impactful items",
   "items_most_impactful_total_header" => "Overall",
@@ -349,6 +354,8 @@ $strings['en'] = [
   "notable_paricipans" => "Notable Participants",
   "np_winner" => "Last match winner",
   "most_matches" => "Most matches played",
+  "most_matches_player" => "Player with most matches played",
+  "most_matches_team" => "Team with most matches played",
   "highest_winrate" => "Highest winrate",
 
   // match records overview

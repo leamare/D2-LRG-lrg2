@@ -284,8 +284,8 @@ $strings['ru'] = [
   "items_timings" => "Тайминги",
   "item_timing_diff" => "Разница с медианой",
   "purchase_rate" => "Частота покупки",
-  "purchases" => "Покупок",
-  "purchases_s" => "Покуп.",
+  "purchases" => "Приобретен",
+  "purchases_s" => "Приобр.",
   "items_winrate_shifts" => "Изменения винрейтов",
   "items_wo_wr_shift" => "Не куплен",
   "items_early_wr_shift" => "Ранний",
@@ -306,6 +306,11 @@ $strings['ru'] = [
   "items_category_medium" => "Средние предметы",
   "items_category_major" => "Крупные предметы",
   "items_category_early" => "Ранние предметы",
+  "items_category_neutral_tier_1" => "Нейтральные предметы - Разряд 1",
+  "items_category_neutral_tier_2" => "Нейтральные предметы - Разряд 2",
+  "items_category_neutral_tier_3" => "Нейтральные предметы - Разряд 3",
+  "items_category_neutral_tier_4" => "Нейтральные предметы - Разряд 4",
+  "items_category_neutral_tier_5" => "Нейтральные предметы - Разряд 5",
 
   "items_most_impactful_header" => "Предметы с наибольшим влиянием",
   "items_most_impactful_total_header" => "Общие",
@@ -350,6 +355,8 @@ $strings['ru'] = [
   "notable_paricipans" => "Примечательные участники",
   "np_winner" => "Победитель последнего матча",
   "most_matches" => "Больше всего сыграно матчей",
+  "most_matches_player" => "Игрок, сыгравший больше всего матчей",
+  "most_matches_team" => "Команда, сыгравшая больше всего матчей",
   "highest_winrate" => "Наибольшая частота побед",
 
   // match records overview
