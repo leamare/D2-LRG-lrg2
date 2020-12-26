@@ -95,7 +95,7 @@ function get_report_descriptor(&$report, $generate_endpoints = false) {
   if (isset($report['pvp'])) $desc['endpoints'][] = "players-pvp";
   if (isset($report['players_summary'])) $desc['endpoints'][] = "players-summary";
 
-  if (isset($report['items'])) {
+  if (isset($report['items']) && !empty($report['items']['pi'])) {
     $desc['endpoints'][] = "items";
     $desc['endpoints'][] = "items-overview";
     if (isset($report['items']['stats'])) {
