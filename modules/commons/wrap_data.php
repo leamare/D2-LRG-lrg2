@@ -84,6 +84,8 @@ function wrap_data ($array, $with_keys = false, $deep = false, $explicit = false
 
 function unwrap_data ($array) {
   $r = [];
+  if (empty($array) || empty($array['head']))
+    return $r;
   if(is_array($array['head'][0])){
     $head = $array['head'][0];
     $array['head'] = array_splice($array['head'], 1);
