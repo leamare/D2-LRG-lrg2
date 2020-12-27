@@ -1,7 +1,7 @@
 <?php 
 
 $endpoints['items-stats'] = function($mods, $vars, &$report) use (&$endpoints, &$meta) {
-  if (!isset($report['items']['stats']))
+  if (!isset($report['items']) || empty($report['pi']) || !isset($report['items']['stats']))
     throw new \Exception("No items stats data");
 
   $res = [];

@@ -1,6 +1,9 @@
 <?php 
 
 $endpoints['items-overview'] = function($mods, $vars, &$report) use (&$endpoints, &$meta) {
+  if (!isset($report['items']) || empty($report['pi']))
+    throw new \Exception("No items data");
+
   $meta['item_categories'];
 
   $skip_items = array_unique(
