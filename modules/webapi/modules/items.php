@@ -8,7 +8,7 @@ include_once(__DIR__ . "/items/progression.php");
 include_once(__DIR__ . "/items/irecords.php");
 
 $endpoints['items'] = function($mods, $vars, &$report) use (&$endpoints) {
-  if (!isset($report['items']) || empty($report['pi']))
+  if (!isset($report['items']) || empty($report['items']['pi']))
     throw new \Exception("No items data");
 
   if (in_array('heroes', $mods) || in_array('heroboxplots', $mods) || in_array('hboxplots', $mods)) {

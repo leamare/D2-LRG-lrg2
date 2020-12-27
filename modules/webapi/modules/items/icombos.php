@@ -1,7 +1,7 @@
 <?php 
 
 $endpoints['items-combos'] = function($mods, $vars, &$report) use (&$endpoints, &$meta) {
-  if (!isset($report['items']) || empty($report['pi']) || !isset($report['items']['records']))
+  if (!isset($report['items']) || empty($report['items']['pi']) || !isset($report['items']['records']))
     throw new \Exception("No items combos data");
   
   $res = [];

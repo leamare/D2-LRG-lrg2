@@ -1,7 +1,7 @@
 <?php 
 
 $endpoints['items-progression'] = function($mods, $vars, &$report) use (&$endpoints) {
-  if (!isset($report['items']) || empty($report['pi']) || !isset($report['items']['progr']))
+  if (!isset($report['items']) || empty($report['items']['pi']) || !isset($report['items']['progr']))
     throw new \Exception("No items data");
 
   $res = [];

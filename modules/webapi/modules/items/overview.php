@@ -1,7 +1,7 @@
 <?php 
 
 $endpoints['items-overview'] = function($mods, $vars, &$report) use (&$endpoints, &$meta) {
-  if (!isset($report['items']) || empty($report['pi']))
+  if (!isset($report['items']) || empty($report['items']['pi']))
     throw new \Exception("No items data");
 
   $meta['item_categories'];
