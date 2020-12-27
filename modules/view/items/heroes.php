@@ -102,6 +102,7 @@ function rg_view_generate_items_heroes() {
     "<td>".number_format($ranks[$item], 1)."</td>".
     "<td class=\"separator\">".number_format($data['winrate']*100, 2)."%</td>".
     "<td>".($data['wo_wr'] < $data['winrate'] ? '+' : '').number_format(($data['winrate']-$data['wo_wr'])*100, 2)."%</td>".
+    // "<td>".($data['wo_wr'] > $data['winrate'] ? '+' : '').number_format(($data['wo_wr']-$data['winrate'])*100, 2)."%</td>".
     "<td>".($data['early_wr'] > $data['winrate'] ? '+' : '').number_format(($data['early_wr']-$data['winrate'])*100, 2)."%</td>".
     "<td>".($data['late_wr'] > $data['winrate'] ? '+' : '').number_format(($data['late_wr']-$data['winrate'])*100, 2)."%</td>".
     "<td>".number_format($data['grad']*100, 2)."%</td>".
@@ -185,8 +186,9 @@ function rg_view_generate_items_heroes() {
       "<td>".number_format($line['prate']*100, 2)."%</td>".
       "<td>".number_format($ranks[$hero], 1)."</td>".
       "<td class=\"separator\">".number_format($line['winrate']*100, 2)."%</td>".
-      //"<td>".($line['wo_wr'] < $line['winrate'] ? '+' : '').number_format(($line['winrate']-$line['wo_wr'])*100, 2)."%</td>".
-      "<td>".number_format($line['wo_wr']*100, 2)."%</td>".
+      "<td>".($line['wo_wr'] < $line['winrate'] ? '+' : '').number_format(($line['winrate']-$line['wo_wr'])*100, 2)."%</td>".
+      // "<td>".($line['wo_wr'] > $line['winrate'] ? '+' : '').number_format(($line['wo_wr']-$line['winrate'])*100, 2)."%</td>".
+      //"<td>".number_format($line['wo_wr']*100, 2)."%</td>".
       "<td>".($line['early_wr'] > $line['winrate'] ? '+' : '').number_format(($line['early_wr']-$line['winrate'])*100, 2)."%</td>".
       "<td>".($line['late_wr'] > $line['winrate'] ? '+' : '').number_format(($line['late_wr']-$line['winrate'])*100, 2)."%</td>".
       "<td>".number_format($line['grad']*100, 2)."%</td>".
