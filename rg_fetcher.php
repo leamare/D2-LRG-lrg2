@@ -91,7 +91,7 @@ if ($stratz_graphql) {
   // which is using new IDs only for major (non-letter) patches
   $stratz_patches = \array_values(
     \array_filter($stratz_patches, function($v) {
-      return (strlen($v['name']) < 5) || ($v['name'][ 4 ] == 'a');
+      return (strlen($v['name']) < 5) || ($v['id'] < 137 && $v['name'][ 4 ] == 'a');
     })
   );
   usort($stratz_patches, function($a, $b) { return $a['id'] <=> $b['id']; });
