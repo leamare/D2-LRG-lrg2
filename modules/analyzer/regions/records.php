@@ -166,19 +166,19 @@ $sql .= "SELECT \"highest_rampage\" cap, m.matchid, (CASE WHEN ABS(comeback) > A
 # most_matches_player
 $sql .= "SELECT \"most_matches_player\" cap, 0 matchid, COUNT(distinct ml.matchid) val, ml.playerid, 0 heroid FROM matchlines ml
         JOIN matches on ml.matchid = matches.matchid
-        WHERE matches.cluster IN (".implode(",", $clusters).")
+        WHERE matches.cluster IN (".implode(",", $clusters).") AND playerid > 0
         GROUP BY ml.playerid
         ORDER BY val DESC LIMIT 1;";
 # widest hero pool
 $sql .= "SELECT \"widest_hero_pool\" cap, 0 matchid, COUNT(distinct ml.heroid) val, ml.playerid, 0 heroid FROM matchlines ml
         JOIN matches on ml.matchid = matches.matchid
-        WHERE matches.cluster IN (".implode(",", $clusters).")
+        WHERE matches.cluster IN (".implode(",", $clusters).") AND playerid > 0
         GROUP BY ml.playerid
         ORDER BY val DESC LIMIT 1;";
 # smallest hero pool
 $sql .= "SELECT \"smallest_hero_pool\" cap, 0 matchid, COUNT(distinct ml.heroid) val, ml.playerid, 0 heroid FROM matchlines ml
         JOIN matches on ml.matchid = matches.matchid
-        WHERE matches.cluster IN (".implode(",", $clusters).")
+        WHERE matches.cluster IN (".implode(",", $clusters).") AND playerid > 0
         GROUP BY ml.playerid
         ORDER BY val ASC LIMIT 1;";
 

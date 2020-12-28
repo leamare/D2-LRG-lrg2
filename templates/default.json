@@ -13,6 +13,7 @@
     "records": true,
     "players": true,
     "players_names": true,
+    "anon_records": false,
 
     "avg_limit" : 5,
     "avg_heroes" : true,
