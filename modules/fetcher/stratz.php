@@ -1,6 +1,6 @@
 <?php 
 
-const ROSHAN = [133, 134, 135, 263, 264, 265, 324, 325, 326, 371, 593, 594, 595, 640];
+const ROSHAN = [133, 134, 135, 263, 324, 325, 326, 371, 593, 594, 595, 640];
 const OBS = [110, 499, 768];
 const SENTRY = [500, 769, 111];
 const LEVELS_RESPAWN = [5,7,9,13,16,26,28,30,32,34,36,44,46,48,50,52,54,65,70,75,80,85,90,95,100,100,100,100,100,100];
@@ -282,9 +282,11 @@ Q
 
       foreach ($pl['stats']['farmDistributionReport'] as $f) {
         foreach ($f['creepType'] as $fc) {
+          if (in_array($fc['id'], OBS)) $aml['wards_destroyed'] += $fc['count'];
           if (in_array($fc['id'], ROSHAN)) $aml['roshans_killed'] += $fc['count'];
         }
         foreach ($f['other'] as $fc) {
+          if (in_array($fc['id'], ROSHAN)) $aml['roshans_killed'] += $fc['count'];
           if (in_array($fc['id'], OBS)) $aml['wards_destroyed'] += $fc['count'];
         }
       }
