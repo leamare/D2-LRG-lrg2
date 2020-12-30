@@ -181,7 +181,7 @@ function fetch($match) {
         $bad_replay = true;
 
         // 14*24*3600 = two weeks
-        if($request_unparsed && !in_array($match, $scheduled) && !empty($match) && (time() - $match['matches']['start_date'] < 1209600)) {
+        if($request_unparsed && !in_array($match, $scheduled) && !empty($match) && (time() - $matchdata['matches']['start_date'] < 1209600)) {
           @file_get_contents($request);
           `php tools/replay_request_stratz.php -m$match`;
           echo "..Requested and scheduled $match\n";

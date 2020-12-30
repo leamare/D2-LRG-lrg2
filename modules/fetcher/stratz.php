@@ -382,7 +382,8 @@ Q
       
       $aml['stuns'] = ($pl['stats']['heroDamageReport']['dealtTotal']['stunDuration'] + $pl['stats']['heroDamageReport']['dealtTotal']['disableDuration'])/100;
 
-      $aml['teamfight_part'] = ($pl['kills']+$pl['assists']) / ( $pl['isRadiant'] ? array_sum($stratz['data']['match']['stats']['radiantKills']) : array_sum($stratz['data']['match']['stats']['direKills']));
+      $aml['teamfight_part'] = $pl['isRadiant'] ? array_sum($stratz['data']['match']['stats']['radiantKills']) : array_sum($stratz['data']['match']['stats']['direKills']);
+      $aml['teamfight_part'] = $aml['teamfight_part'] ? ($pl['kills']+$pl['assists']) / $aml['teamfight_part'] : 0;
       $aml['damage_taken'] = array_sum($pl['stats']['heroDamageReport']['receivedTotal']);
 
       $r['adv_matchlines'][] = $aml;
