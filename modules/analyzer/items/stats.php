@@ -134,8 +134,8 @@ $query_res = $conn->store_result();
 for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
   if (!isset($dataset[$row[0]])) $dataset[$row[0]] = [ 'total' => [] ];
   if (!isset($dataset[$row[0]][$row[1]])) $dataset[$row[0]][$row[1]] = [];
-  $dataset[$row[0]][$row[1]][] = $row[2];
-  $dataset[$row[0]]['total'][] = $row[2];
+  $dataset[$row[0]][$row[1]][] = (int)($row[2]);
+  $dataset[$row[0]]['total'][] = (int)($row[2]);
 }
 
 $query_res->free_result();
