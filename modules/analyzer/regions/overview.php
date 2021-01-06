@@ -43,6 +43,51 @@ if (!$row[1] || ( ($lg_settings['ana']['regions']['use_limiter'] ?? false) && $r
   $sql .= "SELECT \"heroes_picked\", count(distinct hero_id) FROM draft JOIN matches on draft.matchid = matches.matchid WHERE matches.cluster IN (".implode(",", $clusters).") AND is_pick = 1;";
   # heroes banned
   $sql .= "SELECT \"heroes_banned\", count(distinct hero_id) FROM draft JOIN matches on draft.matchid = matches.matchid WHERE matches.cluster IN (".implode(",", $clusters).") AND is_pick = 0;";
+
+  # ********** Medians
+
+  # heroes median picks
+  $sql .= "set @rn := 0; select * from ( select *, @rn := @rn + 1 as rn from (
+    select \"heroes_median_picks\", COUNT(DISTINCT matchlines.matchid) value, matchlines.heroid hid 
+    from matchlines JOIN matches on matchlines.matchid = matches.matchid
+    WHERE matches.cluster IN (".implode(",", $clusters).")
+    GROUP BY matchlines.heroid
+    ORDER BY `value`  DESC
+    ) a order by a.value DESC ) b where b.rn = @rn div 2;";
+
+  # heroes median bans
+  $sql .= "set @rn := 0; select * from ( select *, @rn := @rn + 1 as rn from (
+    select \"heroes_median_bans\", SUM(1) value, draft.hero_id hid
+    from draft join matches on matches.matchid = draft.matchid
+    where draft.is_pick = 0 and matches.cluster IN (".implode(",", $clusters).") GROUP BY hid ORDER BY `value`  DESC
+    ) a order by a.value DESC ) b where b.rn = @rn div 2;";
+
+  # heroes median gpm
+  $sql .= "set @rn := 0; select * from ( select *, @rn := @rn + 1 as rn from (
+    select \"heroes_median_gpm\", matchlines.gpm value 
+    from matchlines JOIN matches on matchlines.matchid = matches.matchid
+    WHERE matches.cluster IN (".implode(",", $clusters).")
+    ORDER BY `value`  DESC
+    ) a order by a.value DESC ) b where b.rn = @rn div 2;";
+
+  # heroes median xpm
+  $sql .= "set @rn := 0; select * from ( select *, @rn := @rn + 1 as rn from (
+    select \"heroes_median_xpm\", matchlines.xpm value
+    from matchlines JOIN matches on matchlines.matchid = matches.matchid
+    WHERE matches.cluster IN (".implode(",", $clusters).")
+    ORDER BY `value`  DESC
+    ) a order by a.value DESC ) b where b.rn = @rn div 2;";
+
+  # matches median duration
+  $sql .= "set @rn := 0; select * from ( select *, @rn := @rn + 1 as rn from (
+    select \"matches_median_duration\", matches.duration/60 as value
+    from matches 
+    WHERE matches.cluster IN (".implode(",", $clusters).")
+    ORDER BY `value` DESC
+    ) a order by a.value DESC ) b where b.rn = @rn div 2;";
+
+  # **********
+
   # Radiant winrate
   $sql .= "SELECT \"radiant_wr\", SUM(radiantWin)*100/SUM(1) FROM matches WHERE matches.cluster IN (".implode(",", $clusters).");";
   # Dire winrate
@@ -59,11 +104,13 @@ if (!$row[1] || ( ($lg_settings['ana']['regions']['use_limiter'] ?? false) && $r
   do {
     $query_res = $conn->store_result();
 
-    $row = $query_res->fetch_row();
+    if(!is_bool($query_res)) {
+      $row = $query_res->fetch_row();
 
-    $result["regions_data"][$region]["main"][$row[0]] = $row[1];
+      $result["regions_data"][$region]["main"][$row[0]] = $row[1];
 
-    $query_res->free_result();
+      $query_res->free_result();
+    }
   } while($conn->next_result());
 
   require("overview/firstlast.php");
