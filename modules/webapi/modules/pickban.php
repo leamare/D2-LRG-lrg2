@@ -7,14 +7,17 @@ $endpoints['pickban'] = function($mods, $vars, &$report) {
     $parent =& $report['teams'][ $vars['team'] ]; 
     $context =& $report['teams'][ $vars['team'] ]['pickban'];
     $context_total_matches = $report['teams'][ $vars['team'] ]['matches_total'];
+    $context_main =& $report['teams'][ $vars['team'] ];
   } else if (isset($vars['region'])) {
     $parent =& $report['regions_data'][ $vars['region'] ]; 
     $context =& $report['regions_data'][ $vars['region'] ]['pickban'];
     $context_total_matches = $report['regions_data'][ $vars['region'] ]['main']["matches_total"];
+    $context_main =& $report['regions_data'][ $vars['region'] ]['main'];
   } else {
     $parent =& $report;
     $context =& $report['pickban'];
     $context_total_matches = $report["random"]["matches_total"];
+    $context_main =& $report["random"][ $vars['team'] ];
   }
 
   if (is_wrapped($context)) {
@@ -22,6 +25,23 @@ $endpoints['pickban'] = function($mods, $vars, &$report) {
   }
 
   if(!sizeof($context)) return [];
+
+  $mp = $context_main['heroes_median_picks'] ?? null;
+  $mb = $context_main['heroes_median_bans'] ?? null;
+
+  if (empty ($mp)) {
+    uasort($context, function($a, $b) {
+      return $a['matches_picked'] <=> $b['matches_picked'];
+    });
+    $mp = $context[ round(sizeof($context)*0.5) ]['matches_picked'];
+  }
+
+  if (empty ($mb)) {
+    uasort($context, function($a, $b) {
+      return $a['matches_banned'] <=> $b['matches_banned'];
+    });
+    $mb = $context[ round(sizeof($context)*0.5) ]['matches_banned'];
+  }
 
   uasort($context, function($a, $b) {
     if($a['matches_total'] == $b['matches_total']) return 0;
@@ -47,15 +67,12 @@ $endpoints['pickban'] = function($mods, $vars, &$report) {
     $last = $el;
     $last_rank = $ranks[$id];
   }
-
-  $median_picks = $parent['random']['heroes_median_picks'] ?? $parent['main']['heroes_median_picks'] ?? null;
-  $median_bans = $parent['random']['heroes_median_bans'] ?? $parent['main']['heroes_median_bans'] ?? null;
-
+  
   foreach($context as $id => &$el) {
     $el['rank'] = round($ranks[$id], 2);
     $el['contest_rate'] = round($el['matches_total']/$context_total_matches, 5);
-    $el['picks_to_median'] = isset($median_picks) ? round($el['matches_picked']/$median_picks, 3) : null;
-    $el['bans_to_median'] = isset($median_bans) ? round($el['matches_banned']/$median_bans, 3) : null;
+    $el['picks_to_median'] = isset($median_picks) ? round($el['matches_picked']/$mp, 1) : null;
+    $el['bans_to_median'] = isset($median_bans) ? round($el['matches_banned']/$mb, 1) : null;
   }
 
   return [
