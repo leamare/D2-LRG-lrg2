@@ -5,6 +5,13 @@ $res["region".$region]["heroes"] = [];
 if($mod == $modstr."-heroes") $unset_module = true;
 $parent_mod = $modstr."-heroes-";
 
+$res["region".$region]['heroes']["pickban"] = "";
+include_once("heroes/pickban.php");
+
+if(check_module($parent_mod."pickban")) {
+  $res["region".$region]['heroes']['pickban'] = rg_view_generate_regions_heroes_pickban($region, $reg_report);
+}
+
 if(isset($reg_report['haverages_heroes'])) {
   $res["region".$region]['heroes']["haverages"] = "";
   include_once("heroes/haverages.php");
@@ -12,13 +19,6 @@ if(isset($reg_report['haverages_heroes'])) {
   if(check_module($parent_mod."haverages")) {
     $res["region".$region]['heroes']['haverages'] = rg_view_generate_regions_heroes_haverages($region, $reg_report);
   }
-}
-
-$res["region".$region]['heroes']["pickban"] = "";
-include_once("heroes/pickban.php");
-
-if(check_module($parent_mod."pickban")) {
-  $res["region".$region]['heroes']['pickban'] = rg_view_generate_regions_heroes_pickban($region, $reg_report);
 }
 
 if(isset($reg_report['draft'])) {

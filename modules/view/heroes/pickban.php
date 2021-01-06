@@ -10,7 +10,7 @@ function rg_view_generate_heroes_pickban() {
 
   $res = "";
 
-  $res .= rg_generator_pickban("heroes-pickban", $report['pickban'], $report["random"]["matches_total"]);
+  $res .= rg_generator_pickban("heroes-pickban", $report['pickban'], $report["random"]);
 
   $res .= rg_generator_uncontested($meta["heroes"], $report['pickban']);
 
