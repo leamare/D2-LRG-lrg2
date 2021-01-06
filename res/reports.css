@@ -634,22 +634,39 @@ table .hero_portrait {
 
 /* other stuff */
 
-.support-me-block {
+.support-me-block, .support-me-block-secondary {
   position: absolute;
   top: 75px;
-  left: 20px;
-  min-width: 250px;
   /* height: 50px; */
   z-index: 20;
-  font-size: 19px;
-  padding: 9px;
-  background-color: rgba(128,128,128,0.2);
   border-radius: 5px;
   opacity: 0.8;
   transition: 300ms all linear;
+  color: #fff;
 }
-.support-me-block:hover {
+.support-me-block {
+  right: 20px;
+  min-width: 250px;
+  background-color: rgba(32,32,32,0.3);
+  padding: 9px;
+  font-size: 19px;
+  text-align: right;
+}
+.support-me-block-secondary {
+  background-color: rgba(132, 0, 255, 0.4);
+  padding: 9px;
+  left: 20px;
+  font-size: 20px;
+  text-align: left;
+}
+.support-me-block:hover, .support-me-block-secondary:hover {
   opacity: 1;
+}
+.support-me-block img, .support-me-block-secondary img {
+  display: inline-block;
+  vertical-align: bottom;
+  height: 26px;
+  width: auto;
 }
 
 .ads-block-report {

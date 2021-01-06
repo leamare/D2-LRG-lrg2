@@ -1,4 +1,4 @@
-<?php  $__postfix = "?v=24053"; ?>
+<?php  $__postfix = "?v=24055"; ?>
 <!DOCTYPE html>
 <html lang="<?php echo $locale; ?>">
   <head>
@@ -114,6 +114,9 @@
     </header>
     <?php 
       if (!empty($support_me_block)) echo "<div class=\"support-me-block\">$support_me_block</div>";
+    ?>
+    <?php 
+      if (!empty($support_me_block_second)) echo "<div class=\"support-me-block-secondary\">$support_me_block_second</div>";
     ?>
     <?php 
       if (!empty($ads_block) && !empty($leaguetag)) echo "<div class=\"ads-block-report\">$ads_block</div>";

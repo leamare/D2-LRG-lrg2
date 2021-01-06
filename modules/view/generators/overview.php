@@ -323,7 +323,7 @@ function rg_view_generator_overview($modlink, &$context, $foreword = "") {
         "</a> / <a href=\"?league=$leaguetag&mod=records".
         (empty($linkvars) ? "" : "&".$linkvars)."\">".locale_string("full_records").
         "</a></div>";
-    $res .= "</div>";
+    //$res .= "</div>";
   }
 
   if (isset($context['records']) && isset($report['settings']['overview_include_records']) && $report['settings']['overview_include_records']) {
