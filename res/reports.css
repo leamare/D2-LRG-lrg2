@@ -647,7 +647,7 @@ table .hero_portrait {
 .support-me-block {
   right: 20px;
   min-width: 250px;
-  background-color: rgba(32,32,32,0.3);
+  background-color: rgba(0,0,0,0.4);
   padding: 9px;
   font-size: 19px;
   text-align: right;
