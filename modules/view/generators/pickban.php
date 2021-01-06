@@ -3,15 +3,35 @@ include_once($root."/modules/view/functions/hero_name.php");
 include_once($root."/modules/view/functions/player_name.php");
 include_once($root."/modules/view/functions/ranking.php");
 
-function rg_generator_pickban($table_id, &$context, $context_total_matches, $heroes_flag = true) {
+function rg_generator_pickban($table_id, &$context, &$context_main, $heroes_flag = true) {
   if(!sizeof($context)) return "";
+
+  $context_total_matches = $context_main['matches'] ?? $context_main["matches_total"] ?? 0;
+  $mp = $context_main['heroes_median_picks'] ?? null;
+  $mb = $context_main['heroes_median_bans'] ?? null;
+
+  if (empty ($mp)) {
+    uasort($context, function($a, $b) {
+      return $a['matches_picked'] <=> $b['matches_picked'];
+    });
+    $mp = $context[ round(sizeof($context)*0.5) ]['matches_picked'];
+  }
+
+  if (empty ($mb)) {
+    uasort($context, function($a, $b) {
+      return $a['matches_banned'] <=> $b['matches_banned'];
+    });
+    $mb = $context[ round(sizeof($context)*0.5) ]['matches_banned'];
+  }
 
   uasort($context, function($a, $b) {
     if($a['matches_total'] == $b['matches_total']) return 0;
     else return ($a['matches_total'] < $b['matches_total']) ? 1 : -1;
   });
 
-  $res =  "<table id=\"$table_id\" class=\"list sortable\"><thead><tr>".
+  $res = "<div class=\"content-text\">".locale_string("heroes_median_picks")." (mp): $mp - ".locale_string("heroes_median_bans")." (mb): $mb</div>";
+
+  $res .=  "<table id=\"$table_id\" class=\"list sortable\"><thead><tr>".
             ($heroes_flag ? "<th class=\"sorter-no-parser\" width=\"1%\"></th>" : "").
             "<th data-sortInitialOrder=\"asc\">".locale_string($heroes_flag ? "hero" : "player")."</th>".
             "<th>".locale_string("matches_total")."</th>".
@@ -19,8 +39,11 @@ function rg_generator_pickban($table_id, &$context, $context_total_matches, $her
             "<th>".locale_string("rank")."</th>".
             "<th class=\"separator\">".locale_string("matches_picked")."</th>".
             "<th>".locale_string("winrate")."</th>".
+            "<th>".locale_string("mp")."</th>".
             "<th class=\"separator\">".locale_string("matches_banned")."</th>".
-            "<th>".locale_string("winrate")."</th></tr></thead>";
+            "<th>".locale_string("winrate")."</th>".
+            "<th>".locale_string("mb")."</th>".
+            "</tr></thead>";
 
   $ranks = [];
   $context_copy = $context;
@@ -53,8 +76,11 @@ function rg_generator_pickban($table_id, &$context, $context_total_matches, $her
             "<td>".number_format($ranks[$id],2)."</td>".
             "<td class=\"separator\">".$el['matches_picked']."</td>".
             "<td>".number_format($el['winrate_picked']*100,2)."%</td>".
+            "<td>".number_format($el['matches_picked']/$mp, 1)."</td>".
             "<td class=\"separator\">".$el['matches_banned']."</td>".
-            "<td>".number_format($el['winrate_banned']*100,2)."%</td></tr>";
+            "<td>".number_format($el['winrate_banned']*100,2)."%</td>".
+            "<td>".number_format($el['matches_banned']/$mb, 1)."</td>".
+            "</tr>";
   }
   unset($oi);
   $res .= "</table>";

@@ -114,7 +114,25 @@ function rg_generator_overview_combos($table_id, $caption, $context, $limiter = 
   return $res;
 }
 
-function rg_generator_pickban_overview($table_id, $context, $context_total_matches, $limiter = 10, $heroes_flag = true) {
+function rg_generator_pickban_overview($table_id, $context, $context_main, $limiter = 10, $heroes_flag = true) {
+  $context_total_matches = $context_main['matches'] ?? $context_main["matches_total"] ?? 0;
+  $mp = $context_main['heroes_median_picks'] ?? null;
+  $mb = $context_main['heroes_median_bans'] ?? null;
+
+  if (empty ($mp)) {
+    uasort($context, function($a, $b) {
+      return $a['matches_picked'] <=> $b['matches_picked'];
+    });
+    $mp = $context[ round(sizeof($context)*0.5) ]['matches_picked'];
+  }
+
+  if (empty ($mb)) {
+    uasort($context, function($a, $b) {
+      return $a['matches_banned'] <=> $b['matches_banned'];
+    });
+    $mb = $context[ round(sizeof($context)*0.5) ]['matches_banned'];
+  }
+
   $res =  "<table id=\"$table_id\" class=\"list\"><thead><tr>".
             ($heroes_flag ? "<th width=\"1%\"></th>" : "").
             "<th>".locale_string($heroes_flag ? "hero" : "player")."</th>".
@@ -123,8 +141,11 @@ function rg_generator_pickban_overview($table_id, $context, $context_total_match
             "<th>".locale_string("rank")."</th>".
             "<th class=\"separator\">".locale_string("matches_picked")."</th>".
             "<th>".locale_string("winrate")."</th>".
+            "<th>".locale_string("mp")."</th>".
             "<th class=\"separator\">".locale_string("matches_banned")."</th>".
-            "<th>".locale_string("winrate")."</th></tr></thead>";
+            "<th>".locale_string("winrate")."</th>".
+            "<th>".locale_string("mb")."</th>".
+            "</tr></thead>";
 
   $ranks = [];
   $context_copy = $context;
@@ -153,8 +174,11 @@ function rg_generator_pickban_overview($table_id, $context, $context_total_match
             "<td>".number_format($ranks[$id],2)."</td>".
             "<td class=\"separator\">".$el['matches_picked']."</td>".
             "<td>".number_format($el['winrate_picked']*100,2)."%</td>".
+            "<td>".number_format($el['matches_picked']/$mp, 1)."</td>".
             "<td class=\"separator\">".$el['matches_banned']."</td>".
-            "<td>".number_format($el['winrate_banned']*100,2)."%</td></tr>";
+            "<td>".number_format($el['winrate_banned']*100,2)."%</td>".
+            "<td>".number_format($el['matches_banned']/$mb, 1)."</td>".
+            "</tr>";
     if ($i == $limiter) break;
   }
   unset($oi);
@@ -163,4 +187,3 @@ function rg_generator_pickban_overview($table_id, $context, $context_total_match
   return $res;
 }
 
-?>
