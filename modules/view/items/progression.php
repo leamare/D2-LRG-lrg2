@@ -42,6 +42,8 @@ function rg_view_generate_items_progression() {
     }
   }
 
+  $data = $report['pickban'][$hero];
+
   $pairs = [];
   $items = [];
   $max_wr = 0;
@@ -55,7 +57,7 @@ function rg_view_generate_items_progression() {
     if (!in_array($v['item2'], $items)) $items[] = $v['item2'];
 
     if ($v['total'] > $max_games) $max_games = $v['total'];
-    $diff = abs(($v['winrate'])-0.5);
+    $diff = abs($v['winrate']-$data['winrate_picked']);
     if ($diff > $max_wr) {
       $max_wr = $diff;
     }
@@ -81,37 +83,42 @@ function rg_view_generate_items_progression() {
   foreach ($items as $item) {
     $minute_gr = round($report['items']['stats'][$hero][$item]['median']/240);
     $minute_gr = in_array($item, $meta['item_categories']['early']) && $minute_gr > 3 ? 3 : $minute_gr;
+    $diff_raw = $report['items']['stats'][$hero][$item]['winrate'] - $report['items']['stats'][$hero][$item]['wo_wr'];
+    $diff = 0.5 + $diff_raw;
     $nodes .= "{ id: $item, value: ".$report['items']['stats'][$hero][$item]['purchases'].", label: '".addslashes(item_name($item))."'".
       ", title: '".addslashes(item_name($item)).", ".locale_string('avg_timing').": ".convert_time_seconds($report['items']['stats'][$hero][$item]['median']).", ".
       locale_string('purchases').": ".$report['items']['stats'][$hero][$item]['purchases'].", ".
-      locale_string('winrate').": ".($report['items']['stats'][$hero][$item]['winrate']*100)."%".
+      locale_string('winrate').": ".($report['items']['stats'][$hero][$item]['winrate']*100)."%, ".
+      locale_string("diff").": ".number_format($diff_raw*100, 2)."%".
       "'".
       ", shape:'circularImage', ".
       "image: '".item_icon_link($item)."', level: ".$minute_gr.
     ", color:{
-        background:'rgba(".number_format(255-255*$report['items']['stats'][$hero][$item]['winrate'], 0).",124,".
-        number_format(255*$report['items']['stats'][$hero][$item]['winrate'], 0).")', ".
-        "border:'rgba(".number_format(255-255*$report['items']['stats'][$hero][$item]['winrate'], 0).",124,".
-        number_format(255*$report['items']['stats'][$hero][$item]['winrate'], 0).")',
-        highlight: { background:'rgba(".number_format(255-255*$report['items']['stats'][$hero][$item]['winrate'], 0).",124,".
-          number_format(255*$report['items']['stats'][$hero][$item]['winrate'], 0).")', ".
-          "border:'rgba(".number_format(255-255*$report['items']['stats'][$hero][$item]['winrate'], 0).",124,".
-          number_format(255*$report['items']['stats'][$hero][$item]['winrate'], 0).")' }
+        background:'rgba(".number_format(255-255*$diff, 0).",124,".
+        number_format(255*$diff, 0).")', ".
+        "border:'rgba(".number_format(255-255*$diff, 0).",124,".
+        number_format(255*$diff, 0).")',
+        highlight: { background:'rgba(".number_format(255-255*$diff, 0).",124,".
+          number_format(255*$diff, 0).")', ".
+          "border:'rgba(".number_format(255-255*$diff, 0).",124,".
+          number_format(255*$diff, 0).")' }
       }
     }, ";
   }
 
   foreach ($pairs as $v) {
+    $diff = $v['winrate'] - $data['winrate_picked'];
     $color = "'rgba(".
-      round(126-255*($max_wr ? ($v['winrate']-0.5)/$max_wr : 0)).",124,".
-      round(126+255*($max_wr ? ($v['winrate']-0.5)/$max_wr : 0)).",".(($v['total']/$max_games)*0.85+0.15).")'";
+      round(126-255*($max_wr ? $diff/$max_wr : 0)).",124,".
+      round(126+255*($max_wr ? $diff/$max_wr : 0)).",".(($v['total']/$max_games)*0.85+0.15).")'";
     $color_hi = "'rgba(".
       round(136-205*($max_wr ? ($v['winrate']-0.5)/$max_wr : 0)).",100,".
       round(136+205*($max_wr ? ($v['winrate']-0.5)/$max_wr : 0)).",1)'";
     $edges .= "{from: ".$v['item1'].", to: ".$v['item2'].", value:".$v['total'].", title:\"".
       $v['total']." ".locale_string("matches").", ".number_format($v['winrate']*100, 2)."% ".locale_string("winrate").
       ", ".locale_string("items_minute_diff").": ".$v['min_diff'].
-      "\", color:{color:$color, highlight: $color_hi}},";
+      ", ".locale_string("diff").": ".number_format($diff*100, 2).
+      "%\", color:{color:$color, highlight: $color_hi}},";
   }
 
   $res[$tag] .= "var nodes = [ ".$nodes." ];";
