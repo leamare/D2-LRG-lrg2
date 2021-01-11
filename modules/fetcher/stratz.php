@@ -176,7 +176,7 @@ Q
 
   $stratz = json_decode($json, true);
   
-  if (empty($stratz['data']) && !empty($stratz['errors'])) {
+  if (empty($stratz['data']) || empty($stratz['data']['match']) || !empty($stratz['errors'])) {
     return null;
   }
 
