@@ -131,9 +131,12 @@ if ($restore) {
     $query_res->free_result();
 
     // fetching data
-    $lines = [
-      implode(',', $schema)
-    ];
+    $fname = $t.'_'.time().'.csv';
+    $files[$t.'.csv'] = $fname;
+
+    $fp = fopen($fname, "w+");
+    
+    fwrite($fp, implode(',', $schema)."\n");
 
     $sql = "SELECT * FROM $t;";
     if ($conn->multi_query($sql) === FALSE)
@@ -149,16 +152,12 @@ if ($restore) {
         else 
           $els[] = $r;
       }
-      $lines[] = implode(',', $els);
+      fwrite($fp, implode(',', $els)."\n");
     }
 
     $query_res->free_result();
 
-    // file contents
-    $buffer = implode("\n", $lines);
-    $fname = $t.'_'.time().'.csv';
-    file_put_contents($fname, $buffer);
-    $files[$t.'.csv'] = $fname;
+    fclose($fp);
 
     echo "OK.\n";
     
