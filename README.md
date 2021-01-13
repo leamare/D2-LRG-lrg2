@@ -278,3 +278,4 @@ Tools are additional scripts that can be used for specific things. All of them s
 * `backport_matchlist` - generates full matchlist based on league's database. Args: `-l%LEAGUETAG%`, `-Tperiod`, `-P4601` where 4601 is ID of a patch, `-r` to fetch only unparsed matches, `-R` to reverse filters (get every match that doesn't fit the filters)
 * `backport_cache` - backports all matches from a league database as .lrgcache.json files to cache folder. Args: `-l%LEAGUETAG%`, `-c%FNAME%` for a list of matches, `-Tperiod` if -c is not specified -- if you need a specific subset using filters - use backport_matchlist first and then -c param
 * `update_rosters` - updates official rosters for all teams in report. Args: `-l%LEAGUETAG%`
+* `update_playerids` - updates missing ranked playerids

@@ -17,6 +17,7 @@ tmp*
 ___*
 _default.json
 nohup.out
+ex.out
 
 # Testing files
 test/
