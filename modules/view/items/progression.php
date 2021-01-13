@@ -42,7 +42,7 @@ function rg_view_generate_items_progression() {
     }
   }
 
-  $data = $report['pickban'][$hero];
+  $data = $report['pickban'][$hero] ?? null;
 
   $pairs = [];
   $items = [];
@@ -57,7 +57,7 @@ function rg_view_generate_items_progression() {
     if (!in_array($v['item2'], $items)) $items[] = $v['item2'];
 
     if ($v['total'] > $max_games) $max_games = $v['total'];
-    $diff = abs($v['winrate']-$data['winrate_picked']);
+    $diff = abs($v['winrate']-($data ? $data['winrate_picked'] : 0.5));
     if ($diff > $max_wr) {
       $max_wr = $diff;
     }
@@ -107,7 +107,7 @@ function rg_view_generate_items_progression() {
   }
 
   foreach ($pairs as $v) {
-    $diff = $v['winrate'] - $data['winrate_picked'];
+    $diff = $v['winrate'] - ($data ? $data['winrate_picked'] : 0.5);
     $color = "'rgba(".
       round(126-255*($max_wr ? $diff/$max_wr : 0)).",124,".
       round(126+255*($max_wr ? $diff/$max_wr : 0)).",".(($v['total']/$max_games)*0.85+0.15).")'";
