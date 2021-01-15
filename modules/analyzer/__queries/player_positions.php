@@ -6,7 +6,7 @@ function rg_query_player_positions(&$conn, $team = null, $cluster = null) {
   for ($core = 0; $core < 2; $core++) {
     if (!isset($res[$core])) $res[$core] = [];
     for ($lane = 1; $lane > 0 && $lane < 6; $lane++) {
-      if (!$core) { $lane = 0; }
+      if (!$core) { $lane = $lane == 1 ? 1 : 3; }
       $res[$core][$lane] = [];
   
       $sql = "SELECT
@@ -36,7 +36,8 @@ function rg_query_player_positions(&$conn, $team = null, $cluster = null) {
                   ( select COUNT(DISTINCT heroid) heropool, playerid from matchlines group by playerid ) _hp
                 ) mhpt 
               WHERE ".
-             ($core == 0 ? "am.isCore = 0" : "am.isCore = 1 AND am.lane = $lane").
+            //  ($core == 0 ? "am.isCore = 0" : "am.isCore = 1 AND am.lane = $lane").
+             ($core == 0 ? "am.isCore = 0 AND am.lane ".($lane == 1 ? '= 1' : '<> 1') :"am.isCore = 1 AND am.lane = $lane").
              ($cluster !== null ? " AND m.cluster IN (".implode(",", $cluster).") " : "").
              ($team === null ? "" : " AND teams_matches.teamid = $team ").
              " GROUP BY am.playerid
@@ -69,7 +70,7 @@ function rg_query_player_positions(&$conn, $team = null, $cluster = null) {
       }
   
       $query_res->free_result();
-      if (!$core) { break; }
+      if (!$core && $lane == 3) { break; }
     }
   }
 
@@ -80,8 +81,9 @@ function rg_query_player_positions_matches(&$conn, &$context) {
   $res = [];
 
   for ($core = 0; $core < 2; $core++) {
+    if (!isset($res[$core])) $res[$core] = [];
     for ($lane = 1; $lane < 6; $lane++) {
-      if (!$core) { $lane = 0; }
+      if (!$core) { $lane = $lane == 1 ? 1 : 3; }
       $res[$core][$lane] = [];
 
       foreach ($context[$core][$lane] as $id => $hero) {
@@ -89,7 +91,8 @@ function rg_query_player_positions_matches(&$conn, &$context) {
 
         $sql = "SELECT matchid
             FROM adv_matchlines WHERE ".
-          ($core == 0 ? "isCore = 0" : "isCore = 1 AND lane = $lane")
+          // ($core == 0 ? "isCore = 0" : "isCore = 1 AND lane = $lane")
+          ($core == 0 ? "isCore = 0 AND lane ".($lane == 1 ? '= 1' : '<> 1') :"isCore = 1 AND lane = $lane")
           ." AND playerid = ".$id.";";
 
         if ($conn->multi_query($sql) === TRUE);
@@ -103,7 +106,7 @@ function rg_query_player_positions_matches(&$conn, &$context) {
 
         $query_res->free_result();
       }
-      if (!$core) { break; }
+      if (!$core && $lane == 3) { break; }
     }
   }
 
