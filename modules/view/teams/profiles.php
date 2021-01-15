@@ -52,8 +52,8 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
                 if (!isset($player_pos[$a]['core']) || !isset($player_pos[$b]['core'])) return 0;
                 if ($player_pos[$a]['core'] > $player_pos[$b]['core']) return -1;
                 if ($player_pos[$a]['core'] < $player_pos[$b]['core']) return 1;
-                if ($player_pos[$a]['lane'] < $player_pos[$b]['lane']) return -1;
-                if ($player_pos[$a]['lane'] > $player_pos[$b]['lane']) return 1;
+                if ($player_pos[$a]['lane'] < $player_pos[$b]['lane']) return ($player_pos[$a]['core'] ? -1 : 1)*1;
+                if ($player_pos[$a]['lane'] > $player_pos[$b]['lane']) return ($player_pos[$a]['core'] ? 1 : -1)*1;
                 return 0;
               });
             }
@@ -142,12 +142,12 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
           if ($mod == $context_mod."team".$tid."-heroes-positions") $unset_module = true;
           $res["team".$tid]['heroes']['positions']['overview'] = "";
           for ($i=1; $i>=0; $i--) {
-            for ($j=1; $j<6 && $j>0; $j++) {
-              if (!$i) { $j = 0; }
+            for ($j=0; $j<6 && $j>=0; $j++) {
+              // if (!$i) { $j = 0; }
               if(!empty($context[$tid]['hero_positions'][$i][$j]))
                 $res["team".$tid]['heroes']['positions']["position_$i.$j"]  = "";
 
-              if (!$i) { break; }
+              // if (!$i) { break; }
             }
           }
 
@@ -165,8 +165,8 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
               if (!isset($player_pos[$a]['core']) || !isset($player_pos[$b]['core'])) return 0;
               if ($player_pos[$a]['core'] > $player_pos[$b]['core']) return -1;
               if ($player_pos[$a]['core'] < $player_pos[$b]['core']) return 1;
-              if ($player_pos[$a]['lane'] < $player_pos[$b]['lane']) return -1;
-              if ($player_pos[$a]['lane'] > $player_pos[$b]['lane']) return 1;
+              if ($player_pos[$a]['lane'] < $player_pos[$b]['lane']) return ($player_pos[$a]['core'] ? -1 : 1)*1;
+              if ($player_pos[$a]['lane'] > $player_pos[$b]['lane']) return ($player_pos[$a]['core'] ? 1 : -1)*1;
               return 0;
             });
             $pl = [];
@@ -174,8 +174,8 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
               if (!isset($report['players'][$player])) continue;
               $position = $player_pos[$player];
               $pl[] = "<span class=\"player\">".player_name($player).
-              (isset($position['core']) ? " (".($position['core'] ? locale_string("core")." " : locale_string("support")).
-                locale_string( "lane_".$position['lane'] ).')' : ''
+              (isset($position['core']) ? " (".($position['core'] ? locale_string("core") : locale_string("support")).
+                ($position['lane'] ? " ".locale_string( "lane_".$position['lane'] ) : '').')' : ''
               )."</span>";
             }
             $res["team".$tid]['heroes']['positions']["overview"] .= implode(', ', $pl)."</div>";
@@ -188,11 +188,11 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
             include_once($root."/modules/view/generators/summary.php");
 
             for ($i=1; $i>=0; $i--) {
-              for ($j=1; $j<6 && $j>0; $j++) {
-                if (!$i) { $j = 0; }
+              for ($j=0; $j<6 && $j>=0; $j++) {
+                // if (!$i) { $j = 0; }
 
                 if (!check_module($parent_module."position_$i.$j") || empty($context[$tid]['hero_positions'][$i][$j])) {
-                  if (!$i) { break; }
+                  // if (!$i) { break; }
                   continue;
                 }
 
@@ -246,7 +246,7 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
 
                 $res["team".$tid]['heroes']['positions']["position_$i.$j"] .= rg_generator_summary("team$tid-heroes-positions-$i-$j", $context[$tid]['hero_positions'][$i][$j], true, true);
                 $res["team".$tid]['heroes']['positions']["position_$i.$j"] .= "<div class=\"content-text\">".locale_string("desc_heroes_positions")."</div>";
-                if (!$i) { break; }
+                // if (!$i) { break; }
               }
             }
           }

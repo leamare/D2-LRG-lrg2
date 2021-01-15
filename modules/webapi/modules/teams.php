@@ -89,8 +89,8 @@ $endpoints['teams'] = function($mods, $vars, &$report) use (&$endpoints) {
           if (!isset($player_pos[$a]['core']) || !isset($player_pos[$b]['core'])) return 0;
           if ($player_pos[$a]['core'] > $player_pos[$b]['core']) return -1;
           if ($player_pos[$a]['core'] < $player_pos[$b]['core']) return 1;
-          if ($player_pos[$a]['lane'] < $player_pos[$b]['lane']) return -1;
-          if ($player_pos[$a]['lane'] > $player_pos[$b]['lane']) return 1;
+          if ($player_pos[$a]['lane'] < $player_pos[$b]['lane']) return ($player_pos[$a]['core'] ? -1 : 1)*1;
+          if ($player_pos[$a]['lane'] > $player_pos[$b]['lane']) return ($player_pos[$a]['core'] ? 1 : -1)*1;
           return 0;
         });
       }

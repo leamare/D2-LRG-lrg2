@@ -46,16 +46,16 @@ function team_card($tid, $full = false) {
     if (!isset($player_pos[$a]['core']) || !isset($player_pos[$b]['core'])) return 0;
     if ($player_pos[$a]['core'] > $player_pos[$b]['core']) return -1;
     if ($player_pos[$a]['core'] < $player_pos[$b]['core']) return 1;
-    if ($player_pos[$a]['lane'] < $player_pos[$b]['lane']) return -1;
-    if ($player_pos[$a]['lane'] > $player_pos[$b]['lane']) return 1;
+    if ($player_pos[$a]['lane'] < $player_pos[$b]['lane']) return ($player_pos[$a]['core'] ? -1 : 1)*1;
+    if ($player_pos[$a]['lane'] > $player_pos[$b]['lane']) return ($player_pos[$a]['core'] ? 1 : -1)*1;
     return 0;
   });
   foreach($report['teams'][$tid]['active_roster'] as $player) {
     if (!isset($report['players'][$player])) continue;
     $position = $player_pos[$player];
     $output .= "<div class=\"team-info-line\">".player_name($player).
-      (isset($position['core']) ? " (".($position['core'] ? locale_string("core")." " : locale_string("support")).
-        locale_string( "lane_".$position['lane'] ).')' : ''
+      (isset($position['core']) ? " (".($position['core'] ? locale_string("core") : locale_string("support")).
+        ($position['lane'] ? " ".locale_string( "lane_".$position['lane'] ) : '').')' : ''
       )."</div>";
   }
   $output .= "</div>";
