@@ -6,7 +6,7 @@ function rg_query_hero_positions(&$conn, $team = null, $cluster = null) {
   for ($core = 0; $core < 2; $core++) {
     if (!isset($res[$core])) $res[$core] = [];
     for ($lane = 1; $lane > 0 && $lane < 6; $lane++) {
-      if (!$core) { $lane = 0; }
+      if (!$core) { $lane = $lane == 1 ? 1 : 3; }
       $res[$core][$lane] = [];
   
       $sql = "SELECT
@@ -33,7 +33,8 @@ function rg_query_hero_positions(&$conn, $team = null, $cluster = null) {
                     ON m.matchid = am.matchid ". 
               ($team === null ? "" : "JOIN teams_matches ON ml.matchid = teams_matches.matchid AND ml.isRadiant = teams_matches.is_radiant ").
             " WHERE ".
-             ($core == 0 ? "am.isCore = 0" : "am.isCore = 1 AND am.lane = $lane").
+             //($core == 0 ? "am.isCore = 0" : "am.isCore = 1 AND am.lane = $lane").
+             ($core == 0 ? "am.isCore = 0 AND am.lane ".($lane == 1 ? '= 1' : '<> 1') :"am.isCore = 1 AND am.lane = $lane").
              ($cluster !== null ? " AND m.cluster IN (".implode(",", $cluster).") " : "").
              ($team === null ? "" : " AND teams_matches.teamid = $team ").
              " GROUP BY am.heroid
@@ -70,7 +71,7 @@ function rg_query_hero_positions(&$conn, $team = null, $cluster = null) {
       }
   
       $query_res->free_result();
-      if (!$core) { break; }
+      if (!$core && $lane == 3) { break; }
     }
   }
 
@@ -83,15 +84,17 @@ function rg_query_hero_positions_matches(&$conn, &$context) {
   $res = [];
 
   for ($core = 0; $core < 2; $core++) {
+    if (!isset($res[$core])) $res[$core] = [];
     for ($lane = 1; $lane < 6; $lane++) {
-      if (!$core) { $lane = 0; }
+      if (!$core) { $lane = $lane == 1 ? 1 : 3; }
       $res[$core][$lane] = [];
 
       foreach ($context[$core][$lane] as $id => $hero) {
         $res[$core][$lane][$id] = [];
 
         $sql = "SELECT matchid FROM adv_matchlines WHERE heroid = ".$id." AND ".
-            ($core == 0 ? "isCore = 0" :"isCore = 1 AND lane = $lane").";";
+            //($core == 0 ? "isCore = 0" :"isCore = 1 AND lane = $lane").";";
+            ($core == 0 ? "isCore = 0 AND lane ".($lane == 1 ? '= 1' : '<> 1') :"isCore = 1 AND lane = $lane").";";
 
         if ($conn->multi_query($sql) === TRUE);
         else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
@@ -104,7 +107,7 @@ function rg_query_hero_positions_matches(&$conn, &$context) {
 
         $query_res->free_result();
       }
-      if (!$core) { break; }
+      if (!$core && $lane == 3) { break; }
     }
   }
 
