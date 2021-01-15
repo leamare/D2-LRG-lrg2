@@ -34,7 +34,7 @@ function rg_query_hero_positions(&$conn, $team = null, $cluster = null) {
               ($team === null ? "" : "JOIN teams_matches ON ml.matchid = teams_matches.matchid AND ml.isRadiant = teams_matches.is_radiant ").
             " WHERE ".
              //($core == 0 ? "am.isCore = 0" : "am.isCore = 1 AND am.lane = $lane").
-             ($core == 0 ? "am.isCore = 0 AND am.lane ".($lane == 1 ? '= 1' : '<> 1') :"am.isCore = 1 AND am.lane = $lane").
+             ($core == 0 ? "am.isCore = 0 AND am.lane ".($lane == 1 ? '= 1' : '<> 1') : "am.isCore = 1 AND am.lane = $lane").
              ($cluster !== null ? " AND m.cluster IN (".implode(",", $cluster).") " : "").
              ($team === null ? "" : " AND teams_matches.teamid = $team ").
              " GROUP BY am.heroid
