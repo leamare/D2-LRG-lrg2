@@ -10,12 +10,12 @@ function rg_view_generate_players_positions() {
   $res = [];
   $res["overview"] = "";
   for ($i=1; $i>=0; $i--) {
-    for ($j=1; $j<6 && $j>0; $j++) {
-      if (!$i) { $j = 0; }
+    for ($j=0; $j<6 && $j>=0; $j++) {
+      // if (!$i) { $j = 0; }
       if(!empty($report['player_positions'][$i][$j]))
         $res["position_$i.$j"]  = "";
 
-      if (!$i) { break; }
+      // if (!$i) { break; }
     }
   }
 
@@ -28,11 +28,11 @@ function rg_view_generate_players_positions() {
     include_once($root."/modules/view/generators/summary.php");
 
     for ($i=1; $i>=0; $i--) {
-      for ($j=1; $j<6 && $j>0; $j++) {
-        if (!$i) { $j = 0; }
+      for ($j=0; $j<6 && $j>=0; $j++) {
+        // if (!$i) { $j = 0; }
 
         if (!check_module($parent_module."position_$i.$j") || empty($report['player_positions'][$i][$j])) {
-          if (!$i) { break; }
+          // if (!$i) { break; }
           continue;
         }
         if(isset($report['player_positions_matches'])) {
@@ -47,7 +47,7 @@ function rg_view_generate_players_positions() {
         $res["position_$i.$j"] = rg_generator_summary("players-positions-$i-$j", $report['player_positions'][$i][$j], false);
 
         $res["position_$i.$j"] .= "<div class=\"content-text\">".locale_string("desc_players_positions")."</div>";
-        if (!$i) { break; }
+        // if (!$i) { break; }
       }
     }
   }

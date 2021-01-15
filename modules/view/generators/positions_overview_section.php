@@ -9,24 +9,24 @@ function rg_generator_overview_positions_section($tables_prefix, &$context, &$pi
   if (is_wrapped($context)) $context = unwrap_data($context);
 
   for ($i=1; $i>=0 && !isset($keys); $i--) {
-    for ($j=1; $j<6 && $j>0; $j++) {
-      if (!$i) { $j = 0; }
+    for ($j=0; $j<6 && $j>=0; $j++) {
+      //if (!$i) { $j = 0; }
       if(isset($context[$i][$j][0])) {
         $keys = array_keys($context[$i][$j][0]);
         break;
       }
-      if (!$i) { break; }
+      //if (!$i) { break; }
     }
   }
 
   for ($i=1; $i>=0; $i--) {
-    for ($j=1; $j<4 && $j>0; $j++) {
-      if (!$i) { $j = 0; }
+    for ($j=0; $j<4 && $j>=0; $j++) {
+      //if (!$i) { $j = 0; }
       if(!empty($context[$i][$j])) {
         $position_overview_template = array("matches" => 0, "wr" => 0);
         break;
       }
-      if (!$i) { break; }
+      //if (!$i) { break; }
     }
   }
 
@@ -34,11 +34,11 @@ function rg_generator_overview_positions_section($tables_prefix, &$context, &$pi
   $ranks = [];
 
   for ($i=1; $i>=0; $i--) {
-    for ($j=1; $j<4 && $j>0; $j++) {
-      if (!$i) { $j = 0; }
+    for ($j=0; $j<4 && $j>=0; $j++) {
+      //if (!$i) { $j = 0; }
 
       if (empty($context[$i][$j])) {
-        if (!$i) { break; }
+        //if (!$i) { break; }
         continue;
       }
 
@@ -77,7 +77,7 @@ function rg_generator_overview_positions_section($tables_prefix, &$context, &$pi
         $overview["$i.$j"][ $id ]['rank'] = $ranks[$i][$j][$id]; 
       }
 
-      if (!$i) { break; }
+      //if (!$i) { break; }
     }
   }
 

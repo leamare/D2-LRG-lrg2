@@ -3,12 +3,13 @@ function generate_positions_strings() {
   global $strings;
 
   for ($i=1; $i>=0; $i--) {
+    $strings['en']["position_$i.0"] = ($i ? locale_string("core") : locale_string("support"));
     for ($j=1; $j<6 && $j>0; $j++) {
-      if (!$i) { $j = 0; }
+      //if (!$i) { $j = 0; }
       if(!isset($strings['en']["position_$i.$j"]))
         $strings['en']["position_$i.$j"] = ($i ? locale_string("core") : locale_string("support"))." ".locale_string("lane_$j");
 
-      if (!$i) { break; }
+      //if (!$i) { break; }
     }
   }
 }
