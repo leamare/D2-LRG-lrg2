@@ -66,6 +66,7 @@ $strings['en'] = [
   "kda" => "K/D/A",
   "opponent" => "Opponent",
   "ratio" => "Ratio",
+  "ratio_pos" => "Ratio",
   "none" => "None",
   "vs" => "vs",
   "days" => "Days",
