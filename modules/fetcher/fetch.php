@@ -952,6 +952,7 @@ function fetch($match) {
           $sz++;
           continue;
         }
+        $travel_boots_state = 0;
 
         foreach ($matchdata['players'][$j]['purchase_log'] as $e) {
           if ($matchdata['duration'] - $e['time'] < 60) continue;
@@ -970,6 +971,12 @@ function fetch($match) {
             }
           }
           if (!$item_id) continue;
+
+          // boots of travel workaround
+          if ($item_id == 47 && $travel_boots_state == 0) { $item_id = 48; $travel_boots_state++; }
+          if ($item_id == 48 && $travel_boots_state == 0) continue;
+          if ($item_id == 219 && $travel_boots_state == 1) { $item_id = 220; $travel_boots_state++; }
+          if ($item_id == 220 && $travel_boots_state == 1) continue;
 
           foreach($meta['item_categories'] as $category_name => $items) {
             if (in_array($item_id, $items)) {
