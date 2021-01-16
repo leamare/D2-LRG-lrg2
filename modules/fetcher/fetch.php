@@ -225,9 +225,9 @@ function fetch($match) {
         unset($matchdata);
       }
     } else {
-      if($request_unparsed && !in_array($match, $scheduled) && !empty($match) && (time() - $matchdata['matches']['start_date'] < 1209600)) {
-        `php tools/replay_request_stratz.php -m$match`;
-        echo "..Requested and scheduled $match STRATZ\n";
+      if($request_unparsed && !in_array($match, $scheduled) && !empty($matchdata)) {
+        //`php tools/replay_request_stratz.php -m$match`;
+        echo "..Rescheduled $match STRATZ\n";
         $first_scheduled[$match] = time();
         $scheduled_stratz[] = $match;
         $scheduled[] = $match;
