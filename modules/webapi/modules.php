@@ -70,6 +70,7 @@ if (isset($_GET['gets'])) $vars['gets'] = explode(",", strtolower($_GET['gets'])
 if (isset($_GET['rep'])) $vars['rep'] = strtolower($_GET['rep']);
 if (isset($_GET['cat']) && !empty($_GET['cat'])) $vars['cat'] = $_GET['cat'];
 if (isset($_GET['item_cat']) && !empty($_GET['item_cat'])) $vars['item_cat'] = explode(',', $_GET['item_cat']);
+$vars['simple_matchcard'] = isset($_GET['simple_matchcard']);
 
 if (empty($endp_name)) {
   $endp = $endpoints['__fallback']();

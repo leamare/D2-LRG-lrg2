@@ -1,8 +1,11 @@
 <?php
 
 function match_card($mid) {
+  global $vars;
   global $report;
   global $meta;
+
+  if ($vars['simple_matchcard']) return match_card_min($mid);
 
   $match = [
     "match_id" => $mid
