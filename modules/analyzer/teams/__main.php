@@ -97,7 +97,7 @@ if ($lg_settings['ana']['teams'])
         require("players/draft.php");
       }
 
-      if ($lg_settings['ana']['teams']['matches']) {
+      if ($lg_settings['ana']['matchlist'] && $lg_settings['ana']['teams']['matches']) {
         # matches
         require("matches.php");
       }
