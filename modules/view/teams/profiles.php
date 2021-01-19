@@ -63,7 +63,9 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
               foreach ($report['matches'][$match] as $l) {
                 if ($l['radiant'] != $radiant) continue;
                 if (!isset($matches[ $l['player'] ])) continue;
-                $matches[ $l['player'] ][ $l['hero'] ] = ( $matches[ $l['player'] ][ $l['hero'] ] ?? 0 ) + 1;
+                if (!isset($matches[ $l['player'] ][ $l['hero'] ])) $matches[ $l['player'] ][ $l['hero'] ] = [ 'ms' => [], 'c' => 0 ];
+                $matches[ $l['player'] ][ $l['hero'] ]['ms'][] = $match;
+                $matches[ $l['player'] ][ $l['hero'] ]['c']++;
               }
             }
 
@@ -71,12 +73,18 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
               "<h1>".locale_string("team_players_unique_heroes")."</h1>";
             
             foreach ($matches as $player => $heroes) {
-              arsort($heroes);
+              uasort($heroes, function($a, $b) {
+                return $b['c'] <=> $a['c'];
+              });
               $res["team".$tid]['overview'] .= "<div class=\"line\"><span class=\"caption\">".player_name($player)."</span>: ";
-              foreach ($heroes as $hero => $num) {
-                $res["team".$tid]['overview'] .= "<a title=\"".hero_name($hero)." - ".locale_string('matches_s')." ".$num." - ".locale_string('total')." ".$context[$tid]['pickban'][$hero]['matches_picked']." - ".
-                  locale_string('winrate_s')." ".($context[$tid]['pickban'][$hero]['winrate_picked']*100)."%\">".
-                  hero_icon($hero)."</a>";
+              foreach ($heroes as $hero => $arr) {
+                $ms = $arr['ms'];
+                $num = $arr['c'];
+                $title = hero_name($hero)." - ".locale_string('matches_s')." ".$num." - ".locale_string('total')." ".$context[$tid]['pickban'][$hero]['matches_picked']." - ".
+                  locale_string('winrate_s')." ".($context[$tid]['pickban'][$hero]['winrate_picked']*100)."%";
+                $res["team".$tid]['overview'] .= "<a title=\"".$title."\" ".
+                  "onclick=\"showModal('".htmlspecialchars(join_matches($ms))."', '".player_name($player)." - $title')\"".
+                  ">".hero_icon($hero)."</a>";
               }
               $res["team".$tid]['overview'] .= "</div>";
             }
