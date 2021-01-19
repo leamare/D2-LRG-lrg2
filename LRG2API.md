@@ -38,7 +38,10 @@ One major GET parameter is `report`. It specifies a tag of a report to load. If 
 * (GET) `pretty` – flag, if it’s used response will be nicely formatted
 * (GET) `desc` - flag, adds report descriptor to the response if set
 * (GET) `teamcard` - flag, adds team card to the response if set
+
 * (GET) `item_cat` - comma delimited list of item categories, allowed values are `all`, `major`, `medium` (~1-2.5k gold items) and `early` (early game items), used only by items modules
+* (GET) `simple_matchcard` - GET flag, returns ALL match cards as simplified ones
+* (GET) `include_matches` - (for team profiles) GET flag, returns matches of players on heroes as matchcards if set
 
 ### Typical data objects
 

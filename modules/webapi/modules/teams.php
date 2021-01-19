@@ -100,7 +100,9 @@ $endpoints['teams'] = function($mods, $vars, &$report) use (&$endpoints) {
         foreach ($report['matches'][$match] as $l) {
           if ($l['radiant'] != $radiant) continue;
           if (!isset($matches[ $l['player'] ])) continue;
-          $matches[ $l['player'] ][ $l['hero'] ] = ( $matches[ $l['player'] ][ $l['hero'] ] ?? 0 ) + 1;
+          if (!isset($matches[ $l['player'] ][ $l['hero'] ])) $matches[ $l['player'] ][ $l['hero'] ] = [ 'ms' => [], 'c' => 0 ];
+          $matches[ $l['player'] ][ $l['hero'] ]['ms'][] = $match;
+          $matches[ $l['player'] ][ $l['hero'] ]['c']++;
         }
       }
 
@@ -112,10 +114,15 @@ $endpoints['teams'] = function($mods, $vars, &$report) use (&$endpoints) {
         ];
         foreach ($heroes as $hero => $num) {
           $pl['heroes'][$hero] = [
-            'played' => $num,
+            'played' => $num['c'],
             'total' => $report['teams'][ $vars['team'] ]['pickban'][$hero]['matches_picked'],
             'winrate' => $report['teams'][ $vars['team'] ]['pickban'][$hero]['winrate_picked']
           ];
+          if ($vars['include_matches']) {
+            $pl['heroes'][$hero]['matches'] = [];
+            foreach ($matches[ $l['player'] ][ $l['hero'] ]['ms'] as $mid) 
+              $pl['heroes'][$hero]['matches'][] = match_card($mid);
+          }
         }
         $res['unique_heroes'][$player] = $pl;
       }
