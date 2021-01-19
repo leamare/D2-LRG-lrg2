@@ -4,24 +4,24 @@ function rgapi_generator_overview_positions_section($context, &$pickban, $count 
   if(!sizeof($context)) return "";
 
   for ($i=1; $i>=0 && !isset($keys); $i--) {
-    for ($j=1; $j<6 && $j>0; $j++) {
-      if (!$i) { $j = 0; }
+    for ($j=0; $j<6 && $j>=0; $j++) {
+      //if (!$i) { $j = 0; }
       if(isset($context[$i][$j][0])) {
         $keys = array_keys($context[$i][$j][0]);
         break;
       }
-      if (!$i) { break; }
+      //if (!$i) { break; }
     }
   }
 
   for ($i=1; $i>=0; $i--) {
-    for ($j=1; $j<4 && $j>0; $j++) {
-      if (!$i) { $j = 0; }
+    for ($j=0; $j<4 && $j>=0; $j++) {
+      //if (!$i) { $j = 0; }
       if(!empty($context[$i][$j])) {
         $position_overview_template = array("matches" => 0, "wr" => 0);
         break;
       }
-      if (!$i) { break; }
+      //if (!$i) { break; }
     }
   }
 
@@ -29,11 +29,11 @@ function rgapi_generator_overview_positions_section($context, &$pickban, $count 
   $ranks = [];
 
   for ($i=1; $i>=0; $i--) {
-    for ($j=1; $j<4 && $j>0; $j++) {
-      if (!$i) { $j = 0; }
+    for ($j=0; $j<4 && $j>=0; $j++) {
+      //if (!$i) { $j = 0; }
 
       if (empty($context[$i][$j])) {
-        if (!$i) { break; }
+        //if (!$i) { break; }
         continue;
       }
 
@@ -72,7 +72,7 @@ function rgapi_generator_overview_positions_section($context, &$pickban, $count 
         $overview["$i.$j"][ $id ]['rank'] = $ranks[$i][$j][$id]; 
       }
 
-      if (!$i) { break; }
+      //if (!$i) { break; }
     }
   }
 
