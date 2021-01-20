@@ -390,6 +390,7 @@ Q
 
       $meta['items'];
       $meta['item_categories'];
+      $travel_boots_state = 0;
       foreach ($pl['stats']['itemPurchases'] as $e) {
         if ($r['matches']['duration'] - $e['time'] < 60) continue;
 
@@ -401,6 +402,12 @@ Q
 
         $item_id = $e['itemId'];
         if (!$item_id) continue;
+
+        // boots of travel workaround
+        if ($item_id == 47 && $travel_boots_state == 0) { $item_id = 48; $travel_boots_state++; }
+        if ($item_id == 48 && $travel_boots_state == 0) continue;
+        if ($item_id == 219 && $travel_boots_state == 1) { $item_id = 220; $travel_boots_state++; }
+        if ($item_id == 220 && $travel_boots_state == 1) continue;
 
         foreach($meta['item_categories'] as $category_name => $items) {
           if (in_array($item_id, $items)) {
