@@ -134,7 +134,7 @@ foreach ($matches as $match) {
 
   do {
     $query_res = $conn->store_result();
-  } while($conn->next_result());
+  } while($conn->more_results() && $conn->next_result());
   //echo "# $match ".$conn->error."\n";
 
   echo "$match\n";
