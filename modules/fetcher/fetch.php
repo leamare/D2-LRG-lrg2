@@ -570,6 +570,7 @@ function fetch($match) {
 
   if (empty($t_match)) {
     $t_match['matchid'] = $match;
+    if (empty($matchdata['start_time'])) return true;
     $t_match['version'] = get_patchid($matchdata['start_time'], $matchdata['patch'], $meta);
     $t_match['radiantWin'] = $matchdata['radiant_win'];
     $t_match['duration'] = $matchdata['duration'];
