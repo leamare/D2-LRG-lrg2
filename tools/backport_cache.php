@@ -6,6 +6,8 @@ $conn = new mysqli($lrg_sql_host, $lrg_sql_user, $lrg_sql_pass, $lrg_sql_db);
 
 if ($conn->connect_error) die("[F] Connection to SQL server failed: ".$conn->connect_error."\n");
 
+$skip = isset($options['s']);
+
 if(isset($options['c'])) {
   $file = $options['c'];
   $matches = explode("\n", file_get_contents($file));
@@ -46,6 +48,12 @@ $sz = sizeof($matches);
 for ($i = 0; $i < $sz; $i++) {
   $m = $matches[$i];
   if (empty($m) || $m[0] === '#') continue;
+
+  if ($skip && file_exists("cache/$m.lrgcache.json")) {
+    echo "[ ] ($i/$sz) cache/$m.lrgcache.json exists, skipping\n";
+    continue;
+  }
+
   $match = [];
 
   $q = "select * from matches where matchid = $m;";
