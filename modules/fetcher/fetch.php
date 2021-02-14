@@ -192,7 +192,7 @@ function fetch($match) {
         //unset($matchdata);
       }
 
-      if (!empty($matchdata) && !$bad_replay) {
+      if (!empty($matchdata)) { //  && !$bad_replay
         $t_match = $matchdata['matches'];
         $t_matchlines = $matchdata['matchlines'];
         $t_draft = $matchdata['draft'];
@@ -215,7 +215,7 @@ function fetch($match) {
             }
           }
         }
-      } else if (isset($matchdata)) {
+      } else {
         $match_players = $matchdata['players'];
         foreach($matchdata['players'] as $p) {
           if(!isset($t_players[$p['playerID']])) {
@@ -263,9 +263,11 @@ function fetch($match) {
       }
     }
 
+    $matchdata_stratz = $matchdata;
     $matchdata = empty($matchdata_od) ? $opendota->match($match) : $matchdata_od;
     echo("..OK.");
     if (empty($matchdata) || empty($matchdata['duration']) || empty($matchdata['players'])) {
+      if (empty($matchdata_stratz)) {
         echo("..ERROR: Unable to read JSON skipping.\n");
         //if (!isset($matchdata['duration'])) var_dump($matchdata);
 
@@ -278,6 +280,9 @@ function fetch($match) {
         } else { //if (in_array($match, $scheduled) && !$force_adding) {
           return null;
         }
+      } else {
+        $matchdata = $matchdata_stratz;
+      }
     } else {
       if($matchdata['duration'] < 600) {
           echo("..Duration is less than 10 minutes, skipping...\n");
