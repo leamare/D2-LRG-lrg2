@@ -123,16 +123,6 @@ function get_stratz_response($match) {
       numDenies
       towerDamage
       roleBasic
-      playbackData {
-        buyBackEvents {
-          time
-        }
-        streakEvents {
-          time
-          type
-          value
-        }
-      }
       steamAccount {
         name
       }
@@ -151,6 +141,20 @@ function get_stratz_response($match) {
 }
 Q
   ];
+
+/* 
+      playbackData {
+        buyBackEvents {
+          time
+        }
+        streakEvents {
+          time
+          type
+          value
+        }
+      }
+*/
+
   $data['query'] = str_replace("  ", "", $data['query']);
   $data['query'] = str_replace("\n", " ", $data['query']);
 
