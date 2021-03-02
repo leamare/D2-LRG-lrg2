@@ -47,6 +47,7 @@ include_once("modules/analyzer/__queries/player_trios.php");
 include_once("modules/analyzer/__queries/player_graph.php");
 
 $meta = new lrg_metadata;
+$meta['heroes'];
 
 $result = [];
 $result["league_name"]  = $lg_settings['league_name'];
@@ -238,6 +239,19 @@ if ($lg_settings['ana']['items'])  {
 // ...
 
 $result['settings'] = $lg_settings['web'];
+
+if (isset($lg_settings['heroes_snapshot'])) {
+  $result['settings']['heroes_snapshot'] = $lg_settings['heroes_snapshot'];
+} else {
+  if (isset($lg_settings['heroes_exclude'])) {
+    foreach($lg_settings['heroes_exclude'] as $hid)
+      unset($meta['heroes'][$hid]);
+  }
+  $result['settings']['heroes_snapshot'] = array_keys($meta['heroes']);
+}
+$result['settings']['heroes_exclude'] = $lg_settings['heroes_exclude'] ?? null;
+
+
 $result['settings']['limiter'] = $limiter;
 $result['settings']['limiter_middle'] = $limiter_middle;
 $result['settings']['limiter_triplets'] = $limiter_lower;
