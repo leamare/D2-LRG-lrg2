@@ -119,19 +119,21 @@ function rg_generator_pickban_overview($table_id, $context, $context_main, $limi
   $mp = $context_main['heroes_median_picks'] ?? null;
   $mb = $context_main['heroes_median_bans'] ?? null;
 
-  if (empty ($mp)) {
+  if (!$mp) {
     uasort($context, function($a, $b) {
       return $a['matches_picked'] <=> $b['matches_picked'];
     });
     $mp = $context[ round(sizeof($context)*0.5) ]['matches_picked'];
   }
+  if (!$mp) $mp = 1;
 
-  if (empty ($mb)) {
+  if (!$mb) {
     uasort($context, function($a, $b) {
       return $a['matches_banned'] <=> $b['matches_banned'];
     });
     $mb = $context[ round(sizeof($context)*0.5) ]['matches_banned'];
   }
+  if (!$mb) $mb = 1;
 
   $res =  "<table id=\"$table_id\" class=\"list\"><thead><tr>".
             ($heroes_flag ? "<th width=\"1%\"></th>" : "").

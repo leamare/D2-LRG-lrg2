@@ -53,6 +53,22 @@ $endpoints['overview'] = function($mods, $vars, &$report) use (&$meta, &$endpoin
   $res['versions'] = $context['versions'];
   $res['game_modes'] = $context['modes'];
 
+  if (!isset($context['main']['heroes_median_picks'])) {
+    uasort($context['pickban'], function($a, $b) {
+      return $a['matches_picked'] <=> $b['matches_picked'];
+    });
+    $context['main']['heroes_median_picks'] = $context['pickban'][ round(sizeof($context['pickban'])*0.5) ]['matches_picked'];
+  }
+  if ($context['main']['heroes_median_picks'] == 0) $context['main']['heroes_median_picks'] = 1;
+
+  if (!isset($context['main']['heroes_median_bans'])) {
+    uasort($context['pickban'], function($a, $b) {
+      return $a['matches_banned'] <=> $b['matches_banned'];
+    });
+    $context['main']['heroes_median_bans'] = $context['pickban'][ round(sizeof($context['pickban'])*0.5) ]['matches_banned'];
+  }
+  if ($context['main']['heroes_median_bans'] == 0) $context['main']['heroes_median_bans'] = 1;
+
   if(isset($context['regions'])) {
     $regions_matches = [];
     $meta['clusters'];
@@ -215,8 +231,7 @@ $endpoints['overview'] = function($mods, $vars, &$report) use (&$meta, &$endpoin
 
       $res['participants']['widest_hero_pool'] = [
         "player_id" => $context['records']['widest_hero_pool']['playerid'],
-        "team_name" => team_name($context['records']['widest_hero_pool']['playerid']),
-        "team_tag" => team_tag($context['records']['widest_hero_pool']['playerid']),
+        "player_name" => player_name($context['records']['widest_hero_pool']['playerid']),
         "value" => $context['records']['widest_hero_pool']['value']
       ];
       $res['participants']['smallest_hero_pool'] = [

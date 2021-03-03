@@ -15,6 +15,7 @@ $endpoints['summary'] = function($mods, $vars, &$report) {
       if (isset($report['teams_interest']) && !in_array($team_id, $report['teams_interest'])) continue;
       $t = [
         "team_id" => $team_id,
+        "team_name" => team_name($team_id),
         "matches_total" => $report['teams'][$team_id]['matches_total'],
         "winrate" => round( $report['teams'][$team_id]['matches_total'] ? 
           $report['teams'][$team_id]['wins']*100/$report['teams'][$team_id]['matches_total']
