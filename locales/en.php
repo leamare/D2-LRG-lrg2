@@ -326,11 +326,12 @@ $strings['en'] = [
   "main_reports" => "Reports List",
   "recent_reports" => "Last updated",
   "all_reports" => "All Reports",
-  "show_tags" => "Show Tags List",
+  "show_tags" => "Show All Categories",
   "noreports" => "No Reports",
   "noreports_desc" => "No reports available for selected tag",
   "start_date" => "Start date",
   "end_date" => "End date",
+  "pinned_main" => "Featured reports",
 
   // overview strings
   "over-pregen-report" => "This is automatically generated report for",
