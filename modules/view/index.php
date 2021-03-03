@@ -19,6 +19,26 @@ function: checktag($reportdata, $tag),
     hidden
 */
 
+$modules = "";
+$modules .= "<div id=\"content-top\">";
+
+if (!empty($__pinned)) {
+  $modules .= "<div class=\"content-text list-pinned\"><h1>".locale_string("pinned_main")."</h1>";
+  foreach($__pinned as $pin) {
+    if ($pin[1] && !isset($cats)) continue;
+    // if ($pin[1] && !isset($cats[$pin[0]])) continue;
+    $modules .= "<a class=\"category".($pin[1] && isset($cat) && $cat == $pin[0] ? " active" : "").
+              "\" href=\"?".($pin[1] ? "cat" : "league")."=".$pin[0].(empty($linkvars) ? "" : "&".$linkvars)."\">";
+    if ($pin[1]) {
+      $modules .= $cats[ $pin[0] ]['names_locales'][$locale] ?? $cats[ $pin[0] ]['name'] ?? locale_string($pin[0]."_reports");
+    } else {
+      $modules .= $cache["reps"][ $pin[0] ]['localized'][$locale]['name'] ?? $cache["reps"][ $pin[0] ]['name'] ?? $pin[0];
+    }
+    $modules .= "</a>";
+  }
+  $modules .= "</div>";
+}
+
 if(!empty($cats)) {
   include_once("modules/view/functions/check_filters.php");
 
@@ -57,18 +77,27 @@ if(!empty($cats)) {
     $head_name = locale_string("recent_reports");
     // $recent_last_limit;
     $reps = $cache["reps"];
-    usort($reps, function($a, $b) {
+    uasort($reps, function($a, $b) {
       return ($b['last_update'] ?? 0) - ($a['last_update'] ?? 0);
     });
     if ($recent_last_limit ?? false) {
       $limit = null;
+      $i = 0;
       foreach($reps as $k => $v) {
         if (($v['last_update'] ?? 0) < $recent_last_limit) {
-          $limit = $k;
+          $limit = $i;
           break;
         }
+        $i++;
       }
-      $reps = array_slice($reps, 0, $limit);
+      $r = [];
+      $i = 0;
+      foreach ($reps as $k => $v) {
+        if ($i >= $limit) break;
+        $r[$k] = $v;
+        $i++;
+      }
+      $reps = $r;
     }
   } else {
     $head_name = $cat;
@@ -80,15 +109,12 @@ if(!empty($cats)) {
   $reps = $cache["reps"];
 }
 
-$modules = "";
-$modules .= "<div id=\"content-top\">";
-
 if(isset($cats) && !empty($cats)) {
-  if(isset($cat)) {
+  if(isset($cat) || !empty($__pinned)) {
     $modules .= "<div class=\"content-text tagsshow\"><a class=\"category\">".locale_string("show_tags")."</a></div>";
   }
 
-  $modules .= "<div class=\"content-text tagslist ".(isset($cat) ? "hidden" : "")."\" ".(isset($cat) ? " style=\"display:none;\"" : "").">";
+  $modules .= "<div class=\"content-text tagslist ".(isset($cat) || !empty($__pinned) ? "hidden" : "")."\" ".(isset($cat) ? " style=\"display:none;\"" : "").">";
 
   $modules .= "<a class=\"category".(isset($cat) && "main" == $cat ? " active" : "").
               "\" href=\"?cat=main".(empty($linkvars) ? "" : "&".$linkvars).
