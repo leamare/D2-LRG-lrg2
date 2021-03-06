@@ -1,6 +1,7 @@
 <?php
 
 $modules['heroes']['hph'] = [];
+unset($modules['heroes']['combos']);
 
 function rg_view_generate_heroes_hph() {
   global $report, $parent, $root, $unset_module, $mod, $meta, $strings;
@@ -19,6 +20,12 @@ function rg_view_generate_heroes_hph() {
     if($a['name'] == $b['name']) return 0;
     else return ($a['name'] > $b['name']) ? 1 : -1;
   });
+
+  $res['combos'] = "";
+  if (check_module($parent_module."combos")) {
+    $parent = $parent_module;
+    $res['combos'] = rg_view_generate_heroes_combos();
+  }
 
   foreach($hnames as $hid => $name) {
     $strings['en']["heroid".$hid] = hero_name($hid);

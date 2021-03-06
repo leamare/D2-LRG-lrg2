@@ -42,4 +42,4 @@ function rg_view_generate_heroes_laning() {
   return $res;
 }
 
-?>
+

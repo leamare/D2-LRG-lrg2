@@ -1,6 +1,6 @@
 <?php
 
-$modules['heroes']['counters'] = [];
+// $modules['heroes']['counters'] = [];
 
 function rg_view_generate_heroes_counters() {
   global $report, $parent, $root, $unset_module, $mod;

@@ -19,6 +19,12 @@ function rg_view_generate_heroes_hvh() {
     else return ($a['name'] > $b['name']) ? 1 : -1;
   });
 
+  $res['counters'] = "";
+  if (check_module($parent_module."counters")) {
+    $parent = $parent_module;
+    $res['counters'] = rg_view_generate_heroes_counters();
+  }
+
   foreach($hnames as $hid => $name) {
     $strings['en']["heroid".$hid] = hero_name($hid);
     $res["heroid".$hid] = "";
