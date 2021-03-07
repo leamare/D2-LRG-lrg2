@@ -72,6 +72,13 @@ $strings['en'] = [
   "days" => "Days",
   "median" => "Median",
   "std_dev" => "Std.dev",
+  "pickrate" => "Pickrate",
+  "banrate" => "Banrate",
+
+  "trends_winrate" => "Winrate",
+  "trends_first" => "First",
+  "trends_last" => "Last",
+  "trends_diff" => "Increase",
 
   // roles
   "core" => "Core",
@@ -131,6 +138,7 @@ $strings['en'] = [
   "irecords" => "Timings records",
   "boxplots" => "Timings Boxplots",
   "heroboxplots" => "Hero Timings Boxplots",
+  "daily_wr" => "Trends",
 
   "averages" => "Average values",
   "participants" => "Participants",

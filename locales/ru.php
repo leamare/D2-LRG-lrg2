@@ -70,6 +70,13 @@ $strings['ru'] = [
   "days" => "Дни",
   "median" => "Медиана",
   "std_dev" => "Стд.откл",
+  "pickrate" => "Пикрейт",
+  "banrate" => "Банрейт",
+
+  "trends_winrate" => "Винрейт",
+  "trends_first" => "Первый",
+  "trends_last" => "Последний",
+  "trends_diff" => "Прирост",
 
   //roles
   "core" => "Основа",
@@ -131,6 +138,7 @@ $strings['ru'] = [
   "irecords" => "Рекордные тайминги",
   "boxplots" => "Боксплоты таймингов",
   "heroboxplots" => "Боксплоты таймингов героев",
+  "daily_wr" => "Тренды",
 
   "averages" => "Средние показатели",
   "participants" => "Участники",
