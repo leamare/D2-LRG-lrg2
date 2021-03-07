@@ -139,6 +139,7 @@ $strings['en'] = [
   "boxplots" => "Timings Boxplots",
   "heroboxplots" => "Hero Timings Boxplots",
   "daily_wr" => "Trends",
+  "wrtimings" => "Game Length",
 
   "averages" => "Average values",
   "participants" => "Participants",
@@ -309,6 +310,34 @@ $strings['en'] = [
   "best_timing_record" => "Games with the best timings",
   "avg_timing" => "Average timing",
 
+  // wrtimings
+  "wr_gradient" => "Gradient",
+  "chart" => "Chart",
+  "q1duration" => "Early (Q1)",
+  "q3duration" => "Late (Q3)",
+  "avg_duration" => "Mean",
+  "early_wr" => "Early",
+  "late_wr" => "Late",
+  "avg_winrate" => "Mean",
+
+  // wrplayers
+  "wrplayers" => "Experience of players",
+  "wrp_q1_players" => "Less Experienced Players",
+  "wrp_q3_players" => "More Experienced Players",
+  "wrp_diffs" => "Winrate Shifts",
+  "wrp_1match_players" => "1 match",
+  "wrp_1plus_players" => "1+ matches",
+  "wrp_q1matches" => "Q1",
+  "wrp_q3matches" => "Q3",
+  "wrp_max_matches" => "Max",
+  "wrp_q1_wr_avg" => "Winrate",
+  "wrp_q1_matches_avg" => "Matches avg",
+  "wrp_q1_players_cnt" => "Players",
+  "wrp_q3_wr_avg" => "Winrate",
+  "wrp_q3_matches_avg" => "Matches avg",
+  "wrp_q3_players_cnt" => "Players",
+  "wrp_diff" => "Difference",
+
   "items_category_selector" => "Items category",
   "items_category_all" => "All",
   "items_category_medium" => "Medium items",
@@ -414,6 +443,8 @@ $strings['en'] = [
   "desc_heroes_counters_pairs_graph" => "This page shows counter pick connections between heroes, based on the most popular counter-pairs. See pairs section for more detailed data about winrates and deviations. Minimum match count for a pair is set to %lim%, minimum deviation is 0.",
   "desc_heroes_hph" => "Choose a hero to see his performance with other heroes",
   "pairs_desc" => "Winrate difference is calculated relative to selected hero's win rate. Expected matches is calculated number of matches the heroes would be picked together randomly based on their pick rates. Deviation is difference between expected number of matches and the actual number (higher number is better and means the heroes are usually picked together intentionally, negative values mean otherwise). Percentage is how much of actual matches is the deviation number.",
+  "desc_heroes_wrtimings" => "Here you can see how winrates of the heroes change with match duration. Early winrate is calculated based on top 25% shortest games (duration less than Q1 - Early duration) and late winrate is based on top 25% longest games (duration higher than Q3 - Late duration). Gradient represents how chances to win change with every minute of the game.",
+  "desc_heroes_wrplayers" => "Here you can see how winrate of a player on a hero changes with more experience (number of matches played). Less experienced players had Q1 and less matches, more experienced players had Q3 and more matches. Winrate gradient represents winrate increase for every match played, winrate difference is the raw difference between winrates of less and more experienced players.",
 
   "items_most_impactful_desc" => "In the items component you may see various items stats. Overview shows top of the most impactful items (in general and for a specific hero) based on their effect on winrate, compared to games when the item wasn't purchased, with the highest positive and negative impacts respectively. Notable timings section shows earliest purchase timings for item-hero pairs with the highest winrate gradient per minute.",
   "items_stats_desc" => "Winrate shifts are differences in winrate compared to the item's winrate overall. Values are for when the item wasn't bought, early (Q1) and late (Q3) timings (higher is better). Winrate gradient per minute shows how winrate changes with every minute of the item's delayed purchase timing. Item timings values can be used to restore the normal distribution chart, where Q1, median and Q3 mean the first, second and third quantiles respectively.",
