@@ -5,6 +5,9 @@ $modules['heroes'] = [];
 if (isset($report['pickban']))
   include("heroes/pickban.php");
 
+if (isset($report['hero_daily_wr']))
+  include("heroes/daily_wr.php");
+
 if (isset($report['averages_heroes']) )
   include("heroes/haverages.php");
 
@@ -38,9 +41,6 @@ if (isset($report['hvh']))
 if (isset($report['hero_summary']))
   include("heroes/summary.php");
 
-if (isset($report['hero_daily_wr']))
-  include("heroes/daily_wr.php");
-
 if (isset($report['hero_winrate_timings']))
   include("heroes/winrate_timings.php");
 
@@ -56,6 +56,11 @@ function rg_view_generate_heroes() {
   if (isset($report['pickban'])) {
     if (check_module($parent."pickban")) {
       $res['pickban'] = rg_view_generate_heroes_pickban();
+    }
+  }
+  if (isset($report['hero_daily_wr'])) {
+    if(check_module($parent."daily_wr")) {
+      $res['daily_wr'] = rg_view_generate_heroes_daily_winrates();
     }
   }
   if (isset($report['averages_heroes']) ) {
@@ -111,11 +116,6 @@ function rg_view_generate_heroes() {
   if (isset($report['hero_summary'])) {
     if(check_module($parent."summary")) {
       $res['summary'] = rg_view_generate_heroes_summary();
-    }
-  }
-  if (isset($report['hero_daily_wr'])) {
-    if(check_module($parent."daily_wr")) {
-      $res['daily_wr'] = rg_view_generate_heroes_daily_winrates();
     }
   }
   if (isset($report['hero_winrate_timings'])) {
