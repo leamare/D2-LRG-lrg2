@@ -80,6 +80,9 @@ function get_report_descriptor(&$report, $generate_endpoints = false) {
   }
   if (isset($report['hero_summary'])) $desc['endpoints'][] = "heroes-summary";
   if (isset($report['hero_laning'])) $desc['endpoints'][] = "heroes-laning";
+  if (isset($report['hero_daily_wr'])) $desc['endpoints'][] = "heroes-daily_wr";
+  if (isset($report['hero_winrate_timings'])) $desc['endpoints'][] = "heroes-wrtimings";
+  if (isset($report['hero_winrate_spammers'])) $desc['endpoints'][] = "heroes-wrplayers";
 
   if (isset($report['players_draft'])) $desc['endpoints'][] = "players-draft";
   if (isset($report['averages_players']) || isset($report['haverages_players'])) $desc['endpoints'][] = "players-haverages";
