@@ -18,6 +18,8 @@ function __rg_view_generate_heroes_daily_winrates_generate_scripts($color, $labe
       labels: ['".implode("','", $labels)."'],
     },
     options: {
+      responsive: true,
+      maintainAspectRatio: false,
       legend: {
         display: false,
       },
@@ -137,17 +139,17 @@ function rg_view_generate_heroes_daily_winrates() {
 
     $res .= "<tr><td>".hero_portrait($hid)."</td><td>".hero_name($hid)."</td>".
       "<td class=\"separator\">".number_format($first_ms, 2)."%</td>".
-      "<td><canvas id=\"hero-daily-matches-$hid\" style=\"width: 100%; height: 70px\"></canvas></td>".
+      "<td><div style=\"position: relative; width: 100%; height: 70px\"><canvas id=\"hero-daily-matches-$hid\"></canvas></div></td>".
       "<td>".number_format($dm[ count($dm)-1 ], 2)."%</td>".
       "<td>".number_format($dm[ count($dm)-1 ]-$first_ms, 2)."%</td>".
 
       "<td class=\"separator\">".number_format($first_msb, 2)."%</td>".
-      "<td><canvas id=\"hero-daily-bans-$hid\" style=\"width: 100%; height: 70px\"></canvas></td>".
+      "<td><div style=\"position: relative; width: 100%; height: 70px\"><canvas id=\"hero-daily-bans-$hid\"></canvas></div></td>".
       "<td>".number_format($dmb[ count($dmb)-1 ], 2)."%</td>".
       "<td>".number_format($dmb[ count($dmb)-1 ]-$first_msb, 2)."%</td>".
 
       "<td class=\"separator\">".number_format($first_wr, 2)."%</td>".
-      "<td><canvas id=\"hero-daily-wr-$hid\" style=\"width: 100%; height: 70px\"></canvas></td>".
+      "<td><div style=\"position: relative; width: 100%; height: 70px\"><canvas id=\"hero-daily-wr-$hid\"></canvas></div></td>".
       "<td>".number_format($dwr[ count($dwr)-1 ], 2)."%</td>".
       "<td>".number_format($dwr[ count($dwr)-1 ]-$first_wr, 2)."%</td>".
     "</tr>";
@@ -167,9 +169,7 @@ function rg_view_generate_heroes_daily_winrates() {
   //   <canvas id=\"canvas\" style=\"width: 100%; height: ".(sizeof($report['hero_daily_wr'])*4)."vh\"></canvas>
   // </div>";
 
-  $res .= "<script>";
-
-  $res .= "window.onload = () => { ".implode(";\n", $scripts)." };</script>";
+  $res .= "<script>window.onload = () => { ".implode(";\n", $scripts)." };</script>";
 
   return $res;
 }

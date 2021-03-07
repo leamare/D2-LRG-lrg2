@@ -38,14 +38,14 @@ if (isset($report['hvh']))
 if (isset($report['hvh']))
   include("heroes/counters.php");
 
-if (isset($report['hero_summary']))
-  include("heroes/summary.php");
-
 if (isset($report['hero_winrate_timings']))
   include("heroes/winrate_timings.php");
 
 if (isset($report['hero_winrate_spammers']))
   include("heroes/winrate_spammers.php");
+
+if (isset($report['hero_summary']))
+  include("heroes/summary.php");
 
 function rg_view_generate_heroes() {
   global $report, $mod, $parent, $unset_module;
@@ -113,11 +113,6 @@ function rg_view_generate_heroes() {
       $res['hph'] = rg_view_generate_heroes_hph();
     }
   }
-  if (isset($report['hero_summary'])) {
-    if(check_module($parent."summary")) {
-      $res['summary'] = rg_view_generate_heroes_summary();
-    }
-  }
   if (isset($report['hero_winrate_timings'])) {
     if(check_module($parent."wrtimings")) {
       $res['wrtimings'] = rg_view_generate_heroes_wrtimings();
@@ -126,6 +121,11 @@ function rg_view_generate_heroes() {
   if (isset($report['hero_winrate_spammers'])) {
     if(check_module($parent."wrplayers")) {
       $res['wrplayers'] = rg_view_generate_heroes_wrplayers();
+    }
+  }
+  if (isset($report['hero_summary'])) {
+    if(check_module($parent."summary")) {
+      $res['summary'] = rg_view_generate_heroes_summary();
     }
   }
 
