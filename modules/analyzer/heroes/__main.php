@@ -68,3 +68,8 @@ if ($lg_settings['ana']['heroes_winrate_boxplots']) {
   # heroes laning
   require_once("modules/analyzer/heroes/winrate_timings.php");
 }
+
+if ($lg_settings['ana']['heroes_winrate_spammers']) {
+  # heroes laning
+  require_once("modules/analyzer/heroes/winrate_spammers.php");
+}
