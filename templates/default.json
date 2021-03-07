@@ -44,6 +44,7 @@
     "hero_combos_graph" : true,
 
     "heroes_daily_winrate": true,
+    "heroes_winrate_boxplots": false,
     "matchlist" : true,
 
     "player_positions" : true,
