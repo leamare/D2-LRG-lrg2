@@ -45,6 +45,8 @@
 
     "heroes_daily_winrate": true,
     "heroes_winrate_boxplots": false,
+    "heroes_winrate_spammers": false,
+
     "matchlist" : true,
 
     "player_positions" : true,
