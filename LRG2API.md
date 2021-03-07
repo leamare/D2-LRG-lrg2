@@ -242,6 +242,7 @@ It’s fairly simple to explain. It doesn’t have a structure and is used in `s
 * `items/irecords` - may use `item` variable, returns `overview` if not set
 * `items/progression` and `items/proglist` (identical) - may use `hero` variable, returns `overview` if not set
 * `heroes/daily_wr`
+* `heroes/wrtimings`
 
 ### Non-report endpoints
 
