@@ -241,6 +241,7 @@ It’s fairly simple to explain. It doesn’t have a structure and is used in `s
 * `items/icombos` - may use `item` variable, returns `total` if not set
 * `items/irecords` - may use `item` variable, returns `overview` if not set
 * `items/progression` and `items/proglist` (identical) - may use `hero` variable, returns `overview` if not set
+* `heroes/daily_wr`
 
 ### Non-report endpoints
 

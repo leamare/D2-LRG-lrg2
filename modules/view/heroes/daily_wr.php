@@ -48,6 +48,9 @@ function rg_view_generate_heroes_daily_winrates() {
     $days = $report['hero_daily_wr']['head'][0];
     sort($days);
     $report['hero_daily_wr'] = unwrap_data($report['hero_daily_wr']);
+  } else {
+    $days = $report['hero_daily_wr'][ array_keys($report['hero_daily_wr'])[0] ];
+    sort($days);
   }
 
   $use_graphjs = true;
