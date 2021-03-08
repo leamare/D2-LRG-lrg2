@@ -11,6 +11,24 @@ foreach ($result["pickban"] as $hid => $data) {
   $h = [];
 
   $matches = (int)$data['matches_picked'];
+
+  if (!$matches) {
+    $r[$hid] = [
+      'matches' => 0,
+      'min_duration' => 0,
+      'q1duration' => 0,
+      'q2duration' => 0,
+      'q3duration' => 0,
+      'max_duration' => 0,
+      'early_wr' => 0,
+      'late_wr' => 0,
+      'avg_duration' => 0,
+      'std_dev' => 0,
+      'winrate_avg' => 0,
+      'grad' => 0
+    ];
+  }
+
   $q1 = floor($matches * 0.25);
   $q2 = floor($matches * 0.5);
   $q3 = floor($matches * 0.75);

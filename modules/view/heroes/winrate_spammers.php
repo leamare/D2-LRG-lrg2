@@ -1,6 +1,6 @@
 <?php 
 
-$modules['heroes']['wrplayers'] = [];
+$modules['heroes']['wrplayers'] = '';
 
 function rg_view_generate_heroes_wrplayers() {
   global $report, $parent, $root, $unset_module, $mod, $meta, $strings;
