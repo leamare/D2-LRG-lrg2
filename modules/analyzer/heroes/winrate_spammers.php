@@ -105,12 +105,12 @@ foreach ($result["pickban"] as $hid => $data) {
       if (!isset($h['min_matches'])) $h['min_matches'] = (int)$row[0];
     }
     
-    $h['min_wr'] = round( $winrates[ 0 ], 4);
+    $h['min_wr'] = count($winrates) ? round( $winrates[ 0 ], 4) : 0;
 
     $h['q1_players'] = $players;
-    $h['q1_matches_avg'] = round( $matches/$players, 2);
+    $h['q1_matches_avg'] = $players ? round( $matches/$players, 2) : 0;
     // $h['q1_wr_total'] = $wins/$matches;
-    $h['q1_wr_avg'] = round( array_sum($winrates)/count($winrates), 4);
+    $h['q1_wr_avg'] = count($winrates) ? round( array_sum($winrates)/count($winrates), 4) : 0;
   } else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
   $query_res->close();
 
@@ -131,7 +131,7 @@ foreach ($result["pickban"] as $hid => $data) {
       $h['max_matches'] = (int)$row[0];
     }
     
-    $h['max_wr'] = round($winrates[ count($winrates)-1 ], 4);
+    $h['max_wr'] = count($winrates) ? round($winrates[ count($winrates)-1 ], 4) : 0;
     $h['q3_players'] = $players;
     $h['q3_matches_avg'] = round($matches/$players, 2);
     // $h['q3_wr_total'] = $wins/$matches;
