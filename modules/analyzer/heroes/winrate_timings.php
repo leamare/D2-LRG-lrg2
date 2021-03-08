@@ -38,7 +38,7 @@ foreach ($result["pickban"] as $hid => $data) {
   // duration quantiles
 
   $sql = "SELECT m.duration FROM matchlines ml JOIN matches m ON m.matchid = ml.matchid
-    WHERE ml.heroid = $hid ORDER BY m.duration ASC LIMIT 1, 1;";
+    WHERE ml.heroid = $hid ORDER BY m.duration ASC LIMIT 0, 1;";
 
   if ($query_res = $conn->query($sql)) {
     $row = $query_res->fetch_row();
