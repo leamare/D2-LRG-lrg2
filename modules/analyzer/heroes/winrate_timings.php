@@ -128,7 +128,7 @@ foreach ($result["pickban"] as $hid => $data) {
     for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
       $sum += pow($row[0], 2);
     }
-    $h['std_dev'] = round( sqrt( $sum/($matches-1) ) );
+    $h['std_dev'] = $matches == 1 ? 0 : round( sqrt( $sum/($matches-1) ) );
   } else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
   $query_res->close();
 
