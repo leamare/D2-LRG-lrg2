@@ -27,6 +27,7 @@ foreach ($result["pickban"] as $hid => $data) {
       'winrate_avg' => 0,
       'grad' => 0
     ];
+    continue;
   }
 
   $q1 = floor($matches * 0.25);
@@ -74,7 +75,7 @@ foreach ($result["pickban"] as $hid => $data) {
   $query_res->close();
 
   $sql = "SELECT m.duration FROM matchlines ml JOIN matches m ON m.matchid = ml.matchid
-    WHERE ml.heroid = $hid ORDER BY m.duration DESC LIMIT 1, 1;";
+    WHERE ml.heroid = $hid ORDER BY m.duration DESC LIMIT 0, 1;";
 
   if ($query_res = $conn->query($sql)) {
     $row = $query_res->fetch_row();
