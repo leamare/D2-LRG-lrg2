@@ -41,31 +41,31 @@ $endpoints['daily_wr'] = function($mods, $vars, &$report) {
     foreach($days as $dt) {
       $dd = $days_data[$dt] ?? [ 'ms' => 0, 'wr' => 0 ];
 
-      if (isset($prev_b) && $prev_b*0.15 > ($dd['bn'] ?? 0)) {
-        $dmb[] = $dmb[ count($dmb)-1 ];
-      } else {
-        $prev_b = $dd['bn'] ?? 0;
-        $dmb[] = round(($dd['bn'] ?? 0)/$global_days[$dt], 4);
-      }
+//       if (isset($prev_b) && $prev_b*0.15 > ($dd['bn'] ?? 0)) {
+//         $dmb[] = $dmb[ count($dmb)-1 ];
+//       } else {
+//         $prev_b = $dd['bn'] ?? 0;
+        $dmb[] = round(100*($dd['bn'] ?? 0)/$global_days[$dt], 2);
+//       }
       if (!$first_msb && ($dd['bn'] ?? 0)) {
-        $first_msb = round($dd['bn']/$global_days[$dt], 4);
+        $first_msb = round(100*$dd['bn']/$global_days[$dt], 2);
       }
 
-      if (isset($prev) && $prev*0.15 > $dd['ms']) {
-        $dwr[] = $dwr[ count($dwr)-1 ];
-        $dm[] = $dm[ count($dm)-1 ];
-        
-        continue;
-      } else {
-        $prev = $dd['ms'];
-      }
+//       if (isset($prev) && $prev*0.15 > $dd['ms']) {
+//         $dwr[] = $dwr[ count($dwr)-1 ];
+//         $dm[] = $dm[ count($dm)-1 ];
+//         
+//         continue;
+//       } else {
+//         $prev = $dd['ms'];
+//       }
       if (!$first_ms && $dd['ms']) {
-        $first_ms = round($dd['ms']/$global_days[$dt], 4);
-        $first_wr = $dd['wr'];
+        $first_ms = round(100*$dd['ms']/$global_days[$dt], 2);
+        $first_wr = $dd['wr']*100;
       }
 
-      $dwr[] = $dd['wr'];
-      $dm[] = round($dd['ms']/$global_days[$dt], 4);
+      $dwr[] = $dd['wr']*100;
+      $dm[] = round(100*$dd['ms']/$global_days[$dt], 2);
     }
 
     $res[$hid] = [
