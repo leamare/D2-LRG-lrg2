@@ -336,6 +336,7 @@ $strings['ru'] = [
   "item_time_q3" => "Q3",
   "item_time_max" => "Максимальный",
   "item_time_std_dev" => "Станд.откл",
+  "item_time_window" => "Окно",
   "best_timing_record" => "Игры с лучшими таймингами",
   "avg_timing" => "Средний тайминг",
 
