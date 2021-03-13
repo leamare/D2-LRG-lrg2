@@ -123,7 +123,7 @@ function rg_view_generate_items_heroes() {
       "<th width=\"12%\" colspan=\"2\"></th>".
       "<th width=\"18%\" colspan=\"3\"></th>".
       "<th class=\"separator\" width=\"30%\" colspan=\"5\">".locale_string("items_winrate_shifts")."</th>".
-      "<th class=\"separator\" colspan=\"7\">".locale_string("items_timings")."</th>".
+      "<th class=\"separator\" colspan=\"8\">".locale_string("items_timings")."</th>".
     "</tr><tr>".
     "<th></th>".
     "<th>".locale_string("hero")."</th>".
@@ -141,6 +141,7 @@ function rg_view_generate_items_heroes() {
     "<th data-sorter=\"time\">".locale_string("item_time_median")."</th>".
     "<th data-sorter=\"time\">".locale_string("item_time_q3")."</th>".
     "<th data-sorter=\"time\">".locale_string("item_time_max")."</th>".
+    "<th data-sorter=\"time\">".locale_string("item_time_window")."</th>".
     "<th data-sorter=\"time\">".locale_string("item_time_std_dev")."</th>".
   "</tr></thead><tbody>";
 
@@ -198,6 +199,7 @@ function rg_view_generate_items_heroes() {
       "<td>".convert_time_seconds($line['median'])."</td>".
       "<td>".convert_time_seconds($line['q3'])."</td>".
       "<td>".convert_time_seconds($line['max_time'])."</td>".
+      "<td>".convert_time_seconds($line['q3']-$line['q1'])."</td>".
       "<td>".convert_time_seconds($line['std_dev'])."</td>".
     "</tr>";
   }
