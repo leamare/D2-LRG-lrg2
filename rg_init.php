@@ -64,7 +64,7 @@ if(isset($argv)) {
 $lg_settings['version'] = $lrg_version;
 
 $meta['heroes'];
-if ($lg_settings['excluded_heroes']) {
+if ($lg_settings['excluded_heroes'] ?? false) {
   foreach($lg_settings['excluded_heroes'] as $hid) {
     if (isset($meta['heroes'][$hid])) unset($meta['heroes'][$hid]);
   }

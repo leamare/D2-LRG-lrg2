@@ -136,6 +136,7 @@ function fetch($match) {
     echo("Reusing cache.");
     $json = file_get_contents("$cache_dir/".$match.".json");
     $matchdata_od = json_decode($json, true);
+    $matchdata = $matchdata_od;
   // } else if($lrg_use_cache && file_exists("$cache_dir/".$match.".json") && file_exists("$cache_dir/unparsed_".$match.".json") && $force_adding) {
   //   echo("Reusing unparsed cache.");
   //   $json = file_get_contents("$cache_dir/unparsed_".$match.".json");
@@ -263,7 +264,7 @@ function fetch($match) {
       }
     }
 
-    $matchdata_stratz = $matchdata;
+    $matchdata_stratz = $matchdata ?? null;
     $matchdata = empty($matchdata_od) ? $opendota->match($match) : $matchdata_od;
     echo("..OK.");
     if (empty($matchdata) || empty($matchdata['duration']) || empty($matchdata['players'])) {
