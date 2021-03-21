@@ -15,6 +15,8 @@ else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n"
 $query_res = $conn->store_result();
 
 for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+  if (!isset($result['pickban'][$row[0]]) || !isset($result['pickban'][$row[1]])) continue;
+  
   $expected_pair  = $result['random']['matches_total'] ? ( $result['pickban'][$row[0]]['matches_picked']
   * $result['pickban'][$row[1]]['matches_picked']
   / $result['random']['matches_total'] )
