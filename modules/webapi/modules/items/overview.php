@@ -105,6 +105,10 @@ $endpoints['items-overview'] = function($mods, $vars, &$report) use (&$endpoints
   if (isset($report['items']['records'])) {
     foreach ($gradients as $i => $v) {
       $gradients[$i]['record'] = $report['items']['records'][ $v['item'] ][ $v['hero'] ] ?? [];
+      if (!empty($report['match_participants_teams']) && !empty($gradients[$i]['record']))
+        $gradients[$i]['record']['match_card_min'] = match_card_min($gradients[$i]['record']['match']);
+      else 
+        $gradients[$i]['record']['match_card_min'] = null;
     }
   }
   $res['gradients'] = $gradients;
