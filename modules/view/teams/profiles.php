@@ -63,9 +63,10 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
               foreach ($report['matches'][$match] as $l) {
                 if ($l['radiant'] != $radiant) continue;
                 if (!isset($matches[ $l['player'] ])) continue;
-                if (!isset($matches[ $l['player'] ][ $l['hero'] ])) $matches[ $l['player'] ][ $l['hero'] ] = [ 'ms' => [], 'c' => 0 ];
+                if (!isset($matches[ $l['player'] ][ $l['hero'] ])) $matches[ $l['player'] ][ $l['hero'] ] = [ 'ms' => [], 'c' => 0, 'w' => 0 ];
                 $matches[ $l['player'] ][ $l['hero'] ]['ms'][] = $match;
                 $matches[ $l['player'] ][ $l['hero'] ]['c']++;
+                $matches[ $l['player'] ][ $l['hero'] ]['w'] += $report['matches_additional'][$match]['radiant_win'] XOR $radiant;
               }
             }
 
@@ -79,9 +80,11 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
               $res["team".$tid]['overview'] .= "<div class=\"line\"><span class=\"caption\">".player_name($player)."</span>: ";
               foreach ($heroes as $hero => $arr) {
                 $ms = $arr['ms'];
+                sort($ms);
                 $num = $arr['c'];
-                $title = hero_name($hero)." - ".locale_string('matches_s')." ".$num." - ".locale_string('total')." ".$context[$tid]['pickban'][$hero]['matches_picked']." - ".
-                  locale_string('winrate_s')." ".($context[$tid]['pickban'][$hero]['winrate_picked']*100)."%";
+                $wr = $arr['w']/$arr['c'];
+                $title = hero_name($hero)." - ".locale_string('matches_s')." ".$num." (".locale_string('total')." ".$context[$tid]['pickban'][$hero]['matches_picked'].") - ".
+                  locale_string('winrate_s')." ".round($wr*100, 2)."%";
                 $res["team".$tid]['overview'] .= "<a title=\"".$title."\" ".
                   "onclick=\"showModal('".htmlspecialchars(join_matches($ms))."', '".player_name($player)." - $title')\"".
                   ">".hero_icon($hero)."</a>";
@@ -332,6 +335,7 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
         if(check_module($context_mod."team".$tid."-matches")) {
           $res["team".$tid]['matches'] = "<div class=\"content-text\">".locale_string("desc_matches")."</div>";
           $res["team".$tid]['matches'] .= "<div class=\"content-cards\">";
+          krsort($context[$tid]['matches']);
           foreach($context[$tid]['matches'] as $matchid => $match) {
             $res["team".$tid]['matches'] .= match_card($matchid);
           }
