@@ -44,6 +44,18 @@ $endpoints['hvh'] = function($mods, $vars, &$report) {
   }
 
   if (isset($vars['heroid'])) {
+    if (isset($report['hero_laning'])) {
+      if (is_wrapped($report['hero_laning'])) {
+        $report['hero_laning'] = unwrap_data($report['hero_laning']);
+      }
+
+      foreach($report['hero_laning'][$vars['heroid']] as $opid => $hero) {
+        if (empty($hvh[$vars['heroid']][$opid])) continue;
+        $hvh[$vars['heroid']][$opid]['lane_rate'] = round( ($hero['matches'] ?? 0)/$hvh[$vars['heroid']][$opid]['matches'], 4 );
+        $hvh[$vars['heroid']][$opid]['lane_wr'] = $hero['lane_wr'] ?? 0;
+      }
+    }
+
     return [
       'reference' => [
         'id' => $vars['heroid'],
