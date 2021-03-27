@@ -100,9 +100,10 @@ $endpoints['teams'] = function($mods, $vars, &$report) use (&$endpoints) {
         foreach ($report['matches'][$match] as $l) {
           if ($l['radiant'] != $radiant) continue;
           if (!isset($matches[ $l['player'] ])) continue;
-          if (!isset($matches[ $l['player'] ][ $l['hero'] ])) $matches[ $l['player'] ][ $l['hero'] ] = [ 'ms' => [], 'c' => 0 ];
+          if (!isset($matches[ $l['player'] ][ $l['hero'] ])) $matches[ $l['player'] ][ $l['hero'] ] = [ 'ms' => [], 'c' => 0, 'w' => 0 ];
           $matches[ $l['player'] ][ $l['hero'] ]['ms'][] = $match;
           $matches[ $l['player'] ][ $l['hero'] ]['c']++;
+          $matches[ $l['player'] ][ $l['hero'] ]['w'] += $report['matches_additional'][$match]['radiant_win'] XOR $radiant;
         }
       }
 
@@ -116,7 +117,7 @@ $endpoints['teams'] = function($mods, $vars, &$report) use (&$endpoints) {
           $pl['heroes'][$hero] = [
             'played' => $num['c'],
             'total' => $report['teams'][ $vars['team'] ]['pickban'][$hero]['matches_picked'],
-            'winrate' => $report['teams'][ $vars['team'] ]['pickban'][$hero]['winrate_picked']
+            'winrate' => round($num['w']/$num['c'], 4)
           ];
           if ($vars['include_matches']) {
             $pl['heroes'][$hero]['matches'] = [];
