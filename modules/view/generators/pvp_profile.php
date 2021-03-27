@@ -20,6 +20,11 @@ function rg_generator_pvp_profile($table_id, &$pvp_context, &$context_wrs, $srci
   else
     $exp = false;
 
+  if (isset( array_values($pvp_context)[0]['lane_rate'] ))
+    $laning = true;
+  else
+    $laning = false;
+
   if(!empty($context_wrs)) {
     $wr_id = $heroes_flag ? "winrate_picked" : "winrate";
     $dt = [
@@ -73,9 +78,12 @@ function rg_generator_pvp_profile($table_id, &$pvp_context, &$context_wrs, $srci
           "<th>".locale_string("matches")."</th>".
           "<th>".locale_string("won")."</th>".
           "<th>".locale_string("lost")."</th>".
-          ($exp ? "<th>".locale_string("pair_expectation")."</th>".
+          ($exp ? "<th class=\"separator\">".locale_string("pair_expectation")."</th>".
             "<th>".locale_string("pair_deviation")."</th>".
             "<th>".locale_string("percentage")."</th>" : "").
+          ($laning ? "<th class=\"separator\">".locale_string("lane_rate")."</th>".
+            "<th>".locale_string("lane_wr")."</th>"
+            : "").
           "</tr></thead>";
 
   if (!$isrank) {
@@ -104,9 +112,12 @@ function rg_generator_pvp_profile($table_id, &$pvp_context, &$context_wrs, $srci
             "<td>".$data['matches']."</td>".
             "<td>".$data['won']."</td>".
             "<td>".$data['lost']."</td>".
-            ($exp ? "<td>".number_format($data['expectation'], 0)."</td>".
+            ($exp ? "<td class=\"separator\">".number_format($data['expectation'], 0)."</td>".
             "<td>".number_format($data['matches']-$data['expectation'], 0)."</td>".
             "<td>".number_format(($data['matches']-$data['expectation'])*100/$data['matches'], 2)."%</td>" : "").
+            ($laning ? "<td class=\"separator\">".number_format($data['lane_rate']*100, 2)."%</td>".
+            "<td>".number_format($data['lane_wr']*100, 2)."%</td>"
+            : "").
             "</tr>";
   }
 
