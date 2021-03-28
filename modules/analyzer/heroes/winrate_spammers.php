@@ -144,7 +144,10 @@ foreach ($result["pickban"] as $hid => $data) {
   $h['avg_matches'] = round($data['matches_picked']/$h['players_all'], 2);
 
   // gradient
-  $h['grad'] = round( ($h['q3_wr_avg']-$h['q1_wr_avg'])/($h['q3_matches_avg']-$h['q1_matches_avg']) , 4 );
+  if ($h['q3_matches_avg']-$h['q1_matches_avg'])
+    $h['grad'] = round( ($h['q3_wr_avg']-$h['q1_wr_avg'])/($h['q3_matches_avg']-$h['q1_matches_avg']) , 4 );
+  else 
+    $h['grad'] = $h['q3_wr_avg']-$h['q1_wr_avg'];
 
   $r[$hid] = $h;
 }
