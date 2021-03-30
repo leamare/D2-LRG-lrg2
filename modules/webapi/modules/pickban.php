@@ -8,6 +8,23 @@ $endpoints['pickban'] = function($mods, $vars, &$report) {
     $context =& $report['teams'][ $vars['team'] ]['pickban'];
     $context_total_matches = $report['teams'][ $vars['team'] ]['matches_total'];
     $context_main =& $report['teams'][ $vars['team'] ];
+
+    $pb = rg_create_team_pickban_data($context_main['pickban'], $context_main['pickban_vs'] ?? [], $context_main['matches_total']);
+
+    foreach($pb as $hid => &$line) {
+      $line['rank'] = round($line['rank'], 2);
+      $line['rank_vs'] = round($line['rank_vs'], 2);
+      $line['arank'] = round($line['arank'], 2);
+      $line['arank_vs'] = round($line['arank_vs'], 2);
+      $line['pickrate'] = round($line['matches_picked']/$context_total_matches, 5);
+      $line['pickrate_vs'] = round($line['matches_picked_vs']/$context_total_matches, 5);
+      $line['banrate'] = round($line['matches_banned']/$context_total_matches, 5);
+      $line['banrate_vs'] = round($line['matches_banned_vs']/$context_total_matches, 5);
+    }
+
+    return [
+      'pickban' => $pb
+    ];
   } else if (isset($vars['region'])) {
     $parent =& $report['regions_data'][ $vars['region'] ]; 
     $context =& $report['regions_data'][ $vars['region'] ]['pickban'];
