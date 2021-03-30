@@ -31,7 +31,11 @@ function rg_generator_pickban($table_id, &$context, &$context_main, $heroes_flag
     else return ($a['matches_total'] < $b['matches_total']) ? 1 : -1;
   });
 
-  $res = "<div class=\"content-text\">".locale_string("heroes_median_picks")." (mp): $mp - ".locale_string("heroes_median_bans")." (mb): $mb</div>";
+  $res = "<div class=\"content-text\">".locale_string("heroes_median_picks").
+    " (mp): $mp - ".locale_string("heroes_median_bans").
+    " (mb): $mb - ".locale_string("matches_total").": $context_total_matches</div>";
+
+  $res .= "<div class=\"content-text\">".locale_string("desc_pickban_ranks")."</div>";
 
   $res .=  "<table id=\"$table_id\" class=\"list sortable\"><thead><tr>".
             ($heroes_flag ? "<th class=\"sorter-no-parser\" width=\"1%\"></th>" : "").
@@ -39,15 +43,19 @@ function rg_generator_pickban($table_id, &$context, &$context_main, $heroes_flag
             "<th>".locale_string("matches_total")."</th>".
             "<th class=\"separator\">".locale_string("contest_rate")."</th>".
             "<th>".locale_string("rank")."</th>".
+            "<th>".locale_string("antirank")."</th>".
             "<th class=\"separator\">".locale_string("matches_picked")."</th>".
+            // "<th>".locale_string("pickrate")."</th>".
             "<th>".locale_string("winrate")."</th>".
             "<th>".locale_string("mp")."</th>".
             "<th class=\"separator\">".locale_string("matches_banned")."</th>".
+            // "<th>".locale_string("banrate")."</th>".
             "<th>".locale_string("winrate")."</th>".
             "<th>".locale_string("mb")."</th>".
             "</tr></thead>";
 
   $ranks = [];
+  $antiranks = [];
   $context_copy = $context;
 
   $compound_ranking_sort = function($a, $b) use ($context_total_matches) {
@@ -70,16 +78,41 @@ function rg_generator_pickban($table_id, &$context, &$context_main, $heroes_flag
   unset($last);
   unset($context_copy);
 
+  $context_copy = $context;
+  foreach($context_copy as &$el)  {
+    $el['winrate_picked'] = 1-$el['winrate_picked'];
+    $el['winrate_banned'] = 1-$el['winrate_banned'];
+  }
+
+  uasort($context_copy, $compound_ranking_sort);
+
+  $increment = 100 / sizeof($context_copy); $i = 0;
+
+  foreach ($context_copy as $id => $el) {
+    if(isset($last) && $el == $last) {
+      $i++;
+      $antiranks[$id] = $last_rank;
+    } else
+      $antiranks[$id] = 100 - $increment*$i++;
+    $last = $el;
+    $last_rank = $antiranks[$id];
+  }
+  unset($last);
+  unset($context_copy);
+
   foreach($context as $id => $el) {
     $res .=  "<tr>".
             ($heroes_flag ? "<td>".hero_portrait($id)."</td><td>".hero_name($id)."</td>" : "<td>".player_name($id)."</td>").
             "<td>".$el['matches_total']."</td>".
             "<td class=\"separator\">".number_format($el['matches_total']/$context_total_matches*100,2)."%</td>".
             "<td>".number_format($ranks[$id],2)."</td>".
+            "<td>".number_format($antiranks[$id],2)."</td>".
             "<td class=\"separator\">".$el['matches_picked']."</td>".
+            // "<td>".number_format($el['matches_picked']/$context_total_matches*100,2)."%</td>".
             "<td>".number_format($el['winrate_picked']*100,2)."%</td>".
             "<td>".number_format($el['matches_picked']/$mp, 1)."</td>".
             "<td class=\"separator\">".$el['matches_banned']."</td>".
+            // "<td>".number_format($el['matches_banned']/$context_total_matches*100,2)."%</td>".
             "<td>".number_format($el['winrate_banned']*100,2)."%</td>".
             "<td>".number_format($el['matches_banned']/$mb, 1)."</td>".
             "</tr>";
