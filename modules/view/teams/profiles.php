@@ -113,6 +113,13 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
                 "</div>";
           }
 
+          $res["team".$tid]['overview'] .= "<div class=\"content-header\">".locale_string("draft")."</div>";
+          $res["team".$tid]['overview'] .= "<div class=\"content-text\">".locale_string("desc_pickban_teams_profile")."</div>";
+          include_once("$root/modules/view/generators/pickban_teams.php");
+          $res["team".$tid]['overview'] .= rg_generator_team_pickban_profile($context[$tid]);
+
+
+          $res["team".$tid]['overview'] .= "<div class=\"content-header\">".locale_string("averages")."</div>";
           $res["team".$tid]['overview'] .= "<table id=\"teams-$tid-avg-table\" class=\"list\"> ";
           foreach ($context[$tid]['averages'] as $key => $value) {
             $res["team".$tid]['overview'] .= "<tr><td>".
@@ -125,6 +132,14 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
         }
       }
 
+      if (isset($context[$tid]['pickban'])) {
+        $res["team".$tid]['pickban'] = "";
+
+        if(check_module($context_mod."team".$tid."-pickban")) {
+          include_once("$root/modules/view/generators/pickban_teams.php");
+          $res["team".$tid]['pickban'] = rg_generator_team_pickban("team$tid-pickban", $context[$tid]);
+        }
+      }
       if (isset($context[$tid]['draft'])) {
         $res["team".$tid]['draft'] = "";
 
