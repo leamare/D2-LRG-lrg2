@@ -69,12 +69,39 @@ $endpoints['pickban'] = function($mods, $vars, &$report) {
     $last = $el;
     $last_rank = $ranks[$id];
   }
+  $last = null;
+
+  $context_cpy = [];
+  foreach($context as $hid => $data) {
+    $context_cpy[$hid] = $data;
+    $context_cpy[$hid]['winrate_picked'] = 1-$context_cpy[$hid]['winrate_picked'];
+    $context_cpy[$hid]['winrate_banned'] = 1-$context_cpy[$hid]['winrate_banned'];
+  }
+
+  $aranks = [];
+
+  uasort($context_cpy, $compound_ranking_sort);
+
+  $increment = 100 / sizeof($context); $i = 0;
+
+  foreach ($context_cpy as $id => $el) {
+    if(isset($last) && $el == $last) {
+      $i++;
+      $aranks[$id] = $last_rank;
+    } else
+      $aranks[$id] = 100 - $increment*$i++;
+    $last = $el;
+    $last_rank = $aranks[$id];
+  }
   
   foreach($context as $id => &$el) {
     $el['rank'] = round($ranks[$id], 2);
+    $el['arank'] = round($aranks[$id], 2);
     $el['contest_rate'] = round($el['matches_total']/$context_total_matches, 5);
-    $el['picks_to_median'] = isset($median_picks) ? round($el['matches_picked']/$mp, 1) : null;
-    $el['bans_to_median'] = isset($median_bans) ? round($el['matches_banned']/$mb, 1) : null;
+    $el['pickrate'] = round($el['matches_picked']/$context_total_matches, 5);
+    $el['banrate'] = round($el['matches_banned']/$context_total_matches, 5);
+    $el['picks_to_median'] = isset($mp) ? round($el['matches_picked']/$mp, 1) : null;
+    $el['bans_to_median'] = isset($mb) ? round($el['matches_banned']/$mb, 1) : null;
   }
 
   return [
