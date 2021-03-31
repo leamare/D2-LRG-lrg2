@@ -36,19 +36,31 @@ $endpoints['hph'] = function($mods, $vars, &$report) {
     if ($srcid) {
       $context =& $report['hph'][$srcid];
 
+      foreach ($context as $id => $el) {
+        if ($el == null) unset($context[$id]);
+        if ($el === true) $context[$id] = $report['hph'][$id][$srcid];
+      }
+
       foreach ($report['hph'][$srcid] as $id => $line) {
-        if ($line === null) {
+        if ($id == '_h') {
           unset($report['hph'][$srcid][$id]);
           continue;
         }
-        if ($line === true) $report['hph'][$srcid][$id] = $report['hph'][$id][$srcid];
-        $context[$id]['wr_diff'] = $context[$id]['winrate'] - $dt['wr'];
+        if ($line == null) {
+          unset($context[$id]);
+          continue;
+        }
+        if ($line === true || is_array($line) && $line['matches'] === -1)
+          $report['hph'][$srcid][$id] = $report['hph'][$id][$srcid];
+
+        $context[$id]['wr_diff'] = round($context[$id]['winrate'] - $dt['wr'], 5);
       }
 
       $compound_ranking_sort = function($a, $b) use ($dt) {
         return positions_ranking_sort($a, $b, $dt['ms']);
       };
       uasort($context, $compound_ranking_sort);
+      $context_cpy = $context;
     
       $increment = 100 / sizeof($context); $i = 0;
     
@@ -60,6 +72,23 @@ $endpoints['hph'] = function($mods, $vars, &$report) {
           $context[$elid]['rank'] = round(100 - $increment*$i++, 2);
         $last = $el;
         $last_rank = $context[$elid]['rank'];
+
+        $context_cpy[$elid]['winrate'] = 1-$context_cpy[$elid]['winrate'];
+      }
+    
+      unset($last);
+  
+      uasort($context_cpy, $compound_ranking_sort);
+      $i = 0;
+    
+      foreach ($context_cpy as $elid => $el) {
+        if(isset($last) && $el == $last) {
+          $i++;
+          $context[$elid]['arank'] = $last_rank;
+        } else
+          $context[$elid]['arank'] = round(100 - $increment*$i++, 2);
+        $last = $el;
+        $last_rank = $context[$elid]['arank'];
       }
     
       unset($last);
@@ -78,7 +107,7 @@ $endpoints['hph'] = function($mods, $vars, &$report) {
   if (isset($vars['heroid'])) {
     return [
       'reference' => $hero_reference,
-      'pairs' => $report['hph'][$srcid]
+      'pairs' => $context
     ];
   }
   return $report['hph'];
