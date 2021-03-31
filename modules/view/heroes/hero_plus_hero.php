@@ -41,8 +41,9 @@ function rg_view_generate_heroes_hph() {
         if (is_array($line) && $line['matches'] === -1) $report['hph'][$hid][$id] = $report['hph'][$id][$hid];
       }
 
-      $res["heroid".$hid] = "<div class=\"content-text\">".locale_string("desc_heroes_hph")."</div>";
+      // $res["heroid".$hid] = "<div class=\"content-text\">".locale_string("desc_heroes_hph")."</div>";
       $res["heroid".$hid] .= "<div class=\"content-text\">".locale_string("pairs_desc")."</div>";
+      $res["heroid".$hid] .= "<div class=\"content-text\">".locale_string("pairs_desc_2")."</div>";
       $res["heroid".$hid] .= rg_generator_hph_profile("$parent_module-$hid", $report['hph'][$hid], $report['pickban'], $hid);
     }
   }
