@@ -86,9 +86,10 @@ function rg_view_generate_heroes_daily_winrates() {
 
   $res .= "<table class=\"list wide sortable\"><thead>".
     "<tr class=\"overhead\"><th colspan=\"2\" width=\"10%\"></th>".
+    "<th class=\"separator\" colspan=\"4\" width=\"30%\">".locale_string("trends_winrate")."</th>".
     "<th class=\"separator\" colspan=\"4\" width=\"30%\">".locale_string("pickrate")."</th>".
     "<th class=\"separator\" colspan=\"4\" width=\"30%\">".locale_string("banrate")."</th>".
-    "<th class=\"separator\" colspan=\"4\" width=\"30%\">".locale_string("trends_winrate")."</th></tr>".
+    "</tr>".
     "<tr><th></th>".
     "<th>".locale_string("hero")."</th>".
     "<th class=\"separator\">".locale_string("trends_first")."</th>".
@@ -106,38 +107,51 @@ function rg_view_generate_heroes_daily_winrates() {
   "</thead><tbody>";
   foreach ($report['hero_daily_wr'] as $hid => $days_data) {
     $dwr = []; $dm = []; $dmb = []; $prev = null; $prev_b = null;
+    $prev_dt = null;
     $first_wr = 0; $first_ms = 0; $first_msb = 0;
     foreach($days as $dt) {
       $dd = $days_data[$dt] ?? [ 'ms' => 0, 'wr' => 0 ];
 
-//       if (isset($prev_b) && $prev_b*0.15 > ($dd['bn'] ?? 0)) {
-//         $dmb[] = $dmb[ count($dmb)-1 ];
-//       } else {
-//         $prev_b = $dd['bn'] ?? 0;
-        $dmb[] = round(100*($dd['bn'] ?? 0)/$global_days[$dt], 2);
-//       }
-      if (!$first_msb && ($dd['bn'] ?? 0)) {
-        $first_msb = round(100*$dd['bn']/$global_days[$dt], 2);
-      }
+      if ($prev_dt == null || $global_days[$dt]/$prev_dt > 0.05) {
+        $prev_dt = $global_days[$dt];
+  //       if (isset($prev_b) && $prev_b*0.15 > ($dd['bn'] ?? 0)) {
+  //         $dmb[] = $dmb[ count($dmb)-1 ];
+  //       } else {
+  //         $prev_b = $dd['bn'] ?? 0;
+          $dmb[] = round(100*($dd['bn'] ?? 0)/$global_days[$dt], 2);
+  //       }
+        if (!$first_msb && ($dd['bn'] ?? 0)) {
+          $first_msb = round(100*$dd['bn']/$global_days[$dt], 2);
+        }
 
-//       if (isset($prev) && $prev*0.15 > $dd['ms']) {
-//         $dwr[] = $dwr[ count($dwr)-1 ];
-//         $dm[] = $dm[ count($dm)-1 ];
-//         
-//         continue;
-//       } else {
-//         $prev = $dd['ms'];
-//       }
-      if (!$first_ms && $dd['ms']) {
-        $first_ms = round(100*$dd['ms']/$global_days[$dt], 2);
-        $first_wr = $dd['wr']*100;
-      }
+  //       if (isset($prev) && $prev*0.15 > $dd['ms']) {
+  //         $dwr[] = $dwr[ count($dwr)-1 ];
+  //         $dm[] = $dm[ count($dm)-1 ];
+  //         
+  //         continue;
+  //       } else {
+  //         $prev = $dd['ms'];
+  //       }
+        if (!$first_ms && $dd['ms']) {
+          $first_ms = round(100*$dd['ms']/$global_days[$dt], 2);
+          $first_wr = $dd['wr']*100;
+        }
 
-      $dwr[] = $dd['wr']*100;
-      $dm[] = round(100*$dd['ms']/$global_days[$dt], 2);
+        $dwr[] = $dd['wr']*100;
+        $dm[] = round(100*$dd['ms']/$global_days[$dt], 2);
+      } else {
+        $dmb[] = $dmb[ sizeof($dmb)-1 ];
+        $dm[] = $dm[ sizeof($dm)-1 ];
+        $dwr[] = $dwr[ sizeof($dwr)-1 ];
+      }
     }
 
     $res .= "<tr><td>".hero_portrait($hid)."</td><td>".hero_name($hid)."</td>".
+      "<td class=\"separator\">".number_format($first_wr, 2)."%</td>".
+      "<td><div style=\"position: relative; width: 100%; height: 70px\"><canvas id=\"hero-daily-wr-$hid\"></canvas></div></td>".
+      "<td>".number_format($dwr[ count($dwr)-1 ], 2)."%</td>".
+      "<td>".number_format($dwr[ count($dwr)-1 ]-$first_wr, 2)."%</td>".
+
       "<td class=\"separator\">".number_format($first_ms, 2)."%</td>".
       "<td><div style=\"position: relative; width: 100%; height: 70px\"><canvas id=\"hero-daily-matches-$hid\"></canvas></div></td>".
       "<td>".number_format($dm[ count($dm)-1 ], 2)."%</td>".
@@ -147,11 +161,6 @@ function rg_view_generate_heroes_daily_winrates() {
       "<td><div style=\"position: relative; width: 100%; height: 70px\"><canvas id=\"hero-daily-bans-$hid\"></canvas></div></td>".
       "<td>".number_format($dmb[ count($dmb)-1 ], 2)."%</td>".
       "<td>".number_format($dmb[ count($dmb)-1 ]-$first_msb, 2)."%</td>".
-
-      "<td class=\"separator\">".number_format($first_wr, 2)."%</td>".
-      "<td><div style=\"position: relative; width: 100%; height: 70px\"><canvas id=\"hero-daily-wr-$hid\"></canvas></div></td>".
-      "<td>".number_format($dwr[ count($dwr)-1 ], 2)."%</td>".
-      "<td>".number_format($dwr[ count($dwr)-1 ]-$first_wr, 2)."%</td>".
     "</tr>";
 
     // winrate
