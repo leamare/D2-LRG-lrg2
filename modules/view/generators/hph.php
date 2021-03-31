@@ -17,10 +17,10 @@ function rg_generator_hph_profile($table_id, &$context, &$context_wrs, $srcid, $
       'ms' => $heroes_flag ? $context_wrs[$srcid]['matches_picked'] : $context_wrs[$srcid]['matches'],
     ];
 
-    $res .= "<table id=\"$table_id\" class=\"list sortable\">".
+    $res .= "<table id=\"$table_id\" class=\"list\">".
         "<thead><tr>".
         ($heroes_flag ? "<th width=\"1%\"></th>" : "").
-        "<th data-sortInitialOrder=\"asc\">".locale_string($heroes_flag ? 'hero' : 'player')."</th>".
+        "<th>".locale_string($heroes_flag ? 'hero' : 'player')."</th>".
         "<th>".locale_string("matches")."</th>".
         "<th>".locale_string("winrate")."</th></tr></thead>".
         "<tbody><tr>".
@@ -40,6 +40,7 @@ function rg_generator_hph_profile($table_id, &$context, &$context_wrs, $srcid, $
       return positions_ranking_sort($a, $b, $dt['ms']);
     };
     uasort($context, $compound_ranking_sort);
+    $context_cpy = $context;
   
     $increment = 100 / sizeof($context); $i = 0;
   
@@ -51,6 +52,23 @@ function rg_generator_hph_profile($table_id, &$context, &$context_wrs, $srcid, $
         $context[$elid]['rank'] = round(100 - $increment*$i++, 2);
       $last = $el;
       $last_rank = $context[$elid]['rank'];
+
+      $context_cpy[$elid]['winrate'] = 1-$context_cpy[$elid]['winrate'];
+    }
+  
+    unset($last);
+
+    uasort($context_cpy, $compound_ranking_sort);
+    $i = 0;
+  
+    foreach ($context_cpy as $elid => $el) {
+      if(isset($last) && $el == $last) {
+        $i++;
+        $context[$elid]['arank'] = $last_rank;
+      } else
+        $context[$elid]['arank'] = round(100 - $increment*$i++, 2);
+      $last = $el;
+      $last_rank = $context[$elid]['arank'];
     }
   
     unset($last);
@@ -62,14 +80,14 @@ function rg_generator_hph_profile($table_id, &$context, &$context_wrs, $srcid, $
   $res .= "<thead><tr>".
           ($heroes_flag && !$i++ ? "<th width=\"1%\"></th>" : "").
           "<th data-sortInitialOrder=\"asc\">".locale_string($heroes_flag ? "hero" : "player")."</th>".
-          ($isrank ? "<th>".locale_string("rank")."</th>" : "").
-          "<th>".locale_string("matches")."</th>".
+          ($isrank ? "<th>".locale_string("rank")."</th><th>".locale_string("antirank")."</th>" : "").
+          "<th class=\"separator\">".locale_string("matches")."</th>".
           "<th>".locale_string("winrate")."</th>".
           "<th>".locale_string("winrate_diff")."</th>".
-          "<th>".locale_string("expectation")."</th>".
+          "<th class=\"separator\">".locale_string("expectation")."</th>".
           "<th>".locale_string("deviation")."</th>".
           "<th>".locale_string("percentage")."</th>".
-          "<th>".locale_string("lane_rate")."</th>".
+          "<th class=\"separator\">".locale_string("lane_rate")."</th>".
           "</tr></thead>";
 
   if (!$isrank) {
@@ -84,14 +102,14 @@ function rg_generator_hph_profile($table_id, &$context, &$context_wrs, $srcid, $
     $res .= "<tr>".
             ($heroes_flag ? "<td>".hero_portrait($elid_op)."</td>" : "").
             "<td>".($heroes_flag ? hero_name($elid_op) : player_name($elid_op))."</td>".
-            ($isrank ? "<td>".number_format($data['rank'], 2)."</td>" : "").
-            "<td>".number_format($data['matches'])."</td>".
+            ($isrank ? "<td>".number_format($data['rank'], 2)."</td><td>".number_format($data['arank'], 2)."</td>" : "").
+            "<td class=\"separator\">".number_format($data['matches'])."</td>".
             "<td>".number_format($data['winrate']*100,2)."%</td>".
             "<td>".number_format(($data['winrate'] - $dt['wr'])*100,2)."%</td>".
-            "<td>".number_format($data['exp'])."</td>".
+            "<td class=\"separator\">".number_format($data['exp'])."</td>".
             "<td>".number_format($data['matches'] - $data['exp'])."</td>".
             "<td>".number_format(100*($data['matches'] - $data['exp'])/$data['matches'], 2)."%</td>".
-            "<td>".number_format($data['lane_rate']*100, 2)."%</td>".
+            "<td class=\"separator\">".number_format($data['lane_rate']*100, 2)."%</td>".
             "</tr>";
   }
 
