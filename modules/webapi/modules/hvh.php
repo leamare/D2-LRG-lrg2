@@ -20,6 +20,7 @@ $endpoints['hvh'] = function($mods, $vars, &$report) {
       return positions_ranking_sort($a, $b, $dt['ms']);
     };
     uasort($pvp_context, $compound_ranking_sort);
+    $pvp_context_cpy = $pvp_context;
   
     $increment = 100 / sizeof($pvp_context); $i = 0;
   
@@ -31,14 +32,29 @@ $endpoints['hvh'] = function($mods, $vars, &$report) {
         $pvp_context[$elid]['rank'] = round(100 - $increment*$i++, 2);
       $last = $el;
       $last_rank = $pvp_context[$elid]['rank'];
+      
+      $pvp_context_cpy[$elid]['winrate'] = 1-$pvp_context_cpy[$elid]['winrate'];
+    }
+
+    unset($last);
+
+    uasort($pvp_context_cpy, $compound_ranking_sort);
+    $i = 0;
+  
+    foreach ($pvp_context_cpy as $elid => $el) {
+      if(isset($last) && $el == $last) {
+        $i++;
+        $pvp_context[$elid]['arank'] = $last_rank;
+      } else
+        $pvp_context[$elid]['arank'] = round(100 - $increment*$i++, 2);
+      $last = $el;
+      $last_rank = $pvp_context[$elid]['arank'];
 
       if (isset($el['expectation'])) {
         $pvp_context[$elid]['deviation'] = $el['matches']-$el['expectation'];
         $pvp_context[$elid]['deviation_pct'] = round(($el['matches']-$el['expectation'])*100/$el['matches'], 2);
       }
     }
-
-    
   
     unset($last);
   }
