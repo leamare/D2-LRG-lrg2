@@ -37,6 +37,29 @@ function rg_generator_summary($table_id, &$context, $hero_flag = true, $rank = f
     }
     unset($last);
 
+    $aranks = [];
+    $context_copy = $context;
+    foreach ($context_copy as &$data) {
+      $data['winrate_s'] = 1-$data['winrate_s'];
+    }
+
+    uasort($context_copy, function($a, $b) use ($total_matches) {
+      return positions_ranking_sort($a, $b, $total_matches);
+    });
+
+    $i = 0;
+
+    foreach ($context_copy as $id => $el) {
+      if(isset($last) && $el['matches_s'] == $last['matches_s'] && $el['winrate_s'] == $last['winrate_s']) {
+        $i++;
+        $aranks[$id] = $last_rank;
+      } else
+        $aranks[$id] = 100 - $increment*$i++;
+      $last = $el;
+      $last_rank = $aranks[$id];
+    }
+    unset($last);
+
     unset($context_copy);
   }
 
@@ -45,7 +68,14 @@ function rg_generator_summary($table_id, &$context, $hero_flag = true, $rank = f
           "<th data-sortInitialOrder=\"asc\">".locale_string($hero_flag ? "hero" : "player")."</th>";
 
   for($k=0, $end=sizeof($keys); $k < $end; $k++) {
-    if ($k == 2 && $rank) $res .= "<th>".locale_string("rank")."</th>";
+    if ($k == 2) {
+      if ($rank) {
+        $res .= "<th>".locale_string("rank")."</th>";
+        $res .= "<th>".locale_string("antirank")."</th>";
+      }
+      $res .= "<th class=\"separator\">".locale_string($keys[$k])."</th>";
+      continue;
+    }
     $res .= "<th>".locale_string($keys[$k])."</th>";
   }
   $res .= "</tr></thead><tbody>";
@@ -56,10 +86,12 @@ function rg_generator_summary($table_id, &$context, $hero_flag = true, $rank = f
             "</td>".
             "<td>".$el['matches_s']."</td>".
             "<td>".number_format($el['winrate_s']*100,1)."%</td>".
-            ($rank ? "<td>".number_format($ranks[$id],2)."</td>" : "");
+            ($rank ? "<td>".number_format($ranks[$id],2)."</td>"."<td>".number_format($aranks[$id],2)."</td>" : "");
 
     for($k=2, $end=sizeof($keys); $k < $end; $k++) {
-      $res .= "<td>";
+      if ($k == 2) $res .= "<td class=\"separator\">";
+      else $res .= "<td>";
+
       if (strpos($keys[$k], "duration") !== FALSE || strpos($keys[$k], "_len") !== FALSE) {
         $res .= convert_time($el[$keys[$k]]);
       } else if(is_numeric($el[$keys[$k]])) {

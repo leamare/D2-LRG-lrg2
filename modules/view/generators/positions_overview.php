@@ -66,6 +66,30 @@ function rg_generator_positions_overview($table_id, &$context, $hero_flag = true
       unset($last);
       unset($context_copy);
 
+      // $antiranks = [];
+      // $context_copy = $context[$i][$j];
+      // foreach($context_copy as &$el)  {
+      //   $el['winrate_s'] = 1-$el['winrate_s'];
+      // }    
+  
+      // uasort($context_copy, function($a, $b) use ($total_matches) {
+      //   return positions_ranking_sort($a, $b, $total_matches);
+      // });
+  
+      // $increment = 100 / sizeof($context_copy); $k = 0;
+  
+      // foreach ($context_copy as $id => $el) {
+      //   if(isset($last) && $el['matches_s'] == $last['matches_s'] && $el['winrate_s'] == $last['winrate_s']) {
+      //     $k++;
+      //     $antiranks[$i][$j][$id] = $last_rank;
+      //   } else
+      //     $antiranks[$i][$j][$id] = 100 - $increment*$k++;
+      //   $last = $el;
+      //   $last_rank = $antiranks[$i][$j][$id];
+      // }
+      // unset($last);
+      // unset($context_copy);
+
       foreach($context[$i][$j] as $id => $el) {
         if (!isset($overview[ $id ])) $overview[ $id ] = $position_overview_template;
 
@@ -73,6 +97,7 @@ function rg_generator_positions_overview($table_id, &$context, $hero_flag = true
         $overview[ $id ]["$i.$j"]['wr'] = $el['winrate_s'];
         $overview[ $id ]["total"] += $el['matches_s'];
         $overview[ $id ]["$i.$j"]['rank'] = $ranks[$i][$j][$id]; 
+        // $overview[ $id ]["$i.$j"]['antirank'] = $antiranks[$i][$j][$id]; 
       }
 
       //if (!$i) { break; }
@@ -99,6 +124,7 @@ function rg_generator_positions_overview($table_id, &$context, $hero_flag = true
     $res .= "<th colspan=\"4\" class=\"separator\" data-sorter=\"digit\">".locale_string("position_$k")."</th>";
     $heroline .= "<th class=\"separator\" data-sorter=\"digit\">".locale_string("matches_s")."</th>".
                   "<th data-sorter=\"digit\">".locale_string("rank")."</th>".
+                  // "<th data-sorter=\"digit\">".locale_string("antirank")."</th>".
                   "<th data-sorter=\"digit\">".locale_string("ratio_pos")."</th>".
                   "<th data-sorter=\"digit\">".locale_string("winrate_s")."</th>";
   }
@@ -119,6 +145,7 @@ function rg_generator_positions_overview($table_id, &$context, $hero_flag = true
       } else {
         $res .= "<td class=\"separator\">".$v['matches']."</td>".
                     "<td>".number_format($v['rank'],1)."</td>".
+                    // "<td>".number_format($v['antirank'],1)."</td>".
                     "<td>".number_format($v['matches']*100/$el['total'],1)."%</td>".
                     "<td>".number_format($v['wr']*100,1)."%</td>";
       }
