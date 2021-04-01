@@ -50,6 +50,7 @@ function rg_generator_pvp_profile($table_id, &$pvp_context, &$context_wrs, $srci
       return positions_ranking_sort($a, $b, $dt['ms']);
     };
     uasort($pvp_context, $compound_ranking_sort);
+    $pvp_context_cpy = $pvp_context;
   
     $increment = 100 / sizeof($pvp_context); $i = 0;
   
@@ -61,6 +62,23 @@ function rg_generator_pvp_profile($table_id, &$pvp_context, &$context_wrs, $srci
         $pvp_context[$elid]['rank'] = round(100 - $increment*$i++, 2);
       $last = $el;
       $last_rank = $pvp_context[$elid]['rank'];
+
+      $pvp_context_cpy[$elid]['winrate'] = 1-$pvp_context_cpy[$elid]['winrate'];
+    }
+  
+    unset($last);
+
+    uasort($pvp_context_cpy, $compound_ranking_sort);
+    $i = 0;
+  
+    foreach ($pvp_context_cpy as $elid => $el) {
+      if(isset($last) && $el == $last) {
+        $i++;
+        $pvp_context[$elid]['arank'] = $last_rank;
+      } else
+        $pvp_context[$elid]['arank'] = round(100 - $increment*$i++, 2);
+      $last = $el;
+      $last_rank = $pvp_context[$elid]['arank'];
     }
   
     unset($last);
@@ -72,10 +90,10 @@ function rg_generator_pvp_profile($table_id, &$pvp_context, &$context_wrs, $srci
   $res .= "<thead><tr>".
           ($heroes_flag && !$i++ ? "<th width=\"1%\"></th>" : "").
           "<th data-sortInitialOrder=\"asc\">".locale_string("opponent")."</th>".
-          ($isrank ? "<th>".locale_string("rank")."</th>" : "").
-          "<th>".locale_string("winrate")."</th>".
+          ($isrank ? "<th>".locale_string("rank")."</th><th>".locale_string("antirank")."</th>" : "").
+          "<th class=\"separator\">".locale_string("winrate")."</th>".
           (!$nodiff ? "<th>".locale_string("diff")."</th>" : "").
-          "<th>".locale_string("matches")."</th>".
+          "<th class=\"separator\">".locale_string("matches")."</th>".
           "<th>".locale_string("won")."</th>".
           "<th>".locale_string("lost")."</th>".
           ($exp ? "<th class=\"separator\">".locale_string("pair_expectation")."</th>".
@@ -106,10 +124,10 @@ function rg_generator_pvp_profile($table_id, &$pvp_context, &$context_wrs, $srci
                       "").">".
             ($heroes_flag ? "<td>".hero_portrait($elid_op)."</td>" : "").
             "<td>".($heroes_flag ? hero_name($elid_op) : player_name($elid_op))."</td>".
-            ($isrank ? "<td>".number_format($data['rank'], 2)."</td>" : "").
-            "<td>".number_format($data['winrate']*100,2)."%</td>".
+            ($isrank ? "<td>".number_format($data['rank'], 2)."</td><td>".number_format($data['arank'], 2)."</td>" : "").
+            "<td class=\"separator\">".number_format($data['winrate']*100,2)."%</td>".
             (!$nodiff ? "<td>".number_format($data['diff']*100,2)."%</td>" : "").
-            "<td>".$data['matches']."</td>".
+            "<td class=\"separator\">".$data['matches']."</td>".
             "<td>".$data['won']."</td>".
             "<td>".$data['lost']."</td>".
             ($exp ? "<td class=\"separator\">".number_format($data['expectation'], 0)."</td>".

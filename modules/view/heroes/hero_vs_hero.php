@@ -43,7 +43,7 @@ function rg_view_generate_heroes_hvh() {
       }
 
 
-      $res["heroid".$hid] = "<div class=\"content-text\">".locale_string("desc_heroes_hvh")."</div>";
+      // $res["heroid".$hid] = "<div class=\"content-text\">".locale_string("desc_heroes_hvh")."</div>";
       $res["heroid".$hid] .= "<div class=\"content-text\">".locale_string("desc_heroes_hvh_2")."</div>";
       $res["heroid".$hid] .= rg_generator_pvp_profile("hero-hvh-$hid", $hvh[$hid], $report['pickban'], $hid);
     }
