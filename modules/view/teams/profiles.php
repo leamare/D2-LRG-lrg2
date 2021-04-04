@@ -1,7 +1,7 @@
 <?php
 
 function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "") {
-  global $mod, $root, $strings, $unset_module, $report, $icons_provider;
+  global $mod, $root, $strings, $unset_module, $report, $icons_provider, $lg_version;
   $res = [];
   if($mod == substr($context_mod, 0, strlen($context_mod)-1)) $unset_module = true;
 
@@ -331,6 +331,14 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
 
         if (isset($context[$tid]['players_draft'])) {
             $res["team".$tid]['players']['draft'] = "";
+
+            if (compare_release_ver($report['ana_version'], [ 2, 18, 0, 0, 0 ]) < 0) {
+              foreach ($context[$tid]['players_draft_pb'] as $id => $el) {
+                if (!in_array($id, $context[$tid]['active_roster'])) {
+                  unset($context[$tid]['players_draft_pb'][$id]);
+                }
+              }
+            }
 
             if(check_module($context_mod."team".$tid."-players-draft")) {
               $res["team".$tid]['players']['draft'] = rg_generator_draft("team$tid-players-draft",

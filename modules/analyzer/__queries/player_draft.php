@@ -45,7 +45,7 @@ function rg_query_player_draft(&$conn, $cluster = null, $team = null) {
 function rg_query_player_draft_pickban(&$conn, $team = null) {
   $sql = "SELECT matchlines.playerid, count(distinct matches.matchid), SUM(NOT matches.radiantWin XOR teams_matches.is_radiant)
     FROM matches JOIN matchlines ON matchlines.matchid = matches.matchid ".
-    ($team !== null ? "JOIN teams_matches ON teams_matches.matchid = matches.matchid
+    ($team !== null ? "JOIN teams_matches ON teams_matches.matchid = matches.matchid AND matchlines.isradiant = teams_matches.is_radiant 
       WHERE teams_matches.teamid = $team" : "").
     " GROUP BY matchlines.playerid;";
 

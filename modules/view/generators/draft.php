@@ -16,19 +16,20 @@ function rg_generator_draft($table_id, &$context_pickban, &$context_draft, $cont
     if(!isset($context_draft[$i])) continue;
     foreach($context_draft[$i] as $stage_num => $stage) {
       if ($stage_num > $max_stage) $max_stage = $stage_num;
-      foreach($stage as $el) {
-        if(!isset($draft[ $el[$id_name] ])) {
-          if($stage_num > 1) {
-            for($j=1; $j<$stage_num; $j++) {
-              $draft[ $el[$id_name] ][$j] = array ("pick" => 0, "pick_wr" => 0, "ban" => 0, "ban_wr" => 0 );
-            }
-          }
-        }
+      
+      foreach($context_pickban as $id => $pbel) {
+        if(empty($draft[ $id ])) $draft[ $id ] = [];
+        if(empty($draft[ $id ][$stage_num]))
+          $draft[ $id ][$stage_num] = array ("pick" => 0, "pick_wr" => 0, "ban" => 0, "ban_wr" => 0 );
+      }
 
-        if(!isset($draft[ $el[$id_name] ][$stage_num]))
-          $draft[ $el[$id_name] ][$stage_num] = array ("pick" => 0, "pick_wr" => 0, "ban" => 0, "ban_wr" => 0 );
-        $draft[ $el[$id_name] ][$stage_num][$type] = $el['matches'];
-        $draft[ $el[$id_name] ][$stage_num][$type."_wr"] = $el['winrate'];
+      foreach($stage as $el) {
+        $id = $el[ $id_name ];
+
+        if (!empty($el)) {
+          $draft[ $id ][$stage_num][$type] = $el['matches'];
+          $draft[ $id ][$stage_num][$type."_wr"] = $el['winrate'];
+        }
       }
     }
   }
@@ -84,7 +85,8 @@ function rg_generator_draft($table_id, &$context_pickban, &$context_draft, $cont
     }
     uasort($scores, $compound_ranking_sort);
 
-    $increment = 100 / sizeof($scores); $j = 0;
+    if (!empty($scores))
+      $increment = 100 / sizeof($scores); $j = 0;
 
     foreach ($scores as $id => $el) {
       if(isset($last) && $el == $last) {
