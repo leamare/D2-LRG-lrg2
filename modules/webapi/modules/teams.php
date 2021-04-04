@@ -131,6 +131,19 @@ $endpoints['teams'] = function($mods, $vars, &$report) use (&$endpoints) {
       $res['unique_heroes'] = null;
     }
 
+    $pb = rg_create_team_pickban_data(
+      $report['teams'][ $vars['team'] ]['pickban'], 
+      $report['teams'][ $vars['team'] ]['pickban_vs'] ?? [], 
+      $report['teams'][ $vars['team'] ]['matches_total']
+    );
+
+    $res['pickban'] = [];
+    $keys = [ 'rank', 'arank', 'rank_vs', 'arank_vs' ];
+    foreach ($keys as $k) {
+      uasort($pb, function($a, $b) use ($k) { return $b[$k] <=> $a[$k]; });
+      $res['pickban'][$k] = array_slice($pb, 0, 7, true);
+    }
+
     return $res;
   }
 
