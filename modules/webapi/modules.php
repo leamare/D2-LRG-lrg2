@@ -5,6 +5,7 @@ $endpoints = [];
 
 if (!empty($report)) {
   include_once(__DIR__ . "/../../modules/view/__post_load.php");
+  include_once(__DIR__ . "/../../modules/view/generators/pickban_teams.php");
 
   if(empty($mod)) $mod = "";
 

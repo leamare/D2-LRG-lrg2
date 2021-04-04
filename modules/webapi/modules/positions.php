@@ -113,4 +113,29 @@ function positions_ranking(&$context, $total_matches) {
       $last_rank = $context[$id]['rank'];
     }
   }
+
+  $last = null;
+
+  foreach($context_copy as &$data) {
+    $data['winrate_s'] = 1-$data['winrate_s'];
+  }
+
+  uasort($context_copy, function($a, $b) use ($total_matches) {
+    return positions_ranking_sort($a, $b, $total_matches);
+  });
+
+  if (!empty($context_copy)) {
+    $i = 0;
+
+    foreach ($context_copy as $id => $el) {
+      if(isset($last) && $el['matches_s'] == $last['matches_s'] && $el['winrate_s'] == $last['winrate_s']) {
+        $i++;
+        $context[$id]['arank'] = $last_rank;
+      } else {
+        $context[$id]['arank'] = round(100 - $increment*$i++, 2);
+      }
+      $last = $el;
+      $last_rank = $context[$id]['arank'];
+    }
+  }
 }
