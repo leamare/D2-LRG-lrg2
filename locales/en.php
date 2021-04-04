@@ -74,6 +74,10 @@ $strings['en'] = [
   "std_dev" => "Std.dev",
   "pickrate" => "Pickrate",
   "banrate" => "Banrate",
+  "antirank" => "Rev-Rank",
+  "arank" => "R-Rank",
+  "team" => "Team",
+  "enemy" => "Enemy",
 
   "trends_winrate" => "Winrate",
   "trends_first" => "First",
@@ -245,6 +249,8 @@ $strings['en'] = [
   "matches_total" => "Matches",
   "matches_picked" => "Picked",
   "matches_banned" => "Banned",
+  "matches_banned_vs" => "Ban VS",
+  "matches_picked_vs" => "Pick VS",
 
   "winrate_picked" => "Winrate picked",
   "winrate_banned" => "Winrate banned",
@@ -404,6 +410,12 @@ $strings['en'] = [
   "longest_match" => "Longest match",
   "shortest_match" => "Shortest match",
 
+  // teams profile captions
+  "team_best_ranked_picks" => "Most effective picks by team",
+  "team_aranked_picks" => "Most frequent, least effective picks by team",
+  "team_best_ranked_bans" => "Most effective picks against the team",
+  "team_aranked_bans" => "Most frequent, least effective against the team",
+
   // modules descriptions
   "desc_overview" => "This page only contains general information about league and small amount of available stats. Look throughout other sections for advanced data.",
   "desc_records" => "This section contains data about highest or lowest values across all matches.",
@@ -421,7 +433,7 @@ $strings['en'] = [
   "desc_heroes_trios" => "This section contains stats for most common hero trios. Winrate difference is calculated based on average expected win rate of the heroes together. Expected matches is calculated number of matches the heroes would be picked together randomly based on their pick rates. Deviation is difference between expected number of matches and the actual number (higher number is better and means the heroes are usually picked together intentionally, negative values mean otherwise). Percentage is how much of actual matches is the deviation number. Minimum amount of matches for trios is set to %liml%.",
   "desc_heroes_lane_combos" => "This section contains stats for most common hero pairs on a same lane. Minimum amount of matches for pairs is set to %liml%.",
   "desc_heroes_hvh" => "Choose a hero to see his performance against other heroes",
-  "desc_heroes_hvh_2" => "The page shows a hero's winrates against certain enemies, as well as winrate advantage (difference in winrate compared to overall value)",
+  "desc_heroes_hvh_2" => "The page shows a hero's winrates against certain enemies, as well as winrate advantage (difference in winrate compared to overall value). Higher rank and winrate mean opponent is easier for the hero, higher R-Rank means opponent is picked often and is less effective against the hero.",
   "desc_players_avg" => "This section contains highest average values among players. Minimum amount of matches is set to %lim%.",
   "desc_players_summary" => "This table contains players' average stats and their most common positions.",
   "desc_players_positions" => "This section contains stats for players' performance on various positions. Positions are determined based on players performance (core or support) and lane. Supports across all lanes (including roamers) are considered as one role. Lanes and positions may not be accurate.",
@@ -444,8 +456,12 @@ $strings['en'] = [
   "desc_heroes_counters_pairs_graph" => "This page shows counter pick connections between heroes, based on the most popular counter-pairs. See pairs section for more detailed data about winrates and deviations. Minimum match count for a pair is set to %lim%, minimum deviation is 0.",
   "desc_heroes_hph" => "Choose a hero to see his performance with other heroes",
   "pairs_desc" => "Winrate difference is calculated relative to selected hero's win rate. Expected matches is calculated number of matches the heroes would be picked together randomly based on their pick rates. Deviation is difference between expected number of matches and the actual number (higher number is better and means the heroes are usually picked together intentionally, negative values mean otherwise). Percentage is how much of actual matches is the deviation number.",
+  "pairs_desc_2" => "Higher Rank means that the pair of heroes is more effective together. Higher Rev-Rank means that the pair is frequently picked together, but has low efficiency.",
   "desc_heroes_wrtimings" => "Here you can see how winrates of the heroes change with match duration. Early winrate is calculated based on top 25% shortest games (duration less than Q1 - Early duration) and late winrate is based on top 25% longest games (duration higher than Q3 - Late duration). Gradient represents how chances to win change with every minute of the game.",
   "desc_heroes_wrplayers" => "Here you can see how winrate of a player on a hero changes with more experience (number of matches played). Less experienced players had Q1 and less matches, more experienced players had Q3 and more matches. Winrate gradient represents winrate increase for every match played, winrate difference is the raw difference between winrates of less and more experienced players.",
+  "desc_pickban_ranks" => "Rank is used to sort heroes by winrate, taking number of their picks and bans into account. Higher rank means the hero is stronger. Rev-Rank (Reverse Rank) is used to show the least effective heroes with the most number of matches.",
+  "desc_pickban_teams" => "Team pickban stats include drafting stats of the team, as well as stats of their opponents (most picked and banned heroes against the team). Ranks are using team's picks and enemy bans stats (and vice versa). Higher team's rank means the hero is strong for the team, higher enemy's rank means the hero is stronger against the team. R-Ranks show the least effective heroes among the most frequent ones.",
+  "desc_pickban_teams_profile" => "This section lists the most and least effective heroes of the team and against it. See Picks and Bans section for more details.",
 
   "items_most_impactful_desc" => "In the items component you may see various items stats. Overview shows top of the most impactful items (in general and for a specific hero) based on their effect on winrate, compared to games when the item wasn't purchased, with the highest positive and negative impacts respectively. Notable timings section shows earliest purchase timings for item-hero pairs with the highest winrate gradient per minute.",
   "items_stats_desc" => "Winrate shifts are differences in winrate compared to the item's winrate overall. Values are for when the item wasn't bought, early (Q1) and late (Q3) timings (higher is better). Winrate gradient per minute shows how winrate changes with every minute of the item's delayed purchase timing. Item timings values can be used to restore the normal distribution chart, where Q1, median and Q3 mean the first, second and third quantiles respectively.",
