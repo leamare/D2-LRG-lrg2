@@ -27,6 +27,7 @@ if (!empty($report)) {
   include_once(__DIR__ . "/modules/hvh.php");
   include_once(__DIR__ . "/modules/hph.php");
   include_once(__DIR__ . "/modules/summary.php");
+  include_once(__DIR__ . "/modules/sides.php");
   include_once(__DIR__ . "/modules/matchcards.php");
   include_once(__DIR__ . "/modules/teams_raw.php");
   include_once(__DIR__ . "/modules/teams.php");

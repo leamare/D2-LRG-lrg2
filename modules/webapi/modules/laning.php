@@ -20,6 +20,10 @@ $endpoints['laning'] = function($mods, $vars, &$report) {
   foreach ($ids as $id) {
     $mm = 0;
     foreach ($context[$id] as $k => $h) {
+      if (empty($h)) {
+        unset($context[$id][$k]);
+        continue;
+      }
       if ($h['matches'] > $mm) $mm = $h['matches'];
       if (!isset($h['matches']) || $h['matches'] == 0) unset($context[$id][$k]);
     }

@@ -17,7 +17,14 @@ $endpoints['sides'] = function($mods, $vars, &$report) {
     throw new \Exception("No module specified");
   }
 
-  $res = $context[$type.'_sides'];
+  foreach($context[$type.'_sides'] as $i => $side) {
+    $res[$i] = [];
+    foreach($side as $item) {
+      $id = $item[$type.'id'];
+      unset($item[$type.'id']);
+      $res[$i][ $id ] = $item;
+    }
+  }
 
   return $res;
 };

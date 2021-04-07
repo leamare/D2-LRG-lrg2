@@ -37,7 +37,7 @@ $endpoints['draft'] = function($mods, $vars, &$report) {
     $context_total_matches = $report["random"]["matches_total"];
   }
 
-  if (is_wrapped($context)) {
+  if (isset($context) && is_wrapped($context)) {
     $context = unwrap_data($context);
   }
   if (is_wrapped($context_draft)) {
