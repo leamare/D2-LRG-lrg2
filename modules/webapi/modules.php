@@ -38,6 +38,7 @@ if (!empty($report)) {
   include_once(__DIR__ . "/modules/wrtimings.php");
   include_once(__DIR__ . "/modules/wrplayers.php");
   include_once(__DIR__ . "/modules/items.php");
+  include_once(__DIR__ . "/modules/profiles.php");
 
   $endpoints['__fallback'] = function() use (&$endpoints) {
     return $endpoints['info'];
@@ -84,9 +85,9 @@ if (empty($endp_name)) {
 } else $endp = $endpoints[$endp_name];
 try {
   $result = $endp($modline, $vars, $report);
-} catch (\Throwable $e) {
+} catch (\Exception $e) {
   if (!isset($resp['errors'])) $resp['errors'] = [];
-    $resp['errors'][] = $e->getMessage();
+    $resp['errors'][] = $e->getMessage().' ('.$e->getFile().':'.$e->getLine().')';
 }
 
 if (isset($result['__endp'])) {

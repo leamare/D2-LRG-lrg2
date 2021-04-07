@@ -244,6 +244,9 @@ It’s fairly simple to explain. It doesn’t have a structure and is used in `s
 * `heroes/daily_wr`
 * `heroes/wrtimings`
 * `heroes/wrplayers`
+* `heroes/profiles` - requires `heroid`
+* `players/profiles` - requires `playerid`
+* `items/profiles` - requires `itemid`
 
 ### Non-report endpoints
 
