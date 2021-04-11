@@ -3,7 +3,7 @@ include_once($root."/modules/view/functions/hero_name.php");
 include_once($root."/modules/view/functions/player_name.php");
 include_once($root."/modules/view/functions/ranking.php");
 
-function rg_generator_pickban($table_id, &$context, &$context_main, $heroes_flag = true) {
+function rg_generator_pickban($table_id, &$context, &$context_main, $heroes_flag = true, $roles = false) {
   if(!sizeof($context)) return "";
 
   $context_total_matches = $context_main['matches'] ?? $context_main["matches_total"] ?? 0;
@@ -37,9 +37,12 @@ function rg_generator_pickban($table_id, &$context, &$context_main, $heroes_flag
 
   $res .= "<div class=\"content-text\">".locale_string("desc_pickban_ranks")."</div>";
 
+  if ($roles) $res .= "<div class=\"content-text\">".locale_string("desc_pickban_roles")."</div>";
+
   $res .=  "<table id=\"$table_id\" class=\"list sortable\"><thead><tr>".
             ($heroes_flag ? "<th class=\"sorter-no-parser\" width=\"1%\"></th>" : "").
             "<th data-sortInitialOrder=\"asc\">".locale_string($heroes_flag ? "hero" : "player")."</th>".
+            ($roles ? "<th>".locale_string("position")."</th>" : "").
             "<th>".locale_string("matches_total")."</th>".
             "<th class=\"separator\">".locale_string("contest_rate")."</th>".
             "<th>".locale_string("rank")."</th>".
@@ -101,12 +104,17 @@ function rg_generator_pickban($table_id, &$context, &$context_main, $heroes_flag
   unset($context_copy);
 
   foreach($context as $id => $el) {
+    $_id = $id;
+    if ($roles) {
+      [ $id, $role ] = explode('|', $id);
+    }
     $res .=  "<tr>".
             ($heroes_flag ? "<td>".hero_portrait($id)."</td><td>".hero_name($id)."</td>" : "<td>".player_name($id)."</td>").
+            ($roles ? "<td>".locale_string("position_$role")."</td>" : "").
             "<td>".$el['matches_total']."</td>".
             "<td class=\"separator\">".number_format($el['matches_total']/$context_total_matches*100,2)."%</td>".
-            "<td>".number_format($ranks[$id],2)."</td>".
-            "<td>".number_format($antiranks[$id],2)."</td>".
+            "<td>".number_format($ranks[$_id],2)."</td>".
+            "<td>".number_format($antiranks[$_id],2)."</td>".
             "<td class=\"separator\">".$el['matches_picked']."</td>".
             // "<td>".number_format($el['matches_picked']/$context_total_matches*100,2)."%</td>".
             "<td>".number_format($el['winrate_picked']*100,2)."%</td>".
