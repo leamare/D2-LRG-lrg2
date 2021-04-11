@@ -11,5 +11,10 @@ $endpoints['wrplayers'] = function($mods, $vars, &$report) {
     $report['hero_winrate_spammers'] = unwrap_data($report['hero_winrate_spammers']);
   }
 
+  foreach ($report['hero_winrate_spammers'] as $hid => $data) {
+    $report['hero_winrate_spammers'][$hid]['diff'] = round($data['q3_wr_avg'] - $data['q1_wr_avg'], 5);
+    $report['hero_winrate_spammers'][$hid]['matches_total'] = $report['pickban'][$hid]['matches_picked'];
+  }
+
   return $report['hero_winrate_spammers'];
 };
