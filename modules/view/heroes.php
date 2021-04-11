@@ -14,8 +14,10 @@ if (isset($report['averages_heroes']) )
 if (isset($report['draft']))
   include("heroes/draft.php");
 
-if (isset($report['hero_positions']))
+if (isset($report['hero_positions'])) {
   include("heroes/positions.php");
+  include("heroes/rolepickban.php");
+}
 
 if (isset($report['hero_laning']))
   include("heroes/laning.php");
@@ -76,6 +78,9 @@ function rg_view_generate_heroes() {
   if (isset($report['hero_positions'])) {
     if(check_module($parent."positions")) {
       $res['positions'] = rg_view_generate_heroes_positions();
+    }
+    if(check_module($parent."rolepickban")) {
+      $res['rolepickban'] = rg_view_generate_heroes_rolepickban();
     }
   }
   if (isset($report['hero_laning'])) {

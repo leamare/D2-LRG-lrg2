@@ -7,6 +7,7 @@ include_once($root."/modules/view/functions/item_name.php");
 include($root."/modules/view/items/overview.php");
 if (isset($report['items']['stats'])) {
   include($root."/modules/view/items/stats.php");
+  include($root."/modules/view/items/icritical.php");
   include($root."/modules/view/items/boxplots.php");
   include($root."/modules/view/items/heroes.php");
   include($root."/modules/view/items/hboxplots.php");
@@ -36,6 +37,9 @@ function rg_view_generate_items() {
   if (isset($report['items']['stats'])) {
     if (check_module($parent."stats")) {
       $res['stats'] = rg_view_generate_items_stats();
+    }
+    if (check_module($parent."icritical")) {
+      $res['icritical'] = rg_view_generate_items_critical();
     }
     if (check_module($parent."boxplots")) {
       $res['boxplots'] = rg_view_generate_items_boxplots();

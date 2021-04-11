@@ -277,6 +277,8 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
             }
           }
         }
+
+        // $res["team".$tid]['heroes']['rolepickban'] = [];
       }
       if (isset($context[$tid]['hero_graph']) && $report['settings']['heroes_combo_graph']) {
         $res["team".$tid]['heroes']['meta_graph'] = "";
