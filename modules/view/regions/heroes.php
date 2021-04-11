@@ -57,6 +57,12 @@ if(isset($reg_report['hero_positions'])) {
   if(check_module($parent_mod."positions")) {
     $res["region".$region]['heroes']['positions'] = rg_view_generate_regions_heroes_positions($region, $reg_report, $parent_mod);
   }
+
+  include_once("heroes/rolepickban.php");
+  $res["region".$region]['heroes']["rolepickban"] = "";
+  if(check_module($parent_mod."rolepickban")) {
+    $res["region".$region]['heroes']['rolepickban'] = rg_view_generate_regions_heroes_rolepickban($region, $reg_report);
+  }
 }
 
 if(isset($reg_report['hero_summary'])) {
