@@ -2,6 +2,7 @@
 
 include_once(__DIR__ . "/items/overview.php");
 include_once(__DIR__ . "/items/stats.php");
+include_once(__DIR__ . "/items/icritical.php");
 include_once(__DIR__ . "/items/heroes.php");
 include_once(__DIR__ . "/items/icombos.php");
 include_once(__DIR__ . "/items/progression.php");
@@ -26,6 +27,9 @@ $endpoints['items'] = function($mods, $vars, &$report) use (&$endpoints) {
   } else if (in_array('progression', $mods) || in_array('proglist', $mods)) {
     $res = $endpoints['items-progression']($mods, $vars, $report);
     $res['__endp'] = "items-progression";
+  } else if (in_array('icritical', $mods)) {
+    $res = $endpoints['items-critical']($mods, $vars, $report);
+    $res['__endp'] = "items-critical";
   } else {
     $res = $endpoints['items-overview']($mods, $vars, $report);
     $res['__endp'] = "items-overview";
