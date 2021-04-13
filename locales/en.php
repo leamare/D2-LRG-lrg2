@@ -140,6 +140,8 @@ $strings['en'] = [
   "proglist" => "Progression pairs",
   "progression" => "Build progression tree",
   "irecords" => "Timings records",
+  "icritical" => "Critical timings",
+  "rolepickban" => "Ranking with roles",
   "boxplots" => "Timings Boxplots",
   "heroboxplots" => "Hero Timings Boxplots",
   "daily_wr" => "Trends",
@@ -314,6 +316,7 @@ $strings['en'] = [
   "item_time_max" => "Max",
   "item_time_std_dev" => "Std.Dev",
   "item_time_window" => "Window",
+  "item_time_critical" => "Critical",
   "best_timing_record" => "Games with the best timings",
   "avg_timing" => "Average timing",
 
@@ -462,6 +465,7 @@ $strings['en'] = [
   "desc_pickban_ranks" => "Rank is used to sort heroes by winrate, taking number of their picks and bans into account. Higher rank means the hero is stronger. Rev-Rank (Reverse Rank) is used to show the least effective heroes with the most number of matches.",
   "desc_pickban_teams" => "Team pickban stats include drafting stats of the team, as well as stats of their opponents (most picked and banned heroes against the team). Ranks are using team's picks and enemy bans stats (and vice versa). Higher team's rank means the hero is strong for the team, higher enemy's rank means the hero is stronger against the team. R-Ranks show the least effective heroes among the most frequent ones.",
   "desc_pickban_teams_profile" => "This section lists the most and least effective heroes of the team and against it. See Picks and Bans section for more details.",
+  "desc_pickban_roles" => "Number of bans is calculated approximately based on ratio of matches on the position to all matches of the hero.",
 
   "items_most_impactful_desc" => "In the items component you may see various items stats. Overview shows top of the most impactful items (in general and for a specific hero) based on their effect on winrate, compared to games when the item wasn't purchased, with the highest positive and negative impacts respectively. Notable timings section shows earliest purchase timings for item-hero pairs with the highest winrate gradient per minute.",
   "items_stats_desc" => "Winrate shifts are differences in winrate compared to the item's winrate overall. Values are for when the item wasn't bought, early (Q1) and late (Q3) timings (higher is better). Winrate gradient per minute shows how winrate changes with every minute of the item's delayed purchase timing. Item timings values can be used to restore the normal distribution chart, where Q1, median and Q3 mean the first, second and third quantiles respectively.",
@@ -473,6 +477,7 @@ $strings['en'] = [
   "items_progression_desc" => "Progression tree visually shows progression pairs. Size of the item represents number of purchases, node's border color represents winrate (orange is closer to zero, blue is closer to 100%). Arrow shows the order in which the items were purchased, its thickness represents number of purchases in this order and the color is the progression pair's winrate. Every level of the tree (vertically) represents 6 minutes of the a game. You can hover over an item/edge for detailed information and click to highlights its connections.",
   "items_records_overview_desc" => "In the records overview you can see the earliest item purchases, based on the difference compared to the item's median purchase time, with item purchases in the third quantile.",
   "items_records_desc" => "There you can see all the earliest purchase times for the chosen item, as well as difference in time, compared to the item's median purchase time. Records are only shown for heroes with the number of purchases for the chosen item higher than the third quantile.",
+  "items_stats_critical_desc" => "This section contains top 75% of most purchased items with negative gradient (sensitive to time of purchase) for selected hero. Q1 is early-average timing, Critical is the calculated time of purchase after which the item goes below 50% winrate. Window is difference between early and critical timings.",
 
   // service info
   "limiter_h" => "Higher limiter",
