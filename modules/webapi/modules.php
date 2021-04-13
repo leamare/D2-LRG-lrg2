@@ -22,6 +22,7 @@ if (!empty($report)) {
   include_once(__DIR__ . "/modules/draft.php");
   include_once(__DIR__ . "/modules/vsdraft.php");
   include_once(__DIR__ . "/modules/positions.php");
+  include_once(__DIR__ . "/modules/rolepickban.php");
   include_once(__DIR__ . "/modules/positions_matches.php");
   include_once(__DIR__ . "/modules/pvp.php");
   include_once(__DIR__ . "/modules/hvh.php");
