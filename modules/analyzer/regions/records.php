@@ -69,10 +69,15 @@ $sql .= "SELECT \"damage_taken\" cap, matches.matchid, ml.damage_taken, ml.playe
         WHERE matches.cluster IN (".implode(",", $clusters).")
         ORDER BY ml.damage_taken DESC LIMIT 1;";
 # lane efficiency
-$sql .= "SELECT \"lane_efficiency\" cap, matches.matchid, ml.efficiency_at10, ml.playerid, ml.heroid FROM adv_matchlines ml
+// $sql .= "SELECT \"lane_efficiency\" cap, matches.matchid, ml.efficiency_at10, ml.playerid, ml.heroid FROM adv_matchlines ml
+//         JOIN matches on ml.matchid = matches.matchid
+//         WHERE matches.cluster IN (".implode(",", $clusters).")
+//         ORDER BY ml.efficiency_at10 DESC LIMIT 1;";
+# stacks made
+$sql .= "SELECT \"neutral_camps_stacked\" cap, matches.matchid, ml.stacks, ml.playerid, ml.heroid FROM adv_matchlines ml
         JOIN matches on ml.matchid = matches.matchid
         WHERE matches.cluster IN (".implode(",", $clusters).")
-        ORDER BY ml.efficiency_at10 DESC LIMIT 1;";
+        ORDER BY ml.stacks DESC LIMIT 1;";
 # wards
 $sql .= "SELECT \"wards_placed\" cap, matches.matchid, ml.wards, ml.playerid, ml.heroid FROM adv_matchlines ml
         JOIN matches on ml.matchid = matches.matchid

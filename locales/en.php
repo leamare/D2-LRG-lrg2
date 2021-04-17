@@ -140,7 +140,7 @@ $strings['en'] = [
   "proglist" => "Progression pairs",
   "progression" => "Build progression tree",
   "irecords" => "Timings records",
-  "icritical" => "Critical timings",
+  "icritical" => "Crucial timings",
   "rolepickban" => "Ranking with roles",
   "boxplots" => "Timings Boxplots",
   "heroboxplots" => "Hero Timings Boxplots",
@@ -235,6 +235,7 @@ $strings['en'] = [
   "biggest_nw_difference" => "Biggest difference in gold earned",
   "lowest_rampage" => "Rampage with lowest team networth difference",
   "highest_rampage" => "Rampage with highest team networth difference",
+  "neutral_camps_stacked" => "Neutral camps stacked",
 
   // match records
   "stomp" => "Networth stomp by a team",

@@ -263,6 +263,7 @@ $strings['ru'] = [
   "biggest_nw_difference" => "Наибольшая разница в полученном золоте",
   "lowest_rampage" => "Буйство с самой низкой разницей в золоте",
   "highest_rampage" => "Буйство с самой высокой разницей в золоте",
+  "neutral_camps_stacked" => "Стаков нейтралов",
 
   // match records
   "stomp" => "Доминация от команды",
