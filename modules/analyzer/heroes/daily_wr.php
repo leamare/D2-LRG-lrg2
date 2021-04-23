@@ -15,6 +15,7 @@ $mday = 86400*$multiplier;
 $sql = "SELECT
   ml.heroid, ( (start_date-$start_timestamp) DIV $mday ) day, SUM(1) matches, SUM(NOT m.radiantWin XOR ml.isradiant)/SUM(1) winrate
   FROM matchlines ml JOIN matches m ON m.matchid = ml.matchid
+  WHERE ml.heroid > 0
   GROUP BY ml.heroid, day
   ORDER BY matches DESC;";
 
@@ -38,7 +39,7 @@ $query_res->free_result();
 $sql = "SELECT
   dr.hero_id, ( (start_date-$start_timestamp) DIV $mday ) day, SUM(1) matches
   FROM draft dr JOIN matches m ON m.matchid = dr.matchid
-  WHERE dr.is_pick = 0
+  WHERE dr.is_pick = 0 AND dr.hero_id > 0
   GROUP BY dr.hero_id, day
   ORDER BY matches DESC;";
 
