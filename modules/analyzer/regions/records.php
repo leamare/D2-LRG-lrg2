@@ -47,11 +47,21 @@ $sql .= "SELECT \"lasthits\" cap, matches.matchid, ml.lasthits, ml.playerid, ml.
         JOIN matches on ml.matchid = matches.matchid
         WHERE matches.cluster IN (".implode(",", $clusters).")
         ORDER BY ml.lasthits DESC LIMIT 1;";
+# lasthits
+$sql .= "SELECT \"lasthits_per_min\" cap, matches.matchid, ml.lasthits*60/m.duration as val, ml.playerid, ml.heroid FROM matchlines ml
+        JOIN matches on ml.matchid = matches.matchid
+        WHERE matches.cluster IN (".implode(",", $clusters).")
+        ORDER BY val DESC LIMIT 1;";
 # hero damage
 $sql .= "SELECT \"hero_damage\" cap, matches.matchid, ml.heroDamage, ml.playerid, ml.heroid FROM matchlines ml
         JOIN matches on ml.matchid = matches.matchid
         WHERE matches.cluster IN (".implode(",", $clusters).")
         ORDER BY ml.heroDamage DESC LIMIT 1;";
+# hero damage per minute
+$sql .= "SELECT \"hero_damage_per_min\" cap, matches.matchid, ml.heroDamage*60/m.duration as val, ml.playerid, ml.heroid FROM matchlines ml
+        JOIN matches on ml.matchid = matches.matchid
+        WHERE matches.cluster IN (".implode(",", $clusters).")
+        ORDER BY val DESC LIMIT 1;";
 # tower damage
 $sql .= "SELECT \"tower_damage\" cap, matches.matchid, ml.towerDamage, ml.playerid, ml.heroid FROM matchlines ml
         JOIN matches on ml.matchid = matches.matchid

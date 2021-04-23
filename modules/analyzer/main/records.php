@@ -20,8 +20,16 @@ $sql .= "SELECT \"kda1\" cap, matchid, (kills+assists)/deaths val, playerid, her
 $sql .= "SELECT \"gold_earned\" cap, matchid, networth, playerid, heroid FROM matchlines ORDER BY networth DESC LIMIT 1;";
 # lasthits
 $sql .= "SELECT \"lasthits\" cap, matchid, lastHits, playerid, heroid FROM matchlines ORDER BY lastHits DESC LIMIT 1;";
+# lasthits per minute
+$sql .= "SELECT \"lasthits_per_min\" cap, m.matchid, ml.lastHits*60/m.duration as val, ml.playerid, ml.heroid FROM matchlines ml
+  JOIN matches m ON m.matchid = ml.matchid
+  ORDER BY val DESC LIMIT 1;";
 # hero damage
 $sql .= "SELECT \"hero_damage\" cap, matchid, heroDamage, playerid, heroid FROM matchlines ORDER BY heroDamage DESC LIMIT 1;";
+# hero damage per minute
+$sql .= "SELECT \"hero_damage_per_min\" cap, m.matchid, ml.heroDamage*60/m.duration as val, ml.playerid, ml.heroid FROM matchlines ml
+  JOIN matches m ON m.matchid = ml.matchid
+  ORDER BY val DESC LIMIT 1;";
 # tower damage
 $sql .= "SELECT \"tower_damage\" cap, matchid, towerDamage, playerid, heroid FROM matchlines ORDER BY towerDamage DESC LIMIT 1;";
 # heal
