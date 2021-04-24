@@ -13,7 +13,7 @@ foreach ($result["pickban"] as $hid => $data) {
   $h = [];
 
   // unique players
-  $sql = "SELECT COUNT(DISTINCT ml.playerid) mnum FROM matchlines ml WHERE ml.heroid = $hid;";
+  $sql = "SELECT COUNT(DISTINCT ml.playerid) mnum FROM matchlines ml WHERE ml.heroid = $hid AND ml.playerid > 0;";
 
   if ($query_res = $conn->query($sql)) {
     $row = $query_res->fetch_row();
@@ -21,7 +21,7 @@ foreach ($result["pickban"] as $hid => $data) {
   } else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
   $query_res->close();
 
-  $sql = "SELECT COUNT(DISTINCT ml.matchid) mnum FROM matchlines ml WHERE ml.heroid = $hid GROUP BY ml.playerid HAVING mnum > 1;";
+  $sql = "SELECT COUNT(DISTINCT ml.matchid) mnum FROM matchlines ml WHERE ml.heroid = $hid AND ml.playerid > 0 GROUP BY ml.playerid HAVING mnum > 1;";
 
   if ($query_res = $conn->query($sql)) {
     $h['players_1plus'] = (int) $query_res->num_rows;
@@ -63,7 +63,7 @@ foreach ($result["pickban"] as $hid => $data) {
   // match numbers quantiles
 
   $sql = "SELECT COUNT(DISTINCT ml.matchid) mnum FROM matchlines ml
-    WHERE ml.heroid = $hid GROUP BY ml.playerid ORDER BY mnum ASC LIMIT $q1, 1;";
+    WHERE ml.heroid = $hid AND ml.playerid > 0 GROUP BY ml.playerid ORDER BY mnum ASC LIMIT $q1, 1;";
 
   if ($query_res = $conn->query($sql)) {
     $row = $query_res->fetch_row();
@@ -72,7 +72,7 @@ foreach ($result["pickban"] as $hid => $data) {
   $query_res->close();
 
   $sql = "SELECT COUNT(DISTINCT ml.matchid) mnum FROM matchlines ml
-    WHERE ml.heroid = $hid GROUP BY ml.playerid ORDER BY mnum ASC LIMIT $q2, 1;";
+    WHERE ml.heroid = $hid AND ml.playerid > 0 GROUP BY ml.playerid ORDER BY mnum ASC LIMIT $q2, 1;";
 
   if ($query_res = $conn->query($sql)) {
     $row = $query_res->fetch_row();
@@ -81,7 +81,7 @@ foreach ($result["pickban"] as $hid => $data) {
   $query_res->close();
 
   $sql = "SELECT COUNT(DISTINCT ml.matchid) mnum FROM matchlines ml
-    WHERE ml.heroid = $hid GROUP BY ml.playerid ORDER BY mnum ASC LIMIT $q3, 1;";
+    WHERE ml.heroid = $hid AND ml.playerid > 0 GROUP BY ml.playerid ORDER BY mnum ASC LIMIT $q3, 1;";
 
   if ($query_res = $conn->query($sql)) {
     $row = $query_res->fetch_row();
@@ -92,7 +92,7 @@ foreach ($result["pickban"] as $hid => $data) {
   // q1 winrate
 
   $sql = "SELECT SUM(1) matches, SUM(NOT m.radiantWin XOR ml.isradiant) wins FROM matchlines ml JOIN matches m ON m.matchid = ml.matchid
-    WHERE ml.heroid = $hid GROUP BY ml.playerid ORDER BY matches ASC LIMIT 0, $q3;";
+    WHERE ml.heroid = $hid AND ml.playerid > 0 GROUP BY ml.playerid ORDER BY matches ASC LIMIT 0, $q3;";
 
   if ($query_res = $conn->query($sql)) {
     $players = 0; $wins = 0; $matches = 0; $winrates = [];
@@ -117,7 +117,7 @@ foreach ($result["pickban"] as $hid => $data) {
   // q3 winrate
 
   $sql = "SELECT SUM(1) matches, SUM(NOT m.radiantWin XOR ml.isradiant) wins FROM matchlines ml JOIN matches m ON m.matchid = ml.matchid
-    WHERE ml.heroid = $hid GROUP BY ml.playerid ORDER BY matches ASC LIMIT $q3, ".$h['players_all'].";";
+    WHERE ml.heroid = $hid AND ml.playerid > 0 GROUP BY ml.playerid ORDER BY matches ASC LIMIT $q3, ".$h['players_all'].";";
 
   if ($query_res = $conn->query($sql)) {
     $players = 0; $wins = 0; $matches = 0; $winrates = [];
