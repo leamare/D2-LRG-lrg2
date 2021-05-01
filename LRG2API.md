@@ -240,6 +240,7 @@ It’s fairly simple to explain. It doesn’t have a structure and is used in `s
 * `items/heroes` and `items/heroboxplots` (identical) - may use `hero` variable
 * `items/icombos` - may use `item` variable, returns `total` if not set
 * `items/irecords` - may use `item` variable, returns `overview` if not set
+* `items/icritical` - may use `hero` variable
 * `items/progression` and `items/proglist` (identical) - may use `hero` variable, returns `overview` if not set
 * `heroes/daily_wr`
 * `heroes/wrtimings`
@@ -247,6 +248,7 @@ It’s fairly simple to explain. It doesn’t have a structure and is used in `s
 * `heroes/profiles` - requires `heroid`
 * `players/profiles` - requires `playerid`
 * `items/profiles` - requires `itemid`
+* `heroes/rolepickban` - also works for regions and teams, requires heroes-positions to be enabled
 
 ### Non-report endpoints
 
