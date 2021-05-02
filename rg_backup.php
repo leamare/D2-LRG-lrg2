@@ -1,7 +1,7 @@
 <?php 
 
 include_once("head.php");
-ini_set('memory_limit', '8192M');
+ini_set('memory_limit', '14192M');
 
 $options = getopt("l:RrFf:o:");
 
