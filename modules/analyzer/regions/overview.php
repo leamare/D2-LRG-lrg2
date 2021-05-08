@@ -92,10 +92,97 @@ if (!$row[1] || ( ($lg_settings['ana']['regions']['use_limiter'] ?? false) && $r
   $sql .= "SELECT \"radiant_wr\", SUM(radiantWin)*100/SUM(1) FROM matches WHERE matches.cluster IN (".implode(",", $clusters).");";
   # Dire winrate
   $sql .= "SELECT \"dire_wr\", (1-(SUM(radiantWin)/SUM(1)))*100 FROM matches WHERE matches.cluster IN (".implode(",", $clusters).");";
-  # average match length
-  $sql .= "SELECT \"avg_match_len\", SUM(duration)/(60*COUNT(DISTINCT matchid)) FROM matches WHERE matches.cluster IN (".implode(",", $clusters).");";
+
+  # roshans killed
+  $sql .= "SELECT \"roshans_killed_total\", SUM(roshans_killed) FROM adv_matchlines
+    JOIN matches on adv_matchlines.matchid = matches.matchid WHERE matches.cluster IN (".implode(",", $clusters).");";
+  # Radiant avg roshans
+  $sql .= "SELECT \"radiant_avg_roshans\", SUM(am.roshans_killed)/COUNT(distinct ml.matchid)
+    FROM adv_matchlines am JOIN matchlines ml ON am.matchid = ml.matchid AND am.playerid = ml.playerid 
+    JOIN matches m ON m.matchid = ml.matchid
+    WHERE ml.isRadiant = 1 AND m.cluster IN (".implode(",", $clusters).");";
+  # Dire avg roshans
+  $sql .= "SELECT \"dire_avg_roshans\", SUM(am.roshans_killed)/COUNT(distinct ml.matchid)
+    FROM adv_matchlines am JOIN matchlines ml ON am.matchid = ml.matchid AND am.playerid = ml.playerid 
+    JOIN matches m ON m.matchid = ml.matchid
+    WHERE ml.isRadiant = 0 AND m.cluster IN (".implode(",", $clusters).");";
+
+  # total creeps killed (lh+dn)
+  $sql .= "SELECT \"creeps_killed\", SUM(lasthits+denies) FROM matchlines ml JOIN matches m ON ml.matchid = m.matchid
+    WHERE m.cluster IN (".implode(",", $clusters).");";
+  # Total avg creeps
+  $sql .= "SELECT \"creeps_killed_avg\", SUM(ml.lasthits)/COUNT(distinct ml.matchid)
+    FROM matchlines ml JOIN matches m ON ml.matchid = m.matchid
+    WHERE m.cluster IN (".implode(",", $clusters).");";
+  # Radiant avg creeps
+  $sql .= "SELECT \"radiant_creeps_killed_avg\", SUM(ml.lasthits)/COUNT(distinct ml.matchid)
+    FROM matchlines ml JOIN matches m ON ml.matchid = m.matchid
+    WHERE ml.isRadiant = 1 AND m.cluster IN (".implode(",", $clusters).");";
+  # Dire avg creeps
+  $sql .= "SELECT \"dire_creeps_killed_avg\", SUM(ml.lasthits)/COUNT(distinct ml.matchid)
+    FROM matchlines ml JOIN matches m ON ml.matchid = m.matchid
+    WHERE ml.isRadiant = 0 AND m.cluster IN (".implode(",", $clusters).");";
+
+  # total wards placed
+  $sql .= "SELECT \"obs_total\", SUM(wards) FROM adv_matchlines
+    JOIN matches on adv_matchlines.matchid = matches.matchid WHERE matches.cluster IN (".implode(",", $clusters).");";
+  # Radiant avg wards
+  $sql .= "SELECT \"radiant_avg_wards\", SUM(am.wards)/COUNT(distinct ml.matchid)
+    FROM adv_matchlines am JOIN matchlines ml ON am.matchid = ml.matchid AND am.playerid = ml.playerid 
+    JOIN matches m ON m.matchid = ml.matchid
+    WHERE ml.isRadiant = 1 AND m.cluster IN (".implode(",", $clusters).");";
+  # Dire avg roshans
+  $sql .= "SELECT \"dire_avg_wards\", SUM(am.wards)/COUNT(distinct ml.matchid)
+    FROM adv_matchlines am JOIN matchlines ml ON am.matchid = ml.matchid AND am.playerid = ml.playerid 
+    JOIN matches m ON m.matchid = ml.matchid
+    WHERE ml.isRadiant = 0 AND m.cluster IN (".implode(",", $clusters).");";
+
+  # total wards destroyed
+  $sql .= "SELECT \"obs_killed_total\", SUM(wards_destroyed) FROM adv_matchlines
+    JOIN matches on adv_matchlines.matchid = matches.matchid WHERE matches.cluster IN (".implode(",", $clusters).");";
+  # Radiant avg wards destroyed
+  $sql .= "SELECT \"radiant_avg_wards_destroyed\", SUM(am.wards_destroyed)/COUNT(distinct ml.matchid)
+    FROM adv_matchlines am JOIN matchlines ml ON am.matchid = ml.matchid AND am.playerid = ml.playerid 
+    JOIN matches m ON m.matchid = ml.matchid
+    WHERE ml.isRadiant = 1 AND m.cluster IN (".implode(",", $clusters).");";
+  # Dire avg wards destroyed
+  $sql .= "SELECT \"dire_avg_wards_destroyed\", SUM(am.wards_destroyed)/COUNT(distinct ml.matchid)
+    FROM adv_matchlines am JOIN matchlines ml ON am.matchid = ml.matchid AND am.playerid = ml.playerid 
+    JOIN matches m ON m.matchid = ml.matchid
+    WHERE ml.isRadiant = 0 AND m.cluster IN (".implode(",", $clusters).");";
+
+  # couriers killed
+  $sql .= "SELECT \"couriers_killed_total\", SUM(couriers_killed) FROM adv_matchlines
+    JOIN matches on adv_matchlines.matchid = matches.matchid WHERE matches.cluster IN (".implode(",", $clusters).");";
+  # Radiant avg couriers killed
+  $sql .= "SELECT \"radiant_avg_couriers_killed\", SUM(am.couriers_killed)/COUNT(distinct ml.matchid)
+    FROM adv_matchlines am JOIN matchlines ml ON am.matchid = ml.matchid AND am.playerid = ml.playerid 
+    JOIN matches m ON m.matchid = ml.matchid
+    WHERE ml.isRadiant = 1 AND m.cluster IN (".implode(",", $clusters).");";
+  # Dire avg couriers killed
+  $sql .= "SELECT \"dire_avg_couriers_killed\", SUM(am.couriers_killed)/COUNT(distinct ml.matchid)
+    FROM adv_matchlines am JOIN matchlines ml ON am.matchid = ml.matchid AND am.playerid = ml.playerid 
+    JOIN matches m ON m.matchid = ml.matchid
+    WHERE ml.isRadiant = 0 AND m.cluster IN (".implode(",", $clusters).");";
+
+  # buybacks total
+  $sql .= "SELECT \"buybacks_total\", SUM(buybacks) FROM adv_matchlines
+    JOIN matches on adv_matchlines.matchid = matches.matchid WHERE matches.cluster IN (".implode(",", $clusters).");";
+  # Radiant avg buybacks total
+  $sql .= "SELECT \"radiant_avg_buybacks_total\", SUM(am.buybacks)/COUNT(distinct ml.matchid)
+    FROM adv_matchlines am JOIN matchlines ml ON am.matchid = ml.matchid AND am.playerid = ml.playerid 
+    JOIN matches m ON m.matchid = ml.matchid
+    WHERE ml.isRadiant = 1 AND m.cluster IN (".implode(",", $clusters).");";
+  # Dire avg buybacks total
+  $sql .= "SELECT \"dire_avg_buybacks_total\", SUM(am.buybacks)/COUNT(distinct ml.matchid)
+    FROM adv_matchlines am JOIN matchlines ml ON am.matchid = ml.matchid AND am.playerid = ml.playerid 
+    JOIN matches m ON m.matchid = ml.matchid
+    WHERE ml.isRadiant = 0 AND m.cluster IN (".implode(",", $clusters).");";
+
   # rampages total
   $sql .= "SELECT \"rampages_total\", SUM(am.multi_kill > 4) FROM matches JOIN adv_matchlines am ON matches.matchid = am.matchid WHERE matches.cluster IN (".implode(",", $clusters).");";
+  # average match length
+  $sql .= "SELECT \"avg_match_len\", SUM(duration)/(60*COUNT(DISTINCT matchid)) FROM matches WHERE matches.cluster IN (".implode(",", $clusters).");";
 
 
   if ($conn->multi_query($sql) === TRUE);# echo "[S] Requested data for REGION STATS.\n";
