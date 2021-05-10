@@ -309,6 +309,7 @@ $strings['en'] = [
   "laning_desc" => "You can find details on Laning stats calculation in FAQ section",
   "laning_total" => "Total laning stats",
   "laning_opponents" => "Stats against lane opponents",
+  "laning_loss_to_win" => "Loss to Win",
 
   // items
   "item" => "Item",
