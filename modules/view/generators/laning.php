@@ -74,10 +74,11 @@ function rg_generator_laning_profile($table_id, &$context, $id_o, $heroes_flag =
     $res .= "<thead><tr class=\"overhead\">".
             "<th width=\"12%\" colspan=\"".($heroes_flag ? "2" : "1")."\"></th>".
             "<th width=\"18%\" colspan=\"3\"></th>".
-            "<th class=\"separator\" colspan=\"2\">".locale_string("lane_advantage")."</th>".
+            "<th class=\"separator\" colspan=\"3\">".locale_string("lane_advantage")."</th>".
             "<th class=\"separator\" colspan=\"2\">".locale_string("lane_won")."</th>".
             "<th class=\"separator\" colspan=\"2\">".locale_string("lane_tie")."</th>".
             "<th class=\"separator\" colspan=\"2\">".locale_string("lane_loss")."</th>".
+            "<th class=\"separator\" colspan=\"1\">".locale_string("winrate_diff")."</th>".
           "</tr><tr>".
           ($heroes_flag ? "<th width=\"1%\"></th>" : "").
           "<th>".locale_string("hero")."</th>".
@@ -86,6 +87,7 @@ function rg_generator_laning_profile($table_id, &$context, $id_o, $heroes_flag =
           "<th>".locale_string("rank")."</th>".
           "<th class=\"separator\">".locale_string("lane_win")."</th>".
           "<th>".locale_string("lane_loss")."</th>".
+          "<th>".locale_string("trends_diff")."</th>".
 
           "<th class=\"separator\">".locale_string("ratio_freq")."</th>".
           "<th>".locale_string("lane_game_won")."</th>".
@@ -93,10 +95,17 @@ function rg_generator_laning_profile($table_id, &$context, $id_o, $heroes_flag =
           "<th>".locale_string("lane_game_won")."</th>".
           "<th class=\"separator\">".locale_string("ratio_freq")."</th>".
           "<th>".locale_string("lane_game_won")."</th>".
+
+          "<th class=\"separator\">".locale_string("laning_loss_to_win")."</th>".
         "</tr></thead>";
 
     $data = $context[0][$id_o];
     $data['matches'] = $data['matches'] ?? 0;
+    $wr_diff = $data['matches'] ? (
+      ( $data['lanes_won'] ? $data['won_from_won']/$data['lanes_won'] : ( $data['lanes_tied'] ? $data['won_from_tie']/$data['lanes_tied'] : 0 ) ) - 
+      ( $data['lanes_lost'] ? $data['won_from_behind']/$data['lanes_lost'] : ( $data['lanes_tied'] ? $data['won_from_tie']/$data['lanes_tied'] : 0 ) )
+    ) : 0;
+
     $res .= "<tr>".
       ($heroes_flag ? "<td>".hero_portrait($id_o)."</td>" : '').
       "<td>".($heroes_flag ? hero_name($id_o) : player_name($id_o))."</td>".
@@ -105,6 +114,7 @@ function rg_generator_laning_profile($table_id, &$context, $id_o, $heroes_flag =
       "<td>".($data['matches'] ? number_format($data['rank'], 1) : '0')."</td>".
       "<td class=\"separator\">".($data['matches'] ? number_format($data['avg_advantage']*100, 2).'%' : '-')."</td>".
       "<td>".($data['matches'] ? number_format($data['avg_disadvantage']*100, 2).'%' : '-')."</td>".
+      "<td>".($data['matches'] ? number_format(($data['avg_advantage']-$data['avg_disadvantage'])*100, 2).'%' : '-')."</td>".
 
       "<td class=\"separator\">".($data['matches'] ? number_format($data['lanes_won']*100/$data['matches'], 2).'%' : '-')."</td>".
       "<td>".($data['matches'] ? ($data['lanes_won'] ? number_format($data['won_from_won']*100/$data['lanes_won'], 2) : '0').'%' : '-')."</td>".
@@ -114,6 +124,8 @@ function rg_generator_laning_profile($table_id, &$context, $id_o, $heroes_flag =
 
       "<td class=\"separator\">".($data['matches'] ? number_format($data['lanes_lost']*100/$data['matches'], 2).'%' : '-')."</td>".
       "<td>".($data['matches'] ? ($data['lanes_lost'] ? number_format($data['won_from_behind']*100/$data['lanes_lost'], 2) : '0').'%' : '-')."</td>".
+
+      "<td class=\"separator\">".($data['matches'] ? number_format($wr_diff*100, 2).'%' : '-')."</td>".
     "</tr>";
     
 
@@ -124,10 +136,11 @@ function rg_generator_laning_profile($table_id, &$context, $id_o, $heroes_flag =
   $res .= "<thead><tr class=\"overhead\">".
             "<th width=\"12%\" colspan=\"".($heroes_flag ? "2" : "1")."\"></th>".
             "<th width=\"18%\" colspan=\"3\"></th>".
-            "<th class=\"separator\" colspan=\"2\" data-sorter=\"digit\">".locale_string("lane_advantage")."</th>".
+            "<th class=\"separator\" colspan=\"3\" data-sorter=\"digit\">".locale_string("lane_advantage")."</th>".
             "<th class=\"separator\" colspan=\"2\" data-sorter=\"digit\">".locale_string("lane_won")."</th>".
             "<th class=\"separator\" colspan=\"2\" data-sorter=\"digit\">".locale_string("lane_tie")."</th>".
             "<th class=\"separator\" colspan=\"2\" data-sorter=\"digit\">".locale_string("lane_loss")."</th>".
+            "<th class=\"separator\" colspan=\"1\" data-sorter=\"digit\">".locale_string("winrate_diff")."</th>".
           "</tr><tr>".
           ($heroes_flag ? "<th width=\"1%\"></th>" : "").
           "<th data-sortInitialOrder=\"asc\" data-sorter=\"text\">".locale_string($id ? "opponent" : "hero")."</th>".
@@ -136,6 +149,7 @@ function rg_generator_laning_profile($table_id, &$context, $id_o, $heroes_flag =
           "<th data-sorter=\"digit\">".locale_string("rank")."</th>".
           "<th class=\"separator\" data-sorter=\"digit\">".locale_string("lane_win")."</th>".
           "<th data-sorter=\"digit\">".locale_string("lane_loss")."</th>".
+          "<th data-sorter=\"digit\">".locale_string("trends_diff")."</th>".
 
           "<th class=\"separator\" data-sorter=\"digit\">".locale_string("ratio_freq")."</th>".
           "<th data-sorter=\"digit\">".locale_string("lane_game_won")."</th>".
@@ -143,10 +157,17 @@ function rg_generator_laning_profile($table_id, &$context, $id_o, $heroes_flag =
           "<th data-sorter=\"digit\">".locale_string("lane_game_won")."</th>".
           "<th class=\"separator\" data-sorter=\"digit\">".locale_string("ratio_freq")."</th>".
           "<th data-sorter=\"digit\">".locale_string("lane_game_won")."</th>".
+          "<th class=\"separator\" data-sorter=\"digit\">".locale_string("laning_loss_to_win")."</th>".
+          // "<th data-sorter=\"digit\">".locale_string("gradient")."</th>".
         "</tr></thead>";
 
   foreach($context[$id_o] as $elid => $data) {
     $data['matches'] = $data['matches'] ?? 0;
+    $wr_diff = $data['matches'] ? (
+        ( $data['lanes_won'] ? $data['won_from_won']/$data['lanes_won'] : ( $data['lanes_tied'] ? $data['won_from_tie']/$data['lanes_tied'] : 0 ) ) - 
+        ( $data['lanes_lost'] ? $data['won_from_behind']/$data['lanes_lost'] : ( $data['lanes_tied'] ? $data['won_from_tie']/$data['lanes_tied'] : 0 ) )
+      ) : 0;
+
     $res .= "<tr class=\"row\">".
       ($heroes_flag ? "<td>".hero_portrait($elid)."</td>" : '').
       "<td>".($heroes_flag ? hero_name($elid) : player_name($elid))."</td>".
@@ -155,6 +176,7 @@ function rg_generator_laning_profile($table_id, &$context, $id_o, $heroes_flag =
       "<td>".($data['matches'] ? number_format($data['rank'], 1) : '0')."</td>".
       "<td class=\"separator\">".($data['matches'] ? number_format($data['avg_advantage']*100, 2).'%' : '-')."</td>".
       "<td>".($data['matches'] ? number_format($data['avg_disadvantage']*100, 2).'%' : '-')."</td>".
+      "<td>".($data['matches'] ? number_format(($data['avg_advantage']-$data['avg_disadvantage'])*100, 2).'%' : '-')."</td>".
 
       "<td class=\"separator\">".($data['matches'] ? number_format($data['lanes_won']*100/$data['matches'], 2).'%' : '-')."</td>".
       "<td>".($data['matches'] ? ($data['lanes_won'] ? number_format($data['won_from_won']*100/$data['lanes_won'], 2) : '0').'%' : '-')."</td>".
@@ -164,6 +186,9 @@ function rg_generator_laning_profile($table_id, &$context, $id_o, $heroes_flag =
 
       "<td class=\"separator\">".($data['matches'] ? number_format($data['lanes_lost']*100/$data['matches'], 2).'%' : '-')."</td>".
       "<td>".($data['matches'] ? ($data['lanes_lost'] ? number_format($data['won_from_behind']*100/$data['lanes_lost'], 2) : '0').'%' : '-')."</td>".
+
+      "<td class=\"separator\">".($data['matches'] ? number_format($wr_diff*100, 2).'%' : '-')."</td>".
+      // "<td>".($data['matches'] ? '%' : '-')."</td>".
     "</tr>";
   }
 
