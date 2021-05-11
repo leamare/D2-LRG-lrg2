@@ -4,184 +4,192 @@ const ROSHAN = [133, 134, 135, 263, 324, 325, 326, 371, 593, 594, 595, 640];
 const OBS = [110, 499, 768];
 const SENTRY = [500, 769, 111];
 const LEVELS_RESPAWN = [5,7,9,13,16,26,28,30,32,34,36,44,46,48,50,52,54,65,70,75,80,85,90,95,100,100,100,100,100,100];
-
-function get_stratz_response($match) {
-  global $stratztoken, $meta;
-
-  $data = [
-    'query' => <<<Q
-{ match(id: $match) {
-    clusterId
-    gameMode
-    gameVersionId
-    statsDateTime
-    startDateTime
-    leagueId
-    durationSeconds
-    parsedDateTime
-    sequenceNum
-    replaySalt
-    regionId
-    lobbyType
-    id
-    isStats
-    stats {
-      matchId
-      radiantNetworthLeads
-      radiantKills
-      direKills
-      pickBans {
-        bannedHeroId
-        heroId
-        isPick
-        isRadiant
-        order
-        playerIndex
-        wasBannedSuccessfully
-        team
-      }
-    }
-    league {
-      name
-    }
-    numHumanPlayers
-    didRadiantWin
-    players {
-      steamAccountId
+const STRATZ_GRAPHQL_QUERY = "{
+  clusterId
+  gameMode
+  gameVersionId
+  statsDateTime
+  startDateTime
+  leagueId
+  durationSeconds
+  parsedDateTime
+  sequenceNum
+  replaySalt
+  regionId
+  lobbyType
+  id
+  isStats
+  stats {
+    matchId
+    radiantNetworthLeads
+    radiantKills
+    direKills
+    pickBans {
+      bannedHeroId
       heroId
-      level
+      isPick
       isRadiant
-      leaverStatus
-      stats {
-        campStack
-        heroDamageReport {
-          receivedTotal {
-            magicalDamage
-            physicalDamage
-            pureDamage
-          }
-          dealtTotal {
-            stunDuration
-            disableDuration
-          }
-        }
-        deniesPerMinute
-        courierKills {
-          time
-        }
-        lastHitsPerMinute
-        networthPerMinute
-        wards {
-          type
-        }
-        deathEvents {
-          timeDead
-          time
-          goldFed
-          byAbility
-        }
-        killEvents {
-          time
-        }
-        itemPurchases {
-          time
-          itemId
-        }
-        inventoryReport {
-          neutral0 {
-            itemId
-          }
-        }
-        farmDistributionReport {
-          creepType {
-            count
-            id
-          }
-          other {
-            count
-            id
-          }
-        }
-        actionReport {
-          pingUsed
-        }
-        level
-      }
-      assists
-      deaths
-      experiencePerMinute
-      heroDamage
-      heroHealing
-      lane
-      kills
-      goldPerMinute
-      gold
-      goldSpent
-      networth
-      role
-      numLastHits
-      numDenies
-      towerDamage
-      roleBasic
-      steamAccount {
-        name
-      }
-    }
-    direTeam {
-      name
-      tag
-    }
-    direTeamId
-    radiantTeamId
-    radiantTeam {
-      name
-      tag
+      order
+      playerIndex
+      wasBannedSuccessfully
+      team
     }
   }
-}
-Q
-  ];
-
-/* 
-      playbackData {
-        buyBackEvents {
-          time
+  league {
+    name
+  }
+  numHumanPlayers
+  didRadiantWin
+  players {
+    steamAccountId
+    heroId
+    level
+    isRadiant
+    leaverStatus
+    stats {
+      campStack
+      heroDamageReport {
+        receivedTotal {
+          magicalDamage
+          physicalDamage
+          pureDamage
         }
-        streakEvents {
-          time
-          type
-          value
+        dealtTotal {
+          stunDuration
+          disableDuration
         }
       }
-*/
+      deniesPerMinute
+      courierKills {
+        time
+      }
+      lastHitsPerMinute
+      networthPerMinute
+      wards {
+        type
+      }
+      deathEvents {
+        timeDead
+        time
+        goldFed
+        byAbility
+      }
+      killEvents {
+        time
+      }
+      itemPurchases {
+        time
+        itemId
+      }
+      inventoryReport {
+        neutral0 {
+          itemId
+        }
+      }
+      farmDistributionReport {
+        creepType {
+          count
+          id
+        }
+        other {
+          count
+          id
+        }
+      }
+      actionReport {
+        pingUsed
+      }
+      level
+    }
+    assists
+    deaths
+    experiencePerMinute
+    heroDamage
+    heroHealing
+    lane
+    kills
+    goldPerMinute
+    gold
+    goldSpent
+    networth
+    role
+    numLastHits
+    numDenies
+    towerDamage
+    roleBasic
+    steamAccount {
+      name
+    }
+  }
+  direTeam {
+    name
+    tag
+  }
+  direTeamId
+  radiantTeamId
+  radiantTeam {
+    name
+    tag
+  }
+}";
 
-  $data['query'] = str_replace("  ", "", $data['query']);
-  $data['query'] = str_replace("\n", " ", $data['query']);
+function get_stratz_response($match) {
+  global $stratztoken, $meta, $stratz_cache, $api_cooldown_seconds;
 
-  if (!empty($stratztoken)) $data['token'] = $stratztoken;
-    
-  $stratz_request = "https://api.stratz.com/graphql";
-
-  $q = http_build_query($data);
-    
-  // $context  = stream_context_create([
-  //   'https' => [
-  //     'method' => 'POST',
-  //     'header'  => 'Content-Type: application/x-www-form-urlencoded'. 
-  //       "\r\ncontent-length: ".strlen($q)."\r\ncontent-type: application/json",
-  //     'content' => $q
-  //   ]
-  // ]);
-
-  // $json = file_get_contents($stratz_request, false, $context);
-  $json = @file_get_contents($stratz_request.'?'.$q);
+  if (isset($stratz_cache[ $match ])) {
+    $stratz = [
+      'data' => [
+        'match' => $stratz_cache[ $match ]
+      ]
+    ];
+  } else {
+    $data = [
+      'query' => "{ match(id: $match) ".STRATZ_GRAPHQL_QUERY."}"
+    ];
   
-  if (empty($json)) return null;
-
-  $stratz = json_decode($json, true);
+    /* 
+        playbackData {
+          buyBackEvents {
+            time
+          }
+          streakEvents {
+            time
+            type
+            value
+          }
+        }
+    */
   
-  if (empty($stratz['data']) || empty($stratz['data']['match']) || !empty($stratz['errors'])) {
-    return null;
+    $data['query'] = str_replace("  ", "", $data['query']);
+    $data['query'] = str_replace("\n", " ", $data['query']);
+  
+    if (!empty($stratztoken)) $data['token'] = $stratztoken;
+      
+    $stratz_request = "https://api.stratz.com/graphql";
+  
+    $q = http_build_query($data);
+
+    sleep($api_cooldown_seconds);
+      
+    // $context  = stream_context_create([
+    //   'https' => [
+    //     'method' => 'POST',
+    //     'header'  => 'Content-Type: application/x-www-form-urlencoded'. 
+    //       "\r\ncontent-length: ".strlen($q)."\r\ncontent-type: application/json",
+    //     'content' => $q
+    //   ]
+    // ]);
+  
+    // $json = file_get_contents($stratz_request, false, $context);
+    $json = @file_get_contents($stratz_request.'?'.$q);
+    
+    if (empty($json)) return null;
+  
+    $stratz = json_decode($json, true);
+    
+    if (empty($stratz['data']) || empty($stratz['data']['match']) || !empty($stratz['errors'])) {
+      return null;
+    }
   }
 
   $r = [];
@@ -546,4 +554,47 @@ Q
   }
 
   return $r;
+}
+
+function get_stratz_multiquery($group) {
+  global $stratztoken, $meta, $stratz_cache, $api_cooldown_seconds;
+
+  $gr = [];
+  foreach ($group as $match) {
+    if (empty($match) || $match[0] == "#" || strlen($match) < 2) continue;
+    $match_rules = processRules($match);
+
+    $gr[] = $match;
+  }
+
+  $data = [
+    'query' => "{ matches(ids: [".implode(',', $gr)."]) ".STRATZ_GRAPHQL_QUERY."}"
+  ];
+
+  $data['query'] = str_replace("  ", "", $data['query']);
+  $data['query'] = str_replace("\n", " ", $data['query']);
+
+  if (!empty($stratztoken)) $data['token'] = $stratztoken;
+    
+  $stratz_request = "https://api.stratz.com/graphql";
+
+  $q = http_build_query($data);
+  
+  $json = file_get_contents($stratz_request.'?'.$q);
+  //$json = @file_get_contents($stratz_request.'?'.$q);
+  
+  if (empty($json)) return null;
+
+  $stratz = json_decode($json, true);
+
+  if (empty($stratz) || empty($stratz['data'])) return null;
+
+  foreach ($stratz['data']['matches'] as $match) {
+    if (empty($match)) continue;
+    $stratz_cache[ $match['id'] ] = $match;
+  }
+
+  sleep($api_cooldown_seconds);
+
+  return $stratz_cache;
 }

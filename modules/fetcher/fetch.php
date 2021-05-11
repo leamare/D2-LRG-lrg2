@@ -147,7 +147,6 @@ function fetch($match) {
   if(empty($matchdata) && $stratz_graphql) {
     echo("Requesting STRATZ GraphQL.");
     $matchdata = get_stratz_response($match);
-    sleep($api_cooldown_seconds-1);
 
     $stratz_request = null;
     if (!empty($matchdata)) {

@@ -52,6 +52,10 @@ $use_stratz = isset($options['S']) || isset($options['s']);
 $require_stratz = isset($options['S']);
 $use_full_stratz = isset($options['Z']);
 $stratz_graphql = isset($options['G']);
+
+$stratz_graphql_group = isset($options['G']) ? (int)($options['G']) : 0;
+$stratz_graphql_group_counter = 0;
+
 $ignore_stratz = isset($options['Q']);
 
 $update_names = isset($options['n']);
@@ -249,6 +253,29 @@ while(sizeof($matches) || $listen) {
     } else {
       array_unshift($matches, trim($match_str));
       $stdin_flag = false;
+    }
+  }
+
+  if ($stratz_graphql_group) {
+    if ($stratz_graphql_group_counter) {
+      $stratz_graphql_group_counter--;
+      
+    } else {
+      $stratz_graphql_group_counter = $stratz_graphql_group-1;
+
+      $stratz_cache = [];
+
+      // $group = [];
+      // for ($i = 0; $i < $stratz_graphql_group; ) {
+      //   if (!isset($matches[$i])) break;
+
+      // }
+
+      $group = array_slice($matches, 0, $stratz_graphql_group);
+      
+      echo "[Z] Requesting group of $stratz_graphql_group matches\n";
+
+      get_stratz_multiquery($group);
     }
   }
 
