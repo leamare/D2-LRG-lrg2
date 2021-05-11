@@ -1107,7 +1107,7 @@ function fetch($match) {
     }
     $player = mb_substr($player, 0, 127);
     $sql = "INSERT INTO players (playerID, nickname) VALUES (".$id.",\"".addslashes($player)."\");";
-    if ($conn->query($sql) === TRUE) $t_players[$id] = $player;
+    if ($conn->query($sql) === TRUE || stripos($conn->error, "Duplicate entry") !== FALSE) $t_players[$id] = $player;
     else {
       echo $conn->error."\n";
       if ($conn->error === "MySQL server has gone away") {
@@ -1311,7 +1311,7 @@ function fetch($match) {
       }
       $sql[strlen($sql)-1] = ";";
   
-      if ($conn->multi_query($sql) === TRUE);
+      if ($conn->multi_query($sql) === TRUE || stripos($conn->error, "Duplicate entry") !== FALSE);
       else die("[F] Unexpected problems when recording to database.\n".$conn->error."\n");
   
       if($lg_settings['ana']['teams']['rosters']) {
@@ -1339,7 +1339,7 @@ function fetch($match) {
           $sql[strlen($sql)-1] = ";";
           $sql = "INSERT INTO teams_rosters (teamid, playerid, position) VALUES ".$sql;
   
-              if ($conn->multi_query($sql) === TRUE) echo "[S] Successfully recorded new teams rosters to database.\n";
+              if ($conn->multi_query($sql) === TRUE || stripos($conn->error, "Duplicate entry") !== FALSE) echo "[S] Successfully recorded new teams rosters to database.\n";
               else die("[F] Unexpected problems when recording to database.\n".$conn->error."\n");
         }
       }
