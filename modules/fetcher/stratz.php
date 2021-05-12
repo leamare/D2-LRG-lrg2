@@ -567,6 +567,8 @@ function get_stratz_multiquery($group) {
     $gr[] = $match;
   }
 
+  if (empty($gr)) return null;
+
   $data = [
     'query' => "{ matches(ids: [".implode(',', $gr)."]) ".STRATZ_GRAPHQL_QUERY."}"
   ];
