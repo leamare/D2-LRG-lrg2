@@ -387,16 +387,16 @@ function get_stratz_response($match) {
         }
       }
       
-      $aml['stacks'] = max($pl['stats']['campStack']);
+      $aml['stacks'] = $pl['stats']['campStack'] ? max($pl['stats']['campStack']) : 0;
       
       $aml['time_dead'] = array_reduce($pl['stats']['deathEvents'], function($c, $a) { return $c + $a['timeDead']; }, 0);
       $aml['pings'] = $pl['stats']['actionReport']['pingUsed'] ?? 0;
       
-      $aml['stuns'] = ($pl['stats']['heroDamageReport']['dealtTotal']['stunDuration'] + $pl['stats']['heroDamageReport']['dealtTotal']['disableDuration'])/100;
+      $aml['stuns'] = (($pl['stats']['heroDamageReport']['dealtTotal']['stunDuration'] ?? 0) + ($pl['stats']['heroDamageReport']['dealtTotal']['disableDuration'] ?? 0))/100;
 
-      $aml['teamfight_part'] = $pl['isRadiant'] ? array_sum($stratz['data']['match']['stats']['radiantKills']) : array_sum($stratz['data']['match']['stats']['direKills']);
+      $aml['teamfight_part'] = $pl['isRadiant'] ? array_sum($stratz['data']['match']['stats']['radiantKills'] ?? []) : array_sum($stratz['data']['match']['stats']['direKills'] ?? []);
       $aml['teamfight_part'] = $aml['teamfight_part'] ? ($pl['kills']+$pl['assists']) / $aml['teamfight_part'] : 0;
-      $aml['damage_taken'] = array_sum($pl['stats']['heroDamageReport']['receivedTotal']);
+      $aml['damage_taken'] = array_sum($pl['stats']['heroDamageReport']['receivedTotal'] ?? []);
 
       $r['adv_matchlines'][] = $aml;
 

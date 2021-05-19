@@ -266,15 +266,15 @@ while(sizeof($matches) || $listen) {
       $stratz_cache = [];
 
       $group = [];
-      for ($i = 0; $i < $stratz_graphql_group; ) {
+      for ($i = 0; count($group) < $stratz_graphql_group; $i++) {
         if (!isset($matches[$i])) break;
 
-        if (empty($match) || $match[0] == "#" || strlen($match) < 2) continue;
+        if (empty($matches[$i]) || $matches[$i][0] == "#" || strlen($matches[$i]) < 2) continue;
 
         if ($update_unparsed || $request_unparsed_players) {
-          $query = $conn->query("SELECT matchid FROM adv_matchlines WHERE matchid = ".$match.";");
+          $query = $conn->query("SELECT matchid FROM adv_matchlines WHERE matchid = ".$matches[$i].";");
         } else {
-          $query = $conn->query("SELECT matchid FROM matches WHERE matchid = ".$match.";");
+          $query = $conn->query("SELECT matchid FROM matches WHERE matchid = ".$matches[$i].";");
         }
 
         if (isset($query->num_rows) && $query->num_rows) {
@@ -282,8 +282,6 @@ while(sizeof($matches) || $listen) {
         }
 
         $group[] = $matches[$i];
-
-        $i++;
       }
 
       // $group = array_slice($matches, 0, $stratz_graphql_group);

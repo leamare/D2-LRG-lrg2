@@ -1121,7 +1121,7 @@ function fetch($match) {
   $sql = "INSERT INTO matches (matchid, radiantWin, duration, modeID, leagueID, start_date, stomp, comeback, cluster, version) VALUES "
     ."(".$t_match['matchid'].",".($t_match['radiantWin'] ? "true" : "false" ).",".$t_match['duration'].","
     .$t_match['modeID'].",".$t_match['leagueID'].",".$t_match['start_date'].","
-    .$t_match['stomp'].",".$t_match['comeback'].",".($t_match['cluster'] ?? 0).",".$t_match['version'].");";
+    .($t_match['stomp'] ?? 0).",".$t_match['comeback'].",".($t_match['cluster'] ?? 0).",".$t_match['version'].");";
   $err_query = "delete from matches where matchid = ".$t_match['matchid'].";";
 
   if ($conn->multi_query($sql) === TRUE);
