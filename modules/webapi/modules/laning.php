@@ -1,5 +1,7 @@
 <?php 
 
+const MIN10_GOLD = 4973;
+
 $endpoints['laning'] = function($mods, $vars, &$report) {
   if (isset($vars['team'])) {
     throw new \Exception("No team allowed");
@@ -63,11 +65,50 @@ $endpoints['laning'] = function($mods, $vars, &$report) {
   }
 
   if (!empty($vars['heroid'])) {
+    $context[0][ $vars['heroid'] ]['avg_advantage_gold'] = MIN10_GOLD*$context[0][ $vars['heroid'] ]['avg_advantage'];
+    $context[0][ $vars['heroid'] ]['avg_disadvantage_gold'] = MIN10_GOLD*$context[0][ $vars['heroid'] ]['avg_disadvantage'];
+    $el =& $context[0][ $vars['heroid'] ];
+    if (!isset($el['avg_gold_diff'])) {
+      $el['avg_gold_diff'] = $el['matches'] ? round( (
+        $el['avg_advantage']*$el['lanes_won'] + 
+        $el['avg_disadvantage']*$el['lanes_lost'] +
+        ($el['avg_advantage']+$el['avg_disadvantage'])*0.5*$el['lanes_tied']
+      ) / $el['matches'], 4) : 0;
+    }
+    $el['avg_gold_diff_gold'] = MIN10_GOLD*$el['avg_gold_diff'];
+
+    foreach($context[ $vars['heroid'] ] as &$el) {
+      $el['avg_advantage_gold'] = MIN10_GOLD*$el['avg_advantage'];
+      $el['avg_disadvantage_gold'] = MIN10_GOLD*$el['avg_disadvantage'];
+      if (!isset($el['avg_gold_diff'])) {
+        $el['avg_gold_diff'] = $el['matches'] ? round( (
+          $el['avg_advantage']*$el['lanes_won'] + 
+          $el['avg_disadvantage']*$el['lanes_lost'] +
+          ($el['avg_advantage']+$el['avg_disadvantage'])*0.5*$el['lanes_tied']
+        ) / $el['matches'], 4) : 0;
+      }
+      $el['avg_gold_diff_gold'] = MIN10_GOLD*$el['avg_gold_diff'];
+    }
+
     return [
       'total' => $context[0][ $vars['heroid'] ],
       'opponents' => $context[ $vars['heroid'] ]
     ];
   }
+
+  foreach($context[0] as &$el) {
+    $el['avg_advantage_gold'] = MIN10_GOLD*$el['avg_advantage'];
+    $el['avg_disadvantage_gold'] = MIN10_GOLD*$el['avg_disadvantage'];
+    if (!isset($el['avg_gold_diff'])) {
+      $el['avg_gold_diff'] = $el['matches'] ? round( (
+        $el['avg_advantage']*$el['lanes_won'] + 
+        $el['avg_disadvantage']*$el['lanes_lost'] +
+        ($el['avg_advantage']+$el['avg_disadvantage'])*0.5*$el['lanes_tied']
+      ) / $el['matches'], 4) : 0;
+    }
+    $el['avg_gold_diff_gold'] = MIN10_GOLD*$el['avg_gold_diff'];
+  }
+
   return [
     'total' => $context[0]
   ];
