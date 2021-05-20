@@ -19,7 +19,8 @@ function rg_query_hero_laning(&$conn, $cluster = null, $team = null) {
   SUM( IF(ams_efficiency_at10 - amr_efficiency_at10 < 0, ams_efficiency_at10 - amr_efficiency_at10, 0) )/SUM( IF(ams_efficiency_at10 - amr_efficiency_at10 < 0, 1, 0) ) avg_disadvantage,
   SUM( (NOT (ams_q.isRadiant XOR radiantWin)) AND ((ams_efficiency_at10 - amr_efficiency_at10) <= -$tie_factor) ) won_from_behind,
   SUM( (NOT (ams_q.isRadiant XOR radiantWin)) AND (ABS(ams_efficiency_at10 - amr_efficiency_at10) < $tie_factor) ) won_from_tie,
-  SUM( (NOT (ams_q.isRadiant XOR radiantWin)) AND ((ams_efficiency_at10 - amr_efficiency_at10) >= $tie_factor) ) won_from_won
+  SUM( (NOT (ams_q.isRadiant XOR radiantWin)) AND ((ams_efficiency_at10 - amr_efficiency_at10) >= $tie_factor) ) won_from_won,
+  SUM(ams_efficiency_at10 - amr_efficiency_at10)/SUM(1) avg_gold_diff
   FROM
   (
     SELECT
@@ -88,7 +89,8 @@ function rg_query_hero_laning(&$conn, $cluster = null, $team = null) {
     SUM( IF(ams_efficiency_at10 - amr_efficiency_at10 < 0, ams_efficiency_at10 - amr_efficiency_at10, 0) )/SUM( IF(ams_efficiency_at10 - amr_efficiency_at10 < 0, 1, 0) ) avg_disadvantage,
     SUM( (NOT (ams_q.isRadiant XOR radiantWin)) AND ((ams_efficiency_at10 - amr_efficiency_at10) <= -$tie_factor) ) won_from_behind,
     SUM( (NOT (ams_q.isRadiant XOR radiantWin)) AND (ABS(ams_efficiency_at10 - amr_efficiency_at10) < $tie_factor) ) won_from_tie,
-    SUM( (NOT (ams_q.isRadiant XOR radiantWin)) AND ((ams_efficiency_at10 - amr_efficiency_at10) >= $tie_factor) ) won_from_won
+    SUM( (NOT (ams_q.isRadiant XOR radiantWin)) AND ((ams_efficiency_at10 - amr_efficiency_at10) >= $tie_factor) ) won_from_won,
+    SUM(ams_efficiency_at10 - amr_efficiency_at10)/SUM(1) avg_gold_diff
     FROM
     (
       SELECT
