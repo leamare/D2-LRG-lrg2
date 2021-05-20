@@ -76,7 +76,7 @@ function rg_generator_laning_profile($table_id, &$context, $id_o, $heroes_flag =
     $res .= "<thead><tr class=\"overhead\">".
             "<th width=\"12%\" colspan=\"".($heroes_flag ? "2" : "1")."\"></th>".
             "<th width=\"18%\" colspan=\"3\"></th>".
-            "<th class=\"separator\" colspan=\"3\">".locale_string("lane_advantage")."</th>".
+            "<th class=\"separator\" colspan=\"4\">".locale_string("lane_advantage")."</th>".
             "<th class=\"separator\" colspan=\"2\">".locale_string("lane_won")."</th>".
             "<th class=\"separator\" colspan=\"2\">".locale_string("lane_tie")."</th>".
             "<th class=\"separator\" colspan=\"2\">".locale_string("lane_loss")."</th>".
