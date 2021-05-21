@@ -85,6 +85,39 @@ const STRATZ_GRAPHQL_QUERY = "{
         neutral0 {
           itemId
         }
+        item0 {
+          itemId
+        }
+        item1 {
+          itemId
+        }
+        item2 {
+          itemId
+        }
+        item3 {
+          itemId
+        }
+        item4 {
+          itemId
+        }
+        item5 {
+          itemId
+        }
+        backPack0 {
+          itemId
+        }
+        backPack1 {
+          itemId
+        }
+        backPack2 {
+          itemId
+        }
+      }
+      matchPlayerBuffEvent {
+        abilityId
+        itemId
+        stackCount
+        time
       }
       farmDistributionReport {
         creepType {
@@ -403,6 +436,11 @@ function get_stratz_response($match) {
       $meta['items'];
       $meta['item_categories'];
       $travel_boots_state = 0;
+
+      $items = [];
+      $items_all = [];
+      $items_cats  = [];
+
       foreach ($pl['stats']['itemPurchases'] as $e) {
         if ($r['matches']['duration'] - $e['time'] < 60) continue;
 
@@ -414,6 +452,8 @@ function get_stratz_response($match) {
 
         $item_id = $e['itemId'];
         if (!$item_id) continue;
+
+        $items_all[$item_id] = $e['time'];
 
         // boots of travel workaround
         if ($item_id == 47 && $travel_boots_state == 0) { $item_id = 48; $travel_boots_state++; }
@@ -437,7 +477,89 @@ function get_stratz_response($match) {
         $it['category_id'] = array_search($category, array_keys($meta['item_categories']));
         $it['time'] = $e['time'];
 
+        $items[$item_id] = $e['time'];
+        $items_cats[ $it['category_id'] ] = ($items_cats[ $it['category_id'] ] ?? 0) + 1;
+
         $r['items'][] = $it;
+      }
+
+      foreach($pl['stats']['matchPlayerBuffEvent'] as $e) {
+        if (in_array($e['itemId'], [108, 271, 247, 609, 727, 725]) && !isset($items_all[ $e['itemId'] ])) {
+          // rosh aghs
+          if ($e['itemId'] == 725) $e['itemId'] = 609;
+          if ($e['itemId'] == 727) $e['itemId'] = 271;
+          
+          $items_all[$item_id] = $e['time'];
+
+          $r['items'][] = [
+            'matchid' => $stratz['data']['match']['id'],
+            'playerid' => $pl['steamAccountId'],
+            'hero_id' => $pl['heroId'],
+            'item_id' => $e['itemId'], 
+            'category_id' => 0,
+            'time' => $e['time']
+          ];
+
+          $items[ $e['itemId'] ] = $e['time'];
+          $items_cats[ 0 ] = ($items_cats[ 0 ] ?? 0) + 1;
+        }
+      }
+
+      asort($items_all);
+
+      foreach($pl['stats']['inventoryReport'] as $t => $e) {
+        $inventory = [];
+        for($i = 0; $i < 6; $i++) {
+          $inventory[] = $e['item'.$i] ? $e['item'.$i]['itemId'] : null;
+        }
+        for($i = 0; $i < 3; $i++) {
+          $inventory[] = $e['backPack'.$i] ? $e['backPack'.$i]['itemId'] : null;
+        }
+        foreach($inventory as $item_id) {
+          // rosh aghs
+          if ($item_id == 725) $item_id = 609;
+          if ($item_id == 727) $item_id = 271;
+
+          if (!$item_id || isset($items_all[ $item_id ]))
+            continue;
+
+          foreach($meta['item_categories'] as $category_name => $items) {
+            if (in_array($item_id, $items)) {
+              $category = $category_name;
+              break;
+            }
+          }
+  
+          $time = ($t-1)*60;
+
+          $last = null;
+          foreach ($items_all as $iid => $ita) {
+            if (in_array($iid, $meta['item_categories']['consumables'])) continue;
+            if ($ita < $time) $last = $ita;
+            else break;
+          }
+          $time = $last;
+
+          $items_all[$item_id] = $time;
+
+          if (in_array($category, ['support', 'consumables', 'parts', 'recipes', 'event']) || strpos($category, "neutral_tier_") !== FALSE ) { //&& $e['time'] > 0) {
+            continue;
+          }
+
+          $category_id = array_search($category, array_keys($meta['item_categories']));
+
+          $r['items'][] = [
+            'matchid' => $stratz['data']['match']['id'],
+            'playerid' => $pl['steamAccountId'],
+            'hero_id' => $pl['heroId'],
+            'item_id' => $item_id, 
+            'category_id' => $category_id,
+            'time' => $time
+          ];
+
+          $items[$item_id] = $time;
+          $items_cats[ $category_id ] = ($items_cats[ $category_id ] ?? 0) + 1;
+        }
       }
 
       $last = null; 
