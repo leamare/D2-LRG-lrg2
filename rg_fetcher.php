@@ -45,7 +45,7 @@ if (!empty($options['d'])) {
   $api_cooldown_seconds = 2;
 }
 
-
+$rewrite_existing = isset($options['W']);
 $update_unparsed = isset($options['u']) || isset($options['U']);
 
 $use_stratz = isset($options['S']) || isset($options['s']);
@@ -257,10 +257,7 @@ while(sizeof($matches) || $listen) {
   }
 
   if ($stratz_graphql_group) {
-    if ($stratz_graphql_group_counter) {
-      $stratz_graphql_group_counter--;
-      
-    } else {
+    if (!$stratz_graphql_group_counter) {
       $stratz_graphql_group_counter = $stratz_graphql_group-1;
 
       $stratz_cache = [];
@@ -271,14 +268,17 @@ while(sizeof($matches) || $listen) {
 
         if (empty($matches[$i]) || $matches[$i][0] == "#" || strlen($matches[$i]) < 2) continue;
 
-        if ($update_unparsed || $request_unparsed_players) {
-          $query = $conn->query("SELECT matchid FROM adv_matchlines WHERE matchid = ".$matches[$i].";");
-        } else {
-          $query = $conn->query("SELECT matchid FROM matches WHERE matchid = ".$matches[$i].";");
-        }
+        if (!$rewrite_existing || $update_unparsed || $request_unparsed_players) {
+          if ($update_unparsed || $request_unparsed_players) {
+            $query = $conn->query("SELECT matchid FROM adv_matchlines WHERE matchid = ".$matches[$i].";");
+          } else {
+            $query = $conn->query("SELECT matchid FROM matches WHERE matchid = ".$matches[$i].";");
+          }
 
-        if (isset($query->num_rows) && $query->num_rows) {
-          continue;
+          if (isset($query->num_rows) && $query->num_rows) {
+            echo '.';
+            continue;
+          }
         }
 
         $group[] = $matches[$i];

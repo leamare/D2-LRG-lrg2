@@ -16,7 +16,7 @@ function fetch($match) {
   global $opendota, $conn, $rnum, $matches, $failed_matches, $scheduled, $scheduled_stratz, $t_teams, $t_players, $use_stratz, $require_stratz,
   $request_unparsed, $meta, $stratz_timeout_retries, $force_adding, $cache_dir, $lg_settings, $lrg_use_cache, $first_scheduled,
   $use_full_stratz, $scheduled_wait_period, $steamapikey, $force_await, $players_list, $rank_limit, $stratztoken, $ignore_stratz,
-  $update_unparsed, $request_unparsed_players, $stratz_graphql, $api_cooldown_seconds, $update_names, $updated_names;
+  $update_unparsed, $request_unparsed_players, $stratz_graphql, $api_cooldown_seconds, $update_names, $updated_names, $rewrite_existing;
 
   $t_match = [];
   $t_matchlines = [];
@@ -62,9 +62,11 @@ function fetch($match) {
       }
     }
 
-    if (!$update_unparsed || $match_parsed) {
+    if (!$rewrite_existing && (!$update_unparsed || $match_parsed)) {
       echo("Already in database, skipping\n");
       return true;
+    } else {
+      echo("Match exists, rewriting...");
     }
 
     $match_exists = true;
@@ -147,6 +149,9 @@ function fetch($match) {
   if(empty($matchdata) && $stratz_graphql) {
     echo("Requesting STRATZ GraphQL.");
     $matchdata = get_stratz_response($match);
+
+    global $stratz_graphql_group, $stratz_graphql_group_counter;
+    if ($stratz_graphql_group) $stratz_graphql_group_counter--;
 
     $stratz_request = null;
     if (!empty($matchdata)) {
@@ -1024,11 +1029,12 @@ function fetch($match) {
 
   echo "..Recording.";
 
-  if ($match_exists && !$match_parsed) {
+  if ($match_exists) {
     // remove match before readding it
     $sql = "DELETE from matchlines where matchid = $match;".
       "DELETE from adv_matchlines where matchid = $match;".
       "DELETE from draft where matchid = $match; ".
+      ( $lg_settings['main']['items'] ? "delete from items where matchid = $match;" : "").
       ( $lg_settings['main']['teams'] ? "delete from teams_matches where matchid = $match;" : "").
       "delete from matches where matchid = $match;";
 

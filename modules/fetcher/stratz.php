@@ -520,7 +520,9 @@ function get_stratz_response($match) {
           if ($item_id == 725) $item_id = 609;
           if ($item_id == 727) $item_id = 271;
 
-          if (!$item_id || isset($items_all[ $item_id ]))
+          $time = ($t-1)*60;
+
+          if (!$item_id || ( isset($items_all[ $item_id ]) && abs($items_all[ $item_id ]-60) < 60))
             continue;
 
           foreach($meta['item_categories'] as $category_name => $items) {
@@ -529,8 +531,6 @@ function get_stratz_response($match) {
               break;
             }
           }
-  
-          $time = ($t-1)*60;
 
           $last = null;
           foreach ($items_all as $iid => $ita) {
@@ -538,7 +538,7 @@ function get_stratz_response($match) {
             if ($ita < $time) $last = $ita;
             else break;
           }
-          $time = $last;
+          $time = $last && $time-$last < 30 ? $last : $time;
 
           $items_all[$item_id] = $time;
 
