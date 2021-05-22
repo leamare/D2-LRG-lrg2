@@ -1,5 +1,5 @@
 <?php
-$sql = "SELECT start_date FROM matches ORDER BY start_date;";
+$sql = "SELECT start_date FROM matches ORDER BY start_date ASC LIMIT 1;";
 
 if ($conn->multi_query($sql) === FALSE) die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
 $query_res = $conn->store_result();
