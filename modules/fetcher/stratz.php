@@ -517,8 +517,10 @@ function get_stratz_response($match) {
         }
         foreach($inventory as $item_id) {
           // rosh aghs
-          if ($item_id == 725) $item_id = 609;
-          if ($item_id == 727) $item_id = 271;
+          if ($item_id == 725 || $item_id == 727)
+            continue;
+          // $item_id = 609;
+          // if ($item_id == 727) $item_id = 271;
 
           $time = ($t-1)*60;
 
