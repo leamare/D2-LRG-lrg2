@@ -93,7 +93,7 @@ if(compare_ver($lg_settings['version'], $lrg_version) < 0) {
 /* first and last match */ {
   $sql = "SELECT matchid, start_date
           FROM matches
-          ORDER BY start_date ASC;";
+          ORDER BY start_date ASC LIMIT 1;";
 
   if ($conn->multi_query($sql) !== TRUE) die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
 
@@ -106,7 +106,7 @@ if(compare_ver($lg_settings['version'], $lrg_version) < 0) {
 
   $sql = "SELECT matchid, start_date
           FROM matches
-          ORDER BY start_date DESC;";
+          ORDER BY start_date DESC LIMIT 1;";
 
   if ($conn->multi_query($sql) !== TRUE) die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
 
