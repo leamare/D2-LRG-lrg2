@@ -1,7 +1,8 @@
 <?php 
 
 include_once("head.php");
-ini_set('memory_limit', '14192M');
+ini_set('memory_limit', '16192M');
+const DISK_CACHE_COUNTER = 25000;
 
 $options = getopt("l:RrFf:o:");
 
@@ -138,26 +139,46 @@ if ($restore) {
     
     fwrite($fp, implode(',', $schema)."\n");
 
-    $sql = "SELECT * FROM $t;";
-    if ($conn->multi_query($sql) === FALSE)
-      die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+    
+    for ($off = 0; ; $off++) {
+      $sql = "SELECT * FROM $t LIMIT ".(DISK_CACHE_COUNTER*$off).", ".DISK_CACHE_COUNTER.";";
 
-    $query_res = $conn->store_result();
+      if ($conn->multi_query($sql) === FALSE)
+        die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
 
-    for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
-      $els = [];
-      foreach ($row as $r) {
-        if (strpos($r, ',') !== false)
-          $els[] = '"'.str_replace('"', '""', $r).'"';
-        else 
-          $els[] = $r;
+      $query_res = $conn->store_result();
+
+      for ($i = 1, $row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row(), $i++) {
+        $els = [];
+        foreach ($row as $r) {
+          if (strpos($r, ',') !== false)
+            $els[] = '"'.str_replace('"', '""', $r).'"';
+          else 
+            $els[] = $r;
+        }
+        fwrite($fp, implode(',', $els)."\n");
+
+        unset($row);
+        unset($els);
+
+        if ($i == DISK_CACHE_COUNTER) {
+          fflush($fp);
+          echo '~';
+          $i = 0;
+          // $fp = fopen($fname, "w+");
+        }
       }
-      fwrite($fp, implode(',', $els)."\n");
+
+      $query_res->free_result();
+
+      if ($i > 1) {
+        break;
+      }
     }
 
-    $query_res->free_result();
-
-    fclose($fp);
+    if ($i != DISK_CACHE_COUNTER) {
+      fclose($fp);
+    }
 
     echo "OK.\n";
     
