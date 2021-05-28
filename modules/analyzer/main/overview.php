@@ -129,6 +129,10 @@ $sql .= "SELECT \"rampages_total\", SUM(multi_kill > 4) FROM adv_matchlines;";
 # average match length
 $sql .= "SELECT \"avg_match_len\", SUM(duration)/(60*COUNT(DISTINCT matchid)) FROM matches;";
 
+# average match length when radiant won
+$sql .= "SELECT \"avg_match_len_radiant_win\", SUM(duration)/(60*COUNT(DISTINCT matchid)) FROM matches WHERE radiantWin = 1;";
+# average match length when dire won
+$sql .= "SELECT \"avg_match_len_dire_win\", SUM(duration)/(60*COUNT(DISTINCT matchid)) FROM matches WHERE radiantWin = 0;";
 
 if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for RANDOM STATS.\n";
 else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");

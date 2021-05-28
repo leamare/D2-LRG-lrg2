@@ -184,6 +184,10 @@ if (!$row[1] || ( ($lg_settings['ana']['regions']['use_limiter'] ?? false) && $r
   # average match length
   $sql .= "SELECT \"avg_match_len\", SUM(duration)/(60*COUNT(DISTINCT matchid)) FROM matches WHERE matches.cluster IN (".implode(",", $clusters).");";
 
+  # average match length when radiant won
+  $sql .= "SELECT \"avg_match_len_radiant_win\", SUM(duration)/(60*COUNT(DISTINCT matchid)) FROM matches WHERE matches.cluster IN (".implode(",", $clusters).") AND matches.radiantWin = 1;";
+  # average match length when dire won
+  $sql .= "SELECT \"avg_match_len_dire_win\", SUM(duration)/(60*COUNT(DISTINCT matchid)) FROM matches WHERE matches.cluster IN (".implode(",", $clusters).") AND matches.radiantWin = 0;";
 
   if ($conn->multi_query($sql) === TRUE);# echo "[S] Requested data for REGION STATS.\n";
   else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
