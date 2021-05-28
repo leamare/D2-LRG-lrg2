@@ -320,7 +320,7 @@ function get_stratz_response($match) {
         array_filter($pl['stats']['wards'], function($a) { return $a['type']; })
       );
 
-      $aml['couriers_killed'] = count($pl['stats']['courierKills']);
+      $aml['couriers_killed'] = count($pl['stats']['courierKills'] ?? []);
 
       $aml['roshans_killed'] = 0;
       $aml['wards_destroyed'] = 0;
