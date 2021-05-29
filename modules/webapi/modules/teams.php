@@ -95,6 +95,29 @@ $endpoints['teams'] = function($mods, $vars, &$report) use (&$endpoints) {
         });
       }
 
+      if (isset($report['teams'][ $vars['team'] ]['pickban'])) {
+        $heroes = [];
+        $teams = count($report['teams']);
+        uasort($report['pickban'], function($a, $b) {
+          return $b['matches_picked'] <=> $a['matches_picked'];
+        });
+        $mp = array_values($report['pickban'])[ ceil(count($report['pickban']) * 0.5) ]['matches_picked'];
+        foreach ($report['teams'][ $vars['team'] ]['pickban'] as $hid => $data) {
+          if ($report['pickban'][$hid]['matches_picked'] > $mp || !$data['matches_picked']) continue;
+          $ref_ratio = $report['pickban'][$hid]['matches_picked']/$teams;
+          if ($data['matches_picked'] > $ref_ratio && ($data['matches_picked'] - $ref_ratio)/$ref_ratio > 1.5) {
+            // $data['ratio'] = $ref_ratio;
+            $data['ratio'] = $data['matches_picked']/$report['pickban'][$hid]['matches_picked'];
+            $heroes[$hid] = $data;
+          }
+        }
+        uasort($heroes, function($a, $b) {
+          return $b['ratio'] <=> $a['ratio'];
+        });
+
+        $res['specific_heroes'] = $heroes;
+      }
+
       foreach($report['teams'][ $vars['team'] ]['matches'] as $match => $v) {
         $radiant = ( $report['match_participants_teams'][$match]['radiant'] ?? 0 ) == $vars['team'] ? 1 : 0;
         foreach ($report['matches'][$match] as $l) {

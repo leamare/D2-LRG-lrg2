@@ -114,7 +114,7 @@ if(isset($cats) && !empty($cats)) {
     $modules .= "<div class=\"content-text tagsshow\"><a class=\"category\">".locale_string("show_tags")."</a></div>";
   }
 
-  $modules .= "<div class=\"content-text tagslist ".(isset($cat) || !empty($__pinned) ? "hidden" : "")."\" ".(isset($cat) ? " style=\"display:none;\"" : "").">";
+  $modules .= "<div class=\"content-text tagslist ".(isset($cat) || !empty($__pinned) ? "hidden" : "")."\" ".(isset($cat) || !empty($__pinned) ? " style=\"display: none;\"" : "").">";
 
   $modules .= "<a class=\"category".(isset($cat) && "main" == $cat ? " active" : "").
               "\" href=\"?cat=main".(empty($linkvars) ? "" : "&".$linkvars).

@@ -70,6 +70,42 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
               }
             }
 
+            if (isset($context[$tid]['pickban'])) {
+              $heroes = [];
+              $teams = count($context);
+              uasort($report['pickban'], function($a, $b) {
+                return $b['matches_picked'] <=> $a['matches_picked'];
+              });
+              $mp = array_values($report['pickban'])[ ceil(count($report['pickban']) * 0.5) ]['matches_picked'];
+              foreach ($context[$tid]['pickban'] as $hid => $data) {
+                if ($report['pickban'][$hid]['matches_picked'] > $mp || !$data['matches_picked']) continue;
+                $ref_ratio = $report['pickban'][$hid]['matches_picked']/$teams;
+                if ($data['matches_picked'] > $ref_ratio && ($data['matches_picked'] - $ref_ratio)/$ref_ratio > 1.5) {
+                  // $data['ratio'] = $ref_ratio;
+                  $data['ratio'] = $data['matches_picked']/$report['pickban'][$hid]['matches_picked'];
+                  $heroes[$hid] = $data;
+                }
+              }
+              uasort($heroes, function($a, $b) {
+                return $b['ratio'] <=> $a['ratio'];
+              });
+
+              $res["team".$tid]['overview'] .= "<div class=\"content-cards specific-heroes-card\">".
+              "<h1>".locale_string("team_specific_heroes")."</h1>";
+
+              if (count($heroes)) {
+                foreach($heroes as $hid => $data) {
+                  $title = hero_name($hid)." - ".locale_string('total')." ".$report['pickban'][$hid]['matches_picked']." - ".locale_string('team')." ".$data['matches_picked']." - ".
+                    locale_string('winrate_s')." ".round($data['winrate_picked']*100, 2)."% - ".locale_string('ratio')." ".round($data['ratio']*100, 2)."%";
+                  $res["team".$tid]['overview'] .= "<a title=\"".$title."\">".hero_icon($hid)."</a>";
+                }
+              } else {
+                $res["team".$tid]['overview'] .= locale_string('none');
+              }
+
+              $res["team".$tid]['overview'] .= "</div>";
+            }
+            
             $res["team".$tid]['overview'] .= "<div class=\"content-cards unique-heroes-card\">".
               "<h1>".locale_string("team_players_unique_heroes")."</h1>";
             
