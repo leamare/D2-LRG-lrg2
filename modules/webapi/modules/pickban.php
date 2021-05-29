@@ -28,7 +28,7 @@ $endpoints['pickban'] = function($mods, $vars, &$report) {
   } else if (isset($vars['region']) && isset($report['regions_data'])) {
     $parent =& $report['regions_data'][ $vars['region'] ]; 
     $context =& $report['regions_data'][ $vars['region'] ]['pickban'];
-    $context_total_matches = $report['regions_data'][ $vars['region'] ]['main']['matches_total'];
+    $context_total_matches = $report['regions_data'][ $vars['region'] ]['main']['matches_total'] ?? $report['regions_data'][ $vars['region'] ]['main']['matches'];
     $context_main =& $report['regions_data'][ $vars['region'] ]['main'];
   } else {
     $parent =& $report;
