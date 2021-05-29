@@ -21,6 +21,8 @@ $strings['ru'] = [
   "buybacks_total" => "Всего выкупов",
   "creeps_killed"  => "Всего убито крипов",
   "avg_match_len" => "Средняя продолжительность матча",
+  "avg_match_len_radiant_win" => "Средняя продолжительность победы Света",
+  "avg_match_len_dire_win" => "Средняя продолжительность победы Тьмы",
   "total_time_dead" => "Общее время в таверне (в минутах)",
   "heroes_contested"=> "Востребованные герои",
   "heroes_uncontested"=> "Невостребованные герои",
@@ -217,6 +219,7 @@ $strings['ru'] = [
   "top_pick_pairs" => "Любимые пары",
   "top_player_pairs" => "Лучшие друзья",
   "team_players_unique_heroes" => "Уникальные герои игроков",
+  "team_specific_heroes" => "Характерные герои команды",
   "team_roster_position" => "Игроки команды на этой позиции",
 
   // summary/haverages strings
@@ -545,5 +548,9 @@ $strings['ru'] = [
   "region105" => "Южная Америка",
   "region107" => "Китай",
   "region108" => "Америка",
+
+  "region1021" => "Западная Европа",
+  "region1022" => "Восточная Европа",
+
   "region199" => "Остальные"
 ];

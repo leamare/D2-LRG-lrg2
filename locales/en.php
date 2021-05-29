@@ -23,6 +23,8 @@ $strings['en'] = [
   "buybacks_total" => "Total buybacks",
   "creeps_killed"  => "Total creeps murdered",
   "avg_match_len" => "Average match duration",
+  "avg_match_len_radiant_win" => "Average Radiant Win duration",
+  "avg_match_len_dire_win" => "Average Dire Win duration",
   "total_time_dead" => "Total time players were dead (minutes)",
   "heroes_contested"=> "Heroes contested",
   "heroes_uncontested"=> "Heroes uncontested",
@@ -189,6 +191,7 @@ $strings['en'] = [
   "top_pick_pairs" => "Favorite pairs",
   "top_player_pairs" => "Best friends",
   "team_players_unique_heroes" => "Unique heroes per player",
+  "team_specific_heroes" => "Team speficic heroes",
   "team_roster_position" => "Team's players on this position",
 
   // summary/haverages strings
@@ -545,5 +548,9 @@ $strings['en'] = [
   "region105" => "South America",
   "region107" => "China",
   "region108" => "Americas",
+
+  "region1021" => "Western Europe",
+  "region1022" => "Eastern Europe",
+
   "region199" => "Others"
 ];
