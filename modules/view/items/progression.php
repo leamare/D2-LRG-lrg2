@@ -81,8 +81,10 @@ function rg_view_generate_items_progression() {
   $edges = '';
 
   foreach ($items as $item) {
-    $minute_gr = round($report['items']['stats'][$hero][$item]['median']/240);
+    if (empty($report['items']['stats'][$hero][$item])) continue;
+    $minute_gr = round($report['items']['stats'][$hero][$item]['median']/180);
     $minute_gr = in_array($item, $meta['item_categories']['early']) && $minute_gr > 3 ? 3 : $minute_gr;
+    if ($minute_gr > 14) $minute_gr = 14;
     $diff_raw = $report['items']['stats'][$hero][$item]['winrate'] - $report['items']['stats'][$hero][$item]['wo_wr'];
     $diff = 0.5 + $diff_raw;
     $nodes .= "{ id: $item, value: ".$report['items']['stats'][$hero][$item]['purchases'].", label: '".addslashes(item_name($item))."'".
@@ -107,14 +109,16 @@ function rg_view_generate_items_progression() {
   }
 
   foreach ($pairs as $v) {
+    if ($v['item1'] == $v['item2']) continue; // TODO:
     $diff = $v['winrate'] - ($data ? $data['winrate_picked'] : 0.5);
     $color = "'rgba(".
       round(126-255*($max_wr ? $diff/$max_wr : 0)).",124,".
-      round(126+255*($max_wr ? $diff/$max_wr : 0)).",".(($v['total']/$max_games)*0.85+0.15).")'";
+      round(126+255*($max_wr ? $diff/$max_wr : 0)).",".(($v['total']/$max_games)*0.25+0.075).")'";
     $color_hi = "'rgba(".
       round(136-205*($max_wr ? ($v['winrate']-0.5)/$max_wr : 0)).",100,".
-      round(136+205*($max_wr ? ($v['winrate']-0.5)/$max_wr : 0)).",1)'";
-    $edges .= "{from: ".$v['item1'].", to: ".$v['item2'].", value:".$v['total'].", title:\"".
+      round(136+205*($max_wr ? ($v['winrate']-0.5)/$max_wr : 0)).",".(0.65*$v['total']/$max_games+0.35).")'";
+    $edges .= "{from: ".$v['item1'].", to: ".$v['item2'].", value:".$v['total'].", width: ".($v['total']/$max_games).", title:\"".
+      addslashes(item_name($v['item1']))." -> ".addslashes(item_name($v['item2']))." - ".
       $v['total']." ".locale_string("matches").", ".number_format($v['winrate']*100, 2)."% ".locale_string("winrate").
       ", ".locale_string("items_minute_diff").": ".$v['min_diff'].
       ", ".locale_string("diff").": ".number_format($diff*100, 2).
@@ -127,7 +131,7 @@ function rg_view_generate_items_progression() {
     "var data = { nodes: nodes, edges: edges };\n".
     "var options={
       edges: {
-        arrows: { to: true }
+        arrows: { to: true },
       },
       nodes: {
         borderWidth:3,
@@ -153,7 +157,7 @@ function rg_view_generate_items_progression() {
           direction: 'UD',
           sortMethod: 'directed',
           shakeTowards: 'leaves',
-          nodeSpacing: 15,
+          nodeSpacing: 25,
           avoidOverlap: 1,
           levelSeparation: 100,
         },

@@ -154,7 +154,7 @@ foreach ($ar as $hero => $pairs) {
 	if ($hero == 'total')
 		$q1matches = quantile($_matches[ $hero ], 0.75);
 	else 
-		$q1matches = quantile($_matches[ $hero ], 0.25);
+		$q1matches = quantile($_matches[ $hero ], 0.375)+1;
 
 	$ar[ $hero ] = array_filter($pairs, function($v) use ($q1matches) {
 		if ($v['total'] <= $q1matches) return false;
