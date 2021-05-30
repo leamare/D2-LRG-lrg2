@@ -524,7 +524,8 @@ function get_stratz_response($match) {
 
           $time = ($t-1)*60;
 
-          if (!$item_id || ( isset($items_all[ $item_id ]) && abs($items_all[ $item_id ]-60) < 60))
+          // && abs($items_all[ $item_id ]-60) < 60)
+          if (!$item_id || isset($items_all[ $item_id ]) )
             continue;
 
           foreach($meta['item_categories'] as $category_name => $items) {
