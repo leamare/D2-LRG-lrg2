@@ -49,8 +49,25 @@ function rg_view_generate_items_progression() {
   $max_wr = 0;
   $max_games = 0;
   if (!isset($report['items']['progr'][$hero])) $report['items']['progr'][$hero] = [];
+
+  foreach ($report['items']['progr'][$hero] as $i => $v) {
+    if (empty($v) || !isset($v['total'])) unset($report['items']['progr'][$hero][$i]);
+  }
+
+  usort($report['items']['progr'][$hero], function($a, $b) {
+    return $b['total'] <=> $a['total'];
+  });
+
+  if (!empty($_GET['cat'])) {
+    $i = floor(count($report['items']['progr'][$hero]) * (float)($_GET['cat']));
+    $med = $report['items']['progr'][$hero][ $i > 0 ? $i-1 : 0 ]['total'];
+  } else {
+    $med = 0;
+  }
+
   foreach ($report['items']['progr'][$hero] as $v) {
-    if (empty($v)) continue;
+    if ($v['total'] < $med) continue;
+
     $pairs[] = $v;
     
     if (!in_array($v['item1'], $items)) $items[] = $v['item1'];
@@ -63,10 +80,6 @@ function rg_view_generate_items_progression() {
     }
   }
   $max_wr *= 2;
-
-  usort($pairs, function($a, $b) {
-    return $b['total'] <=> $a['total'];
-  });
 
   if (empty($pairs)) {
     $res[$tag] .= "<div class=\"content-text\">".locale_string("items_stats_empty")."</div>";
