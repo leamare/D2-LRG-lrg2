@@ -64,6 +64,10 @@ $endpoints['teams'] = function($mods, $vars, &$report) use (&$endpoints) {
     }
 
     $res['card'] = team_card($vars['team']);
+
+    if (!isset($report['teams'][ $vars['team'] ]['averages']))
+      return $res;
+
     $res['averages'] = $report['teams'][ $vars['team'] ]['averages'];
 
     if(isset($report['teams'][ $vars['team'] ]['regions'])) {

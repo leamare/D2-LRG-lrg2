@@ -6,6 +6,33 @@ function team_card($tid) {
 
   if(!isset($report['teams'])) return null;
 
+  if (empty($report['teams'][$tid]['averages'])) {
+    $team = [
+      "team_id" => $tid,
+      "team_name" => team_name($tid),
+      "matches" => $report['teams'][$tid]['matches_total'],
+      "wins" => $report['teams'][$tid]['wins'],
+      "winrate" => round($report['teams'][$tid]['wins']*100/$report['teams'][$tid]['matches_total']),
+    ];
+
+    $roster = [];
+    foreach($report['teams'][$tid]['active_roster'] as $player) {
+      $p = [
+        "player_id" => $player,
+        "player_name" => player_name($player),
+        "position" => null
+      ];
+      if (isset($report['players'][$player])) {
+        $position = reset($report['players_additional'][$player]['positions']);
+        $p['position'] = isset($position['core']) ? $position['core'].".".$position['lane'] : null;
+      }
+      $roster[] = $p;
+    }
+    $team['roster'] = $roster;
+
+    return $team;
+  }
+
   $team = [
     "team_id" => $tid,
     "team_name" => team_name($tid),
