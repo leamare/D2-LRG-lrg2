@@ -208,7 +208,7 @@ function rg_generator_team_pickban($table_id, $context) {
 }
 
 function rg_generator_team_pickban_profile($context) {
-  $pb = rg_create_team_pickban_data($context['pickban'], $context['pickban_vs'], $context['matches_total']);
+  $pb = rg_create_team_pickban_data($context['pickban'], $context['pickban_vs'] ?? [], $context['matches_total']);
 
   if (empty($pb)) return "";
 

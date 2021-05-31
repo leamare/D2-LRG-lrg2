@@ -184,6 +184,14 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
           $res["team".$tid]['draft'] = rg_generator_draft("team$tid-draft", $context[$tid]['pickban'], $context[$tid]['draft'], $context[$tid]['matches_total']);
         }
       }
+      if (isset($context[$tid]['draft_tree'])) {
+        $res["team".$tid]['draft_tree'] = "";
+
+        if(check_module($context_mod."team".$tid."-draft_tree")) {
+          include_once("$root/modules/view/generators/draft_tree.php");
+          $res["team".$tid]['draft_tree'] = rg_generator_draft_tree("team$tid-draft-tree", $context[$tid]['draft_tree'], $context[$tid]['draft'], $report['settings']['limiter_triplets']);
+        }
+      }
       if (isset($context[$tid]['draft_vs'])) {
         $res["team".$tid]['vsdraft'] = "";
 
