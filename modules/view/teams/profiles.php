@@ -66,7 +66,7 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
                 if (!isset($matches[ $l['player'] ][ $l['hero'] ])) $matches[ $l['player'] ][ $l['hero'] ] = [ 'ms' => [], 'c' => 0, 'w' => 0 ];
                 $matches[ $l['player'] ][ $l['hero'] ]['ms'][] = $match;
                 $matches[ $l['player'] ][ $l['hero'] ]['c']++;
-                $matches[ $l['player'] ][ $l['hero'] ]['w'] += $report['matches_additional'][$match]['radiant_win'] XOR $radiant;
+                $matches[ $l['player'] ][ $l['hero'] ]['w'] += ! ($report['matches_additional'][$match]['radiant_win'] XOR $radiant);
               }
             }
 
