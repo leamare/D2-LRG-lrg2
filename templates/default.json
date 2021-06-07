@@ -31,6 +31,7 @@
     "hero_laning": false,
 
     "draft_stages" : true,
+    "draft_tree": false,
 
     "hero_pairs" : true,
     "hero_pairs_matches": true,
