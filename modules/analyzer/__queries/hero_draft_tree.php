@@ -19,7 +19,9 @@ function rg_query_hero_draft_tree(&$conn, $limiter, $cluster = null, $team = nul
   draft d1 JOIN draft d2 ON d1.matchid = d2.matchid 
     AND d1.hero_id > d2.hero_id 
     AND d1.is_radiant = d2.is_radiant
-    AND ( CAST((d1.stage * 2 + d1.is_pick) AS SIGNED) - CAST((d2.stage * 2 + d2.is_pick) AS SIGNED) ) IN (-1, 0, 1)
+    AND ( ( CAST((d1.stage * 2 + d1.is_pick) AS SIGNED) - CAST((d2.stage * 2 + d2.is_pick) AS SIGNED) ) IN (-1, 0, 1)
+      OR ( CAST(d1.stage AS SIGNED) - CAST(d2.stage AS SIGNED) in (-1, 0, 1) AND d1.is_pick = d2.is_pick )
+    )
   JOIN matches m ON d1.matchid = m.matchid ".
   ($team ? "JOIN teams_matches tm ON tm.matchid = m.matchid AND d1.is_radiant = tm.is_radiant " : "").
   (!empty($wheres) ? "WHERE ".implode(' AND ', $wheres) : "").
