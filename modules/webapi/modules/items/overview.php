@@ -39,7 +39,7 @@ $endpoints['items-overview'] = function($mods, $vars, &$report) use (&$endpoints
   $best = [];
   $worst = [];
   uasort($report['items']['stats']['total'], function($a, $b) {
-    return ( $a['winrate']-$a['wo_wr'] ) <=> ( $b['winrate']-$b['wo_wr'] );
+    return ( max($a['early_wr'], $a['late_wr'])-$a['wo_wr'] ) <=> ( max($b['early_wr'], $b['late_wr'])-$b['wo_wr'] );
   });
   $keys = array_keys($report['items']['stats']['total']);
   $sz = sizeof($keys);
@@ -76,8 +76,9 @@ $endpoints['items-overview'] = function($mods, $vars, &$report) use (&$endpoints
       if ($line['purchases'] <= $report['items']['ph'][$hero]['q3'] || $line['purchases'] <= $report['items']['pi'][$iid]['q3']) continue;
       $line['hero'] = $hero;
       $line['item'] = $iid;
+      $wr = max($line['early_wr'], $line['late_wr']);
       
-      if ($line['winrate'] > $line['wo_wr']) $best_a[] = $line;
+      if ($wr > $line['wo_wr']) $best_a[] = $line;
       else $worst_a[] = $line;
 
       if ($line['grad'] < 0) $gradients[] = $line;
@@ -85,10 +86,10 @@ $endpoints['items-overview'] = function($mods, $vars, &$report) use (&$endpoints
   }
 
   uasort($best_a, function($b, $a) {
-    return ( $a['winrate']-$a['wo_wr'] ) <=> ( $b['winrate']-$b['wo_wr'] );
+    return ( max($a['early_wr'], $a['late_wr'])-$a['wo_wr'] ) <=> ( max($b['early_wr'], $b['late_wr'])-$b['wo_wr'] );
   });
   uasort($worst_a, function($a, $b) {
-    return ( $a['winrate']-$a['wo_wr'] ) <=> ( $b['winrate']-$b['wo_wr'] );
+    return ( max($a['early_wr'], $a['late_wr'])-$a['wo_wr'] ) <=> ( max($b['early_wr'], $b['late_wr'])-$b['wo_wr'] );
   });
 
   $best = array_slice($best_a, 0, $limit);
