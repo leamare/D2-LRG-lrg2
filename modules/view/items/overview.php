@@ -48,7 +48,7 @@ function rg_view_generate_items_overview() {
   $best = [];
   $worst = [];
   uasort($report['items']['stats']['total'], function($a, $b) {
-    return ( $a['winrate']-$a['wo_wr'] ) <=> ( $b['winrate']-$b['wo_wr'] );
+    return ( max($a['early_wr'], $a['late_wr'])-$a['wo_wr'] ) <=> ( max($b['early_wr'], $b['late_wr'])-$b['wo_wr'] );
   });
   $keys = array_keys($report['items']['stats']['total']);
   $sz = sizeof($keys);
@@ -77,12 +77,13 @@ function rg_view_generate_items_overview() {
       <th>".locale_string("items_wo_wr_shift")."</th>
     </tr></thead><tbody>";
   foreach ($best as $iid => $line) {
+    $wr = max($line['early_wr'], $line['late_wr']);
     $res .= "<tr>".
       "<td>".item_icon($iid)."</td>".
       "<td>".item_name($iid)."</td>".
       "<td>".$line['purchases']."</td>".
-      "<td>".number_format($line['winrate']*100, 2)."%</td>".
-      "<td>".($line['winrate'] > $line['wo_wr'] ? '+' : '').number_format(($line['winrate']-$line['wo_wr'])*100, 2)."%</td>".
+      "<td>".number_format($wr*100, 2)."%</td>".
+      "<td>".($wr > $line['wo_wr'] ? '+' : '').number_format(($wr-$line['wo_wr'])*100, 2)."%</td>".
     "</tr>";
   }
   $res .= "</tbody></table>";
@@ -95,12 +96,13 @@ function rg_view_generate_items_overview() {
       <th>".locale_string("items_wo_wr_shift")."</th>
     </tr></thead><tbody>";
   foreach ($worst as $iid => $line) {
+    $wr = max($line['early_wr'], $line['late_wr']);
     $res .= "<tr>".
       "<td>".item_icon($iid)."</td>".
       "<td>".item_name($iid)."</td>".
       "<td>".$line['purchases']."</td>".
-      "<td>".number_format($line['winrate']*100, 2)."%</td>".
-      "<td>".($line['winrate'] > $line['wo_wr'] ? '+' : '').number_format(($line['winrate']-$line['wo_wr'])*100, 2)."%</td>".
+      "<td>".number_format($wr*100, 2)."%</td>".
+      "<td>".($wr > $line['wo_wr'] ? '+' : '').number_format(($wr-$line['wo_wr'])*100, 2)."%</td>".
     "</tr>";
   }
   $res .= "</tbody></table>";
@@ -124,8 +126,9 @@ function rg_view_generate_items_overview() {
       if ($line['purchases'] <= $report['items']['ph'][$hero]['q3'] || $line['purchases'] <= $report['items']['pi'][$iid]['q3']) continue;
       $line['hero'] = $hero;
       $line['item'] = $iid;
+      $wr = max($line['early_wr'], $line['late_wr']);
       
-      if ($line['winrate'] > $line['wo_wr']) $best_a[] = $line;
+      if ($wr > $line['wo_wr']) $best_a[] = $line;
       else $worst_a[] = $line;
 
       if ($line['grad'] < 0) $gradients[] = $line;
@@ -133,60 +136,63 @@ function rg_view_generate_items_overview() {
   }
 
   uasort($best_a, function($b, $a) {
-    return ( $a['winrate']-$a['wo_wr'] ) <=> ( $b['winrate']-$b['wo_wr'] );
+    return ( max($a['early_wr'], $a['late_wr'])-$a['wo_wr'] ) <=> ( max($b['early_wr'], $b['late_wr'])-$b['wo_wr'] );
   });
   uasort($worst_a, function($a, $b) {
-    return ( $a['winrate']-$a['wo_wr'] ) <=> ( $b['winrate']-$b['wo_wr'] );
+    return ( max($a['early_wr'], $a['late_wr'])-$a['wo_wr'] ) <=> ( max($b['early_wr'], $b['late_wr'])-$b['wo_wr'] );
   });
 
   $best = array_slice($best_a, 0, $limit);
   $worst = array_slice($worst_a, 0, $limit);
 
+
   $res .= "<div class=\"content-text\"><h1>".locale_string("items_most_impactful_heroes_header")."</h1></div>";
-  //$res .= "<div class=\"small-list-wrapper\">";
-  $res .=  "<table id=\"items-over-best\" class=\"list\">
+  $res .= "<div class=\"small-list-wrapper\">";
+  $res .=  "<table id=\"items-over-best\" class=\"list list-small\">
     <thead><tr>
-      <th colspan=\"2\">".locale_string("hero")."</th>
+      <th>".locale_string("hero")."</th>
       <th colspan=\"2\">".locale_string("item")."</th>
       <th>".locale_string("purchases")."</th>
       <th>".locale_string("winrate")."</th>
       <th>".locale_string("items_wo_wr_shift")."</th>
     </tr></thead><tbody>";
   foreach ($best as $line) {
+    $wr = max($line['early_wr'], $line['late_wr']);
     $res .= "<tr>".
       "<td>".hero_portrait($line['hero'])."</td>".
-      "<td>".hero_name($line['hero'])."</td>".
+      // "<td>".hero_name($line['hero'])."</td>".
       "<td>".item_icon($line['item'])."</td>".
       "<td>".item_name($line['item'])."</td>".
       "<td>".$line['purchases']."</td>".
-      "<td>".number_format($line['winrate']*100, 1)."%</td>".
-      "<td>".($line['winrate'] > $line['wo_wr'] ? '+' : '').number_format(($line['winrate']-$line['wo_wr'])*100, 1)."%</td>".
+      "<td>".number_format($wr*100, 1)."%</td>".
+      "<td>".($wr > $line['wo_wr'] ? '+' : '').number_format(($wr-$line['wo_wr'])*100, 1)."%</td>".
     "</tr>";
   }
   $res .= "</tbody></table>";
 
-  $res .=  "<table id=\"items-over-worst\" class=\"list\">
+  $res .=  "<table id=\"items-over-worst\" class=\"list list-small\">
     <thead><tr>
-      <th colspan=\"2\">".locale_string("hero")."</th>
+      <th>".locale_string("hero")."</th>
       <th colspan=\"2\">".locale_string("item")."</th>
       <th>".locale_string("purchases")."</th>
       <th>".locale_string("winrate")."</th>
       <th>".locale_string("items_wo_wr_shift")."</th>
     </tr></thead><tbody>";
   foreach ($worst as $line) {
+    $wr = max($line['early_wr'], $line['late_wr']);
     $res .= "<tr>".
       "<td>".hero_portrait($line['hero'])."</td>".
-      "<td>".hero_name($line['hero'])."</td>".
+      // "<td>".hero_name($line['hero'])."</td>".
       "<td>".item_icon($line['item'])."</td>".
       "<td>".item_name($line['item'])."</td>".
       "<td>".$line['purchases']."</td>".
-      "<td>".number_format($line['winrate']*100, 1)."%</td>".
-      "<td>".($line['winrate'] > $line['wo_wr'] ? '+' : '').number_format(($line['winrate']-$line['wo_wr'])*100, 1)."%</td>".
+      "<td>".number_format($wr*100, 1)."%</td>".
+      "<td>".($wr > $line['wo_wr'] ? '+' : '').number_format(($wr-$line['wo_wr'])*100, 1)."%</td>".
     "</tr>";
   }
   $res .= "</tbody></table>";
 
-  //$res .= "</div>";
+  $res .= "</div>";
   
   // critical timings on a hero
   // - highest gradient with more than q3 matches
