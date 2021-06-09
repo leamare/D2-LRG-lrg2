@@ -42,7 +42,7 @@ function rg_view_generate_heroes_positions() {
           foreach($report['hero_positions_matches'][$i][$j] as $hid => $matches) {
             $report['hero_positions'][$i][$j][$hid]['matchlinks'] = "<a onclick=\"showModal('".
                 htmlspecialchars(join_matches($matches)).
-                "', '".locale_string("matches")." - ".hero_name($hid)." - ".locale_string("position_$i.$j")."');\">".
+                "', '".locale_string("matches")." - ".addcslashes(hero_name($hid)." - ".locale_string("position_$i.$j"), "'")."');\">".
                 locale_string("matches")."</a>";
           }
         }

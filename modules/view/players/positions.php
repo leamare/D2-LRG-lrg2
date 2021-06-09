@@ -39,7 +39,7 @@ function rg_view_generate_players_positions() {
           foreach($report['player_positions_matches'][$i][$j] as $id => $matches) {
             $report['player_positions'][$i][$j][$id]['matchlinks'] = "<a onclick=\"showModal('".
                 htmlspecialchars(join_matches($matches)).
-                "', '".locale_string("matches")." - ".player_name($id)." - ".locale_string("position_$i.$j")."');\">".
+                "', '".locale_string("matches")." - ".addcslashes(player_name($id)." - ".locale_string("position_$i.$j"), "'")."');\">".
                 locale_string("matches")."</a>";
           }
         }
