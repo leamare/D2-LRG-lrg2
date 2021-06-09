@@ -36,7 +36,7 @@ function rg_generator_tvt_grid($table_id, &$context, $teams_interest = []) {
                                    isset($context[$tid][$team_ids[$i]]['matchids']) ?
                                     "<br />MatchIDs: ".implode($context[$tid][$team_ids[$i]]['matchids'], ", ")
                                     : "").
-                        "','".team_name($tid)." ".locale_string("vs")." ".team_name($team_ids[$i])."')\">".
+                        "','".addcslashes(team_name($tid)." ".locale_string("vs")." ".team_name($team_ids[$i]), "'")."')\">".
                         number_format($teamline[$team_ids[$i]]['winrate']*100,0)."</td>";
       }
     }

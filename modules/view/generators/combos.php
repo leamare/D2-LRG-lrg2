@@ -82,7 +82,7 @@ function rg_generator_combos($table_id, &$context, $context_matches, $heroes_fla
                 ((is_array($context_matches) && !empty($context_matches)) ?
                   "<td><a onclick=\"showModal('".htmlspecialchars(
                     join_matches($context_matches[ $combo[$id.'1'].'-'.$combo[$id.'2'].($trios ? '-'.$combo[$id.'3'] : "") ])).
-                    "', '".addslashes($matches_head)."');\">".locale_string("matches")."</a></td>" :
+                    "', '".addcslashes($matches_head, "'")."');\">".locale_string("matches")."</a></td>" :
                 "").
             "</tr>";
   }

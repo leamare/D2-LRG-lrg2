@@ -10,7 +10,7 @@ function rg_generator_pvp_grid($table_id, $contesters, &$context) {
 
   $res .= "<thead><tr><th></th>";
   foreach($contesters as $elid => $name) {
-    $res .= "<th><span>".$name."</span></th>";
+    $res .= "<th><span>".addcslashes($name, "'")."</span></th>";
   }
   $res .= "</tr></thead>";
 
