@@ -95,7 +95,7 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
 
               if (count($heroes)) {
                 foreach($heroes as $hid => $data) {
-                  $title = hero_name($hid)." - ".locale_string('total')." ".$report['pickban'][$hid]['matches_picked']." - ".locale_string('team')." ".$data['matches_picked']." - ".
+                  $title = addcslashes(hero_name($hid), "'")." - ".locale_string('total')." ".$report['pickban'][$hid]['matches_picked']." - ".locale_string('team')." ".$data['matches_picked']." - ".
                     locale_string('winrate_s')." ".round($data['winrate_picked']*100, 2)."% - ".locale_string('ratio')." ".round($data['ratio']*100, 2)."%";
                   $res["team".$tid]['overview'] .= "<a title=\"".$title."\">".hero_icon($hid)."</a>";
                 }
@@ -119,10 +119,10 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
                 sort($ms);
                 $num = $arr['c'];
                 $wr = $arr['w']/$arr['c'];
-                $title = hero_name($hero)." - ".locale_string('matches_s')." ".$num." (".locale_string('total')." ".$context[$tid]['pickban'][$hero]['matches_picked'].") - ".
+                $title = addcslashes(hero_name($hero), "'")." - ".locale_string('matches_s')." ".$num." (".locale_string('total')." ".$context[$tid]['pickban'][$hero]['matches_picked'].") - ".
                   locale_string('winrate_s')." ".round($wr*100, 2)."%";
                 $res["team".$tid]['overview'] .= "<a title=\"".$title."\" ".
-                  "onclick=\"showModal('".htmlspecialchars(join_matches($ms))."', '".player_name($player)." - $title')\"".
+                  "onclick=\"showModal('".htmlspecialchars(join_matches($ms))."', '".addcslashes(player_name($player), "'")." - $title')\"".
                   ">".hero_icon($hero)."</a>";
               }
               $res["team".$tid]['overview'] .= "</div>";
@@ -309,7 +309,7 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
 
                     $context[$tid]['hero_positions'][$i][$j][$hid]['matchlinks'] = "<a onclick=\"showModal('".
                         htmlspecialchars(join_matches($matches)).
-                        "', '".locale_string("matches")." - ".hero_name($hid)." - ".locale_string("position_$i.$j")."');\">".
+                        "', '".locale_string("matches")." - ".addcslashes(hero_name($hid)." - ".locale_string("position_$i.$j"), "'")."');\">".
                         locale_string("matches")."</a>";
                   }
                 }
