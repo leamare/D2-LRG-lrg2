@@ -191,7 +191,7 @@ $strings['en'] = [
   "top_pick_pairs" => "Favorite pairs",
   "top_player_pairs" => "Best friends",
   "team_players_unique_heroes" => "Unique heroes per player",
-  "team_specific_heroes" => "Team speficic heroes",
+  "team_specific_heroes" => "Team specific heroes",
   "team_roster_position" => "Team's players on this position",
 
   // summary/haverages strings
@@ -494,7 +494,7 @@ $strings['en'] = [
   "items_combos_desc" => "This section shows items that are commonly purchased with the chosen item. Timing difference shows the difference in purchase time of the chosen item compared to the listed one. Expectation is the expected number of purchases together. Deviation represents how ofthen these items are picked up together on purpose (higher positive numbers are better). Percentage is the deviation's part of the total number of purchases together.",
   "items_stats_empty" => "There is not enough data :(",
   "items_progression_list_desc" => "Progression list shows pairs of items bought one after the other.",
-  "items_progression_desc" => "Progression tree visually shows progression pairs. Size of the item represents number of purchases, node's border color represents winrate (orange is closer to zero, blue is closer to 100%). Arrow shows the order in which the items were purchased, its thickness represents number of purchases in this order and the color is the progression pair's winrate. Every level of the tree (vertically) represents 6 minutes of the a game. You can hover over an item/edge for detailed information and click to highlights its connections.",
+  "items_progression_desc" => "Progression tree visually shows progression pairs. Size of the item represents number of purchases, node's border color represents winrate (orange is closer to zero, blue is closer to 100%). Arrow shows the order in which the items were purchased, its thickness represents number of purchases in this order and the color is the progression pair's winrate. Every level of the tree (vertically) represents 3 minutes of the a game. You can hover over an item/edge for detailed information and click to highlights its connections.",
   "items_records_overview_desc" => "In the records overview you can see the earliest item purchases, based on the difference compared to the item's median purchase time, with item purchases in the third quantile.",
   "items_records_desc" => "There you can see all the earliest purchase times for the chosen item, as well as difference in time, compared to the item's median purchase time. Records are only shown for heroes with the number of purchases for the chosen item higher than the third quantile.",
   "items_stats_critical_desc" => "This section contains top 75% of most purchased items with negative gradient (sensitive to time of purchase) for selected hero. Q1 is early-average timing, Critical is the calculated time of purchase after which the item goes below 50% winrate. Window is difference between early and critical timings.",
