@@ -197,8 +197,24 @@ AND table_name = 'items' HAVING z > 0;";
 
 $query = $conn->query($sql);
 if (!isset($query->num_rows) || !$query->num_rows) {
-  $lg_settings['main']['items'] = false;
-  echo "[N] Set &settings.items to false.\n";
+  $sql = "SELECT COUNT(*) z
+  FROM information_schema.tables WHERE table_schema = '$lrg_sql_db' 
+  AND table_name = 'itemslines' HAVING z > 0;";
+
+  $query = $conn->query($sql);
+  if (!isset($query->num_rows) || !$query->num_rows) {
+    $lg_settings['main']['items'] = false;
+    $lg_settings['main']['itemslines'] = false;
+    echo "[N] Set &settings.items to false.\n";
+  } else {
+    $lg_settings['main']['items'] = true;
+    $lg_settings['main']['itemslines'] = true;
+    echo "[N] Set &settings.itemslines to true.\n";
+  }
+} else {
+  $lg_settings['main']['items'] = true;
+  $lg_settings['main']['itemslines'] = false;
+  echo "[N] Set &settings.items to true.\n";
 }
 
 $json = "";
