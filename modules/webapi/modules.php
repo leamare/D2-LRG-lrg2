@@ -40,6 +40,7 @@ if (!empty($report)) {
   include_once(__DIR__ . "/modules/wrplayers.php");
   include_once(__DIR__ . "/modules/items.php");
   include_once(__DIR__ . "/modules/profiles.php");
+  include_once(__DIR__ . "/modules/draft_tree.php");
 
   $endpoints['__fallback'] = function() use (&$endpoints) {
     return $endpoints['info'];
