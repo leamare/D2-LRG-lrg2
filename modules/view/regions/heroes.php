@@ -30,6 +30,15 @@ if(isset($reg_report['draft'])) {
   }
 }
 
+if(isset($reg_report['draft_tree'])) {
+  $res["region".$region]['heroes']["draft_tree"] = "";
+  include_once("heroes/draft_tree.php");
+
+  if(check_module($parent_mod."draft_tree")) {
+    $res["region".$region]['heroes']['draft_tree'] = rg_view_generate_regions_heroes_draft_tree($region, $reg_report);
+  }
+}
+
 if(isset($reg_report['heroes_meta_graph'])) {
   $res["region".$region]['heroes']["meta_graph"] = "";
   include_once("heroes/meta_graph.php");

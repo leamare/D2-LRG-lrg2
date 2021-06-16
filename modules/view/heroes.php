@@ -14,6 +14,9 @@ if (isset($report['averages_heroes']) )
 if (isset($report['draft']))
   include("heroes/draft.php");
 
+if (isset($report['draft_tree']))
+  include("heroes/draft_tree.php");
+
 if (isset($report['hero_positions'])) {
   include("heroes/positions.php");
   include("heroes/rolepickban.php");
@@ -73,6 +76,11 @@ function rg_view_generate_heroes() {
   if (isset($report['draft'])) {
     if (check_module($parent."draft")) {
       $res['draft'] = rg_view_generate_heroes_draft();
+    }
+  }
+  if (isset($report['draft_tree'])) {
+    if (check_module($parent."draft_tree")) {
+      $res['draft_tree'] = rg_view_generate_heroes_draft_tree();
     }
   }
   if (isset($report['hero_positions'])) {

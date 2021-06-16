@@ -14,10 +14,10 @@ function rg_generator_draft_tree($table_id, &$context, &$context_draft, $limiter
 
   if (!empty($_GET['cat'])) {
     $i = floor(count($context) * (float)($_GET['cat']));
-    $med = $context[ $i > 0 ? $i-1 : 0 ]['count'];
   } else {
-    $med = 0;
+    $i = floor(count($context) * 0.35);
   }
+  $med = $context[ $i > 0 ? $i-1 : 0 ]['count'];
 
   $stages_pop = [];
 
@@ -31,12 +31,12 @@ function rg_generator_draft_tree($table_id, &$context, &$context_draft, $limiter
       continue;
     }
 
-    if (!isset($items[ $v['hero1'] . $v['stage1'] ])) {
-      $items[$v['hero1'] . $v['stage1']] = [ $v['hero1'], $v['stage1'] ];
+    if (!isset($items[ $v['hero1'] + $v['stage1']*1000 ])) {
+      $items[$v['hero1'] + $v['stage1']*1000] = [ $v['hero1'], $v['stage1'] ];
       $stages_pop[ $v['stage1'] ] = ($stages_pop[ $v['stage1'] ] ?? 0) + 1;
     }
-    if (!isset($items[ $v['hero2'] . $v['stage2'] ])) {
-      $items[$v['hero2'] . $v['stage2']] = [ $v['hero2'], $v['stage2'] ];
+    if (!isset($items[ $v['hero2'] + $v['stage2']*1000 ])) {
+      $items[$v['hero2'] + $v['stage2']*1000 ] = [ $v['hero2'], $v['stage2'] ];
       $stages_pop[ $v['stage2'] ] = ($stages_pop[ $v['stage2'] ] ?? 0) + 1;
     }
 
