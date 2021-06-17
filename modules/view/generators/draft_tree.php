@@ -124,7 +124,7 @@ function rg_generator_draft_tree($table_id, &$context, &$context_draft, $limiter
     $color_hi = "'rgba(".
       round(136-205*($max_wr ? ($wr-0.5)/$max_wr : 0)).",100,".
       round(136+205*($max_wr ? ($wr-0.5)/$max_wr : 0)).",".(0.85*$v['count']/$max_games+0.15).")'";
-    $edges .= "{from: ".($v['hero1'].$v['stage1']).", to: ".($v['hero2'].$v['stage2']).", value:".$v['count'].", title:\"".
+    $edges .= "{from: ".($v['hero1'] + $v['stage1']*1000).", to: ".($v['hero2'] + $v['stage2']*1000).", value:".$v['count'].", title:\"".
       $v['count']." ".locale_string("matches").", ".number_format($wr*100, 2)."% ".locale_string("winrate").
       ", ".$v['stage1'].' '.$v['stage2'].
       "\", color:{color:$color, highlight: $color_hi}},";
