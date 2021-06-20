@@ -5,6 +5,7 @@ $strings['en'] = [
   "time_format" => "h:i:s",
   "versus" => "⚔",
   "game_num" => "Game",
+  "meet_num" => "Series",
 
   // report overview
   "league_name" => "Report name",
@@ -128,6 +129,7 @@ $strings['en'] = [
   "stage_num_2" => "of",
   "draft" => "Draft",
   "vsdraft" => "Draft against",
+  "draft_tree" => "Draft Tree",
   "positions" => "Positions",
   "sides" => "Factions",
   "pairs" => "Pairs",
@@ -486,6 +488,7 @@ $strings['en'] = [
   "desc_pickban_teams" => "Team pickban stats include drafting stats of the team, as well as stats of their opponents (most picked and banned heroes against the team). Ranks are using team's picks and enemy bans stats (and vice versa). Higher team's rank means the hero is strong for the team, higher enemy's rank means the hero is stronger against the team. R-Ranks show the least effective heroes among the most frequent ones.",
   "desc_pickban_teams_profile" => "This section lists the most and least effective heroes of the team and against it. See Picks and Bans section for more details.",
   "desc_pickban_roles" => "Number of bans is calculated approximately based on ratio of matches on the position to all matches of the hero.",
+  "desc_draft_tree" => "    Draft tree is a way to visually represent draft priorities and order of hero picks and bans.<br />Blue heroes represent picks, orange — bans. Every vertical block of heroes with the same color (one or more columns) represents one draft stage. Draft stages may be separated with an empty block.<br />Bolder connection between heroes means more cases when this kind of draft happened. Bigger icon of a hero means that it's picked (or banned) more on this stage.<br />Use zoom (with a mouse scroll or pinch gesture), move nodes around with cursor or hover over elements to see more details.",
 
   "items_most_impactful_desc" => "In the items component you may see various items stats. Overview shows top of the most impactful items (in general and for a specific hero) based on their effect on winrate, compared to games when the item wasn't purchased, with the highest positive and negative impacts respectively. Notable timings section shows earliest purchase timings for item-hero pairs with the highest winrate gradient per minute.",
   "items_stats_desc" => "Winrate shifts are differences in winrate compared to the item's winrate overall. Values are for when the item wasn't bought, early (Q1) and late (Q3) timings (higher is better). Winrate gradient per minute shows how winrate changes with every minute of the item's delayed purchase timing. Item timings values can be used to restore the normal distribution chart, where Q1, median and Q3 mean the first, second and third quantiles respectively.",
