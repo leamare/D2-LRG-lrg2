@@ -48,6 +48,9 @@ function rg_generator_meta_graph($div_id, &$context, &$context_pickban, $heroes_
       if($counter++ >= $endp && !has_pair($elid, $context)) {
           continue;
       }
+
+      $wr = $max_wr ? ($el['winrate_picked']-0.5)*2/$max_wr : 0;
+      $wr = $wr > 1 ? 1 : $wr;
       
       $nodes .= "{id: $elid, value: ".$el['matches_total'].
         ", label: '".addslashes(hero_name($elid))."'".
@@ -57,27 +60,37 @@ function rg_generator_meta_graph($div_id, &$context, &$context_pickban, $heroes_
         number_format($el['winrate_picked']*100, 1)." ".locale_string("winrate_picked")."'".
         ", shape:'circularImage', ".
         "image: '".hero_icon_link($elid)."', ".
-        "color:{ background:'rgba(".number_format(255-255*$el['winrate_picked'], 0).",124,".
-          number_format(255*$el['winrate_picked'], 0).")', ".
-        "border:'rgba(".number_format(255-255*$el['winrate_picked'], 0).",124,".
-        number_format(255*$el['winrate_picked'], 0).")',
-        highlight: { background:'rgba(".number_format(255-255*$el['winrate_picked'], 0).",124,".
-          number_format(255*$el['winrate_picked'], 0).")', ".
-        "border:'rgba(".number_format(255-255*$el['winrate_picked'], 0).",124,".
-        number_format(255*$el['winrate_picked'], 0).")' }
+        "color:{ background:'rgba(".number_format(126-255*$wr, 0).",124,".
+          number_format(126+255*$wr, 0).", 0.7)', ".
+        "border:'rgba(".number_format(126-255*$wr, 0).",124,".
+        number_format(126+255*$wr, 0).")',
+        highlight: { background:'rgba(".number_format(176-255*$wr, 0).",124,".
+          number_format(176+255*$wr, 0).")', ".
+        "border:'rgba(".number_format(176-255*$wr, 0).",124,".
+        number_format(176+255*$wr, 0).")' }
         } },";
     }
   } else {
     foreach($context_pickban as $elid => $el) {
       if (!has_pair($elid, $context)) continue;
+      
       $wr = $el['won'] / $el['matches'];
+      $wr = $max_wr ? 2*($wr-0.5)/$max_wr : 0;
+      $wr = $wr > 1 ? 1 : $wr;
+
       $nodes .= "{id: $elid, value: ".$el['matches'].
         ", label: '".addslashes(player_name($elid))."'".
         ", title: '".addslashes(player_name($elid)).", ".
         $el['matches']." ".locale_string("total").", ".
         number_format($wr*100, 1)." ".locale_string("winrate")."', ".
-        "color:{ border:'rgba(".number_format(255-255*$wr, 0).",124,".
-        number_format(255*$wr, 0).")' }},";
+        "color:{ background:'rgba(".number_format(126-255*$wr, 0).",124,".
+          number_format(126+255*$wr, 0).", 0.7)', ".
+        "border:'rgba(".number_format(126-255*$wr, 0).",124,".
+        number_format(126+255*$wr, 0).")',
+        highlight: { background:'rgba(".number_format(176-255*$wr, 0).",124,".
+          number_format(176+255*$wr, 0).")', ".
+        "border:'rgba(".number_format(176-255*$wr, 0).",124,".
+        number_format(176+255*$wr, 0).")' } }},";
     }
   }
   $res .= "var nodes = [".$nodes."];";
