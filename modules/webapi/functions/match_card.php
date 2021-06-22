@@ -16,6 +16,7 @@ function match_card($mid) {
   if (!isset($report['matches'])) return $match;
 
   $match['string'] = isset($report['match_parts_strings']) ? $report['match_parts_strings'][$mid] ?? null : null;
+  $match['series_num'] = isset($report['match_parts_series_num']) ? $report['match_parts_series_num'][$mid] ?? null : null;
   $match['game_num'] = isset($report['match_parts_game_num']) ? $report['match_parts_game_num'][$mid] ?? null : null;
 
   $clusters = $meta['clusters'];
@@ -92,7 +93,9 @@ function match_card_min($match) {
   return [
     'match_id' => $match,
     'string' => isset($report['match_parts_strings']) ? $report['match_parts_strings'][$match] ?? null : null,
+    'series_num' => isset($report['match_parts_series_num']) ? $report['match_parts_series_num'][$match] ?? null : null,
     'game_num' => isset($report['match_parts_game_num']) ? $report['match_parts_game_num'][$match] ?? null : null,
+    'total_game_num' => isset($report['match_parts_total_game_num']) ? $report['match_parts_total_game_num'][$match] ?? null : null,
     'teams' => $teams ?? []
   ];
 }
