@@ -1237,19 +1237,45 @@ function fetch($match) {
   }
 
   if(!empty($t_items) && $lg_settings['main']['items']) {
-    $sql = " INSERT INTO items (matchid, hero_id, playerid, item_id, category_id, time) VALUES ";
-    $len = sizeof($t_items);
-    for($i = 0; $i < $len; $i++) {
-        $sql .= "\n\t(".$t_items[$i]['matchid'].",".
-            $t_items[$i]['hero_id'].",".
-            $t_items[$i]['playerid'].",".
-            $t_items[$i]['item_id'].",".
-            $t_items[$i]['category_id'].",".
-            $t_items[$i]['time']."),";
-    }
-    $sql[strlen($sql)-1] = ";";
+    if ($lg_settings['main']['itemslines']) {
+      $sql = " INSERT INTO itemslines (matchid, hero_id, playerid, items) VALUES ";
+      $t_itemslines = [];
+      foreach ($t_items as $item) {
+        if (!isset($t_itemslines[ $item['playerid'] ])) {
+          $t_itemslines[ $item['playerid'] ] = [
+            'matchid' => $item['matchid'],
+            'hero_id' => $item['hero_id'],
+            'playerid' => $item['playerid'],
+            'items' => []
+          ];
+        }
+        $t_itemslines[ $item['playerid'] ]['items'][] = [
+          'i' => (int)$item['item_id'],
+          'c' => (int)$item['category_id'],
+          't' => (int)$item['time'],
+        ];
+      }
+      foreach ($t_itemslines as $t) {
+        $sql .= "\n\t({$t['matchid']}, {$t['hero_id']}, {$t['playerid']}, '".json_encode($t['items'])."'),";
+      }
+      $sql[strlen($sql)-1] = ";";
 
-    $err_query = "DELETE from items where matchid = ".$t_match['matchid'].";".$err_query;
+      $err_query = "DELETE from itemslines where matchid = ".$t_match['matchid'].";".$err_query;
+    } else {
+      $sql = " INSERT INTO items (matchid, hero_id, playerid, item_id, category_id, time) VALUES ";
+      $len = sizeof($t_items);
+      for($i = 0; $i < $len; $i++) {
+          $sql .= "\n\t(".$t_items[$i]['matchid'].",".
+              $t_items[$i]['hero_id'].",".
+              $t_items[$i]['playerid'].",".
+              $t_items[$i]['item_id'].",".
+              $t_items[$i]['category_id'].",".
+              $t_items[$i]['time']."),";
+      }
+      $sql[strlen($sql)-1] = ";";
+
+      $err_query = "DELETE from items where matchid = ".$t_match['matchid'].";".$err_query;
+    }
 
     if ($conn->multi_query($sql) === TRUE);
     else {
