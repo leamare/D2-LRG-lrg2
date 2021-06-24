@@ -21,7 +21,7 @@ else $locale = "en";
 include_once("rg_report_out_settings.php");
 
 include_once("modules/commons/versions.php");
-$lg_version = array( 2, 19, 0, 0, 0 );
+$lg_version = array( 2, 19, 1, 0, 0 );
 
 include_once("modules/commons/merge_mods.php");
 include_once("modules/commons/metadata.php");
