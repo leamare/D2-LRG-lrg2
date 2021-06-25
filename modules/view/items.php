@@ -18,6 +18,7 @@ if (isset($report['items']['combos'])) {
 if (isset($report['items']['progr'])) {
   include($root."/modules/view/items/proglist.php");
   include($root."/modules/view/items/progression.php");
+  include($root."/modules/view/items/builds.php");
 }
 if (isset($report['items']['records'])) {
   include($root."/modules/view/items/irecords.php");
@@ -59,6 +60,9 @@ function rg_view_generate_items() {
   if (isset($report['items']['progr'])) {
     if (check_module($parent."proglist")) {
       $res['proglist'] = rg_view_generate_items_proglist();
+    }
+    if (check_module($parent."builds")) {
+      $res['builds'] = rg_view_generate_items_builds();
     }
     if (check_module($parent."progression")) {
       $res['progression'] = rg_view_generate_items_progression();
