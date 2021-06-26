@@ -46,5 +46,6 @@ $endpoints['draft_tree'] = function($mods, $vars, &$report) {
 
   return [
     'edges' => $context,
+    'draft' => $draft_context
   ];
 };
