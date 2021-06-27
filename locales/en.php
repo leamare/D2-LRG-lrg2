@@ -555,5 +555,6 @@ $strings['en'] = [
   "region1021" => "Western Europe",
   "region1022" => "Eastern Europe",
 
-  "region199" => "Others"
+  "region199" => "Others",
+  "region2001" => "Seasonal Major",
 ];
