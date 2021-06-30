@@ -98,10 +98,13 @@ if (!empty($report['teams']) && !empty($report['matches']) && !empty($report['ma
 
     if (!isset($partCnts[$teamsStr])) {
       $partCnts[$teamsStr] = 0;
-      $totalCnt[$teamStr] = 0;
+      $totalCnt[$teamsStr] = 0;
+    }
+    if (!isset($totalCnt[$teamsStr])) {
+      $totalCnt[$teamsStr] = 0;
     }
     $partCnts[$teamsStr]++;
-    $totalCnt[$teamStr]++;
+    $totalCnt[$teamsStr]++;
     $cnt = $partCnts[$teamsStr];
     
     $report['match_parts_strings'][$mid] = $teamsStr
@@ -109,7 +112,7 @@ if (!empty($report['teams']) && !empty($report['matches']) && !empty($report['ma
       .' - '.locale_string('game_num').' '.$cnt;
     $report['match_parts_series_num'][$mid] = $meetCnts[$teamsStr][0];
     $report['match_parts_game_num'][$mid] = $cnt;
-    $report['match_parts_total_game_num'][$mid] = $totalCnt[$teamStr];
+    $report['match_parts_total_game_num'][$mid] = $totalCnt[$teamsStr];
   }
 }
 
