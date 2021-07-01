@@ -10,9 +10,10 @@ $endpoints['daily_wr'] = function($mods, $vars, &$report) {
   if (is_wrapped($report['hero_daily_wr'])) {
     $days = $report['hero_daily_wr']['head'][0];
     sort($days);
+    $report['hero_daily_wr_days'] = $days;
     $report['hero_daily_wr'] = unwrap_data($report['hero_daily_wr']);
   } else {
-    $days = $report['hero_daily_wr'][ array_keys($report['hero_daily_wr'])[0] ];
+    $days = array_keys($report['hero_daily_wr'][ array_keys($report['hero_daily_wr'])[0] ]);
     sort($days);
   }
 
@@ -43,7 +44,7 @@ $endpoints['daily_wr'] = function($mods, $vars, &$report) {
       $dd = $days_data[$dt] ?? [ 'ms' => 0, 'wr' => 0 ];
 
       if ($prev_dt == null || $global_days[$dt]/$prev_dt > 0.05) {
-        $prev_dt = $global_days[$dt];
+        $prev_dt = $global_days[$dt] ?? null;
   //       if (isset($prev_b) && $prev_b*0.15 > ($dd['bn'] ?? 0)) {
   //         $dmb[] = $dmb[ count($dmb)-1 ];
   //       } else {
