@@ -1,5 +1,7 @@
 <?php 
 
+$repeatVars['draft'] = ['team', 'region'];
+
 $endpoints['draft'] = function($mods, $vars, &$report) {
   if (in_array("players", $mods))
     $type = "player";

@@ -1,5 +1,7 @@
 <?php 
 
+$repeatVars['profiles'] = ['team', 'heroid', 'playerid', 'itemid'];
+
 $endpoints['profiles'] = function($mods, $vars, &$report) use (&$endpoints, &$meta) {
   // hero
   if (in_array("heroes", $mods)) {
@@ -7,6 +9,9 @@ $endpoints['profiles'] = function($mods, $vars, &$report) use (&$endpoints, &$me
       throw new \Exception("Need to specify hero");
     }
     $res = [];
+
+    $res['__endp'] = 'heroes-profiles';
+    $res['__stopRepeater'] = ['team', 'playerid', 'itemid'];
 
     // summary
     if (is_wrapped($report['hero_summary'])) $report['hero_summary'] = unwrap_data($report['hero_summary']);
@@ -151,6 +156,9 @@ $endpoints['profiles'] = function($mods, $vars, &$report) use (&$endpoints, &$me
 
     $res = [];
 
+    $res['__endp'] = 'players-profiles';
+    $res['__stopRepeater'] = ['team', 'heroid', 'itemid'];
+
     // summary
     if (is_wrapped($report['players_summary'])) $report['players_summary'] = unwrap_data($report['players_summary']);
     if (!isset($report['players_summary'][ $vars['playerid'] ])) throw new \Exception("Player `${$vars['playerid']}` is not in the report");
@@ -251,6 +259,9 @@ $endpoints['profiles'] = function($mods, $vars, &$report) use (&$endpoints, &$me
     }
 
     $res = [];
+
+    $res['__endp'] = 'heroes-profiles';
+    $res['__stopRepeater'] = ['team', 'playerid', 'heroid'];
 
     $req = $endpoints['items-heroes']($mods, $vars, $report);
     

@@ -1,5 +1,7 @@
 <?php 
 
+$repeatVars['records'] = ['region'];
+
 $endpoints['records'] = function($mods, $vars, &$report) use (&$endpoints) {
   if (in_array('items', $mods)) {
     $res = $endpoints['items-records']($mods, $vars, $report);

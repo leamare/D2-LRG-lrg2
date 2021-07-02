@@ -1,5 +1,7 @@
 <?php 
 
+$repeatVars['meta_graph'] = ['region'];
+
 $endpoints['meta_graph'] = function($mods, $vars, &$report) {
   if (isset($vars['team'])) {
     $context =& $report['teams'][ $vars['team'] ];

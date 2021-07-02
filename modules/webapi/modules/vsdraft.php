@@ -1,5 +1,7 @@
 <?php 
 
+$repeatVars['vsdraft'] = ['team'];
+
 $endpoints['vsdraft'] = function($mods, $vars, &$report) {
   $type = "heroes";
 

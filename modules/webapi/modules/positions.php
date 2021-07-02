@@ -1,5 +1,7 @@
 <?php 
 
+$repeatVars['positions'] = ['position'];
+
 $endpoints['positions'] = function($mods, $vars, &$report) {
   if (in_array("players", $mods))
     $type = "player";

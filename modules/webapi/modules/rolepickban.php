@@ -1,5 +1,7 @@
 <?php 
 
+$repeatVars['rolepickban'] = ['team', 'region'];
+
 $endpoints['rolepickban'] = function($mods, $vars, &$report) {
   if (!in_array("heroes", $mods)) throw new \Exception("This module is only available for heroes");
 

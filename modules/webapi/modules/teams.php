@@ -2,7 +2,9 @@
 
 include_once(__DIR__ . "/../../view/generators/tvt_unwrap_data.php");
 
-$endpoints['teams'] = function($mods, $vars, &$report) use (&$endpoints) {
+$repeatVars['teams'] = ['team'];
+
+$endpoints['teams'] = function($mods, $vars, &$report) use (&$endpoints, &$repeatVars) {
   if (!isset($report['teams']))
     throw new \Exception("No teams in the report ");
 
@@ -31,6 +33,7 @@ $endpoints['teams'] = function($mods, $vars, &$report) use (&$endpoints) {
 
     $res = [
       '__endp' => 'teams-grid',
+      '__stopRepeater' => 'team',
     ];
   
     foreach($tvt as $tid => $teamline) {
@@ -57,6 +60,7 @@ $endpoints['teams'] = function($mods, $vars, &$report) use (&$endpoints) {
   if (in_array("profiles", $mods)) {
     $res = [
       '__endp' => 'teams-profiles',
+      '__stopRepeater' => [ 'playerid', 'heroid', 'itemid' ],
       'teams_list' => array_keys($report['teams'])
     ];
     if (empty($vars['team'])) {

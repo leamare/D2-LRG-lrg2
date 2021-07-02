@@ -2,6 +2,8 @@
 
 const MIN10_GOLD = 4973;
 
+$repeatVars['laning'] = ['heroid'];
+
 $endpoints['laning'] = function($mods, $vars, &$report) {
   if (isset($vars['team'])) {
     throw new \Exception("No team allowed");
