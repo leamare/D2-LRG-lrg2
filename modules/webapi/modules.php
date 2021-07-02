@@ -2,6 +2,7 @@
 
 $meta = new lrg_metadata;
 $endpoints = [];
+$repeatVars = [];
 
 if (!empty($report)) {
   include_once(__DIR__ . "/../../modules/view/__post_load.php");
@@ -59,40 +60,29 @@ if (!empty($report)) {
 
 $mod = str_replace("/", "-", $mod);
 $modline = array_reverse(explode("-", $mod));
-$vars = [];
 
-foreach ($modline as $ml) {
-  if (!isset($endp_name) && isset($endpoints[$ml])) {
-    $endp_name = $ml;
-  }
-  if (strpos($ml, "region") !== FALSE && $ml != "regions") $vars['region'] = (int)str_replace("region", "", $ml);
-  if (strpos($ml, "position_") !== FALSE) $vars['position'] = str_replace("position_", "", $ml);
-  if (strpos($ml, "heroid") !== FALSE) $vars['heroid'] = (int)str_replace("heroid", "", $ml);
-  if (strpos($ml, "playerid") !== FALSE) $vars['playerid'] = (int)str_replace("playerid", "", $ml);
-  if (strpos($ml, "team") !== FALSE && $ml != "teams") $vars['team'] = (int)str_replace("team", "", $ml);
-  if (strpos($ml, "teamid") !== FALSE) $vars['team'] = (int)str_replace("teamid", "", $ml);
-  if (strpos($ml, "itemid") !== FALSE) $vars['item'] = (int)str_replace("itemid", "", $ml);
-  //if (isset($vars['team'])) $vars['teamid'] = $vars['team']; 
-}
-if (isset($_GET['gets'])) $vars['gets'] = explode(",", strtolower($_GET['gets']));
-if (isset($_GET['rep'])) $vars['rep'] = strtolower($_GET['rep']);
-if (isset($_GET['cat']) && !empty($_GET['cat'])) $vars['cat'] = $_GET['cat'];
-if (isset($_GET['item_cat']) && !empty($_GET['item_cat'])) $vars['item_cat'] = explode(',', $_GET['item_cat']);
-$vars['simple_matchcard'] = isset($_GET['simple_matchcard']);
-$vars['include_matches'] = isset($_GET['include_matches']);
+include_once(__DIR__ . "/execute.php");
+include_once(__DIR__ . "/variables.php");
+include_once(__DIR__ . "/repeaters.php");
 
 if (empty($endp_name)) {
   $endp = $endpoints['__fallback']();
   $endp_name = array_search($endp, $endpoints);
 } else $endp = $endpoints[$endp_name];
-try {
-  $result = $endp($modline, $vars, $report);
-} catch (\Exception $e) {
-  if (!isset($resp['errors'])) $resp['errors'] = [];
-    $resp['errors'][] = $e->getMessage().' ('.$e->getFile().':'.$e->getLine().')';
+
+$repeaters = $repeatVars[ $endp_name ] ?? [];
+
+if (!empty($repeaters)) {
+  $result = repeater($repeaters, $modline, $endp, $vars, $report);
+} else {
+  $result = execute($modline, $endp, $vars, $report);
 }
 
 if (isset($result['__endp'])) {
   $endp_name = $result['__endp'];
   unset($result['__endp']);
+}
+
+if (isset($result['__stopRepeater'])) {
+  unset($result['__stopRepeater']);
 }

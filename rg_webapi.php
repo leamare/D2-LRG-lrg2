@@ -124,7 +124,7 @@ $resp['result'] = $result ?? [];
 if (!empty($report) && $include_descriptor) {
   $resp['report_desc'] = get_report_descriptor($report, true);
 }
-if (!empty($report) && $include_team && !empty($vars['team'])) {
+if (!empty($report) && $include_team && !empty($vars['team']) && !is_array($vars['team'])) {
   $resp['team_card'] = team_card($vars['team']);
 }
 
