@@ -214,7 +214,12 @@ function get_stratz_response($match) {
     // ]);
   
     // $json = file_get_contents($stratz_request, false, $context);
-    $json = @file_get_contents($stratz_request.'?'.$q);
+    $json = @file_get_contents($stratz_request.'?'.$q, false, stream_context_create([
+      'ssl' => [
+        'verify_peer' => false,
+        'verify_peer_name' => false,
+      ]
+    ]));
     
     if (empty($json)) return null;
   
@@ -707,7 +712,12 @@ function get_stratz_multiquery($group) {
 
   $q = http_build_query($data);
   
-  $json = file_get_contents($stratz_request.'?'.$q);
+  $json = @file_get_contents($stratz_request.'?'.$q, false, stream_context_create([
+    'ssl' => [
+      'verify_peer' => false,
+      'verify_peer_name' => false,
+    ]
+  ]));
   //$json = @file_get_contents($stratz_request.'?'.$q);
   
   if (empty($json)) return null;

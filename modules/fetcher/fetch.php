@@ -247,7 +247,7 @@ function fetch($match) {
     if (!$ignore_stratz && !$stratz_graphql && (!empty($players_list) || !empty($rank_limit))) {
       $json = false;
       do {
-        $json = @file_get_contents($stratz_request);
+        $json = file_get_contents($stratz_request);
       } while (!$json);
       $stratz = empty($json) ? [] : json_decode($json, true);
 
@@ -364,7 +364,12 @@ function fetch($match) {
       echo("..Requesting STRATZ.");
 
       if (empty($stratz)) {
-        $json = @file_get_contents($stratz_request);
+        $json = @file_get_contents($stratz_request, false, stream_context_create([
+          'ssl' => [
+            'verify_peer' => false,
+            'verify_peer_name' => false,
+          ]
+        ]));
 
         $stratz = empty($json) ? [] : json_decode($json, true)['data']['match'];
       }
@@ -424,14 +429,24 @@ function fetch($match) {
               $full_request = true;
           }
 
-          $json = file_get_contents($stratz_request);
+          $json = @file_get_contents($stratz_request, false, stream_context_create([
+            'ssl' => [
+              'verify_peer' => false,
+              'verify_peer_name' => false,
+            ]
+          ]));
           $stratz = json_decode($json, true);
 
           if($full_request && empty($stratz) || !$stratz_retries) {
               echo("..ERROR: Missing STRATZ analysis, skipping.\n");
 
               if($request_unparsed && !in_array($match, $scheduled_stratz)) {
-                @file_get_contents($stratz_request);
+                @file_get_contents($stratz_request, false, stream_context_create([
+                  'ssl' => [
+                    'verify_peer' => false,
+                    'verify_peer_name' => false,
+                  ]
+                ]));
                 `php tools/replay_request_stratz.php -m$match`;
                 echo "[\t] Requested and scheduled $match\n";
                 $first_scheduled[$match] = time();
@@ -469,7 +484,7 @@ function fetch($match) {
     }
 
     if($lg_settings['main']['teams'] && (!isset($matchdata['radiant_team']['team_id']) || !isset($matchdata['dire_team']['team_id'])) ) {
-        $json = file_get_contents("https://api.steampowered.com/IDOTA2Match_570/GetMatchDetails/V001/?match_id=$match&key=$steamapikey");
+        $json = @file_get_contents("https://api.steampowered.com/IDOTA2Match_570/GetMatchDetails/V001/?match_id=$match&key=$steamapikey");
         $tmp = json_decode($json, true);
         unset($json);
         if(!isset($matchdata['radiant_team']['team_id'])) {
@@ -482,7 +497,7 @@ function fetch($match) {
               $matchdata['radiant_team']['team_id'] = $tmp['result']['radiant_team_id'];
               $matchdata['radiant_team']['name'] = $tmp['result']['radiant_name'];
 
-              $json = file_get_contents('https://api.steampowered.com/IDOTA2Match_570/GetTeamInfoByTeamID/v001/?key='.$steamapikey.'&teams_requested=1&start_at_team_id='.$matchdata['radiant_team']['team_id']);
+              $json = @file_get_contents('https://api.steampowered.com/IDOTA2Match_570/GetTeamInfoByTeamID/v001/?key='.$steamapikey.'&teams_requested=1&start_at_team_id='.$matchdata['radiant_team']['team_id']);
               $team = json_decode($json, true);
 
               if( !isset($team['result']['teams'][0]['tag']) || $team['result']['teams'][0]['tag'] == null )
@@ -502,7 +517,7 @@ function fetch($match) {
               $matchdata['dire_team']['team_id'] = $tmp['result']['dire_team_id'];
               $matchdata['dire_team']['name'] = $tmp['result']['dire_name'];
 
-              $json = file_get_contents('https://api.steampowered.com/IDOTA2Match_570/GetTeamInfoByTeamID/v001/?key='.$steamapikey.'&teams_requested=1&start_at_team_id='.$matchdata['dire_team']['team_id']);
+              $json = @file_get_contents('https://api.steampowered.com/IDOTA2Match_570/GetTeamInfoByTeamID/v001/?key='.$steamapikey.'&teams_requested=1&start_at_team_id='.$matchdata['dire_team']['team_id']);
               $team = json_decode($json, true);
 
               if( !isset($team['result']['teams'][0]['tag']) || $team['result']['teams'][0]['tag'] == null )

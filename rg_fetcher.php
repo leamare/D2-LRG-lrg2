@@ -88,7 +88,16 @@ $force_await = isset($options['A']);
 $scheduled_stratz = [];
 
 if ($stratz_graphql) {
-  $stratz_patches = \file_get_contents("https://api.stratz.com/api/v1/GameVersion");
+  $stratz_patches = \file_get_contents(
+    "https://api.stratz.com/api/v1/GameVersion",
+    false,
+    stream_context_create([
+      'ssl' => [
+        'verify_peer' => false,
+        'verify_peer_name' => false,
+      ]
+    ])
+  );
   $stratz_patches = \json_decode($stratz_patches, true);
 
   // Altho we are using Stratz API for patches list, we are using OpenDota format
