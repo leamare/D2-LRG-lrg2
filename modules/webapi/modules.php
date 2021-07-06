@@ -4,62 +4,41 @@ $meta = new lrg_metadata;
 $endpoints = [];
 $repeatVars = [];
 
+// Specify endpoints folders for specific conditions
+
 if (!empty($report)) {
   include_once(__DIR__ . "/../../modules/view/__post_load.php");
   include_once(__DIR__ . "/../../modules/view/generators/pickban_teams.php");
 
   if(empty($mod)) $mod = "";
 
-  include_once(__DIR__ . "/modules/info.php");
-  include_once(__DIR__ . "/modules/overview.php");
-  include_once(__DIR__ . "/modules/records.php");
-  include_once(__DIR__ . "/modules/haverages.php");
-  include_once(__DIR__ . "/modules/participants.php");
-  include_once(__DIR__ . "/modules/matches.php");
-  include_once(__DIR__ . "/modules/combos.php");
-  include_once(__DIR__ . "/modules/meta_graph.php");
-  include_once(__DIR__ . "/modules/party_graph.php");
-  include_once(__DIR__ . "/modules/pickban.php");
-  include_once(__DIR__ . "/modules/draft.php");
-  include_once(__DIR__ . "/modules/vsdraft.php");
-  include_once(__DIR__ . "/modules/positions.php");
-  include_once(__DIR__ . "/modules/rolepickban.php");
-  include_once(__DIR__ . "/modules/positions_matches.php");
-  include_once(__DIR__ . "/modules/pvp.php");
-  include_once(__DIR__ . "/modules/hvh.php");
-  include_once(__DIR__ . "/modules/hph.php");
-  include_once(__DIR__ . "/modules/summary.php");
-  include_once(__DIR__ . "/modules/sides.php");
-  include_once(__DIR__ . "/modules/matchcards.php");
-  include_once(__DIR__ . "/modules/teams_raw.php");
-  include_once(__DIR__ . "/modules/teams.php");
-  include_once(__DIR__ . "/modules/roster.php");
-  include_once(__DIR__ . "/modules/laning.php");
-  include_once(__DIR__ . "/modules/counters.php");
-  include_once(__DIR__ . "/modules/daily_wr.php");
-  include_once(__DIR__ . "/modules/wrtimings.php");
-  include_once(__DIR__ . "/modules/wrplayers.php");
-  include_once(__DIR__ . "/modules/items.php");
-  include_once(__DIR__ . "/modules/profiles.php");
-  include_once(__DIR__ . "/modules/draft_tree.php");
+  $__dir = __DIR__ . "/modules/report/";
 
   $endpoints['__fallback'] = function() use (&$endpoints) {
     return $endpoints['info'];
   };
 } else {
-  include_once(__DIR__ . "/modules/list.php");
-  include_once(__DIR__ . "/modules/metadata.php");
-  include_once(__DIR__ . "/modules/locales.php");
-  include_once(__DIR__ . "/modules/getcache.php");
-  include_once(__DIR__ . "/modules/raw.php");
+  $__dir = __DIR__ . "/modules/main/";
 
   $endpoints['__fallback'] = function() use (&$endpoints) {
     return $endpoints['list'];
   };
 }
 
+// Load endpoints
+
+$__list = scandir($__dir);
+foreach ($__list as $file) {
+  if ($file[0] == '.' || !strpos($file, '.php')) continue;
+  include_once($__dir . "draft_tree.php");
+}
+
+// Modlink processor
+
 $mod = str_replace("/", "-", $mod);
 $modline = array_reverse(explode("-", $mod));
+
+// Variables and repeaters
 
 include_once(__DIR__ . "/execute.php");
 include_once(__DIR__ . "/variables.php");
