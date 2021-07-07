@@ -1,10 +1,10 @@
 <?php 
 
-include_once(__DIR__ . "/../functions/draft_accuracy_test.php");
-include_once(__DIR__ . "/../functions/pickban_overview.php");
-include_once(__DIR__ . "/../functions/overview_uncontested.php");
-include_once(__DIR__ . "/../functions/overview_positions.php");
-include_once(__DIR__ . "/../functions/overview_combos.php");
+include_once(__DIR__ . "/../../functions/draft_accuracy_test.php");
+include_once(__DIR__ . "/../../functions/pickban_overview.php");
+include_once(__DIR__ . "/../../functions/overview_uncontested.php");
+include_once(__DIR__ . "/../../functions/overview_positions.php");
+include_once(__DIR__ . "/../../functions/overview_combos.php");
 
 $endpoints['overview'] = function($mods, $vars, &$report) use (&$meta, &$endpoints) {
 

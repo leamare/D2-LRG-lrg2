@@ -13,16 +13,10 @@ if (!empty($report)) {
   if(empty($mod)) $mod = "";
 
   $__dir = __DIR__ . "/modules/report/";
-
-  $endpoints['__fallback'] = function() use (&$endpoints) {
-    return $endpoints['info'];
-  };
+  $__fallback = 'info';
 } else {
   $__dir = __DIR__ . "/modules/main/";
-
-  $endpoints['__fallback'] = function() use (&$endpoints) {
-    return $endpoints['list'];
-  };
+  $__fallback = 'list';
 }
 
 // Load endpoints
@@ -30,8 +24,12 @@ if (!empty($report)) {
 $__list = scandir($__dir);
 foreach ($__list as $file) {
   if ($file[0] == '.' || !strpos($file, '.php')) continue;
-  include_once($__dir . "draft_tree.php");
+  include_once($__dir . $file);
 }
+
+$endpoints['__fallback'] = function() use (&$endpoints, $__fallback) {
+  return $endpoints[$__fallback];
+};
 
 // Modlink processor
 

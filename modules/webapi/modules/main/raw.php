@@ -6,7 +6,7 @@ $endpoints['raw'] = function($mods, $vars, &$report) use ($report_mask_search, $
     $fname = $reports_dir."/".$report_mask_search[0].$leaguetag.$report_mask_search[1];
     if(!file_exists($fname)) {
       $lightcache = true;
-      include(__DIR__ . "../../view/__open_cache.php");
+      include(__DIR__ . "/../../../view/__open_cache.php");
       if(isset($cache['reps'][$leaguetag]['file'])) {
         $fname = $cache['reps'][$leaguetag]['file'];
       }
