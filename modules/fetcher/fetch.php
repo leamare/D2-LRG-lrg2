@@ -1129,7 +1129,7 @@ function fetch($match) {
     $sql = "INSERT INTO players (playerID, nickname) VALUES (".$id.",\"".addslashes($player)."\");";
     if ($conn->query($sql) === TRUE || stripos($conn->error, "Duplicate entry") !== FALSE) $t_players[$id] = $player;
     else {
-      echo $conn->error."\n";
+      echo $conn->error."\n".$sql."\n";
       if ($conn->error === "MySQL server has gone away") {
         sleep(30);
         conn_restart();
@@ -1350,15 +1350,15 @@ function fetch($match) {
     if(sizeof($newteams)) {
       $sql = "INSERT INTO teams (teamid, name, tag) VALUES \n";
       foreach ($newteams as $id => $team) {
-        $team['name'] = substr($team['name'], 0, 48); // 48 = team name field length -2
-        $team['tag'] = substr($team['tag'], 0, 23); // 232 = team tag field length -2
+        $team['name'] = mb_substr($team['name'], 0, 48); // 48 = team name field length -2
+        $team['tag'] = mb_substr($team['tag'], 0, 23); // 23 = team tag field length -2
         // I shouldn't use fixed varchar size in first place though
         $sql .= "\n\t(".$id.",\"".addslashes($team['name'])."\",\"".addslashes($team['tag'])."\"),";
       }
       $sql[strlen($sql)-1] = ";";
   
       if ($conn->multi_query($sql) === TRUE || stripos($conn->error, "Duplicate entry") !== FALSE);
-      else die("[F] Unexpected problems when recording to database.\n".$conn->error."\n");
+      else die("[F] Unexpected problems when recording to database.\n".$conn->error."\n".$sql."\n");
   
       if($lg_settings['ana']['teams']['rosters']) {
         //echo "[ ] Getting teams rosters\n";
