@@ -10,6 +10,7 @@ function team_card($tid) {
     $team = [
       "team_id" => $tid,
       "team_name" => team_name($tid),
+      "team_tag" => team_tag($tid),
       "matches" => $report['teams'][$tid]['matches_total'],
       "wins" => $report['teams'][$tid]['wins'],
       "winrate" => round($report['teams'][$tid]['wins']*100/$report['teams'][$tid]['matches_total']),
@@ -36,6 +37,7 @@ function team_card($tid) {
   $team = [
     "team_id" => $tid,
     "team_name" => team_name($tid),
+    "team_tag" => team_tag($tid),
     "matches" => $report['teams'][$tid]['matches_total'],
     "wins" => $report['teams'][$tid]['wins'],
     "winrate" => round($report['teams'][$tid]['wins']*100/$report['teams'][$tid]['matches_total']),
