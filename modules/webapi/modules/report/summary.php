@@ -16,6 +16,7 @@ $endpoints['summary'] = function($mods, $vars, &$report) {
       $t = [
         "team_id" => $team_id,
         "team_name" => team_name($team_id),
+        "team_tag" => team_tag($team_id),
         "matches_total" => $report['teams'][$team_id]['matches_total'],
         "winrate" => round( $report['teams'][$team_id]['matches_total'] ? 
           $report['teams'][$team_id]['wins']*100/$report['teams'][$team_id]['matches_total']

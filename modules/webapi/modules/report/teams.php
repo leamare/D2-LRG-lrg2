@@ -180,5 +180,6 @@ $endpoints['teams'] = function($mods, $vars, &$report) use (&$endpoints, &$repea
 
   if (in_array("participants", $mods)) 
     return $endpoints['participants']($mods, $vars, $report);
-  return $endpoints['teams_raw']($mods, $vars, $report);
+  
+  return $endpoints['summary']($mods, $vars, $report);
 };
