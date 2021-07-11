@@ -75,8 +75,16 @@ if(compare_ver($lg_settings['version'], $lrg_version) < 0) {
     if (file_exists("templates/".$options['T'].".json"))
       $tmpl = json_decode(file_get_contents("templates/".$options['T'].".json"), true);
 
+    if (isset($tmpl['ana']) && isset($tmpl['ana']['regions']) && isset($tmpl['ana']['regions']['groups'])) {
+      $tmp['ana']['regions']['groups'] = $tmpl['ana']['regions']['groups'];
+    }
+    
     $tmp = array_replace_recursive($tmp, $tmpl);
     unset($tmpl);
+  }
+
+  if (isset($lg_settings['ana']) && isset($lg_settings['ana']['regions']) && isset($lg_settings['ana']['regions']['groups'])) {
+    $tmp['ana']['regions']['groups'] = $lg_settings['ana']['regions']['groups'];
   }
 
   $tmp = array_replace_recursive($tmp, $lg_settings);
