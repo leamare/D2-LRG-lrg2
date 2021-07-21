@@ -41,10 +41,10 @@ if(isset($argv)) {
   if(isset($options['S'])) {
     echo "[ ] Enter parameters below in format \"Parameter = value\".\n    Divide parameters subcategories by a \".\", empty line to exit.\n";
     while (!empty($st = readline_rg(" >  "))) {
-      $st = explode("=", trim($st));
+      $st = explode("=", trim($st), 1);
       $st[0] = trim($st[0]);
       $st[1] = trim($st[1]);
-      if ($st[1][0] === '[' && $st[1][0] === '[') {
+      if ($st[1][0] === '[' && $st[1][strlen($st)-1] === ']') {
         $st[1] = explode(',', substr($st[1], 1, -1));
       }
       $val = &$lg_settings;
