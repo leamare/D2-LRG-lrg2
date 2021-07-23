@@ -14,7 +14,8 @@ SELECT
 	SUM(NOT matches.radiantWin XOR matchlines.isRadiant) wins,
 	min(time) min_time,
 	max(time) max_time,
-	CAST( SUM(time)/SUM(1) AS SIGNED ) avg_time
+	CAST( SUM(time)/SUM(1) AS SIGNED ) avg_time,
+  COUNT(DISTINCT items.matchid) matchcount
 FROM (
   SELECT
     items.matchid matchid,
@@ -60,7 +61,8 @@ SELECT
 	SUM(NOT matches.radiantWin XOR matchlines.isRadiant) wins,
 	min(time) min_time,
 	max(time) max_time,
-	CAST( SUM(time)/SUM(1) AS SIGNED ) avg_time
+	CAST( SUM(time)/SUM(1) AS SIGNED ) avg_time,
+  COUNT(DISTINCT items.matchid) matchcount
 FROM (
   SELECT
     items.matchid matchid,
@@ -117,73 +119,133 @@ foreach ($purchases_h as $hid => $dt) {
 // MEDIANS AND SHIT
 
 // separating timings/wins runs to reduce memory consumption
-$raw_dataset = [];
-$rd_head = [ 
-  'q1t' => 0,
-  'q1w' => 0,
-  'q3t' => 0,
-  'q3w' => 0,
-  'w' => 0,
-  't' => 0
-];
 $dataset = [];
+
+$heroline = "";
 
 foreach ($r as $hid => $items) {
   echo ".";
-  foreach ($items as $iid => $data) {
-    $q = "SELECT items.item_id, items.hero_id, min(items.time) mintime, (NOT matches.radiantWin XOR matchlines.isRadiant) win 
-      FROM items 
-      JOIN matchlines ON matchlines.matchid = items.matchid AND matchlines.heroid = items.hero_id 
-      JOIN matches ON matches.matchid = matchlines.matchid
-      WHERE items.item_id = $iid ".(is_numeric($hid) ? "AND items.hero_id = $hid " : "")."
-      GROUP BY items.matchid, items.item_id, items.hero_id ORDER BY mintime ASC;";
-    
-    $query_res = $conn->query($q);
 
-    if ($query_res !== FALSE);
-    else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n".$q);
-    
+  $q = "SELECT SUM(NOT a.radiantWin XOR a.isRadiant) win, SUM(1) total
+  FROM (
+    SELECT matches.radiantWin, matchlines.isRadiant
+    FROM matchlines
+    JOIN matches ON matches.matchid = matchlines.matchid
+    JOIN items ON matches.matchid = items.matchid AND matchlines.heroid = items.hero_id 
+    ".(is_numeric($hid) ? " WHERE matchlines.heroid = $hid " : "")."
+    GROUP BY matchlines.matchid, matchlines.heroid
+  ) a";
+
+  $query_res = $conn->query($q);
+
+  if ($query_res !== FALSE);
+  else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n".$q);
+
+  if (isset($query_res->num_rows) && $query_res->num_rows) {
+    $row = $query_res->fetch_row();
+    $hero_wins = $row[0];
+    $hero_total = $row[1];
+  }
+  
+  $query_res->close();
+
+  foreach ($items as $iid => $data) {
     if (!isset($dataset[$iid])) $dataset[$iid] = [];
     $dataset[$iid][$hid] = [];
-    if (!isset($raw_dataset[$iid])) $raw_dataset[$iid] = [];
-    $raw_dataset[$iid][$hid] = $rd_head;
-    if (isset($query_res->num_rows) && $query_res->num_rows) {
-      $sz = $query_res->num_rows;
-      $dataset[$iid][$hid]['sum'] = 0;
-      $dataset[$iid][$hid]['sz'] = $sz;
-      $szq1 = round($sz*0.25);
-      $szq2 = round($sz*0.5);
-      $szq3 = round($sz*0.75);
 
-      for ($row = $query_res->fetch_row(), $i = 0; $row != null; $row = $query_res->fetch_row(), $i++) {
-        if ($i == $szq1) $dataset[$iid][$hid]['q1'] = (int)($row[2]);
-        if ($i == $szq2) $dataset[$iid][$hid]['m'] = (int)($row[2]);
-        if ($i == $szq3) $dataset[$iid][$hid]['q3'] = (int)($row[2]);
+    $dataset[$iid][$hid]['q1'] = 0;
+    $dataset[$iid][$hid]['m'] = 0;
+    $dataset[$iid][$hid]['q3'] = 0;
 
-        $dataset[$iid][$hid]['sum'] += pow((int)($row[2])-$r[$hid][$iid]['avg_time'], 2);
+    $dataset[$iid][$hid]['q1w'] = 0;
+    $dataset[$iid][$hid]['q3w'] = 0;
+    $dataset[$iid][$hid]['q1m'] = 0;
+    $dataset[$iid][$hid]['q3m'] = 0;
 
-        if ($i <= $szq1) {
-          $raw_dataset[$iid][$hid]['q1t']++;
-          $raw_dataset[$iid][$hid]['q1w'] += $row[3];
-        }
-      
-        if ($i >= $szq3) {
-          $raw_dataset[$iid][$hid]['q3t']++;
-          $raw_dataset[$iid][$hid]['q3w'] += $row[3];
-        }
-      
-        $raw_dataset[$iid][$hid]['w'] += (int)($row[3]);
-        $raw_dataset[$iid][$hid]['t'] += 1;
-      }
-    } else {
-      $dataset[$iid][$hid]['q1'] = 0;
-      $dataset[$iid][$hid]['m'] = 0;
-      $dataset[$iid][$hid]['q3'] = 0;
+    $dataset[$iid][$hid]['wow'] = 0;
+    $dataset[$iid][$hid]['wom'] = 0;
+
+    if ($data['purchases'] < 2) {
       $dataset[$iid][$hid]['sz'] = 0;
-      $dataset[$iid][$hid]['sum'] = 0;
+      continue;
     }
+
+    $dataset[$iid][$hid]['sz'] = $data['purchases'];
+
+    $qs = [];
+
+    $qs['q1'] = round($data['purchases'] * 0.25);
+    $qs['q2'] = round($data['purchases'] * 0.5);
+    $qs['q3'] = round($data['purchases'] * 0.75);
+
+    $q = "set @rn := 0;
+      set @rw := 0;
+      select * from ( 
+        select *, 
+          @rn := @rn + 1 as rn, 
+          @rw := CASE WHEN @rn-1 in (".implode(',', $qs).") THEN 0 ELSE @rw END + a.win as rw
+        from (
+          SELECT min(items.time) mintime, (NOT matches.radiantWin XOR matchlines.isRadiant) win 
+          FROM items 
+          JOIN matchlines ON matchlines.matchid = items.matchid AND matchlines.heroid = items.hero_id 
+          JOIN matches ON matches.matchid = matchlines.matchid
+          WHERE items.item_id = $iid ".(is_numeric($hid) ? "AND items.hero_id = $hid " : "")."
+          GROUP BY items.matchid, items.item_id, items.hero_id ORDER BY mintime ASC
+        ) a
+      ) b 
+    WHERE b.rn in (".implode(',', $qs).");";
     
-    $query_res->close();
+    if ($conn->multi_query($q) === TRUE);
+    else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n".$q);
+    
+    do {
+      $query_res = $conn->store_result();
+    
+      if(!is_bool($query_res)) {
+        if ($query_res->num_rows == 0) continue;
+
+        $row = $query_res->fetch_row();
+
+        if (!empty($row)) {
+
+          $dataset[$iid][$hid]['q1'] = $row[0];
+          $dataset[$iid][$hid]['q1m'] = $row[2];
+          $dataset[$iid][$hid]['q1w'] = $row[3];
+
+          $dataset[$iid][$hid]['q3m'] += $row[2];
+          $dataset[$iid][$hid]['q3w'] += $row[3];
+          $row = $query_res->fetch_row();
+          $dataset[$iid][$hid]['m'] = $row[0];
+
+          $dataset[$iid][$hid]['q3m'] += $row[2];
+          $dataset[$iid][$hid]['q3w'] += $row[3];
+          $row = $query_res->fetch_row();
+          if ($row) {
+            $dataset[$iid][$hid]['q3'] = $row[0];
+            $dataset[$iid][$hid]['q3m'] = $data['purchases'] - $row[2];
+            $dataset[$iid][$hid]['q3w'] = $data['wins'] - $dataset[$iid][$hid]['q3w'] - $row[3];
+          } else {
+            $dataset[$iid][$hid]['q3'] = $data['max_time'];
+            $dataset[$iid][$hid]['q3m'] = 0;
+            $dataset[$iid][$hid]['q3w'] = 0;
+          }
+
+        }
+
+        $query_res->free_result();
+      }
+    } while($conn->next_result());
+
+    // without
+
+    $dataset[$iid][$hid]['wom'] = $hero_total - $data['matchcount'];
+
+    if ($dataset[$iid][$hid]['wom']) {
+      $dataset[$iid][$hid]['wow'] = $hero_wins - $data['wins'];
+    } else {
+      $dataset[$iid][$hid]['wom'] = 1;
+      $dataset[$iid][$hid]['wow'] = 0;
+    }
   }
 }
 
@@ -207,47 +269,31 @@ foreach ($r as $hid => $items) {
       continue;
     }
 
-    $r[$hid][$iid]['std_dev'] = 0;
-    // $sum = 0;
-    // foreach ($dataset[$iid][$hid] as $v) {
-    //   $sum += pow($v-$data['avg_time'], 2);
-    // }
-
-    $r[$hid][$iid]['std_dev'] = round(sqrt( $dataset[$iid][$hid]['sum']/($sz-1) ), 3);
     $r[$hid][$iid]['q1'] = $dataset[$iid][$hid]['q1'];
     $r[$hid][$iid]['q3'] = $dataset[$iid][$hid]['q3'] ?? $dataset[$iid][$hid]['m'];
     $r[$hid][$iid]['median'] = $dataset[$iid][$hid]['m'];
     $r[$hid][$iid]['winrate'] = round($data['wins']/$data['purchases'], 4);
     $r[$hid][$iid]['prate'] = round($data['purchases']/$items_matches[$hid], 4);
 
-    $wins_q1 = 0; $total_q1 = 0;
-    $wins_q3 = 0; $total_q3 = 0;
-    $q1 = $r[$hid][$iid]['q1'];//$r[$hid][$iid]['median'] - $r[$hid][$iid]['std_dev'];
-    $q3 = $r[$hid][$iid]['q3'];//$r[$hid][$iid]['median'] + $r[$hid][$iid]['std_dev'];
 
-    $total_q1 = $raw_dataset[$iid][$hid]['q1t'];
-    $wins_q1 = $raw_dataset[$iid][$hid]['q1w'];
-    $total_q3 = $raw_dataset[$iid][$hid]['q3t'];
-    $wins_q3 = $raw_dataset[$iid][$hid]['q3w'];
-    // foreach ($raw_dataset[$iid][$hid] as $v) {
-    //   if ($v[0] <= $q1) {
-    //     $total_q1++;
-    //     $wins_q1 += $v[1];
-    //   }
+    // using estimation formula for Standard Deviation because
+    // I don't want to make another query
+    $r[$hid][$iid]['std_dev'] = ($r[$hid][$iid]['max_time'] - $r[$hid][$iid]['min_time']) / 4*inverse_ncdf(($sz - 0.375)/($sz + 0.25))
+      + ($r[$hid][$iid]['q3'] - $r[$hid][$iid]['q1']) / 4*inverse_ncdf((0.75*$sz - 0.125)/($sz + 0.25));
 
-    //   if ($v[0] >= $q3) {
-    //     $total_q3++;
-    //     $wins_q3 += $v[1];
-    //   }
-    // }
+    // it's an approximation, but a decent one, really
+    $r[$hid][$iid]['std_dev'] = ($r[$hid][$iid]['q3'] - $r[$hid][$iid]['q1']) / 1.35;
 
-    $total_wo = 0; $wins_wo = 0;
+    $q1 = $r[$hid][$iid]['q1'];
+    $q3 = $r[$hid][$iid]['q3'];
 
-    foreach ($raw_dataset as $item => $lines) {
-      if ($item == $iid || empty($lines[$hid])) continue;
-      $total_wo += $lines[$hid]['t'];
-      $wins_wo += $lines[$hid]['w'];
-    }
+    $total_q1 = $dataset[$iid][$hid]['q1m'];
+    $wins_q1 = $dataset[$iid][$hid]['q1w'];
+    $total_q3 = $dataset[$iid][$hid]['q3m'];
+    $wins_q3 = $dataset[$iid][$hid]['q3w'];
+
+    $total_wo = $dataset[$iid][$hid]['wom'];
+    $wins_wo = $dataset[$iid][$hid]['wow'];
 
     $r[$hid][$iid]['early_wr'] = $total_q1 ? round($wins_q1/$total_q1, 4) : $r[$hid][$iid]['winrate'];
     $r[$hid][$iid]['late_wr'] = $total_q3 ? round($wins_q3/$total_q3, 4) : $r[$hid][$iid]['winrate'];
@@ -262,7 +308,6 @@ foreach ($r as $hid => $items) {
 }
 
 unset($dataset);
-unset($raw_dataset);
 
 // std_dev
 // q1 q3 median
