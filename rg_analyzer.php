@@ -16,6 +16,7 @@ include_once("modules/commons/quantile.php");
 include_once("modules/commons/generate_tag.php");
 include_once("modules/commons/metadata.php");
 include_once("modules/commons/wrap_data.php");
+include_once("modules/view/functions/ranking.php");
 
 echo("\nConnecting to database...\n");
 

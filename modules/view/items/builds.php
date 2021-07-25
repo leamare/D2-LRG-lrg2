@@ -102,24 +102,33 @@ function rg_view_generate_items_builds() {
     $ks = array_keys($t['children']);
 
     for($i=0; isset($ks[$i]); $i++) {
-      error_log(count($ks));
+      // error_log(count($ks));
       $cid = $ks[$i];
       $ch = $tree[$id]['children'][$cid];
-      if ($cid != 29 && in_array($cid, $meta['item_categories']['early']) && (in_array($cid, $meta['item_categories']['parts']))) {
-        if (isset($tree[$cid]['children'][$id])) continue;
+      if (isset($tree[$cid]['children'][$id])) continue;
+      if (in_array($cid, $meta['item_categories']['early']) && (in_array($cid, $meta['item_categories']['parts']))) {
         $early[] = $cid;
         foreach ($tree[$cid]['children'] as $ccid => $ch2) {
           if (isset($tree[$id]['children'][$ccid])) {
-            $tree[$id]['children'][$ccid]['matches'] = ($tree[$id]['children'][$ccid]['matches']+$ch2['matches'])/2;
+            $tree[$id]['children'][$ccid]['matches'] = $tree[$id]['children'][$ccid]['matches'] + $ch2['matches'];
           } else {
             $tree[$id]['children'][$ccid] = $ch2;
             if (!in_array($ccid, $ks)) $ks[] = $ccid;
           }
         }
-        unset($tree[$id]['children'][$cid]);
+        if ($cid != 29) unset($tree[$id]['children'][$cid]);
       }
     }
   }
+
+  // foreach ($tree as $id => $t) {
+  //   foreach ($t['children'] as $iid => $ch) {
+  //     if (isset($ch['parts'])) {
+  //       $tree[$id]['children'][$iid]['matches'] /= $tree[$id]['children'][$iid]['parts']+1;
+  //       unset($tree[$id]['children'][$iid]['parts']);
+  //     }
+  //   }
+  // }
 
   $early = array_unique($early);
   $early_container = [];
@@ -183,11 +192,12 @@ function rg_view_generate_items_builds() {
           unset($tree[$id]['children'][$id]);
           continue;
         }
-        if (isset($t['children'][$iid]) && $t['children'][$iid]['matches'] > $m_lim && $t['children'][$iid]['matches'] > $tree[$id]['children'][$iid]['matches']) {
+        if ($iid != 29 && isset($t['children'][$iid]) && $t['children'][$iid]['matches'] > $m_lim && $t['children'][$iid]['matches'] > $tree[$id]['children'][$iid]['matches']) {
           // if ($_tid == 63 && $id == 127) echo $tree[$id]['children'][$iid]['matches'];
-          // if ($_tid == 63 && $id == 127) echo item_name($_tid)." - ".item_name($id)."<br />";
-          $t['children'][$iid]['matches'] += $tree[$id]['children'][$iid]['matches'];
+        // if ($_tid == 63 && $id == 127) echo item_name($_tid)." - ".item_name($id)."<br />";
+          // $t['children'][$iid]['matches'] += $tree[$id]['children'][$iid]['matches'];
           $sit[] = [ 'item' => $id, 'child' => $iid, 'parent' => $_tid ];
+
           break;
         }
       }
@@ -205,11 +215,10 @@ function rg_view_generate_items_builds() {
 
     $max_id = null;
 
-    if ($_tid == 11) var_dump($t['children']);
-
     foreach ($t['children'] as $id => $ch) {
       if (in_array($id, $build)) continue;
-      if (($t['time'] ?? false) && $t['time']-60 > $tree[$id]['time']) continue;
+      if ($ch['diff'] <= -1.5) continue;
+      // if (($t['time'] ?? false) && $t['time']-60 > $tree[$id]['time']) continue;
       if (!$max_id) {
         $max_id = $id;
         break;
