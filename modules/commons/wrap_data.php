@@ -49,8 +49,9 @@ function wrap_data ($array, $with_keys = false, $deep = false, $explicit = false
           $data[] = null;
       }
       $r['data'][] = $data;
-    } else
+    } else {
       $r['data'][] = array_values($a);
+    }
   }
 
   $lastval = 0;

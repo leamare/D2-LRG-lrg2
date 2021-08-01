@@ -254,13 +254,14 @@ foreach ($r as $hid => $items) {
     $sz = $dataset[$iid][$hid]['sz'];
 
     if ($sz < 2) {
-      $r[$hid][$iid]['std_dev'] = 0;
       $r[$hid][$iid]['q1'] = $data['avg_time'];
       $r[$hid][$iid]['q3'] = $data['avg_time'];
       $r[$hid][$iid]['median'] = $data['avg_time'];
       $r[$hid][$iid]['winrate'] = $data['wins'];
       
       $r[$hid][$iid]['prate'] = round($data['purchases']/$items_matches[$hid], 4);
+      $r[$hid][$iid]['std_dev'] = 0;
+
       $r[$hid][$iid]['early_wr'] = $r[$hid][$iid]['winrate'];
       $r[$hid][$iid]['late_wr'] = $r[$hid][$iid]['winrate'];
       $r[$hid][$iid]['wo_wr'] = $r[$hid][$iid]['winrate'];
@@ -278,11 +279,11 @@ foreach ($r as $hid => $items) {
 
     // using estimation formula for Standard Deviation because
     // I don't want to make another query
-    $r[$hid][$iid]['std_dev'] = ($r[$hid][$iid]['max_time'] - $r[$hid][$iid]['min_time']) / 4*inverse_ncdf(($sz - 0.375)/($sz + 0.25))
-      + ($r[$hid][$iid]['q3'] - $r[$hid][$iid]['q1']) / 4*inverse_ncdf((0.75*$sz - 0.125)/($sz + 0.25));
+    // $r[$hid][$iid]['std_dev'] = ($r[$hid][$iid]['max_time'] - $r[$hid][$iid]['min_time']) / 4*inverse_ncdf(($sz - 0.375)/($sz + 0.25))
+    //   + ($r[$hid][$iid]['q3'] - $r[$hid][$iid]['q1']) / 4*inverse_ncdf((0.75*$sz - 0.125)/($sz + 0.25));
 
     // it's an approximation, but a decent one, really
-    $r[$hid][$iid]['std_dev'] = ($r[$hid][$iid]['q3'] - $r[$hid][$iid]['q1']) / 1.35;
+    $r[$hid][$iid]['std_dev'] = round( ($r[$hid][$iid]['q3'] - $r[$hid][$iid]['q1']) / 1.35 , 3);
 
     $q1 = $r[$hid][$iid]['q1'];
     $q3 = $r[$hid][$iid]['q3'];
