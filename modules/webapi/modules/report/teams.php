@@ -147,7 +147,7 @@ $endpoints['teams'] = function($mods, $vars, &$report) use (&$endpoints, &$repea
         foreach ($heroes as $hero => $num) {
           $pl['heroes'][$hero] = [
             'played' => $num['c'],
-            'total' => $report['teams'][ $vars['team'] ]['pickban'][$hero]['matches_picked'],
+            'total' => isset($report['teams'][ $vars['team'] ]['pickban'][$hero]) ? $report['teams'][ $vars['team'] ]['pickban'][$hero]['matches_picked'] : $num['c'],
             'winrate' => round($num['w']/$num['c'], 4)
           ];
           if ($vars['include_matches']) {

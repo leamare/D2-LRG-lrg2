@@ -119,7 +119,8 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
                 sort($ms);
                 $num = $arr['c'];
                 $wr = $arr['w']/$arr['c'];
-                $title = addcslashes(hero_name($hero), "'")." - ".locale_string('matches_s')." ".$num." (".locale_string('total')." ".$context[$tid]['pickban'][$hero]['matches_picked'].") - ".
+                $title = addcslashes(hero_name($hero), "'")." - ".locale_string('matches_s')." ".$num." (".locale_string('total')." ".
+                  (isset($context[$tid]['pickban'][$hero]) ? $context[$tid]['pickban'][$hero]['matches_picked'] : $num).") - ".
                   locale_string('winrate_s')." ".round($wr*100, 2)."%";
                 $res["team".$tid]['overview'] .= "<a title=\"".$title."\" ".
                   "onclick=\"showModal('".htmlspecialchars(join_matches($ms))."', '".addcslashes(player_name($player), "'")." - $title')\"".
