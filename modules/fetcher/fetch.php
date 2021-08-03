@@ -888,7 +888,14 @@ function fetch($match) {
               continue;
             
             $pick = $draft_instance['is_pick'] ?? $draft_instance['pick'];
-            $team = $draft_instance['team'] ?? $draft_instance['active_team']-2;
+
+            if (isset($draft_instance['team'])) {
+              $team = $draft_instance['team'];
+            } else if (isset($draft_instance['player_slot'])) {
+              $team = $draft_instance['player_slot'] >= 5;
+            } else {
+              $team = $draft_instance['active_team']-2;
+            }
 
             // if it's the first draft stage or  a switch from bans to picks was made
             if ($last_stage_pick !== $pick && !$pick) {
