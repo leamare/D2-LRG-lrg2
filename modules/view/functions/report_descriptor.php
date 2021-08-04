@@ -20,9 +20,8 @@ function get_report_descriptor(&$report, $generate_endpoints = false) {
 
   if(isset($report['teams'])) {
     $desc["tvt"] = true;
-    $desc["teams"] = [];
-    foreach($report['teams'] as $tid => $team)
-      $desc["teams"][] = $tid;
+    $desc["teams"] = array_keys($report['teams']);
+    $desc["interest"] = $report['teams_interest'] ?? null;
   } else {
     $desc["tvt"] = false;
     if(isset($report['players'])) {
