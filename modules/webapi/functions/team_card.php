@@ -40,7 +40,7 @@ function team_card($tid) {
     "team_tag" => team_tag($tid),
     "matches" => $report['teams'][$tid]['matches_total'],
     "wins" => $report['teams'][$tid]['wins'],
-    "winrate" => round($report['teams'][$tid]['wins']*100/$report['teams'][$tid]['matches_total']),
+    "winrate" => round($report['teams'][$tid]['wins']*100/$report['teams'][$tid]['matches_total'], 2),
     "gpm" => $report['teams'][$tid]['averages']['gpm'],
     "xpm" => $report['teams'][$tid]['averages']['xpm'],
     "kills" => round($report['teams'][$tid]['averages']['kills'], 2),
