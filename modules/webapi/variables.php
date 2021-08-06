@@ -56,7 +56,7 @@ foreach ($modline as $ml) {
     if (strpos($ml, ",") !== FALSE) {
       $vars['team'] = explode(',', $ml);
     } else if ($ml == '*' && !empty($report['teams'])) {
-      $vars['team'] = array_keys($report['teams']);
+      $vars['team'] = $report['teams_interest'] ?? array_keys($report['teams']);
     } else {
       $vars['team'] = (int)$ml;
     }

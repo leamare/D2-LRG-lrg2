@@ -61,7 +61,7 @@ $endpoints['teams'] = function($mods, $vars, &$report) use (&$endpoints, &$repea
     $res = [
       '__endp' => 'teams-profiles',
       '__stopRepeater' => [ 'playerid', 'heroid', 'itemid' ],
-      'teams_list' => array_keys($report['teams'])
+      'teams_list' => $report['teams_interest'] ?? array_keys($report['teams'])
     ];
     if (empty($vars['team'])) {
       $vars['team'] = reset($res['teams_list']);
@@ -115,7 +115,7 @@ $endpoints['teams'] = function($mods, $vars, &$report) use (&$endpoints, &$repea
           $ref_ratio = $report['pickban'][$hid]['matches_picked']/$teams;
           if ($data['matches_picked'] > $ref_ratio && ($data['matches_picked'] - $ref_ratio)/$ref_ratio > 1.5) {
             // $data['ratio'] = $ref_ratio;
-            $data['ratio'] = $data['matches_picked']/$report['pickban'][$hid]['matches_picked'];
+            $data['ratio'] = round($data['matches_picked']/$report['pickban'][$hid]['matches_picked'], 4);
             $heroes[$hid] = $data;
           }
         }
