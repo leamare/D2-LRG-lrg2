@@ -24,7 +24,7 @@ END
 (@last := matchid) AS lastmatchvar,
 (@lasthero := hero_id) AS lastherovar
 FROM items
-WHERE ((NOT @hero) OR (@hero = hero_id)) AND ((category_id = 2 AND @lastmin <= 12) OR category_id <> 2) AND (category_id NOT IN (3, 4, 6, 7, 8, 9, 10, 11, 12, 13))
+WHERE ((NOT @hero) OR (@hero = hero_id)) AND (category_id NOT IN (2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13))
 
 SQL;
 
