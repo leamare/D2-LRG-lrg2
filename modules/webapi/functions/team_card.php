@@ -61,7 +61,11 @@ function team_card($tid) {
       "player_name" => player_name($player)
     ];
     $position = reset($report['players_additional'][$player]['positions']);
-    $p['position'] = isset($position['core']) ? $position['core'].".".$position['lane'] : null;
+    if (isset($report['teams'][$tid]['hero_positions']) || isset($report['hero_positions'])) {
+      $p['position'] = isset($position['core']) ? $position['core'].".".$position['lane'] : null;
+    } else {
+      $p['position'] = null;
+    }
     $roster[] = $p;
   }
   $team['roster'] = $roster;

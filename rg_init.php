@@ -111,7 +111,7 @@ else {
       $response = json_decode(file_get_contents($request."&start_at_match_id=".$last_matchid), true);
     } while (sizeof($response['result']['matches']) > 2 && $last_matchid != $last_tail);
 
-    $out = implode($matches, "\n");
+    $out = implode("\n", $matches);
 }
 echo "\n";
 

@@ -57,7 +57,9 @@
   "tis": {
     "name": "The Internationals",
     "filters": [
-      [ [ 0, "/^ti(\\d+)(_lan)?$/" ] ]
+      [ [ 0, "/^ti(\\d+)(_lan)?(_quali)?(_final)?(s)?$/" ] ],
+      [ [ 0, "/^pre_ti(\\d+)/" ] ],
+      [ [ 0, "/ti_alltime/" ] ]
     ],
     "custom_style": "pro_circuit",
     "custom_logo": "ti"

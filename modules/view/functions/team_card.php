@@ -54,7 +54,8 @@ function team_card($tid, $full = false) {
     if (!isset($report['players'][$player])) continue;
     $position = $player_pos[$player];
     $output .= "<div class=\"team-info-line\">".player_name($player).
-      (isset($position['core']) ? " (".($position['core'] ? locale_string("core") : locale_string("support")).
+      ((isset($report['teams'][$tid]['hero_positions']) || isset($report['hero_positions'])) && isset($position['core']) ?
+        " (".($position['core'] ? locale_string("core") : locale_string("support")).
         ($position['lane'] ? " ".locale_string( "lane_".$position['lane'] ) : '').')' : ''
       )."</div>";
   }
