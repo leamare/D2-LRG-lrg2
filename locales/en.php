@@ -24,6 +24,7 @@ $strings['en'] = [
   "buybacks_total" => "Total buybacks",
   "creeps_killed"  => "Total creeps murdered",
   "avg_match_len" => "Average match duration",
+  "avg_win_len" => "Average Win Duration",
   "avg_match_len_radiant_win" => "Average Radiant Win duration",
   "avg_match_len_dire_win" => "Average Dire Win duration",
   "total_time_dead" => "Total time players were dead (minutes)",
@@ -111,7 +112,7 @@ $strings['en'] = [
   "radiant_matches" => "Radiant Won",
   "dire" => "Dire",
   "dire_wr" => "Dire winrate",
-  "dire_matches" => "Dire Matches",
+  "dire_matches" => "Dire Won",
   "rad_ratio" => "Radiant Ratio",
 
   // modules 

@@ -151,6 +151,10 @@ $sql .= "SELECT \"dire_wr\", 1-(SUM(matches.radiantWin)/COUNT(DISTINCT matches.m
 $sql .= "SELECT \"avg_match_len\", (SUM(matches.duration)/60)/COUNT(DISTINCT matches.matchid) FROM matches JOIN teams_matches
           ON matches.matchid = teams_matches.matchid WHERE teams_matches.teamid = ".$id.";";
 
+# duration
+$sql .= "SELECT \"avg_win_len\", (SUM(matches.duration)/60)/COUNT(DISTINCT matches.matchid) FROM matches JOIN teams_matches
+          ON matches.matchid = teams_matches.matchid WHERE teams_matches.teamid = ".$id." AND matches.radiantWin = teams_matches.is_radiant;";
+
 if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for TEAM $id AVERAGES.\n";
 else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
 
