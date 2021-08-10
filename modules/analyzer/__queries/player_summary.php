@@ -4,7 +4,7 @@ function rg_query_player_summary(&$conn, $cluster = null) {
   $res = [];
 
   $sql = "SELECT
-            am.playerid pid,
+            ml.playerid pid,
             SUM(1) matches,
             SUM(NOT m.radiantWin XOR ml.isradiant)/SUM(1) winrate,
             (SUM(ml.kills)+SUM(ml.assists))/(SUM(ml.deaths)) kills,
@@ -12,19 +12,19 @@ function rg_query_player_summary(&$conn, $cluster = null) {
             ((COUNT(DISTINCT ml.heroid)/mhpt.mhp) * (COUNT(DISTINCT ml.heroid)/SUM(1))) diversity,
             SUM(ml.gpm)/SUM(1) gpm,
             SUM(ml.xpm)/SUM(1) xpm,
-            SUM( ml.heal / (m.duration/60) )/SUM(1) avg_heal,
+            SUM( ml.heal / (m.duration/60) )/count(1) avg_heal,
             SUM( ml.heroDamage / (m.duration/60) )/SUM(1) avg_hero_dmg,
             SUM( ml.towerDamage / (m.duration/60) )/SUM(1) avg_tower_dmg,
-            SUM( am.damage_taken / (m.duration/60) )/SUM(1) avg_dmg_taken,
-            SUM(am.stuns)/SUM(1) stuns,
-            SUM(am.lh_at10)/SUM(1) lh_10,
+            SUM( am.damage_taken / (m.duration/60) )/count(distinct am.matchid) avg_dmg_taken,
+            SUM(am.stuns)/count(distinct am.matchid) stuns,
+            SUM(am.lh_at10)/count(distinct am.matchid) lh_10,
             SUM(ml.lasthits)/(SUM(m.duration)/60) lh,
             SUM(m.duration)/(SUM(1)*60) avg_duration
-          FROM adv_matchlines am JOIN
-            matchlines ml
+          FROM matchlines ml LEFT JOIN
+            adv_matchlines am
                 ON am.matchid = ml.matchid AND am.heroid = ml.heroid
               JOIN matches m
-                ON m.matchid = am.matchid
+                ON m.matchid = ml.matchid
               join ( select max(heropool) mhp from
                 ( select COUNT(DISTINCT heroid) heropool, playerid from matchlines group by playerid ) _hp
               ) mhpt ".
