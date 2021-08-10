@@ -44,7 +44,9 @@ SELECT
 	oi2.category_id item2_cat,
 	SUM(oi2.purmin - oi1.purmin)/SUM(1) min_diff,
 	SUM(1) total,
-	SUM( NOT ml.isRadiant XOR m.radiantWin ) wins
+	SUM( NOT ml.isRadiant XOR m.radiantWin ) wins,
+	AVG(oi1.order_num) item1_order_num,
+	AVG(oi2.order_num) item2_order_num
 FROM
 (	$sq ) oi1 JOIN 
 ( $sq ) oi2 ON oi1.matchid = oi2.matchid AND oi1.hero_id = oi2.hero_id AND oi1.order_num = oi2.order_num - 1
@@ -81,7 +83,9 @@ for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row(
 		'min_diff' => (float)$row[5],
 		'total' => (int)$row[6],
 		'wins' => (int)$row[7],
-		'winrate' => round($row[7]/$row[6], 4)
+		'winrate' => round($row[7]/$row[6], 4),
+		'avgord1' => round($row[8], 1),
+		'avgord2' => round($row[9], 1)
 	];
 	$_matches[ $row[0] ][] = (int)$row[6];
 }
@@ -106,7 +110,9 @@ SELECT
 	oi2.category_id item2_cat,
 	SUM(oi2.purmin - oi1.purmin)/SUM(1) min_diff,
 	SUM(1) total,
-	SUM( NOT ml.isRadiant XOR m.radiantWin ) wins
+	SUM( NOT ml.isRadiant XOR m.radiantWin ) wins,
+	AVG(oi1.order_num) item1_order_num,
+	AVG(oi2.order_num) item2_order_num
 FROM
 (	$sq ) oi1 JOIN 
 ( $sq ) oi2 ON oi1.matchid = oi2.matchid AND oi1.hero_id = oi2.hero_id AND oi1.order_num = oi2.order_num - 1
@@ -143,7 +149,9 @@ for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row(
 		'min_diff' => (float)$row[5],
 		'total' => (int)$row[6],
 		'wins' => (int)$row[7],
-		'winrate' => round($row[7]/$row[6], 4)
+		'winrate' => round($row[7]/$row[6], 4),
+		'avgord1' => round($row[8], 1),
+		'avgord2' => round($row[9], 1)
 	];
 	$_matches[ $row[0] ][] = (int)$row[6];
 }
