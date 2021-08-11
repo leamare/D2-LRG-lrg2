@@ -60,6 +60,22 @@ foreach ($result["matches"] as $matchid => $matchinfo) {
   $query_res->free_result();
 }
 
+$sql = "SELECT matchid, is_radiant, hero_id, stage FROM draft WHERE is_pick = 0 ORDER BY stage ASC;";
+
+if ($conn->multi_query($sql) === TRUE);
+else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+
+$query_res = $conn->store_result();
+
+for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+  if (!isset($result["matches_additional"][$row[0]]['bans'])) {
+    $result["matches_additional"][$row[0]]['bans'] = [ [], [] ];
+  }
+  $result["matches_additional"][$row[0]]['bans'][$row[1]][] = [ (int)$row[2], (int)$row[3] ];
+}
+
+$query_res->free_result();
+
 if($lg_settings['main']['teams']) {
   $result["match_participants_teams"] = array();
   $sql = "SELECT matchid, teamid, is_radiant FROM teams_matches;";
