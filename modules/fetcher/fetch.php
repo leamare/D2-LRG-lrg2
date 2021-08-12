@@ -656,9 +656,10 @@ function fetch($match) {
           return true;
         }
       }
-    } else if (!empty($lg_settings['teams_allowlist'])) {
+    }
+    if (!empty($lg_settings['teams_denylist'])) {
       if (!empty($t_team_matches)) {
-        echo("..No teams to allow, skipping...\n");
+        echo("..No teams to deny, skipping...\n");
         return true;
       }
       foreach ($t_team_matches as $tm) {
