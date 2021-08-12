@@ -94,7 +94,7 @@ if (!empty($report['teams']) && !empty($report['matches']) && !empty($report['ma
       $partCnts[$teamsStr] = 0;
     }
     $meetCnts[$teamsStr][1] = $time;
-    $meetCnts[$teamsStr][2] = $timeDiff;
+    $meetCnts[$teamsStr][2] = max($timeDiff, 1700);
 
     if (!isset($partCnts[$teamsStr])) {
       $partCnts[$teamsStr] = 0;
