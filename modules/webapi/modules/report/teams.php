@@ -24,6 +24,20 @@ $endpoints['teams'] = function($mods, $vars, &$report) use (&$endpoints, &$repea
 
     if(!sizeof($tvt)) return null;
 
+    if (isset($report['match_participants_teams'])) {
+      foreach ($report['match_participants_teams'] as $mid => $teams) {
+        if (!isset($tvt[$teams['dire']][$teams['radiant']]['matchids'])) {
+          $tvt[$teams['dire']][$teams['radiant']]['matchids'] = [];
+        }
+        $tvt[$teams['dire']][$teams['radiant']]['matchids'][] = $mid;
+  
+        if (!isset($tvt[$teams['radiant']][$teams['dire']]['matchids'])) {
+          $tvt[$teams['radiant']][$teams['dire']]['matchids'] = [];
+        }
+        $tvt[$teams['radiant']][$teams['dire']]['matchids'][] = $mid;
+      }
+    }
+
     if (in_array("raw", $mods))
       return $tvt;
     if (in_array("source", $mods))
@@ -48,8 +62,12 @@ $endpoints['teams'] = function($mods, $vars, &$report) use (&$endpoints, &$repea
             "won" => $tvt[$tid][$team_ids[$i]]['won'],
             "lost" => $tvt[$tid][$team_ids[$i]]['lost'],
           ];
-          if (isset($context[$tid][$team_ids[$i]]['matchids']))
-            $res[$tid][ $team_ids[$i] ]['matches'] = $context[$tid][$team_ids[$i]]['matchids'];
+          if (isset($context[$tid][$team_ids[$i]]['matchids'])) {
+            $res[$tid][ $team_ids[$i] ]['matches'] = [];
+            foreach ($context[$tid][$team_ids[$i]]['matchids'] as $mid) {
+              $res[$tid][ $team_ids[$i] ]['matches'][] = match_card_min($mid);
+            }
+          }
         }
       }
     }
