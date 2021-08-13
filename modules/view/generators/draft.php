@@ -192,15 +192,20 @@ function rg_generator_draft($table_id, &$context_pickban, &$context_draft, $cont
   return $res;
 }
 
+define("INACCURATE_DRAFT_MESSAGE", "<div class=\"content-text\">".locale_string("desc_inaccurate_draft")."</div>");
+
 function rg_draft_accuracy_test(&$context_pickban, &$context_draft) {
+  if (empty($context_draft[1][3])) return INACCURATE_DRAFT_MESSAGE;
+
   $ratios = [];
+  
   foreach ($context_draft[1][3] as $dr) {
     $total = $context_pickban[ $dr['heroid'] ]['matches_picked'];
     $stage = $dr['matches'];
     $ratios[] = $stage/$total;
   }
   $res = array_sum($ratios) / sizeof($ratios);
-  if ($res < 0.15) return "<div class=\"content-text\">".locale_string("desc_inaccurate_draft")."</div>";
+  if ($res < 0.15) return INACCURATE_DRAFT_MESSAGE;
   return "";
 }
 
