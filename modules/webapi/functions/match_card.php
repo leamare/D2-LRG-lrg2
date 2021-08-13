@@ -36,6 +36,13 @@ function match_card($mid) {
       "hero_id" => $pl['hero']
     ];
   }
+
+  $match['bans'] = null;
+  if (isset($report['matches_additional'][$mid]['bans'])) {
+    $match['bans'] = [];
+    $match['bans']['radiant'] = $report['matches_additional'][$mid]['bans'][0];
+    $match['bans']['dire'] = $report['matches_additional'][$mid]['bans'][0];
+  }
   
   if(isset($report['teams']) && isset($report['match_participants_teams'][$mid])) {
     $teams = [];

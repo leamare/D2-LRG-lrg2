@@ -42,14 +42,30 @@ function match_card($mid) {
     $team_radiant = locale_string("radiant");
     $team_dire = locale_string("dire");
   }
+
+  $radiant_bans = ""; $dire_bans = "";
+  if (isset($report['matches_additional'][$mid]['bans'])) {
+    $radiant_bans .= "<div class=\"match-heroes-bans radiant\">";
+    foreach ($report['matches_additional'][$mid]['bans'][0] as [$hero, $stage]) {
+      $radiant_bans .= "<div class=\"match-hero\">".hero_portrait($hero)."</div>";
+    }
+    $radiant_bans .= "</div>";
+
+    $dire_bans .= "<div class=\"match-heroes-bans dire\">";
+    foreach ($report['matches_additional'][$mid]['bans'][1] as [$hero, $stage]) {
+      $dire_bans .= "<div class=\"match-hero\">".hero_portrait($hero)."</div>";
+    }
+    $dire_bans .= "</div>";
+  }
+
   $radiant .= "<div class=\"match-team-score\">".$report['matches_additional'][$mid]['radiant_score']."</div>".
               "<div class=\"match-team-name".($report['matches_additional'][$mid]['radiant_win'] ? " winner" : "")."\">".$team_radiant."</div>";
   $dire .= "<div class=\"match-team-score\">".$report['matches_additional'][$mid]['dire_score']."</div>".
            "<div class=\"match-team-name".($report['matches_additional'][$mid]['radiant_win'] ? "" : " winner")."\">".$team_dire."</div>";
 
-  $radiant .= "<div class=\"match-players\">".$players_radi."</div><div class=\"match-heroes\">".$heroes_radi."</div>".
+  $radiant .= "<div class=\"match-players\">".$players_radi."</div><div class=\"match-heroes\">".$heroes_radi."</div>".$radiant_bans.
               "<div class=\"match-team-nw\">".$report['matches_additional'][$mid]['radiant_nw']."</div></div>";
-  $dire .= "<div class=\"match-players\">".$players_dire."</div><div class=\"match-heroes\">".$heroes_dire."</div>".
+  $dire .= "<div class=\"match-players\">".$players_dire."</div><div class=\"match-heroes\">".$heroes_dire."</div>".$dire_bans.
           "<div class=\"match-team-nw\">".$report['matches_additional'][$mid]['dire_nw']."</div></div>";
 
 

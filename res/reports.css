@@ -362,6 +362,27 @@ table .hero_portrait {
   width: 90%;
   margin:5% 0 ;
 }
+
+.match-team .match-heroes-bans {
+  filter: grayscale(100%);
+  opacity: .75;
+  margin: 0 1%;
+}
+.match-team .match-heroes-bans.radiant {
+  text-align: left;
+}
+.match-team .match-heroes-bans.dire {
+  text-align: right;
+}
+.match-team .match-heroes-bans .match-hero {
+  width: 12.15%;
+  display: inline-block;
+}
+.match-team .match-heroes-bans .match-hero img {
+  width: 86%;
+  margin: 7% 0;
+}
+
 .match-team-name {
   text-align: center;
   font-size: 20px;
