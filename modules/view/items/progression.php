@@ -135,7 +135,7 @@ function rg_view_generate_items_progression() {
       $v['total']." ".locale_string("matches").", ".number_format($v['winrate']*100, 2)."% ".locale_string("winrate").
       ", ".locale_string("items_minute_diff").": ".$v['min_diff'].
       ", ".locale_string("diff").": ".number_format($diff*100, 2).
-      "%\", color:{color:$color, highlight: $color_hi}},";
+      "%"."\", color:{color:$color, highlight: $color_hi}},";
   }
 
   $res[$tag] .= "var nodes = [ ".$nodes." ];";
