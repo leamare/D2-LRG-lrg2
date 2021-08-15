@@ -27,8 +27,9 @@ $endpoints['summary'] = function($mods, $vars, &$report) {
     $res['__endp'] = "teams-summary";
   } else if (in_array("players", $mods)) {
     if (is_wrapped($context['players_summary'])) $context['players_summary'] = unwrap_data($context['players_summary']);
-    if (isset($report['players_additional'])) {
+    if (isset($report['players_additional']) && isset($report['player_positions'])) {
       foreach($context['players_summary'] as $id => $player) {
+        if (!isset($report['players_additional'][$id]['positions'])) continue;
         $position = reset($report['players_additional'][$id]['positions']);
         $position = $position["core"].".".$position["lane"];
         $context['players_summary'][$id]['common_position'] = $position;

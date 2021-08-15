@@ -128,10 +128,14 @@ function rg_generator_pickban_overview($table_id, $context, $context_main, $limi
   if (!$mp) $mp = 1;
 
   if (!$mb) {
-    uasort($context, function($a, $b) {
-      return $a['matches_banned'] <=> $b['matches_banned'];
-    });
-    $mb = $context[ round(sizeof($context)*0.5) ]['matches_banned'];
+    if ($mp > 1) {
+      $mb = 1;
+    } else {
+      uasort($context, function($a, $b) {
+        return $a['matches_banned'] <=> $b['matches_banned'];
+      });
+      $mb = $context[ round(sizeof($context)*0.5) ]['matches_banned'];
+    }
   }
   if (!$mb) $mb = 1;
 
