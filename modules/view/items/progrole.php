@@ -116,7 +116,7 @@ function rg_view_generate_items_progrole() {
   $pbdata = $report['pickban'][$hero] ?? null;
 
   $pairs = [];
-  $items = []; $items_matches = []; $items_matches1 = [];
+  $items = []; $items_matches = []; $items_matches_1 = [];
   $max_wr = 0;
   $max_games = 0;
 
@@ -140,22 +140,22 @@ function rg_view_generate_items_progrole() {
       $items[] = $v['item1'];
     }
     
+    if (!isset($items_matches_1[ $v['item1'] ])) {
+      $items_matches_1[ $v['item1'] ] = 0;
+    }
     if (!isset($items_matches[ $v['item1'] ])) {
-      $items_matches[ $v['item1'] ] = null;
+      $items_matches[ $v['item1'] ] = 0;
     }
-    if (!isset($items_matches1[ $v['item1'] ])) {
-      $items_matches1[ $v['item1'] ] = 0;
-    }
-    $items_matches1[ $v['item1'] ] += $v['total'];
+    $items_matches_1[ $v['item1'] ] += $v['total'];
     
-    if (!in_array($v['item2'], $items)) {
-      $items[] = $v['item2'];
-    }
-
     if (!isset($items_matches[ $v['item2'] ])) {
       $items_matches[ $v['item2'] ] = 0;
     }
     $items_matches[ $v['item2'] ] += $v['total'];
+
+    if (!in_array($v['item2'], $items)) {
+      $items[] = $v['item2'];
+    }
 
     if ($v['total'] > $max_games) $max_games = $v['total'];
     $diff = abs($v['winrate']-($pbdata ? $pbdata['winrate_picked'] : 0.5));
@@ -166,15 +166,9 @@ function rg_view_generate_items_progrole() {
   $max_wr *= 2;
 
   foreach ($items_matches as $iid => $v) {
-    if ($v !== null) {
-      if (isset($items_matches1[$iid])) {
-        $items_matches[$iid] = ($items_matches[$iid] + $items_matches1[$iid]) / 2;
-      }
-    } else {
-      $items_matches[$iid] = $items_matches1[$iid];
-    }
+    $items_matches[$iid] = max($items_matches[$iid] ?? 0, $items_matches_1[$iid] ?? 0);
   }
-  unset($items_matches1);
+  unset($items_matches_1);
 
   if (empty($pairs)) {
     $res["heroid".$hero]["position_".$crole] .= "<div class=\"content-text\">".locale_string("items_stats_empty")."</div>";
@@ -233,7 +227,7 @@ function rg_view_generate_items_progrole() {
       $v['total']." ".locale_string("matches").", ".number_format($v['winrate']*100, 2)."% ".locale_string("winrate").
       ", ".locale_string("items_minute_diff").": ".$v['min_diff'].
       ", ".locale_string("diff").": ".number_format($diff*100, 2).
-      "%".$v['avgord1'].' '.$v['avgord2']."\", color:{color:$color, highlight: $color_hi}},";
+      "% [".$v['avgord1'].' -> '.$v['avgord2']."]\", color:{color:$color, highlight: $color_hi}},";
   }
 
   $reslocal .= "var nodes = [ ".$nodes." ];";
