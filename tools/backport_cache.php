@@ -89,8 +89,10 @@ for ($i = 0; $i < $sz; $i++) {
       $match['teams'] = instaquery($conn, $q);
     }
 
-    $q = "select * from teams_rosters where teamid in (".implode(',', $teams).");";
-    $match['teams_rosters'] = instaquery($conn, $q);
+    if (!empty($teams)) {
+      $q = "select * from teams_rosters where teamid in (".implode(',', $teams).");";
+      $match['teams_rosters'] = instaquery($conn, $q);
+    }
   }
 
   if($lg_settings['main']['items']) {
