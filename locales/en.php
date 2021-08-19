@@ -158,6 +158,7 @@ $strings['en'] = [
   "icombos" => "Item Pairs",
   "proglist" => "Progression pairs",
   "progression" => "Build progression tree",
+  "progrole" => "Progression for roles",
   "irecords" => "Timings records",
   "icritical" => "Crucial timings",
   "rolepickban" => "Ranking with roles",
@@ -387,6 +388,10 @@ $strings['en'] = [
   "items_most_impactful_heroes_header" => "For heroes",
   "items_overview_timings_header" => "Most notable timings records",
   "items_minute_diff" => "Purchase time difference (minutes)",
+
+  // progression for roles
+  "progrole_available_heroes" => "Heroes with builds available",
+  "positions_count" => "Number of different roles",
 
   // reports list
   "noleague_cap" => "Latest Reports",

@@ -158,6 +158,7 @@ $strings['ru'] = [
   "icombos" => "Пары предметов",
   "proglist" => "Пары прогрессии",
   "progression" => "Дерево прогрессии сборки",
+  "progrole" => "Прогрессия по ролям",
   "irecords" => "Рекордные тайминги",
   "icritical" => "Критические тайминги",
   "rolepickban" => "Ранкинг с ролями",
@@ -388,6 +389,10 @@ $strings['ru'] = [
   "items_most_impactful_heroes_header" => "Для героев",
   "items_overview_timings_header" => "Самые примечательные рекорды таймингов",
   "items_minute_diff" => "Разница во времени (минуты)",
+
+  // progression for roles
+  "progrole_available_heroes" => "Герои с доступными сборками",
+  "positions_count" => "Число разных ролей",
 
   // reports list
   "noleague_cap" => "Последние отчёты",
