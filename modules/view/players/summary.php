@@ -9,10 +9,13 @@ function rg_view_generate_players_summary() {
   if (isset($report['players_additional'])) {
     generate_positions_strings();
 
-    foreach($report['players_summary'] as $id => $player) {
-      $position = reset($report['players_additional'][$id]['positions']);
-      $position = "position_".$position["core"].".".$position["lane"];
-      $report['players_summary'][$id]['common_position'] = locale_string($position);
+    if (isset($report['player_positions'])) {
+      foreach($report['players_summary'] as $id => $player) {
+        if (!isset($report['players_additional'][$id]['positions'])) continue;
+        $position = reset($report['players_additional'][$id]['positions']);
+        $position = "position_".$position["core"].".".$position["lane"];
+        $report['players_summary'][$id]['common_position'] = locale_string($position);
+      }
     }
   }
 

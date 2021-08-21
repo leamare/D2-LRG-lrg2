@@ -1,4 +1,4 @@
-<?php  $__postfix = "?v=24060"; ?>
+<?php  $__postfix = "?v=24061"; ?>
 <!DOCTYPE html>
 <html lang="<?php echo $locale; ?>">
   <head>
@@ -50,6 +50,8 @@
       echo "<meta name=\"twitter:description\" content=\"$rep_sm_title\">";
       echo "<meta name=\"twitter:image\" content=\"".$host_link."/res/header_grafenium.jpg\">";
       
+      if (!empty($meta_keywords)) echo "<meta name=\"keywords\" content=\"$meta_keywords\">";
+
       echo "<title>$rep_sm_title</title>";
       
     ?>

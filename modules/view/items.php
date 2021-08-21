@@ -20,6 +20,9 @@ if (isset($report['items']['progr'])) {
   include($root."/modules/view/items/progression.php");
   include($root."/modules/view/items/builds.php");
 }
+if (isset($report['items']['progrole'])) {
+  include($root."/modules/view/items/progrole.php");
+}
 if (isset($report['items']['records'])) {
   include($root."/modules/view/items/irecords.php");
 }
@@ -66,6 +69,11 @@ function rg_view_generate_items() {
     }
     if (check_module($parent."progression")) {
       $res['progression'] = rg_view_generate_items_progression();
+    }
+  }
+  if (isset($report['items']['progrole'])) {
+    if (check_module($parent."progrole")) {
+      $res['progrole'] = rg_view_generate_items_progrole();
     }
   }
   if (isset($report['items']['records'])) {
