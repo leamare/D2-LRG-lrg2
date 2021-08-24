@@ -711,3 +711,39 @@ table .hero_portrait {
 img.rf_icon {
   vertical-align: middle;
 }
+
+table.list {
+  position: relative;
+}
+
+table.list thead {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+}
+
+.tablesorter-header {
+  position: relative;
+}
+
+.tablesorter-headerDesc::after {
+  content: '';
+  border-left: .4em solid transparent;
+  border-right: .4em solid transparent;
+  border-top: .5em solid var(--table-text);
+  position: absolute;
+  right: 5%;
+  top: calc(50% - .25em);
+  opacity: .6;
+}
+
+.tablesorter-headerAsc::after {
+  content: '';
+  border-left: .4em solid transparent;
+  border-right: .4em solid transparent;
+  border-bottom: .5em solid var(--table-text);
+  position: absolute;
+  right: 5%;
+  top: calc(50% - .25em);
+  opacity: .6;
+}

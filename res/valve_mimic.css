@@ -137,8 +137,8 @@ a:hover {
 	padding-top: 40px;
 	background-color: var(--content-bg);
 	padding-bottom: 40px;
-  overflow: hidden;
-  overflow-x: auto;
+  /* overflow: hidden;
+  overflow-x: auto; */
 }
 .content-section div:first-child {
   margin-top: 0;
