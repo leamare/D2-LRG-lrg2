@@ -100,3 +100,5 @@ $link_provider_icon = "https://courier.spectral.gg/images/other/link_providers/%
 $league_logo_provider = "https://courier.spectral.gg/images/dota/leagues/%LID%_ticket.png";
 $league_logo_banner_provider = "https://courier.spectral.gg/images/dota/leagues/%LID%_banner.png";
 $team_logo_provider = "https://courier.spectral.gg/images/dota/teams/%TEAM%.png";
+
+$roleicon_logo_provider = "https://courier.spectral.gg/images/dota/roles/%ROLE%_alt.png?size=smaller";

@@ -64,6 +64,8 @@ if ($update_names) $updated_names = [];
 $request_unparsed = isset($options['R']);
 $request_unparsed_players = isset($options['p']);
 
+$ignore_abandons = isset($options['f']);
+
 if(!empty($odapikey) && !isset($ignore_api_key))
   $opendota = new \SimpleOpenDotaPHP\odota_api(false, "", $api_cooldown ?? 0, $odapikey);
 else
