@@ -44,8 +44,16 @@ $endpoints['items-critical'] = function($mods, $vars, &$report) use (&$endpoints
     if (empty($v)) unset($report['items']['stats'][$hero][$iid]);
   }
 
+  if (isset($vars['heroid'])) {
+    $res['hero_pickban'] = $report['pickban'][$hero] ?? [];
+    $winrate = $report['pickban'][$hero]['winrate_picked'];
+  } else {
+    $res['hero_pickban'] = null;
+    $winrate = 0.5;
+  }
+
   $items = array_filter($report['items']['stats'][$hero], function($v, $k) use (&$neutral_items) {
-    return ( !in_array($k, $neutral_items) || empty($v) ) && $v['grad'] < 0;
+    return ( !in_array($k, $neutral_items) || empty($v) ) && $v['grad'] < -0.01;
   }, ARRAY_FILTER_USE_BOTH);
 
   if (!empty($items_allowed)) {
@@ -72,7 +80,7 @@ $endpoints['items-critical'] = function($mods, $vars, &$report) use (&$endpoints
       'median' => $line['median'],
       'winrate' => $line['winrate'],
       'early_wr' => $line['early_wr'],
-      'critical_time' => round( $line['q1'] - 60*($line['early_wr'] - 0.5)/$line['grad'] ),
+      'critical_time' => round( $line['q1'] - 60*($line['early_wr'] - $winrate)/$line['grad'] ),
     ];
   }
 
@@ -80,12 +88,6 @@ $endpoints['items-critical'] = function($mods, $vars, &$report) use (&$endpoints
   $res['categories'] = $items_categories;
   $res['allowed_items'] = $items_allowed;
   $res['hero'] = $vars['heroid'] ?? null;
-
-  if (isset($vars['heroid'])) {
-    $res['hero_pickban'] = $report['pickban'][$hero] ?? [];
-  } else {
-    $res['hero_pickban'] = null;
-  }
 
   $res['items'] = $items_rc;
 

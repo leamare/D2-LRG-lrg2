@@ -65,6 +65,7 @@ function rg_view_generate_items_critical() {
 
   if ($hero !== 'total') {
     $data = $report['pickban'][$hero];
+    $winrate = $data['winrate_picked'];
 
     $res[$tag] .= "<table id=\"items-$tag-reference\" class=\"list\">";
     $res[$tag] .= "<thead><tr>".
@@ -79,6 +80,8 @@ function rg_view_generate_items_critical() {
       "<td>".$data['matches_picked']."</td>".
       "<td>".number_format($data['winrate_picked']*100, 2)."%</td>".
     "</tr></tbody></table><br />";
+  } else {
+    $winrate = 0.5;
   }
 
   $item_cats = [
@@ -87,7 +90,7 @@ function rg_view_generate_items_critical() {
   ];
 
   $items = array_filter($report['items']['stats'][$hero], function($v, $k) use (&$neutral_items) {
-    return ( !in_array($k, $neutral_items) || empty($v) ) && $v['grad'] < 0;
+    return ( !in_array($k, $neutral_items) || empty($v) ) && $v['grad'] < -0.01;
   }, ARRAY_FILTER_USE_BOTH);
 
   if ($cat) {
@@ -117,7 +120,7 @@ function rg_view_generate_items_critical() {
       'median' => $line['median'],
       'winrate' => $line['winrate'],
       'early_wr' => $line['early_wr'],
-      'critical_time' => $line['q1'] - 60*($line['early_wr'] - 0.5)/$line['grad'],
+      'critical_time' => $line['q1'] - 60*($line['early_wr'] - $winrate)/$line['grad'],
     ];
 
   }
