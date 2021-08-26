@@ -3,6 +3,7 @@
 include_once("head.php");
 ini_set('memory_limit', '16192M');
 const DISK_CACHE_COUNTER = 25000;
+const QUERY_COUNTER = 10000;
 
 $options = getopt("l:RrFf:o:");
 
@@ -51,6 +52,7 @@ if ($restore) {
     'matches',
     'matchlines',
     'adv_matchlines',
+    'items',
     'draft',
     'teams_matches',
     'teams',
@@ -61,28 +63,78 @@ if ($restore) {
     if (file_exists($dir.'/'.$t.'.csv')) {
       echo("[ ] Adding data to `$t`...");
       $table = $t;
-      $buffer = file_get_contents($dir.'/'.$t.'.csv');
-      $buffer = explode("\n", $buffer);
-      $schema = $buffer[0];
-      unset($buffer[0]);
-      foreach ($buffer as $line) {
-        $sql = "INSERT INTO $t ($schema) VALUES (";
-        $vals = explode(',', $line);
+
+      // counting lines
+      $_lines = 0;
+      $handle = fopen($dir.'/'.$t.'.csv', "r");
+      if ($handle) {
+        while (($line = fgets($handle)) !== false) {
+          $_lines++;
+        }
+      
+        fclose($handle);
+      } else {
+        die("Error reading the file `$t`\n");
+      }
+      
+      $handle = fopen($dir.'/'.$t.'.csv', "r");
+      $schema = fgets($handle);
+      $_lines--;
+
+      $qlines = [];
+      $qcnt = 0;
+      $hsz = count(explode(',', $schema));
+
+      while (($line = fgets($handle)) !== false) {
+        if (empty($line)) continue;
+
+        $qline = "";
+        $_vals = explode(',', $line);
+
+        $vals = []; $jstr = false;
+        foreach ($_vals as $v) {
+          if ($jstr) {
+            $vals[ count($vals)-1 ] .= ','.$v;
+            if (!empty($v) && $v[strlen($v)-1] == '"') {
+              $jstr = false;
+            }
+          } else {
+            if (!empty($v) && $v[0] == '"') {
+              $jstr = true;
+            }
+            $vals[] = $v;
+          }
+        }
+
         foreach ($vals as $v) {
           if (strpos($v, ',') !== false) {
             $v = substr($v, 1, strlen($v)-2);
             $v = str_replace('""', '"', $v);
           }
-          $sql .= "\"".addcslashes($v, '"')."\",";
+          if (!is_numeric($v) && !mb_check_encoding($v, 'UTF-8')) {
+            $v = mb_convert_encoding($v, 'UTF-8');
+          }
+          $qline .= "\"".addcslashes($v, '"\\')."\",";
         }
-        $sql[strlen($sql)-1] = ")";
-        $sql .= ';';
+        $qline[strlen($qline)-1] = ")";
 
-        if ($conn->multi_query($sql) === TRUE);
-        else {
-          echo "[E] ERROR: ".$conn->error."\n";
+        $qlines[] = '('.$qline;
+        $qcnt += $hsz;
+        $_lines--;
+
+        if ($qcnt >= QUERY_COUNTER || $_lines <= 1) {
+          $sql = "INSERT INTO $t ($schema) VALUES \n".implode(",\n", $qlines).';';
+          if ($conn->multi_query($sql) === TRUE);
+          else {
+            echo "[E] ERROR: ".$conn->error."\n    Details: `tmp/query_".time().".sql`\n";
+            file_put_contents('tmp/query_'.time().'.sql', $sql);
+          }
+
+          $qcnt = 0;
+          $qlines = [];
         }
       }
+      fclose($handle);
       echo "OK.\n";
     }
   }
@@ -97,6 +149,7 @@ if ($restore) {
 } else {
   $conn = new mysqli($lrg_sql_host, $lrg_sql_user, $lrg_sql_pass, $lrg_sql_db);
   $conn->set_charset('utf8mb4');
+  $conn->query("set names utf8mb4");
   
   $tables = [];
   $files = [];
@@ -137,6 +190,7 @@ if ($restore) {
 
     $fp = fopen($fname, "w+");
     
+    // fwrite($fp, pack("CCC",0xef,0xbb,0xbf)); 
     fwrite($fp, implode(',', $schema)."\n");
 
     
@@ -150,6 +204,7 @@ if ($restore) {
 
       for ($i = 1, $row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row(), $i++) {
         $els = [];
+
         foreach ($row as $r) {
           if (strpos($r, ',') !== false)
             $els[] = '"'.str_replace('"', '""', $r).'"';
@@ -184,6 +239,7 @@ if ($restore) {
     
     $conn->close();
     $conn = new mysqli($lrg_sql_host, $lrg_sql_user, $lrg_sql_pass, $lrg_sql_db);
+    $conn->set_charset('utf8mb4');
   }
 
   unset($lines);
