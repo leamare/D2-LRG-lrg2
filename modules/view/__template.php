@@ -41,14 +41,19 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=1600px, initial-scale=0.4">
     <?php
+      if (isset($report['league_id']) && isset($league_logo_provider)) 
+        $league_logo_link = str_replace('%LID%', $report['league_id'], $league_logo_provider);
+      else 
+        $league_logo_link = $host_link."/res/header_grafenium.jpg";
+
       echo "<meta name=\"title\" content=\"$rep_sm_title\">";
       echo "<meta name=\"description\" content=\"$rep_sm_desc\">";
       echo "<meta name=\"og:title\" content=\"$rep_sm_title\">";
       echo "<meta name=\"og:description\" content=\"$rep_sm_title\">";
-      echo "<meta name=\"og:image\" content=\"".$host_link."/res/header_grafenium.jpg\">";
+      echo "<meta name=\"og:image\" content=\"".$league_logo_link."\">";
       echo "<meta name=\"twitter:title\" content=\"$rep_sm_title\">";
       echo "<meta name=\"twitter:description\" content=\"$rep_sm_title\">";
-      echo "<meta name=\"twitter:image\" content=\"".$host_link."/res/header_grafenium.jpg\">";
+      echo "<meta name=\"twitter:image\" content=\"".$league_logo_link."\">";
       
       if (!empty($meta_keywords)) echo "<meta name=\"keywords\" content=\"$meta_keywords\">";
 
