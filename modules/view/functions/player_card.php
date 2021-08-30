@@ -20,12 +20,12 @@ function player_card($player_id) {
   if(isset($report['teams']) && isset($pinfo['team']) && isset($report['teams'][ $pinfo['team'] ]))
     $output .= "<div class=\"player-team\">".team_link($pinfo['team'])."</div>";
   $output .= "<div class=\"player-add-info\">".
-                "<div class=\"player-info-line\"><span class=\"caption\">".locale_string("matches").":</span> ".$pinfo['matches']." (".
-                  $pinfo['won']." - ".($pinfo['matches'] - $pinfo['won']).")</div>".
-                "<div class=\"player-info-line\"><span class=\"caption\">".locale_string("winrate").":</span> ".number_format($pinfo['won']*100/$pinfo['matches'], 2)."%</div>".
-                "<div class=\"player-info-line\"><span class=\"caption\">".locale_string("gpm").":</span> ".number_format($pinfo['gpm'],1)."</div>".
-                "<div class=\"player-info-line\"><span class=\"caption\">".locale_string("xpm").":</span> ".number_format($pinfo['xpm'],1)."</div>".
-                "<div class=\"player-info-line\"><span class=\"caption\">".locale_string("hero_pool").":</span> ".$pinfo['hero_pool_size']."</div>".
+                "<div class=\"player-info-line\"><span class=\"caption\">".locale_string("matches").":</span> ".($pinfo['matches'] ?? 0)." (".
+                  ($pinfo['won'] ?? 0)." - ".(($pinfo['matches'] ?? 0) - ($pinfo['won'] ?? 0)).")</div>".
+                "<div class=\"player-info-line\"><span class=\"caption\">".locale_string("winrate").":</span> ".number_format(($pinfo['won'] ?? 0)*100/($pinfo['matches'] ?? 1), 2)."%</div>".
+                "<div class=\"player-info-line\"><span class=\"caption\">".locale_string("gpm").":</span> ".number_format($pinfo['gpm'] ?? 0,1)."</div>".
+                "<div class=\"player-info-line\"><span class=\"caption\">".locale_string("xpm").":</span> ".number_format($pinfo['xpm'] ?? 0,1)."</div>".
+                "<div class=\"player-info-line\"><span class=\"caption\">".locale_string("hero_pool").":</span> ".($pinfo['hero_pool_size'] ?? 0)."</div>".
                 (isset($region_line) ? "<div class=\"player-info-line\"><span class=\"caption\">".locale_string("regions").":</span> ".$region_line."</div>" : "").
                 "</div>";
 

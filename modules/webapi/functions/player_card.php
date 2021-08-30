@@ -18,12 +18,12 @@ function player_card($player_id) {
     "player_id" => $player_id,
     "player_name" => $pname,
     "team_id" => isset($report['teams']) && isset($pinfo['team']) && isset($report['teams'][ $pinfo['team'] ]) ? $pinfo['team'] : null,
-    "matches" => $pinfo['matches'],
-    "wins" => $pinfo['won'], 
-    "winrate" => round($pinfo['won']*100/$pinfo['matches'], 2),
-    "gpm" => $pinfo['gpm'],
-    "xpm" => $pinfo['xpm'],
-    "hero_pool" => $pinfo['hero_pool_size']
+    "matches" => $pinfo['matches'] ?? 0,
+    "wins" => $pinfo['won'] ?? 0, 
+    "winrate" => round(($pinfo['won'] ?? 0)*100/($pinfo['matches'] ?? 1), 2),
+    "gpm" => $pinfo['gpm'] ?? 0,
+    "xpm" => $pinfo['xpm'] ?? 0,
+    "hero_pool" => $pinfo['hero_pool_size'] ?? 0
   ];
 
   if (isset($regions)) $player['regions'] = $regions;
