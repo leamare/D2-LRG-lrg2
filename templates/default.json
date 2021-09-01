@@ -14,6 +14,7 @@
     "players": true,
     "players_names": true,
     "anon_records": false,
+    "milestones": false,
 
     "avg_limit" : 5,
     "avg_heroes" : true,

@@ -152,6 +152,9 @@ require_once("modules/analyzer/main/limiters.php");
 if ($lg_settings['ana']['records']) {
   require_once("modules/analyzer/main/records.php");
 }
+if ($lg_settings['ana']['milestones']) {
+  require_once("modules/analyzer/milestones.php");
+}
 
 # game versions
 require_once("modules/analyzer/main/versions.php");

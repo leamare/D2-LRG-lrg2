@@ -16,6 +16,15 @@ if (!empty($result["regions_data"])) {
   }
 }
 
+if (isset($result['milestones']['players'])) {
+  foreach ($result['milestones']['players'] as $type => $list) {
+    foreach ($list as $pl => $v) {
+      if (!$pl) continue;
+      $pls[ $pl ] = null;
+    }
+  }
+}
+
 $sql = "SELECT playerid, nickname FROM players WHERE playerid IN (".implode(',', array_keys($pls)).")";
 
 if ($conn->multi_query($sql) === TRUE);# echo "[S] Requested data for PLAYER SUMMARY.\n";
