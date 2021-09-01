@@ -29,6 +29,42 @@ $sql .= "SELECT \"total:godlikes\", 0, SUM(streak >= 9) value FROM adv_matchline
 $sql .= "SELECT \"total:playtime\", 0, SUM(duration) value FROM matches m;";
 $sql .= "SELECT \"total:time_dead\", 0, SUM(time_dead) value FROM adv_matchlines;";
 
+// === heroes milestones
+
+$sql .= "SELECT \"heroes:matches\", heroid, COUNT(distinct matchid) value FROM matchlines GROUP BY heroid ORDER BY value DESC LIMIT $avg_limit;";
+$sql .= "SELECT \"heroes:wins\", heroid, SUM(NOT m.radiantWin XOR ml.isradiant) value 
+  FROM matchlines ml JOIN matches m ON ml.matchid = m.matchid
+  GROUP BY heroid ORDER BY value DESC LIMIT $avg_limit;";
+
+$sql .= "SELECT \"heroes:kills\", heroid, SUM(kills) value FROM matchlines GROUP BY heroid ORDER BY value DESC LIMIT $avg_limit;";
+$sql .= "SELECT \"heroes:deaths\", heroid, SUM(deaths) value FROM matchlines GROUP BY heroid ORDER BY value DESC LIMIT $avg_limit;";
+$sql .= "SELECT \"heroes:assists\", heroid, SUM(assists) value FROM matchlines GROUP BY heroid ORDER BY value DESC LIMIT $avg_limit;";
+$sql .= "SELECT \"heroes:contribution\", heroid, SUM(kills+assists) value FROM matchlines GROUP BY heroid ORDER BY value DESC LIMIT $avg_limit;";
+$sql .= "SELECT \"heroes:creeps_killed\", heroid, SUM(lastHits) value FROM matchlines GROUP BY heroid ORDER BY value DESC LIMIT $avg_limit;";
+$sql .= "SELECT \"heroes:creeps_denies\", heroid, SUM(denies) value FROM matchlines GROUP BY heroid ORDER BY value DESC LIMIT $avg_limit;";
+
+$sql .= "SELECT \"heroes:courier_kills\", heroid, SUM(couriers_killed) value FROM adv_matchlines GROUP BY heroid ORDER BY value DESC LIMIT $avg_limit;";
+$sql .= "SELECT \"heroes:roshan_kills\", heroid, SUM(roshans_killed) value FROM adv_matchlines GROUP BY heroid ORDER BY value DESC LIMIT $avg_limit;";
+$sql .= "SELECT \"heroes:hero_damage\", heroid, SUM(heroDamage) value FROM matchlines GROUP BY heroid ORDER BY value DESC LIMIT $avg_limit;";
+$sql .= "SELECT \"heroes:tower_damage\", heroid, SUM(towerDamage) value FROM matchlines GROUP BY heroid ORDER BY value DESC LIMIT $avg_limit;";
+$sql .= "SELECT \"heroes:heal\", heroid, SUM(heal) value FROM matchlines GROUP BY heroid ORDER BY value DESC LIMIT $avg_limit;";
+$sql .= "SELECT \"heroes:damage_taken\", heroid, SUM(damage_taken) value FROM adv_matchlines GROUP BY heroid ORDER BY value DESC LIMIT $avg_limit;";
+$sql .= "SELECT \"heroes:stuns\", heroid, SUM(stuns) value FROM adv_matchlines GROUP BY heroid ORDER BY value DESC LIMIT $avg_limit;";
+
+$sql .= "SELECT \"heroes:wards_placed\", heroid, SUM(wards) value FROM adv_matchlines GROUP BY heroid ORDER BY value DESC LIMIT $avg_limit;";
+$sql .= "SELECT \"heroes:sentries_placed\", heroid, SUM(sentries) value FROM adv_matchlines GROUP BY heroid ORDER BY value DESC LIMIT $avg_limit;";
+$sql .= "SELECT \"heroes:wards_destroyed\", heroid, SUM(wards_destroyed) value FROM adv_matchlines GROUP BY heroid ORDER BY value DESC LIMIT $avg_limit;";
+$sql .= "SELECT \"heroes:buybacks\", heroid, SUM(buybacks) value FROM adv_matchlines GROUP BY heroid ORDER BY value DESC LIMIT $avg_limit;";
+$sql .= "SELECT \"heroes:stacks\", heroid, SUM(stacks) value FROM adv_matchlines GROUP BY heroid ORDER BY value DESC LIMIT $avg_limit;";
+$sql .= "SELECT \"heroes:pings\", heroid, SUM(pings) value FROM adv_matchlines GROUP BY heroid ORDER BY value DESC LIMIT $avg_limit;";
+
+$sql .= "SELECT \"heroes:rampages\", heroid, SUM(multi_kill >= 5) value FROM adv_matchlines GROUP BY heroid ORDER BY value DESC LIMIT $avg_limit;";
+$sql .= "SELECT \"heroes:godlikes\", heroid, SUM(streak >= 9) value FROM adv_matchlines GROUP BY heroid ORDER BY value DESC LIMIT $avg_limit;";
+$sql .= "SELECT \"heroes:playtime\", heroid, SUM(m.duration) value 
+  FROM matchlines ml JOIN matches m ON ml.matchid = m.matchid 
+  GROUP BY heroid ORDER BY value DESC LIMIT $avg_limit;";
+$sql .= "SELECT \"heroes:time_dead\", heroid, SUM(time_dead) value FROM adv_matchlines GROUP BY heroid ORDER BY value DESC LIMIT $avg_limit;";
+
 // === players milestones
 
 if (!$lg_settings['ana']['anon_records']) {
