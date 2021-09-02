@@ -22,6 +22,14 @@ function: checktag($reportdata, $tag),
 $modules = "";
 $modules .= "<div id=\"content-top\">";
 
+if (!empty($__friends) && !isset($cat)) {
+  $modules .= "<div class=\"content-text list-pinned friends-list\"><h1>".locale_string("friends_main")."</h1>";
+  foreach($__friends as $pin) {
+    $modules .= "<a class=\"category\" href=\"".$pin[1]."\" target=\"_blank\">".$pin[0]."</a>";
+  }
+  $modules .= "</div>";
+}
+
 if (!empty($__pinned)) {
   $modules .= "<div class=\"content-text list-pinned\"><h1>".locale_string("pinned_main")."</h1>";
   foreach($__pinned as $pin) {
