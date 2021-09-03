@@ -25,7 +25,8 @@ $sql .= "SELECT \"denies\", heroid, SUM(denies)/SUM(1) value, SUM(1) mtch  FROM 
 
 
 # stuns
-$sql .= "SELECT \"stuns\", heroid, SUM(stuns)/SUM(1) value, SUM(1) mtch  FROM adv_matchlines GROUP BY heroid HAVING $limiter_lower < mtch ORDER BY value DESC LIMIT $avg_limit;";
+$sql .= "SELECT \"stuns\", heroid, SUM(CASE WHEN am.stuns >= 0 THEN am.stuns ELSE 0 END)/SUM(CASE WHEN am.stuns >= 0 THEN 1 ELSE 0 END) value, 
+  SUM(CASE WHEN am.stuns >= 0 THEN 1 ELSE 0 END) mtch  FROM adv_matchlines am GROUP BY heroid HAVING $limiter_lower < mtch ORDER BY value DESC LIMIT $avg_limit;";
 # stacks
 $sql .= "SELECT \"stacks\", heroid, SUM(stacks)/SUM(1) value, SUM(1) mtch  FROM adv_matchlines GROUP BY heroid HAVING $limiter_lower < mtch ORDER BY value DESC LIMIT $avg_limit;";
 # courier kills

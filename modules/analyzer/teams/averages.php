@@ -108,7 +108,7 @@ $sql .= "SELECT \"hero_pool\", COUNT(DISTINCT matchlines.heroid) FROM matchlines
           WHERE teams_matches.teamid = ".$id.";";
 
 # pings
-$sql .= "SELECT \"pings\", SUM(adv_matchlines.pings)/COUNT(DISTINCT matchlines.matchid) FROM matchlines JOIN teams_matches
+$sql .= "SELECT \"pings\", SUM(CASE WHEN adv_matchlines.pings > 0 THEN adv_matchlines.pings ELSE 0 END)/(SUM(CASE WHEN adv_matchlines.pings > 0 THEN 1 ELSE 0 END)/5) FROM matchlines JOIN teams_matches
           ON matchlines.matchid = teams_matches.matchid
           AND matchlines.isRadiant = teams_matches.is_radiant
           JOIN adv_matchlines ON adv_matchlines.matchid = matchlines.matchid AND adv_matchlines.playerid = matchlines.playerid

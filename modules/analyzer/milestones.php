@@ -49,7 +49,7 @@ $sql .= "SELECT \"heroes:hero_damage\", heroid, SUM(heroDamage) value FROM match
 $sql .= "SELECT \"heroes:tower_damage\", heroid, SUM(towerDamage) value FROM matchlines GROUP BY heroid ORDER BY value DESC LIMIT $avg_limit;";
 $sql .= "SELECT \"heroes:heal\", heroid, SUM(heal) value FROM matchlines GROUP BY heroid ORDER BY value DESC LIMIT $avg_limit;";
 $sql .= "SELECT \"heroes:damage_taken\", heroid, SUM(damage_taken) value FROM adv_matchlines GROUP BY heroid ORDER BY value DESC LIMIT $avg_limit;";
-$sql .= "SELECT \"heroes:stuns\", heroid, SUM(stuns) value FROM adv_matchlines GROUP BY heroid ORDER BY value DESC LIMIT $avg_limit;";
+$sql .= "SELECT \"heroes:stuns\", heroid, SUM(CASE WHEN stuns > 0 THEN stuns ELSE 0 END) value FROM adv_matchlines GROUP BY heroid ORDER BY value DESC LIMIT $avg_limit;";
 
 $sql .= "SELECT \"heroes:wards_placed\", heroid, SUM(wards) value FROM adv_matchlines GROUP BY heroid ORDER BY value DESC LIMIT $avg_limit;";
 $sql .= "SELECT \"heroes:sentries_placed\", heroid, SUM(sentries) value FROM adv_matchlines GROUP BY heroid ORDER BY value DESC LIMIT $avg_limit;";
@@ -86,7 +86,7 @@ if (!$lg_settings['ana']['anon_records']) {
   $sql .= "SELECT \"players:tower_damage\", playerid, SUM(towerDamage) value FROM matchlines GROUP BY playerid ORDER BY value DESC LIMIT $avg_limit;";
   $sql .= "SELECT \"players:heal\", playerid, SUM(heal) value FROM matchlines GROUP BY playerid ORDER BY value DESC LIMIT $avg_limit;";
   $sql .= "SELECT \"players:damage_taken\", playerid, SUM(damage_taken) value FROM adv_matchlines GROUP BY playerid ORDER BY value DESC LIMIT $avg_limit;";
-  $sql .= "SELECT \"players:stuns\", playerid, SUM(stuns) value FROM adv_matchlines GROUP BY playerid ORDER BY value DESC LIMIT $avg_limit;";
+  $sql .= "SELECT \"players:stuns\", playerid, SUM(CASE WHEN stuns > 0 THEN stuns ELSE 0 END) value FROM adv_matchlines GROUP BY playerid ORDER BY value DESC LIMIT $avg_limit;";
 
   $sql .= "SELECT \"players:wards_placed\", playerid, SUM(wards) value FROM adv_matchlines GROUP BY playerid ORDER BY value DESC LIMIT $avg_limit;";
   $sql .= "SELECT \"players:sentries_placed\", playerid, SUM(sentries) value FROM adv_matchlines GROUP BY playerid ORDER BY value DESC LIMIT $avg_limit;";
@@ -145,7 +145,7 @@ if ($lg_settings['main']['teams']) {
     FROM matchlines ml JOIN teams_matches tm ON ml.matchid = tm.matchid AND ml.isRadiant = tm.is_radiant
     JOIN adv_matchlines am ON am.matchid = ml.matchid AND am.playerid = ml.playerid
     GROUP BY teamid ORDER BY value DESC LIMIT $avg_limit;";
-  $sql .= "SELECT \"teams:stuns\", teamid, SUM(am.stuns) value 
+  $sql .= "SELECT \"teams:stuns\", teamid, SUM(CASE WHEN am.stuns > 0 THEN am.stuns ELSE 0 END) value 
     FROM matchlines ml JOIN teams_matches tm ON ml.matchid = tm.matchid AND ml.isRadiant = tm.is_radiant
     JOIN adv_matchlines am ON am.matchid = ml.matchid AND am.playerid = ml.playerid
     GROUP BY teamid ORDER BY value DESC LIMIT $avg_limit;";

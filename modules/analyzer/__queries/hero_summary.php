@@ -16,7 +16,7 @@ function rg_query_hero_summary(&$conn, $cluster = null) {
             SUM( ml.heroDamage / (m.duration/60) )/SUM(1) avg_hero_dmg,
             SUM( ml.towerDamage / (m.duration/60) )/SUM(1) avg_tower_dmg,
             SUM( am.damage_taken / (m.duration/60) )/SUM(1) avg_dmg_taken,
-            SUM(am.stuns)/SUM(1) stuns,
+            SUM(CASE WHEN am.stuns >= 0 THEN am.stuns ELSE 0 END)/SUM(CASE WHEN am.stuns >= 0 THEN 1 ELSE 0 END) stuns,
             SUM(am.lh_at10)/SUM(1) lh_10,
             SUM(ml.lasthits)/(SUM(m.duration)/60) lh,
             SUM(m.duration)/(SUM(1)*60) avg_duration
