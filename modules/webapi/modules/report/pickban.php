@@ -52,7 +52,7 @@ $endpoints['pickban'] = function($mods, $vars, &$report) {
     uasort($context, function($a, $b) {
       return $a['matches_picked'] <=> $b['matches_picked'];
     });
-    $mp = $context[ round(sizeof($context)*0.5) ]['matches_picked'];
+    $mp = isset($context[ round(sizeof($context)*0.5) ]) ? $context[ round(sizeof($context)*0.5) ]['matches_picked'] : 1;
   }
   if (!$mp) $mp = 1;
 
@@ -63,7 +63,7 @@ $endpoints['pickban'] = function($mods, $vars, &$report) {
       uasort($context, function($a, $b) {
         return $a['matches_banned'] <=> $b['matches_banned'];
       });
-      $mb = $context[ round(sizeof($context)*0.5) ]['matches_banned'];
+      $mb = isset($context[ round(sizeof($context)*0.5) ]) ? $context[ round(sizeof($context)*0.5) ]['matches_banned'] : 1;
     }
   }
   if (!$mb) $mb = 1;

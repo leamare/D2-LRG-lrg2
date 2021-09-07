@@ -57,7 +57,8 @@ $endpoints['overview'] = function($mods, $vars, &$report) use (&$meta, &$endpoin
     uasort($context['pickban'], function($a, $b) {
       return $a['matches_picked'] <=> $b['matches_picked'];
     });
-    $context['main']['heroes_median_picks'] = $context['pickban'][ round(sizeof($context['pickban'])*0.5) ]['matches_picked'];
+    $context['main']['heroes_median_picks'] = isset($context['pickban'][ round(sizeof($context['pickban'])*0.5) ]) ? 
+      $context['pickban'][ round(sizeof($context['pickban'])*0.5) ]['matches_picked'] : 1;
   }
   if ($context['main']['heroes_median_picks'] == 0) $context['main']['heroes_median_picks'] = 1;
 
@@ -65,7 +66,8 @@ $endpoints['overview'] = function($mods, $vars, &$report) use (&$meta, &$endpoin
     uasort($context['pickban'], function($a, $b) {
       return $a['matches_banned'] <=> $b['matches_banned'];
     });
-    $context['main']['heroes_median_bans'] = $context['pickban'][ round(sizeof($context['pickban'])*0.5) ]['matches_banned'];
+    $context['main']['heroes_median_bans'] = isset($context['pickban'][ round(sizeof($context['pickban'])*0.5) ]) ? 
+      $context['pickban'][ round(sizeof($context['pickban'])*0.5) ]['matches_banned'] : 1;
   }
   if ($context['main']['heroes_median_bans'] == 0) $context['main']['heroes_median_bans'] = 1;
 
