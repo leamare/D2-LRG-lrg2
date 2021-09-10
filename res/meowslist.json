@@ -44,7 +44,8 @@
       [ [ 0, "/div5_ranked_/" ] ],
       [ [ 0, "/imm_ranked_/" ] ]
     ],
-    "custom_style": "ranked"
+    "custom_style": "ranked",
+    "lid": "ranked"
   },
   "pro_circuit_2017_2018": {
     "name": "Pro Circuit 2017-2018",
@@ -62,7 +63,8 @@
       [ [ 0, "/ti_alltime/" ] ]
     ],
     "custom_style": "pro_circuit",
-    "custom_logo": "ti"
+    "custom_logo": "ti",
+    "lid": "int"
   },
   "fpl": {
     "name": "FaceIT Pro League",
