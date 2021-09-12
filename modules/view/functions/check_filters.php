@@ -15,6 +15,13 @@ define( 'LRG_TAG_FILTER_REPORT_TYPE_TEAMS', 11 );
 define( 'LRG_TAG_FILTER_FOLDER', 12 );
 define( 'LRG_TAG_FILTER_MATCHES_TOTAL_LESS', 13 );
 define( 'LRG_TAG_FILTER_MATCHES_TOTAL_MORE', 14 );
+define( 'LRG_TAG_FILTER_PATCH_IN', 15 );
+define( 'LRG_TAG_FILTER_PATCH_FROM', 16 );
+define( 'LRG_TAG_FILTER_PATCH_TO', 17 );
+define( 'LRG_TAG_FILTER_NAMEDESC', 18 );
+define( 'LRG_TAG_FILTER_DAYS_NUM_MORE', 19 );
+define( 'LRG_TAG_FILTER_DAYS_NUM_LESS', 20 );
+define( 'LRG_TAG_FILTER_NAMEDESC_EXCLUSIVE', 21 );
 
 /*
 filters:
@@ -52,10 +59,60 @@ function check_filters($rep, $filters) {
           $group_result = $group_result && preg_match($filter[1], $rep['tag']);
           break;
         case LRG_TAG_FILTER_NAME:
-          $group_result = $group_result && preg_match($filter[1], $rep['name']);
+          if (isset($rep['localized'])) {
+            $r = preg_match($filter[1], $rep['name']);
+            foreach ($rep['localized'] as $loc) {
+              if ($r) break;
+              if (!isset($loc['name'])) continue;
+              $r = $r || preg_match($filter[1], $loc['name']);
+            }
+
+            $group_result = $group_result && $r;
+          } else {
+            $group_result = $group_result && preg_match($filter[1], $rep['name']);
+          }
           break;
         case LRG_TAG_FILTER_DESC:
-          $group_result = $group_result && preg_match($filter[1], $rep['desc']);
+          if (isset($rep['localized'])) {
+            $r = preg_match($filter[1], $rep['desc']);
+            foreach ($rep['localized'] as $loc) {
+              if ($r) break;
+              if (!isset($loc['desc'])) continue;
+              $r = $r || preg_match($filter[1], $loc['desc']);
+            }
+
+            $group_result = $group_result && $r;
+          } else {
+            $group_result = $group_result && preg_match($filter[1], $rep['desc']);
+          }
+          break;
+        case LRG_TAG_FILTER_NAMEDESC:
+          if (isset($rep['localized'])) {
+            $r = preg_match($filter[1], $rep['desc']) || preg_match($filter[1], $rep['name']);
+            foreach ($rep['localized'] as $loc) {
+              if ($r) break;
+              if (isset($loc['desc'])) $r = $r || preg_match($filter[1], $loc['desc']);
+              if (isset($loc['name'])) $r = $r || preg_match($filter[1], $loc['name']);
+            }
+
+            $group_result = $group_result && $r;
+          } else {
+            $group_result = $group_result && ( preg_match($filter[1], $rep['desc']) || preg_match($filter[1], $rep['name']) );
+          }
+          break;
+        case LRG_TAG_FILTER_NAMEDESC_EXCLUSIVE:
+          if (isset($rep['localized'])) {
+            $r = preg_match($filter[1], $rep['desc']) && preg_match($filter[1], $rep['name']);
+            foreach ($rep['localized'] as $loc) {
+              if (!$r) break;
+              if (isset($loc['desc'])) $r = $r && preg_match($filter[1], $loc['desc']);
+              if (isset($loc['name'])) $r = $r && preg_match($filter[1], $loc['name']);
+            }
+
+            $group_result = $group_result && $r;
+          } else {
+            $group_result = $group_result && ( preg_match($filter[1], $rep['desc']) && preg_match($filter[1], $rep['name']) );
+          }
           break;
         case LRG_TAG_FILTER_ID:
           $group_result = $group_result && ($filter[1] == $rep['id']);
@@ -73,16 +130,55 @@ function check_filters($rep, $filters) {
           $group_result = $group_result && ($filter[1] >= $rep['last_match']['mid']);
           break;
         case LRG_TAG_FILTER_TEAM_IN:
-          $group_result = $group_result && (isset($rep['teams']) && in_array($filter[1], $rep['teams']));
+          if (is_array($filter[1]) && isset($rep['teams'])) {
+            $v = false;
+            foreach ($filter[1] as $v) {
+              $v = (int)$v;
+              if (!$v) continue;
+              if (in_array($v, $rep['teams'])) {
+                $v = true;
+                break;
+              }
+            }
+            $group_result = $group_result && $v;
+          } else {
+            $group_result = $group_result && (isset($rep['teams']) && in_array($filter[1], $rep['teams']));
+          }
           break;
         case LRG_TAG_FILTER_PLAYER_IN:
-          $group_result = $group_result && (isset($rep['players']) && in_array($filter[1], $rep['players']));
+          if (is_array($filter[1]) && isset($rep['players'])) {
+            $v = false;
+            foreach ($filter[1] as $v) {
+              $v = (int)$v;
+              if (!$v) continue;
+              if (in_array($v, $rep['players'])) {
+                $v = true;
+                break;
+              }
+            }
+            $group_result = $group_result && $v;
+          } else {
+            $group_result = $group_result && (isset($rep['players']) && in_array($filter[1], $rep['players']));
+          }
           break;
         case LRG_TAG_FILTER_REGION_IN:
-          $group_result = $group_result && (isset($rep['regions']) && in_array($filter[1], $rep['regions']));
+          if (is_array($filter[1]) && isset($rep['regions'])) {
+            $v = false;
+            foreach ($filter[1] as $v) {
+              $v = (int)$v;
+              if (!$v) continue;
+              if (in_array($v, $rep['regions'])) {
+                $v = true;
+                break;
+              }
+            }
+            $group_result = $group_result && $v;
+          } else {
+            $group_result = $group_result && (isset($rep['regions']) && in_array($filter[1], $rep['regions']));
+          }
           break;
         case LRG_TAG_FILTER_REPORT_TYPE_TEAMS:
-          $group_result = $group_result && $rep['tvt'];
+          $group_result = $group_result && ($rep['tvt'] == $filter[1]);
           break;
         case LRG_TAG_FILTER_FOLDER:
           if(isset($rep['file'])) {
@@ -95,6 +191,39 @@ function check_filters($rep, $filters) {
           break;
         case LRG_TAG_FILTER_MATCHES_TOTAL_MORE:
           $group_result = $group_result && ($filter[1] < $rep['matches']);
+          break;
+        case LRG_TAG_FILTER_PATCH_IN:
+          $group_result = $group_result && (isset($rep['patches']) && in_array($filter[1], $rep['patches']));
+          break;
+        case LRG_TAG_FILTER_PATCH_FROM:
+          $val = false;
+          if (isset($rep['patches'])) {
+            foreach ($rep['patches'] as $pid => $matches) {
+              if ($pid >= $filter[1]) {
+                $val = true;
+                break;
+              }
+            }
+          }
+          $group_result = $group_result && $val;
+          break;
+        case LRG_TAG_FILTER_PATCH_TO:
+          $val = true;
+          if (isset($rep['patches'])) {
+            foreach ($rep['patches'] as $pid => $matches) {
+              if ($pid > $filter[1]) {
+                $val = false;
+                break;
+              }
+            }
+          }
+          $group_result = $group_result && $val;
+          break;
+        case LRG_TAG_FILTER_DAYS_NUM_MORE:
+          $group_result = $group_result && $rep['days'] > $filter[1];
+          break;
+        case LRG_TAG_FILTER_DAYS_NUM_LESS:
+          $group_result = $group_result && $rep['days'] < $filter[1];
           break;
       }
     }
