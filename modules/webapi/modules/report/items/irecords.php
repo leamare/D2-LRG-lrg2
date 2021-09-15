@@ -15,6 +15,8 @@ $endpoints['items-records'] = function($mods, $vars, &$report) use (&$endpoints,
 
     $res['item'] = $item;
     $res['records'] = [];
+    if (empty($report['items']['records'][$item])) return $res;
+
     foreach ($report['items']['records'][$item] as $hero => $line) {
       if (empty($line) || empty($line['match'])) continue;
       if (!empty($report['match_participants_teams']))

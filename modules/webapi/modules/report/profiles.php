@@ -28,8 +28,8 @@ $endpoints['profiles'] = function($mods, $vars, &$report) use (&$endpoints, &$me
       $res['draft'] = [];
       $res['draft']['total'] = $draft['total'][ $vars['heroid'] ];
       $res['draft']['stages'] = [];
-      foreach($draft['stages'] as $i => $stage) {
-        $res['draft']['stages'][$i] = $stage[ $vars['heroid'] ] ?? null;
+      foreach($draft['stages'][ $vars['heroid'] ] as $i => $stage) {
+        $res['draft']['stages'][$i] = $stage ?? null;
       }
     }
 
@@ -159,6 +159,14 @@ $endpoints['profiles'] = function($mods, $vars, &$report) use (&$endpoints, &$me
     $res['__endp'] = 'players-profiles';
     $res['__stopRepeater'] = ['team', 'heroid', 'itemid'];
 
+    // if (empty($vars['gets']) || $vars['gets'] == '*') {
+    //   // $vars['gets'] = [ 'total', 'heroes', 'heroes-matches', 'heroes-rank-top', 'heroes-rank-bot', 'records', 'records-best' ];
+    //   $vars['gets'] = [ 'total', 'heroes-purchases', 'heroes-rank-top', 'heroes-rank-bot', 'records-best' ];
+    // }
+
+    $res['name'] = player_name($vars['playerid'], false);
+    $res['name_tagged'] = player_name($vars['playerid']);
+
     // summary
     if (is_wrapped($report['players_summary'])) $report['players_summary'] = unwrap_data($report['players_summary']);
     if (!isset($report['players_summary'][ $vars['playerid'] ])) throw new \Exception("Player `${$vars['playerid']}` is not in the report");
@@ -258,19 +266,65 @@ $endpoints['profiles'] = function($mods, $vars, &$report) use (&$endpoints, &$me
       throw new \Exception("Need to specify item");
     }
 
+    if (empty($vars['gets']) || $vars['gets'] == '*') {
+      // $vars['gets'] = [ 'total', 'heroes', 'heroes-matches', 'heroes-rank-top', 'heroes-rank-bot', 'records', 'records-best' ];
+      $vars['gets'] = [ 'total', 'heroes-purchases', 'heroes-rank-top', 'heroes-rank-bot', 'records-best' ];
+    }
+
     $res = [];
 
     $res['__endp'] = 'heroes-profiles';
     $res['__stopRepeater'] = ['team', 'playerid', 'heroid'];
 
     $req = $endpoints['items-heroes']($mods, $vars, $report);
-    
-    $res['total'] = $req['total'];
-    $res['heroes'] = $req['heroes'];
+
+    if (in_array('total', $vars['gets'])) {
+      $res['total'] = $req['total'];
+    }
+
+    $heroes = $req['heroes'];
+    if (in_array('heroes', $vars['gets'])) {
+      $res['heroes'] = $heroes;
+    }
+
+    if (in_array('heroes-purchases', $vars['gets'])) {
+      uasort($heroes, function($a, $b) {
+        return $b['purchases'] <=> $a['purchases'];
+      });
+
+      $res['heroes-purchases'] = array_slice($heroes, 0, 10, true);
+    }
+
+    if (in_array('heroes-rank-top', $vars['gets'])) {
+      uasort($heroes, function($a, $b) {
+        return $b['rank'] <=> $a['rank'];
+      });
+
+      $res['heroes-rank-top'] = array_slice($heroes, 0, 10, true);
+    }
+
+    if (in_array('heroes-rank-bot', $vars['gets'])) {
+      uasort($heroes, function($a, $b) {
+        return $a['rank'] <=> $b['rank'];
+      });
+
+      $res['heroes-rank-bot'] = array_slice($heroes, 0, 10, true);
+    }
 
     if (isset($report['items']['records'])) {
       $req = $endpoints['items-records']($mods, $vars, $report);
-      $res['records'] = $req['records'];
+
+      if (in_array('records', $vars['gets'])) {
+        $res['records'] = $req['records'];
+      }
+
+      if (in_array('records-best', $vars['gets'])) {
+        uasort($req['records'], function($a, $b) {
+          return $b['diff'] <=> $a['diff'];
+        });
+
+        $res['records-best'] = array_slice($req['records'], 0, 10, true);
+      }
     }
     
     return $res;

@@ -63,13 +63,13 @@ foreach ($modline as $ml) {
   }
 
   if (strpos($ml, "itemid") !== FALSE) {
-    $ml = str_replace("itemid", "", $ml);
+    $ml = str_replace("item", "", str_replace("itemid", "", $ml));
     if (strpos($ml, ",") !== FALSE) {
-      $vars['itemid'] = explode(',', $ml);
+      $vars['item'] = explode(',', $ml);
     } else if ($ml == '*' && isset($report['items']) && !empty($report['items']['stats']['total'])) {
-      $vars['itemid'] = array_keys($report['items']['stats']['total']);
+      $vars['item'] = array_keys($report['items']['stats']['total']);
     } else {
-      $vars['itemid'] = (int)$ml;
+      $vars['item'] = (int)$ml;
     }
   }
 
