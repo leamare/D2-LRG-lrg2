@@ -18,15 +18,27 @@ function player_name($pid, $tt = true) {
   return $res;
 }
 
-function player_link($pid, $tt = true) {
-  global $link_provider, $links_providers;
+function player_link($pid, $tt = true, $nolinks = false) {
+  global $link_provider, $links_providers, $report, $leaguetag;
 
   if ($pid < 0) return player_name($pid, $tt);
 
-  if (empty($links_providers))
-    return "<a target=\"_blank\" href=\"https://$link_provider/players/$pid\">".player_name($pid, $tt)."</a>";
+  if (empty($links_providers) || $nolinks) {
+    if (isset($link_provider))
+      return "<a target=\"_blank\" href=\"https://$link_provider/players/$pid\">".player_name($pid, $tt)."</a>";
+    else if (isset($report['players_summary'])) {
+      return "<a href=\"?league=$leaguetag&mod=players-profiles-playerid$pid".(empty($linkvars) ? "" : "&".$linkvars)."\">".player_name($pid, $tt)."</a>";
+    } else {
+      return player_name($pid, $tt);
+    }
+  }
   
-  $r = player_name($pid, $tt)." - ";
+  if (isset($report['players_summary'])) {
+    $r = "<a href=\"?league=$leaguetag&mod=players-profiles-playerid$pid".(empty($linkvars) ? "" : "&".$linkvars)."\">".player_name($pid, $tt)."</a> - ";
+  } else {
+    $r = player_name($pid, $tt)." - ";
+  }
+  
   foreach ($links_providers as $lpn => $lpl) {
     $r .= "<a target=\"_blank\" href=\"https://$lpl/players/$pid\">".link_provider($lpn)."</a> ";
   }

@@ -25,6 +25,12 @@ function item_name($iid) {
   return "Unknown";
 }
 
+function item_link($iid) {
+  global $leaguetag, $linkvars;
+  return "<a href=\"?league=$leaguetag&mod=items-profiles-itemid$iid".(empty($linkvars) ? "" : "&".$linkvars)."\">".
+    item_name($iid)."</a>";
+}
+
 function item_full($iid) {
   return item_icon($hid)." ".item_name($hid);
 }
