@@ -19,7 +19,7 @@ function rg_generator_haverages($table_id, &$context, $hero_flag = true) {
                       hero_name($el[$id]) :
                       ( stripos($key, "team") !== FALSE ?
                         team_name($el[$id]) :
-                        player_name($el[$id])
+                        player_link($el[$id], true, true)
                       )
                     ).
               "</td><td>".number_format($el['value'],2)."</td></tr>";

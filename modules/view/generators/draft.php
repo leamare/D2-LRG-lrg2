@@ -132,7 +132,7 @@ function rg_generator_draft($table_id, &$context_pickban, &$context_draft, $cont
     if($hero_flag)
       $draft[$id]['out'] .= "<td>".hero_portrait($id)."</td><td>".hero_name($id)."</td>";
     else
-      $draft[$id]['out'] .= "<td>".player_name($id)."</td>";
+      $draft[$id]['out'] .= "<td>".player_link($id, true, true)."</td>";
 
     $draft[$id]['out'] .= "<td>".$context_pickban[$id]['matches_total']."</td>";
     $draft[$id]['out'] .= "<td>".number_format($ranks[$id], 2)."</td>";
