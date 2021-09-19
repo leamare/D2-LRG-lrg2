@@ -96,7 +96,7 @@ function rg_view_generate_items_heroes() {
 
   $res['itemid'.$item] .= "<tr>".
     "<td>".item_icon($item)."</td>".
-    "<td>".item_name($item)."</td>".
+    "<td>".item_link($item)."</td>".
     "<td class=\"separator\">".$data['purchases']."</td>".
     "<td>".number_format($data['prate']*100, 2)."%</td>".
     "<td>".number_format($ranks[$item], 1)."</td>".

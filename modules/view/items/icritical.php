@@ -166,7 +166,7 @@ function rg_view_generate_items_critical() {
   foreach ($items_rc as $iid => $line) {
     $res[$tag] .= "<tr>".
       "<td>".item_icon($iid)."</td>".
-      "<td>".item_name($iid)."</td>".
+      "<td>".item_link($iid)."</td>".
       "<td class=\"separator\">".$line['purchases']."</td>".
       "<td>".number_format($line['prate']*100, 2)."%</td>".
       "<td class=\"separator\">".number_format($line['winrate']*100, 2)."%</td>".

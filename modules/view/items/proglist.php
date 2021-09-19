@@ -64,9 +64,9 @@ function rg_view_generate_items_proglist() {
   foreach ($pairs as $line) {
     $res[$tag] .= "<tr>".
       "<td>".item_icon($line['item1'])."</td>".
-      "<td>".item_name($line['item1'])."</td>".
+      "<td>".item_link($line['item1'])."</td>".
       "<td>".item_icon($line['item2'])."</td>".
-      "<td>".item_name($line['item2'])."</td>".
+      "<td>".item_link($line['item2'])."</td>".
       "<td>".$line['total']."</td>".
       "<td>".number_format(100*$line['winrate'], 2)."%</td>".
       "<td>".number_format($line['min_diff'], 1)."</td>".

@@ -122,7 +122,7 @@ function rg_view_generate_items_irecords() {
     foreach ($overview as $line) {
       $res[$tag] .= "<tr><td>".match_link($line['match'])."</td>".
         "<td>".item_icon($line['item'])."</td>".
-        "<td>".item_name($line['item'])."</td>".
+        "<td>".item_link($line['item'])."</td>".
         "<td>".hero_portrait($line['hero'])."</td>".
         "<td>".hero_name($line['hero'])."</td>".
         "<td>".convert_time_seconds($line['time'])."</td>".

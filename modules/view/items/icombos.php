@@ -133,9 +133,9 @@ function rg_view_generate_items_icombos() {
     foreach ($pairs as $line) {
       $res['overview'] .= "<tr>".
         "<td>".item_icon($line['itemid1'])."</td>".
-        "<td>".item_name($line['itemid1'])."</td>".
+        "<td>".item_link($line['itemid1'])."</td>".
         "<td>".item_icon($line['itemid2'])."</td>".
-        "<td>".item_name($line['itemid2'])."</td>".
+        "<td>".item_link($line['itemid2'])."</td>".
         "<td>".$line['matches']."</td>".
         "<td>".number_format(100*$line['wins']/$line['matches'], 2)."%</td>".
         "<td>".number_format(100*$line['wr_diff'], 2)."%</td>".
