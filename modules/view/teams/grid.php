@@ -10,6 +10,8 @@ function rg_view_generate_teams_grid() {
 
   if (isset($report['match_participants_teams'])) {
     foreach ($report['match_participants_teams'] as $mid => $teams) {
+      if (empty($teams['dire']) || empty($teams['radiant'])) continue;
+
       if (!isset($tvt[$teams['dire']][$teams['radiant']]['matchids'])) {
         $tvt[$teams['dire']][$teams['radiant']]['matchids'] = [];
       }
