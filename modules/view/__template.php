@@ -1,4 +1,4 @@
-<?php  $__postfix = "?v=25063"; ?>
+<?php  $__postfix = "?v=26000"; ?>
 <!DOCTYPE html>
 <html lang="<?php echo $locale; ?>">
   <head>
@@ -33,18 +33,26 @@
               $rep_sm_desc .= ' '.$title_separator.' '.$head_desc;
           }
         }
-       
-       $host_link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 
-                "https" : "http") . "://" . $_SERVER['HTTP_HOST'] .  
-                dirname($_SERVER['REQUEST_URI']); 
     ?>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=1600px, initial-scale=0.4">
     <?php
-      if (isset($report['league_id']) && isset($league_logo_provider)) 
-        $league_logo_link = str_replace('%LID%', $report['league_id'], $league_logo_provider);
+      if (!isset($social_lid)) {
+        if (isset($report['league_id'])) $social_lid = $report['league_id'];
+        elseif (!empty($__lid_fallbacks)) {
+          foreach ($__lid_fallbacks as $preg => $lid) {
+            if (preg_match($preg, $leaguetag ?? $cat)) {
+              $social_lid = $lid;
+              break;
+            }
+          }
+        }
+      }
+
+      if (isset($social_lid) && isset($league_logo_provider)) 
+        $league_logo_link = str_replace('%LID%', $social_lid, $league_logo_provider);
       else 
-        $league_logo_link = $host_link."/res/header_grafenium.jpg";
+        $league_logo_link = $social_lid_fallback ?? $host_link."/res/header_grafenium.jpg";
 
       echo "<meta name=\"title\" content=\"$rep_sm_title\">";
       echo "<meta name=\"description\" content=\"$rep_sm_desc\">";
