@@ -6,6 +6,8 @@ if (file_exists($cats_file)) {
 
 include_once("modules/view/__open_cache.php");
 include_once("modules/view/__update_cache.php");
+include_once("modules/view/functions/check_filters.php");
+include_once("modules/view/functions/create_search_filters.php");
 include_once("$root/modules/view/functions/convert_patch.php");
 
 /*
@@ -22,34 +24,49 @@ function: checktag($reportdata, $tag),
 $modules = "";
 $modules .= "<div id=\"content-top\">";
 
-if (!empty($__friends) && !isset($cat)) {
-  $modules .= "<div class=\"content-text list-pinned friends-list\"><h1>".locale_string("friends_main")."</h1>";
-  foreach($__friends as $pin) {
-    $modules .= "<a class=\"category\" href=\"".$pin[1]."\" target=\"_blank\">".$pin[0]."</a>";
-  }
-  $modules .= "</div>";
-}
+// $modules .= "<div class=\"content-text tabs-container\">";
+
+// $modules .= "<input type=\"radio\" class=\"tab\" id=\"tabs-block-tab1\" name=\"css-tabs\">";
+
+$tabSelected = null;
+$tabsNames = [];
+$tabsContent = [];
+$tabsTags = [];
 
 if (!empty($__pinned)) {
-  $modules .= "<div class=\"content-text list-pinned\"><h1>".locale_string("pinned_main")."</h1>";
+  $tmp = "";
   foreach($__pinned as $pin) {
     if ($pin[1] && !isset($cats)) continue;
     // if ($pin[1] && !isset($cats[$pin[0]])) continue;
-    $modules .= "<a class=\"category".($pin[1] && isset($cat) && $cat == $pin[0] ? " active" : "").
+    $tmp .= "<a class=\"category".($pin[1] && isset($cat) && $cat == $pin[0] ? " active" : "").
               "\" href=\"?".($pin[1] ? "cat" : "league")."=".$pin[0].(empty($linkvars) ? "" : "&".$linkvars)."\">";
     if ($pin[1]) {
-      $modules .= $cats[ $pin[0] ]['names_locales'][$locale] ?? $cats[ $pin[0] ]['name'] ?? locale_string($pin[0]."_reports");
+      $tmp .= $cats[ $pin[0] ]['names_locales'][$locale] ?? $cats[ $pin[0] ]['name'] ?? locale_string($pin[0]."_reports");
     } else {
-      $modules .= $cache["reps"][ $pin[0] ]['localized'][$locale]['name'] ?? $cache["reps"][ $pin[0] ]['name'] ?? $pin[0];
+      $tmp .= $cache["reps"][ $pin[0] ]['localized'][$locale]['name'] ?? $cache["reps"][ $pin[0] ]['name'] ?? $pin[0];
     }
-    $modules .= "</a>";
+    $tmp .= "</a>";
+
+    if ($pin[1] && isset($cat) && $cat == $pin[0]) $tabSelected = 0;
   }
-  $modules .= "</div>";
+
+  $tabsContent[] = $tmp;
+  $tabsNames[] = locale_string("pinned_main");
+  $tabsTags[] = "list-pinned";
 }
 
-if(!empty($cats)) {
-  include_once("modules/view/functions/check_filters.php");
+if (!empty($searchstring)) {
+  $searchfilter = create_search_filters($searchstring);
 
+  $reps = [];
+  foreach($cache["reps"] as $tag => $rep) {
+    if(check_filters($rep, $searchfilter))
+      $reps[$tag] = $rep;
+  }
+
+  $head_name = locale_string("search_header");
+  $head_desc = htmlspecialchars($searchstring);
+} else if (!empty($cats)) {
   if (isset($cat) && isset($cats[$cat])) {
     $reps = [];
     foreach($cache["reps"] as $tag => $rep) {
@@ -66,6 +83,8 @@ if(!empty($cats)) {
 
     if(isset($cats[$cat]['desc_locales'][$locale])) $head_desc = $cats[$cat]['desc_locales'][$locale];
     else if(isset($cats[$cat]['desc'])) $head_desc = $cats[$cat]['desc'];
+
+    if (isset($cats[$cat]['lid'])) $social_lid = $cats[$cat]['lid'];
   } else if(!isset($cat) || $cat == "main") {
     $head_name = $instance_name;
     $head_desc = $instance_desc;
@@ -118,23 +137,28 @@ if(!empty($cats)) {
 }
 
 if(isset($cats) && !empty($cats)) {
-  if(isset($cat) || !empty($__pinned)) {
-    $modules .= "<div class=\"content-text tagsshow\"><a class=\"category\">".locale_string("show_tags")."</a></div>";
-  }
+  // if(isset($cat) || !empty($__pinned)) {
+  //   $tmp = "<div class=\"content-text tagsshow\"><a class=\"category\">".locale_string("show_tags")."</a></div>";
+  // }
 
-  $modules .= "<div class=\"content-text tagslist ".(isset($cat) || !empty($__pinned) ? "hidden" : "")."\" ".(isset($cat) || !empty($__pinned) ? " style=\"display: none;\"" : "").">";
+  // $tmp = "<div class=\"content-text tagslist ".(isset($cat) || !empty($__pinned) ? "hidden" : "")."\" ".(isset($cat) || !empty($__pinned) ? " style=\"display: none;\"" : "").">";
+  $tmp = "";
 
-  $modules .= "<a class=\"category".(isset($cat) && "main" == $cat ? " active" : "").
+  $tmp .= "<a class=\"category".(isset($cat) && "main" == $cat ? " active" : "").
               "\" href=\"?cat=main".(empty($linkvars) ? "" : "&".$linkvars).
               "\">".locale_string("main_reports")."</a>";
-  $modules .= "<a class=\"category".(isset($cat) && "recent" == $cat ? " active" : "").
+  $tmp .= "<a class=\"category".(isset($cat) && "recent" == $cat ? " active" : "").
               "\" href=\"?cat=recent".(empty($linkvars) ? "" : "&".$linkvars).
               "\">".locale_string("recent_reports")."</a>";
+
+  if ($tabSelected === null && isset($cat) && ($cat == "main" || $cat == "recent")) {
+    $tabSelected = count($tabsNames);
+  }
 
   foreach($cats as $tag => $desc) {
     if($tag == $hidden_cat || (isset($desc['hidden']) && $desc['hidden'])) continue;
 
-    $modules .= "<a class=\"category".(isset($cat) && $tag == $cat ? " active" : "")."\" ".
+    $tmp .= "<a class=\"category".(isset($cat) && $tag == $cat ? " active" : "")."\" ".
                 "href=\"?cat=".$tag.(empty($linkvars) ? "" : "&".$linkvars)."\" ".
                 (isset($desc['desc_locales'][$locale]) ? "title=\"".$desc['desc_locales'][$locale]."\"" :
                   (isset($desc['desc']) ? "title=\"".$desc['desc']."\"" : "")
@@ -144,13 +168,91 @@ if(isset($cats) && !empty($cats)) {
                   (isset($desc['name']) ? $desc['name'] : $tag)
                 ).
                 "</a>";
+
+    if ($tabSelected === null && isset($cat) && $tag == $cat) {
+      $tabSelected = count($tabsNames);
+    }
   }
 
   if(isset($cats[$hidden_cat]))
-    $modules .= "<a class=\"category".(isset($cat) && "all" == $cat ? " active" : "").
+    $tmp .= "<a class=\"category".(isset($cat) && "all" == $cat ? " active" : "").
                 "\" href=\"?cat=all".(empty($linkvars) ? "" : "&".$linkvars).
                 "\">".locale_string("all_reports")."</a>";
 
+  $tabsContent[] = $tmp;
+  $tabsNames[] = locale_string("all_tags");
+  $tabsTags[] = "tagslist";
+}
+
+// search block
+  $tmp = "<form action=\"?".(empty($linkvars) ? "" : $linkvars)."\" method=\"get\">".
+    "<input type=\"text\" name=\"search\" value=\"".htmlspecialchars($searchstring ?? (isset($cat) && $cat != "main" ? "!cat:$cat " : ""))."\" />";
+  
+  if (!empty($linkvars)) {
+    $_vars = explode('&', $linkvars);
+    foreach ($_vars as $kv) {
+      [$k, $v] = explode('=', $kv);
+      $tmp .= "<input type=\"hidden\" name=\"$k\" value=\"".addcslashes($v, '"')."\" />";
+    }
+  }
+  
+  $tmp .= "<input type=\"submit\" value=\"".locale_string("search_submit")."\" />";
+
+  if (isset($search_info_link)) {
+    $tmp .= "<div class=\"content-text\">".
+      "<a href=\"$search_info_link\" target=\"_blank\">".locale_string("search_info_link")."</a>".
+    "</div>";
+  }
+
+  $tmp .= "</form>";
+
+  $tabsContent[] = $tmp;
+  $tabsNames[] = locale_string("search");
+  $tabsTags[] = "searchform";
+
+  if (!empty($searchstring)) $tabSelected = count($tabsNames)-1;
+//
+
+if (!empty($tabsNames)) {
+  $modules .= "<div class=\"tabs-block\">";
+
+  if ($tabSelected === null) $tabSelected = 0;
+
+  foreach ($tabsNames as $i => $name) {
+    $modules .= "<input type=\"radio\" class=\"tab\" id=\"tabs-block-tab".($i+1)."\" name=\"css-tabs\" ".($i == $tabSelected ? "checked" : "").">";
+  }
+
+  $modules .= "<ul class=\"tabs-container\">";
+  foreach ($tabsNames as $i => $name) {
+    $modules .= "<li class=\"tabs-container-tab\"><label for=\"tabs-block-tab".($i+1)."\">$name</label></li>";
+  }
+  $modules .= "</ul>";
+
+  foreach ($tabsContent as $i => $content) {
+    $tags = $tabsTags[$i] ?? "";
+    $modules .= "<div class=\"tab-content $tags\">$content</div>";
+  }
+
+  $modules .= "</div>";
+}
+
+if (!empty($__links)) {
+  $modules .= "<div class=\"content-text list-pinned friends-list\">";
+  foreach($__links as $pin) {
+    $modules .= "<a class=\"category\" href=\"".$pin[1]."\" target=\"_blank\">".
+      (isset($pin[2]) ? "<img src=\"".$pin[2]."\" alt=\"favicon\" class=\"category-icon\" />" : "").
+      $pin[0]."</a>";
+  }
+  $modules .= "</div>";
+}
+
+if (!empty($__friends) && !(isset($cat) || isset($searchstring))) {
+  $modules .= "<div class=\"content-text list-pinned friends-list\"><h1>".locale_string("friends_main")."</h1>";
+  foreach($__friends as $pin) {
+    $modules .= "<a class=\"category\" href=\"".$pin[1]."\" target=\"_blank\">".
+      (isset($pin[2]) ? "<img src=\"".$pin[2]."\" alt=\"favicon\" class=\"category-icon\" />" : "").
+      $pin[0]."</a>";
+  }
   $modules .= "</div>";
 }
 
@@ -198,7 +300,7 @@ if (sizeof($cache['reps']) === 0) {
   foreach($reps as $report) {
     if (empty($report)) continue;
     if ($report['short_fname'][0] == '!') continue;
-    if(!isset($cat) && $index_list < sizeof($reps)) {
+    if(!(isset($cat) || isset($searchstring)) && $index_list < sizeof($reps)) {
       if(!$index_list) break;
       $index_list--;
     }
