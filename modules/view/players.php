@@ -20,8 +20,10 @@ if (isset($report['player_pairs']) || isset($report['player_triplets']) || isset
 if (isset($report['players_combo_graph']) && $report['settings']['players_combo_graph'] && isset($report['players_additional']))
   include("players/party_graph.php");
 
-if (isset($report['players_summary']) )
+if (isset($report['players_summary']) ) {
   include("players/summary.php");
+  include("players/profiles.php");
+}
 
 
   function rg_view_generate_players() {
@@ -64,6 +66,9 @@ if (isset($report['players_summary']) )
     if (isset($report['players_summary'])) {
       if(check_module($parent."summary")) {
         $res['summary'] = rg_view_generate_players_summary();
+      }
+      if(check_module($parent."profiles")) {
+        $res['profiles'] = rg_view_generate_players_profiles();
       }
     }
 

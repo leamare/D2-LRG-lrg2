@@ -11,6 +11,7 @@ if (isset($report['items']['stats'])) {
   include($root."/modules/view/items/boxplots.php");
   include($root."/modules/view/items/heroes.php");
   include($root."/modules/view/items/hboxplots.php");
+  include($root."/modules/view/items/profiles.php");
 }
 if (isset($report['items']['combos'])) {
   include($root."/modules/view/items/icombos.php");
@@ -53,6 +54,9 @@ function rg_view_generate_items() {
     }
     if (check_module($parent."heroboxplots")) {
       $res['heroboxplots'] = rg_view_generate_items_heroboxplots();
+    }
+    if (check_module($parent."profiles")) {
+      $res['profiles'] = rg_view_generate_items_profiles();
     }
   }
   if (isset($report['items']['combos'])) {
