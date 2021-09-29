@@ -14,7 +14,7 @@ $endpoints['milestones'] = function($mods, $vars, &$report) use (&$endpoints) {
   ];
 
   foreach ($data['total'] as $k => $v) {
-    $res[$k] = $v[0];
+    $res['total'][$k] = $v[0];
   }
 
   if (!empty($data['players'])) {
