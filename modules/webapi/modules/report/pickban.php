@@ -1,8 +1,11 @@
 <?php 
 
+include_once(__DIR__ . "/../../functions/pickban_overview.php");
+include_once(__DIR__ . "/../../functions/overview_uncontested.php");
+
 $repeatVars['pickban'] = ['team', 'region'];
 
-$endpoints['pickban'] = function($mods, $vars, &$report) {
+$endpoints['pickban'] = function($mods, $vars, &$report) use (&$meta, &$endpoints) {
   if (!in_array("heroes", $mods)) throw new \Exception("This module is only available for heroes");
 
   if (isset($vars['team']) && isset($report['teams'])) {
@@ -127,7 +130,21 @@ $endpoints['pickban'] = function($mods, $vars, &$report) {
     $el['bans_to_median'] = isset($mb) ? round($el['matches_banned']/$mb, 1) : null;
   }
 
+  try {
+    $uncontested = rgapi_generator_uncontested($meta['heroes'], $context, true);
+    $res[ $uncontested['type'] ] = $uncontested['data'];
+  } catch (Exception $e) {
+    $uncontested = [
+      'type' => 'heroes_uncontested',
+      'data' => null
+    ];
+  }
+
   return [
-    'pickban' => $context
+    'median_picks' => $mp ?? null,
+    'median_bans' => $mb ?? null,
+    'total' => $context_total_matches ?? null,
+    'pickban' => $context,
+    $uncontested['type'] => $uncontested['data']
   ];
 };
