@@ -268,7 +268,7 @@ $endpoints['profiles'] = function($mods, $vars, &$report) use (&$endpoints, &$me
 
     if (empty($vars['gets']) || $vars['gets'] == '*') {
       // $vars['gets'] = [ 'total', 'heroes', 'heroes-matches', 'heroes-rank-top', 'heroes-rank-bot', 'records', 'records-best' ];
-      $vars['gets'] = [ 'total', 'heroes-purchases', 'heroes-rank-top', 'heroes-rank-bot', 'records-best' ];
+      $vars['gets'] = [ 'total', 'heroes-prate', 'heroes-rank-top', 'heroes-rank-bot', 'records-best' ];
     }
 
     $res = [];
@@ -287,13 +287,17 @@ $endpoints['profiles'] = function($mods, $vars, &$report) use (&$endpoints, &$me
       $res['heroes'] = $heroes;
     }
 
-    if (in_array('heroes-purchases', $vars['gets'])) {
+    if (in_array('heroes-prate', $vars['gets'])) {
       uasort($heroes, function($a, $b) {
-        return $b['purchases'] <=> $a['purchases'];
+        return $b['prate'] <=> $a['prate'];
       });
 
-      $res['heroes-purchases'] = array_slice($heroes, 0, 10, true);
+      $res['heroes-prate'] = array_slice($heroes, 0, 10, true);
     }
+
+    $heroes = array_filter($heroes, function($a) {
+      return $a['prate'] > 0.01;
+    });
 
     if (in_array('heroes-rank-top', $vars['gets'])) {
       uasort($heroes, function($a, $b) {
