@@ -629,6 +629,7 @@ table .hero_portrait {
   margin-left: 5%;
   margin-right: 5%;
   line-height: 34px;
+  padding: 10px 0;
 }
 .tagslist.hidden {
   display: none;
@@ -705,7 +706,7 @@ table .hero_portrait {
 	line-height: 2em;
 	color: var(--text);
   clear: both;
-  margin: 10px 10%;
+  margin: 0 10%;
 
 	padding: 25px 5% 25px;
 }
@@ -844,4 +845,73 @@ table.list thead {
   right: 5%;
   top: calc(50% - .25em);
   opacity: .6;
+}
+
+
+.profile-header {
+	text-align: center;
+
+	font-size: 18px;
+	line-height: 34px;
+	color: var(--text);
+  clear: both;
+
+	margin: 30px 10% 0;
+  overflow: hidden;
+}
+.profile-header .profile-image {
+  float: left;
+  width: 256px;
+}
+.profile-header.bigger-image .profile-image {
+  width: 384px;
+}
+.profile-header .profile-image img {
+  width: 256px;
+  height: auto;
+}
+.profile-header.bigger-image .profile-image img {
+  width: 384px;
+}
+.profile-header .profile-name {
+  color: var(--content-text-overview);
+  font-size: 34px;
+  line-height: 2.5em;
+  margin-top: 14px;
+  text-align: left;
+  margin-left: 286px;
+}
+.profile-header.bigger-image .profile-name {
+  margin-left: 412px;
+}
+.profile-header .profile-content {
+  text-align: left;
+  margin-left: 286px;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.profile-header.bigger-image .profile-content {
+  margin-left: 384px;
+}
+.profile-header .profile-stats {
+  width: 31%;
+}
+.profile-header .profile-stats * {
+  font-size: 20px;
+  line-height: 1.5em;
+}
+.profile-statline label {
+  color: var(--content-text-overview);
+  font-weight: bold;
+}
+.profile-stats-header {
+  color: var(--content-text-overview);
+  font-size: 20px;
+  line-height: 1.5em;
+  font-weight: bold;
+}
+.profile-links img {
+  height: 2em;
+  width: auto;
 }
