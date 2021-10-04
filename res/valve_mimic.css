@@ -221,7 +221,7 @@ a:hover {
 	text-align: center;
 
   border-top: 1px solid var(--content-header);
-  color: var(--selector-bg);
+  color: var(--content-header);
 
   padding-top: 20px;
 	margin: 0 25% 20px;
@@ -232,7 +232,7 @@ a:hover {
 	text-align: center;
 
   border-top: 1px solid var(--content-header);
-  color: var(--selector-bg);
+  color: var(--content-header);
 
   padding-top: 20px;
 	margin: 0 25% 20px;
@@ -243,7 +243,7 @@ a:hover {
 	text-align: center;
 
   border-top: 1px solid var(--content-header);
-  color: var(--selector-bg);
+  color: var(--content-header);
 
   padding-top: 20px;
 	margin: 0 25% 20px;
@@ -264,6 +264,8 @@ a:hover {
 
 	color: var(--selector-link);
   display: inline-block;
+  border-bottom: 3px solid #0000;
+  transition: 150ms all linear;
 }
 .select-selectors {
   background: var(--selectors-bg);
@@ -282,6 +284,10 @@ a:hover {
 
 .selector:hover {
 	color: var(--selector-link);
+  border-bottom: 3px solid var(--content-header);
+}
+.selector:hover a {
+  text-decoration: none;
 }
 
 .content-text h1 , .content-cards h1{
@@ -374,7 +380,7 @@ header.navBar a, header.navBar a:hover, header.navBar a:visited, header.navBar a
 .modal {
     display: none;
     position: fixed;
-    z-index: 1;
+    z-index: 1001;
     left: 0;
     top: 0;
     width: 100%;
