@@ -38,6 +38,7 @@ One major GET parameter is `report`. It specifies a tag of a report to load. If 
 * (GET) `pretty` – flag, if it’s used response will be nicely formatted
 * (GET) `desc` - flag, adds report descriptor to the response if set
 * (GET) `teamcard` - flag, adds team card to the response if set
+* (GET) `search` - search query used for search
 
 * (GET) `item_cat` - comma delimited list of item categories, allowed values are `all`, `major`, `medium` (~1-2.5k gold items) and `early` (early game items), used only by items modules
 * (GET) `simple_matchcard` - GET flag, returns ALL match cards as simplified ones
@@ -249,6 +250,7 @@ It’s fairly simple to explain. It doesn’t have a structure and is used in `s
 * `players/profiles` - requires `playerid`
 * `items/profiles` - requires `itemid`
 * `heroes/rolepickban` - also works for regions and teams, requires heroes-positions to be enabled
+* `milestones`
 
 ### Non-report endpoints
 
@@ -257,3 +259,4 @@ It’s fairly simple to explain. It doesn’t have a structure and is used in `s
 * `locales` (requires `gets`, returns locale objects used by LRG2 WV)
 * `getcache` (returns raw cache used for lists)
 * `raw` (requires `rep`, returns raw report)
+* `search` (requires `search`, returns list of reports found)
