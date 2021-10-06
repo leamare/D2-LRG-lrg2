@@ -243,7 +243,8 @@ if ($conn->select_db($lrg_db_prefix."_".$lg_settings['league_tag'])) {
     `category_id` smallint(5) UNSIGNED NOT NULL,
     `time` int(11) NOT NULL,
     KEY `items_matchid_heroid_IDX` (`matchid`,`hero_id`) USING BTREE,
-    KEY `items_matchid_player_IDX` (`matchid`,`playerid`) USING BTREE
+    KEY `items_matchid_player_IDX` (`matchid`,`playerid`) USING BTREE,
+    KEY `items_matchid_item_IDX` (`matchid`,`item_id`) USING BTREE
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
     if ($conn->connect_error) die("[F] Can't create table `items`: ".$conn->connect_error."\n");
 
