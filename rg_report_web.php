@@ -1,5 +1,7 @@
 <?php
 
+ini_set('memory_limit', '1024M');
+
 include_once("modules/commons/locale_strings.php");
 include_once("modules/commons/array_pslice.php");
 include_once("modules/commons/get_language_code_iso6391.php");
@@ -14,14 +16,24 @@ if(isset($_REQUEST['loc']) && !empty($_REQUEST['loc'])) {
 }
 
 require_once('locales/en.php');
-if(strtolower($locale) != "en" && file_exists('locales/'.$locale.'.php'))
-  require_once('locales/'.$locale.'.php');
-else $locale = "en";
+if(strtolower($locale) != "en") {
+  include_locale($locale) or $locale = "en";
+}
+if (isset($strings[$locale]) && isset($strings[$locale]['__fallback'])) {
+  $fallback_locale = $strings[$locale]['__fallback'];
+  if (!isset($strings[$fallback_locale])) {
+    include_locale($fallback_locale);
+  }
+}
+
+$host_link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 
+                "https" : "http") . "://" . $_SERVER['HTTP_HOST'] .  
+                dirname($_SERVER['REQUEST_URI']); 
 
 include_once("rg_report_out_settings.php");
 
 include_once("modules/commons/versions.php");
-$lg_version = array( 2, 19, 2, 0, 0 );
+$lg_version = array( 2, 20, 0, 0, 1 );
 
 include_once("modules/commons/merge_mods.php");
 include_once("modules/commons/metadata.php");
@@ -73,6 +85,9 @@ if ($lrg_use_get) {
     $cat = $_GET['cat'];
     //$linkvars[] = array("cat", $_GET['cat']);
   } //else $cat = "";
+  if(isset($_GET['search']) && !empty($_GET['search'])) {
+    $searchstring = $_GET['search'];
+  }
 
   if(isset($_GET['latest'])) $latest = true;
 }
@@ -122,6 +137,9 @@ if (isset($report)) {
     if (isset($report['records']))
       include_once("modules/view/records.php");
 
+    if (isset($report['milestones']))
+      include_once("modules/view/milestones.php");
+
     if (isset($report['averages_heroes']) || isset($report['pickban']) || isset($report['draft']) || isset($report['hero_positions']) ||
         isset($report['hero_sides']) || isset($report['hero_pairs']) || isset($report['hero_triplets']))
           include_once("modules/view/heroes.php");
@@ -160,6 +178,11 @@ if (isset($report)) {
   # records
   if (isset($modules['records']) && check_module("records")) {
     merge_mods($modules['records'], rg_view_generate_records());
+  }
+
+  # milestones
+  if (isset($modules['milestones']) && check_module("milestones")) {
+    merge_mods($modules['milestones'], rg_view_generate_milestones());
   }
 
   # heroes

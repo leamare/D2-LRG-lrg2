@@ -1,6 +1,6 @@
 # Dota 2 League Report Generator (D2-LRG-lrg2)
 
-## Current version: 2.19.0
+## Current version: 2.20.0
 
 This is the **lrg2** version that won't be updated any further.
 

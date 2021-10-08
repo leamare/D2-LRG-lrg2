@@ -14,12 +14,16 @@ if(isset($_REQUEST['loc']) && !empty($_REQUEST['loc'])) {
   $locale = $_REQUEST['loc'];
 }
 
+$host_link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 
+                "https" : "http") . "://" . $_SERVER['HTTP_HOST'] .  
+                dirname($_SERVER['REQUEST_URI']); 
+
 $include_descriptor = isset($_REQUEST['desc']);
 $include_team = isset($_REQUEST['teamcard']);
 
 include_once("rg_report_out_settings.php");
 include_once("modules/commons/versions.php");
-$lg_version = [ 2, 19, 1, 0, 0 ];
+$lg_version = [ 2, 20, 0, 0, 1 ];
 
 include_once("modules/commons/locale_strings.php");
 
@@ -51,6 +55,7 @@ include_once("modules/view/functions/join_matches.php");
 
 include_once("modules/view/functions/has_pair.php");
 include_once("modules/view/functions/check_filters.php");
+include_once("modules/view/functions/create_search_filters.php");
 
 include_once("modules/view/generators/pvp_unwrap_data.php");
 
