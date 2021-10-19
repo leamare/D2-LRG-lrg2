@@ -13,7 +13,11 @@ function rg_view_generate_players_summary() {
       foreach($report['players_summary'] as $id => $player) {
         if (!isset($report['players_additional'][$id]['positions'])) continue;
         $position = reset($report['players_additional'][$id]['positions']);
-        $position = "position_".$position["core"].".".$position["lane"];
+        if (empty($position)) {
+          $position = "unknown";
+        } else {
+          $position = "position_".$position["core"].".".$position["lane"];
+        }
         $report['players_summary'][$id]['common_position'] = locale_string($position);
       }
     }
