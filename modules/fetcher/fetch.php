@@ -5,6 +5,8 @@
  * Even I would rather not look inside of what's hidden here.
  */
 
+include_once __DIR__.'/comebacks.php';
+
 function conn_restart() {
   global $conn, $lrg_sql_host, $lrg_sql_user, $lrg_sql_pass, $lrg_sql_db;
   $conn->close();
@@ -614,12 +616,20 @@ function fetch($match) {
     $t_match['leagueID'] = $matchdata['leagueid'];
     $t_match['cluster']  = $matchdata['cluster'] ?? null;
     $t_match['start_date'] = $matchdata['start_time'];
-    if (isset($matchdata['stomp']))
-        $t_match['stomp'] = $matchdata['stomp'];
-    else $t_match['stomp'] = $bad_replay ? 0 : $matchdata['loss'];
-    if (isset($matchdata['comeback']))
-        $t_match['comeback'] = $matchdata['comeback'];
-    else $t_match['comeback'] = $bad_replay ? 0 : $matchdata['throw'];
+
+    // if (isset($matchdata['stomp']))
+    //     $t_match['stomp'] = $matchdata['stomp'];
+    // else $t_match['stomp'] = $bad_replay ? 0 : $matchdata['loss'];
+    // if (isset($matchdata['comeback']))
+    //     $t_match['comeback'] = $matchdata['comeback'];
+    // else $t_match['comeback'] = $bad_replay ? 0 : $matchdata['throw'];
+
+    if (!$bad_replay) {
+      [ $t_match['stomp'], $t_match['comeback'] ] = find_comebacks($matchdata['radiant_gold_adv'], $matchdata['radiant_win']);
+    } else {
+      $t_match['stomp'] = 0;
+      $t_match['comeback'] = 0;
+    }
 
     if ($lg_settings['main']['teams'] && (isset($matchdata['radiant_team']) || isset($matchdata['dire_team']))) {
       for($i=0; $i<2; $i++) {

@@ -1,5 +1,7 @@
 <?php 
 
+include_once __DIR__.'/comebacks.php';
+
 const ROSHAN = [133, 134, 135, 263, 324, 325, 326, 371, 593, 594, 595, 640];
 const OBS = [110, 499, 768];
 const SENTRY = [500, 769, 111];
@@ -243,11 +245,7 @@ function get_stratz_response($match) {
   $r['matches']['version'] = get_patchid($r['matches']['start_date'], convert_patch_id($r['matches']['start_date']), $meta);
 
   if ($stratz['data']['match']['statsDateTime']) {
-    $throwVal = $stratz['data']['match']['didRadiantWin'] ? max($stratz['data']['match']['stats']['radiantNetworthLeads']) : min($stratz['data']['match']['stats']['radiantNetworthLeads']) * -1;
-    $comebackVal = $stratz['data']['match']['didRadiantWin'] ? min($stratz['data']['match']['stats']['radiantNetworthLeads']) * -1 : max($stratz['data']['match']['stats']['radiantNetworthLeads']);
-  
-    $r['matches']['stomp'] = $stratz['data']['match']['didRadiantWin'] ? $throwVal : $comebackVal;
-    $r['matches']['comeback'] = $stratz['data']['match']['didRadiantWin'] ? $comebackVal : $throwVal;
+    [ $r['matches']['stomp'], $r['matches']['comeback'] ] = find_comebacks($stratz['data']['match']['stats']['radiantNetworthLeads'], $stratz['data']['match']['didRadiantWin']);
   } else {
     $r['matches']['stomp'] = 0;
     $r['matches']['comeback'] = 0;
