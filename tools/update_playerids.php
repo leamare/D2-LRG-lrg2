@@ -75,7 +75,7 @@ foreach ($matches as $match) {
       } 
     }",
   ];
-  if (!empty($stratztoken)) $data['token'] = $stratztoken;
+  if (!empty($stratztoken)) $data['key'] = $stratztoken;
   
   $stratz_request = "https://api.stratz.com/graphql";
 

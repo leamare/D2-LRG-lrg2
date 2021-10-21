@@ -94,7 +94,7 @@ function fetch($match) {
       } 
     }",
   ];
-  if (!empty($stratztoken)) $data['token'] = $stratztoken;
+  if (!empty($stratztoken)) $data['key'] = $stratztoken;
   
   $stratz_request = "https://api.stratz.com/graphql?".http_build_query($data);
 
@@ -438,7 +438,7 @@ function fetch($match) {
           echo ", retrying.";
 
           if (empty($stratz['stats']['pickBans'])) {
-              // $request = "https://api.stratz.com/api/v1/match/$match".(!empty($stratztoken) ? "?token=$stratztoken" : "");
+              // $request = "https://api.stratz.com/api/v1/match/$match".(!empty($stratztoken) ? "?key=$stratztoken" : "");
               $full_request = true;
           }
 
