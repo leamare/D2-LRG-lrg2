@@ -198,7 +198,7 @@ function get_stratz_response($match) {
     $data['query'] = str_replace("  ", "", $data['query']);
     $data['query'] = str_replace("\n", " ", $data['query']);
   
-    if (!empty($stratztoken)) $data['token'] = $stratztoken;
+    if (!empty($stratztoken)) $data['key'] = $stratztoken;
       
     $stratz_request = "https://api.stratz.com/graphql";
   
