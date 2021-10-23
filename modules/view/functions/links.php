@@ -9,11 +9,11 @@ function match_link($mid) {
   }
 
   if (empty($links_providers))
-    return "<a href=\"https://$link_provider/matches/$mid\" target=\"_blank\" rel=\"noopener\">$midText</a>";
+    return "<a href=\"https://$link_provider/matches/$mid\" target=\"_blank\" rel=\"noopener\" class=\"matchlink\">$midText</a>";
   
   $r = $midText." - ";
   foreach ($links_providers as $lpn => $lpl) {
-    $r .= "<a target=\"_blank\" href=\"https://$lpl/matches/$mid\">".link_provider($lpn)."</a> ";
+    $r .= "<a class=\"matchlink\" target=\"_blank\" href=\"https://$lpl/matches/$mid\">".link_provider($lpn)."</a> ";
   }
   //$r .= " ] ";
   return $r;

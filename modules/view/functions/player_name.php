@@ -40,7 +40,7 @@ function player_link($pid, $tt = true, $nolinks = false) {
   }
   
   foreach ($links_providers as $lpn => $lpl) {
-    $r .= "<a target=\"_blank\" href=\"https://$lpl/players/$pid\">".link_provider($lpn)."</a> ";
+    $r .= "<a class=\"matchlink\" target=\"_blank\" href=\"https://$lpl/players/$pid\">".link_provider($lpn)."</a> ";
   }
   //$r .= " ] ";
   return $r;

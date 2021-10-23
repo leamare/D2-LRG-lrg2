@@ -915,3 +915,13 @@ table.list thead {
   height: 2em;
   width: auto;
 }
+
+.matchlink {
+  font-size: inherit;
+}
+.matchlink img {
+  font-size: inherit;
+  height: .9em;
+  vertical-align: middle;
+  margin-top: -.2em;
+}
