@@ -134,8 +134,8 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
 
           $res["team".$tid]['overview'] .= "<div class=\"content-text\">".
             "<a href=\"https://www.dotabuff.com/esports/teams/$tid\">Dotabuff</a> / ".
-            "<a href=\"https://www.opendota.com/teams/$tid\">OpenDota</a>".
-            //"<a href=\"https://www.opendota.com/teams/$tid\">Stratz</a> / ".
+            "<a href=\"https://www.opendota.com/teams/$tid\">OpenDota</a> / ".
+            "<a href=\"https://www.stratz.com/teams/$tid\">Stratz</a>".
           "</div>";
 
           if(isset($report['teams'][$tid]['regions'])) {

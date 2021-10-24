@@ -41,18 +41,18 @@ function match_card($mid) {
   if (isset($report['matches_additional'][$mid]['bans'])) {
     $match['bans'] = [];
     $match['bans']['radiant'] = $report['matches_additional'][$mid]['bans'][0];
-    $match['bans']['dire'] = $report['matches_additional'][$mid]['bans'][0];
+    $match['bans']['dire'] = $report['matches_additional'][$mid]['bans'][1];
   }
   
   if(isset($report['teams']) && isset($report['match_participants_teams'][$mid])) {
     $teams = [];
     if(isset($report['match_participants_teams'][$mid]['radiant']) &&
        isset($report['teams'][ $report['match_participants_teams'][$mid]['radiant'] ]['name']))
-       $teams['radiant'] = $report['match_participants_teams'][$mid]['radiant'];
+       $teams['radiant'] = team_card_min($report['match_participants_teams'][$mid]['radiant']);
     else $team_radiant = $teams['radiant'] = null;
     if(isset($report['match_participants_teams'][$mid]['dire']) &&
        isset($report['teams'][ $report['match_participants_teams'][$mid]['dire'] ]['name']))
-      $teams['dire'] = $report['match_participants_teams'][$mid]['dire'];
+      $teams['dire'] = team_card_min($report['match_participants_teams'][$mid]['dire']);
     else $team_dire = $teams['dire'] = null;
 
     $match['teams'] = $teams;

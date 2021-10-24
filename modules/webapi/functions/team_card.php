@@ -111,3 +111,18 @@ function team_card($tid) {
 
   return $team;
 }
+
+function team_card_min($tid) {
+  global $report;
+  global $meta;
+
+  if(!isset($report['teams'])) return null;
+
+  $team = [
+    "team_id" => $tid,
+    "team_name" => team_name($tid),
+    "team_tag" => team_tag($tid),
+  ];
+
+  return $team;
+}
