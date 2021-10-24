@@ -1,5 +1,7 @@
 <?php 
 
+$repeatVars['matches'] = ['team'];
+
 $endpoints['matches'] = function($mods, $vars, &$report) use (&$meta) {
   if (empty($report['matches'])) 
     throw new Exception("No matches available for this report");
@@ -13,6 +15,9 @@ $endpoints['matches'] = function($mods, $vars, &$report) use (&$meta) {
   } else {
     $context =& $report['matches'];
   }
+
+  if ($vars['team'] ?? false)
+    $res['card'] = team_card($vars['team']);
 
   $res['matches'] = [];
   foreach ($context as $id => $data) {
