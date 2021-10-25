@@ -1,4 +1,4 @@
-<?php  $__postfix = "?v=26000"; ?>
+<?php  $__postfix = "?v=27400"; ?>
 <!DOCTYPE html>
 <html lang="<?php echo $locale; ?>">
   <head>
@@ -158,6 +158,23 @@
           <div id="image-logo"></div>
         <?php } ?>
     <?php } ?>
+    <?php 
+      if (!empty($global_partners) || (!empty($leaguetag) && !empty($report['sponsors']))) {
+        echo "<div class=\"partners-list ".(isset($custom_logo) ? "special-logo" : "")."\">";
+        
+        $partners_raw = (!empty($leaguetag) && !empty($report['sponsors'])) ? $report['sponsors'] : ($global_partners ?? []);
+        $partners = [];
+        foreach ($partners_raw as $type => $link) {
+          $partners[] = "<a target=\"_blank\" href=\"".$link."\" class=\"shoutout-link\">".
+          // FIXME:
+            (stripos($type, "stratz") !== false ? "<img src=\"https://spectral.gg/res/social/stratz_white.png\" class=\"sponsor-icon\"> " : "").
+          $type."</a>";
+        }
+        echo implode(", ", $partners);
+
+        echo "</div>";
+      }
+    ?>
     </div>
       <div id="main-section" class="content-section">
         <?php

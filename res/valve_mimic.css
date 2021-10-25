@@ -377,6 +377,13 @@ header.navBar a, header.navBar a:hover, header.navBar a:visited, header.navBar a
   color: var(--navlink) !important;
 }
 
+.navItem a img {
+  vertical-align: middle;
+  margin-top: -.1em;
+  font-size: inherit;
+  height: .95em;
+}
+
 .modal {
     display: none;
     position: fixed;

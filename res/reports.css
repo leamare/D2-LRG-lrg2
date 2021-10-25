@@ -758,7 +758,7 @@ table:target {
 
 /* other stuff */
 
-.support-me-block, .support-me-block-secondary {
+.support-me-block, .support-me-block-secondary, .ads-block-report, .partners-list {
   position: absolute;
   top: 75px;
   /* height: 50px; */
@@ -785,10 +785,21 @@ table:target {
   line-height: 1.75em;
   text-align: left;
 }
-.support-me-block:hover, .support-me-block-secondary:hover {
+.ads-block-report, .partners-list {
+  background-color: rgba(50,50,50,.7);
+  padding: 3px;
+  width: 30%;
+  left: calc(35% - 9px);
+  font-size: 22px;
+  line-height: 1.75em;
+  text-align: left;
+  text-align: center;
+  opacity: .6;
+}
+.support-me-block:hover, .support-me-block-secondary:hover, .ads-block-report:hover, .partners-list:hover {
   opacity: 1;
 }
-.support-me-block img, .support-me-block-secondary img {
+.support-me-block img, .support-me-block-secondary img, .ads-block-report img, .partners-list img {
   display: inline-block;
   vertical-align: bottom;
   height: 2.75em;
@@ -796,19 +807,25 @@ table:target {
   margin-bottom: .3em;
 }
 
-.ads-block-report {
-  position: absolute;
-  top: 542px;
-  left: 4px;
-}
-
 .ads-block-main {
   text-align: center;
   max-height: 100px;
 }
 
-img.rf_icon {
-  vertical-align: middle;
+.partners-list {
+  bottom: 10px;
+  top: auto;
+  font-size: 18px;
+}
+.partners-list.special-logo {
+  left: 20px;
+  width: auto;
+  padding-left: 15px;
+  padding-right: 15px;
+}
+.partners-list a img {
+  font-size: inherit;
+  height: 1.25em;
 }
 
 table.list {
