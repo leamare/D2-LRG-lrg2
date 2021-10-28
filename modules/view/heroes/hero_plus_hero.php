@@ -32,19 +32,23 @@ function rg_view_generate_heroes_hph() {
     $res["heroid".$hid] = "";
 
     if(check_module($parent_module."heroid".$hid)) {
-      foreach ($report['hph'][$hid] as $id => $line) {
-        if ($id == '_h') {
-          unset($report['hph'][$hid][$id]);
-          continue;
+      if (!empty ($report['hph'][$hid])) {
+        foreach ($report['hph'][$hid] as $id => $line) {
+          if ($id == '_h') {
+            unset($report['hph'][$hid][$id]);
+            continue;
+          }
+          if ($line === null) unset($report['hph'][$hid][$id]);
+          if (is_array($line) && $line['matches'] === -1) $report['hph'][$hid][$id] = $report['hph'][$id][$hid];
         }
-        if ($line === null) unset($report['hph'][$hid][$id]);
-        if (is_array($line) && $line['matches'] === -1) $report['hph'][$hid][$id] = $report['hph'][$id][$hid];
-      }
 
-      // $res["heroid".$hid] = "<div class=\"content-text\">".locale_string("desc_heroes_hph")."</div>";
-      $res["heroid".$hid] .= "<div class=\"content-text\">".locale_string("pairs_desc")."</div>";
-      $res["heroid".$hid] .= "<div class=\"content-text\">".locale_string("pairs_desc_2")."</div>";
-      $res["heroid".$hid] .= rg_generator_hph_profile("$parent_module-$hid", $report['hph'][$hid], $report['pickban'], $hid);
+        // $res["heroid".$hid] = "<div class=\"content-text\">".locale_string("desc_heroes_hph")."</div>";
+        $res["heroid".$hid] .= "<div class=\"content-text\">".locale_string("pairs_desc")."</div>";
+        $res["heroid".$hid] .= "<div class=\"content-text\">".locale_string("pairs_desc_2")."</div>";
+        $res["heroid".$hid] .= rg_generator_hph_profile("$parent_module-$hid", $report['hph'][$hid], $report['pickban'], $hid);
+      } else {
+        $res["heroid".$hid] .= "<div class=\"content-text\">".locale_string("stats_empty")."</div>";
+      }
     }
   }
 
