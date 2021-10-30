@@ -20,7 +20,7 @@ $endpoints['hph'] = function($mods, $vars, &$report) {
   $isrank = false;
   $srcid = $vars['heroid'];
 
-  if(!empty($context_wrs)) {
+  if(!empty($context_wrs) && !empty($context_wrs[$srcid])) {
     $dt = [
       'wr' => $context_wrs[$srcid]['winrate_picked'],
       'ms' => $context_wrs[$srcid]['matches_picked'],
@@ -97,7 +97,7 @@ $endpoints['hph'] = function($mods, $vars, &$report) {
     }
   }
 
-  if (!$isrank) {
+  if (!$isrank && !empty($pvp_context)) {
     uasort($pvp_context, function($a, $b) {
       if($a['wr_diff'] == $b['wr_diff']) return 0;
       else return ($a['wr_diff'] < $b['wr_diff']) ? 1 : -1;
@@ -106,8 +106,8 @@ $endpoints['hph'] = function($mods, $vars, &$report) {
 
   if (isset($vars['heroid'])) {
     return [
-      'reference' => $hero_reference,
-      'pairs' => $context
+      'reference' => $hero_reference ?? null,
+      'pairs' => $context ?? null
     ];
   }
   return $report['hph'];
