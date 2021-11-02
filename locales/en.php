@@ -479,6 +479,8 @@ $strings['en'] = [
   "team_aranked_bans" => "Most frequent, least effective against the team",
 
   // modules descriptions
+  "stats_empty" => "There is no data :(",
+
   "desc_overview" => "This page only contains general information about league and small amount of available stats. Look throughout other sections for advanced data.",
   "desc_records" => "This section contains data about highest or lowest values across all matches.",
   "desc_heroes_avg" => "This section contains highest average values among heroes. Minimum amount of matches is set to %lim%.",
