@@ -97,7 +97,7 @@ function match_card($mid) {
                   <div class=\"match-info-line\"><span class=\"caption\">".locale_string("winner").":</span> ".
                     ($report['matches_additional'][$mid]['radiant_win'] ? $team_radiant : $team_dire)."</div>
                   <div class=\"match-info-line\"><span class=\"caption\">".locale_string("date").":</span> ".
-                    date(locale_string("time_format")." ".locale_string("date_format"), $report['matches_additional'][$mid]['date'])."</div>
+                    date(locale_string("time_format")." ".locale_string("date_format"), $report['matches_additional'][$mid]['date'] + $report['matches_additional'][$mid]['duration'])."</div>
               </div>";
 
   return $output."</div>";
