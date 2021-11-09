@@ -89,7 +89,7 @@ if (!empty($report['teams']) && !empty($report['matches']) && !empty($report['ma
     }
     // 3600 * 4 = 10800
     $timeDiff = $meetCnts[$teamsStr][1] ? $time - $meetCnts[$teamsStr][1] - $duration : 0;
-    if (!$meetCnts[$teamsStr][1] || ($partCnts[$teamsStr] < 2 && $timeDiff > 14400) || ($partCnts[$teamsStr] >= 2 && $timeDiff > $meetCnts[$teamsStr][2] * 2)) {
+    if (!$meetCnts[$teamsStr][1] || ($partCnts[$teamsStr] < 2 && $timeDiff > 14400) || ($partCnts[$teamsStr] >= 2 && $timeDiff > $meetCnts[$teamsStr][2] * 3)) {
       $meetCnts[$teamsStr][0]++;
       $partCnts[$teamsStr] = 0;
     }
