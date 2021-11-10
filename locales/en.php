@@ -217,6 +217,7 @@ $strings['en'] = [
   "denies" => "Creeps denied",
   "denies_s" => "DN",
   "stacks" => "Neutral camps stacked",
+  "stacks_s" => "Stacks",
   "hero_damage" => "Damage to heroes",
   "tower_damage" => "Damage to buildings",
   "heal" => "Hero healing",

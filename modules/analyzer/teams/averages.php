@@ -88,7 +88,7 @@ $sql .= "SELECT \"wards_destroyed\", SUM(ans.sum_wards_destroyed)/SUM(ans.match_
       ) ans;";
 
 # avg stacks
-$sql .= "SELECT \"stacks\", SUM(ans.sum_stacks)/SUM(ans.match_count) FROM (
+$sql .= "SELECT \"stacks_s\", SUM(ans.sum_stacks)/SUM(ans.match_count) FROM (
   SELECT SUM(adv_matchlines.stacks) sum_stacks, COUNT(DISTINCT matchlines.matchid) match_count
   FROM adv_matchlines JOIN matchlines
   ON adv_matchlines.matchid = matchlines.matchid
