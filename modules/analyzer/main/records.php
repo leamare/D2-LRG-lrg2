@@ -54,6 +54,28 @@ $sql .= "SELECT \"stuns\" cap, matchid, stuns, playerid, heroid FROM adv_matchli
 # courier kills by player
 $sql .= "SELECT \"couriers_killed_by_player\" cap, matchid, couriers_killed, playerid, heroid FROM adv_matchlines ORDER BY couriers_killed DESC LIMIT 1;";
 
+# most_kills_by_team
+$sql .= "SELECT \"most_kills_by_team\" cap, matchlines.matchid, SUM(kills) sum_kills, teams_matches.teamid as playerid, 0 heroid
+  FROM matchlines JOIN teams_matches
+  ON matchlines.matchid = teams_matches.matchid
+  AND matchlines.isRadiant = teams_matches.is_radiant
+  GROUP BY matchlines.matchid, matchlines.isRadiant
+ORDER BY sum_kills DESC LIMIT 1;";
+# most_assists_by_team
+$sql .= "SELECT \"most_assists_by_team\" cap, matchlines.matchid, SUM(assists) sum_assists, teams_matches.teamid as playerid, 0 heroid
+  FROM matchlines JOIN teams_matches
+  ON matchlines.matchid = teams_matches.matchid
+  AND matchlines.isRadiant = teams_matches.is_radiant
+  GROUP BY matchlines.matchid, matchlines.isRadiant
+ORDER BY sum_assists DESC LIMIT 1;";
+# fewest_deaths_by_team
+$sql .= "SELECT \"fewest_deaths_by_team\" cap, matchlines.matchid, SUM(deaths) sum_deaths, teams_matches.teamid as playerid, 0 heroid
+  FROM matchlines JOIN teams_matches
+  ON matchlines.matchid = teams_matches.matchid
+  AND matchlines.isRadiant = teams_matches.is_radiant
+  GROUP BY matchlines.matchid, matchlines.isRadiant
+ORDER BY sum_deaths ASC LIMIT 1;";
+
 # couriers killed in game
 $sql .= "SELECT \"couriers_killed_in_game\" cap, matchid, SUM(couriers_killed) cours, 0 playerid, 0 heroid FROM adv_matchlines GROUP BY matchid ORDER BY cours DESC;";
 # roshans killed in game
