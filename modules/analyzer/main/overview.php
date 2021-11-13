@@ -18,6 +18,15 @@ $sql .= "SELECT \"heroes_picked\", count(distinct hero_id) FROM draft WHERE is_p
 # heroes banned
 $sql .= "SELECT \"heroes_banned\", count(distinct hero_id) FROM draft WHERE is_pick = 0;";
 
+# kills per minute avg
+$sql .= "SELECT 
+  \"kills_per_minute_average\", sum(kpm)/count(matchid)
+FROM (
+  select sum(kills)*60/matches.duration kpm, matches.matchid 
+  from matchlines join matches on matchlines.matchid = matches.matchid
+  group by matchid
+) s;";
+
 # ********** Medians
 
 # heroes median picks
