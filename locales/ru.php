@@ -43,6 +43,7 @@ $strings['ru'] = [
   "teams_on_event" => "Команд в лиге",
   "matches_unparsed" => "Матчей без детального анализа",
   "rampages_total" => "Всего буйств",
+  "kills_per_minute_average" => "Убийств в минуту в среднем",
 
   "radiant_avg_roshans" => "Убийств Рошана в среднем за игру Силами Света",
   "dire_avg_roshans" => "Убийств Рошана в среднем за игру Силами Тьмы",
@@ -286,6 +287,10 @@ $strings['ru'] = [
   "lowest_rampage" => "Буйство с самой низкой разницей в золоте",
   "highest_rampage" => "Буйство с самой высокой разницей в золоте",
   "neutral_camps_stacked" => "Стаков нейтралов",
+  "most_kills_by_team" => "Больше всего убийств от команды в матче",
+  "most_assists_by_team" => "Больше всего помощи от команды в матче",
+  "fewest_deaths_by_team" => "Меньше всего смертей команды в матче",
+  "most_deaths_by_team" => "Больше всего смертей команды в матче",
 
   // match records
   "stomp" => "Доминация от команды",

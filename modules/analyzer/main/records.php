@@ -75,6 +75,13 @@ $sql .= "SELECT \"fewest_deaths_by_team\" cap, matchlines.matchid, SUM(deaths) s
   AND matchlines.isRadiant = teams_matches.is_radiant
   GROUP BY matchlines.matchid, matchlines.isRadiant
 ORDER BY sum_deaths ASC LIMIT 1;";
+# most_deaths_by_team
+$sql .= "SELECT \"most_deaths_by_team\" cap, matchlines.matchid, SUM(deaths) sum_deaths, teams_matches.teamid as playerid, 0 heroid
+  FROM matchlines JOIN teams_matches
+  ON matchlines.matchid = teams_matches.matchid
+  AND matchlines.isRadiant = teams_matches.is_radiant
+  GROUP BY matchlines.matchid, matchlines.isRadiant
+ORDER BY sum_deaths DESC LIMIT 1;";
 
 # couriers killed in game
 $sql .= "SELECT \"couriers_killed_in_game\" cap, matchid, SUM(couriers_killed) cours, 0 playerid, 0 heroid FROM adv_matchlines GROUP BY matchid ORDER BY cours DESC;";

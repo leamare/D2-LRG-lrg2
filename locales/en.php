@@ -45,6 +45,7 @@ $strings['en'] = [
   "teams_on_event" => "Teams on event",
   "matches_unparsed" => "Matches without detailed analysis",
   "rampages_total" => "Rampages total",
+  "kills_per_minute_average" => "Kills per minute on average",
 
   "radiant_avg_roshans" => "Average Roshan kills per game by Radiant",
   "dire_avg_roshans" => "Average Roshan kills per game by Dire",
@@ -258,6 +259,10 @@ $strings['en'] = [
   "lowest_rampage" => "Rampage with lowest team networth difference",
   "highest_rampage" => "Rampage with highest team networth difference",
   "neutral_camps_stacked" => "Neutral camps stacked",
+  "most_kills_by_team" => "Most kills by a team in a match",
+  "most_assists_by_team" => "Most assists by a team in a match",
+  "fewest_deaths_by_team" => "Fewest deaths of a team in a match",
+  "most_deaths_by_team" => "Most deaths of a team in a match",
 
   // match records
   "stomp" => "Networth stomp by a team",
