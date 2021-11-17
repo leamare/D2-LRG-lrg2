@@ -1,7 +1,7 @@
 <?php
 
 function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "") {
-  global $mod, $root, $strings, $unset_module, $report, $icons_provider, $lg_version;
+  global $mod, $root, $strings, $unset_module, $report, $icons_provider, $lg_version, $roleicon_logo_provider;
   $res = [];
   if($mod == substr($context_mod, 0, strlen($context_mod)-1)) $unset_module = true;
 
@@ -101,6 +101,197 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
                 }
               } else {
                 $res["team".$tid]['overview'] .= locale_string('none');
+              }
+
+              $res["team".$tid]['overview'] .= "</div>";
+            }
+
+            // FIRST PLAYED BY THE TEAM
+            if (!empty($context[$tid]['matches']) && isset($report['matches'])) {
+              $first_matches_heroes = [];
+
+              ksort($report['matches']);
+              foreach ($report['matches'] as $mid => $heroes) {
+                foreach ($heroes as $v) {
+                  if (!isset($first_matches_heroes[$v['hero']])) {
+                    $first_matches_heroes[$v['hero']] = $mid;
+                  }
+                }
+              }
+
+              if (isset($report['hero_positions_matches'])) {
+                $first_matches_heroes_positions = [
+                  '0.0' => [],
+                  '1.3' => [],
+                  '1.2' => [],
+                  '1.1' => []
+                ];
+                foreach ($first_matches_heroes_positions as $rolestring => &$arr) {
+                  [ $isCore, $lane ] = explode('.', $rolestring);
+                  if ($lane == 0) {
+                    $report['hero_positions_matches'][$isCore][0] = [];
+                    foreach ($report['hero_positions_matches'][$isCore] as $k => $vs) {
+                      foreach ($vs as $hid => $v) {
+                        if (!isset($report['hero_positions_matches'][$isCore][0][$hid]))
+                          $report['hero_positions_matches'][$isCore][0][$hid] = [];
+                        $report['hero_positions_matches'][$isCore][0][$hid] = $report['hero_positions_matches'][$isCore][0][$hid] + $v;
+                      }
+                    }
+                  }
+                  foreach ($report['hero_positions_matches'][$isCore][$lane] as $hid => $v) {
+                    $first_matches_heroes_positions[$rolestring][$hid] = min($v);
+                  }
+                }
+              }
+
+              if (isset($context[$tid]['regions']) && isset($report['regions_data'])) {
+                $first_matches_heroes_regions = [];
+                foreach ($context[$tid]['regions'] as $rid => $ms) {
+                  $first_matches_heroes_regions[$rid] = [];
+                  foreach ($report['regions_data'][$rid]['matches'] as $mid => $s) {
+                    if (empty($mid)) continue;
+                    foreach ($report['matches'][$mid] as $v) {
+                      if (!isset($first_matches_heroes_regions[$rid][$v['hero']])) {
+                        $first_matches_heroes_regions[$rid][$v['hero']] = $mid;
+                      }
+                    }
+                  }
+                }
+
+                if (isset($report['hero_positions_matches'])) {
+                  $first_matches_heroes_positions_regions = [];
+                  $__dummy = [
+                    '0.0' => [],
+                    '1.3' => [],
+                    '1.2' => [],
+                    '1.1' => []
+                  ];
+
+                  foreach ($context[$tid]['regions'] as $rid => $ms) {
+                    $first_matches_heroes_positions_regions[$rid] = $__dummy;
+
+                    foreach ($first_matches_heroes_positions_regions[$rid] as $rolestring => &$arr) {
+                      [ $isCore, $lane ] = explode('.', $rolestring);
+                      if ($lane == 0) {
+                        $report['hero_positions_matches'][$isCore][0] = [];
+                        foreach ($report['hero_positions_matches'][$isCore] as $k => $vs) {
+                          foreach ($vs as $hid => $v) {
+                            if (!isset($report['hero_positions_matches'][$isCore][0][$hid]))
+                              $report['hero_positions_matches'][$isCore][0][$hid] = [];
+                            $report['hero_positions_matches'][$isCore][0][$hid] = $report['hero_positions_matches'][$isCore][0][$hid] + $v;
+                          }
+                        }
+                      }
+                      foreach ($report['hero_positions_matches'][$isCore][$lane] as $hid => $v) {
+                        $matches = array_intersect($v, array_keys($report['regions_data'][$rid]['matches']));
+                        if (empty($matches)) continue;
+                        $first_matches_heroes_positions_regions[$rid][$rolestring][$hid] = min($matches);
+                      }
+                    }
+                  }
+                }
+              }
+
+              $fp_filter = function($a, $k) use (&$context, &$report, &$tid) {
+                $radiant = null;
+                foreach ($report['matches'][$a] as $i => $hero) {
+                  if ($hero['hero'] == $k) {
+                    $radiant = $hero['radiant'];
+                    break;
+                  }
+                }
+
+                return isset($context[$tid]['matches'][$a]) && array_search($tid, $report['match_participants_teams'][$a]) == ($radiant ? 'radiant' : 'dire');
+              };
+
+              $res["team".$tid]['overview'] .= "<div class=\"content-cards unique-heroes-card\">".
+                "<h1>".locale_string("team_first_picked_by")."</h1>";
+              
+              $res["team".$tid]['overview'] .= "<div class=\"line\"><span class=\"caption\">".locale_string('team_first_total')."</span>: ";
+              $first_matches_heroes = array_filter($first_matches_heroes, $fp_filter, ARRAY_FILTER_USE_BOTH);
+              if (empty($first_matches_heroes)) {
+                $res["team".$tid]['overview'] .= locale_string('stats_no_elements');
+              } else {
+                foreach ($first_matches_heroes as $hid => $mid) {
+                  $title = addcslashes(hero_name($hid), "'");
+                  $res["team".$tid]['overview'] .= "<a title=\"".$title."\" ".
+                  "onclick=\"showModal('".htmlspecialchars(join_matches([$mid]))."', '".$title."')\"".
+                  ">".hero_icon($hid)."</a>";
+                }
+              }
+              $res["team".$tid]['overview'] .= "</div>";
+
+              $roleicons = [
+                "0.0" => "hardsupporticon",
+                "1.1" => "safelaneicon",
+                "1.2" => "midlaneicon",
+                "1.3" => "offlaneicon",
+              ];
+              generate_positions_strings();
+
+              if (isset($first_matches_heroes_positions)) {
+                $res["team".$tid]['overview'] .= "<div class=\"line\"><span class=\"caption\">".locale_string('team_first_total_role')."</span>: ";
+
+                $line = "";
+                foreach ($first_matches_heroes_positions as $role => $rolems) {
+                  $rolems = array_filter($rolems, $fp_filter, ARRAY_FILTER_USE_BOTH);
+                  if (empty($rolems)) continue;
+
+                  $line .= "<span class=\"role-heroes\">".
+                    "<img class=\"roleicon\" src=\"".str_replace("%ROLE%", $roleicons[$role], $roleicon_logo_provider)."&size=smaller\" alt=\"".$roleicons[$role]."\" />: [ ";
+                  foreach ($rolems as $hid => $mid) {
+                    $title = addcslashes(hero_name($hid)." - ".locale_string("position_$role"), "'");
+                    $line .= "<a title=\"".$title."\" ".
+                    "onclick=\"showModal('".htmlspecialchars(join_matches([$mid]))."', '".$title."')\"".
+                    ">".hero_icon($hid)."</a>";
+                  }
+                  $line .= " ]</span> ";
+                }
+                if (empty($line)) $line = locale_string('stats_no_emelents');
+                $res["team".$tid]['overview'] .= $line."</div>";
+              }
+
+              if (isset($first_matches_heroes_regions)) {
+                $res["team".$tid]['overview'] .= "<div class=\"line\"><span class=\"caption\">".locale_string('team_first_region')."</span>: ";
+
+                $line = "";
+                foreach ($first_matches_heroes_regions as $region => $rolems) {
+                  $rolems = array_filter($rolems, $fp_filter, ARRAY_FILTER_USE_BOTH);
+                  foreach ($rolems as $hid => $mid) {
+                    $title = addcslashes(hero_name($hid)." - ".locale_string("region$region"), "'");
+                    $line .= "<a title=\"".$title."\" ".
+                    "onclick=\"showModal('".htmlspecialchars(join_matches([$mid]))."', '".$title."')\"".
+                    ">".hero_icon($hid)."</a>";
+                  }
+                }
+                if (empty($line)) $line = locale_string('stats_no_emelents');
+                $res["team".$tid]['overview'] .= $line."</div>";
+              }
+
+              if (isset($first_matches_heroes_positions_regions)) {
+                $res["team".$tid]['overview'] .= "<div class=\"line\"><span class=\"caption\">".locale_string('team_first_region_positions')."</span>: ";
+
+                $line = "";
+                foreach ($first_matches_heroes_positions_regions as $region => $roles) {
+                  $line .= "<span class=\"heroes-icons-wrapper\"> { ";
+                  foreach ($roles as $role => $rolems) {
+                    $rolems = array_filter($rolems, $fp_filter, ARRAY_FILTER_USE_BOTH);
+                    if (empty($rolems)) continue;
+  
+                    $line .= "<span class=\"role-heroes\">".
+                      "<img class=\"roleicon\" src=\"".str_replace("%ROLE%", $roleicons[$role], $roleicon_logo_provider)."&size=smaller\" alt=\"".$roleicons[$role]."\" />: [ ";
+                    foreach ($rolems as $hid => $mid) {
+                      $title = addcslashes(hero_name($hid)." - ".locale_string("position_$role"), "'");
+                      $line .= "<a title=\"".$title."\" ".
+                      "onclick=\"showModal('".htmlspecialchars(join_matches([$mid]))."', '".$title."')\"".
+                      ">".hero_icon($hid)."</a>";
+                    }
+                    $line .= " ]</span> ";
+                  }
+                  $line .= " } </span> ";
+                }
+                if (empty($line)) $line = locale_string('stats_no_emelents');
+                $res["team".$tid]['overview'] .= $line."</div>";
               }
 
               $res["team".$tid]['overview'] .= "</div>";
