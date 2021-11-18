@@ -99,6 +99,166 @@ $endpoints['teams'] = function($mods, $vars, &$report) use (&$endpoints, &$repea
       $res['regions'] = null;
     }
 
+    // FIRST PLAYED BY THE TEAM
+    // no need to recalculate this here (could move it out to postload for instance)
+    // but honestly
+    // I don't care, this shit is about to be rewritten again anyway
+    if (!empty($report['teams'][ $vars['team'] ]['matches']) && isset($report['matches'])) {
+      $first_matches_heroes = [];
+
+      ksort($report['matches']);
+      foreach ($report['matches'] as $mid => $heroes) {
+        foreach ($heroes as $v) {
+          if (!isset($first_matches_heroes[$v['hero']])) {
+            $first_matches_heroes[$v['hero']] = $mid;
+          }
+        }
+      }
+
+      $__posdummy = [
+        '1.1' => [],
+        '1.2' => [],
+        '1.3' => [],
+        '0.0' => [],
+      ];
+
+      if (isset($report['hero_positions_matches'])) {
+        $first_matches_heroes_positions = $__posdummy;
+        foreach ($first_matches_heroes_positions as $rolestring => &$arr) {
+          [ $isCore, $lane ] = explode('.', $rolestring);
+          if ($lane == 0) {
+            $report['hero_positions_matches'][$isCore][0] = [];
+            foreach ($report['hero_positions_matches'][$isCore] as $k => $vs) {
+              foreach ($vs as $hid => $v) {
+                if (!isset($report['hero_positions_matches'][$isCore][0][$hid]))
+                  $report['hero_positions_matches'][$isCore][0][$hid] = [];
+                $report['hero_positions_matches'][$isCore][0][$hid] = array_merge($report['hero_positions_matches'][$isCore][0][$hid], $v);
+              }
+            }
+          }
+          foreach ($report['hero_positions_matches'][$isCore][$lane] as $hid => $v) {
+            $first_matches_heroes_positions[$rolestring][$hid] = min($v);
+          }
+        }
+      }
+
+      if (isset($report['teams'][ $vars['team'] ]['regions']) && isset($report['regions_data'])) {
+        $first_matches_heroes_regions = [];
+        foreach ($report['teams'][ $vars['team'] ]['regions'] as $rid => $ms) {
+          $first_matches_heroes_regions[$rid] = [];
+          foreach ($report['regions_data'][$rid]['matches'] as $mid => $s) {
+            if (empty($mid)) continue;
+            foreach ($report['matches'][$mid] as $v) {
+              if (!isset($first_matches_heroes_regions[$rid][$v['hero']])) {
+                $first_matches_heroes_regions[$rid][$v['hero']] = $mid;
+              }
+            }
+          }
+        }
+
+        if (isset($report['hero_positions_matches'])) {
+          $first_matches_heroes_positions_regions = [];
+          
+          foreach ($report['teams'][ $vars['team'] ]['regions'] as $rid => $ms) {
+            $first_matches_heroes_positions_regions[$rid] = $__posdummy;
+
+            foreach ($first_matches_heroes_positions_regions[$rid] as $rolestring => &$arr) {
+              [ $isCore, $lane ] = explode('.', $rolestring);
+              if ($lane == 0) {
+                $report['hero_positions_matches'][$isCore][0] = [];
+                foreach ($report['hero_positions_matches'][$isCore] as $k => $vs) {
+                  foreach ($vs as $hid => $v) {
+                    if (!isset($report['hero_positions_matches'][$isCore][0][$hid]))
+                      $report['hero_positions_matches'][$isCore][0][$hid] = [];
+                    $report['hero_positions_matches'][$isCore][0][$hid] = $report['hero_positions_matches'][$isCore][0][$hid] + $v;
+                  }
+                }
+              }
+              foreach ($report['hero_positions_matches'][$isCore][$lane] as $hid => $v) {
+                $matches = array_intersect($v, array_keys($report['regions_data'][$rid]['matches']));
+                if (empty($matches)) continue;
+                $first_matches_heroes_positions_regions[$rid][$rolestring][$hid] = min($matches);
+              }
+            }
+          }
+        }
+      }
+
+      $fp_filter = function($a, $k) use (&$vars, &$report) {
+        $radiant = null;
+        foreach ($report['matches'][$a] as $i => $hero) {
+          if ($hero['hero'] == $k) {
+            $radiant = $hero['radiant'];
+            break;
+          }
+        }
+
+        return isset($report['teams'][ $vars['team'] ]['matches'][$a]) && array_search($vars['team'], $report['match_participants_teams'][$a]) == ($radiant ? 'radiant' : 'dire');
+      };
+
+      // ACTUAL TEAM FILTERING
+
+      $res['first_picked_by'] = [];
+
+      $res['first_picked_by']['total'] = [];
+      $first_matches_heroes = array_filter($first_matches_heroes, $fp_filter, ARRAY_FILTER_USE_BOTH);
+      foreach ($first_matches_heroes as $hid => $mid) {
+        $res['first_picked_by']['total'][$hid] = match_card_min($mid);
+      }
+
+      if (isset($first_matches_heroes_positions)) {
+        $res['first_picked_by']['total_positions'] = [];
+
+        foreach ($first_matches_heroes_positions as $role => $rolems) {
+          $rolems = array_filter($rolems, $fp_filter, ARRAY_FILTER_USE_BOTH);
+          if (empty($rolems)) continue;
+          $res['first_picked_by']['total_positions'][$role] = [];
+
+          foreach ($rolems as $hid => $mid) {
+            $res['first_picked_by']['total_positions'][$role][$hid] = match_card_min($mid);
+          }
+        }
+      } else {
+        $res['first_picked_by']['total_positions'] = null;
+      }
+
+      if (isset($first_matches_heroes_regions)) {
+        $res['first_picked_by']['regions'] = [];
+
+        foreach ($first_matches_heroes_regions as $region => $rolems) {
+          $res['first_picked_by']['regions'][$region] = [];
+          $rolems = array_filter($rolems, $fp_filter, ARRAY_FILTER_USE_BOTH);
+          foreach ($rolems as $hid => $mid) {
+            $res['first_picked_by']['regions'][$region][$hid] = match_card_min($mid);
+          }
+        }
+      } else {
+        $res['first_picked_by']['regions'] = null;
+      }
+
+      if (isset($first_matches_heroes_positions_regions)) {
+        $res['first_picked_by']['regions_positions'] = [];
+
+        foreach ($first_matches_heroes_positions_regions as $region => $roles) {
+          $res['first_picked_by']['regions_positions'][$region] = [];
+          foreach ($roles as $role => $rolems) {
+            $rolems = array_filter($rolems, $fp_filter, ARRAY_FILTER_USE_BOTH);
+            if (empty($rolems)) continue;
+
+            $res['first_picked_by']['regions_positions'][$region][$role] = [];
+
+            foreach ($rolems as $hid => $mid) {
+              $res['first_picked_by']['regions_positions'][$region][$role][$hid] = match_card_min($mid);
+            }
+          }
+        }
+      } else {
+        $res['first_picked_by']['regions_positions'] = null;
+      }
+    } else {
+      $res['first_picked_by'] = null;
+    }
+
     if (!empty($report['match_participants_teams'])) {
       $res['unique_heroes'] = [];
 
