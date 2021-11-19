@@ -277,15 +277,33 @@ table .hero_portrait {
 }
 .unique-heroes-card .line img, .hero_icon {
   vertical-align: middle;
+  margin: 0 2px;
+}
+.unique-heroes-card .roleicon {
+  height: 30px;
+  width: auto;
 }
 .unique-heroes-card .line {
   margin: 7px;
-  line-height: 24px;
+  line-height: 32px;
   font-size: 20px;
 }
 .unique-heroes-card .line .caption {
   font-size: inherit;
   font-weight: bold;
+}
+.unique-heroes-card .role-heroes, .unique-heroes-card .heroes-icons-wrapper{
+  line-height: 32px;
+  font-size: 26px;
+  opacity: .8;
+  background-color: rgba(0,0,0,0.15);
+  color: var(--content-header);
+  border-radius: 5px;
+  padding: 2px;
+  margin: 0 2px;
+}
+.unique-heroes-card .role-heroes:hover, .unique-heroes-card .heroes-icons-wrapper:hover {
+  opacity: 1;
 }
 
 .match-card, .player-card, .team-card {

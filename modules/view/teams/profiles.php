@@ -107,6 +107,9 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
             }
 
             // FIRST PLAYED BY THE TEAM
+            // no need to recalculate this here (could move it out to postload for instance)
+            // but honestly
+            // I don't care, this shit is about to be rewritten again anyway
             if (!empty($context[$tid]['matches']) && isset($report['matches'])) {
               $first_matches_heroes = [];
 
@@ -119,13 +122,15 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
                 }
               }
 
+              $__posdummy = [
+                '1.1' => [],
+                '1.2' => [],
+                '1.3' => [],
+                '0.0' => [],
+              ];
+
               if (isset($report['hero_positions_matches'])) {
-                $first_matches_heroes_positions = [
-                  '0.0' => [],
-                  '1.3' => [],
-                  '1.2' => [],
-                  '1.1' => []
-                ];
+                $first_matches_heroes_positions = $__posdummy;
                 foreach ($first_matches_heroes_positions as $rolestring => &$arr) {
                   [ $isCore, $lane ] = explode('.', $rolestring);
                   if ($lane == 0) {
@@ -134,7 +139,7 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
                       foreach ($vs as $hid => $v) {
                         if (!isset($report['hero_positions_matches'][$isCore][0][$hid]))
                           $report['hero_positions_matches'][$isCore][0][$hid] = [];
-                        $report['hero_positions_matches'][$isCore][0][$hid] = $report['hero_positions_matches'][$isCore][0][$hid] + $v;
+                        $report['hero_positions_matches'][$isCore][0][$hid] = array_merge($report['hero_positions_matches'][$isCore][0][$hid], $v);
                       }
                     }
                   }
@@ -160,15 +165,9 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
 
                 if (isset($report['hero_positions_matches'])) {
                   $first_matches_heroes_positions_regions = [];
-                  $__dummy = [
-                    '0.0' => [],
-                    '1.3' => [],
-                    '1.2' => [],
-                    '1.1' => []
-                  ];
-
+                  
                   foreach ($context[$tid]['regions'] as $rid => $ms) {
-                    $first_matches_heroes_positions_regions[$rid] = $__dummy;
+                    $first_matches_heroes_positions_regions[$rid] = $__posdummy;
 
                     foreach ($first_matches_heroes_positions_regions[$rid] as $rolestring => &$arr) {
                       [ $isCore, $lane ] = explode('.', $rolestring);
