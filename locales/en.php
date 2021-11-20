@@ -198,6 +198,11 @@ $strings['en'] = [
   "team_players_unique_heroes" => "Unique heroes per player",
   "team_specific_heroes" => "Team specific heroes",
   "team_roster_position" => "Team's players on this position",
+  "team_first_total" => "Total",
+  "team_first_total_role" => "By position",
+  "team_first_region" => "Total by region",
+  "team_first_region_positions" => "By region and position",
+  "team_first_picked_by" => "First time report picks by the team",
 
   // summary/haverages strings
   "gpm" => "GPM",
@@ -486,6 +491,7 @@ $strings['en'] = [
 
   // modules descriptions
   "stats_empty" => "There is no data :(",
+  "stats_no_elements" => "No elements :(",
 
   "desc_overview" => "This page only contains general information about league and small amount of available stats. Look throughout other sections for advanced data.",
   "desc_records" => "This section contains data about highest or lowest values across all matches.",

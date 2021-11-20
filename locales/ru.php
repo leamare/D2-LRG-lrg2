@@ -226,6 +226,11 @@ $strings['ru'] = [
   "team_players_unique_heroes" => "Уникальные герои игроков",
   "team_specific_heroes" => "Характерные герои команды",
   "team_roster_position" => "Игроки команды на этой позиции",
+  "team_first_total" => "В целом",
+  "team_first_total_role" => "На роли",
+  "team_first_region" => "В целом по региону",
+  "team_first_region_positions" => "В целом на роли и по региону",
+  "team_first_picked_by" => "Впервые выбранны за отчёт этой командой",
 
   // summary/haverages strings
   "gpm" => "З/М",
@@ -487,6 +492,7 @@ $strings['ru'] = [
 
   // modules descriptions
   "stats_empty" => "Нет данных :(",
+  "stats_no_elements" => "Нет элементов :(",
 
   "desc_overview" => "На этой странице содержится общая информация о лиге и немного доступной статистики. Загляните в другие разделы, чтобы ознакомиться с остальными данными.",
   "desc_records" => "Этот раздел содержит информацию о наибольших и наименьших показателях среди всех матчей.",
