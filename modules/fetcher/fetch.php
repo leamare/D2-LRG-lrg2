@@ -19,7 +19,7 @@ function fetch($match) {
   $request_unparsed, $meta, $stratz_timeout_retries, $force_adding, $cache_dir, $lg_settings, $lrg_use_cache, $first_scheduled,
   $use_full_stratz, $scheduled_wait_period, $steamapikey, $force_await, $players_list, $rank_limit, $stratztoken, $ignore_stratz,
   $update_unparsed, $request_unparsed_players, $stratz_graphql, $api_cooldown_seconds, $update_names, $updated_names, $rewrite_existing,
-  $ignore_abandons;
+  $ignore_abandons, $lastversion;
 
   $t_match = [];
   $t_matchlines = [];
@@ -1174,6 +1174,10 @@ function fetch($match) {
         return false;
       }
     }
+  }
+
+  if ($t_match['version'] < 0) {
+    $t_match['version'] = $lastversion;
   }
 
   $sql = "INSERT INTO matches (matchid, radiantWin, duration, modeID, leagueID, start_date, stomp, comeback, cluster, version) VALUES "
