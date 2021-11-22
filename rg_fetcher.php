@@ -91,7 +91,7 @@ $scheduled_stratz = [];
 
 if ($stratz_graphql) {
   $stratz_patches = \file_get_contents(
-    "https://api.stratz.com/api/v1/GameVersion",
+    "https://api.stratz.com/api/v1/GameVersion?key=".$stratztoken,
     false,
     stream_context_create([
       'ssl' => [
