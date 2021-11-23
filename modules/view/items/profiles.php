@@ -109,12 +109,15 @@ function rg_view_generate_items_profiles() {
   uasort($heroes, function($a, $b) {
     return $b['prate'] <=> $a['prate'];
   });
+  $min_prate = $heroes[ array_keys($heroes)[floor(count($heroes)*0.75)] ]['prate'];
 
   $heroes_purchases = array_slice($heroes, 0, 10);
 
-  $heroes = array_filter($heroes, function($a) {
-    return $a['prate'] > 0.01;
+  $heroes = array_filter($heroes, function($a) use ($min_prate) {
+    return $a['prate'] > $min_prate;
   });
+
+  $group_size = min(floor(count($heroes)/2), 10);
 
   // best ranked heroes
 
@@ -122,7 +125,7 @@ function rg_view_generate_items_profiles() {
     return $b['rank'] <=> $a['rank'];
   });
 
-  $heroes_rank_top = array_slice($heroes, 0, 10);
+  $heroes_rank_top = array_slice($heroes, 0, $group_size);
 
   // worst ranked purchases
 
@@ -130,7 +133,7 @@ function rg_view_generate_items_profiles() {
     return $a['rank'] <=> $b['rank'];
   });
 
-  $heroes_rank_bot = array_slice($heroes, 0, 10);
+  $heroes_rank_bot = array_slice($heroes, 0, $group_size);
 
   // best records
 

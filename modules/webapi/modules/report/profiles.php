@@ -287,24 +287,27 @@ $endpoints['profiles'] = function($mods, $vars, &$report) use (&$endpoints, &$me
       $res['heroes'] = $heroes;
     }
 
-    if (in_array('heroes-prate', $vars['gets'])) {
-      uasort($heroes, function($a, $b) {
-        return $b['prate'] <=> $a['prate'];
-      });
+    uasort($heroes, function($a, $b) {
+      return $b['prate'] <=> $a['prate'];
+    });
+    $min_prate = $heroes[ array_keys($heroes)[floor(count($heroes)*0.75)] ]['prate'];
 
+    if (in_array('heroes-prate', $vars['gets'])) {
       $res['heroes-prate'] = array_slice($heroes, 0, 10, true);
     }
 
-    $heroes = array_filter($heroes, function($a) {
-      return $a['prate'] > 0.01;
+    $heroes = array_filter($heroes, function($a) use ($min_prate) {
+      return $a['prate'] > $min_prate;
     });
+
+    $group_size = min(floor(count($heroes)/2), 10);
 
     if (in_array('heroes-rank-top', $vars['gets'])) {
       uasort($heroes, function($a, $b) {
         return $b['rank'] <=> $a['rank'];
       });
 
-      $res['heroes-rank-top'] = array_slice($heroes, 0, 10, true);
+      $res['heroes-rank-top'] = array_slice($heroes, 0, $group_size, true);
     }
 
     if (in_array('heroes-rank-bot', $vars['gets'])) {
@@ -327,7 +330,7 @@ $endpoints['profiles'] = function($mods, $vars, &$report) use (&$endpoints, &$me
           return $b['diff'] <=> $a['diff'];
         });
 
-        $res['records-best'] = array_slice($req['records'], 0, 10, true);
+        $res['records-best'] = array_slice($req['records'], 0, $group_size, true);
       }
     }
     
