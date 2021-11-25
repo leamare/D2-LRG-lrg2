@@ -52,4 +52,3 @@ if(isset($argv)) {
     $lg_settings = json_decode($lg_settings, true);
   }
   $lrg_use_cache = true;
-

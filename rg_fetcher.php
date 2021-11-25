@@ -15,6 +15,15 @@ include_once("libs/simple-opendota-php/simple_opendota.php");
 
 echo("\nInitialising...\n");
 
+if (!function_exists('array_key_first')) {
+  function array_key_first(array $arr) {
+      foreach($arr as $key => $unused) {
+          return $key;
+      }
+      return NULL;
+  }
+}
+
 $conn = new mysqli($lrg_sql_host, $lrg_sql_user, $lrg_sql_pass, $lrg_sql_db);
 $conn->set_charset('utf8mb4');
 $meta = new lrg_metadata;
