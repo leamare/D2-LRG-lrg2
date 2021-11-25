@@ -147,8 +147,8 @@ if ($stratz_graphql) {
 
   $lastversion = convert_patch_id(time());
 } else {
-  $lp = array_key_last($metadata['patchdates']);
-  $lastversion = ((int)$lp)*100 + count($metadata['patchdates'][$lp]['dates']);
+  $lp = array_key_last($meta['patchdates']);
+  $lastversion = ((int)$lp)*100 + count($meta['patchdates'][$lp]['dates']);
 }
 
 if (!$listen) {
