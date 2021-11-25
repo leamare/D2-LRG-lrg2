@@ -23,6 +23,15 @@ if (!function_exists('array_key_first')) {
       return NULL;
   }
 }
+if (!function_exists("array_key_last")) {
+  function array_key_last(array $array) {
+      if (!is_array($array) || empty($array)) {
+          return NULL;
+      }
+     
+      return array_keys($array)[count($array)-1];
+  }
+}
 
 $conn = new mysqli($lrg_sql_host, $lrg_sql_user, $lrg_sql_pass, $lrg_sql_db);
 $conn->set_charset('utf8mb4');
