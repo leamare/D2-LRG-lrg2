@@ -64,12 +64,16 @@ if(isset($argv)) {
 $lg_settings['version'] = $lrg_version;
 
 $meta['heroes'];
-if ($lg_settings['excluded_heroes'] ?? false) {
-  foreach($lg_settings['excluded_heroes'] as $hid) {
-    if (isset($meta['heroes'][$hid])) unset($meta['heroes'][$hid]);
-  }
-}
-$lg_settings['heroes_snapshot'] = array_keys($meta['heroes']);
+// if ($lg_settings['excluded_heroes'] ?? false) {
+//   foreach($lg_settings['excluded_heroes'] as $hid) {
+//     if (isset($meta['heroes'][$hid])) unset($meta['heroes'][$hid]);
+//   }
+// }
+// $lg_settings['heroes_snapshot'] = array_keys($meta['heroes']);
+
+$lg_settings['excluded_heroes'] = $lg_settings['excluded_heroes'] ?? [];
+// Heroes snapshots are still supported
+// but editing them is painful
 
 $f = fopen("leagues/".$lg_settings['league_tag'].".json", "w") or die("[F] Couldn't open file to save results. Check working directory for `leagues` folder.\n");
 fwrite($f, json_encode($lg_settings, JSON_PRETTY_PRINT));
