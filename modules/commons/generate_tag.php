@@ -107,7 +107,6 @@ function generate_tag($name) {
     for ($i=0, $sz=count($name_chars); $i < $sz; $i++) {
       if (mb_ctype_upper($name_chars[$i])) {
         $tag .= $name_chars[$i];
-        var_dump($name_chars[$i]);
       }
     }
   } else {
