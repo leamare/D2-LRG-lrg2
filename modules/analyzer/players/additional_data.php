@@ -1,4 +1,5 @@
 <?php
+
 $result["players"] = array();
 $sql = "SELECT playerid, nickname FROM players";
 

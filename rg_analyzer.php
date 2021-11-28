@@ -110,7 +110,9 @@ if(compare_ver($lg_settings['version'], $lrg_version) < 0) {
   $query_res = $conn->store_result();
   $row = $query_res->fetch_row();
 
-  $result["first_match"] = array( "mid" => $row[0], "date" => $row[1] );
+  if ($row) {
+    $result["first_match"] = array( "mid" => $row[0], "date" => $row[1] );
+  }
 
   $query_res->free_result();
 
@@ -123,7 +125,9 @@ if(compare_ver($lg_settings['version'], $lrg_version) < 0) {
   $query_res = $conn->store_result();
   $row = $query_res->fetch_row();
 
-  $result["last_match"] = array( "mid" => $row[0], "date" => $row[1] );
+  if ($row) {
+    $result["last_match"] = array( "mid" => $row[0], "date" => $row[1] );
+  }
 
   $query_res->free_result();
 }
@@ -163,8 +167,10 @@ require_once("modules/analyzer/main/modes.php");
 # game modes
 require_once("modules/analyzer/main/regions.php");
 
-# league days
-require_once("modules/analyzer/main/days.php");
+if (!empty($result["first_match"])) {
+  # league days
+  require_once("modules/analyzer/main/days.php");
+}
 
 
 # Heroes modules

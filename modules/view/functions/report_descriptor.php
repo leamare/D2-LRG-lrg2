@@ -2,17 +2,20 @@
 
 function get_report_descriptor(&$report, $generate_endpoints = false) {
   //echo  $report['league_tag']."<br />";
+  $empty_match = [
+    'date' => 0, 'matchid' => 0
+  ];
 
   $desc = [
     "tag" => $report['league_tag'],
     "name" => $report['league_name'],
     "desc" => $report['league_desc'],
     "id" => $report['league_id'],
-    "first_match" => $report['first_match'],
-    "last_match" => $report['last_match'],
-    "matches" => $report['random']['matches_total'],
+    "first_match" => $report['first_match'] ?? $empty_match,
+    "last_match" => $report['last_match'] ?? $empty_match,
+    "matches" => $report['random']['matches_total'] ?? 0,
     "ver" => $report['ana_version'],
-    "days" => sizeof($report['days']),
+    "days" => sizeof($report['days'] ?? []),
     "anonymous_players" => empty($report['players_additional']),
     "matches_details" => !empty($report['players_additional']),
     "patches" => $report['versions'] ?? null
