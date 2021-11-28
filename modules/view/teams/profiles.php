@@ -182,9 +182,9 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
                         }
                       }
                       foreach ($report['hero_positions_matches'][$isCore][$lane] as $hid => $v) {
-                        $matches = array_intersect($v, array_keys($report['regions_data'][$rid]['matches']));
-                        if (empty($matches)) continue;
-                        $first_matches_heroes_positions_regions[$rid][$rolestring][$hid] = min($matches);
+                        $_matches = array_intersect($v, array_keys($report['regions_data'][$rid]['matches']));
+                        if (empty($_matches)) continue;
+                        $first_matches_heroes_positions_regions[$rid][$rolestring][$hid] = min($_matches);
                       }
                     }
                   }
