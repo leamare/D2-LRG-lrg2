@@ -3,7 +3,7 @@
 function get_report_descriptor(&$report, $generate_endpoints = false) {
   //echo  $report['league_tag']."<br />";
   $empty_match = [
-    'date' => 0, 'matchid' => 0
+    'date' => 0, 'mid' => 0
   ];
 
   $desc = [

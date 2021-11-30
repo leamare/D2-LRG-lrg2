@@ -353,8 +353,8 @@ if (sizeof($cache['reps']) === 0) {
       "<td>".$participants."</td>".
       "<td>".(isset($report['regions']) ? sizeof($report['regions']) : ' - ')."</td>".
       "<td>".$report['days']."</td>".
-      "<td value=\"".$report['first_match']['date']."\" data-matchid=\"".$report['first_match']['mid']."\">".date(locale_string("date_format"), $report['first_match']['date'])."</td>".
-      "<td value=\"".$report['last_match']['date']."\" data-matchid=\"".$report['last_match']['mid']."\">".date(locale_string("date_format"), $report['last_match']['date'])."</td></tr>";
+      "<td value=\"".$report['first_match']['date']."\" data-matchid=\"".($report['first_match']['mid'] ?? 0)."\">".date(locale_string("date_format"), $report['first_match']['date'])."</td>".
+      "<td value=\"".$report['last_match']['date']."\" data-matchid=\"".($report['last_match']['mid'] ?? 0)."\">".date(locale_string("date_format"), $report['last_match']['date'])."</td></tr>";
   }
   if(!$index_list ) {
     $modules .= "<tr><td></td><td></td><td>...</td><td colspan=\"8\"></td></tr>";
