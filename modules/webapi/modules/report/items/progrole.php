@@ -1,5 +1,7 @@
 <?php 
 
+// $repeatVars['items-progrole'] = ['heroid', 'position'];
+
 $endpoints['items-progrole'] = function($mods, $vars, &$report) use (&$endpoints) {
   if (!isset($report['items']) || empty($report['items']['pi']) || !isset($report['items']['progr']))
     throw new \Exception("No items data");

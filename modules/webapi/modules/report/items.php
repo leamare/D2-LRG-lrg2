@@ -9,7 +9,7 @@ include_once(__DIR__ . "/items/progression.php");
 include_once(__DIR__ . "/items/irecords.php");
 include_once(__DIR__ . "/items/progrole.php");
 
-$repeatVars['items'] = ['heroid', 'itemid'];
+$repeatVars['items'] = ['heroid', 'itemid', 'position'];
 
 $endpoints['items'] = function($mods, $vars, &$report) use (&$endpoints) {
   if (!isset($report['items']) || empty($report['items']['pi']))

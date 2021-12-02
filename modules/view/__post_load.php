@@ -14,7 +14,7 @@ function generate_positions_strings() {
   }
 }
 
-if ((stripos($mod, "positions") !== FALSE || stripos($mod, "role") !== FALSE) && isset($strings['en'])) {
+if ((stripos($mod, "position") !== FALSE || stripos($mod, "role") !== FALSE) && isset($strings['en'])) {
   generate_positions_strings();
 }
 
