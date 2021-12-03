@@ -728,11 +728,19 @@ function fetch($match) {
         }
 
         // using fetcher rules
-        if (isset($match_rules['player'][ $t_matchlines[$i]['playerid'] ]))
+        if (isset($match_rules['player'][ $t_matchlines[$i]['playerid'] ])) {
           $t_matchlines[$i]['playerid'] = (int)$match_rules['player'][ $t_matchlines[$i]['playerid'] ];
+          $player_info = $opendota->player($t_matchlines[$i]['playerid']);
+          $t_new_players[ $t_matchlines[$i]['playerid'] ] = $player_info['profile']['name'] ?? $player_info['profile']['personaname'] ?? "Player ".$t_matchlines[$i]['playerid'];
+        }
 
-        if (isset($match_rules['pslot'][$i]))
+        if (isset($match_rules['pslot'][$i])) {
           $t_matchlines[$i]['playerid'] = (int)$match_rules['pslot'][$i];
+          $player_info = $opendota->player($t_matchlines[$i]['playerid']);
+          $t_new_players[ $t_matchlines[$i]['playerid'] ] = $player_info['profile']['name'] ?? $player_info['profile']['personaname'] ?? "Player ".$t_matchlines[$i]['playerid'];
+        }
+
+
 
         $t_matchlines[$i]['heroid'] = $matchdata['players'][$j]['hero_id'];
         $t_matchlines[$i]['isRadiant'] = $matchdata['players'][$j]['isRadiant'];
