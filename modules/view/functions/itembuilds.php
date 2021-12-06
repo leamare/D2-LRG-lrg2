@@ -1,5 +1,15 @@
 <?php
 
+function calculate_favor_score($array) {
+  $res = 0;
+  $sz = count($array);
+
+  foreach ($array as $i => $n) {
+    $res += $n/($sz-$i);
+  }
+
+  return $res;
+}
 
 function traverse_build_tree(&$stats, &$tree, &$hero, $m_lim, $m_role, $root = '0', $build = null) {
   if (!$build) {
