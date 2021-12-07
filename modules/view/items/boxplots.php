@@ -1,6 +1,6 @@
 <?php
 
-$modules['items']['boxplots'] = [];
+$modules['items']['bplots']['boxplots'] = [];
 
 function rg_view_generate_items_boxplots() {
   global $report, $parent, $root, $unset_module, $mod, $meta, $strings, $leaguetag, $linkvars, $use_graphjs, $use_graphjs_boxplots;
@@ -18,6 +18,17 @@ function rg_view_generate_items_boxplots() {
   $res = [];
 
   $res['total'] = '';
+
+  $neutral_items = array_unique(
+    array_merge(
+      $meta['item_categories']['neutral_tier_1'],
+      $meta['item_categories']['neutral_tier_2'],
+      $meta['item_categories']['neutral_tier_3'],
+      $meta['item_categories']['neutral_tier_4'],
+      $meta['item_categories']['neutral_tier_5']
+    )
+  );
+  $enable_neutrals = false;
 
   if(check_module($parent_module."total")) {
     $hero = "total";
@@ -50,12 +61,16 @@ function rg_view_generate_items_boxplots() {
 
   foreach ($report['items']['stats'][$hero] as $iid => $v) {
     if (empty($v)) unset($report['items']['stats'][$hero][$iid]);
+
+    if (!$enable_neutrals && in_array($iid, $neutral_items)) {
+      $enable_neutrals = true;
+    }
   }
 
   $ranks = [];
 
   uasort($report['items']['stats'][$hero], function($a, $b) {
-    return $b['purchases'] <=> $a['purchases'];
+    return $a['median'] <=> $b['median'];
   });
 
   $res[$tag] .= "<div class=\"selector-modules-level-4\">";
@@ -82,6 +97,9 @@ function rg_view_generate_items_boxplots() {
     'major', 'medium', 'early', 
     // 'neutral_tier_1', 'neutral_tier_2', 'neutral_tier_3', 'neutral_tier_4', 'neutral_tier_5',
   ];
+  if ($enable_neutrals) {
+    $item_cats = array_merge($item_cats, [ 'neutral_tier_1', 'neutral_tier_2', 'neutral_tier_3', 'neutral_tier_4', 'neutral_tier_5' ]);
+  }
 
   $items = array_filter($report['items']['stats'][$hero], function($v, $k) use ($cat, &$meta) {
     if ($cat !== null) {
@@ -121,7 +139,7 @@ function rg_view_generate_items_boxplots() {
   $d = 0.25*0.7;
   foreach ($items as $iid => $line) {
     $entries[] = "{ min: ".$line['min_time'].", q1: ".$line['q1'].", median: ".$line['median'].", q3: ".$line['q3'].", max: ".$line['max_time'].", mean: ".$line['avg_time']." }";
-    $labels[] = addslashes(item_name($iid));
+    $labels[] = addslashes(item_name($iid))." (".$line['purchases'].")";
     $line['avg_time'] = $line['avg_time'] > $line['q3'] ? ($line['q1']+$line['q3'])/2 : $line['avg_time'];
     $lines[] = "{
       label: '".item_tag($iid)."',

@@ -1,6 +1,6 @@
 <?php
 
-$modules['items']['heroboxplots'] = [];
+$modules['items']['bplots']['heroboxplots'] = [];
 
 function rg_view_generate_items_heroboxplots() {
   global $report, $parent, $root, $unset_module, $mod, $meta, $strings, $leaguetag, $linkvars, $use_graphjs, $use_graphjs_boxplots;
@@ -97,7 +97,7 @@ function rg_view_generate_items_heroboxplots() {
   }
 
   uasort($heroes, function($a, $b) {
-    return $b['purchases'] <=> $a['purchases'];
+    return $a['median'] <=> $b['median'];
   });
 
   if (empty($heroes)) {
@@ -118,7 +118,7 @@ function rg_view_generate_items_heroboxplots() {
   $d = 0.25*0.7;
   foreach ($heroes as $iid => $line) {
     $entries[] = "{ min: ".$line['min_time'].", q1: ".$line['q1'].", median: ".$line['median'].", q3: ".$line['q3'].", max: ".$line['max_time'].", mean: ".$line['avg_time']." }";
-    $labels[] = addslashes(hero_name($iid));
+    $labels[] = addslashes(hero_name($iid)). " (".$line['purchases'].")";
     $line['avg_time'] = $line['avg_time'] > $line['q3'] ? ($line['q1']+$line['q3'])/2 : $line['avg_time'];
     $lines[] = "{
       label: '".hero_tag($iid)."',
