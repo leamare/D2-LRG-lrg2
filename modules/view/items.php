@@ -16,14 +16,16 @@ if (isset($report['items']['stats'])) {
 if (isset($report['items']['combos'])) {
   include($root."/modules/view/items/icombos.php");
 }
-if (isset($report['items']['progr'])) {
+if (isset($report['items']['progr']) || isset($report['items']['progrole'])) {
   include($root."/modules/view/items/proglist.php");
   include($root."/modules/view/items/progression.php");
-  include($root."/modules/view/items/builds.php");
+  if (isset($report['items']['progrole'])) {
+    include($root."/modules/view/items/builds.php");
+  }
 }
-if (isset($report['items']['progrole'])) {
-  include($root."/modules/view/items/progrole.php");
-}
+// if (isset($report['items']['progrole'])) {
+//   include($root."/modules/view/items/progrole.php");
+// }
 if (isset($report['items']['records'])) {
   include($root."/modules/view/items/irecords.php");
 }
@@ -46,14 +48,24 @@ function rg_view_generate_items() {
     if (check_module($parent."icritical")) {
       $res['icritical'] = rg_view_generate_items_critical();
     }
-    if (check_module($parent."boxplots")) {
-      $res['boxplots'] = rg_view_generate_items_boxplots();
+    if (check_module($parent."bplots")) {
+      $res['bplots'] = [
+        'boxplots' => [],
+        'heroboxplots' => [],
+      ];
+      
+      if($mod == $parent."bplots") $unset_module = true;
+      $parent = $parent."bplots-";
+
+      if (check_module($parent."boxplots")) {
+        $res['bplots']['boxplots'] = rg_view_generate_items_boxplots();
+      }
+      if (check_module($parent."heroboxplots")) {
+        $res['bplots']['heroboxplots'] = rg_view_generate_items_heroboxplots();
+      }
     }
     if (check_module($parent."heroes")) {
       $res['heroes'] = rg_view_generate_items_heroes();
-    }
-    if (check_module($parent."heroboxplots")) {
-      $res['heroboxplots'] = rg_view_generate_items_heroboxplots();
     }
     if (check_module($parent."profiles")) {
       $res['profiles'] = rg_view_generate_items_profiles();
@@ -64,22 +76,22 @@ function rg_view_generate_items() {
       $res['icombos'] = rg_view_generate_items_icombos();
     }
   }
-  if (isset($report['items']['progr'])) {
+  if (isset($report['items']['progr']) || isset($report['items']['progrole'])) {
     if (check_module($parent."proglist")) {
       $res['proglist'] = rg_view_generate_items_proglist();
     }
     if (check_module($parent."builds")) {
       $res['builds'] = rg_view_generate_items_builds();
     }
-    if (check_module($parent."progression")) {
+    if (check_module($parent."progression") || check_module($parent."progrole")) {
       $res['progression'] = rg_view_generate_items_progression();
     }
   }
-  if (isset($report['items']['progrole'])) {
-    if (check_module($parent."progrole")) {
-      $res['progrole'] = rg_view_generate_items_progrole();
-    }
-  }
+  // if (isset($report['items']['progrole'])) {
+  //   if (check_module($parent."progrole")) {
+  //     $res['progrole'] = rg_view_generate_items_progrole();
+  //   }
+  // }
   if (isset($report['items']['records'])) {
     if (check_module($parent."irecords")) {
       $res['irecords'] = rg_view_generate_items_irecords();

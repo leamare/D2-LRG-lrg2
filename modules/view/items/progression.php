@@ -3,8 +3,12 @@
 $modules['items']['progression'] = [];
 
 function rg_view_generate_items_progression() {
-  global $report, $parent, $root, $unset_module, $mod, $meta, $strings, $visjs_settings, $use_visjs;
+  global $report, $parent, $root, $unset_module, $mod, $meta, $strings, $visjs_settings, $use_visjs, $leaguetag;
   $use_visjs = true;
+
+  if (stripos($mod, "progrole") !== false) {
+    $mod = str_ireplace("progrole", "progression", $mod);
+  }
 
   if($mod == $parent."progression") $unset_module = true;
   $parent_module = $parent."progression-";
@@ -18,7 +22,7 @@ function rg_view_generate_items_progression() {
   }
 
   $res = [
-    'overview' => ''
+    'overview' => [ 'all' => '' ]
   ];
 
   $hnames = $meta["heroes"];
@@ -34,11 +38,42 @@ function rg_view_generate_items_progression() {
   }
   foreach($hnames as $hid => $name) {
     $strings['en']["heroid".$hid] = hero_name($hid);
-    $res["heroid".$hid] = "";
+    if (empty($report['items']['progr'][$hid]) && empty($report['items']['progrole']['data'][$hid])) {
+      $res["heroid".$hid] = "";
+    } else {
+      $res["heroid".$hid] = [];
+      $res["heroid".$hid]["all"] = "";
+    }
 
     if(check_module($parent_module."heroid".$hid)) {
+      if (empty($report['items']['progr'][$hid]) && empty($report['items']['progrole']['data'][$hid])) {
+        $res["heroid".$hid] = [ 'all' => "" ];
+      }
+      
       $hero = $hid;
       $tag = "heroid$hid";
+
+      if (empty($report['items']['progrole']['data'][$hid])) continue;
+
+      if($mod == $parent_module."heroid".$hid) $unset_module = true;
+      $parent_module = $parent_module."heroid".$hid."-";
+
+      $crole = null;
+
+      if (check_module($parent_module."all")) {
+        $crole = null;
+      }
+
+      if (isset($report['items']['progrole']) && !empty($report['items']['progrole']['data'][$hid])) {
+        generate_positions_strings();
+        foreach($report['items']['progrole']['data'][$hid] as $role => $pairs) {
+          $res["heroid".$hid]["position_".$role] = "";
+
+          if(check_module($parent_module."position_".$role)) {
+            $crole = $role;
+          }
+        }
+      }
     }
   }
 
@@ -48,15 +83,13 @@ function rg_view_generate_items_progression() {
   $items = [];
   $max_wr = 0;
   $max_games = 0;
-  if (!isset($report['items']['progr'][$hero])) $report['items']['progr'][$hero] = [];
-
-  foreach ($report['items']['progr'][$hero] as $i => $v) {
-    if (empty($v) || !isset($v['total'])) unset($report['items']['progr'][$hero][$i]);
+  if (empty($crole)) {
+    if (!isset($report['items']['progr'][$hero])) $context = [];
+    else $context =& $report['items']['progr'][$hero];
+  } else {
+    if (!isset($report['items']['progrole']['data'][$hero][$crole])) $context = [];
+    else $context =& $report['items']['progrole']['data'][$hero][$crole];
   }
-
-  usort($report['items']['progr'][$hero], function($a, $b) {
-    return $b['total'] <=> $a['total'];
-  });
 
   if (!empty($_GET['cat'])) {
     $i = floor(count($report['items']['progr'][$hero]) * (float)($_GET['cat']));
@@ -65,13 +98,39 @@ function rg_view_generate_items_progression() {
     $med = 0;
   }
 
-  foreach ($report['items']['progr'][$hero] as $v) {
+  if ($crole ?? false) {
+    $items_matches_1 = [];
+    $items_matches = [];
+  }
+
+  foreach ($context as $v) {
+    if (empty($v)) continue;
+
+    if ($crole ?? false) {
+      $v = array_combine($report['items']['progrole']['keys'], $v);
+    }
+
     if ($v['total'] < $med) continue;
 
     $pairs[] = $v;
     
     if (!in_array($v['item1'], $items)) $items[] = $v['item1'];
     if (!in_array($v['item2'], $items)) $items[] = $v['item2'];
+
+    if ($crole ?? false) {
+      if (!isset($items_matches_1[ $v['item1'] ])) {
+        $items_matches_1[ $v['item1'] ] = 0;
+      }
+      if (!isset($items_matches[ $v['item1'] ])) {
+        $items_matches[ $v['item1'] ] = 0;
+      }
+      $items_matches_1[ $v['item1'] ] += $v['total'];
+      
+      if (!isset($items_matches[ $v['item2'] ])) {
+        $items_matches[ $v['item2'] ] = 0;
+      }
+      $items_matches[ $v['item2'] ] += $v['total'];
+    }
 
     if ($v['total'] > $max_games) $max_games = $v['total'];
     $diff = abs($v['winrate']-($data ? $data['winrate_picked'] : 0.5));
@@ -81,14 +140,41 @@ function rg_view_generate_items_progression() {
   }
   $max_wr *= 2;
 
+  if ($crole ?? false) {
+    foreach ($items_matches as $iid => $v) {
+      $items_matches[$iid] = max($items_matches[$iid] ?? 0, $items_matches_1[$iid] ?? 0);
+    }
+    unset($items_matches_1);
+  }
+
+  usort($pairs, function($a, $b) {
+    return $b['total'] <=> $a['total'];
+  });
+
   if (empty($pairs)) {
-    $res[$tag] .= "<div class=\"content-text\">".locale_string("items_stats_empty")."</div>";
+    $res[$tag][($crole ?? false) ? "position_".$crole : "all"] = "<div class=\"content-text\">".locale_string("items_stats_empty")."</div>";
     return $res;
   }
 
-  $res[$tag] .= "<div class=\"content-text\">".locale_string("items_progression_desc")."</div>";
+  $reslocal = "";
 
-  $res[$tag] .= "<div id=\"items-progr-$tag\" class=\"graph\"></div><script type=\"text/javascript\">";
+  $reslocal .= "<div class=\"selector-modules-level-5\">".
+    "<span class=\"selector active\">".
+      "<a href=\"?league=".$leaguetag."&mod=items-progression-$tag-".(($crole ?? false) ? "position_".$crole : "all").(empty($linkvars) ? "" : "&".$linkvars)."\">".
+        locale_string("items_progression_as_tree").
+      "</a>".
+    "</span>".
+    " | ".
+    "<span class=\"selector\">".
+      "<a href=\"?league=".$leaguetag."&mod=items-proglist-$tag-".(($crole ?? false) ? "position_".$crole : "all").(empty($linkvars) ? "" : "&".$linkvars)."\">".
+        locale_string("items_progression_as_list").
+      "</a>".
+    "</span>".
+  "</div>";
+
+  $reslocal .= "<div class=\"content-text\">".locale_string("items_progression_desc")."</div>";
+
+  $reslocal .= "<div id=\"items-progr-$tag\" class=\"graph\"></div><script type=\"text/javascript\">";
 
   $nodes = '';
   $edges = '';
@@ -100,9 +186,12 @@ function rg_view_generate_items_progression() {
     if ($minute_gr > 14) $minute_gr = 14;
     $diff_raw = $report['items']['stats'][$hero][$item]['winrate'] - $report['items']['stats'][$hero][$item]['wo_wr'];
     $diff = 0.5 + $diff_raw;
-    $nodes .= "{ id: $item, value: ".$report['items']['stats'][$hero][$item]['purchases'].", label: '".addslashes(item_name($item))."'".
+    $nodes .= "{ id: $item, value: ".
+      (($crole ?? false) ? $items_matches[$item] : $report['items']['stats'][$hero][$item]['purchases']).
+      ", label: '".addslashes(item_name($item))."'".
       ", title: '".addslashes(item_name($item)).", ".locale_string('avg_timing').": ".convert_time_seconds($report['items']['stats'][$hero][$item]['median']).", ".
       locale_string('purchases').": ".$report['items']['stats'][$hero][$item]['purchases'].", ".
+      (($crole ?? false) ? locale_string('position').": ".$items_matches[$item].", " : "").
       locale_string('winrate').": ".($report['items']['stats'][$hero][$item]['winrate']*100)."%, ".
       locale_string("diff").": ".number_format($diff_raw*100, 2)."%".
       "'".
@@ -135,12 +224,13 @@ function rg_view_generate_items_progression() {
       $v['total']." ".locale_string("matches").", ".number_format($v['winrate']*100, 2)."% ".locale_string("winrate").
       ", ".locale_string("items_minute_diff").": ".$v['min_diff'].
       ", ".locale_string("diff").": ".number_format($diff*100, 2).
-      "% [".$v['avgord1'].' -> '.$v['avgord2']."]\", color:{color:$color, highlight: $color_hi}},";
+      (isset($v['avgord1']) ? "% [".$v['avgord1'].' -> '.$v['avgord2']."]" : "").
+      "\", color:{color:$color, highlight: $color_hi}},";
   }
 
-  $res[$tag] .= "var nodes = [ ".$nodes." ];";
-  $res[$tag] .= "var edges = [ ".$edges." ];";
-  $res[$tag] .= "var container = document.getElementById('items-progr-$tag');\n".
+  $reslocal .= "var nodes = [ ".$nodes." ];";
+  $reslocal .= "var edges = [ ".$edges." ];";
+  $reslocal .= "var container = document.getElementById('items-progr-$tag');\n".
     "var data = { nodes: nodes, edges: edges };\n".
     "var options={
       edges: {
@@ -180,7 +270,9 @@ function rg_view_generate_items_progression() {
     "</script>";
 
 
-  $res[$tag] .= "<div class=\"content-text\">".locale_string("items_progression_list_desc")."</div>";
+  $reslocal .= "<div class=\"content-text\">".locale_string("items_progression_list_desc")."</div>";
+
+  $res[$tag][($crole ?? false) ? "position_".$crole : "all"] = $reslocal;
 
   return $res;
 }
