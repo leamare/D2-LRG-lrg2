@@ -42,6 +42,21 @@ function traverse_build_tree(&$stats, &$tree, &$hero, $m_lim, $m_role, $root = '
       return $b['matches'] <=> $a['matches'];
     });
 
+    // favor points assignment
+
+    $items_list = array_keys($t['children']);
+    $i_sz = count($items_list);
+    foreach ($items_list as $i => $item) {
+      if (!isset($build['favors'][$item])) $build['favors'][$item] = [];
+      // using 1.5 as Favor Factor, it's best somewhere between 1 and 2
+      $build['favors'][$item][] = pow($i/$i_sz, 1.5);
+      $t['children'][$item]['matches'] *= 1 + calculate_favor_score($build['favors'][$item])/1.5;
+    }
+
+    // resorting items taking factored match numbers into account
+    uasort($t['children'], function($a, $b) {
+      return $b['matches'] <=> $a['matches'];
+    });
 
     $situationals = [];
     $build_sz = count($build['path']) + 1;
