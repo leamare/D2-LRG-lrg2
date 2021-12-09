@@ -104,3 +104,96 @@ function traverse_build_tree(&$stats, &$tree, &$hero, $m_lim, $m_role, $root = '
   return $build;
 }
 
+function generate_item_builds(&$pairs, &$stats, $hero) {
+  global $report;
+
+  $m_lim = $pairs[ ceil(count($pairs)*0.5)-1 ]['total'];
+
+  $dummy = [
+    'parents' => [],
+    'children' => [],
+    'matches' => 0
+  ];
+
+  $tree = [
+    '0' => $dummy
+  ];
+
+  foreach ($pairs as $pair) {
+    if (!isset($tree[ $pair['item1'] ])) {
+      $tree[ $pair['item1'] ] = $dummy;
+      $tree[ $pair['item1'] ]['time'] = $stats[ $pair['item1'] ]['median'];
+    }
+    if (!isset($tree[ $pair['item2'] ])) {
+      $tree[ $pair['item2'] ] = $dummy;
+      $tree[ $pair['item2'] ]['time'] = $stats[ $pair['item2'] ]['median'];
+    }
+
+    if ($pair['avgord1'] <= 1) {
+      if (!isset($tree[ '0' ]['children'][ $pair['item1'] ])) {
+        $tree[ '0' ]['children'][ $pair['item1'] ] = [
+          'diff' => $stats[ $pair['item1'] ]['median'] / 60,
+          'matches' => 0,
+          'winrate' => $stats[ $pair['item1'] ]['winrate'],
+          'min_ord' => 0
+        ];
+      }
+      $tree[ '0' ]['children'][ $pair['item1'] ]['matches'] += $pair['total'] * (1-$pair['avgord1']);
+    }
+
+    if ($pair['avgord2'] < 1) {
+      if (!isset($tree[ '0' ]['children'][ $pair['item2'] ])) {
+        $tree[ '0' ]['children'][ $pair['item2'] ] = [
+          'diff' => $stats[ $pair['item2'] ]['median'] / 60,
+          'matches' => 0,
+          'winrate' => $stats[ $pair['item2'] ]['winrate'],
+          'min_ord' => 0
+        ];
+      }
+      $tree[ '0' ]['children'][ $pair['item2'] ]['matches'] += $pair['total'] * (1-$pair['avgord2']);
+    }
+
+    if ($pair['min_diff'] > 0) {
+      if (isset($tree[ $pair['item1'] ]['children'][ $pair['item2'] ])) continue;
+
+      $tree[ $pair['item1'] ]['children'][ $pair['item2'] ] = [
+        'diff' => $pair['min_diff'],
+        'matches' => $pair['total'],
+        'winrate' => $pair['winrate'],
+        'min_ord' => floor($pair['avgord2'])
+      ];
+      $tree[ $pair['item2'] ]['parents'][] = $pair['item1'];
+      
+      $tree[ $pair['item1'] ]['matches'] += $pair['total'];
+    } else {
+      if (isset($tree[ $pair['item2'] ]['children'][ $pair['item1'] ])) continue;
+
+      $tree[ $pair['item2'] ]['children'][ $pair['item1'] ] = [
+        'diff' => $pair['min_diff'],
+        'matches' => $pair['total'],
+        'winrate' => $pair['winrate'],
+        'min_ord' => floor($pair['avgord1'])
+      ];
+      $tree[ $pair['item1'] ]['parents'][] = $pair['item2'];
+
+      $tree[ $pair['item2'] ]['matches'] += $pair['total'];
+    }
+  }
+
+  foreach ($tree as $id => $t) {
+    foreach ($tree[$id]['children'] as $iid => $ch) {
+      if ($iid == $id) {
+        unset($tree[$id]['children'][$id]);
+        continue;
+      }
+    }
+  }
+
+  // Generating builds, going through the tree
+  $builds = [];
+  $roots = [];
+
+  $builds = traverse_build_tree($stats, $tree, $hero, $m_lim, $hero['role_matches']);
+
+  return [ $builds, $tree ];
+}
