@@ -61,6 +61,26 @@ function traverse_build_tree(&$stats, &$tree, &$hero, $m_lim, $m_role, $root = '
     $situationals = [];
     $build_sz = count($build['path']) + 1;
     foreach ($t['children'] as $id => $h) {
+      if (!isset($tree[$id])) {
+        unset($t['children'][$id]);
+        continue;
+      }
+
+      if (!isset($tree[$id]['med_ord'])) {
+        $local_ord = [];
+        foreach ($tree[$id]['children'] as $child) {
+          $local_ord[] = $child['min_ord'];
+        }
+        sort($local_ord);
+        $tree[$id]['med_ord'] = !empty($local_ord) ? $local_ord[ floor(count($local_ord)/2) ] - 1 : $ord;
+      }
+
+      if ($ord < 3 && !empty($tree[$id]['children'])) {
+        if ($tree[$id]['med_ord'] - $ord > 1 ) {
+          $t['children'][$id]['skip'] = true;
+          continue;
+        }
+      }
 
       $local_lim = $tree[$id]['matches'] ? round($tree[$id]['matches'] * 0.25) : $m_lim;
 
