@@ -174,6 +174,161 @@ function traverse_build_tree(&$stats, &$tree, &$hero, $m_lim, $m_role, $root = '
     $ord++;
   }
 
+  // post processing: TODO:
+  // - items stats -> neutrals
+  // - items stats -> early items
+  // - situationals
+  // - lategame list, lategame branches
+  // - main item
+
+  foreach ($build['swap_raw'] as $i => [ $i1, $i2 ]) {
+    if (!in_array($i2, $build['path'])) {
+      continue;
+    }
+    $ord1 = array_search($i1, $build['path']);
+    $ord2 = array_search($i2, $build['path']);
+    if (abs($ord1 - $ord2) > 2) continue;
+
+    $build['swap'][$i1] = $i2;
+  }
+
+  unset($build['swap_raw']);
+
+  foreach ($build['sit_raw'] as $item => $cases) {
+    if (in_array($item, $build['path'])) continue;
+
+    // $build['sit'][$item] = array_reduce($cases, function($carry, $a) {
+    //   return $carry += $a['order'];
+    // }, 0) / count($cases);
+
+    $order_frequency = [];
+    foreach ($cases as $case) {
+      if (!isset($order_frequency[ $case['order'] ])) $order_frequency[ $case['order'] ] = 0;
+      $order_frequency[ $case['order'] ] += $case['matches'];
+    }
+
+    arsort($order_frequency);
+
+    $build['sit'][$item] = array_keys($order_frequency)[0];
+  }
+
+  unset($build['sit_raw']);
+
+  asort($build['sit']);
+
+  $alts_keys = array_keys($build['alt']);
+  $sz = count($alts_keys);
+
+  $alts_items = [];
+
+  for ($i = 0; $i < $sz; $i++) {
+    $item = $alts_keys[$i];
+    $alts = $build['alt'][$item];
+
+    foreach ($alts as $alt) {
+      if (($stats[$item]['median'] - $stats[$alt]['median']) > 240) {
+        unset($alts[ array_search($alt, $alts) ]);
+        $alts = array_values($alts);
+        continue;
+      }
+
+      $alts_items[] = $alt;
+
+      if ($alt == $item || in_array($alt, $build['path'])) {
+        unset($alts[ array_search($alt, $alts) ]);
+        $alts = array_values($alts);
+        continue;
+      }
+
+      for ($j = $i+1; $j < $sz; $j++) {
+        $item2 = $alts_keys[$j];
+        $alts2 = $build['alt'][$item2];
+
+        if (in_array($alt, $alts2)) {
+          if ($build['sit'][$alt]-1 == $j) {
+            unset($alts[ array_search($alt, $alts) ]);
+            $alts = array_values($alts);
+          } else {
+            unset($alts2[ array_search($alt, $alts2) ]);
+            $build['alt'][$item2] = array_values($alts2);
+          }
+        }
+      }
+    }
+    if (empty($alts)) unset($build['alt'][$item]);
+    else $build['alt'][$item] = $alts;
+  }
+
+  $alts_items = array_unique($alts_items);
+  foreach ($alts_items as $alt) {
+    unset($build['sit'][$alt]);
+  }
+  $build['alts_items'] = $alts_items;
+
+  // Detecting lategame point
+
+  $first = $build['path'] ? $tree[ $build['path'][0] ]['matches'] : 0;
+  $threshold = $first * 0.1;
+  $lategame = null;
+
+  // collecting number of matches per pair
+  // to find our the exact lategame point
+
+  $matches = [];
+  for ($i = 1, $sz = count($build['path']); $i < $sz; $i++) {
+    $val = $tree[ $build['path'][$i-1] ]['children'][ $build['path'][$i] ]['matches'];
+    $matches[] = $val;
+  }
+
+  $threshold = $matches ? $matches[0] * 0.05 : 0;
+
+  $deltas = [];
+  for ($i = 1, $sz = count($matches); $i < $sz; $i++) {
+    $val = $matches[$i-1] - $matches[$i];
+    $deltas[] = $val;
+
+    if (!$lategame && $i > 1 && $val > $threshold) {
+      // 3 is added to correct for "lost" pairs while calculating deltas
+      // 1 order round is lost due to using pairs (the first round doesn't have a starting pair)
+      // 1 order round is lost due to using deltas between pairs
+      // and 1 order round is added on top of that since usually "lategame" point is a smooth transition
+      $lategame = $i+3;
+    }
+  }
+
+
+  $build['lategamePoint'] = min($lategame, count($build['path']));
+
+  // creating a list of possible lategame items
+
+  $build['lategame'] = [];
+
+  if ($lategame) {
+    $sz = count($build['path']);
+    for ($i = $lategame-2; $i < $sz; $i++) {
+      if ($i > $lategame-2) $build['lategame'][] = $build['path'][$i];
+      $local_lim = $tree[ $build['path'][$i] ]['matches'] ? round($tree[ $build['path'][$i] ]['matches'] * 0.05) : $m_lim;
+      foreach ($tree[ $build['path'][$i] ]['children'] as $item => $ch) {
+        if ($ch['matches'] < $local_lim) continue;
+        if (isset($build['lategame'][$item]) || in_array($item, $build['path']) || (isset($build['sit'][$item]) && $build['sit'][$item] < $i-1)) continue;
+        $build['lategame'][] = $item;
+      }
+    }
+  }
+
+  // TODO: empty builds
+
+  $build_times = [];
+
+  $build_times[] = $tree['0']['children'][ $build['path'][0] ]['diff'];
+  $alts_keys = array_keys($build['path']);
+  $sz = count($alts_keys);
+  for ($i = 1; $i < $sz; $i++) {
+    $build_times[] = $tree[ $build['path'][$i-1] ]['children'][ $build['path'][$i] ]['diff'];
+  }
+
+  $build['times'] = $build_times;
+
   return $build;
 }
 
