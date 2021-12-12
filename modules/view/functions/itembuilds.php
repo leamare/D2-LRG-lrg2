@@ -120,8 +120,64 @@ function traverse_build_tree(&$stats, &$tree, &$hero, $m_lim, $m_role, $root = '
     $prev = $root;
     $root = $max_id;
 
+    if ($root) {
+      // primary candidates
+      $children = $tree[$root]['children'];
+      uasort($children, function($a, $b) {
+        return $b['matches'] <=> $a['matches'];
+      });
+      $primes = array_slice($children, 0, round(count($children) * .75), true);
+
+      foreach ($situationals as $item => $sit) {
+        if (isset($primes[ $sit['child'] ])) {
+          if (!isset($build['alt'][$root])) $build['alt'][$root] = [];
+          $build['alt'][$root][] = $item;
+        }
+        if (!isset($build['sit_raw'][$item])) $build['sit_raw'][$item] = [];
+        $build['sit_raw'][$item][] = $sit;
+      }
+
+      $children = array_keys($t['children']);
+
+      // take swaps into consideration
+      $i = 0;
+      foreach ($children as $item) {
+        if ($item == $root) continue;
+        if ($tree[$item]['skip'] ?? false) continue;
+        // swaps
+        if (isset($tree[$root]['children'][$item])) {
+          $data = $t['children'][$item];
+          $i++;
+          if (($data['matches_orig'] ?? $data['matches']) > $m_lim * 10) $build['swap_raw'][] = [ $root, $item ];
+
+          if (isset($tree[$prev]['children'][$item]) && isset($tree[$prev]['children'][$item]['matches_orig'])) {
+            $data['matches'] = $tree[$prev]['children'][$item]['matches_orig'];
+          }
+
+          if (!isset($tree[$root]['children'][$item]['matches_orig'])) {
+            $tree[$root]['children'][$item]['matches_orig'] = $tree[$root]['children'][$item]['matches'];
+            $tree[$root]['children'][$item]['matches'] = $tree[$root]['children'][$item]['matches_orig'] + round($data['matches']/($i+2));
+          } else {
+            $prev_add = $tree[$root]['children'][$item]['matches'] - $tree[$root]['children'][$item]['matches_orig'];
+            $tree[$root]['children'][$item]['matches'] = $tree[$root]['children'][$item]['matches_orig'] + round($data['matches']/($i+2));
+          }
+          // if (!isset($build['favors'][$item])) $build['favors'][$item] = [];
+          // $build['favors'][$item][] = $i;
+        } else {
+          // $build['favors'][$item][] = 1;
+        }
+      }
+
+      $build['path'][] = $root;
+    }
+
+    $ord++;
+  }
 
   return $build;
+}
+
+function inject_item_stats(&$build, &$stats, $hero) {
 }
 
 function generate_item_builds(&$pairs, &$stats, $hero) {
@@ -210,10 +266,11 @@ function generate_item_builds(&$pairs, &$stats, $hero) {
   }
 
   // Generating builds, going through the tree
-  $builds = [];
-  $roots = [];
+  $build = [];
 
-  $builds = traverse_build_tree($stats, $tree, $hero, $m_lim, $hero['role_matches']);
+  $build = traverse_build_tree($stats, $tree, $m_lim, $hero['role_matches']);
 
-  return [ $builds, $tree ];
+  inject_item_stats($build, $stats, $hero);
+
+  return [ $build, $tree ];
 }
