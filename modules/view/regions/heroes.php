@@ -68,7 +68,7 @@ if(isset($reg_report['hero_positions'])) {
   }
 
   include_once("heroes/rolepickban.php");
-  $res["region".$region]['heroes']["rolepickban"] = "";
+  // $res["region".$region]['heroes']["rolepickban"] = "";
   if(check_module($parent_mod."rolepickban")) {
     $res["region".$region]['heroes']['rolepickban'] = rg_view_generate_regions_heroes_rolepickban($region, $reg_report);
   }

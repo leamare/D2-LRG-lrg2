@@ -2,8 +2,7 @@
 include_once("$root/modules/view/generators/pickban.php");
 
 function rg_view_generate_regions_heroes_rolepickban($region, $reg_report) {
-  global $meta;
-  global $modules;
+  global $meta, $modules, $leaguetag, $linkvars;
 
   if (is_wrapped($reg_report['hero_positions'])) $reg_report['hero_positions'] = unwrap_data($reg_report['hero_positions']);
 
@@ -27,7 +26,21 @@ function rg_view_generate_regions_heroes_rolepickban($region, $reg_report) {
     }
   }
 
-  $res = rg_generator_pickban("region$region-heroes-pickban", $pb, $reg_report['main'], true, true);
+  $res = "<div class=\"selector-modules-level-5\">".
+    "<span class=\"selector\">".
+      "<a href=\"?league=".$leaguetag."&mod=regions-region$region-heroes-pickban".(empty($linkvars) ? "" : "&".$linkvars)."\">".
+        locale_string("overview").
+      "</a>".
+    "</span>".
+    " | ".
+    "<span class=\"selector active\">".
+      "<a href=\"?league=".$leaguetag."&mod=regions-region$region-heroes-rolepickban".(empty($linkvars) ? "" : "&".$linkvars)."\">".
+        locale_string("rolepickban").
+      "</a>".
+    "</span>".
+  "</div>";
+
+  $res .= rg_generator_pickban("region$region-heroes-pickban", $pb, $reg_report['main'], true, true);
   $res .= rg_generator_uncontested($meta["heroes"], $reg_report['pickban']);
   $res .= "<div class=\"content-text\">".locale_string("desc_heroes_pickban")."</div>";
 

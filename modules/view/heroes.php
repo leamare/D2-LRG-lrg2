@@ -22,6 +22,13 @@ if (isset($report['hero_positions'])) {
   include("heroes/rolepickban.php");
 }
 
+if (isset($report['items']) && isset($report['items']['progrole'])) {
+  $modules['heroes']['&builds'] = [
+    'type' => 1,
+    'link' => 'items-builds'
+  ];
+}
+
 if (isset($report['hero_laning']))
   include("heroes/laning.php");
 
