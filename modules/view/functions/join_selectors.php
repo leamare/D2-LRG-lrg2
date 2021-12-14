@@ -35,7 +35,7 @@ function join_selectors($modules, $level, $parent="") {
         );
 
     $modname = locale_string($modtag);
-    if(is_array($module)) {
+    if($mod_type) {
       if (strpos($parent, "profiles") == strlen($parent)-8)
         $modname .= "";
         # FIXME Remove this block later, using class-based modules with a parameter
@@ -76,7 +76,7 @@ function join_selectors($modules, $level, $parent="") {
         $selectors[] = "<option value=\"module-".$mn."\">".$modname."</option>";
       }
     }
-    if($startline_check_res || !$lrg_use_get || $lrg_get_depth < $level+1 || $unset_selector) {
+    if(!$mod_islink && ($startline_check_res || !$lrg_use_get || $lrg_get_depth < $level+1 || $unset_selector)) {
       if(is_array($module)) {
         $module = join_selectors($module, $level+1, $mn);
       }
@@ -85,6 +85,7 @@ function join_selectors($modules, $level, $parent="") {
       $unset_selector = false;
     }
   }
+
   if ($selectors_num < $max_tabs)
     return "<div class=\"selector-modules".(empty($level_codes[$level][0]) ? "" : "-".$level_codes[$level][0])."\">".implode(" | ", $selectors)."</div>".$out;
   else
