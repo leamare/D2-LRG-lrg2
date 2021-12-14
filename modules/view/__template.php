@@ -1,4 +1,4 @@
-<?php  $__postfix = "?v=27401"; ?>
+<?php  $__postfix = "?v=27540"; ?>
 <!DOCTYPE html>
 <html lang="<?php echo $locale; ?>">
   <head>
@@ -101,7 +101,7 @@
   </head>
   <body>
     <?php if (!empty($custom_body)) echo $custom_body; ?>
-    <header class="navBar">
+    <header class="navBar <?php  if (!empty($previewcode) && $_earlypreview) echo "early-access"; ?>">
       <div class="navLinks">
         <div class="navItem dotalogo"><a href="<?php echo $main_path; ?>"></a></div>
         <div class="navItem bold"><a href=".<?php if(!empty($linkvars)) echo "?".$linkvars; ?>" title="Dota 2 League Reports"><?php echo locale_string("leag_reports")?></a></div>
@@ -128,7 +128,8 @@
       </div>
     </header>
     <?php 
-      if (!empty($support_me_block)) echo "<div class=\"support-me-block\">$support_me_block</div>";
+      if (!empty($previewcode) && $_earlypreview) echo "<div class=\"support-me-block early-access\">".locale_string("earlypreview")."</div>";
+      else if (!empty($support_me_block)) echo "<div class=\"support-me-block\">$support_me_block</div>";
     ?>
     <?php 
       if (!empty($support_me_block_second)) echo "<div class=\"support-me-block-secondary\">$support_me_block_second</div>";

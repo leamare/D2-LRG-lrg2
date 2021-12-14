@@ -12,6 +12,12 @@ $locales = [
 
 $max_tabs = 12;
 
+$previewcode = 123;
+$_earlypreview_banlist = [
+  // 'items-builds'
+];
+
+
 $recent_last_limit = time() - 14*24*3600;
 
 $custom_head = "";

@@ -11,10 +11,13 @@ function join_selectors($modules, $level, $parent="") {
   global $leaguetag;
   global $max_tabs;
   global $linkvars;
+  global $_earlypreview_banlist, $_earlypreview;
 
   $out = "";
   $first = true;
   $unset_selector = false;
+
+  if (empty($_earlypreview_banlist)) $_earlypreview_banlist = [];
 
   if(empty($parent)) {
     $selectors = explode("-", $mod);
@@ -28,11 +31,26 @@ function join_selectors($modules, $level, $parent="") {
   $selectors_num = sizeof($modules);
 
   foreach($modules as $modtag => $module) {
-    $mn = (empty($parent) ? "" : $parent."-" ).$modtag;
-    $startline_check_res = stripos($mod, $mn) === 0 && (
+    $mod_type = 0;
+    $mod_islink = false;
+
+    if ($modtag[0] == "&") {
+      $mod_islink = true;
+      $modtag = substr($modtag, 1);
+      $mn = $module['link'];
+      $mod_type = $module['type'] ?? 0;
+    } else {
+      $mn = (empty($parent) ? "" : $parent."-" ).$modtag;
+      $startline_check_res = stripos($mod, $mn) === 0 && (
           (strlen($mod) == strlen($mn)) ||
           (strlen($mod) > strlen($mn) && $mod[strlen($mn)] == '-')
         );
+      if (is_array($module)) $mod_type = 1;
+    }
+    
+    if (!$_earlypreview && in_array($mn, $_earlypreview_banlist)) {
+      continue;
+    }
 
     $modname = locale_string($modtag);
     if($mod_type) {

@@ -65,6 +65,8 @@ $root = dirname(__FILE__);
 
 $linkvars = [];
 
+$_earlypreview = empty($previewcode) ? true : false;
+
 if ($lrg_use_get) {
   if(isset($_GET['mod'])) $mod = $_GET['mod'];
   else $mod = "";
@@ -80,6 +82,10 @@ if ($lrg_use_get) {
   if(isset($_GET['stow']) && !empty($_GET['stow'])) {
     $override_style = $_GET['stow'];
     $linkvars[] = array("stow", $_GET['stow']);
+  }
+  if(!empty($previewcode) && isset($_GET['earlypreview']) && ($_GET['earlypreview'] == $previewcode)) {
+    $linkvars[] = [ "earlypreview", $previewcode ];
+    $_earlypreview = true;
   }
   if(isset($_GET['cat']) && !empty($_GET['cat'])) {
     $cat = $_GET['cat'];
