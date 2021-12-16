@@ -243,6 +243,8 @@ It’s fairly simple to explain. It doesn’t have a structure and is used in `s
 * `items/irecords` - may use `item` variable, returns `overview` if not set
 * `items/icritical` - may use `hero` variable
 * `items/progression` and `items/proglist` (identical) - may use `hero` variable, returns `overview` if not set
+* `items/progrole` - may use `hero` and `position`, supports repeaters for both, if hero is not set returns the list of all possible role progressions for every hero
+* `items/builds` - may use `hero` and `position`, pretty much same rules as progrole
 * `heroes/daily_wr`
 * `heroes/wrtimings`
 * `heroes/wrplayers`

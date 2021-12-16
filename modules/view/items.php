@@ -11,23 +11,26 @@ if (isset($report['items']['stats'])) {
   include($root."/modules/view/items/boxplots.php");
   include($root."/modules/view/items/heroes.php");
   include($root."/modules/view/items/hboxplots.php");
-  include($root."/modules/view/items/profiles.php");
 }
 if (isset($report['items']['combos'])) {
   include($root."/modules/view/items/icombos.php");
 }
 if (isset($report['items']['progr']) || isset($report['items']['progrole'])) {
-  include($root."/modules/view/items/proglist.php");
-  include($root."/modules/view/items/progression.php");
   if (isset($report['items']['progrole'])) {
     include($root."/modules/view/items/builds.php");
+    include($root."/modules/view/items/buildspowerspikes.php");
   }
+  include($root."/modules/view/items/proglist.php");
+  include($root."/modules/view/items/progression.php");
 }
 // if (isset($report['items']['progrole'])) {
 //   include($root."/modules/view/items/progrole.php");
 // }
 if (isset($report['items']['records'])) {
   include($root."/modules/view/items/irecords.php");
+}
+if (isset($report['items']['stats'])) {
+  include($root."/modules/view/items/profiles.php");
 }
 
 function rg_view_generate_items() {
@@ -77,14 +80,17 @@ function rg_view_generate_items() {
     }
   }
   if (isset($report['items']['progr']) || isset($report['items']['progrole'])) {
-    if (check_module($parent."proglist")) {
-      $res['proglist'] = rg_view_generate_items_proglist();
-    }
     if (check_module($parent."builds")) {
       $res['builds'] = rg_view_generate_items_builds();
     }
+    if (check_module($parent."buildspowerspikes")) {
+      $res['buildspowerspikes'] = rg_view_generate_items_buildspowerspikes();
+    }
     if (check_module($parent."progression") || check_module($parent."progrole")) {
       $res['progression'] = rg_view_generate_items_progression();
+    }
+    if (check_module($parent."proglist")) {
+      $res['proglist'] = rg_view_generate_items_proglist();
     }
   }
   // if (isset($report['items']['progrole'])) {
