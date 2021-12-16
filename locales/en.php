@@ -6,6 +6,7 @@ $strings['en'] = [
   "versus" => "⚔",
   "game_num" => "Game",
   "meet_num" => "Series",
+  "minute_short" => "min",
 
   // report overview
   "league_name" => "Report name",
@@ -97,6 +98,8 @@ $strings['en'] = [
   "arank" => "R-Rank",
   "team" => "Team",
   "enemy" => "Enemy",
+  "link" => "Link",
+  "all" => "All",
 
   "trends_winrate" => "Winrate",
   "trends_first" => "First",
@@ -158,11 +161,12 @@ $strings['en'] = [
   "stats" => "Stats",
   "icombos" => "Item Pairs",
   "proglist" => "Progression pairs",
-  "progression" => "Build progression tree",
+  "progression" => "Build tree",
   "progrole" => "Progression for roles",
   "irecords" => "Timings records",
   "icritical" => "Crucial timings",
   "rolepickban" => "Ranking with roles",
+  "bplots" => "Boxplots",
   "boxplots" => "Timings Boxplots",
   "heroboxplots" => "Hero Timings Boxplots",
   "daily_wr" => "Trends",
@@ -182,6 +186,8 @@ $strings['en'] = [
   "regions" => "Regions",
   "roster"  => "Active players",
   "profiles" => "Profiles",
+  "explain_summary" => "Explain this to me",
+  "earlypreview" => "Early preview",
 
   // team card
   "team_name" => "Team Name",
@@ -348,6 +354,7 @@ $strings['en'] = [
   "items_late_wr_long" => "Winrate with late timing",
   "items_heroes_full" => "Full item stats for heroes",
   "items_records_full" => "All item timing records",
+  "items_stats" => "Items stats",
   "item_time_mean" => "Mean",
   "item_time_min" => "Min",
   "item_time_q1" => "Q1",
@@ -358,6 +365,8 @@ $strings['en'] = [
   "item_time_std_dev" => "Std.Dev",
   "item_time_window" => "Window",
   "item_time_critical" => "Critical",
+  "item_time_critical_long" => "Critical timing",
+  "item_time_q1_long" => "Early timing",
   "item_profile_heroes_purchases" => "Heroes with highest purchase rates",
   "item_profile_heroes_best_rank" => "Heroes with best purchase ranks",
   "item_profile_heroes_worst_rank" => "Heroes with worst purchase ranks",
@@ -412,7 +421,9 @@ $strings['en'] = [
 
   // progression for roles
   "progrole_available_heroes" => "Heroes with builds available",
-  "positions_count" => "Number of different roles",
+  "positions_count" => "Number of roles",
+  "items_progression_as_tree" => "Items progression as a tree",
+  "items_progression_as_list" => "Items progression as a list",
 
   // reports list
   "noleague_cap" => "Latest Reports",
@@ -493,6 +504,27 @@ $strings['en'] = [
   "stats_empty" => "There is no data :(",
   "stats_no_elements" => "No elements :(",
 
+  // builds
+  "builds" => "Builds",
+  "builds_main_build" => "Main build",
+  "builds_alt_subheader" => "Alternatives",
+  "builds_swaps_subheader" => "Order swaps",
+  "builds_situational_short" => "Situation",
+  "builds_main_short" => "Main",
+  "builds_partial" => "This build didn't have enough data in the item progression tree, so it was based on item stats instead. This build might not be accurate or represent the chosen role.",
+  "builds_early" => "Early",
+  "builds_core" => "Core",
+  "builds_lategame" => "Lategame",
+  "builds_situational_early" => "Situational Early",
+  "builds_situational" => "Situational",
+  "builds_alts" => "Alternatives",
+  "builds_swaps" => "Order swaps",
+  "builds_neutrals" => "Neutral items",
+  "builds_timeline" => "Timeline",
+  "builds_lategame_main_route" => "Main route",
+  "builds_lategame_all" => "All potential choices",
+  "builds_other_value" => "Other valuable items",
+
   "desc_overview" => "This page only contains general information about league and small amount of available stats. Look throughout other sections for advanced data.",
   "desc_records" => "This section contains data about highest or lowest values across all matches.",
   "desc_heroes_avg" => "This section contains highest average values among heroes. Minimum amount of matches is set to %lim%.",
@@ -552,6 +584,14 @@ $strings['en'] = [
   "items_records_overview_desc" => "In the records overview you can see the earliest item purchases, based on the difference compared to the item's median purchase time, with item purchases in the third quantile.",
   "items_records_desc" => "There you can see all the earliest purchase times for the chosen item, as well as difference in time, compared to the item's median purchase time. Records are only shown for heroes with the number of purchases for the chosen item higher than the third quantile.",
   "items_stats_critical_desc" => "This section contains top 75% of most purchased items with negative gradient (sensitive to time of purchase) for selected hero. Q1 is early-average timing, Critical is the calculated time of purchase after which the item goes below 50% winrate. Window is difference between early and critical timings.",
+
+  "builds_desc_1" => "This build is generated based on item build progression trees and hero items stats (you can explore them for more details). The goal is to provide a robust item build that covers multiple alternative choices, situational items and timings based purely on data (without using additional metadata, like item recipes or cost). If the build tree for the selected hero and role is incomplete or absent, stats are used to fill in the gaps. The build doesn't have skill builds and starting items since these are not recorded (for now).",
+  "builds_desc_2" => "Every role covers only one build. However, you can often find an alternative route by exploring alternative item choices (given this playstyle has enough matches). Core Build and Lategame Main Route are populated from the role progression tree, while early items, neutral items, additional lategame and high impact items are populated from stats, based on purchase rates and timings.",
+  "builds_desc_3" => "There are four types of items: <b>regular</b>, <b>common</b> (highlight color, high purchase rate), <b>strong</b> (green, high winrate increase) and <b>critical</b> (red, have high negative gradient leading to an important timing). Every item has its purchase rate number in bottom right corner, as well as three special lines of stats. For the first three types these are median timing, winrate increase compared to games where this item wasn't purchased and average winrate. For critical items it's timing window (realistic early timing to critical time), winrate increase with the early timing and winrate gradient. You can also hover with your mouse over any item or number to see the details.",
+  "builds_desc_4" => "Winrate gradient represents how the item's winrate changes with every minute of delayed timing. Negative gradient means the item becomes less beneficial with every minute. Critical timing is the time after which chances to win will be lower than the hero's average.",
+  "builds_desc_5" => "The section is divided into three major blocks. The first major block is <u>Build Overview</u>. It has several basic categories: <b>Early</b> (items purchased before any core items, can be changed depending on the game), <b>Core</b> (items essential for the hero), <b>Lategame</b> (basic choices after essential items were purchased), as well as <b>Situational Early</b> (items that don't fit into the regular build or skipped a lot) and <b>Situational</b> (additional lategame items). You can also notice following categories: <b>Alternatives</b> (highlights alternative item choices), <b>Order Swaps</b> (two items that often switch places in the build order) and <b>Neutral Items</b> (when available).",
+  "builds_desc_6" => "The second major block is <u>Timeline</u>. It represents visually the order in which early, core and situational items are usually purchased, as well as highlighting order swaps, alternatives and less popular item choices to make it easier to see the build progression. Highlighted items (big blocks at the top with brighter background) are a core part of the build, while situational and early items can be skipped. Straight after Timeline you can see <u>Lategame</u> block, which holds the most common lategame route, as well as additional lategame items sorted by their median time of purchase. The last major block has more <u>neutral items</u> (if available), as well as the list of other <u>high impact items</u> that didn't fit into the build.",
+  "builds_desc_7" => "The build is using data to power itself up. The more data is available the better build you get. Naturally, uncommon roles or heroes might not get a proper build. Role trees only generated if the hero has more than 5% of matches on the role.",
 
   // service info
   "limiter_h" => "Higher limiter",
