@@ -444,6 +444,7 @@ $strings['en'] = [
   "search_header" => "Search resuts",
   "search_submit" => "Find stuff",
   "search_info_link" => "About search commands",
+  "filter_placeholder" => "Type here to filter...",
   "friends_main" => "Friends",
 
   // overview strings
@@ -525,6 +526,24 @@ $strings['en'] = [
   "builds_lategame_all" => "All potential choices",
   "builds_other_value" => "Other valuable items",
 
+  "build_item_type_regular" => "Normal item",
+  "build_item_type_common" => "High pickup rate",
+  "build_item_type_strong" => "High winrate",
+  "build_item_type_strong_grad" => "Positive gradient",
+  "build_item_type_critical" => "Critical timing",
+
+  "build_item_type_regular_explain" => "Nothing too special",
+  "build_item_type_common_explain" => "Purchased extremely often",
+  "build_item_type_strong_explain" => "Incredibly high winrate increase when purchased",
+  "build_item_type_strong_grad_explain" => "Better when purchased later",
+  "build_item_type_critical_explain" => "Timing of purchase is very important",
+
+  "builds_desc_tldr_0" => "Short version",
+  "builds_desc_tldr_1" => "This Item build is based on stats. Includes alternative item choices, situational items and stuff like that. You can read more about the different categories and how it works below.",
+  "builds_desc_tldr_2" => "It's only item build, no starting items, talents and skill builds yet.",
+  "builds_desc_tldr_3" => "There are five types of items, explanation and reference for stats below:",
+  "builds_desc_tldr_4" => "You can hover over numbers and items to see details. That's it. Below is the more detailed version.",
+
   "desc_overview" => "This page only contains general information about league and small amount of available stats. Look throughout other sections for advanced data.",
   "desc_records" => "This section contains data about highest or lowest values across all matches.",
   "desc_heroes_avg" => "This section contains highest average values among heroes. Minimum amount of matches is set to %lim%.",
@@ -590,7 +609,7 @@ $strings['en'] = [
   "builds_desc_3" => "There are four types of items: <b>regular</b>, <b>common</b> (highlight color, high purchase rate), <b>strong</b> (green, high winrate increase) and <b>critical</b> (red, have high negative gradient leading to an important timing). Every item has its purchase rate number in bottom right corner, as well as three special lines of stats. For the first three types these are median timing, winrate increase compared to games where this item wasn't purchased and average winrate. For critical items it's timing window (realistic early timing to critical time), winrate increase with the early timing and winrate gradient. You can also hover with your mouse over any item or number to see the details.",
   "builds_desc_4" => "Winrate gradient represents how the item's winrate changes with every minute of delayed timing. Negative gradient means the item becomes less beneficial with every minute. Critical timing is the time after which chances to win will be lower than the hero's average.",
   "builds_desc_5" => "The section is divided into three major blocks. The first major block is <u>Build Overview</u>. It has several basic categories: <b>Early</b> (items purchased before any core items, can be changed depending on the game), <b>Core</b> (items essential for the hero), <b>Lategame</b> (basic choices after essential items were purchased), as well as <b>Situational Early</b> (items that don't fit into the regular build or skipped a lot) and <b>Situational</b> (additional lategame items). You can also notice following categories: <b>Alternatives</b> (highlights alternative item choices), <b>Order Swaps</b> (two items that often switch places in the build order) and <b>Neutral Items</b> (when available).",
-  "builds_desc_6" => "The second major block is <u>Timeline</u>. It represents visually the order in which early, core and situational items are usually purchased, as well as highlighting order swaps, alternatives and less popular item choices to make it easier to see the build progression. Highlighted items (big blocks at the top with brighter background) are a core part of the build, while situational and early items can be skipped. Straight after Timeline you can see <u>Lategame</u> block, which holds the most common lategame route, as well as additional lategame items sorted by their median time of purchase. The last major block has more <u>neutral items</u> (if available), as well as the list of other <u>high impact items</u> that didn't fit into the build.",
+  "builds_desc_6" => "The second major block is <u>Timeline</u>. It represents visually the order in which early, core and situational items are usually purchased, as well as highlighting order swaps (in this case winrate increase is shown for this time/order of purchase), alternatives and less popular item choices to make it easier to see the build progression. Highlighted items (big blocks at the top with brighter background) are a core part of the build, while situational and early items can be skipped. Straight after Timeline you can see <u>Lategame</u> block, which holds the most common lategame route, as well as additional lategame items sorted by their median time of purchase. The last major block has more <u>neutral items</u> (if available), as well as the list of other <u>high impact items</u> that didn't fit into the build.",
   "builds_desc_7" => "The build is using data to power itself up. The more data is available the better build you get. Naturally, uncommon roles or heroes might not get a proper build. Role trees only generated if the hero has more than 5% of matches on the role.",
 
   // service info
