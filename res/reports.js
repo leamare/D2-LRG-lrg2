@@ -3,14 +3,22 @@ $(document).ready(function() {
     $(this).toggleClass('highlighted');
   });
 
-  // FIXME
-  //$('thead.th').removeAttr('onclick');
   $('table.sortable').tablesorter({
     sortInitialOrder: 'desc',
     stringTo: 'min',
     sortReset: true,
   });
-  //$('#heroes-pickban').tablesorter();
+  
+  $(".search-filter").on("keyup", function() {
+    const value = $(this).val().toLowerCase();
+    const table = $(this).attr('data-table-filter-id');
+    
+    $("#" + table + " tbody tr").filter(function() {
+      const aliases = $(this).find('img[data-aliases]').attr('data-aliases');
+      const line = $(this).text().toLowerCase() + (aliases ? ' ' + aliases.toLowerCase() : '');
+      $(this).toggle( line.indexOf(value) !== -1 )
+    });
+  });
 });
 
 
