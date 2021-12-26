@@ -2,7 +2,11 @@
 function hero_portrait($hid) {
   global $meta, $portraits_provider;
   if (isset($meta->heroes[ $hid ]['tag']))
-    return "<img class=\"hero_portrait\" src=\"".str_replace("%HERO%", $meta['heroes'][ $hid ]['tag'], $portraits_provider)."\" alt=\"".$meta['heroes'][ $hid ]['tag']."\" />";
+    return "<img class=\"hero_portrait\" src=\"".str_replace("%HERO%", $meta['heroes'][ $hid ]['tag'], $portraits_provider)."\" alt=\"".$meta['heroes'][ $hid ]['tag']."\"".
+      " data-aliases=\"".(
+      ($meta['heroes'][ $hid ]['alt'] ?? "") . " " .
+      ($meta['heroes'][ $hid ]['aliases'] ?? "")
+    )."\" />";
   else return "<img class=\"hero_portrait\" alt=\"undefined\" />";
 }
 
