@@ -5,6 +5,11 @@ function item_icon($iid) {
   return "<img class=\"hero_portrait\" src=\"".str_replace("%HERO%", item_tag($iid), $item_icons_provider)."\" alt=\"".item_tag($iid)."\" />";
 }
 
+function item_big_icon($iid) {
+  global $item_profile_icons_provider, $item_icons_provider;
+  return "<img class=\"hero_portrait\" src=\"".str_replace("%HERO%", item_tag($iid), $item_profile_icons_provider ?? $item_icons_provider)."\" alt=\"".item_tag($iid)."\" />";
+}
+
 function item_icon_link($iid) {
   global $item_icons_provider;
   return str_replace("%HERO%", item_tag($iid), $item_icons_provider);
