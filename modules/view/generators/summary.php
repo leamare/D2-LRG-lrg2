@@ -63,7 +63,9 @@ function rg_generator_summary($table_id, &$context, $hero_flag = true, $rank = f
     unset($context_copy);
   }
 
-  $res = "<table id=\"$table_id\" class=\"list wide sortable\"><thead><tr>".
+  $res = "<input name=\"filter\" class=\"search-filter wide\" data-table-filter-id=\"$table_id\" placeholder=\"".locale_string('filter_placeholder')."\" />";
+
+  $res .= "<table id=\"$table_id\" class=\"list wide sortable\"><thead><tr>".
           ($hero_flag ? "<th class=\"sorter-no-parser\" width=\"1%\"></th>" : "").
           "<th data-sortInitialOrder=\"asc\">".locale_string($hero_flag ? "hero" : "player")."</th>";
 

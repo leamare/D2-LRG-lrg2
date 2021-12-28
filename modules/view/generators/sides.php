@@ -44,7 +44,9 @@ function rg_generator_sides($table_id, &$context, $heroes_flag = true) {
     else return ($a[-1]['diff'] < $b[-1]['diff']) ? 1 : -1;
   });
 
-  $res = "<table id=\"$table_id\" class=\"list wide sortable\"><thead>".
+  $res = "<input name=\"filter\" class=\"search-filter wide\" data-table-filter-id=\"$table_id\" placeholder=\"".locale_string('filter_placeholder')."\" />";
+
+  $res .= "<table id=\"$table_id\" class=\"list wide sortable\"><thead>".
             "<tr class=\"overhead\"><th colspan=\"".(2+$heroes_flag)."\"></th>".
             "<th class=\"separator\" colspan=\"2\">".locale_string("rad_view")."</th>".
             "<th class=\"separator\" colspan=\"".(sizeof($keys)-1)."\">".locale_string("radiant")."</th>".

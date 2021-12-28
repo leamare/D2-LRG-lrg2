@@ -72,7 +72,7 @@ function rg_generator_laning_profile($table_id, &$context, $id_o, $heroes_flag =
 
 
   if ($id_o) {
-    $res = "<table id=\"$table_id\" class=\"list wide\"><caption>".locale_string("laning_reference")."</caption>";
+    $res = "<table id=\"$table_id-reference\" class=\"list wide\"><caption>".locale_string("laning_reference")."</caption>";
     $res .= "<thead><tr class=\"overhead\">".
             "<th width=\"12%\" colspan=\"".($heroes_flag ? "2" : "1")."\"></th>".
             "<th width=\"18%\" colspan=\"3\"></th>".
@@ -143,7 +143,9 @@ function rg_generator_laning_profile($table_id, &$context, $id_o, $heroes_flag =
     $res .= "</table>";
   }
 
-  $res .= "<table id=\"$table_id\" class=\"list wide sortable\"><caption>".locale_string($id ? "laning_opponents" : "laning_total")."</caption>";
+  
+  $res .= "<table id=\"$table_id\" class=\"list wide sortable\"><caption>".locale_string($id ? "laning_opponents" : "laning_total")."";
+  $res .= "<input name=\"filter\" class=\"search-filter inside\" data-table-filter-id=\"$table_id\" placeholder=\"".locale_string('filter_placeholder')."\" /></caption>";
   $res .= "<thead><tr class=\"overhead\">".
             "<th width=\"12%\" colspan=\"".($heroes_flag ? "2" : "1")."\"></th>".
             "<th width=\"18%\" colspan=\"3\"></th>".

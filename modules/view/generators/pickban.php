@@ -43,6 +43,8 @@ function rg_generator_pickban($table_id, &$context, &$context_main, $heroes_flag
 
   if ($roles) $res .= "<div class=\"content-text\">".locale_string("desc_pickban_roles")."</div>";
 
+  $res .= "<input name=\"filter\" class=\"search-filter\" data-table-filter-id=\"$table_id\" placeholder=\"".locale_string('filter_placeholder')."\" />";
+
   $res .=  "<table id=\"$table_id\" class=\"list sortable\"><thead><tr>".
             ($heroes_flag ? "<th class=\"sorter-no-parser\" width=\"1%\"></th>" : "").
             "<th data-sortInitialOrder=\"asc\">".locale_string($heroes_flag ? "hero" : "player")."</th>".

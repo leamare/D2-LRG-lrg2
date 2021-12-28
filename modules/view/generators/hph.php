@@ -17,7 +17,7 @@ function rg_generator_hph_profile($table_id, &$context, &$context_wrs, $srcid, $
       'ms' => $heroes_flag ? $context_wrs[$srcid]['matches_picked'] : $context_wrs[$srcid]['matches'],
     ];
 
-    $res .= "<table id=\"$table_id\" class=\"list\">".
+    $res .= "<table id=\"$table_id-reference\" class=\"list\">".
         "<thead><tr>".
         ($heroes_flag ? "<th width=\"1%\"></th>" : "").
         "<th>".locale_string($heroes_flag ? 'hero' : 'player')."</th>".
@@ -76,6 +76,7 @@ function rg_generator_hph_profile($table_id, &$context, &$context_wrs, $srcid, $
     $isrank = true; $i = 0;
   }
 
+  $res .= "<input name=\"filter\" class=\"search-filter\" data-table-filter-id=\"$table_id\" placeholder=\"".locale_string('filter_placeholder')."\" />";
   $res .= "<table id=\"$table_id\" class=\"list sortable\">";
   $res .= "<thead><tr>".
           ($heroes_flag && !$i++ ? "<th width=\"1%\"></th>" : "").

@@ -39,6 +39,7 @@ function join_selectors($modules, $level, $parent="") {
       $modtag = substr($modtag, 1);
       $mn = $module['link'];
       $mod_type = $module['type'] ?? 0;
+      $startline_check_res = false;
     } else {
       $mn = (empty($parent) ? "" : $parent."-" ).$modtag;
       $startline_check_res = stripos($mod, $mn) === 0 && (

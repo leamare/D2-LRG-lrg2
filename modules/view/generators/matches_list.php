@@ -9,7 +9,8 @@ function rg_generator_matches_list($table_id, &$context) {
   $matches = array_keys($context);
 
   $i = 0;
-  $res = "<table id=\"$table_id\" class=\"list sortable\"><thead><tr>".
+  $res = "<input name=\"filter\" class=\"search-filter\" data-table-filter-id=\"$table_id\" placeholder=\"".locale_string('filter_placeholder')."\" />";
+  $res .= "<table id=\"$table_id\" class=\"list sortable\"><thead><tr>".
           "<th>".locale_string("match")."</th>".
           "<th data-sortInitialOrder=\"asc\">".locale_string("radiant")."</th>".
           "<th data-sortInitialOrder=\"asc\">".locale_string("dire")."</th>".

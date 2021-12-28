@@ -135,6 +135,7 @@ function rg_generator_team_pickban($table_id, $context) {
 
   $res .= "<div class=\"content-text\">".locale_string("desc_pickban_teams")."</div>";
 
+  $res .= "<input name=\"filter\" class=\"search-filter wide\" data-table-filter-id=\"$table_id\" placeholder=\"".locale_string('filter_placeholder')."\" />";
   $res .=  "<table id=\"$table_id\" class=\"wide list sortable\"><thead><tr class=\"overhead\">".
       "<th colspan=\"2\"></th>".
       "<th colspan=\"2\" class=\"separator\">".locale_string("total")."</th>".

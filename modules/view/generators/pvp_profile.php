@@ -32,7 +32,7 @@ function rg_generator_pvp_profile($table_id, &$pvp_context, &$context_wrs, $srci
       'ms' => $heroes_flag ? $context_wrs[$srcid]['matches_picked'] : $context_wrs[$srcid]['matches'],
     ];
 
-    $res .= "<table id=\"$table_id\" class=\"list sortable\">".
+    $res .= "<table id=\"$table_id-reference\" class=\"list sortable\">".
         "<thead><tr>".
         ($heroes_flag ? "<th width=\"1%\"></th>" : "").
         "<th data-sortInitialOrder=\"asc\">".locale_string($heroes_flag ? 'hero' : 'player')."</th>".
@@ -86,6 +86,7 @@ function rg_generator_pvp_profile($table_id, &$pvp_context, &$context_wrs, $srci
     $isrank = true; $i = 0;
   }
 
+  $res .= "<input name=\"filter\" class=\"search-filter\" data-table-filter-id=\"$table_id\" placeholder=\"".locale_string('filter_placeholder')."\" />";
   $res .= "<table id=\"$table_id\" class=\"list sortable\">";
   $res .= "<thead><tr>".
           ($heroes_flag && !$i++ ? "<th width=\"1%\"></th>" : "").
