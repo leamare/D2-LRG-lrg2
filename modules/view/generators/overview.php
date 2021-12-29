@@ -223,7 +223,7 @@ function rg_view_generator_overview($modlink, &$context, $foreword = "") {
     $res .= "<div class=\"content-header\">".locale_string("notable_paricipans")."</div>";
     $res .= "<div class=\"content-cards\">";
 
-    if (isset($report['teams']) && $context['settings']['overview_last_match_winners']) {
+    if (isset($report['teams']) && $context['settings']['overview_last_match_winners'] && !empty($report['matches_additional'])) {
       if($report['matches_additional'][ $context['last_match']['mid'] ]['radiant_win']) {
           if (isset( $report['match_participants_teams'][ $context['last_match']['mid'] ]['radiant'] ))
               $tid = $report['match_participants_teams'][ $context['last_match']['mid'] ]['radiant'];
@@ -498,7 +498,7 @@ function rg_view_generator_overview($modlink, &$context, $foreword = "") {
   }
 
 
-  if($report['settings']['overview_matches']) {
+  if($report['settings']['overview_matches'] && !empty($report['matches_additional'])) {
     $res .= "<div class=\"content-header\">".locale_string("notable_matches")."</div>";
     $res .= "<div class=\"content-cards\">";
 
