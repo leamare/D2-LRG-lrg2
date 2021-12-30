@@ -10,7 +10,7 @@ function rg_generator_positions_overview($table_id, &$context, $hero_flag = true
 
   $position_overview_template = array("total" => 0);
   for ($i=1; $i>=0 && !isset($keys); $i--) {
-    for ($j=0; $j<6 && $j>=0; $j++) {
+    for ($j=($i ? 0 : 5); $j<6 && $j>=0; ($i ? $j++ : $j--)) {
       //if (!$i) { $j = 0; }
       if(isset($context[$i][$j][0])) {
         $keys = array_keys($context[$i][$j][0]);
@@ -21,7 +21,7 @@ function rg_generator_positions_overview($table_id, &$context, $hero_flag = true
   }
 
   for ($i=1; $i>=0; $i--) {
-    for ($j=0; $j<6 && $j>=0; $j++) {
+    for ($j=($i ? 0 : 5); $j<6 && $j>=0; ($i ? $j++ : $j--)) {
       //if (!$i) { $j = 0; }
       if(isset($context[$i][$j]) && sizeof($context[$i][$j]))
         $position_overview_template["$i.$j"] = array("matches" => 0, "wr" => 0);
@@ -33,7 +33,7 @@ function rg_generator_positions_overview($table_id, &$context, $hero_flag = true
   $ranks = [];
 
   for ($i=1; $i>=0; $i--) {
-    for ($j=0; $j<6 && $j>=0; $j++) {
+    for ($j=($i ? 0 : 5); $j<6 && $j>=0; ($i ? $j++ : $j--)) {
       //if (!$i) { $j = 0; }
 
       if (!isset($context[$i][$j]) || !sizeof($context[$i][$j])) {
@@ -108,7 +108,9 @@ function rg_generator_positions_overview($table_id, &$context, $hero_flag = true
     else return ($a['total'] < $b['total']) ? 1 : -1;
   });
 
-  $res = "<table id=\"$table_id\" class=\"list wide sortable\"><thead><tr class=\"overhead\"><th width=\"20%\" colspan=\"".(2+$hero_flag)."\"></th>";
+  $res = "<input name=\"filter\" class=\"search-filter wide\" data-table-filter-id=\"$table_id\" placeholder=\"".locale_string('filter_placeholder')."\" />";
+
+  $res .= "<table id=\"$table_id\" class=\"list wide sortable\"><thead><tr class=\"overhead\"><th width=\"20%\" colspan=\"".(2+$hero_flag)."\"></th>";
 
   $heroline = "<tr>".
                 ($hero_flag ?
@@ -157,4 +159,3 @@ function rg_generator_positions_overview($table_id, &$context, $hero_flag = true
   return $res;
 }
 
-?>
