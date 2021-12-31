@@ -48,6 +48,7 @@ function rg_view_generate_items_icombos() {
 
   if ($item) {
     $res['itemid'.$item] .= "<div class=\"content-text\">".locale_string("items_combos_desc")."</div>";
+    $res['itemid'.$item] .= "<input name=\"filter\" class=\"search-filter\" data-table-filter-id=\"items-itemid$item\" placeholder=\"".locale_string('filter_placeholder')."\" />";
     $res['itemid'.$item] .= "<table id=\"items-itemid$item\" class=\"list sortable\">";
     $res['itemid'.$item] .= "<thead><tr class=\"overhead\">".
         "<th width=\"12%\"></th>".
@@ -113,6 +114,7 @@ function rg_view_generate_items_icombos() {
     }
 
     $res['overview'] .= "<div class=\"content-text\">".locale_string("items_combos_overview_desc")."</div>";
+    $res['overview'] .= "<input name=\"filter\" class=\"search-filter\" data-table-filter-id=\"items-icombos-overview\" placeholder=\"".locale_string('filter_placeholder')."\" />";
     $res['overview'] .= "<table id=\"items-icombos-overview\" class=\"list sortable\">";
     $res['overview'] .= "<thead><tr class=\"overhead\">".
         "<th width=\"18%\" colspan=\"2\">".locale_string("item")." 1</th>".

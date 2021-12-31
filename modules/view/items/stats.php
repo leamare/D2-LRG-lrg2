@@ -139,6 +139,8 @@ function rg_view_generate_items_stats() {
     return $res;
   }
 
+  $res[$tag] .= "<input name=\"filter\" class=\"search-filter wide\" data-table-filter-id=\"items-$tag\" placeholder=\"".locale_string('filter_placeholder')."\" />";
+
   $res[$tag] .= "<table id=\"items-$tag\" class=\"list wide sortable\">";
   $res[$tag] .= "<thead><tr class=\"overhead\">".
       "<th width=\"15%\" colspan=\"2\"></th>".

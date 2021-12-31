@@ -118,6 +118,8 @@ function rg_view_generate_items_heroes() {
 
   // HEROES TABLE
 
+  $res['itemid'.$item] .= "<input name=\"filter\" class=\"search-filter wide\" data-table-filter-id=\"items-itemid$item\" placeholder=\"".locale_string('filter_placeholder')."\" />";
+
   $res['itemid'.$item] .= "<table id=\"items-itemid$item\" class=\"list wide sortable\">";
   $res['itemid'.$item] .= "<thead><tr class=\"overhead\">".
       "<th width=\"12%\" colspan=\"2\"></th>".
