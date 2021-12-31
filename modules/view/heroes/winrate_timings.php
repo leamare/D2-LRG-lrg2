@@ -15,7 +15,9 @@ function rg_view_generate_heroes_wrtimings() {
 
   $res .= "<div class=\"content-text\">".locale_string("desc_heroes_wrtimings")."</div>";
 
-  $res .= "<table class=\"list wide sortable\"><thead><tr class=\"overhead\">".
+  $res .= "<input name=\"filter\" class=\"search-filter wide\" data-table-filter-id=\"heroes-wrtimings\" placeholder=\"".locale_string('filter_placeholder')."\" />";
+
+  $res .= "<table id=\"heroes-wrtimings\" class=\"list wide sortable\"><thead><tr class=\"overhead\">".
       "<th colspan=\"2\"></th>".
       "<th></th>".
       "<th colspan=\"5\" class=\"separator\">".locale_string("duration")."</th>".

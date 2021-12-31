@@ -13,7 +13,9 @@ function rg_view_generate_heroes_wrplayers() {
 
   $res .= "<div class=\"content-text\">".locale_string("desc_heroes_wrplayers")."</div>";
 
-  $res .= "<table class=\"list wide sortable\"><thead><tr class=\"overhead\">".
+  $res .= "<input name=\"filter\" class=\"search-filter wide\" data-table-filter-id=\"heroes-wrspammers\" placeholder=\"".locale_string('filter_placeholder')."\" />";
+
+  $res .= "<table id=\"heroes-wrspammers\" class=\"list wide sortable\"><thead><tr class=\"overhead\">".
       "<th colspan=\"2\"></th>".
       "<th colspan=\"2\" class=\"separator\">".locale_string("players")."</th>".
       "<th colspan=\"3\" class=\"separator\">".locale_string("matches")."</th>".

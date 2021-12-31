@@ -13,7 +13,7 @@ function rg_view_generate_heroes_positions() {
   if (is_wrapped($report['hero_positions'])) $report['hero_positions'] = unwrap_data($report['hero_positions']);
 
   for ($i=1; $i>=0; $i--) {
-    for ($j=0; $j<6 && $j>=0; $j++) {
+    for ($j=($i ? 0 : 5); $j<6 && $j>=0; ($i ? $j++ : $j--)) {
       //if (!$i) { $j = 0; }
       if(!empty($report['hero_positions'][$i][$j]))
         $res["position_$i.$j"]  = "";
@@ -31,7 +31,7 @@ function rg_view_generate_heroes_positions() {
     include_once($root."/modules/view/generators/summary.php");
 
     for ($i=1; $i>=0; $i--) {
-      for ($j=0; $j<6 && $j>=0; $j++) {
+      for ($j=($i ? 0 : 5); $j<6 && $j>=0; ($i ? $j++ : $j--)) {
         //if (!$i) { $j = 0; }
 
         if (!check_module($parent_module."position_$i.$j") || empty($report['hero_positions'][$i][$j])) {
