@@ -332,6 +332,208 @@ function traverse_build_tree(&$stats, &$tree, &$hero, $m_lim, $m_role, $root = '
   return $build;
 }
 
+function traverse_build_tree_partial(&$stats, &$tree, $m_lim, $m_role) {
+  $build = [
+    'path' => [],
+    'favors' => [],
+    'sit_raw' => [],
+    'sit' => [],
+    'alt' => [],
+    'swap' => [],
+    'swap_raw' => [],
+    'lategamePoint' => null,
+    'lategame' => [],
+    'alts_items' => [],
+    'partial' => true,
+  ];
+
+  global $meta;
+
+  uasort($stats, function($a, $b) {
+    return $b['purchases'] <=> $a['purchases'];
+  });
+
+  $role_limit = ($m_role / reset($stats)['purchases']) * 0.1;
+  
+  uasort($stats, function($a, $b) {
+    return $a['median'] <=> $b['median'];
+  });
+
+  $allowed_items = array_merge($meta['item_categories']['medium'], $meta['item_categories']['major']);
+
+  $orders = [];
+
+  $last_time = null;
+  $order = 0;
+  foreach ($stats as $item => $st) {
+    if (!in_array($item, $allowed_items)) continue;
+
+    if ($stats[$item]['prate'] < $role_limit) {
+      continue;
+    }
+    
+    if (isset($tree[$item])) {
+      if (!$tree[$item]['matches']) {
+        foreach ($tree[$item]['parents'] as $parent) {
+          $tree[$item]['matches'] += $tree[$parent]['children'][$item]['matches'];
+        }
+      }
+      $stats[$item]['prate'] = $tree[$item]['matches']/$m_role;
+    }
+
+    if (!$last_time) {
+      $order = 0;
+      $last_time = $st['median'];
+      $orders[$order] = [];
+    }
+    if ($st['median'] - $last_time > 120) {
+      $order++;
+      $orders[$order] = [];
+      $last_time = $st['median'];
+    }
+
+    $orders[$order][] = $item;
+  }
+
+  $orders_prate = [];
+
+  foreach ($orders as &$order) {
+    usort($order, function($a, $b) use (&$stats) {
+      return $stats[$b]['prate'] <=> $stats[$a]['prate'];
+    });
+
+    $orders_prate[] = [ $order[0], $stats[ $order[0] ]['prate'], $stats[ $order[0] ]['median'] ];
+  }
+
+  $treecount = count($tree)-1;
+
+  $build_order = 0;
+  $last_order_prate = 0;
+  $next = 0;
+  for($i = 0, $sz = count($orders_prate); $i < $sz; $i++) {
+    if ($next) {
+      // block has next
+        // no children
+      // block doesn't have next
+      if (in_array($next, $orders[$i])) {
+        $last_order_prate = $i;
+    
+        $primary = $next;
+        $build['path'][] = $primary;
+        unset($orders[$i][ array_search($primary, $orders[$i]) ]);
+
+        if (!empty($tree[$primary]['children'])) {
+          uasort($tree[$primary]['children'], function($a, $b) {
+            return $b['matches'] <=> $a['matches'];
+          });
+          $next = array_keys($tree[$primary]['children'])[0];
+        } else {
+          $next = 0;
+        }
+      } else {
+        foreach ($orders[$i] as $ord) {
+          $build['sit'][$ord] = $build_order;
+          if ($build['lategamePoint']) {
+            $build['lategame'][] = $ord;
+          }
+        }
+        continue;
+      }
+    } else {
+      $primary = 0;
+
+      if ($treecount) {
+        if (isset($tree[ $orders_prate[$i][0] ])) {
+          $primary = $orders_prate[$i][0];
+        } else {
+          foreach ($orders[$i] as $ord) {
+            if (isset($tree[$ord])) {
+              $primary = $ord;
+              break;
+            }
+          }
+        }
+      }
+      
+      if ($primary) {
+        $last_order_prate = $i;
+    
+        $build['path'][] = $primary;
+        unset($orders[$i][ array_search($primary, $orders[$i]) ]);
+
+        if (!empty($tree[$primary]['children'])) {
+          uasort($tree[$primary]['children'], function($a, $b) {
+            return $b['matches'] <=> $a['matches'];
+          });
+          $next = array_keys($tree[$primary]['children'])[0];
+        }
+      } else {
+        if ($i > 0 && $orders_prate[$last_order_prate][1] - $orders_prate[$i][1] > 0.15) {
+          foreach ($orders[$i] as $ord) {
+            $build['sit'][$ord] = $build_order;
+            if ($build['lategamePoint']) {
+              $build['lategame'][] = $ord;
+            }
+          }
+          continue;
+        } else {
+          $last_order_prate = $i;
+    
+          $build['path'][] = $orders_prate[$i][0];
+          $primary = $orders_prate[$i][0];
+          unset($orders[$i][0]);
+        }
+      }
+    }
+
+    if (!empty($orders[$i])) {
+      $build['alt'][ $primary ] = [];
+      foreach($orders[$i] as $ord) {
+        $build['alt'][ $primary ][] = $ord;
+        $build['alts_items'][] = $ord;
+      }
+    }
+
+    // 30 min = 1200 sec
+    if (!$build['lategamePoint'] && $build_order > 3 && ($orders_prate[$i][1] <= 0.25 || +$orders_prate[$i][2] > 1800)) {
+      $build['lategamePoint'] = $build_order;
+    }
+
+    if ($build['lategamePoint']) {
+      $build['lategame'][] = $primary;
+      foreach($orders[$i] as $ord) {
+        $build['lategame'][] = $ord;
+      }
+    }
+
+    $build_order++;
+  }
+
+  if (!$build['lategamePoint']) $build['lategamePoint'] = count($build['path']);
+  if ($build['lategamePoint'] < 5) $build['lategamePoint']++;
+
+  $build['alts_items'] = array_unique($build['alts_items']);
+
+  foreach ($build['path'] as $i => $item) {
+    if ($i && $stats[ $item ]['q1'] < $stats[ $build['path'][$i-1] ]['q3']) {
+      $build['swap'][ $build['path'][$i-1] ] = $item;
+    }
+
+    $build['times'][] = ($i ? $stats[ $item ]['q1']-$stats[ $build['path'][$i-1] ]['q1'] : $stats[ $item ]['q1'])/60;
+  }
+
+  $lasttime = $stats[ $item ]['q1'];
+  $lastord = $i;
+
+  if (empty($build['lategame'])) {
+    foreach ($build['sit'] as $item => $ord) {
+      if ($ord > $lastord) $build['lategame'][] = $item;
+    }
+  }
+
+  return $build;
+}
+
 function inject_item_stats(&$build, &$stats, $hero) {
 }
 
