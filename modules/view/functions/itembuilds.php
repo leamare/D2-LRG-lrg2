@@ -535,6 +535,143 @@ function traverse_build_tree_partial(&$stats, &$tree, $m_lim, $m_role) {
 }
 
 function inject_item_stats(&$build, &$stats, $hero) {
+  global $meta;
+
+  $lategame = $build['lategamePoint'];
+  $lategame_time = round(array_sum(array_slice($build['times'], 0, $lategame)) * 60);
+
+  // early game items
+
+  $early_items = [];
+  foreach($meta['item_categories']['early'] as $item) {
+    if (in_array($item, $build['path']) || isset($build['sit'][$item])) continue;
+    if (!isset($stats[$item])) continue;
+    if ($stats[$item]['prate'] < 0.09 || $stats[$item]['median'] > 1200) continue;
+    
+    $order = 0; 
+    for ($i = 0, $sum = $build['times'][0], $sz = count($build['times']); $i < $sz; $i++, $sum += $build['times'][$i] ?? 0) {
+      if ($stats[$item]['median'] / 60 < $sum) {
+        $order = $i;
+        break;
+      }
+    }
+
+    if (!isset($early_items[$order])) {
+      $early_items[$order] = [];
+    }
+
+    $early_items[$order][ $item ] = [
+      'time' => $stats[$item]['median'],
+      'winrate' => $stats[$item]['wo_wr'],
+      'prate' => $stats[$item]['prate']
+    ];
+
+    $items[] = $item;
+  }
+  ksort($early_items);
+
+  $build['early'] = $early_items;
+  foreach ($build['early'] as &$early_order) {
+    uasort($early_order, function($a, $b) {
+      return $a['time'] <=> $b['time'];
+    });
+  }
+
+  // neutrals
+
+  $build['neutrals'] = [];
+
+  $neutrals_list = [];
+
+  for ($i = 1; $i < 6; $i++) {
+    $neutrals_list = array_merge($neutrals_list, $meta['item_categories']['neutral_tier_'.$i]);
+
+    $tier = [];
+    foreach ($meta['item_categories']['neutral_tier_'.$i] as $item) {
+      if (empty($stats[$item])) continue;
+      $tier[$item] = $stats[$item]['prate'];
+    }
+
+    if (empty($tier)) continue;
+
+    $local_lim = max($tier) * 0.4;
+
+    $tier = array_keys(
+      array_filter($tier, function($a) use ($local_lim) {
+        return $a > $local_lim;
+      })
+    );
+
+    if (empty($tier)) continue;
+
+    $build['neutrals'][$i] = $tier;
+
+    usort($build['neutrals'][$i], function($a, $b) use (&$stats) {
+      return $stats[ $b ]['winrate'] <=> $stats[ $a ]['winrate'];
+    });
+  }
+
+  // other significant items
+
+  $items = array_merge($items, $build['path'], array_keys($build['sit']), $build['lategame'], $build['alts_items'], $neutrals_list, $meta['item_categories']['early']);
+  $items = array_unique($items);
+
+  $significant = [];
+
+  foreach ($stats as $item => $is) {
+    // why .6% specifically? Because.
+    if (empty($is) || in_array($item, $items) || $is['prate'] < 0.006) continue;
+
+    if ($is['prate'] > 0.035 && $is['median'] > $lategame_time) {
+      $build['lategame'][] = $item;
+    } else {
+      $significant[] = $item;
+    }
+
+    $items[] = $item;
+  }
+
+  $build['lategame'] = array_unique($build['lategame']);
+
+  $build['significant'] = $significant;
+
+  // items stats
+  // only includes prate, median timing and wo_wr as the most useful stats for the build
+  // critical times section will contain Q1-Q3 winrates and timings for cases when it's needed
+
+  // $items = array_merge($items, $significant);
+
+  $build['stats'] = [];
+
+  $build['critical'] = [];
+
+  foreach ($items as $item) {
+    if (empty($stats[$item])) continue;
+
+    $build['stats'][$item] = [
+      'prate' => $stats[$item]['prate'],
+      'med_time' => $stats[$item]['median'],
+      'winrate' => $stats[$item]['winrate'],
+      'wo_wr_incr' => $stats[$item]['winrate'] - $stats[$item]['wo_wr'], // would like to show increase there, but we can get it later, I guess
+      // not going to pass hero stats here as well
+      // or am I?
+    ];
+
+    if ($stats[$item]['median'] > 60 && ( $stats[$item]['grad'] < -0.01 || $stats[$item]['grad'] > 0.01 ) && !in_array($item, $neutrals_list)) {
+      $build['critical'][$item] = [
+        'q1' => $stats[$item]['q1'],
+        'q3' => $stats[$item]['q3'],
+        'grad' => $stats[$item]['grad'],
+        'critical_time' => $stats[$item]['q1'] - 60*(($stats[$item]['early_wr'] - $hero['winrate_picked'])/$stats[$item]['grad']),
+        'early_wr' => $stats[$item]['early_wr'],
+        'early_wr_incr' => $stats[$item]['early_wr'] - $stats[$item]['wo_wr'],
+      ];
+    }
+  }
+
+  usort($build['significant'], function($a, $b) use (&$build) {
+    return $build['stats'][ $a ]['med_time'] <=> $build['stats'][ $b ]['med_time'];
+  });
 }
 
 function generate_item_builds(&$pairs, &$stats, $hero) {
