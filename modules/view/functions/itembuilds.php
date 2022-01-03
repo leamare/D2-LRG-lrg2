@@ -11,7 +11,7 @@ function calculate_favor_score($array) {
   return $res;
 }
 
-function traverse_build_tree(&$stats, &$tree, &$hero, $m_lim, $m_role, $root = '0', $build = null) {
+function traverse_build_tree(&$stats, &$tree, $m_lim, $m_role, $root = '0', $build = null) {
   if (!$build) {
     $build = [
       'path' => [],
@@ -23,6 +23,7 @@ function traverse_build_tree(&$stats, &$tree, &$hero, $m_lim, $m_role, $root = '
       'swap_raw' => [],
       'lategamePoint' => null,
       'lategame' => [],
+      'partial' => false,
     ];
     // neutrals, early are added later
   }
@@ -296,8 +297,11 @@ function traverse_build_tree(&$stats, &$tree, &$hero, $m_lim, $m_role, $root = '
     }
   }
 
-
-  $build['lategamePoint'] = min($lategame, count($build['path']));
+  if ($lategame > 2) {
+    $build['lategamePoint'] = min($lategame, count($build['path']));
+  } else {
+    $build['lategamePoint'] = count($build['path']);
+  }
 
   // creating a list of possible lategame items
 
@@ -677,7 +681,11 @@ function inject_item_stats(&$build, &$stats, $hero) {
 function generate_item_builds(&$pairs, &$stats, $hero) {
   global $report;
 
-  $m_lim = $pairs[ ceil(count($pairs)*0.5)-1 ]['total'];
+  if (!empty($pairs)) {
+    $m_lim = $pairs[ ceil(count($pairs)*0.5)-1 ]['total'];
+  } else {
+    $m_lim = 1;
+  }
 
   $dummy = [
     'parents' => [],
@@ -762,9 +770,16 @@ function generate_item_builds(&$pairs, &$stats, $hero) {
   // Generating builds, going through the tree
   $build = [];
 
-  $build = traverse_build_tree($stats, $tree, $m_lim, $hero['role_matches']);
+  if (count($tree['0']['children']) < 2 || count($tree) < 4) {
+    $build = traverse_build_tree_partial($stats, $tree, $m_lim, $hero['role_matches']);
+  } else {
+    $build = traverse_build_tree($stats, $tree, $m_lim, $hero['role_matches']);
+  }
 
   inject_item_stats($build, $stats, $hero);
+
+  unset($build['favors']);
+  unset($build['alts_items']);
 
   return [ $build, $tree ];
 }
