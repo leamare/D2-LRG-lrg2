@@ -960,3 +960,105 @@ table.list thead {
   vertical-align: middle;
   margin-top: -.2em;
 }
+
+/* item builds */
+
+.hero-build {
+  text-align: center;
+  font-size: 18px;
+  line-height: 34px;
+  color: var(--text);
+  clear: both;
+  margin: 30px 10% 0;
+  max-height: 999999px;
+}
+
+.hero-build-overview-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  justify-content: center;
+}
+
+.hero-build-overview-container .header {
+  margin: 24px 0;
+  border-radius: 10px;
+  font-size: 18px;
+  padding: 8px;
+  max-width: 90%;
+
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  font-weight: bold;
+  color: var(--selector-link);
+
+  background-color: var(--selectors-bg);
+
+  flex: 1;
+}
+
+.build-overview-container {
+  margin: 0 16px 24px;
+  align-content: flex-start;
+}
+.build-overview-container.main-build-early, .build-overview-container.main-build-core, .build-overview-container.main-build-lategame {
+  width: 500px;
+  flex-grow: 1;
+}
+.build-overview-container {
+  width: 850px;
+  flex-grow: 2;
+}
+.build-overview-container.main-build-alts, .build-overview-container.main-build-neutrals, .build-overview-container.main-build-swaps {
+  overflow: hidden;
+  flex-basis: 100%;
+}
+.hero-build .flexbreak {
+  flex-basis: 100%;
+}
+
+.items-list {
+  display: flex;
+  align-items: flex-start;
+}
+.items-list.items-swaps {
+  display: inline-flex;
+  margin: 0 28px;
+}
+
+.build-overview-container .container-content {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  justify-content: center;
+  margin: 0 auto;
+  max-width: 86%;
+}
+.build-overview-container .container-content .items-list {
+  min-width: 700px;
+  width: 45%;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+.build-overview-container .container-content .items-list.items-list-inner {
+  width: auto;
+  min-width: auto;
+  flex: 1;
+}
+
+@media only screen and (min-width:2385px) {
+  .build-overview-container .container-content {
+    justify-content: space-between;
+  }
+}
+@media only screen and (max-width:2385px) {
+  .build-overview-container .container-content .items-list {
+    width: auto;
+    min-width: max(50%, 900px);
+  }
+}
+
