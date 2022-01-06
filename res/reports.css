@@ -1062,3 +1062,316 @@ table.list thead {
   }
 }
 
+
+.build-item-component {
+  display: inline-block;
+  flex-direction: column;
+  margin: 5px 5px 10px 5px !important;
+  border-radius: 5px;
+  background-color: rgba(0,0,0,0.2);
+}
+
+.build-item-component .item-image {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 86px;
+  height: 62px;
+  /* width: 5vw;
+  height: 3.6vw; */
+  margin-bottom: 5px;
+  opacity: .85;
+
+  border-radius: 5px;
+  border: 2px solid var(--selectors-bg);
+  overflow: hidden;
+  transition: 250ms all linear;
+  position: relative;
+}
+.build-item-component .item-image:hover, .build-item-component .item-text:hover {
+  opacity: 1;
+  box-shadow: 0 0 10px var(--selectors-bg);
+}
+
+.build-item-component.common .item-image, .build-item-component.common .item-text {
+  border-color: var(--content-header);
+}
+.build-item-component.common .item-image:hover, .build-item-component.common .item-text:hover {
+  box-shadow: 0 0 10px var(--content-header);
+}
+
+.build-item-component.strong .item-image, .build-item-component.strong .item-text {
+  border-color: var(--high-wr-bright);
+}
+.build-item-component.strong .item-image:hover, .build-item-component.strong .item-text:hover {
+  box-shadow: 0 0 10px var(--high-wr-bright);
+}
+
+.build-item-component.critical .item-image, .build-item-component.critical .item-text {
+  border-color: var(--low-wr-bright);
+}
+.build-item-component.critical .item-image:hover, .build-item-component.critical .item-text:hover {
+  box-shadow: 0 0 10px var(--low-wr-bright);
+}
+
+.build-item-component .item-image img {
+  min-width: 100%;
+}
+
+.build-item-component .item-text {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 86px;
+  height: 62px;
+
+  border-radius: 5px;
+  border: 2px solid var(--selectors-bg);
+  overflow: hidden;
+  transition: 250ms all linear;
+  position: relative;
+
+  background-color: var(--content-header);
+  color: var(--caption);
+  font-size: 36px;
+  letter-spacing: .1em;
+  font-weight: bold;
+  text-decoration: none;
+}
+.build-item-component.tbc .item-text {
+  background-color: var(--table-bg);
+  opacity: .5;
+}
+.build-item-component.tbc .item-text:hover {
+  opacity: 1;
+}
+
+.build-item-component .item-stat-tooltip-line, .build-item-component .item-stat-tooltip  {
+  color: var(--caption);
+  font-size: 12px;
+  line-height: 1.4em;
+  /* background-color: rgba(0,0,0,0.2); */
+  text-decoration: none;
+}
+.build-item-component .item-stat-tooltip-line {
+  display: block;
+  opacity: 0.8;
+  transition: 250ms all linear;
+}
+
+.build-item-component .item-stat-tooltip-line:nth-child(3) {
+  opacity: 0.6;
+}
+.build-item-component .item-stat-tooltip-line:nth-child(4) {
+  opacity: 0.4;
+}
+
+.build-item-component .item-stat-tooltip-line:hover {
+  opacity: 1;
+  background-color: rgba(0,0,0,1);
+}
+
+.build-item-component .item-image .item-prate {
+  position: absolute;
+  background-color: rgba(0,0,0,0.9);
+  color: #fff;
+  opacity: 0.8;
+  right: 0;
+  bottom: 0;
+  font-size: 11px;
+  padding: 3px 3px 2px 5px;
+  border-top-left-radius: 5px;
+  line-height: inherit;
+}
+
+/* this abomination should help with making shadows unter the text bright enough */
+
+.build-item-component.winrate-strong .item-winrate-increase {
+  text-shadow: 0 0 10px var(--high-wr-bright), 0 0 7px var(--high-wr-bright), 0 0 5px var(--high-wr-bright), 0 0 5px var(--high-wr-bright), 0 0 5px var(--high-wr-bright),
+               0 0 10px var(--high-wr-bright), 0 0 7px var(--high-wr-bright), 0 0 5px var(--high-wr-bright), 0 0 5px var(--high-wr-bright), 0 0 5px var(--high-wr-bright),
+               0 0 5px var(--high-wr-bright), 0 0 5px var(--high-wr-bright), 0 0 5px var(--high-wr-bright);
+}
+.build-item-component.winrate-weak .item-winrate-increase {
+  text-shadow: 0 0 10px var(--low-wr-bright), 0 0 7px var(--low-wr-bright), 0 0 5px var(--low-wr-bright), 0 0 5px var(--low-wr-bright), 0 0 5px var(--low-wr-bright),
+               0 0 10px var(--low-wr-bright), 0 0 7px var(--low-wr-bright), 0 0 5px var(--low-wr-bright), 0 0 5px var(--low-wr-bright), 0 0 5px var(--low-wr-bright),
+               0 0 5px var(--low-wr-bright), 0 0 5px var(--low-wr-bright), 0 0 5px var(--low-wr-bright);
+}
+
+.build-item-arrow {
+  display: inline-flex;
+  flex-direction: column;
+  margin: 5px !important;
+  border-radius: 5px;
+}
+.build-item-arrow:after {
+  content: '';
+  background-color: var(--content-header);
+  width: 32px;
+  height: 66px;
+  border-radius: 5px;
+  color: var(--caption);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  opacity: .8;
+}
+.build-item-arrow-right:after {
+  content: '▶';
+}
+.build-item-arrow-left:after {
+  content: '◀';
+}
+.build-item-arrow-swap:after {
+  content: '⮀';
+}
+
+.build-timeline-order .build-item-component {
+  opacity: 0.7;
+  transition: 250ms all linear;
+}
+.build-timeline-order .build-item-component:hover, .build-timeline-order .build-item-component.big {
+  opacity: 1;
+}
+
+.build-item-component.big {
+  display: inline-flex;
+  flex-basis: 100%;
+  flex-direction: row;
+  align-items: center;
+  margin: 0 0 5px 0 !important;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.build-item-component.big .labels {
+  min-width: 80px;
+  flex: 1;
+}
+.build-item-component.big .item-image .item-prate {
+  font-size: 12px;
+  padding: 3px 7px;
+  border-radius: 7px;
+  right: 8px;
+  bottom: 8px;
+}
+.build-item-component.big .item-image, .build-item-component.big .item-text {
+  width: 100px;
+  height: 100px;
+  margin: 0;
+  /* transform: scale(1.1); */
+  overflow:visible;
+  border: none;
+}
+.build-item-component.big .item-image img {
+  min-width: 110%;
+}
+.build-item-component.big .item-image:hover, .build-item-component.big .item-text:hover {
+  filter: drop-shadow(0 0 5px var(--selector-bg));
+  box-shadow: none;
+}
+.build-item-component.big .item-stat-tooltip-line, .build-item-component.big .item-stat-tooltip {
+  color: var(--caption);
+  font-size: 14px;
+  line-height: 1.4em;
+  text-decoration: none;
+}
+.build-item-component.common.big .item-image, .build-item-component.common.big .item-text {
+  border: none;
+  filter: drop-shadow(0 0 5px var(--content-header));
+}
+.build-item-component.common.big .item-image:hover, .build-item-component.common.big .item-text:hover {
+  filter: drop-shadow(0 0 10px var(--content-header));
+  box-shadow: none;
+}
+
+.build-item-component.strong.big .item-image, .build-item-component.strong.big .item-text {
+  border: none;
+  filter: drop-shadow(0 0 5px var(--high-wr-bright));
+}
+.build-item-component.strong.big .item-image:hover, .build-item-component.strong.big .item-text:hover {
+  filter: drop-shadow(0 0 15px var(--high-wr-bright));
+  box-shadow: none;
+}
+
+.build-item-component.critical.big .item-image, .build-item-component.critical.big .item-text {
+  border: none;
+  filter: drop-shadow(0 0 5px var(--low-wr-bright));
+}
+.build-item-component.critical.big .item-image:hover, .build-item-component.critical.big .item-text:hover {
+  filter: drop-shadow(0 0 15px var(--low-wr-bright));
+  box-shadow: none;
+}
+
+.build-item-component.small, .build-item-component.smallest {
+  display: inline-flex;
+  flex-basis: 100%;
+  flex-direction: row;
+  align-items: center;
+  margin: 0 0 2px 0 !important;
+  flex-wrap: nowrap;
+  justify-content: center;
+  overflow: hidden;
+  opacity: 0.5;
+  transition: 250ms all linear;
+}
+.build-item-component.smallest:hover, .build-item-component.small:hover {
+  opacity: 1;
+}
+.build-item-component.smallest .item-image img, .build-item-component.small .item-image img {
+  min-width: auto;
+  height: 100%;
+  width: auto;
+}
+.build-item-component.smallest .labels, .build-item-component.small .labels {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.build-item-component.smallest .labels > * {
+  min-width: 50px;
+  flex: 1;
+}
+.build-item-component.smallest .labels > *:first-child {
+  flex-basis: 100%;
+}
+.build-item-component.small .labels > * {
+  min-width: 70px;
+  flex: 1;
+}
+.build-item-component.smallest .item-image .item-prate, .build-item-component.small .item-image .item-prate {
+  font-size: 9px;
+  width: 100%;
+  text-align: center;
+  border-radius: 0;
+  padding: 2px 0;
+}
+.build-item-component.small .item-image .item-prate {
+  font-size: 10px;
+}
+.build-item-component.smallest .item-image, .build-item-component.smallest .item-text {
+  width: auto;
+  max-height: 42px;
+  margin: 0;
+  min-width: 32px;
+  margin: 0;
+  border-width: 1px;
+}
+.build-item-component.smallest .item-stat-tooltip-line, .build-item-component.smallest .item-stat-tooltip {
+  font-size: 10px;
+}
+
+.build-item-component.small .item-image, .build-item-component.small .item-text {
+  width: auto;
+  max-height: 42px;
+  margin: 0;
+  min-width: 32px;
+  margin: 0;
+  border-width: 2px;
+}
+
+.hero-build-timeline-container {
+  display: flex;
+}
+
