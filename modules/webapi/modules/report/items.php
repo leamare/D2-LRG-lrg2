@@ -8,6 +8,7 @@ include_once(__DIR__ . "/items/icombos.php");
 include_once(__DIR__ . "/items/progression.php");
 include_once(__DIR__ . "/items/irecords.php");
 include_once(__DIR__ . "/items/progrole.php");
+include_once(__DIR__ . "/items/builds.php");
 
 $repeatVars['items'] = ['heroid', 'itemid', 'position'];
 
@@ -38,6 +39,10 @@ $endpoints['items'] = function($mods, $vars, &$report) use (&$endpoints) {
   } else if (in_array('progrole', $mods)) {
     $res = $endpoints['items-progrole']($mods, $vars, $report);
     $res['__endp'] = "items-progrole";
+    $res['__stopRepeater'] = "itemid";
+  } else if (in_array('builds', $mods)) {
+    $res = $endpoints['items-builds']($mods, $vars, $report);
+    $res['__endp'] = "items-builds";
     $res['__stopRepeater'] = "itemid";
   } else if (in_array('icritical', $mods)) {
     $res = $endpoints['items-critical']($mods, $vars, $report);
