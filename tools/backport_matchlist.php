@@ -6,6 +6,8 @@ if ($conn->connect_error) die("[F] Connection to SQL server failed: ".$conn->con
 
 $wheres = [];
 
+$_file = !empty($options['f']) ? $options['f'] : "matchlists/$lrg_league_tag.list";
+
 if(isset($options['T'])) {
   $endt = isset($options['e']) ? $options['e'] : 0;
   $tp = strtotime($options['T'], 0);
@@ -33,9 +35,11 @@ if (isset($options['P'])) {
 } 
 if (isset($options['r'])) {
   $wheres[] = "matchid not in (select distinct matchid from adv_matchlines)";
+} else if (isset($options['R'])) {
+  $wheres[] = "matchid in (select distinct matchid from adv_matchlines)";
 }
 
-$sql = "SELECT matchid FROM matches".(!empty($wheres) ? " WHERE ".(isset($options['R']) ? 'NOT ' : '').'('.implode(' AND ', $wheres).')' : "").";";
+$sql = "SELECT matchid FROM matches".(!empty($wheres) ? " WHERE ".(isset($options['Z']) ? 'NOT ' : '').'('.implode(' AND ', $wheres).')' : "").";";
 
 if ($conn->multi_query($sql) === TRUE) echo "[S] Requested MatchIDs.\n";
 else die("[F] Unexpected problems when recording to database.\n".$conn->error."\n".$sql."\n");
@@ -50,6 +54,6 @@ $query_res->free_result();
 
 $matches = implode("\n", $matches);
 
-file_put_contents("matchlists/$lrg_league_tag.list", $matches);
+file_put_contents($_file, $matches);
 
 ?>
