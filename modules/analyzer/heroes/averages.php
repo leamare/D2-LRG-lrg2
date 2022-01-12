@@ -34,8 +34,11 @@ $sql .= "SELECT \"courier_kills\", heroid, SUM(couriers_killed)/SUM(1) value, SU
           GROUP BY heroid HAVING $limiter_lower < mtch ORDER BY value DESC LIMIT $avg_limit;";
 # roshan kills by hero's team
 $sql .= "SELECT \"roshan_kills_with_team\", heroid, SUM(rs.rshs)/SUM(1) value, SUM(1) mtch FROM matchlines JOIN (
-  SELECT matchid, SUM(roshans_killed) rshs FROM adv_matchlines GROUP BY matchid
-) rs ON matchlines.matchid = rs.matchid GROUP BY heroid HAVING $limiter_lower < mtch ORDER BY value DESC LIMIT $avg_limit;";
+  SELECT ml.matchid, SUM(am.roshans_killed) rshs, ml.isradiant is_radiant 
+  FROM adv_matchlines am JOIN matchlines ml ON am.playerid = ml.playerid AND am.matchid = ml.matchid
+  GROUP BY ml.matchid, ml.isradiant
+) rs ON matchlines.matchid = rs.matchid AND matchlines.isradiant = rs.is_radiant
+GROUP BY heroid HAVING $limiter_lower < mtch ORDER BY value DESC LIMIT $avg_limit;";
 
 # hero damage / minute
 $sql .= "SELECT \"hero_damage_per_min\", matchlines.heroid heroid, SUM(matchlines.heroDamage/(matches.duration/60))/SUM(1) value, SUM(1) mtch

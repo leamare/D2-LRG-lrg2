@@ -48,14 +48,18 @@ $sql .= "SELECT \"courier_kills\", playerid, SUM(couriers_killed)/SUM(1) value, 
           GROUP BY playerid HAVING $limiter_lower < mtch ORDER BY value DESC LIMIT $avg_limit;";
 # roshan kills by hero's team
 if ($lg_settings['main']['teams'])
-  $sql .= "SELECT \"roshan_kills_by_team\", teams_matches.teamid, SUM(rs.rshs)/SUM(1) value, SUM(1) mtch FROM matchlines JOIN (
-    SELECT matchid, SUM(roshans_killed) rshs FROM adv_matchlines GROUP BY matchid
-  ) rs ON matchlines.matchid = rs.matchid
-  JOIN teams_matches ON matchlines.matchid = teams_matches.matchid and matchlines.isradiant = teams_matches.is_radiant
+  $sql .= "SELECT \"roshan_kills_by_team\", teams_matches.teamid, SUM(rs.rshs)/SUM(1) value, SUM(1) mtch FROM (
+    SELECT ml.matchid, SUM(am.roshans_killed) rshs, ml.isradiant is_radiant 
+    FROM adv_matchlines am JOIN matchlines ml ON am.playerid = ml.playerid AND am.matchid = ml.matchid
+    GROUP BY ml.matchid, ml.isradiant
+  ) rs
+  JOIN teams_matches ON rs.matchid = teams_matches.matchid and rs.is_radiant = teams_matches.is_radiant
   GROUP BY teams_matches.teamid HAVING $limiter_lower < mtch ORDER BY value DESC LIMIT $avg_limit;";
 else
   $sql .= "SELECT \"roshan_kills_with_team\", playerid, SUM(rs.rshs)/SUM(1) value, SUM(1) mtch FROM matchlines JOIN (
-    SELECT matchid, SUM(roshans_killed) rshs FROM adv_matchlines GROUP BY matchid
+    SELECT ml.matchid, SUM(am.roshans_killed) rshs, ml.isradiant is_radiant 
+    FROM adv_matchlines am JOIN matchlines ml ON am.playerid = ml.playerid AND am.matchid = ml.matchid
+    GROUP BY ml.matchid, ml.isradiant
   ) rs ON matchlines.matchid = rs.matchid
   GROUP BY playerid HAVING $limiter_lower < mtch ORDER BY value DESC LIMIT $avg_limit;";
 # wards destroyed
