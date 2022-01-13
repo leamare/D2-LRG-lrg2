@@ -6,7 +6,7 @@ if ($conn->connect_error) die("[F] Connection to SQL server failed: ".$conn->con
 
 $wheres = [];
 
-$_file = !empty($options['f']) ? $options['f'] : "matchlists/$lrg_league_tag.list";
+$_file = !empty($options['o']) ? $options['o'] : "matchlists/$lrg_league_tag.list";
 
 if(isset($options['T'])) {
   $endt = isset($options['e']) ? $options['e'] : 0;
