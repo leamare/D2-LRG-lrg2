@@ -20,6 +20,8 @@ There’s also a note about versions format. It’s basically a number based on 
 
 One major GET parameter is `report`. It specifies a tag of a report to load. If such report exists then GET `mod` is parsed. This is case one – Report is loaded. The second case is opposite and it has some unique endpoints.
 
+There's also a thing called "repeater". Basically (if the method supports it) you can pass a comma delimited input (e.g. `1,2,3,5`) or an asterisk (`*`) instead of value. The resulting set will have responses for all selected values (asterisk selects all possible values) for this method.
+
 ### Variables
 
 * (GET) `league` – report tag for report endpoints

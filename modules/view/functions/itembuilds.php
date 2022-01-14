@@ -12,6 +12,12 @@ function calculate_favor_score($array) {
 }
 
 function traverse_build_tree(&$stats, &$tree, $m_lim, $m_role, $root = '0', $build = null) {
+  // metadata usage for item categories
+  global $meta;
+
+
+  // initially this was made with an assumption that I will implement branching eventually
+  // it didn't happen, but I believe I might do that one day
   if (!$build) {
     $build = [
       'path' => [],
@@ -28,28 +34,28 @@ function traverse_build_tree(&$stats, &$tree, $m_lim, $m_role, $root = '0', $bui
     // neutrals, early are added later
   }
 
-  global $meta;
+  $ord = 0; // current order round number
+  $prev = 0; // primary item of the previous round
 
-  $alt_roots = [];
-  $ord = 0;
-
-  $prev = 0;
   while (true) {
+    // exit only when everything else is done, and no primary item selected
     if ($root === null) break;
-    $t = $tree[$root];
-    if (empty($t['children'])) break;
 
+    $t = $tree[$root];
+    if (empty($t['children'])) break; // nowhere to go
+
+    // there will be a lot of such sorting by match numbers
+    // initial sort is necessary to apply favor points transformations correctly
     uasort($t['children'], function($a, $b) {
       return $b['matches'] <=> $a['matches'];
     });
 
     // favor points assignment
-
     $items_list = array_keys($t['children']);
     $i_sz = count($items_list);
     foreach ($items_list as $i => $item) {
       if (!isset($build['favors'][$item])) $build['favors'][$item] = [];
-      // using 1.5 as Favor Factor, it's best somewhere between 1 and 2
+      // using 1.5 as Favor Factor, all good values lie somewhere between 1 and 2
       $build['favors'][$item][] = pow($i/$i_sz, 1.5);
       $t['children'][$item]['matches'] *= 1 + calculate_favor_score($build['favors'][$item])/1.5;
     }
@@ -59,6 +65,7 @@ function traverse_build_tree(&$stats, &$tree, $m_lim, $m_role, $root = '0', $bui
       return $b['matches'] <=> $a['matches'];
     });
 
+    // situational items processing
     $situationals = [];
     $build_sz = count($build['path']) + 1;
     foreach ($t['children'] as $id => $h) {
@@ -67,6 +74,7 @@ function traverse_build_tree(&$stats, &$tree, $m_lim, $m_role, $root = '0', $bui
         continue;
       }
 
+      // assign median order for the item to check later if it actually belongs there
       if (!isset($tree[$id]['med_ord'])) {
         $local_ord = [];
         foreach ($tree[$id]['children'] as $child) {
@@ -76,6 +84,9 @@ function traverse_build_tree(&$stats, &$tree, $m_lim, $m_role, $root = '0', $bui
         $tree[$id]['med_ord'] = !empty($local_ord) ? $local_ord[ floor(count($local_ord)/2) ] - 1 : $ord;
       }
 
+      // early items might be very flexible with order swaps so need to skip the first bunch
+      // this kind of check allows for items with earlier order to pop up
+      // but not with the later order
       if ($ord < 3 && !empty($tree[$id]['children'])) {
         if ($tree[$id]['med_ord'] - $ord > 1 ) {
           $t['children'][$id]['skip'] = true;
@@ -83,13 +94,17 @@ function traverse_build_tree(&$stats, &$tree, $m_lim, $m_role, $root = '0', $bui
         }
       }
 
+      // local limiter, use median limiter $m_lim otherwise
       $local_lim = $tree[$id]['matches'] ? round($tree[$id]['matches'] * 0.25) : $m_lim;
 
+      // checking second order children
       foreach ($tree[$id]['children'] as $iid => $ch) {
         if ($iid == $id) {
           unset($tree[$id]['children'][$id]);
           continue;
         }
+        // if they have enough matches, the item with all the corresponding data is recorded
+        // to potential situationals
         if (isset($t['children'][$iid]) && $t['children'][$iid]['matches'] > $local_lim && $t['children'][$iid]['matches'] > $tree[$id]['children'][$iid]['matches']) {
           $situationals[$id] = [ 'child' => $iid, 'parent' => $root, 'order' => $build_sz, 'matches' => $t['children'][$id]['matches'] ];
 
@@ -100,6 +115,7 @@ function traverse_build_tree(&$stats, &$tree, $m_lim, $m_role, $root = '0', $bui
 
     $max_id = null;
 
+    // second run through children
     foreach ($t['children'] as $id => $ch) {
       if (in_array($id, $build['path'])) continue;
       if ($ch['diff'] <= 0) continue;
@@ -122,13 +138,16 @@ function traverse_build_tree(&$stats, &$tree, $m_lim, $m_role, $root = '0', $bui
     $root = $max_id;
 
     if ($root) {
-      // primary candidates
+      // getting primary candidates for the next round
       $children = $tree[$root]['children'];
       uasort($children, function($a, $b) {
         return $b['matches'] <=> $a['matches'];
       });
       $primes = array_slice($children, 0, round(count($children) * .75), true);
 
+      // checking situationals of this round
+      // if an item's child is a prime for next round - the item is considered an alt
+      // if an item is skippable it's recorded as situational
       foreach ($situationals as $item => $sit) {
         if (isset($primes[ $sit['child'] ])) {
           if (!isset($build['alt'][$root])) $build['alt'][$root] = [];
@@ -140,17 +159,20 @@ function traverse_build_tree(&$stats, &$tree, $m_lim, $m_role, $root = '0', $bui
 
       $children = array_keys($t['children']);
 
-      // take swaps into consideration
+      // taking swaps into consideration
       $i = 0;
       foreach ($children as $item) {
         if ($item == $root) continue;
         if ($tree[$item]['skip'] ?? false) continue;
+
         // swaps
         if (isset($tree[$root]['children'][$item])) {
           $data = $t['children'][$item];
           $i++;
           if (($data['matches_orig'] ?? $data['matches']) > $m_lim * 10) $build['swap_raw'][] = [ $root, $item ];
 
+          // passing match number from the previous round, recording the original number to avoid
+          // second round swap increase
           if (isset($tree[$prev]['children'][$item]) && isset($tree[$prev]['children'][$item]['matches_orig'])) {
             $data['matches'] = $tree[$prev]['children'][$item]['matches_orig'];
           }
@@ -162,10 +184,6 @@ function traverse_build_tree(&$stats, &$tree, $m_lim, $m_role, $root = '0', $bui
             $prev_add = $tree[$root]['children'][$item]['matches'] - $tree[$root]['children'][$item]['matches_orig'];
             $tree[$root]['children'][$item]['matches'] = $tree[$root]['children'][$item]['matches_orig'] + round($data['matches']/($i+2));
           }
-          // if (!isset($build['favors'][$item])) $build['favors'][$item] = [];
-          // $build['favors'][$item][] = $i;
-        } else {
-          // $build['favors'][$item][] = 1;
         }
       }
 
@@ -175,13 +193,10 @@ function traverse_build_tree(&$stats, &$tree, $m_lim, $m_role, $root = '0', $bui
     $ord++;
   }
 
-  // post processing: TODO:
-  // - items stats -> neutrals
-  // - items stats -> early items
-  // - situationals
-  // - lategame list, lategame branches
-  // - main item
+  // post processing
 
+  // checking swaps again, if they actually have similar order,
+  // if they are both in the build
   foreach ($build['swap_raw'] as $i => [ $i1, $i2 ]) {
     if (!in_array($i2, $build['path'])) {
       continue;
@@ -195,12 +210,9 @@ function traverse_build_tree(&$stats, &$tree, $m_lim, $m_role, $root = '0', $bui
 
   unset($build['swap_raw']);
 
+  // group situational items by their order
   foreach ($build['sit_raw'] as $item => $cases) {
     if (in_array($item, $build['path'])) continue;
-
-    // $build['sit'][$item] = array_reduce($cases, function($carry, $a) {
-    //   return $carry += $a['order'];
-    // }, 0) / count($cases);
 
     $order_frequency = [];
     foreach ($cases as $case) {
@@ -217,16 +229,20 @@ function traverse_build_tree(&$stats, &$tree, $m_lim, $m_role, $root = '0', $bui
 
   asort($build['sit']);
 
+  // group alternative items
   $alts_keys = array_keys($build['alt']);
   $sz = count($alts_keys);
 
   $alts_items = [];
 
+  // this is a cleanup to remove items from alts
+  // that were already used or something
   for ($i = 0; $i < $sz; $i++) {
     $item = $alts_keys[$i];
     $alts = $build['alt'][$item];
 
     foreach ($alts as $alt) {
+      // timing for alts shouldn't be too different
       if (($stats[$item]['median'] - $stats[$alt]['median']) > 240) {
         unset($alts[ array_search($alt, $alts) ]);
         $alts = array_values($alts);
@@ -235,18 +251,24 @@ function traverse_build_tree(&$stats, &$tree, $m_lim, $m_role, $root = '0', $bui
 
       $alts_items[] = $alt;
 
+      // alt can't be a part of the main build
       if ($alt == $item || in_array($alt, $build['path'])) {
         unset($alts[ array_search($alt, $alts) ]);
         $alts = array_values($alts);
         continue;
       }
 
+      // initially this was the place where branching happened
+      // and it was the part of the main loop
+      // now it just peeks forward slightly and looks for mutual alts
       for ($j = $i+1; $j < $sz; $j++) {
         $item2 = $alts_keys[$j];
         $alts2 = $build['alt'][$item2];
 
         if (in_array($alt, $alts2)) {
           if ($build['sit'][$alt]-1 == $j) {
+            // if an item is already a "situational" or has a different order, it's removed from alts
+            // situationals have a higher order priority
             unset($alts[ array_search($alt, $alts) ]);
             $alts = array_values($alts);
           } else {
@@ -260,6 +282,7 @@ function traverse_build_tree(&$stats, &$tree, $m_lim, $m_role, $root = '0', $bui
     else $build['alt'][$item] = $alts;
   }
 
+  // recording all used items for the future stats injection
   $alts_items = array_unique($alts_items);
   foreach ($alts_items as $alt) {
     unset($build['sit'][$alt]);
@@ -267,7 +290,6 @@ function traverse_build_tree(&$stats, &$tree, $m_lim, $m_role, $root = '0', $bui
   $build['alts_items'] = $alts_items;
 
   // Detecting lategame point
-
   $first = $build['path'] ? $tree[ $build['path'][0] ]['matches'] : 0;
   $threshold = $first * 0.1;
   $lategame = null;
@@ -320,7 +342,7 @@ function traverse_build_tree(&$stats, &$tree, $m_lim, $m_role, $root = '0', $bui
     }
   }
 
-  // TODO: empty builds
+  // creating build times based on pairs diff times
 
   $build_times = [];
 
@@ -337,6 +359,10 @@ function traverse_build_tree(&$stats, &$tree, $m_lim, $m_role, $root = '0', $bui
 }
 
 function traverse_build_tree_partial(&$stats, &$tree, $m_lim, $m_role) {
+  // this method is largely based on traverse_build_tree
+  // but is intended to be used only if there is not enough tree data to generate a build
+  // so it uses stats instead
+
   $build = [
     'path' => [],
     'favors' => [],
@@ -353,29 +379,34 @@ function traverse_build_tree_partial(&$stats, &$tree, $m_lim, $m_role) {
 
   global $meta;
 
+  // getting minimal number of matches to filter by
   uasort($stats, function($a, $b) {
     return $b['purchases'] <=> $a['purchases'];
   });
-
   $role_limit = ($m_role / reset($stats)['purchases']) * 0.1;
   
+  // then sorting by median purchase time
   uasort($stats, function($a, $b) {
     return $a['median'] <=> $b['median'];
   });
 
+  // only "big" items are allowed, everything else is injected with stats later
   $allowed_items = array_merge($meta['item_categories']['medium'], $meta['item_categories']['major']);
 
   $orders = [];
 
+  // creating a list of potential primary items and major orders
   $last_time = null;
   $order = 0;
   foreach ($stats as $item => $st) {
     if (!in_array($item, $allowed_items)) continue;
 
+    // not enough matches -> get out
     if ($stats[$item]['prate'] < $role_limit) {
       continue;
     }
     
+    // if there is a partial tree - use it as a basis until it's done
     if (isset($tree[$item])) {
       if (!$tree[$item]['matches']) {
         foreach ($tree[$item]['parents'] as $parent) {
@@ -390,6 +421,7 @@ function traverse_build_tree_partial(&$stats, &$tree, $m_lim, $m_role) {
       $last_time = $st['median'];
       $orders[$order] = [];
     }
+    // if there is more than 2 minutes from previous item => increase order
     if ($st['median'] - $last_time > 120) {
       $order++;
       $orders[$order] = [];
@@ -401,6 +433,7 @@ function traverse_build_tree_partial(&$stats, &$tree, $m_lim, $m_role) {
 
   $orders_prate = [];
 
+  // orders are done, create a list of max purchase rate and potential primaries for every order
   foreach ($orders as &$order) {
     usort($order, function($a, $b) use (&$stats) {
       return $stats[$b]['prate'] <=> $stats[$a]['prate'];
@@ -416,16 +449,17 @@ function traverse_build_tree_partial(&$stats, &$tree, $m_lim, $m_role) {
   $next = 0;
   for($i = 0, $sz = count($orders_prate); $i < $sz; $i++) {
     if ($next) {
-      // block has next
-        // no children
-      // block doesn't have next
+      // Case 1: we have a preset next item (from tree)
       if (in_array($next, $orders[$i])) {
+        // the item is in the order => it's automatically made primary
         $last_order_prate = $i;
     
         $primary = $next;
         $build['path'][] = $primary;
         unset($orders[$i][ array_search($primary, $orders[$i]) ]);
 
+        // if there are children => make them next
+        // else set next flag to 0
         if (!empty($tree[$primary]['children'])) {
           uasort($tree[$primary]['children'], function($a, $b) {
             return $b['matches'] <=> $a['matches'];
@@ -435,6 +469,7 @@ function traverse_build_tree_partial(&$stats, &$tree, $m_lim, $m_role) {
           $next = 0;
         }
       } else {
+        // this order is situational, skip
         foreach ($orders[$i] as $ord) {
           $build['sit'][$ord] = $build_order;
           if ($build['lategamePoint']) {
@@ -446,6 +481,7 @@ function traverse_build_tree_partial(&$stats, &$tree, $m_lim, $m_role) {
     } else {
       $primary = 0;
 
+      // if tree is not empty - use it as source for primary
       if ($treecount) {
         if (isset($tree[ $orders_prate[$i][0] ])) {
           $primary = $orders_prate[$i][0];
@@ -465,6 +501,7 @@ function traverse_build_tree_partial(&$stats, &$tree, $m_lim, $m_role) {
         $build['path'][] = $primary;
         unset($orders[$i][ array_search($primary, $orders[$i]) ]);
 
+        // if there are potential children in the tree - use them as next
         if (!empty($tree[$primary]['children'])) {
           uasort($tree[$primary]['children'], function($a, $b) {
             return $b['matches'] <=> $a['matches'];
@@ -472,6 +509,7 @@ function traverse_build_tree_partial(&$stats, &$tree, $m_lim, $m_role) {
           $next = array_keys($tree[$primary]['children'])[0];
         }
       } else {
+        // no primary, using the highest prate item
         if ($i > 0 && $orders_prate[$last_order_prate][1] - $orders_prate[$i][1] > 0.15) {
           foreach ($orders[$i] as $ord) {
             $build['sit'][$ord] = $build_order;
@@ -490,6 +528,7 @@ function traverse_build_tree_partial(&$stats, &$tree, $m_lim, $m_role) {
       }
     }
 
+    // all other items in the same order are alts
     if (!empty($orders[$i])) {
       $build['alt'][ $primary ] = [];
       foreach($orders[$i] as $ord) {
@@ -498,7 +537,8 @@ function traverse_build_tree_partial(&$stats, &$tree, $m_lim, $m_role) {
       }
     }
 
-    // 30 min = 1200 sec
+    // 30 min = 1800 sec
+    // items past 30 min point or with low purchase rate are considered a lategame point
     if (!$build['lategamePoint'] && $build_order > 3 && ($orders_prate[$i][1] <= 0.25 || +$orders_prate[$i][2] > 1800)) {
       $build['lategamePoint'] = $build_order;
     }
@@ -707,6 +747,7 @@ function generate_item_builds(&$pairs, &$stats, $hero) {
       $tree[ $pair['item2'] ]['time'] = $stats[ $pair['item2'] ]['median'];
     }
 
+    // populating root point
     if ($pair['avgord1'] <= 1) {
       if (!isset($tree[ '0' ]['children'][ $pair['item1'] ])) {
         $tree[ '0' ]['children'][ $pair['item1'] ] = [
