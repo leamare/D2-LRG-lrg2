@@ -675,7 +675,7 @@ function inject_item_stats(&$build, &$stats, $hero) {
     $items[] = $item;
   }
 
-  $build['lategame'] = array_unique($build['lategame']);
+  $build['lategame'] = array_values(array_unique($build['lategame']));
 
   $build['significant'] = $significant;
 
