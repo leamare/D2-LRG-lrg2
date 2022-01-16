@@ -45,7 +45,12 @@ function rg_view_generator_teams_summary($context = null, $short_flag = false) {
     "avg_match_len"
   ];
 
-  $keys = array_keys( array_values($report['teams'])[0]['averages'] );
+  foreach ($report['teams'] as $vals) {
+    if (!isset($vals['averages'])) continue;
+
+    $keys = array_keys($vals['averages']);
+    break;
+  }
 
   if (!$short_flag)
     $res .= "<input name=\"filter\" class=\"search-filter wide\" data-table-filter-id=\"teams-summary\" placeholder=\"".locale_string('filter_placeholder')."\" />";
