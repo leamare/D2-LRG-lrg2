@@ -271,6 +271,10 @@ if (sizeof($cache['reps']) === 0) {
     $modules .= "<div class=\"content-header\">".locale_string("noleague_cap")."</div>";
   $modules .= "</div>";
 
+  if(isset($cat) || $index_list >= sizeof($reps)) {
+    $modules .= "<input name=\"filter\" class=\"search-filter wide\" data-table-filter-id=\"leagues-list\" placeholder=\"".locale_string('filter_placeholder')."\" />";
+  }
+
   $modules .= "<table id=\"leagues-list\" class=\"list wide ".(isset($cat) ? "sortable" : "")."\"><thead><tr>";
   $modules .= "<th>".locale_string("league_name")."</th>".
     "<th>".locale_string("league_id")."</th>".
@@ -338,7 +342,19 @@ if (sizeof($cache['reps']) === 0) {
       $report['desc'] = $report['localized'][$locale]['desc'] ?? $report['desc'];
     }
 
-    $modules .= "<tr><td><a href=\"?league=".$report['tag'].(empty($linkvars) ? "" : "&".$linkvars)."\">".$report['name']."</a></td>".
+    $aliases = $report['tag'];
+    $aliases .= " ".$event_type;
+    if (isset($report['patches'])) {
+      foreach ($report['patches'] as $patch => $sz)
+        $aliases .= " ".convert_patch($patch);
+    }
+    if (isset($report['regions'])) {
+      foreach ($report['regions'] as $reg) {
+        $aliases .= " ".locale_string("region".$reg);
+      }
+    }
+
+    $modules .= "<tr><td><a href=\"?league=".$report['tag'].(empty($linkvars) ? "" : "&".$linkvars)."\" data-aliases=\"".$aliases."\">".$report['name']."</a></td>".
       "<td>".($report['id'] == "" ? "-" : $report['id'])."</td>".
       "<td>".$report['desc']."</td>".
       "<td>".locale_string($event_type)."</td>".
@@ -356,7 +372,7 @@ if (sizeof($cache['reps']) === 0) {
       "<td value=\"".$report['first_match']['date']."\" data-matchid=\"".($report['first_match']['mid'] ?? 0)."\">".date(locale_string("date_format"), $report['first_match']['date'])."</td>".
       "<td value=\"".$report['last_match']['date']."\" data-matchid=\"".($report['last_match']['mid'] ?? 0)."\">".date(locale_string("date_format"), $report['last_match']['date'])."</td></tr>";
   }
-  if(!$index_list ) {
+  if(!$index_list) {
     $modules .= "<tr><td></td><td></td><td>...</td><td colspan=\"8\"></td></tr>";
   }
 
