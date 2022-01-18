@@ -14,7 +14,7 @@ $(document).ready(function() {
     const table = $(this).attr('data-table-filter-id');
     
     $("#" + table + " tbody tr").filter(function() {
-      const aliases = $(this).find('img[data-aliases]').attr('data-aliases');
+      const aliases = $(this).find('img[data-aliases], a[data-aliases]').attr('data-aliases');
       const line = $(this).text().toLowerCase() + (aliases ? ' ' + aliases.toLowerCase() : '');
       $(this).toggle( line.indexOf(value) !== -1 )
     });
