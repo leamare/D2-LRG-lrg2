@@ -87,6 +87,19 @@ $sql .= "SELECT \"wards_destroyed\", SUM(ans.sum_wards_destroyed)/SUM(ans.match_
           GROUP BY matchlines.matchid
       ) ans;";
 
+# avg wards lost
+$sql .= "SELECT \"wards_lost\", SUM(ans.sum_wards_destroyed)/SUM(ans.match_count) FROM (
+  SELECT SUM(adv_matchlines.wards_destroyed) sum_wards_destroyed, COUNT(DISTINCT matchlines.matchid) match_count
+  FROM adv_matchlines JOIN matchlines
+  ON adv_matchlines.matchid = matchlines.matchid
+  AND adv_matchlines.playerid = matchlines.playerid
+  JOIN teams_matches
+  ON adv_matchlines.matchid = teams_matches.matchid
+  AND matchlines.isRadiant <> teams_matches.is_radiant
+  WHERE teams_matches.teamid = ".$id."
+  GROUP BY matchlines.matchid
+) ans;";
+
 # avg stacks
 $sql .= "SELECT \"stacks_s\", SUM(ans.sum_stacks)/SUM(ans.match_count) FROM (
   SELECT SUM(adv_matchlines.stacks) sum_stacks, COUNT(DISTINCT matchlines.matchid) match_count
