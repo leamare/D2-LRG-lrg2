@@ -23,16 +23,19 @@ function rg_view_generator_teams_summary($context = null, $short_flag = false) {
   $percentages = [
     "rad_ratio",
     "radiant_wr",
-    "dire_wr"
+    "dire_wr",
+    "diversity"
   ];
 
   $aliases = [
     "wards_placed" => "wards_placed_s",
     "sentries_placed" => "sentries_placed_s",
     "wards_destroyed" => "wards_destroyed_s",
+    "wards_lost" => "wards_lost_s",
     "radiant_wr" => "rad_wr_s",
     "dire_wr" => "dire_wr_s",
-    "avg_match_len" => "duration"
+    "avg_match_len" => "duration_s",
+    "avg_win_len" => "avg_win_len_s",
   ];
 
   $short = [
@@ -94,9 +97,7 @@ function rg_view_generator_teams_summary($context = null, $short_flag = false) {
                 strpos($k, "duration") !== FALSE || strpos($k, "_len") !== FALSE ?
                   convert_time($v) :
                   number_format($v*(in_array($k, $percentages) ? 100 : 1),
-                    ($v > 1000) ? 0 : (
-                        ($v > 100) ? 1 : 2
-                      )
+                    ($v > 1000) ? 0 : 1
                     )
               ).
               (in_array($k, $percentages) ? "%" : "")."</td>";

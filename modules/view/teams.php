@@ -1,4 +1,6 @@
 <?php
+include_once("$root/modules/view/functions/teams_diversity_recalc.php");
+
 $modules['teams'] = [];
 
 function rg_view_generate_teams() {
@@ -11,6 +13,13 @@ function rg_view_generate_teams() {
   $res['summary'] = "";
   if (check_module($parent."summary")) {
     include_once("$root/modules/view/generators/teams_summary.php");
+
+    foreach ($report['teams'] as $team => $data) {
+      if (!isset($data['averages']) || !isset($data['averages']['hero_pool'])) continue;
+
+      $report['teams'][$team]['averages']['diversity'] = teams_diversity_recalc($data);
+    }
+
     $res['summary'] = rg_view_generator_teams_summary();
   }
 

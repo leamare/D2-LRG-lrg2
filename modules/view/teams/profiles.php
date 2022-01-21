@@ -32,8 +32,11 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
           $percentages = [
             "rad_ratio",
             "radiant_wr",
-            "dire_wr"
+            "dire_wr",
+            "diversity",
           ];
+
+          $context[$tid]['averages']['diversity'] = teams_diversity_recalc($context[$tid]);
 
           $res["team".$tid]['overview'] .= $foreword;
           $res["team".$tid]['overview'] .= "<div class=\"content-cards\">".team_card($tid, true)."</div>";
