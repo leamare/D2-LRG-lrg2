@@ -10,9 +10,15 @@ $endpoints['summary'] = function($mods, $vars, &$report) {
   }
 
   if (in_array("teams", $mods)) {
+    include_once(__DIR__ . "/../../../view/functions/teams_diversity_recalc.php");
+
     $context_k = array_keys($context['teams']);
     foreach($context_k as $team_id) {
       if (isset($report['teams_interest']) && !in_array($team_id, $report['teams_interest'])) continue;
+
+      if (isset($report['teams'][ $team_id ]['averages']) || isset($report['teams'][ $team_id ]['averages']['hero_pool'])) 
+        $report['teams'][ $team_id ]['averages']['diversity'] = teams_diversity_recalc($report['teams'][ $team_id ]);
+
       $t = [
         "team_id" => $team_id,
         "team_name" => team_name($team_id),

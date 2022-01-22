@@ -1,6 +1,7 @@
 <?php 
 
 include_once(__DIR__ . "/../../../view/generators/tvt_unwrap_data.php");
+include_once(__DIR__ . "/../../../view/functions/teams_diversity_recalc.php");
 
 $repeatVars['teams'] = ['team'];
 
@@ -89,6 +90,9 @@ $endpoints['teams'] = function($mods, $vars, &$report) use (&$endpoints, &$repea
 
     if (!isset($report['teams'][ $vars['team'] ]['averages']))
       return $res;
+
+    if (isset($report['teams'][ $vars['team'] ]['averages']['hero_pool'])) 
+      $report['teams'][ $vars['team'] ]['averages']['diversity'] = teams_diversity_recalc($report['teams'][ $vars['team'] ]);
 
     $res['averages'] = $report['teams'][ $vars['team'] ]['averages'];
 
