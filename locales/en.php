@@ -48,6 +48,7 @@ $strings['en'] = [
   "matches_unparsed" => "Matches without detailed analysis",
   "rampages_total" => "Rampages total",
   "kills_per_minute_average" => "Kills per minute on average",
+  "recent_matches" => "Recent matches",
 
   "radiant_avg_roshans" => "Average Roshan kills per game by Radiant",
   "dire_avg_roshans" => "Average Roshan kills per game by Dire",
@@ -98,6 +99,7 @@ $strings['en'] = [
   "antirank" => "Rev-Rank",
   "arank" => "R-Rank",
   "team" => "Team",
+  "allies" => "Allies",
   "enemy" => "Enemy",
   "link" => "Link",
   "all" => "All",
@@ -119,6 +121,7 @@ $strings['en'] = [
   "dire_wr" => "Dire winrate",
   "dire_matches" => "Dire Won",
   "rad_ratio" => "Radiant Ratio",
+  "side" => "Faction",
 
   // modules 
   "record" => "Record",
@@ -305,6 +308,7 @@ $strings['en'] = [
   "outcome_impact_s" => "OI",
   "rank" => "Rank",
   "percentage" => "Percentage",
+  "balance_total" => "Balance rank",
 
   // combos
   "pair_expectation" => "Expected matches",
@@ -313,6 +317,10 @@ $strings['en'] = [
   "winrate_diff" => "Winrate difference",
   "lane_rate" => "Same lane rate",
   "time_diff" => "Time difference",
+  "best_friends" => "Best allies",
+  "worst_friends" => "Worst allies",
+  "best_opponents" => "Best counters",
+  "worst_opponents" => "Worst counters",
 
   // summary shorthands
   "matches_s" => "Mtchs",
@@ -529,6 +537,8 @@ $strings['en'] = [
   "builds_lategame_main_route" => "Main route",
   "builds_lategame_all" => "All potential choices",
   "builds_other_value" => "Other valuable items",
+  "build_basic" => "Basic item build",
+  "builds_more" => "See detailed item builds",
 
   "build_item_type_regular" => "Normal item",
   "build_item_type_common" => "High pickup rate",
@@ -594,7 +604,8 @@ $strings['en'] = [
   "desc_pickban_teams" => "Team pickban stats include drafting stats of the team, as well as stats of their opponents (most picked and banned heroes against the team). Ranks are using team's picks and enemy bans stats (and vice versa). Higher team's rank means the hero is strong for the team, higher enemy's rank means the hero is stronger against the team. R-Ranks show the least effective heroes among the most frequent ones.",
   "desc_pickban_teams_profile" => "This section lists the most and least effective heroes of the team and against it. See Picks and Bans section for more details.",
   "desc_pickban_roles" => "Number of bans is calculated approximately based on ratio of matches on the position to all matches of the hero.",
-  "desc_draft_tree" => "    Draft tree is a way to visually represent draft priorities and order of hero picks and bans.<br />Blue heroes represent picks, orange — bans. Every vertical block of heroes with the same color (one or more columns) represents one draft stage. Draft stages may be separated with an empty block.<br />Bolder connection between heroes means more cases when this kind of draft happened. Bigger icon of a hero means that it's picked (or banned) more on this stage.<br />Use zoom (with a mouse scroll or pinch gesture), move nodes around with cursor or hover over elements to see more details.",
+  "desc_draft_tree" => "Draft tree is a way to visually represent draft priorities and order of hero picks and bans.<br />Blue heroes represent picks, orange — bans. Every vertical block of heroes with the same color (one or more columns) represents one draft stage. Draft stages may be separated with an empty block.<br />Bolder connection between heroes means more cases when this kind of draft happened. Bigger icon of a hero means that it's picked (or banned) more on this stage.<br />Use zoom (with a mouse scroll or pinch gesture), move nodes around with cursor or hover over elements to see more details.",
+  "desc_balance" => "Balance metric estimates how balanced the meta is (0 to 100)",
 
   "items_most_impactful_desc" => "In the items component you may see various items stats. Overview shows top of the most impactful items (in general and for a specific hero) based on their effect on winrate, compared to games when the item wasn't purchased, with the highest positive and negative impacts respectively. Notable timings section shows earliest purchase timings for item-hero pairs with the highest winrate gradient per minute.",
   "items_stats_desc" => "Winrate shifts are differences in winrate compared to the item's winrate overall. Values are for when the item wasn't bought, early (Q1) and late (Q3) timings (higher is better). Winrate gradient per minute shows how winrate changes with every minute of the item's delayed purchase timing. Item timings values can be used to restore the normal distribution chart, where Q1, median and Q3 mean the first, second and third quantiles respectively.",
@@ -615,6 +626,14 @@ $strings['en'] = [
   "builds_desc_5" => "The section is divided into three major blocks. The first major block is <u>Build Overview</u>. It has several basic categories: <b>Early</b> (items purchased before any core items, can be changed depending on the game), <b>Core</b> (items essential for the hero), <b>Lategame</b> (basic choices after essential items were purchased), as well as <b>Situational Early</b> (items that don't fit into the regular build or skipped a lot) and <b>Situational</b> (additional lategame items). You can also notice following categories: <b>Alternatives</b> (highlights alternative item choices), <b>Order Swaps</b> (two items that often switch places in the build order) and <b>Neutral Items</b> (when available).",
   "builds_desc_6" => "The second major block is <u>Timeline</u>. It represents visually the order in which early, core and situational items are usually purchased, as well as highlighting order swaps (in this case winrate increase is shown for this time/order of purchase), alternatives and less popular item choices to make it easier to see the build progression. Highlighted items (big blocks at the top with brighter background) are a core part of the build, while situational and early items can be skipped. Straight after Timeline you can see <u>Lategame</u> block, which holds the most common lategame route, as well as additional lategame items sorted by their median time of purchase. The last major block has more <u>neutral items</u> (if available), as well as the list of other <u>high impact items</u> that didn't fit into the build.",
   "builds_desc_7" => "The build is using data to power itself up. The more data is available the better build you get. Naturally, uncommon roles or heroes might not get a proper build. Role trees only generated if the hero has more than 5% of matches on the role.",
+
+  "desc_laning_1" => "Lane winrate is determined based on networthes in the matchup at the end of the laning stage. Huge difference is won/lost lane, small difference is considered a tie. Won lane counts as 1 point, tie counts as a half.",
+  "desc_laning_2" => "Lane status of a support is based on a networth of the closest core (so if a support's core won the lane, the support is considered a winner too).",
+  "desc_laning_3" => "Rank for lane stats is based on lane winrate, number of matches, average differences in lane advantage and match win rate. In case of hero specific laning stats the highest rank indicates the best possible lane opponent to benefit the hero (aka the easiest one). There may be slight differences in numbers, produced by either lack of detailed analysis or lack of an opponent in lane.",
+  "desc_laning_4" => "There are some assumptions and only one factor used to detect laning outcome, due to my current limitations. HOWEVER, from practice it turns out to be pretty accurate with the real picture.",
+  "desc_laning_5" => "Since it's based on NETWORTH, it's naturally affected by hero and tower kills, as well as deaths. It also means that if a hero switched to jungle and got more from there, then the hero practically won the lane (if the hero didn't leave the lane completely).",
+  "desc_laning_6" => "Hero laning matchups are not limited to 1 vs 1 lane matchups. Supports and even multiple cores on lane may affect the picture.",
+  "desc_laning_7" => "There's no such thing as \"lost lane 1 vs 3, but it's actually a won lane\". If a hero lost lane, then the lane is lost, no matter how you call it. However, there are winrates from lost/tie/won lanes, that can show you, how effective the hero may be if the lane was lost, completing the picture. Same goes the other way around.",
 
   // service info
   "limiter_h" => "Higher limiter",
