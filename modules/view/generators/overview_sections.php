@@ -4,6 +4,7 @@ include_once($root."/modules/view/functions/player_name.php");
 include_once($root."/modules/view/functions/ranking.php");
 include_once($root."/modules/view/generators/draft.php");
 include_once($root."/modules/view/generators/positions_overview_section.php");
+include_once($root."/modules/view/functions/teams_diversity_recalc.php");
 
 function rg_generator_overview_chart($name, $labels, $context) {
   if(!sizeof($context)) return "";
@@ -89,13 +90,13 @@ function rg_generator_overview_combos($table_id, $caption, $context, $limiter = 
     $i--;
     $res .= "<tr>".
                 ($heroes_flag ? "<td>".hero_portrait($combo[$id.'1'])."</td>" : "").
-                "<td>".($heroes_flag ? hero_name($combo[$id.'1']) : player_name($combo[$id.'1']))."</td>".
+                "<td>".($heroes_flag ? hero_link($combo[$id.'1']) : player_link($combo[$id.'1']))."</td>".
                 ($heroes_flag ? "<td>".hero_portrait($combo[$id.'2'])."</td>" : "").
-                "<td>".($heroes_flag ? hero_name($combo[$id.'2']) : player_name($combo[$id.'2']))."</td>".
+                "<td>".($heroes_flag ? hero_link($combo[$id.'2']) : player_link($combo[$id.'2']))."</td>".
                 (
                   $trios ?
                   ($heroes_flag ? "<td>".hero_portrait($combo[$id.'3'])."</td>" : "").
-                  "<td>".($heroes_flag ? hero_name($combo[$id.'3']) : player_name($combo[$id.'2']))."</td>" :
+                  "<td>".($heroes_flag ? hero_link($combo[$id.'3']) : player_link($combo[$id.'2']))."</td>" :
                   ""
                   ).
                 "<td>".$combo['matches']."</td>".
@@ -174,7 +175,7 @@ function rg_generator_pickban_overview($table_id, $context, $context_main, $limi
   foreach($context as $id => $el) {
     $i++;
     $res .=  "<tr>".
-            ($heroes_flag ? "<td>".hero_portrait($id)."</td><td>".hero_name($id)."</td>" : "<td>".player_name($id)."</td>").
+            ($heroes_flag ? "<td>".hero_portrait($id)."</td><td>".hero_link($id)."</td>" : "<td>".player_link($id)."</td>").
             "<td>".$el['matches_total']."</td>".
             "<td class=\"separator\">".number_format($el['matches_total']/$context_total_matches*100,2)."%</td>".
             "<td>".number_format($ranks[$id],2)."</td>".
@@ -193,3 +194,16 @@ function rg_generator_pickban_overview($table_id, $context, $context_main, $limi
   return $res;
 }
 
+function rg_generator_balance_overview($table_id, $context) {
+  $vals = balance_rank($context);
+
+  return "<table id=\"$table_id\" class=\"list\">".
+    "<thead><tr><th>".locale_string("balance_total")."</th><th>".locale_string("winrate")."</th><th>".
+    locale_string("pickrate")."</th><th>".locale_string("contest_rate")."</th></tr></thead>".
+    "<tbody><tr>".
+      "<td>".number_format($vals[0]*100,1)."</td>".
+      "<td>".number_format($vals[1]*100,1)."</td>".
+      "<td>".number_format($vals[2]*100,1)."</td>".
+      "<td>".number_format($vals[3]*100,1)."</td>".
+    "</tr></tbody></table>";
+}

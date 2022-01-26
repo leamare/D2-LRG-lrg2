@@ -204,6 +204,8 @@ function rg_view_generator_overview($modlink, &$context, $foreword = "") {
     $res .= "</div>";
   }
 
+  $res .= rg_generator_balance_overview("$prefix-balance", $context['pickban']);
+
   if($report['settings']['overview_random_stats']) {
     //$res .= "<div class=\"content-header\">".locale_string("random")."</div>";
     $res .= "<table class=\"list\" id=\"overview-table\">";

@@ -2,6 +2,21 @@
 include_once($root."/modules/view/functions/hero_name.php");
 include_once($root."/modules/view/functions/player_name.php");
 include_once($root."/modules/view/functions/ranking.php");
+include_once($root."/modules/view/functions/teams_diversity_recalc.php");
+
+function rg_generator_balance($table_id, $context) {
+  $vals = balance_rank($context);
+
+  return "<table id=\"$table_id\" class=\"list\">".
+    "<thead><tr><th>".locale_string("balance_total")."</th><th>".locale_string("winrate")."</th><th>".
+    locale_string("pickrate")."</th><th>".locale_string("contest_rate")."</th></tr></thead>".
+    "<tbody><tr>".
+      "<td>".number_format($vals[0]*100,1)."</td>".
+      "<td>".number_format($vals[1]*100,1)."</td>".
+      "<td>".number_format($vals[2]*100,1)."</td>".
+      "<td>".number_format($vals[3]*100,1)."</td>".
+    "</tr></tbody></table>";
+}
 
 function rg_generator_pickban($table_id, &$context, &$context_main, $heroes_flag = true, $roles = false) {
   if(!sizeof($context)) return "";
@@ -39,9 +54,7 @@ function rg_generator_pickban($table_id, &$context, &$context_main, $heroes_flag
     " (mp): $mp - ".locale_string("heroes_median_bans").
     " (mb): $mb - ".locale_string("matches_total").": $context_total_matches</div>";
 
-  $res .= "<div class=\"content-text\">".locale_string("desc_pickban_ranks")."</div>";
-
-  if ($roles) $res .= "<div class=\"content-text\">".locale_string("desc_pickban_roles")."</div>";
+  $res .= rg_generator_balance("$table_id-balance", $context);
 
   $res .= "<input name=\"filter\" class=\"search-filter\" data-table-filter-id=\"$table_id\" placeholder=\"".locale_string('filter_placeholder')."\" />";
 
@@ -115,7 +128,7 @@ function rg_generator_pickban($table_id, &$context, &$context_main, $heroes_flag
       [ $id, $role ] = explode('|', $id);
     }
     $res .=  "<tr>".
-            ($heroes_flag ? "<td>".hero_portrait($id)."</td><td>".hero_name($id)."</td>" : "<td>".player_name($id)."</td>").
+            ($heroes_flag ? "<td>".hero_portrait($id)."</td><td>".hero_link($id)."</td>" : "<td>".player_link($id)."</td>").
             ($roles ? "<td>".locale_string("position_$role")."</td>" : "").
             "<td>".$el['matches_total']."</td>".
             "<td class=\"separator\">".number_format($el['matches_total']/$context_total_matches*100,2)."%</td>".
@@ -200,5 +213,3 @@ function rg_generator_uncontested($context, $contested, $small = false, $heroes_
 
   return $res;
 }
-
-?>
