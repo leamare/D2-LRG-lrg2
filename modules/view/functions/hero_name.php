@@ -3,10 +3,7 @@ function hero_portrait($hid) {
   global $meta, $portraits_provider;
   if (isset($meta->heroes[ $hid ]['tag']))
     return "<img class=\"hero_portrait\" src=\"".str_replace("%HERO%", $meta['heroes'][ $hid ]['tag'], $portraits_provider)."\" alt=\"".$meta['heroes'][ $hid ]['tag']."\"".
-      " data-aliases=\"".(
-      ($meta['heroes'][ $hid ]['alt'] ?? "") . " " .
-      ($meta['heroes'][ $hid ]['aliases'] ?? "")
-    )."\" />";
+      " data-aliases=\"".hero_aliases($hid)."\" />";
   else return "<img class=\"hero_portrait\" alt=\"undefined\" />";
 }
 
@@ -25,11 +22,11 @@ function hero_icon($hid) {
 }
 
 function hero_full($hid) {
-  return hero_portrait($hid)." ".hero_name($hid);
+  return hero_portrait($hid)." ".hero_link($hid);
 }
 
 function hero_full_icon($hid) {
-  return hero_icon($hid)." ".hero_name($hid);
+  return hero_icon($hid)." ".hero_link($hid);
 }
 
 function hero_name($hid) {
@@ -42,4 +39,19 @@ function hero_tag($hid) {
   global $meta;
   if (isset($meta->heroes[ $hid ]['tag'])) return $meta->heroes[ $hid ]['tag'];
   return "undefined";
+}
+
+function hero_link($hid) {
+  global $leaguetag;
+
+  return "<a href=\"?league=$leaguetag&mod=heroes-profiles-heroid$hid".(empty($linkvars) ? "" : "&".$linkvars)."\">".hero_name($hid)."</a>";
+}
+
+function hero_aliases($hid) {
+  global $meta;
+
+  return (
+    ($meta['heroes'][ $hid ]['alt'] ?? "") . " " .
+    ($meta['heroes'][ $hid ]['aliases'] ?? "")
+  );
 }
