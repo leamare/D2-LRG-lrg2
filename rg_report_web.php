@@ -55,6 +55,7 @@ include_once("modules/view/functions/player_name.php");
 include_once("modules/view/functions/hero_name.php");
 
 include_once("modules/view/functions/has_pair.php");
+include_once("modules/view/functions/process_menu.php");
 
 # PRESETS
 include_once("modules/view/__preset.php");
