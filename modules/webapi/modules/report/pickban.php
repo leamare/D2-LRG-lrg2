@@ -2,6 +2,7 @@
 
 include_once(__DIR__ . "/../../functions/pickban_overview.php");
 include_once(__DIR__ . "/../../functions/overview_uncontested.php");
+include_once(__DIR__ . "/../../../view/functions/teams_diversity_recalc.php");
 
 $repeatVars['pickban'] = ['team', 'region'];
 
@@ -140,11 +141,19 @@ $endpoints['pickban'] = function($mods, $vars, &$report) use (&$meta, &$endpoint
     ];
   }
 
+  [ $balance, $b_wr, $b_pr, $b_cr ] = balance_rank($context);
+
   return [
     'median_picks' => $mp ?? null,
     'median_bans' => $mb ?? null,
     'total' => $context_total_matches ?? null,
     'pickban' => $context,
-    $uncontested['type'] => $uncontested['data']
+    $uncontested['type'] => $uncontested['data'],
+    'balance' => [
+      'total' => round($balance, 3),
+      'winrate' => round($b_wr, 3),
+      'pickrate' => round($b_pr, 3),
+      'contest' => round($b_cr, 3),
+    ]
   ];
 };
