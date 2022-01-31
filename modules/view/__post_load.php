@@ -128,3 +128,35 @@ if (!empty($report['settings']['heroes_snapshot'])) {
     unset($meta['heroes'][$hid]);
   }
 }
+
+if (isset($report["first_match"]) && isset($report["last_match"]) && compare_ver($report['ana_version'], [ 2,23,0,0,0 ]) < 0) {
+  $meta['heroes'];
+
+  $last_match = $report["last_match"]["date"];
+  $first_match = $report["first_match"]["date"];
+
+  $is_cm_only = ( isset($report["modes"][2]) || isset($report["modes"][8]) ) && count($report["modes"]) < 3;
+  
+  foreach ($meta['heroes'] as $hid => $data) {
+    if (!isset($data['released'])) continue;
+
+    $line = null;
+
+    foreach ($data['released'] as $l) {
+      if ($l[0] > $last_match) break;
+
+      if ($l[0] > $first_match) continue;
+      $line = $l;
+    }
+
+    if ($is_cm_only) {
+      if (empty($line) || !($line[2] ?? 0)) {
+        unset($meta['heroes'][$hid]);
+      }
+    } else {
+      if (!$line) {
+        unset($meta['heroes'][$hid]);
+      }
+    }
+  }
+}
