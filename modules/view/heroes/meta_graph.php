@@ -44,11 +44,14 @@ function rg_view_generate_heroes_meta_graph() {
       "per" => "35%"
   ];
 
-  $res = "<div class=\"content-text\">".locale_string("desc_meta_graph", $locale_settings)."</div>";
-
+  $res = "<details class=\"content-text explainer\"><summary>".locale_string("explain_summary")."</summary>".
+    "<div class=\"explain-content\">".
+      "<div class=\"line\">".locale_string("desc_meta_graph", $locale_settings)."</div>".
+      "<div class=\"line\">".locale_string("desc_meta_graph_add", $locale_settings)."</div>".
+    "</div>".
+  "</details>";
+  
   $res .= rg_generator_meta_graph("heroes-meta-graph", $report['hero_combos_graph'], $report['pickban']);
-
-  $res .= "<div class=\"content-text\">".locale_string("desc_meta_graph_add", $locale_settings)."</div>";
 
   return $res;
 }

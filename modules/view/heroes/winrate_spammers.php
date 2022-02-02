@@ -11,7 +11,11 @@ function rg_view_generate_heroes_wrplayers() {
     $report['hero_winrate_spammers'] = unwrap_data($report['hero_winrate_spammers']);
   }
 
-  $res .= "<div class=\"content-text\">".locale_string("desc_heroes_wrplayers")."</div>";
+  $res .= "<details class=\"content-text explainer\"><summary>".locale_string("explain_summary")."</summary>".
+    "<div class=\"explain-content\">".
+      "<div class=\"line\">".locale_string("desc_heroes_wrplayers")."</div>".
+    "</div>".
+  "</details>";
 
   $res .= "<input name=\"filter\" class=\"search-filter wide\" data-table-filter-id=\"heroes-wrspammers\" placeholder=\"".locale_string('filter_placeholder')."\" />";
 

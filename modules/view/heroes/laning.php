@@ -20,11 +20,26 @@ function rg_view_generate_heroes_laning() {
     else return ($a['name'] > $b['name']) ? 1 : -1;
   });
 
+  $explainer = "<details class=\"content-text explainer\"><summary>".locale_string("explain_summary")."</summary>".
+    "<div class=\"explain-content\">".
+      "<div class=\"line\">".locale_string("desc_heroes_hvh")."</div>".
+      "<div class=\"line\">".locale_string("desc_laning_1")."</div>".
+      "<div class=\"line\">".locale_string("desc_laning_2")."</div>".
+      "<div class=\"line\">".locale_string("desc_laning_3")."</div>".
+      "<div class=\"line\">".locale_string("desc_laning_4")."</div>".
+      "<div class=\"line\">".locale_string("desc_laning_5")."</div>".
+      "<div class=\"line\">".locale_string("desc_laning_6")."</div>".
+      "<div class=\"line\">".locale_string("desc_laning_7")."</div>".
+    "</div>".
+  "</details>";
+
   $res['total'] = '';
 
   if(check_module($parent_module."total")) {
     $res["total"] = "<div class=\"content-text\">".locale_string("desc_heroes_hvh")."</div>";
-    $res["total"] .= "<div class=\"content-text\">".locale_string("laning_desc")."</div>";
+    
+    $res["total"] = $explainer;
+
     $res["total"] .= rg_generator_laning_profile("$parent_module-total", $report['hero_laning'], 0);
   }
 
@@ -33,8 +48,7 @@ function rg_view_generate_heroes_laning() {
     $res["heroid".$hid] = "";
 
     if(check_module($parent_module."heroid".$hid)) {
-      $res["heroid".$hid] = "<div class=\"content-text\">".locale_string("desc_heroes_hvh")."</div>";
-      $res["heroid".$hid] .= "<div class=\"content-text\">".locale_string("laning_desc")."</div>";
+      $res["heroid".$hid] = $explainer;
       $res["heroid".$hid] .= rg_generator_laning_profile("$parent_module-$hid", $report['hero_laning'], $hid);
     }
   }

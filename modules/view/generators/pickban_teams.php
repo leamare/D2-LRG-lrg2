@@ -133,7 +133,11 @@ function rg_generator_team_pickban($table_id, $context) {
   //   " (mp): $mp - ".locale_string("heroes_median_bans").
   //   " (mb): $mb - ".locale_string("matches_total").": $context_total_matches</div>";
 
-  $res .= "<div class=\"content-text\">".locale_string("desc_pickban_teams")."</div>";
+  $res .= "<details class=\"content-text explainer\"><summary>".locale_string("explain_summary")."</summary>".
+    "<div class=\"explain-content\">".
+      "<div class=\"line\">".locale_string("desc_pickban_teams")."</div>".
+    "</div>".
+  "</details>";
 
   $res .= "<input name=\"filter\" class=\"search-filter wide\" data-table-filter-id=\"$table_id\" placeholder=\"".locale_string('filter_placeholder')."\" />";
   $res .=  "<table id=\"$table_id\" class=\"wide list sortable\"><thead><tr class=\"overhead\">".

@@ -43,8 +43,13 @@ function rg_view_generate_heroes_hph() {
         }
 
         // $res["heroid".$hid] = "<div class=\"content-text\">".locale_string("desc_heroes_hph")."</div>";
-        $res["heroid".$hid] .= "<div class=\"content-text\">".locale_string("pairs_desc")."</div>";
-        $res["heroid".$hid] .= "<div class=\"content-text\">".locale_string("pairs_desc_2")."</div>";
+        
+        $res["heroid".$hid] .= "<details class=\"content-text explainer\"><summary>".locale_string("explain_summary")."</summary>".
+          "<div class=\"explain-content\">".
+            "<div class=\"line\">".locale_string("pairs_desc")."</div>".
+            "<div class=\"line\">".locale_string("pairs_desc_2")."</div>".
+          "</div>".
+        "</details>";
         $res["heroid".$hid] .= rg_generator_hph_profile("$parent_module-$hid", $report['hph'][$hid], $report['pickban'], $hid);
       } else {
         $res["heroid".$hid] .= "<div class=\"content-text\">".locale_string("stats_empty")."</div>";

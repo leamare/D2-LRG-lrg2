@@ -41,10 +41,12 @@ function rg_view_generate_heroes_hvh() {
           $hvh[$hid][$opid]['lane_wr'] = $hero['lane_wr'] ?? 0;
         }
       }
-
-
-      // $res["heroid".$hid] = "<div class=\"content-text\">".locale_string("desc_heroes_hvh")."</div>";
-      $res["heroid".$hid] .= "<div class=\"content-text\">".locale_string("desc_heroes_hvh_2")."</div>";
+      
+      $res["heroid".$hid] .= "<details class=\"content-text explainer\"><summary>".locale_string("explain_summary")."</summary>".
+          "<div class=\"explain-content\">".
+            "<div class=\"line\">".locale_string("desc_heroes_hvh_2")."</div>".
+          "</div>".
+        "</details>";
       $res["heroid".$hid] .= rg_generator_pvp_profile("hero-hvh-$hid", $hvh[$hid], $report['pickban'], $hid);
     }
   }

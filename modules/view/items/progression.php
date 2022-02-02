@@ -172,7 +172,11 @@ function rg_view_generate_items_progression() {
     "</span>".
   "</div>";
 
-  $reslocal .= "<div class=\"content-text\">".locale_string("items_progression_desc")."</div>";
+  $reslocal .= "<details class=\"content-text explainer\"><summary>".locale_string("explain_summary")."</summary>".
+    "<div class=\"explain-content\">".
+      "<div class=\"line\">".locale_string("items_progression_desc")."</div>".
+    "</div>".
+  "</details>";
 
   $reslocal .= "<div id=\"items-progr-$tag\" class=\"graph\"></div><script type=\"text/javascript\">";
 

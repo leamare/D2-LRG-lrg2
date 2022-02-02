@@ -344,7 +344,11 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
           }
 
           $res["team".$tid]['overview'] .= "<div class=\"content-header\">".locale_string("draft")."</div>";
-          $res["team".$tid]['overview'] .= "<div class=\"content-text\">".locale_string("desc_pickban_teams_profile")."</div>";
+          $res["team".$tid]['overview'] .= "<details class=\"content-text explainer\"><summary>".locale_string("explain_summary")."</summary>".
+            "<div class=\"explain-content\">".
+              "<div class=\"line\">".locale_string("desc_pickban_teams_profile")."</div>".
+            "</div>".
+          "</details>";
           include_once("$root/modules/view/generators/pickban_teams.php");
           $res["team".$tid]['overview'] .= rg_generator_team_pickban_profile($context[$tid]);
 
@@ -525,9 +529,13 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
           $locale_settings = ["lim" => ceil($report['settings']['limiter_triplets']*$multiplier)+1,
               "per" => "35%"
           ];
-          $res["team".$tid]['heroes']['meta_graph'] = "<div class=\"content-text\">".locale_string("desc_meta_graph", $locale_settings)."</div>";
+          $res["team".$tid]['heroes']['meta_graph'] .= "<details class=\"content-text explainer\"><summary>".locale_string("explain_summary")."</summary>".
+            "<div class=\"explain-content\">".
+              "<div class=\"line\">".locale_string("desc_meta_graph", $locale_settings)."</div>".
+              "<div class=\"line\">".locale_string("desc_meta_graph_add", $locale_settings)."</div>".
+            "</div>".
+          "</details>";
           $res["team".$tid]['heroes']['meta_graph'] .= rg_generator_meta_graph("team$tid-heroes-meta-graph", $context[$tid]['hero_graph'], $context[$tid]['pickban']);
-          $res["team".$tid]['heroes']['meta_graph'] .= "<div class=\"content-text\">".locale_string("desc_meta_graph_add", $locale_settings)."</div>";
         }
       }
       if ((isset($context[$tid]['hero_pairs']) && !empty($context[$tid]['hero_pairs'])) ||

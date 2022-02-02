@@ -66,7 +66,11 @@ function rg_view_generate_items_heroes() {
 
   $data = $report['items']['stats']['total'][$item];
 
-  $res['itemid'.$item] .= "<div class=\"content-text\">".locale_string("items_stats_desc")."</div>";
+  $res['itemid'.$item] .= "<details class=\"content-text explainer\"><summary>".locale_string("explain_summary")."</summary>".
+    "<div class=\"explain-content\">".
+      "<div class=\"line\">".locale_string("items_stats_desc")."</div>".
+    "</div>".
+  "</details>";
 
   $res['itemid'.$item] .= "<table id=\"items-itemid$item-reference\" class=\"list wide\">";
   $res['itemid'.$item] .= "<thead><tr class=\"overhead\">".
@@ -184,7 +188,7 @@ function rg_view_generate_items_heroes() {
 
     $res['itemid'.$item] .= "<tr>".
       "<td>".hero_portrait($hero)."</td>".
-      "<td>".hero_name($hero)."</td>".
+      "<td>".hero_link($hero)."</td>".
       "<td class=\"separator\">".$line['purchases']."</td>".
       "<td>".number_format($line['prate']*100, 2)."%</td>".
       "<td>".number_format($ranks[$hero], 1)."</td>".

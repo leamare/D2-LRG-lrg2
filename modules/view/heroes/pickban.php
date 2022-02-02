@@ -23,11 +23,17 @@ function rg_view_generate_heroes_pickban() {
     "</span>".
   "</div>";
 
+  $res .= "<details class=\"content-text explainer\"><summary>".locale_string("explain_summary")."</summary>".
+    "<div class=\"explain-content\">".
+      "<div class=\"line\">".locale_string("desc_heroes_pickban")."</div>".
+      "<div class=\"line\">".locale_string("desc_pickban_ranks")."</div>".
+      "<div class=\"line\">".locale_string("desc_balance")."</div>".
+    "</div>".
+  "</details>";
+
   $res .= rg_generator_pickban("heroes-pickban", $report['pickban'], $report["random"]);
 
   $res .= rg_generator_uncontested($meta["heroes"], $report['pickban']);
-
-  $res .= "<div class=\"content-text\">".locale_string("desc_heroes_pickban")."</div>";
 
   return $res;
 }

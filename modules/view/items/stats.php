@@ -132,7 +132,11 @@ function rg_view_generate_items_stats() {
   
   $res[$tag] .= "</div>";
 
-  $res[$tag] .= "<div class=\"content-text\">".locale_string("items_stats_desc")."</div>";
+  $res[$tag] .= "<details class=\"content-text explainer\"><summary>".locale_string("explain_summary")."</summary>".
+    "<div class=\"explain-content\">".
+      "<div class=\"line\">".locale_string("items_stats_desc")."</div>".
+    "</div>".
+  "</details>";
 
   if (empty($items)) {
     $res[$tag] .= "<div class=\"content-text\">".locale_string("items_stats_empty")."</div>";

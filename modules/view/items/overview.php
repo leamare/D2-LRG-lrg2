@@ -35,7 +35,11 @@ function rg_view_generate_items_overview() {
   }
 
   $res .= "<div class=\"content-header\">".locale_string("items_most_impactful_header")."</div>";
-  $res .= "<div class=\"content-text\">".locale_string("items_most_impactful_desc")."</div>";
+  $res .= "<details class=\"content-text explainer\"><summary>".locale_string("explain_summary")."</summary>".
+    "<div class=\"explain-content\">".
+      "<div class=\"line\">".locale_string("items_most_impactful_desc")."</div>".
+    "</div>".
+  "</details>";
 
   // most impactful (5):
   // - best wr difference + more than q3 purchases

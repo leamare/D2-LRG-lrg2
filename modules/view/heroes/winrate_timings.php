@@ -13,7 +13,11 @@ function rg_view_generate_heroes_wrtimings() {
     $report['hero_winrate_timings'] = unwrap_data($report['hero_winrate_timings']);
   }
 
-  $res .= "<div class=\"content-text\">".locale_string("desc_heroes_wrtimings")."</div>";
+  $res .= "<details class=\"content-text explainer\"><summary>".locale_string("explain_summary")."</summary>".
+    "<div class=\"explain-content\">".
+      "<div class=\"line\">".locale_string("desc_heroes_wrtimings")."</div>".
+    "</div>".
+  "</details>";
 
   $res .= "<input name=\"filter\" class=\"search-filter wide\" data-table-filter-id=\"heroes-wrtimings\" placeholder=\"".locale_string('filter_placeholder')."\" />";
 

@@ -35,14 +35,22 @@ function rg_view_generate_heroes_counters() {
 
   $res['pairs'] = "";
   if (check_module($parent_module."pairs")) {
-    $res['pairs'] =  "<div class=\"content-text\">".locale_string("desc_heroes_counters_pairs", [ "lim"=>$report['settings']['limiter_combograph']+1 ] )."</div>";
+    $res['pairs'] .= "<details class=\"content-text explainer\"><summary>".locale_string("explain_summary")."</summary>".
+          "<div class=\"explain-content\">".
+            "<div class=\"line\">".locale_string("desc_heroes_counters_pairs", [ "lim"=>$report['settings']['limiter_combograph']+1 ] )."</div>".
+          "</div>".
+        "</details>";
 
     $res['pairs'] .=  rg_generator_combos("hero-pairs", $hvh, null);
   }
 
   $res['graph'] = "";
   if (check_module($parent_module."graph")) {
-    $res['graph'] =  "<div class=\"content-text\">".locale_string("desc_heroes_counters_pairs_graph", [ "lim"=>$report['settings']['limiter_combograph']+1 ] )."</div>";
+    $res['graph'] .= "<details class=\"content-text explainer\"><summary>".locale_string("explain_summary")."</summary>".
+          "<div class=\"explain-content\">".
+            "<div class=\"line\">".locale_string("desc_heroes_counters_pairs_graph", [ "lim"=>$report['settings']['limiter_combograph']+1 ] )."</div>".
+          "</div>".
+        "</details>";
 
     sort($devs);
     $med_deviation = $devs[ round( count($devs) * 0.75 ) ];
