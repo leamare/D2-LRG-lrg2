@@ -84,7 +84,7 @@ function rg_generator_summary($table_id, &$context, $hero_flag = true, $rank = f
 
   foreach($context as $id => $el) {
     $res .= "<tr><td>".
-              ($hero_flag ? hero_portrait($id)."</td><td>".hero_name($id) : player_link($id, true, true)).
+              ($hero_flag ? hero_portrait($id)."</td><td>".hero_link($id) : player_link($id, true, true)).
             "</td>".
             "<td>".$el['matches_s']."</td>".
             "<td>".number_format($el['winrate_s']*100,1)."%</td>".

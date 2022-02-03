@@ -2,7 +2,7 @@
 
 $modules['heroes']['daily_wr'] = "";
 
-function __rg_view_generate_heroes_daily_winrates_generate_scripts($color, $labels, $data, $id) {
+function __rg_view_generate_heroes_daily_winrates_generate_scripts($color, $labels, $data, $id, $full = false) {
   return "new Chart(document.getElementById(\"$id\").getContext(\"2d\"), {
     type: 'line',
     data: {
@@ -33,9 +33,7 @@ function __rg_view_generate_heroes_daily_winrates_generate_scripts($color, $labe
           },
         }], 
         yAxes: [{
-          gridLines: {
-            display: false
-          },
+          ".($full ? "ticks: {min: 0, max: 100, }," : "gridLines: { display: false },")."
         }]
       }
     }
@@ -148,7 +146,7 @@ function rg_view_generate_heroes_daily_winrates() {
       }
     }
 
-    $res .= "<tr><td>".hero_portrait($hid)."</td><td>".hero_name($hid)."</td>".
+    $res .= "<tr><td>".hero_portrait($hid)."</td><td>".hero_link($hid)."</td>".
       "<td class=\"separator\">".number_format($first_wr, 2)."%</td>".
       "<td><div style=\"position: relative; width: 100%; height: 70px\"><canvas id=\"hero-daily-wr-$hid\"></canvas></div></td>".
       "<td>".number_format($dwr[ count($dwr)-1 ], 2)."%</td>".

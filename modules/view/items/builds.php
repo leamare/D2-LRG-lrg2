@@ -171,7 +171,7 @@ function rg_view_generate_items_builds() {
 
     foreach ($hnames as $hid => $hname) {
       $roles = $report['items']['progrole']['data'][$hid] ?? []; 
-      $res['overview'] .= "<tr><td>".hero_icon($hid)."</td><td>".hero_name($hid)."</td><td class=\"separator\">";
+      $res['overview'] .= "<tr><td>".hero_icon($hid)."</td><td>".hero_link($hid)."</td><td class=\"separator\">";
 
       $res['overview'] .= count($roles)."</td>";
 
@@ -298,7 +298,7 @@ function rg_view_generate_items_builds() {
     "</tr></thead><tbody>";
     $reslocal .= "<tr>".
       "<td>".hero_portrait($hero)."</td>".
-      "<td>".hero_name($hero)."</td>".
+      "<td>".hero_link($hero)."</td>".
       "<td>".($pbdata['role_matches'] ?? $pbdata['matches_picked'])."</td>".
       ($pbdata['role_matches'] && isset($report['hero_positions']) ? "<td>".number_format(100*$pbdata['role_matches']/$pbdata['matches_picked'], 2)."%</td>" : "").
       "<td>".number_format(($pbdata['role_winrate'] ?? $pbdata['winrate_picked'])*100, 2)."%</td>".
@@ -453,9 +453,6 @@ function rg_view_generate_items_builds() {
     return $build['stats'][$a]['med_time'] <=> $build['stats'][$b]['med_time'];
   });
 
-  // TODO: 
-
-  // $reslocal .= "<div class=\"content-text\">";
 
   foreach ($overview_categories as $codename => $items) {
     $reslocal .= "<div class=\"build-overview-container main-build-$codename\">";
@@ -505,26 +502,6 @@ function rg_view_generate_items_builds() {
     }
   }
   $reslocal .= "</div>";
-
-  // if (!empty($build['neutrals'])) {
-  //   $reslocal .= "<div class=\"build-overview-container main-build-neutrals\">";
-  //   $reslocal .= "<div class=\"header\">".locale_string("builds_neutrals")." (top-5)</div><div class=\"container-content\">";
-  //   foreach ($build['neutrals'] as $i => $items) {
-  //     $reslocal .= "<div class=\"items-list\">".
-  //       "<div class=\"build-item-component text common\"><a class=\"item-text\">T$i</a></div>".
-  //       "<div class=\"build-item-arrow build-item-arrow-right\"></div><div class=\"items-list items-list-inner\">";
-  //     $sz = count($items);
-  //     foreach ($items as $j => $item) {
-  //       $reslocal .= itembuild_item_component($build, $item);
-  //       if ($j == 4 && $sz > 6) break;
-  //     }
-  //     if ($sz > 6) {
-  //       $reslocal .= "<div class=\"build-item-component text common tbc\"><a class=\"item-text\">...</a></div>";
-  //     }
-  //     $reslocal .= "</div></div>";
-  //   }
-  //   $reslocal .= "</div></div>";
-  // }
 
   // closing block
   $reslocal .= "</div>";

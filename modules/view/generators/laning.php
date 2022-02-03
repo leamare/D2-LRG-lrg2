@@ -118,7 +118,7 @@ function rg_generator_laning_profile($table_id, &$context, $id_o, $heroes_flag =
 
     $res .= "<tr>".
       ($heroes_flag ? "<td>".hero_portrait($id_o)."</td>" : '').
-      "<td>".($heroes_flag ? hero_name($id_o) : player_name($id_o))."</td>".
+      "<td>".($heroes_flag ? hero_link($id_o) : player_link($id_o))."</td>".
       "<td>".($data['matches'] ? $data['matches'] : '-')."</td>".
       "<td>".($data['matches'] ? number_format($data['lane_wr']*100, 2).'%' : '-')."</td>".
       "<td>".($data['matches'] ? number_format($data['rank'], 1) : '0')."</td>".
@@ -191,7 +191,7 @@ function rg_generator_laning_profile($table_id, &$context, $id_o, $heroes_flag =
 
     $res .= "<tr class=\"row\">".
       ($heroes_flag ? "<td>".hero_portrait($elid)."</td>" : '').
-      "<td>".($heroes_flag ? hero_name($elid) : player_name($elid))."</td>".
+      "<td>".($heroes_flag ? hero_link($elid) : player_link($elid))."</td>".
       "<td>".($data['matches'] ? $data['matches'] : '-')."</td>".
       "<td>".($data['matches'] ? number_format($data['lane_wr']*100, 2).'%' : '-')."</td>".
       "<td>".($data['matches'] ? number_format($data['rank'], 1) : '0')."</td>".

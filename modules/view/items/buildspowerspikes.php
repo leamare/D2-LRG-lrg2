@@ -88,7 +88,7 @@ function rg_view_generate_items_buildspowerspikes() {
 
     foreach ($hnames as $hid => $hname) {
       $roles = $report['items']['progrole']['data'][$hid] ?? []; 
-      $res['overview'] .= "<tr><td>".hero_icon($hid)."</td><td>".hero_name($hid)."</td><td class=\"separator\">";
+      $res['overview'] .= "<tr><td>".hero_icon($hid)."</td><td>".hero_link($hid)."</td><td class=\"separator\">";
       $kroles = array_keys($roles);
       usort($kroles, function($a, $b) {
         [$ac, $al] = explode('.', $a); [$bc, $bl] = explode('.', $b);

@@ -100,7 +100,7 @@ function rg_generator_overview_positions_section($tables_prefix, &$context, &$pi
     $i = 0;
     foreach ($heroes as $id => $v) {
       if (++$i > $count) break;
-      $res .= "<tr><td>".hero_portrait($id)."</td><td>".hero_name($id)."</td>".
+      $res .= "<tr><td>".hero_portrait($id)."</td><td>".hero_link($id)."</td>".
         "<td>".$v['matches']."</td>".
         "<td>".number_format($v['rank'],1)."</td>".
         //"<td>".number_format($v['matches']*100/$pickban[$id]['matches_total'],1)."%</td>".

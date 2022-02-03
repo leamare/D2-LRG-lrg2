@@ -100,7 +100,7 @@ function rg_view_generate_items_stats() {
     "</tr></thead><tbody>";
     $res[$tag] .= "<tr>".
       "<td>".hero_portrait($hero)."</td>".
-      "<td>".hero_name($hero)."</td>".
+      "<td>".hero_link($hero)."</td>".
       "<td>".$data['matches_picked']."</td>".
       "<td>".number_format($data['winrate_picked']*100, 2)."%</td>".
     "</tr></tbody></table><br />";

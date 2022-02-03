@@ -40,7 +40,7 @@ function rg_generator_pvp_profile($table_id, &$pvp_context, &$context_wrs, $srci
         "<th>".locale_string("winrate")."</th></tr></thead>".
         "<tbody><tr>".
         ($heroes_flag ? "<td>".hero_portrait($srcid)."</td>" : "").
-        "<td>".($heroes_flag ? hero_name($srcid) : player_name($srcid))."</td>".
+        "<td>".($heroes_flag ? hero_link($srcid) : player_link($srcid))."</td>".
         "<td>".$dt['ms']."</td>".
         "<td>".number_format($dt['wr']*100,2)."%</td>".
         "</tr></tbody></table>";
@@ -124,7 +124,7 @@ function rg_generator_pvp_profile($table_id, &$pvp_context, &$context_wrs, $srci
                       "onclick=\"showModal('".implode($data['matchids'], ", ")."','".locale_string("matches")."')\"" :
                       "").">".
             ($heroes_flag ? "<td>".hero_portrait($elid_op)."</td>" : "").
-            "<td>".($heroes_flag ? hero_name($elid_op) : player_name($elid_op))."</td>".
+            "<td>".($heroes_flag ? hero_link($elid_op) : player_link($elid_op))."</td>".
             ($isrank ? "<td>".number_format($data['rank'], 2)."</td><td>".number_format($data['arank'], 2)."</td>" : "").
             "<td class=\"separator\">".number_format($data['winrate']*100,2)."%</td>".
             (!$nodiff ? "<td>".number_format($data['diff']*100,2)."%</td>" : "").

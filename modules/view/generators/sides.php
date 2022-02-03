@@ -75,7 +75,7 @@ function rg_generator_sides($table_id, &$context, $heroes_flag = true) {
       $el[1]["winrate"] = 0;
     }
 
-    $res .= "<tr><td>".($heroes_flag ? hero_portrait($elid)."</td><td>".hero_name($elid) : player_name($elid))."</td>".
+    $res .= "<tr><td>".($heroes_flag ? hero_portrait($elid)."</td><td>".hero_link($elid) : player_link($elid))."</td>".
             "<td>".$el[-1]['matches']."</td>".
             "<td class=\"separator\">".number_format($el[1]["matches"]*100/$el[-1]["matches"],2)."%</td>".
             "<td>".number_format($el[-1]["diff"]*100,2)."%</td>";

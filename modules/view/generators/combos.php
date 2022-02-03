@@ -59,18 +59,18 @@ function rg_generator_combos($table_id, &$context, $context_matches, $heroes_fla
   foreach($context as $combo) {
     if (!empty($context_matches))
       $matches_head = locale_string("matches")." : ".
-        ($heroes_flag ? hero_name($combo[$id.'1']) : player_name($combo[$id.'1']))." + ".
-        ($heroes_flag ? hero_name($combo[$id.'2']) : player_name($combo[$id.'2'])).
-        ($trios ? " + ".($heroes_flag ? hero_name($combo[$id.'3']) : player_name($combo[$id.'3'])) : "");
+        ($heroes_flag ? hero_link($combo[$id.'1']) : player_link($combo[$id.'1']))." + ".
+        ($heroes_flag ? hero_link($combo[$id.'2']) : player_link($combo[$id.'2'])).
+        ($trios ? " + ".($heroes_flag ? hero_link($combo[$id.'3']) : player_link($combo[$id.'3'])) : "");
     $res .= "<tr>".
                 ($heroes_flag ? "<td>".hero_portrait($combo[$id.'1'])."</td>" : "").
-                "<td>".($heroes_flag ? hero_name($combo[$id.'1']) : player_name($combo[$id.'1']))."</td>".
+                "<td>".($heroes_flag ? hero_link($combo[$id.'1']) : player_link($combo[$id.'1']))."</td>".
                 ($heroes_flag ? "<td>".hero_portrait($combo[$id.'2'])."</td>" : "").
-                "<td>".($heroes_flag ? hero_name($combo[$id.'2']) : player_name($combo[$id.'2']))."</td>".
+                "<td>".($heroes_flag ? hero_link($combo[$id.'2']) : player_link($combo[$id.'2']))."</td>".
                 (
                   $trios ?
                   ($heroes_flag ? "<td>".hero_portrait($combo[$id.'3'])."</td>" : "").
-                  "<td>".($heroes_flag ? hero_name($combo[$id.'3']) : player_name($combo[$id.'2']))."</td>" :
+                  "<td>".($heroes_flag ? hero_link($combo[$id.'3']) : player_link($combo[$id.'2']))."</td>" :
                   ""
                   ).
                 "<td>".$combo['matches']."</td>".

@@ -44,7 +44,7 @@ function rg_view_generate_heroes_wrplayers() {
   "</tr></thead><tbody>";
 
   foreach ($report['hero_winrate_spammers'] as $hid => $data) {
-    $res .= "<tr><td>".hero_portrait($hid)."</td><td>".hero_name($hid)."</td>".
+    $res .= "<tr><td>".hero_portrait($hid)."</td><td>".hero_link($hid)."</td>".
       "<td class=\"separator\">".$data['players_1only']."</td>".
       "<td>".$data['players_1plus']."</td>".
       "<td class=\"separator\">".$data['q1matches']."</td>".

@@ -49,7 +49,7 @@ function rg_view_generate_heroes_wrtimings() {
   $d = 0.25*0.7;
 
   foreach ($report['hero_winrate_timings'] as $hid => $data) {
-    $res .= "<tr><td>".hero_portrait($hid)."</td><td>".hero_name($hid)."</td>".
+    $res .= "<tr><td>".hero_portrait($hid)."</td><td>".hero_link($hid)."</td>".
       "<td>".($data['matches'])."</td>".
       "<td class=\"separator\">".convert_time_seconds($data['q1duration'])."</td>".
       "<td>".convert_time_seconds($data['q2duration'])."</td>".

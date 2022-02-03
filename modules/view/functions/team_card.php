@@ -53,7 +53,7 @@ function team_card($tid, $full = false) {
   foreach($report['teams'][$tid]['active_roster'] as $player) {
     if (!isset($report['players'][$player])) continue;
     $position = $player_pos[$player];
-    $output .= "<div class=\"team-info-line\">".player_name($player).
+    $output .= "<div class=\"team-info-line\">".player_link($player, true, true).
       ((isset($report['teams'][$tid]['hero_positions']) || isset($report['hero_positions'])) && isset($position['core']) ?
         " (".($position['core'] ? locale_string("core") : locale_string("support")).
         ($position['lane'] ? " ".locale_string( "lane_".$position['lane'] ) : '').')' : ''

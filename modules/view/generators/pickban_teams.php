@@ -179,7 +179,7 @@ function rg_generator_team_pickban($table_id, $context) {
   
   foreach($pb as $id => $el) {
     $res .=  "<tr>".
-      "<td>".hero_portrait($id)."</td><td>".hero_name($id)."</td>".
+      "<td>".hero_portrait($id)."</td><td>".hero_link($id)."</td>".
       "<td class=\"separator\">".$el['matches']."</td>".
       "<td>".number_format($el['matches']/$context['matches_total']*100,2)."%</td>".
 
@@ -235,7 +235,7 @@ function rg_generator_team_pickban_profile($context) {
   $counter = 7;
   foreach($pb as $hid => $hero) {
     if($counter == 0) break;
-    $res .=  "<tr><td>".hero_portrait($hid)."</td><td>".hero_name($hid)."</td>".
+    $res .=  "<tr><td>".hero_portrait($hid)."</td><td>".hero_link($hid)."</td>".
       "<td>".number_format($hero['rank'], 1)."</td>".
       "<td>".$hero['matches_picked']."</td>".
       "<td>".number_format($hero['winrate_picked']*100,1)."%</td>".
@@ -262,7 +262,7 @@ function rg_generator_team_pickban_profile($context) {
   $counter = 7;
   foreach($pb as $hid => $hero) {
     if($counter == 0) break;
-    $res .=  "<tr><td>".hero_portrait($hid)."</td><td>".hero_name($hid)."</td>".
+    $res .=  "<tr><td>".hero_portrait($hid)."</td><td>".hero_link($hid)."</td>".
       "<td>".number_format($hero['arank'], 1)."</td>".
       "<td>".$hero['matches_picked']."</td>".
       "<td>".number_format($hero['winrate_picked']*100,1)."%</td>".
@@ -289,7 +289,7 @@ function rg_generator_team_pickban_profile($context) {
   $counter = 7;
   foreach($pb as $hid => $hero) {
     if($counter == 0) break;
-    $res .=  "<tr><td>".hero_portrait($hid)."</td><td>".hero_name($hid)."</td>".
+    $res .=  "<tr><td>".hero_portrait($hid)."</td><td>".hero_link($hid)."</td>".
       "<td>".number_format($hero['rank_vs'], 1)."</td>".
       "<td>".$hero['matches_picked_vs']."</td>".
       "<td>".number_format($hero['winrate_picked_vs']*100,1)."%</td>".
@@ -316,7 +316,7 @@ function rg_generator_team_pickban_profile($context) {
   $counter = 7;
   foreach($pb as $hid => $hero) {
     if($counter == 0) break;
-    $res .=  "<tr><td>".hero_portrait($hid)."</td><td>".hero_name($hid)."</td>".
+    $res .=  "<tr><td>".hero_portrait($hid)."</td><td>".hero_link($hid)."</td>".
       "<td>".number_format($hero['arank_vs'], 1)."</td>".
       "<td>".$hero['matches_picked_vs']."</td>".
       "<td>".number_format($hero['winrate_picked_vs']*100,1)."%</td>".

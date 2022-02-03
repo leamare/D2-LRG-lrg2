@@ -134,7 +134,7 @@ function rg_generator_positions_overview($table_id, &$context, $hero_flag = true
 
   foreach ($overview as $elid => $el) {
     $res .= "<tr><td>".
-        ($hero_flag ? hero_portrait($elid)."</td><td>".hero_name($elid) : player_name($elid)).
+        ($hero_flag ? hero_portrait($elid)."</td><td>".hero_link($elid) : player_link($elid)).
         "</td><td>".$el['total']."</td>";
     foreach($el as $v) {
       if (!is_array($v)) continue;

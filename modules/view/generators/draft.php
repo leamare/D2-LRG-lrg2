@@ -130,7 +130,7 @@ function rg_generator_draft($table_id, &$context_pickban, &$context_draft, $cont
 
     $draft[$id] = array ("out" => "", "matches" => $context_pickban[$id]['matches_total']);
     if($hero_flag)
-      $draft[$id]['out'] .= "<td>".hero_portrait($id)."</td><td>".hero_name($id)."</td>";
+      $draft[$id]['out'] .= "<td>".hero_portrait($id)."</td><td>".hero_link($id)."</td>";
     else
       $draft[$id]['out'] .= "<td>".player_link($id, true, true)."</td>";
 
@@ -156,6 +156,7 @@ function rg_generator_draft($table_id, &$context_pickban, &$context_draft, $cont
     else return ($a['matches'] < $b['matches']) ? 1 : -1;
   });
 
+  $res .= "<input name=\"filter\" class=\"search-filter wide\" data-table-filter-id=\"$table_id\" placeholder=\"".locale_string('filter_placeholder')."\" />";
   $res .= "<table id=\"$table_id\" class=\"list wide sortable\"><thead><tr class=\"overhead\"><th width=\"11%\"".($hero_flag ? " colspan=\"2\"" : "")."></th>".
           "<th colspan=\"6\">".locale_string("total")."</th>";
   $heroline = "<tr>".

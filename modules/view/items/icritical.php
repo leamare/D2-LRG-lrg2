@@ -76,7 +76,7 @@ function rg_view_generate_items_critical() {
     "</tr></thead><tbody>";
     $res[$tag] .= "<tr>".
       "<td>".hero_portrait($hero)."</td>".
-      "<td>".hero_name($hero)."</td>".
+      "<td>".hero_link($hero)."</td>".
       "<td>".$data['matches_picked']."</td>".
       "<td>".number_format($data['winrate_picked']*100, 2)."%</td>".
     "</tr></tbody></table><br />";
@@ -136,7 +136,11 @@ function rg_view_generate_items_critical() {
   
   $res[$tag] .= "</div>";
 
-  $res[$tag] .= "<div class=\"content-text\">".locale_string("items_stats_critical_desc")."</div>";
+  $res[$tag] .= "<details class=\"content-text explainer\"><summary>".locale_string("explain_summary")."</summary>".
+    "<div class=\"explain-content\">".
+      "<div class=\"line\">".locale_string("items_stats_critical_desc")."</div>".
+    "</div>".
+  "</details>";
 
   if (empty($items)) {
     $res[$tag] .= "<div class=\"content-text\">".locale_string("items_stats_empty")."</div>";

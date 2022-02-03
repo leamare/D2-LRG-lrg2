@@ -237,7 +237,7 @@ function rg_view_generate_items_profiles() {
     foreach ($records_best as $hero => $line) {
       $res['itemid'.$item] .=  "<tr><td>".match_link($line['match'])."</td>".
         "<td>".hero_portrait($line['hero'])."</td>".
-        "<td>".hero_name($line['hero'])."</td>".
+        "<td>".hero_link($line['hero'])."</td>".
         "<td data-sorter=\"time\">".convert_time_seconds($line['time'])."</td>".
         "<td data-sorter=\"time\">".convert_time_seconds($line['diff'])."</td>".
       "</tr>";

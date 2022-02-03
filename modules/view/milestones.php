@@ -60,7 +60,7 @@ function rg_view_generate_milestones() {
             "<th width=\"3%\"></th><th width=\"45%\">".locale_string("hero")."</th>".
             "<th>".locale_string("value")."</th></tr></thead>";
       foreach($list as $pl => $val) {
-        $res .= "<td>".hero_portrait($pl)."</td><td>".hero_name($pl)."</td><td>".
+        $res .= "<td>".hero_portrait($pl)."</td><td>".hero_link($pl)."</td><td>".
         (strpos($type, "time") !== FALSE || strpos($type, "stuns") !== FALSE ? convert_time_seconds($val) : number_format($val)).
         "</td></tr>";
       }

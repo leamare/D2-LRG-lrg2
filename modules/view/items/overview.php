@@ -164,7 +164,7 @@ function rg_view_generate_items_overview() {
     $wr = max($line['early_wr'], $line['late_wr']);
     $res .= "<tr>".
       "<td>".hero_portrait($line['hero'])."</td>".
-      // "<td>".hero_name($line['hero'])."</td>".
+      // "<td>".hero_link($line['hero'])."</td>".
       "<td>".item_icon($line['item'])."</td>".
       "<td>".item_link($line['item'])."</td>".
       "<td>".$line['purchases']."</td>".
@@ -186,7 +186,7 @@ function rg_view_generate_items_overview() {
     $wr = max($line['early_wr'], $line['late_wr']);
     $res .= "<tr>".
       "<td>".hero_portrait($line['hero'])."</td>".
-      // "<td>".hero_name($line['hero'])."</td>".
+      // "<td>".hero_link($line['hero'])."</td>".
       "<td>".item_icon($line['item'])."</td>".
       "<td>".item_link($line['item'])."</td>".
       "<td>".$line['purchases']."</td>".
@@ -223,7 +223,7 @@ function rg_view_generate_items_overview() {
       $record = $report['items']['records'][ $line['item'] ][ $line['hero'] ] ?? [];
     $res .= "<tr>".
       "<td>".hero_portrait($line['hero'])."</td>".
-      "<td>".hero_name($line['hero'])."</td>".
+      "<td>".hero_link($line['hero'])."</td>".
       "<td>".item_icon($line['item'])."</td>".
       "<td>".item_link($line['item'])."</td>".
       "<td>".$line['purchases']."</td>".

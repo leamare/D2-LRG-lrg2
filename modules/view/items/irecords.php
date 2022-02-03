@@ -71,7 +71,7 @@ function rg_view_generate_items_irecords() {
       if (empty($line)) continue;
       $res[$tag] .=  "<tr><td>".match_link($line['match'])."</td>".
         "<td>".hero_portrait($hero)."</td>".
-        "<td>".hero_name($hero)."</td>".
+        "<td>".hero_link($hero)."</td>".
         "<td data-sorter=\"time\">".convert_time_seconds($line['time'])."</td>".
         "<td data-sorter=\"time\">".convert_time_seconds($line['diff'])."</td>".
       "</tr>";
@@ -124,7 +124,7 @@ function rg_view_generate_items_irecords() {
         "<td>".item_icon($line['item'])."</td>".
         "<td>".item_link($line['item'])."</td>".
         "<td>".hero_portrait($line['hero'])."</td>".
-        "<td>".hero_name($line['hero'])."</td>".
+        "<td>".hero_link($line['hero'])."</td>".
         "<td>".convert_time_seconds($line['time'])."</td>".
         "<td>".convert_time_seconds($line['diff'])."</td>".
       "</tr>";
