@@ -47,7 +47,11 @@ function rg_view_generate_items_icombos() {
   // HEROES TABLE
 
   if ($item) {
-    $res['itemid'.$item] .= "<div class=\"content-text\">".locale_string("items_combos_desc")."</div>";
+    $res['itemid'.$item] .= "<details class=\"content-text explainer\"><summary>".locale_string("explain_summary")."</summary>".
+      "<div class=\"explain-content\">".
+        "<div class=\"line\">".locale_string("items_combos_desc")."</div>".
+      "</div>".
+    "</details>";
     $res['itemid'.$item] .= "<input name=\"filter\" class=\"search-filter\" data-table-filter-id=\"items-itemid$item\" placeholder=\"".locale_string('filter_placeholder')."\" />";
     $res['itemid'.$item] .= "<table id=\"items-itemid$item\" class=\"list sortable\">";
     $res['itemid'.$item] .= "<thead><tr class=\"overhead\">".
@@ -113,7 +117,11 @@ function rg_view_generate_items_icombos() {
       }
     }
 
-    $res['overview'] .= "<div class=\"content-text\">".locale_string("items_combos_overview_desc")."</div>";
+    $res['overview'] .= "<details class=\"content-text explainer\"><summary>".locale_string("explain_summary")."</summary>".
+      "<div class=\"explain-content\">".
+        "<div class=\"line\">".locale_string("items_combos_overview_desc")."</div>".
+      "</div>".
+    "</details>";
     $res['overview'] .= "<input name=\"filter\" class=\"search-filter\" data-table-filter-id=\"items-icombos-overview\" placeholder=\"".locale_string('filter_placeholder')."\" />";
     $res['overview'] .= "<table id=\"items-icombos-overview\" class=\"list sortable\">";
     $res['overview'] .= "<thead><tr class=\"overhead\">".

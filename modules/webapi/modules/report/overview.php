@@ -5,6 +5,7 @@ include_once(__DIR__ . "/../../functions/pickban_overview.php");
 include_once(__DIR__ . "/../../functions/overview_uncontested.php");
 include_once(__DIR__ . "/../../functions/overview_positions.php");
 include_once(__DIR__ . "/../../functions/overview_combos.php");
+include_once(__DIR__ . "/../../../view/functions/teams_diversity_recalc.php");
 
 $endpoints['overview'] = function($mods, $vars, &$report) use (&$meta, &$endpoints) {
 
@@ -116,6 +117,14 @@ $endpoints['overview'] = function($mods, $vars, &$report) use (&$meta, &$endpoin
       }
     }
   }
+
+  [ $balance, $b_wr, $b_pr, $b_cr ] = balance_rank($context['pickban']);
+  $res['balance'] = [
+    'total' => round($balance, 3),
+    'winrate' => round($b_wr, 3),
+    'pickrate' => round($b_pr, 3),
+    'contest' => round($b_cr, 3),
+  ];
 
   $res['main'] = $context['main'];
 
