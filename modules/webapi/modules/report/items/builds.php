@@ -42,6 +42,8 @@ $endpoints['items-builds'] = function($mods, $vars, &$report) use (&$endpoints) 
         'positions' => array_keys($positions),
       ];
     }
+
+    return $res;
   } else {
     if ($crole === null) return [];
 
@@ -104,11 +106,18 @@ $endpoints['items-builds'] = function($mods, $vars, &$report) use (&$endpoints) 
   
     [ $build, $tree ] = generate_item_builds($pairs, $report['items']['stats'][$hero], $pbdata);
 
-    return [
+    $res = [
       'hero' => $hero,
       'role' => $crole,
+      'stats' => $pbdata,
       'build' => $build,
     ];
+
+    if (isset($vars['gets']) && in_array("tree", $vars['gets'])) {
+      $res['tree'] = $tree;
+    }
+
+    return $res;
   }
 
   return [];

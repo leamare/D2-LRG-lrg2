@@ -20,6 +20,38 @@ $endpoints['matches'] = function($mods, $vars, &$report) use (&$meta) {
     $res['card'] = team_card($vars['team']);
 
   $res['matches'] = [];
+
+  if (isset($vars['playerid']) || isset($vars['heroid'])) {
+    $positions = [];
+
+    for($i=0; $i<=1; $i++) {
+      for($j=0; $j<=5; $j++) {
+        $list = [];
+
+        if (isset($report['hero_positions_matches']) && isset($vars['heroid'])) {
+          if (isset($report['hero_positions_matches'][$i][$j][ $vars['heroid'] ])) {
+            $list = $report['hero_positions_matches'][$i][$j][ $vars['heroid'] ];
+          }
+        }
+        if (isset($report['player_positions_matches']) && isset($vars['playerid'])) {
+          if (!isset($report['player_positions_matches'][$i][$j][ $vars['playerid'] ])) {
+            $list = $list + $report['player_positions_matches'][$i][$j][ $vars['playerid'] ];
+          }
+        }
+
+        array_unique($list);
+
+        foreach ($list as $mid) {
+          $positions[$mid] = "$i.$j";
+        }
+      }
+    }
+
+    if (isset($vars['playerid']) && isset($vars['heroid'])) {
+
+    }
+  }
+
   foreach ($context as $id => $data) {
     if (isset($report['matches_additional']) && isset($vars['team']) && isset($vars['region'])) {
       $region = $meta['clusters'][ $report['matches_additional'][$mid]['cluster'] ];
@@ -67,7 +99,11 @@ $endpoints['matches'] = function($mods, $vars, &$report) use (&$meta) {
       if (!$found) continue;
     }
 
-    $res['matches'][] = match_card($id);
+    $card = match_card($id);
+    if (isset($positions)) {
+      $card['position'] = $positions[$id] ?? null;
+    }
+    $res['matches'][] = $card;
   }
 
   return $res;
