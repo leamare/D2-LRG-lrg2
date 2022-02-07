@@ -64,4 +64,129 @@ function rg_generator_matches_list($table_id, &$context) {
   return $res;
 }
 
-?>
+function rg_generator_hero_matches_list($table_id, $hero, $limit = null, $wide = false) {
+  global $report;
+
+  if (empty($report['matches']) && empty($report['matches_additional'])) return "";
+
+  $keys = [
+    'is_radiant' => true,
+    'allies' => true,
+    'opponents' => true,
+    'radiant_win' => true,
+    'duration' => true,
+    'player' => true,
+    'team' => false,
+    'role' => false,
+  ];
+
+  $matches = [];
+
+  foreach ($report['matches'] as $mid => $data) {
+    usort($data, function($a, $b) {
+      return $a['radiant'] <=> $b['radiant'];
+    });
+
+    $heroes = array_map(function($a) {
+      return $a['hero'];
+    }, $data);
+
+    $index = array_search($hero, $heroes);
+
+    if ($index !== false) {
+      $radiant = $index < 5;
+
+      $matches[$mid] = [
+        'is_radiant' => $radiant,
+        'allies' => array_slice($heroes, $radiant ? 0 : 5, 5),
+        'opponents' => array_slice($heroes, $radiant ? 5 : 0, 5),
+        'radiant_win' => $report['matches_additional'][$mid]['radiant_win'],
+        'duration' => $report['matches_additional'][$mid]['duration'],
+        'player' => $data[$index]['player']
+      ];
+
+      continue;
+    }
+  }
+
+  if (isset($report['match_participants_teams'])) {
+    $keys['team'] = true;
+
+    foreach ($matches as $mid => $data) {
+      $matches[$mid]['team_self'] = $report['match_participants_teams'][$mid][$data['is_radiant'] ? 'radiant' : 'dire'];
+      $matches[$mid]['team_enemy'] = $report['match_participants_teams'][$mid][$data['is_radiant'] ? 'dire' : 'radiant'];
+    }
+  }
+
+  if (isset($report['hero_positions_matches'])) {
+    $keys['role'] = true;
+    generate_positions_strings();
+
+    for($i=0; $i<=1; $i++) {
+      for($j=0; $j<=5; $j++) {
+        if (!isset($report['hero_positions_matches'][$i][$j][$hero])) continue;
+
+        foreach ($report['hero_positions_matches'][$i][$j][$hero] as $mid) {
+          $matches[$mid]['role'] = "$i.$j";
+        }
+      }
+    }
+  }
+
+  $res = "";
+
+  if (!$limit || $limit > 10) {
+    $res .= "<input name=\"filter\" class=\"search-filter ".($wide ? 'wide' : '')."\" data-table-filter-id=\"$table_id\" placeholder=\"".
+      locale_string('filter_placeholder')."\" />";
+  }
+
+  krsort($matches);
+
+  $res .= "<table id=\"$table_id\" class=\"list sortable ".($wide ? 'wide' : '')."\"><thead><tr>".
+    "<th>".locale_string("match")."</th>".
+    "<th>".locale_string("player")."</th>".
+    ($keys['role'] ? "<th>".locale_string("position")."</th>" : "").
+    "<th>".locale_string("side")."</th>".
+    "<th>".locale_string("allies")."</th>".
+    "<th>".locale_string("enemy")."</th>".
+    "<th>".locale_string("won")."</th>".
+    "<th>".locale_string("duration")."</th>".
+  "</tr>".
+  "</thead><tbody>";
+
+  if ($limit) {
+    $i = 0;
+  }
+
+  foreach ($matches as $mid => $data) {
+    $res .= "<tr ".($keys['team'] ? "data-aliases=\"".team_name($data['team_self'])." ".team_name($data['team_enemy'])."\"" : "").">".
+      "<td>".match_link($mid)."</td>".
+      "<td>".player_link($data['player'])."</td>".
+      ($keys['role'] ? "<td>".locale_string(isset($data['role']) ? "position_".$data['role'] : "none")."</td>" : "").
+      "<td>".locale_string($data['is_radiant'] ? 'radiant' : 'dire')."</td>".
+      "<td>";
+    
+    foreach ($data['allies'] as $h) {
+      $res .= "<a title=\"".hero_name($h)."\" data-aliases=\"".hero_tag($h)." ".hero_aliases($h)."\">".hero_icon($h)."</a>";
+    }
+
+    $res .= "</td><td>";
+
+    foreach ($data['opponents'] as $h) {
+      $res .= "<a title=\"".hero_name($h)."\" data-aliases=\"".hero_tag($h)." ".hero_aliases($h)."\">".hero_icon($h)."</a>";
+    }
+
+    $res .= "</td><td>".locale_string(($data['radiant_win'] XOR $data['is_radiant']) ? 'won' : 'lost')."</td>".
+      "<td>".convert_time_seconds($data['duration'])."</td>".
+    "</tr>";
+
+    if ($limit) {
+      $i++;
+      if ($i == $limit) break;
+    }
+  }
+
+  $res .= "</tbody></table>";
+
+  return $res;
+}
