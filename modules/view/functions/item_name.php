@@ -37,5 +37,5 @@ function item_link($iid) {
 }
 
 function item_full($iid) {
-  return item_icon($hid)." ".item_name($hid);
+  return item_icon($iid)." ".item_name($iid);
 }

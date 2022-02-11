@@ -17,7 +17,8 @@ function hero_icon_link($hid) {
 function hero_icon($hid) {
   global $meta, $icons_provider;
   if (isset($meta->heroes[ $hid ]['tag']))
-    return "<img class=\"hero_icon\" src=\"".hero_icon_link($hid)."\" alt=\"".$meta['heroes'][ $hid ]['tag']."\" />";
+    return "<img class=\"hero_icon\" src=\"".hero_icon_link($hid)."\" alt=\"".$meta['heroes'][ $hid ]['tag'].
+      "\" data-aliases=\"".hero_aliases($hid)."\" />";
   else return "<img class=\"hero_icon\" alt=\"undefined\" />";
 }
 
@@ -42,7 +43,7 @@ function hero_tag($hid) {
 }
 
 function hero_link($hid) {
-  global $leaguetag;
+  global $leaguetag, $linkvars;
 
   return "<a href=\"?league=$leaguetag&mod=heroes-profiles-heroid$hid".(empty($linkvars) ? "" : "&".$linkvars)."\">".hero_name($hid)."</a>";
 }

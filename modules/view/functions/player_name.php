@@ -19,7 +19,7 @@ function player_name($pid, $tt = true) {
 }
 
 function player_link($pid, $tt = true, $nolinks = false) {
-  global $link_provider, $links_providers, $report, $leaguetag;
+  global $link_provider, $links_providers, $report, $leaguetag, $linkvars;
 
   if ($pid < 0) return player_name($pid, $tt);
 
