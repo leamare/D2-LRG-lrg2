@@ -56,6 +56,7 @@ function rg_generator_draft($table_id, &$context_pickban, &$context_draft, $cont
   uasort($context_pickban, $compound_ranking_sort);
 
   $increment = 100 / sizeof($context_pickban); $i = 0;
+  $last_rank = 0;
 
   foreach ($context_pickban as $id => $el) {
     $oi = ($el['matches_picked']*$el['winrate_picked'] + $el['matches_banned']*$el['winrate_banned'])
@@ -156,7 +157,7 @@ function rg_generator_draft($table_id, &$context_pickban, &$context_draft, $cont
     else return ($a['matches'] < $b['matches']) ? 1 : -1;
   });
 
-  $res .= "<input name=\"filter\" class=\"search-filter wide\" data-table-filter-id=\"$table_id\" placeholder=\"".locale_string('filter_placeholder')."\" />";
+  $res .= search_filter_component($table_id, true);
   $res .= "<table id=\"$table_id\" class=\"list wide sortable\"><thead><tr class=\"overhead\"><th width=\"11%\"".($hero_flag ? " colspan=\"2\"" : "")."></th>".
           "<th colspan=\"6\">".locale_string("total")."</th>";
   $heroline = "<tr>".

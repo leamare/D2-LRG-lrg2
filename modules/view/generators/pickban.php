@@ -56,7 +56,7 @@ function rg_generator_pickban($table_id, &$context, &$context_main, $heroes_flag
 
   $res .= rg_generator_balance("$table_id-balance", $context);
 
-  $res .= "<input name=\"filter\" class=\"search-filter\" data-table-filter-id=\"$table_id\" placeholder=\"".locale_string('filter_placeholder')."\" />";
+  $res .= search_filter_component($table_id);
 
   $res .=  "<table id=\"$table_id\" class=\"list sortable\"><thead><tr>".
             ($heroes_flag ? "<th class=\"sorter-no-parser\" width=\"1%\"></th>" : "").
@@ -86,7 +86,7 @@ function rg_generator_pickban($table_id, &$context, &$context_main, $heroes_flag
 
   uasort($context, $compound_ranking_sort);
 
-  $increment = 100 / sizeof($context); $i = 0;
+  $increment = 100 / sizeof($context); $i = 0; $last_rank = 0;
 
   foreach ($context as $id => $el) {
     if(isset($last) && $el == $last) {

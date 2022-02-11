@@ -56,7 +56,7 @@ function rg_view_generator_teams_summary($context = null, $short_flag = false) {
   }
 
   if (!$short_flag)
-    $res .= "<input name=\"filter\" class=\"search-filter wide\" data-table-filter-id=\"teams-summary\" placeholder=\"".locale_string('filter_placeholder')."\" />";
+    $res .= search_filter_component("teams-summary", true);
 
   $res .= "<table id=\"teams-summary\" class=\"list ".($short_flag ? "" : "wide")." sortable\">";
 

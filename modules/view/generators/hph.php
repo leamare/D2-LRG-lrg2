@@ -42,7 +42,7 @@ function rg_generator_hph_profile($table_id, &$context, &$context_wrs, $srcid, $
     uasort($context, $compound_ranking_sort);
     $context_cpy = $context;
   
-    $increment = 100 / sizeof($context); $i = 0;
+    $increment = 100 / sizeof($context); $i = 0; $last_rank = 0;
   
     foreach ($context as $elid => $el) {
       if(isset($last) && $el == $last) {
@@ -76,7 +76,7 @@ function rg_generator_hph_profile($table_id, &$context, &$context_wrs, $srcid, $
     $isrank = true; $i = 0;
   }
 
-  $res .= "<input name=\"filter\" class=\"search-filter\" data-table-filter-id=\"$table_id\" placeholder=\"".locale_string('filter_placeholder')."\" />";
+  $res .= search_filter_component($table_id);
   $res .= "<table id=\"$table_id\" class=\"list sortable\">";
   $res .= "<thead><tr>".
           ($heroes_flag && !$i++ ? "<th width=\"1%\"></th>" : "").

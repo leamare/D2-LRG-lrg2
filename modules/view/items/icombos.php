@@ -52,7 +52,7 @@ function rg_view_generate_items_icombos() {
         "<div class=\"line\">".locale_string("items_combos_desc")."</div>".
       "</div>".
     "</details>";
-    $res['itemid'.$item] .= "<input name=\"filter\" class=\"search-filter\" data-table-filter-id=\"items-itemid$item\" placeholder=\"".locale_string('filter_placeholder')."\" />";
+    $res['itemid'.$item] .= search_filter_component("items-itemid$item");
     $res['itemid'.$item] .= "<table id=\"items-itemid$item\" class=\"list sortable\">";
     $res['itemid'.$item] .= "<thead><tr class=\"overhead\">".
         "<th width=\"12%\"></th>".
@@ -122,7 +122,7 @@ function rg_view_generate_items_icombos() {
         "<div class=\"line\">".locale_string("items_combos_overview_desc")."</div>".
       "</div>".
     "</details>";
-    $res['overview'] .= "<input name=\"filter\" class=\"search-filter\" data-table-filter-id=\"items-icombos-overview\" placeholder=\"".locale_string('filter_placeholder')."\" />";
+    $res['overview'] .= search_filter_component("items-icombos-overview");
     $res['overview'] .= "<table id=\"items-icombos-overview\" class=\"list sortable\">";
     $res['overview'] .= "<thead><tr class=\"overhead\">".
         "<th width=\"18%\" colspan=\"2\">".locale_string("item")." 1</th>".

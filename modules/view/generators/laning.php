@@ -54,7 +54,7 @@ function rg_generator_laning_profile($table_id, &$context, $id_o, $heroes_flag =
     };
     uasort($context[$id], $compound_ranking_sort);
 
-    $increment = 100 / sizeof($context[$id]); $i = 0;
+    $increment = 100 / sizeof($context[$id]); $i = 0; $last_rank = 0;
 
     foreach ($context[$id] as $elid => $el) {
       if(isset($last) && $el == $last) {
@@ -145,7 +145,8 @@ function rg_generator_laning_profile($table_id, &$context, $id_o, $heroes_flag =
 
   
   $res .= "<table id=\"$table_id\" class=\"list wide sortable\"><caption>".locale_string($id ? "laning_opponents" : "laning_total")."";
-  $res .= "<input name=\"filter\" class=\"search-filter inside\" data-table-filter-id=\"$table_id\" placeholder=\"".locale_string('filter_placeholder')."\" /></caption>";
+  $res .= search_filter_component($table_id, false, true);
+  $res .= "</caption>";
   $res .= "<thead><tr class=\"overhead\">".
             "<th width=\"12%\" colspan=\"".($heroes_flag ? "2" : "1")."\"></th>".
             "<th width=\"18%\" colspan=\"3\"></th>".

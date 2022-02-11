@@ -40,7 +40,7 @@ function rg_generator_combos($table_id, &$context, $context_matches, $heroes_fla
 
   unset($combo);
 
-  $res = "<input name=\"filter\" class=\"search-filter wide\" data-table-filter-id=\"$table_id\" placeholder=\"".locale_string('filter_placeholder')."\" />";
+  $res = search_filter_component($table_id, true);
 
   $res .= "<table id=\"$table_id\" class=\"list wide sortable\"><thead><tr class=\"thead\">".
          ($heroes_flag ? "<th colspan=\"".($trios ? 6 : 4)."\">".locale_string("heroes")."</th>" : "<th colspan=\"".($trios ? 3 : 2)."\">".locale_string("players")."</th>").

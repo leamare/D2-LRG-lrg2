@@ -8,8 +8,7 @@ function rg_generator_matches_list($table_id, &$context) {
   if(!sizeof($context)) return "";
   $matches = array_keys($context);
 
-  $i = 0;
-  $res = "<input name=\"filter\" class=\"search-filter\" data-table-filter-id=\"$table_id\" placeholder=\"".locale_string('filter_placeholder')."\" />";
+  $res = search_filter_component($table_id);
   $res .= "<table id=\"$table_id\" class=\"list sortable\"><thead><tr>".
           "<th>".locale_string("match")."</th>".
           "<th data-sortInitialOrder=\"asc\">".locale_string("radiant")."</th>".
@@ -136,8 +135,7 @@ function rg_generator_hero_matches_list($table_id, $hero, $limit = null, $wide =
   $res = "";
 
   if (!$limit || $limit > 10) {
-    $res .= "<input name=\"filter\" class=\"search-filter ".($wide ? 'wide' : '')."\" data-table-filter-id=\"$table_id\" placeholder=\"".
-      locale_string('filter_placeholder')."\" />";
+    $res .= search_filter_component($table_id, $wide);
   }
 
   krsort($matches);

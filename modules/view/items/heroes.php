@@ -50,6 +50,7 @@ function rg_view_generate_items_heroes() {
   uasort($report['items']['stats']['total'], $ranking_sort);
 
   $increment = 100 / sizeof($report['items']['stats']['total']); $i = 0;
+  $last_rank = 0;
 
   foreach ($report['items']['stats']['total'] as $id => $el) {
     if(isset($last) && $el == $last) {
@@ -121,8 +122,7 @@ function rg_view_generate_items_heroes() {
   $res['itemid'.$item] .= "</tbody></table>";
 
   // HEROES TABLE
-
-  $res['itemid'.$item] .= "<input name=\"filter\" class=\"search-filter wide\" data-table-filter-id=\"items-itemid$item\" placeholder=\"".locale_string('filter_placeholder')."\" />";
+  $res['itemid'.$item] .= search_filter_component("items-itemid$item", true);
 
   $res['itemid'.$item] .= "<table id=\"items-itemid$item\" class=\"list wide sortable\">";
   $res['itemid'.$item] .= "<thead><tr class=\"overhead\">".

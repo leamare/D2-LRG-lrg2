@@ -70,6 +70,7 @@ function rg_view_generate_items_stats() {
   uasort($report['items']['stats'][$hero], $ranking_sort);
 
   $increment = 100 / sizeof($report['items']['stats'][$hero]); $i = 0;
+  $last_rank = 0;
 
   foreach ($report['items']['stats'][$hero] as $id => $el) {
     if(isset($last) && $el == $last) {
@@ -143,7 +144,7 @@ function rg_view_generate_items_stats() {
     return $res;
   }
 
-  $res[$tag] .= "<input name=\"filter\" class=\"search-filter wide\" data-table-filter-id=\"items-$tag\" placeholder=\"".locale_string('filter_placeholder')."\" />";
+  $res[$tag] .= search_filter_component("items-$tag", true);
 
   $res[$tag] .= "<table id=\"items-$tag\" class=\"list wide sortable\">";
   $res[$tag] .= "<thead><tr class=\"overhead\">".

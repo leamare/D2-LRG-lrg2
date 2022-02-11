@@ -33,7 +33,7 @@ function rg_generator_pvp_grid($table_id, $contesters, &$context) {
                         ."%<br />".locale_string("won")." ".$context[$elid][$player_ids[$i]]['won']." - "
                                  .locale_string("lost")." ".$context[$elid][$player_ids[$i]]['lost'].(
                                    isset($context[$elid][$player_ids[$i]]['matchids']) ?
-                                    "<br />MatchIDs: ".implode($context[$elid][$player_ids[$i]]['matchids'], ", ")
+                                    "<br />MatchIDs: ".implode(", ", $context[$elid][$player_ids[$i]]['matchids'])
                                     : "").
                         "','".$contesters[$elid]." vs ".$contesters[$player_ids[$i]]."')\">".
                     number_format($playerline[$player_ids[$i]]['winrate']*100,0)."</td>";

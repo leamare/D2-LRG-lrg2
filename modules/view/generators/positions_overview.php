@@ -52,7 +52,7 @@ function rg_generator_positions_overview($table_id, &$context, $hero_flag = true
         return positions_ranking_sort($a, $b, $total_matches);
       });
   
-      $increment = 100 / sizeof($context_copy); $k = 0;
+      $increment = 100 / sizeof($context_copy); $k = 0; $last_rank = 0;
   
       foreach ($context_copy as $id => $el) {
         if(isset($last) && $el['matches_s'] == $last['matches_s'] && $el['winrate_s'] == $last['winrate_s']) {
@@ -108,7 +108,7 @@ function rg_generator_positions_overview($table_id, &$context, $hero_flag = true
     else return ($a['total'] < $b['total']) ? 1 : -1;
   });
 
-  $res = "<input name=\"filter\" class=\"search-filter wide\" data-table-filter-id=\"$table_id\" placeholder=\"".locale_string('filter_placeholder')."\" />";
+  $res = search_filter_component($table_id, true);
 
   $res .= "<table id=\"$table_id\" class=\"list wide sortable\"><thead><tr class=\"overhead\"><th width=\"20%\" colspan=\"".(2+$hero_flag)."\"></th>";
 

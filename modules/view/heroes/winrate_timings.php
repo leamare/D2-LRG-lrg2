@@ -19,7 +19,7 @@ function rg_view_generate_heroes_wrtimings() {
     "</div>".
   "</details>";
 
-  $res .= "<input name=\"filter\" class=\"search-filter wide\" data-table-filter-id=\"heroes-wrtimings\" placeholder=\"".locale_string('filter_placeholder')."\" />";
+  $res .= search_filter_component("heroes-wrtimings", true);
 
   $res .= "<table id=\"heroes-wrtimings\" class=\"list wide sortable\"><thead><tr class=\"overhead\">".
       "<th colspan=\"2\"></th>".

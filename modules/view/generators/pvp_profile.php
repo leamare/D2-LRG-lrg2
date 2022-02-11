@@ -52,7 +52,7 @@ function rg_generator_pvp_profile($table_id, &$pvp_context, &$context_wrs, $srci
     uasort($pvp_context, $compound_ranking_sort);
     $pvp_context_cpy = $pvp_context;
   
-    $increment = 100 / sizeof($pvp_context); $i = 0;
+    $increment = 100 / sizeof($pvp_context); $i = 0; $last_rank = 0;
   
     foreach ($pvp_context as $elid => $el) {
       if(isset($last) && $el == $last) {
@@ -86,7 +86,7 @@ function rg_generator_pvp_profile($table_id, &$pvp_context, &$context_wrs, $srci
     $isrank = true; $i = 0;
   }
 
-  $res .= "<input name=\"filter\" class=\"search-filter\" data-table-filter-id=\"$table_id\" placeholder=\"".locale_string('filter_placeholder')."\" />";
+  $res .= search_filter_component($table_id);
   $res .= "<table id=\"$table_id\" class=\"list sortable\">";
   $res .= "<thead><tr>".
           ($heroes_flag && !$i++ ? "<th width=\"1%\"></th>" : "").
@@ -121,7 +121,7 @@ function rg_generator_pvp_profile($table_id, &$pvp_context, &$context_wrs, $srci
 
   foreach($pvp_context as $elid_op => $data) {
     $res .= "<tr ".(isset($data['matchids']) ?
-                      "onclick=\"showModal('".implode($data['matchids'], ", ")."','".locale_string("matches")."')\"" :
+                      "onclick=\"showModal('".implode(", ", $data['matchids'])."','".locale_string("matches")."')\"" :
                       "").">".
             ($heroes_flag ? "<td>".hero_portrait($elid_op)."</td>" : "").
             "<td>".($heroes_flag ? hero_link($elid_op) : player_link($elid_op))."</td>".

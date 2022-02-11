@@ -53,7 +53,7 @@ function rg_generator_overview_positions_section($tables_prefix, &$context, &$pi
         return positions_ranking_sort($a, $b, $total_matches);
       });
   
-      $increment = 100 / sizeof($context_copy); $k = 0;
+      $increment = 100 / sizeof($context_copy); $k = 0; $last_rank = 0;
   
       foreach ($context_copy as $id => $el) {
         if(isset($last) && $el['matches_s'] == $last['matches_s'] && $el['winrate_s'] == $last['winrate_s']) {

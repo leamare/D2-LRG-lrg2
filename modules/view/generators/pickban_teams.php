@@ -101,7 +101,7 @@ function rg_create_team_pickban_data($context_pb, $context_vs_pb, $context_total
 
     uasort($pb, $compound_ranking_sort);
 
-    $i = 0; $last = null;
+    $i = 0; $last = null; $last_rank = 0;
 
     foreach ($pb as $id => $el) {
       if(isset($last) && $el == $last) {
@@ -139,7 +139,7 @@ function rg_generator_team_pickban($table_id, $context) {
     "</div>".
   "</details>";
 
-  $res .= "<input name=\"filter\" class=\"search-filter wide\" data-table-filter-id=\"$table_id\" placeholder=\"".locale_string('filter_placeholder')."\" />";
+  $res .= search_filter_component($table_id, false);
   $res .=  "<table id=\"$table_id\" class=\"wide list sortable\"><thead><tr class=\"overhead\">".
       "<th colspan=\"2\"></th>".
       "<th colspan=\"2\" class=\"separator\">".locale_string("total")."</th>".

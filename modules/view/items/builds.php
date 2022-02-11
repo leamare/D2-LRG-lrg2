@@ -157,7 +157,7 @@ function rg_view_generate_items_builds() {
       '1.1', '1.2', '1.3', '0.3', '0.1'
     ];
 
-    $res['overview'] .= "<input name=\"filter\" class=\"search-filter\" data-table-filter-id=\"filterable-heroes-builds\" placeholder=\"".locale_string('filter_placeholder')."\" />";
+    $res['overview'] .= search_filter_component("filterable-heroes-builds");
 
     $res['overview'] .= "<table id=\"filterable-heroes-builds\" class=\"list sortable\"><thead>".
       "<tr><th width=\"1%\"></th><th width=\"15%\" class=\"sortInitialOrder-asc\">".
