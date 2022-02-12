@@ -59,6 +59,8 @@ if (isset($report['hero_winrate_spammers']))
 if (isset($report['hero_summary']))
   include("heroes/summary.php");
 
+include("heroes/profiles.php");
+
 function rg_view_generate_heroes() {
   global $report, $mod, $parent, $unset_module;
 
@@ -147,6 +149,10 @@ function rg_view_generate_heroes() {
     if(check_module($parent."summary")) {
       $res['summary'] = rg_view_generate_heroes_summary();
     }
+  }
+
+  if(check_module($parent."profiles")) {
+    $res['profiles'] = rg_view_generate_heroes_profiles();
   }
 
   return $res;
