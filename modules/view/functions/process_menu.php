@@ -13,7 +13,10 @@ function process_menu($menu, $list = false) {
       "</$tag>";
     } else {
       $r .= "<$tag class=\"navItem\"><a href=\"".$link['link']."\" target=\"_blank\" rel=\"noopener\" title=\"".($link['text'] ?? $link['title'] ?? "")."\">".
-        (isset($link['icon']) ? "<img src=\"".$link['icon']."\" class=\"topbar-icon\"> " : "").$link['text'].
+        (isset($link['icon']) ? 
+          "<img src=\"".$link['icon']."\" class=\"topbar-icon\" alt=\"".($link['text'] ?? $link['title'] ?? "")."\"> " : 
+          ""
+        ).$link['text'].
       "</a></$tag>";
     }
   }

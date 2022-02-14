@@ -279,10 +279,10 @@ if (isset($lg_settings['heroes_snapshot'])) {
     foreach($lg_settings['heroes_exclude'] as $hid)
       unset($meta['heroes'][$hid]);
   } else {
-    $last_match = $report["last_match"]["date"];
-    $first_match = $report["first_match"]["date"];
+    $last_match = $result["last_match"]["date"];
+    $first_match = $result["first_match"]["date"];
   
-    $is_cm_only = ( isset($report["modes"][2]) || isset($report["modes"][8]) ) && count($report["modes"]) < 3;
+    $is_cm_only = ( isset($result["modes"][2]) || isset($result["modes"][8]) ) && count($result["modes"]) < 3;
     
     foreach ($meta['heroes'] as $hid => $data) {
       if (!isset($data['released'])) continue;
