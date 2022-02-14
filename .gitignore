@@ -9,6 +9,7 @@ reports/
 libs/
 metadata/
 tmp/
+.vscode/
 
 # Settings container
 rg_settings.json

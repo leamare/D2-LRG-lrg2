@@ -184,7 +184,8 @@ function rg_view_generate_heroes_profiles() {
     "<div class=\"profile-content\">";
   
   $count = count($data);
-  $gr_size = round($count / 3);
+  $gr_size = ceil($count / 3);
+  $last_gr = $count - $gr_size*2;
   $desc_blocks = [];
 
   $i = 0; $block = [];
@@ -208,7 +209,7 @@ function rg_view_generate_heroes_profiles() {
 
     $block[] = "<label>".locale_string($k)."</label>: ".$v;
     $i++;
-    if ($i == $gr_size || $i == $count) {
+    if ($i == $gr_size || $i == $count || (isset($desc_blocks[1]) && $i == $last_gr)) {
       $desc_blocks[] = "<div class=\"profile-statline\">".implode("</div><div class=\"profile-statline\">", $block)."</div>";
       $block = [];
       $i = 0;
@@ -221,6 +222,7 @@ function rg_view_generate_heroes_profiles() {
 
   $combos = [];
   $combos_limit = 5;
+  $combos_threshold = $data['matches_s'] * 0.025;
 
   if (isset($report['hph'])) {
     if (is_wrapped($report['hph'])) {
@@ -229,17 +231,28 @@ function rg_view_generate_heroes_profiles() {
 
     if (isset($report['hph'][$hero])) {
       foreach ($report['hph'][$hero] as $h => $data) {
-        if (empty($data) || !$data['matches'] || $h == "_h") unset($report['hph'][$hero][$h]);
+        if (!empty($data) && $h != "_h" && $data['matches'] == -1) {
+          $report['hph'][$hero][$h] = $report['hph'][$h][$hero];
+        }
+        if (empty($data) || !$data['matches'] || $h == "_h") {
+          unset($report['hph'][$hero][$h]);
+        }
       }
 
+      $report['hph'][$hero] = array_filter($report['hph'][$hero], function($a) use ($combos_threshold) {
+        return $a['matches'] > $combos_threshold;
+      });
+
       uasort($report['hph'][$hero], function($a, $b) {
-        return $b['wr_diff'] <=> $b['wr_diff'];
+        return $b['wr_diff'] <=> $a['wr_diff'];
       });
 
       $keys = array_keys($report['hph'][$hero]);
 
       $combos['best_friends'] = array_slice($keys, 0, $combos_limit);
-      $combos['worst_friends'] = array_slice($keys, count($keys)-$combos_limit);
+      $combos['worst_friends'] = array_reverse(
+        array_slice($keys, count($keys)-$combos_limit)
+      );
     }
   }
 
@@ -251,14 +264,20 @@ function rg_view_generate_heroes_profiles() {
         if (empty($data) || !$data['matches'] || $h == "_h") unset($hvh[$h]);
       }
 
+      $hvh[$hero] = array_filter($hvh[$hero], function($a) use ($combos_threshold) {
+        return $a['matches'] > $combos_threshold;
+      });
+
       uasort($hvh[$hero], function($a, $b) {
-        return $b['winrate'] <=> $b['winrate'];
+        return $b['winrate'] <=> $a['winrate'];
       });
 
       $keys = array_keys($hvh[$hero]);
 
       $combos['worst_opponents'] = array_slice($keys, 0, $combos_limit);
-      $combos['best_opponents'] = array_slice($keys, count($keys)-$combos_limit);
+      $combos['best_opponents'] = array_reverse(
+        array_slice($keys, count($keys)-$combos_limit)
+      );
     }
   }
   
