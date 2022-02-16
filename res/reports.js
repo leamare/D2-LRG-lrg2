@@ -9,7 +9,7 @@ $(document).ready(function() {
     sortReset: true,
   });
   
-  $(".search-filter").on("keyup", function() {
+  $(".search-filter").on("input", function() {
     const value = $(this).val().toLowerCase();
     const table = $(this).attr('data-table-filter-id');
     
@@ -38,8 +38,24 @@ $(document).ready(function() {
       let isOpen = !$(this).parent().hasClass('select-show');
       // closeAllSelect($(this).parent());
       $(this).parent().toggleClass('select-show');
+
+      let container = $(this).parent().find('.custom-selector-values')[0];
       if (isOpen) {
         $(this).siblings('input.search-filter-selector').focus();
+        
+        setTimeout(() => {
+          let selected = $(container).find('.custom-selector-option.as-selected');
+          
+          if (!selected.length) {
+            selected = $(container).find('.custom-selector-option:visible');
+          }
+
+          if (selected.length) {
+            scrollTo(container, selected[0]);
+          }
+        }, 150);
+      } else {
+        $(container).find('.focused').toggleClass('focused');
       }
       e.stopPropagation();
     });
@@ -107,6 +123,11 @@ $(document).ready(function() {
         $(select).trigger('change');
       });
 
+      $(option).on('mouseenter', function (e) {
+        $(this).parent().find('.focused').toggleClass('focused');
+        $(this).toggleClass('focused');
+      });
+
       $(div).append(option);
     }
 
@@ -114,9 +135,9 @@ $(document).ready(function() {
 
     if (sz > 10) {
       const placeholder = $(select).attr('data-placeholder');
-      const input = $(`<input type="text" name="filter" class="search-filter-selector" placeholder="${placeholder}" />`);
+      const input = $(`<input type="search" name="filter" class="search-filter-selector" placeholder="${placeholder}" />`);
 
-      $(input).on('keyup', function() {
+      $(input).on('input', function() {
         const value = $(this).val().toLowerCase();
         const options = $(this).parent().find('.custom-selector-list')[0];
         
@@ -125,6 +146,9 @@ $(document).ready(function() {
           const line = $(this).text().toLowerCase() + (aliases ? ' ' + aliases.toLowerCase() : '');
           $(this).toggle( line.indexOf(value) !== -1 )
         });
+
+        $(options).find('.focused').toggleClass('focused');
+        $( $(options).children('.custom-selector-option:visible')[0] ).toggleClass('focused');
       });
 
       $(input).on('click', function(e) {
@@ -135,13 +159,84 @@ $(document).ready(function() {
 
       $(el).addClass('searchable');
     }
+
+    $(el).on('keydown', function(e) {
+      if ( $(this).hasClass('select-show') ) {
+        if (e.keyCode == 40) { // arrowdown
+          let container = $(this).find('.custom-selector-values')[0];
+          let selected = $(container).find('.custom-selector-option.focused:visible');
+          if (selected.length) {
+            let next = $(selected[0]).nextAll(':visible');
+            if (next.length) {
+              $(container).find('.custom-selector-option.focused').toggleClass('focused');
+              $( next[0] ).toggleClass('focused', true);
+              scrollTo(container, next[0]);
+            }
+          } else {
+            selected = $(container).find('.custom-selector-option.as-selected:visible');
+            if (!selected.length) selected = $(container).find('.custom-selector-option:visible');
+            $(selected[0]).toggleClass('focused', true);
+
+            scrollTo(container, selected[0]);
+          }
+
+          e.stopPropagation();
+        }
+
+        if (e.keyCode == 38) { // arrowup
+          let container = $(this).find('.custom-selector-values')[0];
+          let selected = $(container).find('.custom-selector-option.focused:visible');
+          if (selected.length) {
+            let prev = $(selected[0]).prevAll(':visible');
+            if (prev.length) {
+              $(container).find('.custom-selector-option.focused').toggleClass('focused');
+              $( prev[0] ).toggleClass('focused', true);
+              scrollTo(container, prev[0]);
+            }
+          } else {
+            selected = $(container).find('.custom-selector-option.as-selected:visible');
+            if (!selected.length) selected = $(container).find('.custom-selector-option:visible');
+            $(selected[0]).toggleClass('focused', true);
+
+            scrollTo(container, selected[0]);
+            
+          }
+
+          e.stopPropagation();
+        }
+
+        if (e.keyCode == 13) { // enter
+          let selected = $(this).find('.custom-selector-option.focused:visible');
+          if (selected.length) { 
+            $(selected[0]).trigger('click');
+          }
+
+          e.stopPropagation();
+        }
+      }
+    });
   }
 
   $(document).on('click', closeAllSelect);
 });
 
 
-// code from example on w3c
+function scrollTo(container, elem) {
+  const margin = parseInt( $(container).css('marginTop') );
+  const top = $(elem).position().top;
+  const height = $(elem).height();
+  const containerHeight = $(container).height();
+
+  if (top+height > containerHeight) {
+    $(container).scrollTop(
+      $(container).scrollTop() + ( top+height*1.5 - containerHeight )
+    );
+  } else if (top < 0) {
+    $(container).scrollTop(
+      $(container).scrollTop() + top
+    );
+  }
+}
 
 function showModal(text, cap) {
     document.getElementById('modal-text').innerHTML = text;
