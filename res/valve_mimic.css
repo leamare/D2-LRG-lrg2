@@ -297,6 +297,100 @@ a:hover {
   text-decoration: none;
 }
 
+.custom-selector select {
+  display: none;
+}
+.custom-selector {
+  color: var(--selector-link);
+  font-family: inherit;
+  font-size: 1.05em;
+  min-width: 300px;
+  display: inline-block;
+  position: relative;
+}
+.custom-selector .custom-selector-selected, .custom-selector .custom-selector-list, .custom-selector-option {
+  font-size: inherit;
+}
+.custom-selector .custom-selector-selected, .custom-selector-option {
+  padding: 5px 20px;
+  text-align: left;
+  transition: all 200ms linear;
+  cursor: pointer;
+  background-color: var(--tagslist-bg);
+  color: var(--link);
+}
+.custom-selector .custom-selector-selected {
+  background: var(--table-thead-bg);
+  color: var(--table-thead-text);
+  text-align: center;
+  transition: all 200ms linear;
+}
+.custom-selector-option.as-selected {
+  background: var(--tagslist-active);
+  color: var(--link);
+}
+.custom-selector-option:hover, .custom-selector-option.focused {
+  background: var(--tagslist-bg-hover);
+  color: var(--link);
+}
+.custom-selector .custom-selector-selected:hover, .custom-selector .custom-selector-selected.focused {
+  filter: brightness(1.3);
+}
+.custom-selector .custom-selector-selected:after {
+  content: '▼';
+  font-size: .7em;
+  line-height: 1.75em;
+  float: right;
+}
+.custom-selector .custom-selector-list {
+  background: var(--table-bg);
+  position: absolute;
+  margin: 0;
+  width: 100%;
+  height: 14em;
+  overflow-y: scroll;
+  z-index: 1000;
+  transform: translateY(-50%) scaleY(0);
+  opacity: 0;
+  transition: 100ms all linear;
+  display: block;
+}
+.custom-selector.searchable .custom-selector-list {
+  margin-top: 34px;
+}
+.custom-selector .search-filter-selector {
+  position: absolute;
+  z-index: 1000;
+  display: block;
+  opacity: .8;
+  transform: translateY(0) scaleY(0);
+  transition: 20ms all linear;
+}
+.custom-selector.select-show .custom-selector-list, .custom-selector.select-show .search-filter-selector {
+  display: block;
+  top: 100%;
+  transform: translateY(0) scaleY(1);
+}
+.custom-selector.select-show .custom-selector-list {
+  opacity: 1;
+}
+.custom-selector.select-show .search-filter-selector:focus {
+  outline: none;
+  filter: brightness(1.3);
+}
+.custom-selector-option-icon {
+  vertical-align: middle;
+  margin-top: -0.25em;
+  font-size: inherit;
+  height: 1.2em;
+  min-width: 32px;
+  margin-right: 5px;
+  object-fit: contain;
+}
+.custom-selector-option.no-icon {
+  padding-left: 57px;
+}
+
 .content-text h1 , .content-cards h1{
     margin: 42px 0 18px;
     font-size: 24px;
@@ -348,7 +442,6 @@ header.navBar {
   background-image: linear-gradient(to bottom, #69006d 0%, #41083c 100%);
 }
 .navLinks {
-  overflow: hidden;
   height: 64px;
   float: left;
   width: 75%;
@@ -369,19 +462,93 @@ header.navBar {
 .navItem:last-child {
   border: none;
 }
-.navItem.dotalogo {
+.navItem.dotalogo, .navItem.arrow {
   font-size: 0;
   height: 33px;
   width: 33px;
-  background-image: url(spec_dota_logo_small.png);
   background-position: center;
   margin: 15px 0;
   background-repeat: no-repeat;
+}
+.navItem.dotalogo {
+  background-image: url(spec_dota_logo_small.png);
+}
+.navItem.arrow {
+  border-right: none;
+  position: absolute;
+  left: calc(10% - 48px);
+}
+.navItem.arrow a {
+  text-align: center;
+  opacity: .5;
+  transition: 150ms all linear;
+  display: block;
+}
+.navItem.arrow a:hover {
+  text-decoration: none;
+  opacity: 1;
+  text-shadow: 0 0 5px #fff;
+}
+.navItem.arrow a::before {
+  content: '❮';
+  font-size: 28px;
+  vertical-align: middle;
+  line-height: 1.25em; 
 }
 .navItem.dotalogo a {
   width: 33px;
   height: 33px;
   display: block;
+}
+.navItem.submenu {
+  position: relative;
+  transition: 250ms all linear;
+}
+.navItem.submenu > a.parent::after {
+  content: ' ❯';
+  line-height: 1.5em;
+  vertical-align: middle;
+  font-size: .7em;
+  margin-left: 7px;
+}
+.navItem.submenu ul {
+  transform: translateY(-50%) scaleY(0);
+  opacity: 0;
+  transition: 100ms all linear;
+  position: absolute;
+  background-color: rgba(0,0,0,0.8);
+  left: 0;
+  list-style: none;
+  min-width: 250px;
+}
+.navItem.submenu:hover {
+  background-color: rgba(0,0,0,0.3);
+  border-radius: 5px;
+}
+.navItem.submenu:hover a {
+  text-decoration: none;
+}
+.navItem.submenu:hover ul {
+  transform: translateY(0) scaleY(1);
+  top: 95%;
+  opacity: 1;
+}
+.navItem.submenu ul .navItem {
+  margin: 5px 0;
+  border-right: none;
+  transition: 150ms all linear;
+  display: block;
+  float: none;
+  text-align: left;
+}
+.navItem.submenu ul .navItem a {
+  display: block;
+}
+.navItem.submenu ul .navItem:hover a {
+  text-decoration: none;
+}
+.navItem.submenu ul .navItem:hover {
+  background-color: rgba(255,255,255,0.1);
 }
 header.navBar a, header.navBar a:hover, header.navBar a:visited, header.navBar a:focus {
   color: var(--navlink) !important;
