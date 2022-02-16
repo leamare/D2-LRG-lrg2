@@ -33,7 +33,7 @@ $host_link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ?
 include_once("rg_report_out_settings.php");
 
 include_once("modules/commons/versions.php");
-$lg_version = array( 2, 20, 0, 0, 1 );
+$lg_version = [ 2, 23, 0, 0, 4 ];
 
 include_once("modules/commons/merge_mods.php");
 include_once("modules/commons/metadata.php");
@@ -45,6 +45,7 @@ include_once("modules/view/functions/modules.php");
 include_once("modules/view/functions/player_card.php");
 include_once("modules/view/functions/team_card.php");
 include_once("modules/view/functions/match_card.php");
+include_once("modules/view/functions/search_filter_component.php");
 
 include_once("modules/view/functions/join_selectors.php");
 include_once("modules/view/functions/links.php");

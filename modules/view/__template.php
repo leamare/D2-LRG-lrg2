@@ -1,4 +1,4 @@
-<?php  $__postfix = "?v=28171"; ?>
+<?php  $__postfix = "?v=28192"; ?>
 <!DOCTYPE html>
 <html lang="<?php echo $locale; ?>">
   <head>
@@ -103,12 +103,10 @@
     <?php if (!empty($custom_body)) echo $custom_body; ?>
     <header class="navBar <?php  if (!empty($previewcode) && $_earlypreview) echo "early-access"; ?>">
       <div class="navLinks">
-        <div class="navItem dotalogo"><a href="<?php echo $main_path; ?>"></a></div>
-        <div class="navItem bold"><a href=".<?php if(!empty($linkvars)) echo "?".$linkvars; ?>" title="Dota 2 League Reports"><?php echo locale_string("leag_reports")?></a></div>
+        <div class="navItem arrow"><a href="<?php echo $main_path; ?>"></a></div>
+        <div class="navItem dotalogo"><a href=".<?php if(!empty($linkvars)) echo "?".$linkvars; ?>" title="Dota 2 League Reports"></a></div>
         <?php
-          foreach($title_links as $link) {
-            echo "<div class=\"navItem\"><a href=\"".$link['link']."\" target=\"_blank\" rel=\"noopener\" title=\"".$link['title']."\">".$link['text']."</a></div>";
-          }
+          echo process_menu($title_links);
          ?>
       </div>
       <div class="locale-changer">
