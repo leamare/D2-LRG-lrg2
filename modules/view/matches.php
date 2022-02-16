@@ -26,7 +26,33 @@ function rg_view_generate_matches() {
     $res['cards'] .= "</div>";
   }
 
+  $res['heroes'] = [];
+  if (check_module($parent."heroes")) {
+    if ($mod == $parent."heroes") $unset_module = true;
+    $parent .= "heroes-";
+
+    global $meta, $strings;
+
+    $hnames = [];
+    foreach ($meta['heroes'] as $id => $v) {
+      $hnames[$id] = $v['name'];
+      $strings['en']["heroid".$id] = $v['name'];
+    }
+  
+    uasort($hnames, function($a, $b) {
+      if($a == $b) return 0;
+      else return ($a > $b) ? 1 : -1;
+    });
+  
+    foreach($hnames as $hid => $name) {
+      $res['heroes']["heroid".$hid] = "";
+  
+      if(check_module($parent."heroid".$hid)) {
+        $res['heroes']["heroid".$hid] = rg_generator_hero_matches_list("matches-heroes-$hid", $hid, null, true);
+      }
+    }
+  }
+
   return $res;
 }
 
-?>
