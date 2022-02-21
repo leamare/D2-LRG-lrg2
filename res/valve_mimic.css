@@ -782,6 +782,23 @@ footer a, footer a:active, footer a:visited, footer a:focus {
   flex: 1;
 }
 
+.tabs-block [type=radio]:first-of-type:checked ~ .tab-content:nth-of-type(1).list-pinned,
+.tabs-block [type=radio]:nth-of-type(2):checked~ .tab-content:nth-of-type(2).list-pinned,
+.tabs-block [type=radio]:nth-of-type(3):checked~ .tab-content:nth-of-type(3).list-pinned,
+.tabs-block [type=radio]:nth-of-type(4):checked~ .tab-content:nth-of-type(4).list-pinned,
+.tabs-block [type=radio]:nth-of-type(5):checked~ .tab-content:nth-of-type(5).list-pinned,
+.tabs-block [type=radio]:nth-of-type(6):checked~ .tab-content:nth-of-type(6).list-pinned,
+.tabs-block [type=radio]:first-of-type:checked ~ .tab-content:nth-of-type(1).tagslist,
+.tabs-block [type=radio]:nth-of-type(2):checked~ .tab-content:nth-of-type(2).tagslist,
+.tabs-block [type=radio]:nth-of-type(3):checked~ .tab-content:nth-of-type(3).tagslist,
+.tabs-block [type=radio]:nth-of-type(4):checked~ .tab-content:nth-of-type(4).tagslist,
+.tabs-block [type=radio]:nth-of-type(5):checked~ .tab-content:nth-of-type(5).tagslist,
+.tabs-block [type=radio]:nth-of-type(6):checked~ .tab-content:nth-of-type(6).tagslist {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
 .tabs-block .tab-content.tagslist, .tabs-block .tab-content.list-pinned {
   margin-left: 2.5%;
   margin-right: 2.5%;

@@ -417,7 +417,6 @@ function rg_view_generate_items_builds() {
     }
   }
   $overview_categories['core'] = array_merge($overview_categories['core'], array_slice($build['path'], 1, $build['lategamePoint']-2));
-  // TODO: insert all early orders before their items
 
   foreach ($build['sit'] as $item => $order)  {
     if ($order < $build['lategamePoint']-1) {

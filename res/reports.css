@@ -661,8 +661,7 @@ table .hero_portrait {
 }
 
 .tagslist .category, .tagsshow .category, .list-pinned .category {
-  display: inline-flex;
-  justify-content: center;
+  display: inline-block;
   background-color: var(--tagslist-bg);
   width: 280px;
   font-size: 18px;
