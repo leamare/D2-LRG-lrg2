@@ -6,6 +6,59 @@ const ROSHAN = [133, 134, 135, 263, 324, 325, 326, 371, 593, 594, 595, 640];
 const OBS = [110, 499, 768];
 const SENTRY = [500, 769, 111];
 const LEVELS_RESPAWN = [5,7,9,13,16,26,28,30,32,34,36,44,46,48,50,52,54,65,70,75,80,85,90,95,100,100,100,100,100,100];
+
+const STRATZ_GAME_MODE = [
+  'NONE' => 0,
+  'ALL_PICK' => 1,
+  'CAPTAINS_MODE' => 2,
+  'RANDOM_DRAFT' => 3,
+  'SINGLE_DRAFT' => 4,
+  'ALL_RANDOM' => 5,
+  'INTRO' => 6,
+  'THE_DIRETIDE' => 7,
+  'REVERSE_CAPTAINS_MODE' => 8,
+  'THE_GREEVILING' => 9,
+  'TUTORIAL' => 10,
+  'MID_ONLY' => 11,
+  'LEAST_PLAYED' => 12,
+  'NEW_PLAYER_POOL' => 13,
+  'COMPENDIUM_MATCHMAKING' => 14,
+  'CUSTOM' => 15,
+  'CAPTAINS_DRAFT' => 16,
+  'BALANCED_DRAFT' => 17,
+  'ABILITY_DRAFT' => 18,
+  'EVENT' => 19,
+  'ALL_RANDOM_DEATH_MATCH' => 20,
+  'SOLO_MID' => 21,
+  'ALL_PICK_RANKED' => 22,
+  'TURBO' => 23,
+  'MUTATION' => 24,
+];
+
+const STRATZ_LOBBY_TYPE = [
+  'UNRANKED' => 0,
+  'PRACTICE' => 1,
+  'TOURNAMENT' => 2,
+  'TUTORIAL' => 3,
+  'COOP_VS_BOTS' => 4,
+  'TEAM_MATCH' => 5,
+  'SOLO_QUEUE' => 6,
+  'RANKED' => 7,
+  'SOLO_MID' => 8,
+  'BATTLE_CUP' => 9,
+  'EVENT' => 12,
+  'INVALID' => -1,
+];
+
+const STRATZ_LANE_TYPE = [
+  'SAFE_LANE' => 1,
+  'MID_LANE' => 2,
+  'OFF_LANE' => 3,
+  'JUNGLE' => 4,
+  'ROAMING' => 4,
+  'UNKNOWN' => 0,
+];
+
 const STRATZ_GRAPHQL_QUERY = "{
   clusterId
   gameMode
@@ -238,7 +291,7 @@ function get_stratz_response($match) {
   $r['matches']['matchid'] = $stratz['data']['match']['id'];
   $r['matches']['radiantWin'] = $stratz['data']['match']['didRadiantWin'];
   $r['matches']['duration'] = $stratz['data']['match']['durationSeconds'];
-  $r['matches']['modeID'] = $stratz['data']['match']['gameMode'];
+  $r['matches']['modeID'] = STRATZ_GAME_MODE[ $stratz['data']['match']['gameMode'] ] ?? $stratz['data']['match']['gameMode'];
   $r['matches']['cluster'] = $stratz['data']['match']['clusterId'];
   $r['matches']['start_date'] = $stratz['data']['match']['startDateTime'];
   $r['matches']['leagueID'] = $stratz['data']['match']['leagueId'] ?? 0;
@@ -265,7 +318,11 @@ function get_stratz_response($match) {
   foreach ($stratz['data']['match']['players'] as $i => $pl) {
     $r['payload']['score_radiant'] += $pl['isRadiant'] ? $pl['kills'] : 0;
     $r['payload']['score_dire'] += !$pl['isRadiant'] ? $pl['kills'] : 0;
-    $r['payload']['leavers'] += $pl['leaverStatus'] > 1 ? 1 : 0;
+    $r['payload']['leavers'] += (
+      is_numeric($pl['leaverStatus']) 
+      ? $pl['leaverStatus'] > 1
+      : $pl['leaverStatus'] !== 'NONE'
+    ) ? 1 : 0;
 
     $ml = [];
     $ml['matchid'] = $stratz['data']['match']['id'];
@@ -303,10 +360,12 @@ function get_stratz_response($match) {
         array_slice($pl['stats']['lastHitsPerMinute'], 0, 10)
       );
       
-      $aml['lane'] = ($pl['lane'] > 3 || !$pl['lane']) ? 4 : $pl['lane'];
+      $aml['lane'] = is_numeric($pl['lane'])
+        ? ( ($pl['lane'] > 3 || !$pl['lane']) ? 4 : $pl['lane'] )
+        : STRATZ_LANE_TYPE[$pl['lane']];
 
-      if ($aml['lane'] == 4) $aml['isCore'] = 0;
-      else $aml['isCore'] = $pl['roleBasic'] ? 0 : 1;
+      if ($aml['lane'] == 4 || !$aml['lane']) $aml['isCore'] = 0;
+      else $aml['isCore'] = (is_numeric($pl['roleBasic']) ? $pl['roleBasic'] : $pl['roleBasic'] == 'CORE') ? 0 : 1;
       
       $melee = (40 * 60);
       $ranged = (45 * 20);
@@ -463,6 +522,8 @@ function get_stratz_response($match) {
         if ($item_id == 48 && $travel_boots_state == 0) continue;
         if ($item_id == 219 && $travel_boots_state == 1) { $item_id = 220; $travel_boots_state++; }
         if ($item_id == 220 && $travel_boots_state == 1) continue;
+
+        $category = "";
 
         foreach($meta['item_categories'] as $category_name => $items) {
           if (in_array($item_id, $items)) {
