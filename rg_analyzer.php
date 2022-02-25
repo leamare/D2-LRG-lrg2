@@ -288,12 +288,21 @@ if (isset($lg_settings['heroes_snapshot'])) {
       if (!isset($data['released'])) continue;
   
       $line = null;
+      $last = null;
   
       foreach ($data['released'] as $l) {
         if ($l[0] > $last_match) break;
   
-        if ($l[0] > $first_match) continue;
+        $last = $l;
+  
+        if ($l[0] > $first_match) {
+          continue;
+        }
         $line = $l;
+      }
+  
+      if (!$line) {
+        $line = $last;
       }
   
       if ($is_cm_only) {
