@@ -365,7 +365,7 @@ function get_stratz_response($match) {
         : STRATZ_LANE_TYPE[$pl['lane']];
 
       if ($aml['lane'] == 4 || !$aml['lane']) $aml['isCore'] = 0;
-      else $aml['isCore'] = (is_numeric($pl['roleBasic']) ? $pl['roleBasic'] : $pl['roleBasic'] == 'CORE') ? 0 : 1;
+      else $aml['isCore'] = (is_numeric($pl['roleBasic']) ? $pl['roleBasic'] : $pl['roleBasic'] !== 'CORE') ? 0 : 1;
       
       $melee = (40 * 60);
       $ranged = (45 * 20);
