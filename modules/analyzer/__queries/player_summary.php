@@ -7,7 +7,7 @@ function rg_query_player_summary(&$conn, $cluster = null) {
             ml.playerid pid,
             SUM(1) matches,
             SUM(NOT m.radiantWin XOR ml.isradiant)/SUM(1) winrate,
-            (SUM(ml.kills)+SUM(ml.assists))/(SUM(ml.deaths)) kills,
+            (SUM(ml.kills)+SUM(ml.assists))/(SUM(ml.deaths)) kda,
             COUNT(DISTINCT ml.heroid) heropool,
             ((COUNT(DISTINCT ml.heroid)/mhpt.mhp) * (COUNT(DISTINCT ml.heroid)/SUM(1))) diversity,
             SUM(ml.gpm)/SUM(1) gpm,
@@ -19,7 +19,10 @@ function rg_query_player_summary(&$conn, $cluster = null) {
             SUM(am.stuns)/count(distinct am.matchid) stuns,
             SUM(am.lh_at10)/count(distinct am.matchid) lh_10,
             SUM(ml.lasthits)/(SUM(m.duration)/60) lh,
-            SUM(m.duration)/(SUM(1)*60) avg_duration
+            SUM(m.duration)/(SUM(1)*60) avg_duration,
+            SUM(ml.kills)/count(distinct am.matchid) kills,
+            SUM(ml.deaths)/count(distinct am.matchid) deaths,
+            SUM(ml.assists)/count(distinct am.matchid) assists
           FROM matchlines ml LEFT JOIN
             adv_matchlines am
                 ON am.matchid = ml.matchid AND am.heroid = ml.heroid
@@ -44,6 +47,9 @@ function rg_query_player_summary(&$conn, $cluster = null) {
       "hero_pool" => $row[4],
       "diversity" => $row[5],
       "kda"  => $row[3],
+      "kills_s"  => $row[16],
+      "deaths_s"  => $row[17],
+      "assists_s"  => $row[18],
       "gpm"    => $row[6],
       "xpm"    => $row[7],
       "heal_per_min_s" => $row[8],
