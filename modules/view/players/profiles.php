@@ -43,7 +43,14 @@ function rg_view_generate_players_profiles() {
         "<div class=\"profile-statline\"><label>".locale_string("duration")."</label>: ".convert_time($data['duration'])."</div>".
       "</div>".
       "<div class=\"profile-stats\">".
-        "<div class=\"profile-statline\"><label>".locale_string("kda")."</label>: ".number_format($data['kda'], 2)."</div>".
+        "<div class=\"profile-statline\"><label>".locale_string("kda")."</label>: ".(
+          isset($data['kills_s']) ? 
+          number_format($data['kills_s'], 2)."/".
+          number_format($data['deaths_s'], 2)."/".
+          number_format($data['assists_s'], 2)." (".number_format($data['kda'], 2).")"
+           : number_format($data['kda'], 2)
+        ).
+        "</div>".
         "<div class=\"profile-statline\"><label>".locale_string("gpm")."</label>: ".number_format($data['gpm'], 0)."</div>".
         "<div class=\"profile-statline\"><label>".locale_string("xpm")."</label>: ".number_format($data['xpm'], 0)."</div>".
         "<div class=\"profile-statline\"><label>".locale_string("lh_at10")."</label>: ".number_format($data['lh_at10'], 1)."</div>".
