@@ -63,10 +63,19 @@ function rg_generator_matches_list($table_id, &$context) {
   return $res;
 }
 
-function rg_generator_hero_matches_list($table_id, $hero, $limit = null, $wide = false) {
+function rg_generator_hero_matches_list($table_id, $hero, $limit = null, $wide = false, $mlist_raw = null) {
   global $report;
 
   if (empty($report['matches']) && empty($report['matches_additional'])) return "";
+
+  if (empty($mlist_raw)) {
+    $matcheslist = $report['matches'];
+  } else {
+    $matcheslist = [];
+    foreach ($mlist_raw as $mid => $match) {
+      $matcheslist[$mid] = $report['matches'][$mid];
+    }
+  }
 
   $keys = [
     'is_radiant' => true,
@@ -81,7 +90,7 @@ function rg_generator_hero_matches_list($table_id, $hero, $limit = null, $wide =
 
   $matches = [];
 
-  foreach ($report['matches'] as $mid => $data) {
+  foreach ($matcheslist as $mid => $data) {
     usort($data, function($a, $b) {
       return $a['radiant'] <=> $b['radiant'];
     });
@@ -126,6 +135,7 @@ function rg_generator_hero_matches_list($table_id, $hero, $limit = null, $wide =
         if (!isset($report['hero_positions_matches'][$i][$j][$hero])) continue;
 
         foreach ($report['hero_positions_matches'][$i][$j][$hero] as $mid) {
+          if (!isset($matches[$mid])) continue;
           $matches[$mid]['role'] = "$i.$j";
         }
       }
