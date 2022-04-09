@@ -150,12 +150,10 @@ function rg_view_generate_heroes_profiles() {
         $roles["$i.$j"] = [ $report['hero_positions'][$i][$j][$hero]['matches_s'], $report['hero_positions'][$i][$j][$hero]['winrate_s'] ];
 
         if (isset($report['hero_positions_matches'])) {
-          foreach($report['hero_positions_matches'][$i][$j] as $hid => $matches) {
-            $roles["$i.$j"][] = "<a onclick=\"showModal('".
-              htmlspecialchars(join_matches($matches)).
-              "', '".locale_string("matches")." - ".addcslashes(hero_name($hid)." - ".locale_string("position_$i.$j"), "'")."');\">".
-              locale_string("matches")."</a>";
-          }
+          $roles["$i.$j"][] = "<a onclick=\"showModal('".
+            htmlspecialchars(join_matches($report['hero_positions_matches'][$i][$j][$hero])).
+            "', '".locale_string("matches")." - ".addcslashes(hero_name($hero)." - ".locale_string("position_$i.$j"), "'")."');\">".
+            locale_string("matches")."</a>";
         }
       }
     }
