@@ -113,6 +113,21 @@ function join_selectors($modules, $level, $parent="") {
         }
       }
 
+      if (strpos($modtag, 'itemid') !== false) {
+        global $meta;
+        $mods = explode('-', $mn);
+        foreach ($mods as $m) {
+          if (strpos($m, 'itemid') === 0) {
+            $iid = (int)str_replace('itemid', '', $m);
+            break;
+          }
+        }
+        if (isset($iid)) {
+          $data_aliases = item_tag($iid)." $m";
+          $data_icon = item_icon_link($iid);
+        }
+      }
+
       if($lrg_use_get && $lrg_get_depth > $level) {
 
         if (stripos($mod, $mn) === 0 && (
