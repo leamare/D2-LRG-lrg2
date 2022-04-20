@@ -61,7 +61,7 @@ function rg_view_generate_players_profiles() {
         "<div class=\"profile-statline\"><label>".locale_string("hero_damage_per_min")."</label>: ".number_format($data['hero_damage_per_min_s'], 1)."</div>".
         "<div class=\"profile-statline\"><label>".locale_string("tower_damage_per_min")."</label>: ".number_format($data['tower_damage_per_min_s'], 1)."</div>".
         "<div class=\"profile-statline\"><label>".locale_string("taken_damage_per_min")."</label>: ".number_format($data['taken_damage_per_min_s'], 1)."</div>".
-        "<div class=\"profile-statline\"><label>".locale_string("stuns")."</label>: ".convert_time($data['stuns'])."</div>".
+        "<div class=\"profile-statline\"><label>".locale_string("stuns")."</label>: ".round($data['stuns'], 2)."</div>".
       "</div>".
     "</div>".
     // "<div class=\"profile-content\">";
