@@ -115,7 +115,7 @@
           echo '<label><select onchange="setLocale(this.value);" class="select-locale">';
           foreach($locales as $loc => $lname) {
             $loc = str_replace(".json", "", $loc);
-            if($loc == $locale)
+            if($loc == $locale || ($isBetaLocale && $loc == $locale."_beta"))
              echo '<option selected>'.$lname.'</option>';
             else
              echo '<option value="'.$loc.'">'.$lname.'</option>';

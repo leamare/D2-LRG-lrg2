@@ -6,7 +6,27 @@ include_once("modules/commons/locale_strings.php");
 include_once("modules/commons/array_pslice.php");
 include_once("modules/commons/get_language_code_iso6391.php");
 
+$localesMap = include_once("locales/map.php");
+
+$locales = [];
+foreach ($localesMap as $lc => $lv) {
+  if ($lv['alias'] ?? false) continue;
+  $locales[ $lc.($lv['beta'] ?? false ? '_beta' : '') ] = ( $lv['name'] ?? $lc ).($lv['beta'] ?? false ? ' (beta)' : '');
+}
+
+$def_locale = isset($localesMap['def']) ? $localesMap['def']['alias'] : 'en';
+
+$isBetaLocale = false;
 $locale = $_COOKIE['loc'] ?? GetLanguageCodeISO6391();
+
+if (isset($localesMap[ $locale ]) && ($localesMap[ $locale ]['alias'] ?? false)) {
+  $locale = $localesMap[ $locale ]['alias'];
+}
+
+if (strpos($locale, '_beta')) {
+  $isBetaLocale = true;
+  $locale = str_replace("_beta", "", $locale);
+}
 
 $linkvars = [];
 
@@ -15,7 +35,8 @@ if(isset($_REQUEST['loc']) && !empty($_REQUEST['loc'])) {
   $linkvars[] = array("loc", $_REQUEST['loc']);
 }
 
-require_once('locales/en.php');
+// require_once('locales/en.php');
+include_locale('en');
 if(strtolower($locale) != "en") {
   include_locale($locale) or $locale = "en";
 }

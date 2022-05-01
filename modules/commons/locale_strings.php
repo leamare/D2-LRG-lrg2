@@ -1,12 +1,10 @@
 <?php
 
 function locale_string($string_id, $vars = []) {
-  global $strings;
-  global $locale;
-  global $fallback_locale;
+  global $strings, $locale, $localesMap, $fallback_locale;
 
-  if(empty($fallback_locale) && isset($locale) && isset($strings[$locale]['__fallback'])) {
-    $fallback_locale = $strings[$locale]['__fallback'];
+  if(empty($fallback_locale) && isset($locale) && isset($localesMap[$locale]) && isset($localesMap[$locale]['fallback'])) {
+    $fallback_locale = $localesMap[$locale]['fallback'];
   }
 
   if(isset($locale) && isset($strings[$locale][$string_id])) {
@@ -25,13 +23,40 @@ function locale_string($string_id, $vars = []) {
 }
 
 function include_locale($locale) {
-  global $strings;
+  global $strings, $localesMap, $isBetaLocale;
 
-  if (file_exists('locales/'.$locale.'.php')) {
-    require_once('locales/'.$locale.'.php');
-  } elseif (file_exists('locales/'.$locale.'.json')) {
-    $strings[$locale] = json_decode(file_get_contents('locales/'.$locale.'.json'), true);
+  if (isset($localesMap[ $locale ]) && ($localesMap[ $locale ]['alias'] ?? false)) {
+    $locale = $localesMap[ $locale ]['alias'];
+  }
+
+  if (!isset($localesMap[ $locale ])) return false;
+
+  if (($localesMap[$locale]['beta'] ?? false) && !$isBetaLocale) {
+    return false;
+  }
+
+  $file = $localesMap[$locale]['file'] ?? 'locales/'.$locale.'.json';
+
+  if (!isset($strings[$locale])) $strings[$locale] = [];
+
+  // if (file_exists('locales/'.$locale.'.php')) {
+  //   require_once('locales/'.$locale.'.php');
+  // } else
+  if (file_exists($file)) {
+    $strings[$locale] = array_merge(
+      $strings[$locale],
+      json_decode(file_get_contents('locales/'.$locale.'.json'), true)
+    );
+    
   } else return false;
 
   return true;
+}
+
+function register_locale_string($string, $tag, $locale) {
+  global $strings;
+
+  if (!isset($strings[$locale])) $strings[$locale] = [];
+
+  $strings[$locale][$tag] = $string;
 }
