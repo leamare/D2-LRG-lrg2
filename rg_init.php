@@ -44,7 +44,7 @@ if(isset($argv)) {
       $st = explode("=", trim($st), 2);
       $st[0] = trim($st[0]);
       $st[1] = trim($st[1]);
-      if ($st[1][0] === '[' && $st[1][strlen($st)-1] === ']') {
+      if ($st[1][0] === '[' && $st[1][strlen($st[1])-1] === ']') {
         $st[1] = explode(',', substr($st[1], 1, -1));
       }
       $val = &$lg_settings;

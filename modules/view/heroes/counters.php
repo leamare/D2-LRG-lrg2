@@ -26,7 +26,7 @@ function rg_view_generate_heroes_counters() {
       'matches' => $line['matches'],
       'winrate' => $line['h1winrate'],
       'wr_diff' => round($line['h1winrate']-$report['pickban'][$line['heroid1']]['winrate_picked'], 5),
-      'expectation' => $line['exp']
+      'expectation' => $line['exp'] ?? 0
     ];
     $hvh[] = $p;
     $devs[] = ($p['matches']-$p['expectation']);

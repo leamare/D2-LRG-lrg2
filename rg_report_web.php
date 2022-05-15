@@ -173,7 +173,7 @@ if (isset($report)) {
         isset($report['hero_sides']) || isset($report['hero_pairs']) || isset($report['hero_triplets']))
           include_once("modules/view/heroes.php");
 
-    if (isset($report['items']) && !empty($report['items']['pi']))
+    if (!empty($report['items']) && !empty($report['items']['pi']))
       include_once("modules/view/items.php");
 
     if (isset($report['players']) || isset($report['players_summary']))
@@ -220,7 +220,7 @@ if (isset($report)) {
   }
 
   # items
-  if (isset($modules['items']) && check_module("items")) {
+  if (isset($modules['items']) && check_module("items") && !empty($report['items'])) {
     merge_mods($modules['items'], rg_view_generate_items());
   }
 

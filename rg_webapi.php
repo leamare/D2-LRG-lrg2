@@ -8,10 +8,48 @@ $resp = [
   "result" => null,
 ];
 
-//$locale = $_COOKIE['loc'] ?? GetLanguageCodeISO6391();
+include_once("modules/commons/locale_strings.php");
+include_once("modules/commons/get_language_code_iso6391.php");
+
+$localesMap = include_once("locales/map.php");
+
+$locales = [];
+foreach ($localesMap as $lc => $lv) {
+  if ($lv['alias'] ?? false) continue;
+  $locales[ $lc.($lv['beta'] ?? false ? '_beta' : '') ] = ( $lv['name'] ?? $lc ).($lv['beta'] ?? false ? ' (beta)' : '');
+}
+
+$def_locale = isset($localesMap['def']) ? $localesMap['def']['alias'] : 'en';
+
+$isBetaLocale = false;
+$locale = $_COOKIE['loc'] ?? GetLanguageCodeISO6391();
+
+if (isset($localesMap[ $locale ]) && ($localesMap[ $locale ]['alias'] ?? false)) {
+  $locale = $localesMap[ $locale ]['alias'];
+}
+
+if (strpos($locale, '_beta')) {
+  $isBetaLocale = true;
+  $locale = str_replace("_beta", "", $locale);
+}
+
+$linkvars = [];
 
 if(isset($_REQUEST['loc']) && !empty($_REQUEST['loc'])) {
   $locale = $_REQUEST['loc'];
+  $linkvars[] = array("loc", $_REQUEST['loc']);
+}
+
+// require_once('locales/en.php');
+include_locale('en');
+if(strtolower($locale) != "en") {
+  include_locale($locale) or $locale = "en";
+}
+if (isset($strings[$locale]) && isset($strings[$locale]['__fallback'])) {
+  $fallback_locale = $strings[$locale]['__fallback'];
+  if (!isset($strings[$fallback_locale])) {
+    include_locale($fallback_locale);
+  }
 }
 
 $host_link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 
@@ -24,13 +62,6 @@ $include_team = isset($_REQUEST['teamcard']);
 include_once("rg_report_out_settings.php");
 include_once("modules/commons/versions.php");
 $lg_version = [ 2, 23, 0, 0, 4 ];
-
-include_once("modules/commons/locale_strings.php");
-
-require_once('locales/en.php');
-if(strtolower($locale) != "en" && file_exists('locales/'.$locale.'.php'))
-  require_once('locales/'.$locale.'.php');
-else $locale = "en";
 
 include_once("modules/commons/merge_mods.php");
 include_once("modules/commons/metadata.php");

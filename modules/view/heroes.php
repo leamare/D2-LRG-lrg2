@@ -67,6 +67,8 @@ function rg_view_generate_heroes() {
   if($mod == "heroes") $unset_module = true;
   $parent = "heroes-";
 
+  $res = [];
+
   if (isset($report['pickban'])) {
     if (check_module($parent."pickban")) {
       $res['pickban'] = rg_view_generate_heroes_pickban();

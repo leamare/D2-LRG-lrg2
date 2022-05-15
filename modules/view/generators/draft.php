@@ -75,12 +75,12 @@ function rg_generator_draft($table_id, &$context_pickban, &$context_draft, $cont
     $ranks_stages[$i] = [];
     $scores = [];
     foreach ($draft as $id => $stages) {
-      if(isset($stages[$i]) && ($stages[$i]['pick']+$stages[$i]['ban']))
+      if(isset($stages[$i]) && (($stages[$i]['pick'] ?? 0)+($stages[$i]['ban'] ?? 0)))
         $scores[$id] = [
-          "matches_picked" => $stages[$i]['pick'],
-          "winrate_picked" => $stages[$i]['pick_wr'],
-          "matches_banned" => $stages[$i]['ban'],
-          "winrate_banned" => $stages[$i]['ban_wr'],
+          "matches_picked" => $stages[$i]['pick'] ?? 0,
+          "winrate_picked" => $stages[$i]['pick_wr'] ?? 0,
+          "matches_banned" => $stages[$i]['ban'] ?? 0,
+          "winrate_banned" => $stages[$i]['ban_wr'] ?? 0,
         ];
 
     }
@@ -110,12 +110,12 @@ function rg_generator_draft($table_id, &$context_pickban, &$context_draft, $cont
     foreach($stages as $stage_num => $stage) {
       if($max_stage > 1) {
         $draftline .= "<td class=\"separator\">".(isset($ranks_stages[$stage_num][$id]) ? number_format($ranks_stages[$stage_num][$id],2) : "-")."</td>";
-        if($stage['pick'])
+        if($stage['pick'] ?? false)
           $draftline .= "<td>".$stage['pick']."</td><td>".number_format($stage['pick_wr']*100, 2)."%</td>";
         else
           $draftline .= "<td>&zwnj;-</td><td>&zwnj;-</td>";
 
-        if($stage['ban'])
+        if($stage['ban'] ?? false)
           $draftline .= "<td>".$stage['ban']."</td><td>".number_format($stage['ban_wr']*100, 2)."%</td>";
         else
           $draftline .= "<td>&zwnj;-</td><td>&zwnj;-</td>";
@@ -129,6 +129,16 @@ function rg_generator_draft($table_id, &$context_pickban, &$context_draft, $cont
         $draftline .= "<td class=\"separator\">&zwnj;-</td><td>&zwnj;-</td><td>&zwnj;-</td><td>&zwnj;-</td><td>&zwnj;-</td>";
     }
 
+    if (empty($context_pickban[$id])) {
+      $context_pickban[$id] = [
+        'matches_total' => 0,
+        'matches_picked' => 0,
+        'matches_banned' => 0,
+        'winrate_picked' => 0,
+        'winrate_banned' => 0,
+      ];
+    }
+
     $draft[$id] = array ("out" => "", "matches" => $context_pickban[$id]['matches_total']);
     if($hero_flag)
       $draft[$id]['out'] .= "<td>".hero_portrait($id)."</td><td>".hero_link($id)."</td>";
@@ -136,7 +146,7 @@ function rg_generator_draft($table_id, &$context_pickban, &$context_draft, $cont
       $draft[$id]['out'] .= "<td>".player_link($id, true, true)."</td>";
 
     $draft[$id]['out'] .= "<td>".$context_pickban[$id]['matches_total']."</td>";
-    $draft[$id]['out'] .= "<td>".number_format($ranks[$id], 2)."</td>";
+    $draft[$id]['out'] .= "<td>".number_format($ranks[$id] ?? 0, 2)."</td>";
 
     if($context_pickban[$id]['matches_picked'])
       $draft[$id]['out'] .= "<td>".$context_pickban[$id]['matches_picked']."</td><td>".number_format($context_pickban[$id]['winrate_picked']*100, 2)."%</td>";

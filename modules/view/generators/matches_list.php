@@ -121,8 +121,13 @@ function rg_generator_hero_matches_list($table_id, $hero, $limit = null, $wide =
     $keys['team'] = true;
 
     foreach ($matches as $mid => $data) {
-      $matches[$mid]['team_self'] = $report['match_participants_teams'][$mid][$data['is_radiant'] ? 'radiant' : 'dire'];
-      $matches[$mid]['team_enemy'] = $report['match_participants_teams'][$mid][$data['is_radiant'] ? 'dire' : 'radiant'];
+      if (isset($report['match_participants_teams'][$mid])) {
+        $matches[$mid]['team_self'] = $report['match_participants_teams'][$mid][$data['is_radiant'] ? 'radiant' : 'dire'] ?? 'self';
+        $matches[$mid]['team_enemy'] = $report['match_participants_teams'][$mid][$data['is_radiant'] ? 'dire' : 'radiant'] ?? 'enemy';
+      } else {
+        $matches[$mid]['team_self'] = 'self';
+        $matches[$mid]['team_enemy'] = 'enemy';
+      }
     }
   }
 

@@ -2,7 +2,9 @@
 
 include_once($root."/modules/view/functions/itembuilds.php");
 
-$modules['items']['builds'] = [];
+if (!empty($report['items']) && !empty($report['items']['pi'])) {
+  $modules['items']['builds'] = [];
+}
 
 function itembuild_item_component(&$build, $item, $flags = []) {
   $big = $flags['big'] ?? false;

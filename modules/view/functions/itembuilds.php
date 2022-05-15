@@ -657,7 +657,7 @@ function inject_item_stats(&$build, &$stats, $hero) {
 
   // other significant items
 
-  $items = array_merge($items, $build['path'], array_keys($build['sit']), $build['lategame'], $build['alts_items'], $neutrals_list, $meta['item_categories']['early']);
+  $items = array_merge($items ?? [], $build['path'], array_keys($build['sit']), $build['lategame'], $build['alts_items'], $neutrals_list, $meta['item_categories']['early']);
   $items = array_unique($items);
 
   $significant = [];
@@ -748,7 +748,7 @@ function generate_item_builds(&$pairs, &$stats, $hero) {
     }
 
     // populating root point
-    if ($pair['avgord1'] <= 1) {
+    if (($pair['avgord1'] ?? 0) <= 1) {
       if (!isset($tree[ '0' ]['children'][ $pair['item1'] ])) {
         $tree[ '0' ]['children'][ $pair['item1'] ] = [
           'diff' => $stats[ $pair['item1'] ]['median'] / 60,
@@ -757,11 +757,11 @@ function generate_item_builds(&$pairs, &$stats, $hero) {
           'min_ord' => 0
         ];
       }
-      $tree[ '0' ]['children'][ $pair['item1'] ]['matches'] += $pair['total'] * (1-$pair['avgord1']);
+      $tree[ '0' ]['children'][ $pair['item1'] ]['matches'] += $pair['total'] * (1-($pair['avgord1'] ?? 0));
     }
 
-    if ($pair['avgord2'] < 1) {
-      if (!isset($tree[ '0' ]['children'][ $pair['item2'] ])) {
+    if (($pair['avgord2'] ?? 0) < 1) {
+      if (!isset($tree[ '0' ]['children'][ $pair['item2'] ]) && isset($stats[ $pair['item2'] ])) {
         $tree[ '0' ]['children'][ $pair['item2'] ] = [
           'diff' => $stats[ $pair['item2'] ]['median'] / 60,
           'matches' => 0,
@@ -769,7 +769,7 @@ function generate_item_builds(&$pairs, &$stats, $hero) {
           'min_ord' => 0
         ];
       }
-      $tree[ '0' ]['children'][ $pair['item2'] ]['matches'] += $pair['total'] * (1-$pair['avgord2']);
+      $tree[ '0' ]['children'][ $pair['item2'] ]['matches'] += $pair['total'] * (1-($pair['avgord2'] ?? 0));
     }
 
     if ($pair['min_diff'] > 0) {
@@ -779,7 +779,7 @@ function generate_item_builds(&$pairs, &$stats, $hero) {
         'diff' => $pair['min_diff'],
         'matches' => $pair['total'],
         'winrate' => $pair['winrate'],
-        'min_ord' => floor($pair['avgord2'])
+        'min_ord' => floor($pair['avgord2'] ?? 0)
       ];
       $tree[ $pair['item2'] ]['parents'][] = $pair['item1'];
       
@@ -791,7 +791,7 @@ function generate_item_builds(&$pairs, &$stats, $hero) {
         'diff' => $pair['min_diff'],
         'matches' => $pair['total'],
         'winrate' => $pair['winrate'],
-        'min_ord' => floor($pair['avgord1'])
+        'min_ord' => floor($pair['avgord1'] ?? 0)
       ];
       $tree[ $pair['item1'] ]['parents'][] = $pair['item2'];
 

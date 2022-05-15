@@ -30,6 +30,10 @@ function join_selectors($modules, $level, $parent="") {
   $selectors = array();
   $selectors_num = sizeof($modules);
 
+  if (!isset($level_codes[$level])) {
+    $level_codes[$level] = end($level_codes);
+  }
+
   foreach($modules as $modtag => $module) {
     $mod_type = 0;
     $mod_islink = false;

@@ -35,7 +35,7 @@ function rg_view_generate_heroes_hvh() {
           $report['hero_laning'] = unwrap_data($report['hero_laning']);
         }
 
-        foreach($report['hero_laning'][$hid] as $opid => $hero) {
+        foreach(($report['hero_laning'][$hid] ?? []) as $opid => $hero) {
           if (empty($hvh[$hid][$opid])) continue;
           $hvh[$hid][$opid]['lane_rate'] = ($hero['matches'] ?? 0)/$hvh[$hid][$opid]['matches'];
           $hvh[$hid][$opid]['lane_wr'] = $hero['lane_wr'] ?? 0;

@@ -29,6 +29,8 @@ function rg_view_generate_players_profiles() {
     }
   }
 
+  if (empty($player)) return "";
+
   $data = $report['players_summary'][$player];
 
   $res['playerid'.$player] .= "<div class=\"profile-header\">".

@@ -1,7 +1,9 @@
 <?php
 
-// include_once($root."/modules/view/functions/itembuilds.php");
-// include_once($root."/modules/view/items/builds.php");
+if (!function_exists('itembuild_item_component')) {
+  include_once($root."/modules/view/functions/itembuilds.php");
+  include_once($root."/modules/view/items/builds.php");
+}
 include_once($root."/modules/view/generators/laning.php");
 include_once($root."/modules/view/generators/matches_list.php");
 include_once($root."/modules/view/heroes/daily_wr.php");
@@ -119,6 +121,8 @@ function rg_view_generate_heroes_profiles() {
     }
   }
 
+  if (empty($hero)) return "";
+
   if (isset($report['hero_summary'])) {
     if (is_wrapped($report['hero_summary'])) $report['hero_summary'] = unwrap_data($report['hero_summary']);
   }
@@ -127,7 +131,7 @@ function rg_view_generate_heroes_profiles() {
     $data = $report['hero_summary'][$hero];
   } else {
     $data = [
-      'matches_s' => 0,
+      'matches_s' => ($report['pickban'][$hero] ?? [])['matches_picked'] ?? 0,
     ];
   }
 
@@ -229,10 +233,10 @@ function rg_view_generate_heroes_profiles() {
 
     if (isset($report['hph'][$hero])) {
       foreach ($report['hph'][$hero] as $h => $data) {
-        if (!empty($data) && $h != "_h" && $data['matches'] == -1) {
+        if (!empty($data) && !is_bool($data) && $h != "_h" && $data['matches'] == -1) {
           $report['hph'][$hero][$h] = $report['hph'][$h][$hero];
         }
-        if (empty($data) || !$data['matches'] || $h == "_h") {
+        if ((empty($data) || is_bool($data)) || !$data['matches'] || $h == "_h") {
           unset($report['hph'][$hero][$h]);
         }
       }
@@ -349,6 +353,8 @@ function rg_view_generate_heroes_profiles() {
     $prev_dt = null;
     $first_wr = 0; $first_ms = 0; $first_msb = 0;
     foreach($days as $dt) {
+      if (!isset($global_days[$dt])) $global_days[$dt] = 0;
+
       $dd = $days_data[$dt] ?? [ 'ms' => 0, 'wr' => 0 ];
 
       if ($prev_dt == null || $global_days[$dt]/$prev_dt > 0.05) {
@@ -542,7 +548,7 @@ function rg_view_generate_heroes_profiles() {
     $stages = [];
 
     for ($pick = 0; $pick <= 1; $pick++) {
-      foreach ($report['draft'][$pick] as $stage => $heroes) {
+      foreach (($report['draft'][$pick] ?? []) as $stage => $heroes) {
         if (!isset($stages[$stage])) {
           $stages[$stage] = [
             'total' => 0,

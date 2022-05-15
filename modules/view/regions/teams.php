@@ -9,6 +9,14 @@ if (check_module($parent_mod."summary")) {
   include_once("$root/modules/view/generators/teams_summary.php");
   if($reg_report['settings']['teams_summary_softgen'] ?? false)
     $res["region".$region]['teams']['summary']  = "<div class=\"content-text\">".locale_string("desc_teams_summary_softgen")."</div>";
+
+  foreach ($report['teams'] as $team => $data) {
+    if (!is_array($data)) continue;
+    if (!isset($data['averages']) || !isset($data['averages']['hero_pool'])) continue;
+
+    $report['teams'][$team]['averages']['diversity'] = teams_diversity_recalc($data);
+  }
+
   $res["region".$region]['teams']['summary'] .= rg_view_generator_teams_summary($reg_report['teams']);
 }
 
@@ -42,7 +50,7 @@ if (check_module($parent_mod."profiles")) {
 $res["region".$region]['teams']['cards'] = "";
 if (check_module($parent_mod."cards")) {
   include_once("$root/modules/view/generators/participants_teams.php");
-  if($reg_report['settings']['teams_summary_softgen'])
+  if($reg_report['settings']['teams_summary_softgen'] ?? false)
     $res["region".$region]['teams']['cards']  = "<div class=\"content-text\">".locale_string("desc_teams_summary_softgen")."</div>";
   $res["region".$region]['teams']['cards'] .= "<div class=\"content-text\">".locale_string("desc_participants")."</div>";
   $res["region".$region]['teams']['cards'] .= rg_generator_participants_teams($reg_report['teams']);
