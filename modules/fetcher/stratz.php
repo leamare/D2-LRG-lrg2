@@ -123,6 +123,10 @@ const STRATZ_GRAPHQL_QUERY = "{
       wards {
         type
       }
+      itemPurchases {
+        time
+        itemId
+      }
       deathEvents {
         timeDead
         time
@@ -183,6 +187,11 @@ const STRATZ_GRAPHQL_QUERY = "{
           count
           id
         }
+      }
+      wardDestruction {
+        gold
+        time
+        experience
       }
       actionReport {
         pingUsed
@@ -376,20 +385,20 @@ function get_stratz_response($match) {
       $aml['efficiency_at10'] = $pl['stats']['networthPerMinute'][10] / $tenMinute;
       
       $aml['wards'] = count(
-        array_filter($pl['stats']['wards'], function($a) { return !$a['type']; })
+        array_filter($pl['stats']['itemPurchases'], function($a) { return $a['itemId'] == 42; })
       );
       $aml['sentries'] = count(
-        array_filter($pl['stats']['wards'], function($a) { return $a['type']; })
+        array_filter($pl['stats']['itemPurchases'], function($a) { return $a['itemId'] == 43; })
       );
 
       $aml['couriers_killed'] = count($pl['stats']['courierKills'] ?? []);
 
       $aml['roshans_killed'] = 0;
-      $aml['wards_destroyed'] = 0;
+      $aml['wards_destroyed'] = count($pl['stats']['wardDestruction']);
 
       foreach ($pl['stats']['farmDistributionReport'] as $f) {
         foreach ($f['creepType'] as $fc) {
-          if (in_array($fc['id'], OBS)) $aml['wards_destroyed'] += $fc['count'];
+          // if (in_array($fc['id'], OBS)) $aml['wards_destroyed'] += $fc['count'];
           if (in_array($fc['id'], ROSHAN)) $aml['roshans_killed'] += $fc['count'];
         }
         // foreach ($f['other'] as $fc) {
