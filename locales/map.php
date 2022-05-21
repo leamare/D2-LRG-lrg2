@@ -28,7 +28,6 @@ return [
         "name" => "Português",
     ],
     "zh" => [
-        "beta" => false,
         "file" => __DIR__ . "/zh.json",
         "name" => "普通话",
     ]
