@@ -392,10 +392,10 @@ function get_stratz_response($match) {
           if (in_array($fc['id'], OBS)) $aml['wards_destroyed'] += $fc['count'];
           if (in_array($fc['id'], ROSHAN)) $aml['roshans_killed'] += $fc['count'];
         }
-        foreach ($f['other'] as $fc) {
-          if (in_array($fc['id'], ROSHAN)) $aml['roshans_killed'] += $fc['count'];
-          if (in_array($fc['id'], OBS)) $aml['wards_destroyed'] += $fc['count'];
-        }
+        // foreach ($f['other'] as $fc) {
+        //   if (in_array($fc['id'], ROSHAN)) $aml['roshans_killed'] += $fc['count'];
+        //   if (in_array($fc['id'], OBS)) $aml['wards_destroyed'] += $fc['count'];
+        // }
       }
       
       $kde = [];
