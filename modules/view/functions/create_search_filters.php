@@ -182,7 +182,7 @@ function create_search_filters(string $searchstring) {
           case 'tag-has':
             $vals = explode(',', $command[1]);
             foreach ($vals as $v) {
-              $filters[] = [ LRG_CAT_FILTER_TAG, addcslashes($v, REGEX_MASK) ];
+              $filters[] = [ LRG_CAT_FILTER_TAG, "/".addcslashes($v, REGEX_MASK)."/" ];
             }
             break;
           case 'mid-from':
