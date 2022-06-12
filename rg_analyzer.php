@@ -289,11 +289,14 @@ if (isset($lg_settings['heroes_snapshot'])) {
   
       $line = null;
       $last = null;
+      $in_cm = false;
   
       foreach ($data['released'] as $l) {
         if ($l[0] > $last_match) break;
   
         $last = $l;
+
+        $in_cm = (bool)($l[2] ?? 0);
   
         if ($l[0] > $first_match) {
           continue;
@@ -306,7 +309,7 @@ if (isset($lg_settings['heroes_snapshot'])) {
       }
   
       if ($is_cm_only) {
-        if (empty($line) || !($line[2] ?? 0)) {
+        if (!$in_cm) {
           unset($meta['heroes'][$hid]);
         }
       } else {

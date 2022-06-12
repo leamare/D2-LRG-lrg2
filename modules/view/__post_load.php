@@ -142,11 +142,14 @@ if (isset($report["first_match"]) && isset($report["last_match"]) && compare_ver
 
     $line = null;
     $last = null;
+    $in_cm = false;
 
     foreach ($data['released'] as $l) {
       if ($l[0] > $last_match) break;
 
       $last = $l;
+
+      $in_cm = (bool)($l[2] ?? 0);
 
       if ($l[0] > $first_match) {
         continue;
@@ -159,7 +162,7 @@ if (isset($report["first_match"]) && isset($report["last_match"]) && compare_ver
     }
 
     if ($is_cm_only) {
-      if (empty($line) || !($line[2] ?? 0)) {
+      if (!$in_cm) {
         unset($meta['heroes'][$hid]);
       }
     } else {
