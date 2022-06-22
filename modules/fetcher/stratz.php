@@ -59,6 +59,12 @@ const STRATZ_LANE_TYPE = [
   'UNKNOWN' => 0,
 ];
 
+const STRATZ_LEAVER_STATUS = [
+  'NONE' => 0,
+  'DISCONNECTED' => 1,
+  'ABANDONED' => 2,
+];
+
 const STRATZ_GRAPHQL_QUERY = "{
   clusterId
   gameMode
@@ -327,11 +333,11 @@ function get_stratz_response($match) {
   foreach ($stratz['data']['match']['players'] as $i => $pl) {
     $r['payload']['score_radiant'] += $pl['isRadiant'] ? $pl['kills'] : 0;
     $r['payload']['score_dire'] += !$pl['isRadiant'] ? $pl['kills'] : 0;
-    $r['payload']['leavers'] += (
-      is_numeric($pl['leaverStatus']) 
-      ? $pl['leaverStatus'] > 1
-      : $pl['leaverStatus'] !== 'NONE'
-    ) ? 1 : 0;
+
+    if (!is_numeric($pl['leaverStatus'])) {
+      $pl['leaverStatus'] = STRATZ_LEAVER_STATUS[ $pl['leaverStatus'] ] ?? 0;
+    }
+    if ($pl['leaverStatus'] > 1) $r['payload']['leavers']++;
 
     $ml = [];
     $ml['matchid'] = $stratz['data']['match']['id'];
