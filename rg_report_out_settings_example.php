@@ -28,7 +28,7 @@ $custom_content = "";
 
 $custom_footer = "";
 
-$support_me_block = "asdas";
+$support_me_block = "";
 
 $ads_block = "";
 
@@ -46,37 +46,12 @@ $main_path = "/rg_report_web.php";
 $default_style = "";
 $noleague_style = "";
 
-$postfixes = [
-  'en' => "Title postfix",
-  'ru' => "Постфикс заголовка"
-];
+$instance_title = locale_string("main_default_instance_title");
+$instance_name = locale_string("main_specgg_instance_name");
+$instance_desc = locale_string("main_default_intance_desc");
 
-$long_descriptions = [
-  'en' => "Long description",
-  'ru' => "Длинное описание заголовка"
-];
-
-$instance_titles = [
-  'en' => "LRG",
-  //'ru' => "Длинное описание заголовка"
-];
-
-$instance_names = [
-  'en' => "League Report Generator Instance",
-  'ru' => "Инстанс генератора отчётов"
-];
-
-$instance_descs = [
-  'en' => "Header description",
-  'ru' => "Описание в шапке"
-];
-
-$instance_title = $instance_titles[ $locale ] ?? $instance_titles[ $def_locale ];
-$instance_name = $instance_names[ $locale ] ?? $instance_names[ $def_locale ];
-$instance_desc = $instance_descs[ $locale ] ?? $instance_descs[ $def_locale ];
-
-$instance_title_postfix = $postfixes[ $locale ] ?? $postfixes[ $def_locale ];
-$instance_long_desc = $long_descriptions[ $locale ] ?? $long_descriptions[ $def_locale ];
+$instance_title_postfix = locale_string("main_default_desc");
+$instance_long_desc = locale_string("main_default_desc_long");
 $title_separator = "-";
 
 # main page settings
@@ -92,11 +67,11 @@ $hidden_cat = "hidden";
 $index_list = 5; #-1 all, 0 none, other - number of reports on main page
 $title_slice_max = 4;
 
-$link_provider = "stratz.com"; //opendota.com dotabuff.com
+// $link_provider = "stratz.com"; //opendota.com dotabuff.com
 $links_providers = [
-  'DB' => "dotabuff.com",
+  'Dotabuff' => "dotabuff.com",
   'Stratz' => "stratz.com",
-  'OD' => "opendota.com",
+  'OpenDota' => "opendota.com",
 ];
 
 $search_info_link = "https://spectral.gg/lrg2search";

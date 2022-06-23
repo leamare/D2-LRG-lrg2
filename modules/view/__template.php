@@ -63,7 +63,7 @@
       echo "<meta name=\"twitter:description\" content=\"$rep_sm_title\">";
       echo "<meta name=\"twitter:image\" content=\"".$league_logo_link."\">";
       
-      if (!empty($meta_keywords)) echo "<meta name=\"keywords\" content=\"$meta_keywords\">";
+      echo "<meta name=\"keywords\" content=\"".locale_string("system_meta_keywords")."\">";
 
       echo "<title>$rep_sm_title</title>";
       
