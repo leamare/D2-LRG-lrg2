@@ -3,12 +3,7 @@
 
 $lrg_use_get = true;
 $lrg_get_depth = 6;
-$def_locale = "en";
 $locale = $locale ?? $def_locale;
-$locales = [
-  "en" => "English",
-  "ru" => "Русский"
-];
 
 $max_tabs = 12;
 

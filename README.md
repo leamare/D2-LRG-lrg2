@@ -146,8 +146,8 @@ Parameters:
 * `-cDIRECTORY` - Use DIRECTORY to store and check cached data (./cache by default)
 * `-R` - Automatically request a match to parse and try again later
 * `-S` - Strongly require STRATZ (for Ranked All Pick and Random Draft pick order and non-tournament matches player names), skip it STRATZ doesn't respond. In combination with -R reschedules match and tries again later
-* `-s` - Softly require STRATZ (works just like -S, but after failure just continues without STRATZ response)
-* `-Z` - Use full match data request from Stratz (called when can't get data using shortcuts)
+* `-s` - Softly require STRATZ (works just like -S, but after failure just continues without STRATZ response) **DEPRECATED**
+* `-Z` - Use full match data request from Stratz (called when can't get data using shortcuts) **DEPRECATED**
 * `-w123` - Specify number of seconds to wait before requesting scheduled matches again (default: 60)
 * `-A` - Force await flag, forces awaiting for availability of replay data (for cases when you pass data to the script and don't want it to end on EOF)
 * `-P` - Playerlist to use (discards any match that doesn't have all 10 players in the playerlist)
@@ -159,6 +159,7 @@ Parameters:
 * `-Q` - disables unparsed matches in -U mode (to only work with matches without detailed player data)
 * `-G` - use Stratz GraphQL to populate data
 * `-n` - force update player names
+* `-f` - ignore abandons
 
 Fetcher has two modes: "listen" mode and the regular one. Fetcher is using matchlist from `matchlists` follder by default, listen mode changes it to STDIN. It's not async because of time limitation on OpenDota side (basically you can't be too fast with your requests anyway, so there's no need to be asynchronous).
 
