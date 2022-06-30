@@ -33,6 +33,12 @@ function rg_view_generate_players_profiles() {
 
   $data = $report['players_summary'][$player];
 
+  if (isset($data['hero_damage_per_min_s']) && $data['gpm'] && !isset($data['damage_to_gold_per_min_s'])) {
+    $data = array_insert_before($data, "gpm", [
+      "damage_to_gold_per_min_s" => ($data['hero_damage_per_min_s'] ?? 0)/($data['gpm'] ?? 1),
+    ]);
+  }
+
   $res['playerid'.$player] .= "<div class=\"profile-header\">".
     "<div class=\"profile-image\"><img src=\"".str_replace("%HERO%", $player, $player_photo_provider ?? "")."\" /></div>".
     "<div class=\"profile-name\">".player_link($player)."</div>".
@@ -53,10 +59,11 @@ function rg_view_generate_players_profiles() {
            : number_format($data['kda'], 2)
         ).
         "</div>".
-        "<div class=\"profile-statline\"><label>".locale_string("gpm")."</label>: ".number_format($data['gpm'], 0)."</div>".
-        "<div class=\"profile-statline\"><label>".locale_string("xpm")."</label>: ".number_format($data['xpm'], 0)."</div>".
+        "<div class=\"profile-statline\"><label>".locale_string("gpm")."/".locale_string("xpm")."</label>: ".
+          number_format($data['gpm'], 0)."/".number_format($data['xpm'], 0)."</div>".
         "<div class=\"profile-statline\"><label>".locale_string("lh_at10")."</label>: ".number_format($data['lh_at10'], 1)."</div>".
         "<div class=\"profile-statline\"><label>".locale_string("lasthits_per_min_s")."</label>: ".number_format($data['lasthits_per_min_s'], 1)."</div>".
+        "<div class=\"profile-statline\"><label>".locale_string("damage_to_gold_per_min")."</label>: ".number_format($data['damage_to_gold_per_min_s'], 3)."</div>".
       "</div>".
       "<div class=\"profile-stats\">".
         "<div class=\"profile-statline\"><label>".locale_string("heal_per_min")."</label>: ".number_format($data['heal_per_min_s'], 2)."</div>".
@@ -80,11 +87,13 @@ function rg_view_generate_players_profiles() {
           $heroes[ $hero['hero'] ] = [
             'wins' => 0,
             'matches' => 0,
+            'matchlinks' => []
           ];
         }
         $heroes[ $hero['hero'] ]['matches']++;
         if ($hero['radiant'] == $report['matches_additional'][$mid]['radiant_win'])
           $heroes[ $hero['hero'] ]['wins']++;
+        $heroes[ $hero['hero'] ]['matchlinks'][] = $mid;
       }
     }
 
@@ -99,6 +108,29 @@ function rg_view_generate_players_profiles() {
       "\">".hero_icon($hid)."</a>";
     }
     $res['playerid'.$player] .= "</div>";
+
+    $res['playerid'.$player] .= "<table id=\"player-profile-pid$player-heroes\" class=\"list sortable\"><thead><tr>".
+      "<th width=\"2%\"></th>".
+      "<th>".locale_string("hero")."</th>".
+      "<th>".locale_string("matches")."</th>".
+      "<th>".locale_string("winrate")."</th>".
+      "<th>".locale_string("matchlinks")."</th>".
+    "</tr></thead>";
+
+    $res['playerid'.$player] .= "<tbody>";
+    foreach ($heroes as $hid => $data) {
+      $res['playerid'.$player] .= "<tr><td>".hero_portrait($hid)."</td>".
+        "<td>".hero_link($hid)."</td>".
+        "<td>".number_format($data['matches'])."</td>".
+        "<td>".number_format(100*$data['wins']/$data['matches'], 2)."%</td>".
+        "<td><a onclick=\"showModal('".
+          htmlspecialchars(join_matches($data['matchlinks'])).
+          "', '".addcslashes(player_name($player)." - ".hero_name($hid), "'")."');\">".
+          locale_string("matches").
+        "</a></td>";
+    }
+    
+    $res['playerid'.$player] .= "</tbody></table>";
   }
 
   // drafts data

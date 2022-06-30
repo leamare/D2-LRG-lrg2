@@ -135,6 +135,12 @@ function rg_view_generate_heroes_profiles() {
     ];
   }
 
+  if (isset($data['hero_damage_per_min_s']) && $data['gpm'] && !isset($data['damage_to_gold_per_min_s'])) {
+    $data = array_insert_before($data, "gpm", [
+      "damage_to_gold_per_min_s" => ($data['hero_damage_per_min_s'] ?? 0)/($data['gpm'] ?? 1),
+    ]);
+  }
+
   $total_matches = $data['matches_s'];
   $scripts = [];
 

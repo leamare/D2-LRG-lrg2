@@ -63,6 +63,16 @@ function rg_generator_summary($table_id, &$context, $hero_flag = true, $rank = f
     unset($context_copy);
   }
 
+  if (in_array("hero_damage_per_min_s", $keys) && in_array("gpm", $keys) && !in_array("damage_to_gold_per_min_s", $keys)) {
+    foreach ($context as $id => $el) {
+      $context[$id] = array_insert_before($context[$id], "gpm", [
+        "damage_to_gold_per_min_s" => ($context[$id]['hero_damage_per_min_s'] ?? 0)/($context[$id]['gpm'] ?? 1),
+      ]);
+    }
+
+    $keys = array_insert_before($keys, array_search("gpm", $keys), [ 'damage_to_gold_per_min_s' ]);
+  }
+
   $res = search_filter_component($table_id, true);
 
   $res .= "<table id=\"$table_id\" class=\"list wide sortable\"><thead><tr>".
