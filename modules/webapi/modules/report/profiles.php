@@ -18,6 +18,12 @@ $endpoints['profiles'] = function($mods, $vars, &$report) use (&$endpoints, &$me
     if (!isset($report['hero_summary'][ $vars['heroid'] ])) throw new \Exception("Hero `${$vars['heroid']}` is not in the report");
     $res['summary'] = $report['hero_summary'][ $vars['heroid'] ];
 
+    if (isset($res['summary']['hero_damage_per_min_s']) && $res['summary']['gpm'] && !isset($res['summary']['damage_to_gold_per_min_s'])) {
+      $res['summary'] = array_insert_before($res['summary'], "gpm", [
+        "damage_to_gold_per_min_s" => ($res['summary']['hero_damage_per_min_s'] ?? 0)/($res['summary']['gpm'] ?? 1),
+      ]);
+    }
+
     // pickban data
     $pb = $endpoints['pickban']($mods, $vars, $report);
     $res['pickban'] = $pb['pickban'][ $vars['heroid'] ];
@@ -171,6 +177,12 @@ $endpoints['profiles'] = function($mods, $vars, &$report) use (&$endpoints, &$me
     if (is_wrapped($report['players_summary'])) $report['players_summary'] = unwrap_data($report['players_summary']);
     if (!isset($report['players_summary'][ $vars['playerid'] ])) throw new \Exception("Player `${$vars['playerid']}` is not in the report");
     $res['summary'] = $report['players_summary'][ $vars['playerid'] ];
+
+    if (isset($res['summary']['hero_damage_per_min_s']) && $res['summary']['gpm'] && !isset($res['summary']['damage_to_gold_per_min_s'])) {
+      $res['summary'] = array_insert_before($res['summary'], "gpm", [
+        "damage_to_gold_per_min_s" => ($res['summary']['hero_damage_per_min_s'] ?? 0)/($res['summary']['gpm'] ?? 1),
+      ]);
+    }
 
     // drafts data
     if (isset($report['players_draft'])) {

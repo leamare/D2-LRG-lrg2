@@ -37,7 +37,7 @@ $endpoints['summary'] = function($mods, $vars, &$report) {
       foreach($context['players_summary'] as $id => $player) {
         if (!isset($report['players_additional'][$id]['positions'])) continue;
         $position = reset($report['players_additional'][$id]['positions']);
-        $position = $position["core"].".".$position["lane"];
+        $position = is_array($position) ? $position["core"].".".$position["lane"] : "0.0";
         $context['players_summary'][$id]['common_position'] = $position;
       }
     }
@@ -49,6 +49,16 @@ $endpoints['summary'] = function($mods, $vars, &$report) {
     $res['__endp'] = "heroes-summary";
   } else {
     throw new \Exception("What kind of summary do you need?");
+  }
+
+  $keys = array_keys( array_values($res)[0] );
+  if (in_array("hero_damage_per_min_s", $keys) && in_array("gpm", $keys) && !in_array("damage_to_gold_per_min_s", $keys)) {
+    foreach ($res as $id => $el) {
+      if (!is_numeric($id)) continue;
+      $res[$id] = array_insert_before($res[$id], "gpm", [
+        "damage_to_gold_per_min_s" => ($res[$id]['hero_damage_per_min_s'] ?? 0)/($res[$id]['gpm'] ?? 1),
+      ]);
+    }
   }
 
   return $res;

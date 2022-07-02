@@ -62,8 +62,25 @@ $endpoints['positions'] = function($mods, $vars, &$report) {
     }
     positions_ranking($res, $context_total_matches);
     
+    $keys = array_keys( array_values($res)[0] );
+    $is_dmg_per_min = in_array("hero_damage_per_min_s", $keys) && in_array("gpm", $keys) && !in_array("damage_to_gold_per_min_s", $keys);
+    if (in_array("hero_damage_per_min_s", $keys) && in_array("gpm", $keys) && !in_array("damage_to_gold_per_min_s", $keys)) {
+      foreach ($context as $id => $el) {
+        $context[$id] = array_insert_before($context[$id], "gpm", [
+          "damage_to_gold_per_min_s" => ($context[$id]['hero_damage_per_min_s'] ?? 0)/($context[$id]['gpm'] ?? 1),
+        ]);
+      }
+
+      $keys = array_insert_before($keys, array_search("gpm", $keys), [ 'damage_to_gold_per_min_s' ]);
+    }
+
     foreach ($res as $id => $data) {
       $res[$id]['picks_to_median'] = isset($median_picks) ? round($data['matches_s']/$median_picks, 3) : null;
+      if ($is_dmg_per_min) {
+        $res[$id] = array_insert_before($res[$id], "gpm", [
+          "damage_to_gold_per_min_s" => ($res[$id]['hero_damage_per_min_s'] ?? 0)/($res[$id]['gpm'] ?? 1),
+        ]);
+      }
     }
 
     return [
