@@ -763,7 +763,8 @@ function fetch($match) {
         $t_adv_matchlines[$i]['heroid'] = $matchdata['players'][$j]['hero_id'];
 
         if (!$bad_replay) {
-          $t_adv_matchlines[$i]['lh_at10'] = $matchdata['players'][$j]['lh_t'][10];
+          if (empty($matchdata['players'][$j]['lh_t'])) $matchdata['players'][$j]['lh_t'] = [0];
+          $t_adv_matchlines[$i]['lh_at10'] = $matchdata['players'][$j]['lh_t'][10] ?? end($matchdata['players'][$j]['lh_t']);
           if ($matchdata['players'][$j]['lane_role'] == 5)
               $matchdata['players'][$j]['lane_role'] = 4; # we don't care about different jungles
           //if ($matchdata['players'][$j]['is_roaming'])
@@ -783,6 +784,8 @@ function fetch($match) {
           if ($matchdata['players'][$j]['obs_placed'] > 8) $support_indicators++;
           if ($matchdata['players'][$j]['obs_placed'] > 12) $support_indicators++;
           if ($matchdata['players'][$j]['sen_placed'] > 6) $support_indicators++;
+
+          if (empty($matchdata['players'][$j]['lane_efficiency'])) $matchdata['players'][$j]['lane_efficiency'] = $t_adv_matchlines[$i]['lh_at10']/42;
 
           if ($matchdata['players'][$j]['lane_efficiency'] < 0.55 && $matchdata['players'][$j]['win']) $support_indicators++;
           if ($matchdata['players'][$j]['lane_efficiency'] < 0.50) $support_indicators++;
