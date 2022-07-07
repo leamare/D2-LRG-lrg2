@@ -66,6 +66,7 @@ include_once("modules/view/functions/modules.php");
 include_once("modules/view/functions/player_card.php");
 include_once("modules/view/functions/team_card.php");
 include_once("modules/view/functions/match_card.php");
+include_once("modules/view/functions/filter_toggles.php");
 include_once("modules/view/functions/search_filter_component.php");
 
 include_once("modules/view/functions/join_selectors.php");
