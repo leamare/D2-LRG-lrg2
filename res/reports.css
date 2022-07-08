@@ -598,6 +598,39 @@ table .hero_portrait {
 .content-text .hero-list {
   line-height: 0px;
 }
+.filter-toggles {
+  text-align: left;
+  font-size: 18px;
+  line-height: 34px;
+  color: var(--text);
+  margin: 30px auto 0;
+  width: 82%;
+  display: flex;
+}
+.filter-toggles.wide {
+  width: 98%;
+}
+.filter-toggles label {
+  font-size: 1em;
+  line-height: inherit;
+  background: var(--tagslist-bg);
+  padding-left: 1.2em;
+  padding-right: 1.2em;
+  margin-right: 1em;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: .25s all linear;
+  user-select: none;
+}
+
+.filter-toggles input[type=checkbox] {
+  display:none;
+}
+
+.filter-toggles input[type=checkbox]:checked + label {
+  background: var(--tagslist-active);
+  color: var(--caption);
+}
 
 .chart-pie {
   width: 40%;
