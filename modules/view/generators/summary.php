@@ -12,12 +12,15 @@ function rg_generator_summary($table_id, &$context, $hero_flag = true, $rank = f
 
   $keys = array_keys( array_values($context)[0] );
 
+  $matches = [];
+
   if ($rank) {
     $ranks = [];
     $context_copy = $context;
     $total_matches = 0;
     foreach ($context as $c) {
       if ($total_matches < $c['matches_s']) $total_matches = $c['matches_s'];
+      $matches[] = $c['matches_s'];
     }
 
     uasort($context_copy, function($a, $b) use ($total_matches) {
@@ -73,7 +76,15 @@ function rg_generator_summary($table_id, &$context, $hero_flag = true, $rank = f
     $keys = array_insert_before($keys, array_search("gpm", $keys), [ 'damage_to_gold_per_min_s' ]);
   }
 
-  $res = search_filter_component($table_id, true);
+  sort($matches);
+  $res = filter_toggles_component($table_id, [
+    'summary_matches' => [
+      'value' => $matches[ round(count($matches)/2) ],
+      'label' => 'data_filter_summary_matches'
+    ]
+  ], $table_id, 'wide');
+
+  $res .= search_filter_component($table_id, true);
 
   $res .= "<table id=\"$table_id\" class=\"list wide sortable\"><thead><tr>".
           ($hero_flag ? "<th class=\"sorter-no-parser\" width=\"1%\"></th>" : "").
@@ -93,7 +104,7 @@ function rg_generator_summary($table_id, &$context, $hero_flag = true, $rank = f
   $res .= "</tr></thead><tbody>";
 
   foreach($context as $id => $el) {
-    $res .= "<tr><td>".
+    $res .= "<tr data-value-summary_matches=\"".$el['matches_s']."\"><td>".
               ($hero_flag ? hero_portrait($id)."</td><td>".hero_link($id) : player_link($id, true, true)).
             "</td>".
             "<td>".$el['matches_s']."</td>".
