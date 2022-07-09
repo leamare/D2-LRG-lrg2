@@ -54,6 +54,17 @@ function rg_generator_pickban($table_id, &$context, &$context_main, $heroes_flag
     " (mp): $mp - ".locale_string("heroes_median_bans").
     " (mb): $mb - ".locale_string("matches_total").": $context_total_matches</div>";
 
+  $res = filter_toggles_component($table_id, [
+    'mp' => [
+      'value' => '0.9',
+      'label' => 'data_filter_low_values_mp'
+    ],
+    'mb' => [
+      'value' => '0.9',
+      'label' => 'data_filter_low_values_mb'
+    ]
+  ], $table_id);
+
   $res .= rg_generator_balance("$table_id-balance", $context);
 
   $res .= search_filter_component($table_id);
@@ -127,7 +138,9 @@ function rg_generator_pickban($table_id, &$context, &$context_main, $heroes_flag
     if ($roles) {
       [ $id, $role ] = explode('|', $id);
     }
-    $res .=  "<tr>".
+    $el_mp = number_format($el['matches_picked']/$mp, 1);
+    $el_mb = number_format($el['matches_banned']/$mb, 1);
+    $res .=  "<tr data-value-mp=\"$el_mp\" data-value-mb=\"$el_mb\">".
             ($heroes_flag ? "<td>".hero_portrait($id)."</td><td>".hero_link($id)."</td>" : "<td>".player_link($id)."</td>").
             ($roles ? "<td>".locale_string("position_$role")."</td>" : "").
             "<td>".$el['matches_total']."</td>".
@@ -137,11 +150,11 @@ function rg_generator_pickban($table_id, &$context, &$context_main, $heroes_flag
             "<td class=\"separator\">".$el['matches_picked']."</td>".
             // "<td>".number_format($el['matches_picked']/$context_total_matches*100,2)."%</td>".
             "<td>".number_format($el['winrate_picked']*100,2)."%</td>".
-            "<td>".number_format($el['matches_picked']/$mp, 1)."</td>".
+            "<td>".$el_mp."</td>".
             "<td class=\"separator\">".$el['matches_banned']."</td>".
             // "<td>".number_format($el['matches_banned']/$context_total_matches*100,2)."%</td>".
             "<td>".number_format($el['winrate_banned']*100,2)."%</td>".
-            "<td>".number_format($el['matches_banned']/$mb, 1)."</td>".
+            "<td>".$el_mb."</td>".
             "</tr>";
   }
   unset($oi);
