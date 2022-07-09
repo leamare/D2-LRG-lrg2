@@ -32,6 +32,13 @@ function rg_generator_positions_overview($table_id, &$context, $hero_flag = true
   $overview = [];
   $ranks = [];
 
+  $filters = [
+    'overview_total' => [
+      'value' => null,
+      'label' => 'data_filter_positions_overview_total_mp'
+    ]
+  ];
+
   for ($i=1; $i>=0; $i--) {
     for ($j=($i ? 0 : 5); $j<6 && $j>=0; ($i ? $j++ : $j--)) {
       //if (!$i) { $j = 0; }
@@ -41,12 +48,21 @@ function rg_generator_positions_overview($table_id, &$context, $hero_flag = true
         continue;
       }
 
+      $matches = [];
+
       $ranks[$i][$j] = [];
       $context_copy = $context[$i][$j];
       $total_matches = 0;
       foreach ($context_copy as $c) {
         if ($total_matches < $c['matches_s']) $total_matches = $c['matches_s'];
+        $matches[] = $c['matches_s'];
       }
+
+      sort($matches);
+      $filters["position_$i.$j"] = [
+        'value' => $matches[ round(count($matches)/2) ],
+        'label' => "data_filter_positions_${i}.${j}_mp"
+      ];
   
       uasort($context_copy, function($a, $b) use ($total_matches) {
         return positions_ranking_sort($a, $b, $total_matches);
@@ -108,7 +124,11 @@ function rg_generator_positions_overview($table_id, &$context, $hero_flag = true
     else return ($a['total'] < $b['total']) ? 1 : -1;
   });
 
-  $res = search_filter_component($table_id, true);
+  $filters['overview_total']['value'] = array_values($overview)[ floor(count($overview)*0.45) ]['total'];
+
+  $res = filter_toggles_component($table_id, $filters, $table_id, 'wide');
+
+  $res .= search_filter_component($table_id, true);
 
   $res .= "<table id=\"$table_id\" class=\"list wide sortable\"><thead><tr class=\"overhead\"><th width=\"20%\" colspan=\"".(2+$hero_flag)."\"></th>";
 
@@ -133,26 +153,34 @@ function rg_generator_positions_overview($table_id, &$context, $hero_flag = true
   $res .= "</tr>".$heroline."</tr></thead>";
 
   foreach ($overview as $elid => $el) {
-    $res .= "<tr><td>".
-        ($hero_flag ? hero_portrait($elid)."</td><td>".hero_link($elid) : player_link($elid)).
-        "</td><td>".$el['total']."</td>";
-    foreach($el as $v) {
+    $params = [
+      "data-value-overview_total=\"".$el['total']."\""
+    ];
+
+    $elres = "";
+
+    foreach($el as $k => $v) {
       if (!is_array($v)) continue;
 
+      $params[] = "data-value-position_$k=\"".$v['matches']."\"";
+
       if(!$v['matches']) {
-        $res .= "<td class=\"separator\">-</td>".
+        $elres .= "<td class=\"separator\">-</td>".
                       "<td>-</td>".
                       "<td>-</td>".
                       "<td>-</th>";
       } else {
-        $res .= "<td class=\"separator\">".$v['matches']."</td>".
+        $elres .= "<td class=\"separator\">".$v['matches']."</td>".
                     "<td>".number_format($v['rank'],1)."</td>".
                     // "<td>".number_format($v['antirank'],1)."</td>".
                     "<td>".number_format($v['matches']*100/$el['total'],1)."%</td>".
                     "<td>".number_format($v['wr']*100,1)."%</td>";
       }
     }
-    $res .= "</tr>";
+
+    $res .= "<tr ".implode(" ", $params)."><td>".
+        ($hero_flag ? hero_portrait($elid)."</td><td>".hero_link($elid) : player_link($elid)).
+        "</td><td>".$el['total']."</td>".$elres."</tr>";
   }
   $res .= "</table>";
 
