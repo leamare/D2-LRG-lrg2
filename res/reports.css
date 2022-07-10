@@ -631,6 +631,9 @@ table .hero_portrait {
   background: var(--tagslist-active);
   color: var(--caption);
 }
+.filter-toggle-hidden {
+  display: none !important;
+}
 
 .chart-pie {
   width: 40%;
