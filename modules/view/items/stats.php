@@ -51,10 +51,10 @@ function rg_view_generate_items_stats() {
   }
 
   $meta['item_categories'];
-  if (isset($_GET['item_cat']) && isset($meta['item_categories'][ $_GET['item_cat'] ])) {
-    $cat = $_GET['item_cat'];
+  if (isset($_GET['item_cat'])) {
+    $cat = explode(',', $_GET['item_cat']);
   } else {
-    $cat = null;
+    $cat = [];
   }
 
   foreach ($report['items']['stats'][$hero] as $iid => $v) {
@@ -115,21 +115,38 @@ function rg_view_generate_items_stats() {
     $item_cats = array_merge($item_cats, [ 'neutral_tier_1', 'neutral_tier_2', 'neutral_tier_3', 'neutral_tier_4', 'neutral_tier_5' ]);
   }
 
-  $items = array_filter($report['items']['stats'][$hero], function($v, $k) use ($cat, &$meta) {
-    if ($cat !== null) {
-      return in_array($k, $meta['item_categories'][$cat]) && !empty($v);
+  $item_cats_filtered = [];
+  foreach ($cat as $ic) {
+    if (empty($meta['item_categories'][$ic])) continue;
+
+    $item_cats_filtered = array_merge($item_cats_filtered, $meta['item_categories'][$ic]);
+  }
+
+  $items = array_filter($report['items']['stats'][$hero], function($v, $k) use (&$cat, &$item_cats_filtered) {
+    if (!empty($cat)) {
+      return in_array($k, $item_cats_filtered) && !empty($v);
     }
     return !empty($v);
   }, ARRAY_FILTER_USE_BOTH);
 
   $res[$tag] .= 
     "<span class=\"selector\">".locale_string("items_category_selector").":</span> ".
-    "<select onchange=\"select_modules_link(this);\" class=\"select-selectors select-selectors-level-4\">".
-    "<option ".($cat === null ? "selected=\"selected\"" : "")." value=\"?league=".$leaguetag."&mod=".$mod.(empty($linkvars) ? "" : "&".$linkvars)."\">".locale_string("items_category_all")."</option>";
+    // onchange=\"select_modules_link(this);\"
+    "<div class=\"custom-selector-multiple\">".
+    "<select multiple id=\"items-cat-multiselect\" class=\"select-selectors select-selectors-level-4\" 
+      data-empty-placeholder=\"".locale_string("items_category_all")."\">";
+    // "<option ".($cat === null ? "selected=\"selected\"" : "").
+    //   " value=\"?league=".$leaguetag."&mod=".$mod.(empty($linkvars) ? "" : "&".$linkvars)."\">".locale_string("items_category_all")."</option>";
   foreach ($item_cats as $ic) {
-    $res[$tag] .= "<option ".($cat == $ic ? "selected=\"selected\"" : "")." value=\"?league=".$leaguetag."&mod=".$mod.(empty($linkvars) ? "" : "&".$linkvars)."&item_cat=$ic\">".locale_string("items_category_$ic")."</option>";
+    $res[$tag] .= "<option ".(in_array($ic, $cat) ? "selected=\"selected\"" : "").
+      " value=\"$ic\">".locale_string("items_category_$ic")."</option>";
   }
-  $res[$tag] .= "</select>";
+  $res[$tag] .= "</select></div>";
+  $res[$tag] .= "<input type=\"button\" 
+    class=\"custom-button\" 
+    onclick=\"multiselectSubmit('items-cat-multiselect', '?league=".$leaguetag."&mod=".$mod.(empty($linkvars) ? "" : "&".$linkvars)."', 'item_cat')\"
+    value=\"".locale_string("apply")."\"
+  />";
   
   $res[$tag] .= "</div>";
 
