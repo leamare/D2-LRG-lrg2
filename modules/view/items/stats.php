@@ -117,10 +117,11 @@ function rg_view_generate_items_stats() {
 
   $item_cats_filtered = [];
   foreach ($cat as $ic) {
-    if (empty($meta['item_categories'][$ic])) continue;
+    if (empty($meta['item_categories'][$ic]) || !in_array($ic, $item_cats)) continue;
 
     $item_cats_filtered = array_merge($item_cats_filtered, $meta['item_categories'][$ic]);
   }
+  $item_cats_filtered = array_unique($item_cats_filtered);
 
   $items = array_filter($report['items']['stats'][$hero], function($v, $k) use (&$cat, &$item_cats_filtered) {
     if (!empty($cat)) {
