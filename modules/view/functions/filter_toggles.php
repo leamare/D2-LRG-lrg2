@@ -18,6 +18,8 @@ function filter_toggles_component($group, $description, $table = null, $modifier
   $filters = [];
 
   foreach ($description as $param => $desc) {
+    if (empty($desc)) continue;
+
     $filters[] = filter_toggle_single_component(
       $param, 
       $desc['table'] ?? $table ?? 'table',
@@ -26,6 +28,8 @@ function filter_toggles_component($group, $description, $table = null, $modifier
       $group
     );
   }
+
+  if (empty($filters)) return "";
 
   return "<div class=\"filter-toggles $modifiers\" data-filter-toggles-group=\"$group\">".implode("\n", $filters)."</div>";
 }
