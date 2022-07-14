@@ -429,6 +429,9 @@ a:hover {
 .custom-button:hover {
   background: var(--tagslist-bg-hover);
 }
+.custom-button:active {
+  background: var(--tagslist-bg);
+}
 
 .custom-selector + .custom-button, .custom-selector-multiple + .custom-button {
   margin-left: .5em;

@@ -1658,3 +1658,7 @@ table.list thead {
 input[type=search]::-webkit-search-cancel-button {
   filter: brightness(5) drop-shadow(0 0 3px black);
 } 
+
+.filter-toggles + .search-filter {
+  margin-top: 15px;
+}
