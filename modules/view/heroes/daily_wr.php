@@ -44,6 +44,32 @@ function rg_view_generate_heroes_daily_winrates() {
   global $report, $parent, $root, $unset_module, $mod, $meta, $strings, $use_graphjs;
   $res = "";
 
+  $context_main = $report['random'] ?? $report['main'] ?? [];
+
+  $context_total_matches = $context_main['matches'] ?? $context_main["matches_total"] ?? 0;
+  $mp = $context_main['heroes_median_picks'] ?? null;
+  $mb = $context_main['heroes_median_bans'] ?? null;
+
+  if (!$mp) {
+    uasort($report['pickban'], function($a, $b) {
+      return $a['matches_picked'] <=> $b['matches_picked'];
+    });
+    $mp = isset($report['pickban'][ round(sizeof($context)*0.5) ]) ? $report['pickban'][ round(sizeof($context)*0.5) ]['matches_picked'] : 1;
+  }
+  if (!$mp) $mp = 1;
+
+  if (!$mb) {
+    if ($mp > 1) {
+      $mb = 1;
+    } else {
+      uasort($report['pickban'], function($a, $b) {
+        return $a['matches_banned'] <=> $b['matches_banned'];
+      });
+      $mb = isset($report['pickban'][ round(sizeof($context)*0.5) ]) ? $report['pickban'][ round(sizeof($report['pickban'])*0.5) ]['matches_banned'] : 1;
+    }
+  }
+  if (!$mb) $mb = 1;
+
   if (is_wrapped($report['hero_daily_wr'])) {
     $days = $report['hero_daily_wr']['head'][0];
     sort($days);
@@ -79,8 +105,18 @@ function rg_view_generate_heroes_daily_winrates() {
     $labels[] = date(locale_string("date_format"), $timestamp);
   }
 
-
   $scripts = [];
+
+  $res = filter_toggles_component('heroes-dailywr', [
+    'pickrate' => [
+      'value' => number_format(100*$mp/$context_total_matches, 2),
+      'label' => 'data_filter_low_values_pickrate'
+    ],
+    'banrate' => [
+      'value' => number_format(100*$mb/$context_total_matches, 2),
+      'label' => 'data_filter_low_values_banrate'
+    ]
+  ], 'heroes-dailywr', 'wide');
 
   $res .= search_filter_component("heroes-dailywr", true);
 
@@ -146,7 +182,11 @@ function rg_view_generate_heroes_daily_winrates() {
       }
     }
 
-    $res .= "<tr><td>".hero_portrait($hid)."</td><td>".hero_link($hid)."</td>".
+    $el_mp = max($dm); //array_sum($dm)/count($dm);
+    $el_mb = max($dmb); //array_sum($dmb)/count($dmb);
+
+    $res .= "<tr data-value-pickrate=\"$el_mp\" data-value-banrate=\"$el_mb\">".
+      "<td>".hero_portrait($hid)."</td><td>".hero_link($hid)."</td>".
       "<td class=\"separator\">".number_format($first_wr, 2)."%</td>".
       "<td><div style=\"position: relative; width: 100%; height: 70px\"><canvas id=\"hero-daily-wr-$hid\"></canvas></div></td>".
       "<td>".number_format($dwr[ count($dwr)-1 ], 2)."%</td>".
