@@ -10,6 +10,8 @@ function rg_generator_hph_profile($table_id, &$context, &$context_wrs, $srcid, $
   $i = 0;
   $isrank = false;
 
+  $matches_med = [];
+
   if(!empty($context_wrs)) {
     $wr_id = $heroes_flag ? "winrate_picked" : "winrate";
     $dt = [
@@ -45,6 +47,8 @@ function rg_generator_hph_profile($table_id, &$context, &$context_wrs, $srcid, $
     $increment = 100 / sizeof($context); $i = 0; $last_rank = 0;
   
     foreach ($context as $elid => $el) {
+      $matches_med[] = $el['matches'];
+      
       if(isset($last) && $el == $last) {
         $i++;
         $context[$elid]['rank'] = $last_rank;
@@ -74,7 +78,32 @@ function rg_generator_hph_profile($table_id, &$context, &$context_wrs, $srcid, $
     unset($last);
 
     $isrank = true; $i = 0;
+  } else {
+    foreach ($context as $elid => $el) {
+      $matches_med[] = $el['matches'];
+    }
   }
+
+  sort($matches_med);
+
+  $res .= filter_toggles_component($table_id, [
+    'match' => [
+      'value' => $matches_med[ round(count($matches_med)/2) ] ?? 0,
+      'label' => 'data_filter_matches'
+    ],
+    'diff' => [
+      'value' => 0,
+      'label' => 'data_filter_wr_diff'
+    ],
+    'dev' => $exp ? [
+      'value' => '1',
+      'label' => 'data_filter_pos_deviation'
+    ] : null,
+    'lane' => [
+      'value' => '25',
+      'label' => 'data_filter_lane_rate'
+    ]
+  ], $table_id);
 
   $res .= search_filter_component($table_id);
   $res .= "<table id=\"$table_id\" class=\"list sortable\">";
@@ -100,18 +129,23 @@ function rg_generator_hph_profile($table_id, &$context, &$context_wrs, $srcid, $
 
   foreach($context as $elid_op => $data) {
     if ($data['matches'] == 0) continue;
-    $res .= "<tr>".
-            ($heroes_flag ? "<td>".hero_portrait($elid_op)."</td>" : "").
-            "<td>".($heroes_flag ? hero_link($elid_op) : player_link($elid_op))."</td>".
-            ($isrank ? "<td>".number_format($data['rank'], 2)."</td><td>".number_format($data['arank'], 2)."</td>" : "").
-            "<td class=\"separator\">".number_format($data['matches'])."</td>".
-            "<td>".number_format($data['winrate']*100,2)."%</td>".
-            "<td>".number_format(($data['winrate'] - $dt['wr'])*100,2)."%</td>".
-            "<td class=\"separator\">".number_format($data['exp'])."</td>".
-            "<td>".number_format($data['matches'] - $data['exp'])."</td>".
-            "<td>".number_format(100*($data['matches'] - $data['exp'])/$data['matches'], 2)."%</td>".
-            "<td class=\"separator\">".number_format($data['lane_rate']*100, 2)."%</td>".
-            "</tr>";
+    $res .= "<tr ".
+      "data-value-match=\"".$data['matches']."\" ".
+      "data-value-diff=\"".number_format(($data['winrate'] - $dt['wr'])*100,2)."\" ".
+      ($exp ? "data-value-dev=\"".number_format($data['matches']-$data['exp'], 0)."\" " : "").
+      "data-value-lane=\"".number_format($data['lane_rate']*100, 2)."\" ".
+      ">".
+      ($heroes_flag ? "<td>".hero_portrait($elid_op)."</td>" : "").
+      "<td>".($heroes_flag ? hero_link($elid_op) : player_link($elid_op))."</td>".
+      ($isrank ? "<td>".number_format($data['rank'], 2)."</td><td>".number_format($data['arank'], 2)."</td>" : "").
+      "<td class=\"separator\">".number_format($data['matches'])."</td>".
+      "<td>".number_format($data['winrate']*100,2)."%</td>".
+      "<td>".number_format(($data['winrate'] - $dt['wr'])*100,2)."%</td>".
+      "<td class=\"separator\">".number_format($data['exp'])."</td>".
+      "<td>".number_format($data['matches'] - $data['exp'])."</td>".
+      "<td>".number_format(100*($data['matches'] - $data['exp'])/$data['matches'], 2)."%</td>".
+      "<td class=\"separator\">".number_format($data['lane_rate']*100, 2)."%</td>".
+      "</tr>";
   }
 
   $res .= "</table>";
