@@ -14,6 +14,7 @@ function rg_generator_laning_profile($table_id, &$context, $id_o, $heroes_flag =
 
   $ranks = [];
   $ids = [ 0 ];
+  $matches_med = [];
   if (!empty($id_o)) $ids[] = $id_o;
 
   if ($id_o) unset($context[$id_o][$id_o]);
@@ -33,6 +34,7 @@ function rg_generator_laning_profile($table_id, &$context, $id_o, $heroes_flag =
       }
       if ($h['matches'] > $mm) $mm = $h['matches'];
       if (!isset($h['matches']) || $h['matches'] == 0) unset($context[$id][$k]);
+      if (empty($id_o) || $id == $id_o) $matches_med[] = $h['matches'];
     }
 
     uasort($context[$id], function($a, $b) {
@@ -143,10 +145,21 @@ function rg_generator_laning_profile($table_id, &$context, $id_o, $heroes_flag =
     $res .= "</table>";
   }
 
-  
-  $res .= "<table id=\"$table_id\" class=\"list wide sortable\"><caption>".locale_string($id ? "laning_opponents" : "laning_total")."";
-  $res .= search_filter_component($table_id, false, true);
-  $res .= "</caption>";
+  sort($matches_med);
+
+  $res .= "<div class=\"content-text\"><h1>".locale_string($id ? "laning_opponents" : "laning_total")."</h1></div>";
+  $res .= filter_toggles_component($table_id, [
+    'match' => [
+      'value' => $matches_med[ round(count($matches_med)/2) ] ?? 0,
+      'label' => 'data_filter_matches'
+    ],
+    'lane_wr' => [
+      'value' => 49,
+      'label' => 'data_filter_lane_wr'
+    ],
+  ], $table_id, 'wide');
+  $res .= search_filter_component($table_id, true);
+  $res .= "<table id=\"$table_id\" class=\"list wide sortable\">";
   $res .= "<thead><tr class=\"overhead\">".
             "<th width=\"12%\" colspan=\"".($heroes_flag ? "2" : "1")."\"></th>".
             "<th width=\"18%\" colspan=\"3\"></th>".
@@ -190,7 +203,10 @@ function rg_generator_laning_profile($table_id, &$context, $id_o, $heroes_flag =
       ) / $data['matches'] : 0;
     }
 
-    $res .= "<tr class=\"row\">".
+    $res .= "<tr ".
+      "data-value-match=\"".$data['matches']."\" ".
+      "data-value-lane_wr=\"".($data['matches'] ? number_format($data['lane_wr']*100, 2) : 0)."\" ".
+      " class=\"row\">".
       ($heroes_flag ? "<td>".hero_portrait($elid)."</td>" : '').
       "<td>".($heroes_flag ? hero_link($elid) : player_link($elid))."</td>".
       "<td>".($data['matches'] ? $data['matches'] : '-')."</td>".
