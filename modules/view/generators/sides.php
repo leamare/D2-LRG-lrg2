@@ -8,6 +8,8 @@ function rg_generator_sides($table_id, &$context, $heroes_flag = true) {
   $elements = [];
   $id = $heroes_flag ? "heroid" : "playerid";
 
+  $matches_med = [];
+
   for ($i=0; $i<2 && !isset($keys); $i++) {
       if(isset($context[$i][0])) {
         $keys = array_keys($context[$i][0]);
@@ -37,6 +39,8 @@ function rg_generator_sides($table_id, &$context, $heroes_flag = true) {
       $elements[$elid][-1]["diff"] = 0;
     else
       $elements[$elid][-1]["diff"] = $elements[$elid][1]["winrate"] - $elements[$elid][0]["winrate"];
+    
+    $matches_med[] = $el[-1]['matches'];
   }
 
   uasort($elements, function($a, $b) {
@@ -44,7 +48,16 @@ function rg_generator_sides($table_id, &$context, $heroes_flag = true) {
     else return ($a[-1]['diff'] < $b[-1]['diff']) ? 1 : -1;
   });
 
-  $res = search_filter_component($table_id, true);
+  sort($matches_med);
+
+  $res = filter_toggles_component($table_id, [
+    'match' => [
+      'value' => $matches_med[ round(count($matches_med)/2) ] ?? 0,
+      'label' => 'data_filter_matches'
+    ]
+  ], $table_id, 'wide');
+
+  $res .= search_filter_component($table_id, true);
 
   $res .= "<table id=\"$table_id\" class=\"list wide sortable\"><thead>".
             "<tr class=\"overhead\"><th colspan=\"".(2+$heroes_flag)."\"></th>".
@@ -75,10 +88,11 @@ function rg_generator_sides($table_id, &$context, $heroes_flag = true) {
       $el[1]["winrate"] = 0;
     }
 
-    $res .= "<tr><td>".($heroes_flag ? hero_portrait($elid)."</td><td>".hero_link($elid) : player_link($elid))."</td>".
-            "<td>".$el[-1]['matches']."</td>".
-            "<td class=\"separator\">".number_format($el[1]["matches"]*100/$el[-1]["matches"],2)."%</td>".
-            "<td>".number_format($el[-1]["diff"]*100,2)."%</td>";
+    $res .= "<tr data-value-match=\"".$el[-1]['matches']."\">".
+      "<td>".($heroes_flag ? hero_portrait($elid)."</td><td>".hero_link($elid) : player_link($elid))."</td>".
+      "<td>".$el[-1]['matches']."</td>".
+      "<td class=\"separator\">".number_format($el[1]["matches"]*100/$el[-1]["matches"],2)."%</td>".
+      "<td>".number_format($el[-1]["diff"]*100,2)."%</td>";
 
     for ($side = 1; $side >= 0; $side--) {
       $res .= "<td class=\"separator\">".number_format($el[$side][ "matches" ])."</th>";
