@@ -13,43 +13,17 @@ function rg_view_generate_heroes_wrtimings() {
     $report['hero_winrate_timings'] = unwrap_data($report['hero_winrate_timings']);
   }
 
-  $res .= "<details class=\"content-text explainer\"><summary>".locale_string("explain_summary")."</summary>".
-    "<div class=\"explain-content\">".
-      "<div class=\"line\">".locale_string("desc_heroes_wrtimings")."</div>".
-    "</div>".
-  "</details>";
-
-  $res .= search_filter_component("heroes-wrtimings", true);
-
-  $res .= "<table id=\"heroes-wrtimings\" class=\"list wide sortable\"><thead><tr class=\"overhead\">".
-      "<th colspan=\"2\"></th>".
-      "<th></th>".
-      "<th colspan=\"5\" class=\"separator\">".locale_string("duration")."</th>".
-      "<th colspan=\"4\" class=\"separator\">".locale_string("trends_winrate")."</th>".
-      "<th width=\"20%\" class=\"separator\"></th>".
-      // "<th width=\"1%\"></th>".
-    "</tr><tr>".
-      "<th></th><th>".locale_string("hero")."</th>".
-      "<th>".locale_string("matches")."</th>".
-      "<th class=\"separator\">".locale_string("q1duration")."</th>".
-      "<th>".locale_string("median")."</th>".
-      "<th>".locale_string("q3duration")."</th>".
-      "<th>".locale_string("avg_duration")."</th>".
-      "<th>".locale_string("std_dev")."</th>".
-      "<th class=\"separator\">".locale_string("early_wr")."</th>".
-      "<th>".locale_string("avg_winrate")."</th>".
-      "<th>".locale_string("late_wr")."</th>".
-      "<th>".locale_string("wr_gradient")."</th>".
-      "<th class=\"separator\">".locale_string("chart")."</th>".
-      // "<th></th>".
-  "</tr></thead><tbody>";
+  $rows = "";
 
   $scripts = [];
   $lineFactor = 0.7;
   $d = 0.25*0.7;
+  $matches_med = [];
 
   foreach ($report['hero_winrate_timings'] as $hid => $data) {
-    $res .= "<tr><td>".hero_portrait($hid)."</td><td>".hero_link($hid)."</td>".
+    $matches_med[] = $data['matches'];
+
+    $rows .= "<tr data-value-match=\"".$data['matches']."\" ><td>".hero_portrait($hid)."</td><td>".hero_link($hid)."</td>".
       "<td>".($data['matches'])."</td>".
       "<td class=\"separator\">".convert_time_seconds($data['q1duration'])."</td>".
       "<td>".convert_time_seconds($data['q2duration'])."</td>".
@@ -119,7 +93,45 @@ function rg_view_generate_heroes_wrtimings() {
     })";
   }
 
-  $res .= "</tbody></table>";
+  sort($matches_med);
+
+  $res .= "<details class=\"content-text explainer\"><summary>".locale_string("explain_summary")."</summary>".
+    "<div class=\"explain-content\">".
+      "<div class=\"line\">".locale_string("desc_heroes_wrtimings")."</div>".
+    "</div>".
+  "</details>";
+
+  $res .= filter_toggles_component("heroes-wrtimings", [
+    'match' => [
+      'value' => $matches_med[ round(count($matches_med)/2) ] ?? 0,
+      'label' => 'data_filter_matches'
+    ]
+  ], "heroes-wrtimings", 'wide');
+
+  $res .= search_filter_component("heroes-wrtimings", true);
+
+  $res .= "<table id=\"heroes-wrtimings\" class=\"list wide sortable\"><thead><tr class=\"overhead\">".
+      "<th colspan=\"2\"></th>".
+      "<th></th>".
+      "<th colspan=\"5\" class=\"separator\">".locale_string("duration")."</th>".
+      "<th colspan=\"4\" class=\"separator\">".locale_string("trends_winrate")."</th>".
+      "<th width=\"20%\" class=\"separator\"></th>".
+      // "<th width=\"1%\"></th>".
+    "</tr><tr>".
+      "<th></th><th>".locale_string("hero")."</th>".
+      "<th>".locale_string("matches")."</th>".
+      "<th class=\"separator\">".locale_string("q1duration")."</th>".
+      "<th>".locale_string("median")."</th>".
+      "<th>".locale_string("q3duration")."</th>".
+      "<th>".locale_string("avg_duration")."</th>".
+      "<th>".locale_string("std_dev")."</th>".
+      "<th class=\"separator\">".locale_string("early_wr")."</th>".
+      "<th>".locale_string("avg_winrate")."</th>".
+      "<th>".locale_string("late_wr")."</th>".
+      "<th>".locale_string("wr_gradient")."</th>".
+      "<th class=\"separator\">".locale_string("chart")."</th>".
+      // "<th></th>".
+  "</tr></thead><tbody>$rows</tbody></table>";
 
   $res .= "<script>window.onload = () => { ".implode(";\n", $scripts)." };</script>";
 
