@@ -162,6 +162,67 @@ function rg_view_generate_items_stats() {
     return $res;
   }
 
+  $rows = "";
+  $matches_med = [];
+
+  foreach ($items as $iid => $line) {
+    $matches_med[] = $line['purchases'];
+    
+    $rows .= "<tr ".
+      "data-value-prate=\"{$line['purchases']}\" ".
+      "data-value-winrate=\"".number_format($line['winrate']*100, 2)."\" ".
+      "data-value-grad_pos=\"".($line['grad'] > 0 ? 1 : 0)."\" ".
+      "data-value-grad_neg=\"".($line['grad'] < 0 ? 1 : 0)."\" ".
+      "data-value-nograd=\"".($line['grad'] == 0 ? 1 : 0)."\" ".
+    ">".
+      "<td>".item_icon($iid)."</td>".
+      "<td>".item_link($iid)."</td>".
+      "<td class=\"separator\">".$line['purchases']."</td>".
+      "<td>".number_format($line['prate']*100, 2)."%</td>".
+      "<td>".number_format($ranks[$iid], 1)."</td>".
+      "<td class=\"separator\">".number_format($line['winrate']*100, 2)."%</td>".
+      "<td>".($line['wo_wr'] < $line['winrate'] ? '+' : '').number_format(($line['winrate']-$line['wo_wr'])*100, 2)."%</td>".
+      // "<td>".($line['wo_wr'] > $line['winrate'] ? '+' : '').number_format(($line['wo_wr']-$line['winrate'])*100, 2)."%</td>".
+      // "<td>".number_format($line['wo_wr']*100, 2)."%</td>".
+      "<td>".($line['early_wr'] > $line['winrate'] ? '+' : '').number_format(($line['early_wr']-$line['winrate'])*100, 2)."%</td>".
+      "<td>".($line['late_wr'] > $line['winrate'] ? '+' : '').number_format(($line['late_wr']-$line['winrate'])*100, 2)."%</td>".
+      "<td>".number_format($line['grad']*100, 2)."%</td>".
+      "<td class=\"separator\">".convert_time_seconds($line['avg_time'])."</td>".
+      "<td>".convert_time_seconds($line['min_time'])."</td>".
+      "<td>".convert_time_seconds($line['q1'])."</td>".
+      "<td>".convert_time_seconds($line['median'])."</td>".
+      "<td>".convert_time_seconds($line['q3'])."</td>".
+      "<td>".convert_time_seconds($line['max_time'])."</td>".
+      "<td>".convert_time_seconds($line['q3']-$line['q1'])."</td>".
+      "<td>".convert_time_seconds($line['std_dev'])."</td>".
+    "</tr>";
+  }
+
+  sort($matches_med);
+
+  $res[$tag] .= filter_toggles_component("items-$tag", [
+    'prate' => [
+      'value' => $matches_med[ round(count($matches_med)/2) ] ?? 0,
+      'label' => 'data_filter_items_prate'
+    ],
+    'winrate' => [
+      'value' => 50,
+      'label' => 'data_filter_items_winrate'
+    ],
+    'grad_pos' => [
+      'value' => 1,
+      'label' => 'data_filter_items_grad_pos'
+    ],
+    'grad_neg' => [
+      'value' => 1,
+      'label' => 'data_filter_items_grad_neg'
+    ],
+    'nograd' => [
+      'value' => 1,
+      'label' => 'data_filter_items_nograd'
+    ]
+  ], "items-$tag", 'wide');
+
   $res[$tag] .= search_filter_component("items-$tag", true);
 
   $res[$tag] .= "<table id=\"items-$tag\" class=\"list wide sortable\">";
@@ -189,34 +250,7 @@ function rg_view_generate_items_stats() {
     "<th data-sorter=\"time\">".locale_string("item_time_max")."</th>".
     "<th data-sorter=\"time\">".locale_string("item_time_window")."</th>".
     "<th data-sorter=\"time\">".locale_string("item_time_std_dev")."</th>".
-  "</tr></thead><tbody>";
-
-  foreach ($items as $iid => $line) {
-    $res[$tag] .= "<tr>".
-      "<td>".item_icon($iid)."</td>".
-      "<td>".item_link($iid)."</td>".
-      "<td class=\"separator\">".$line['purchases']."</td>".
-      "<td>".number_format($line['prate']*100, 2)."%</td>".
-      "<td>".number_format($ranks[$iid], 1)."</td>".
-      "<td class=\"separator\">".number_format($line['winrate']*100, 2)."%</td>".
-      "<td>".($line['wo_wr'] < $line['winrate'] ? '+' : '').number_format(($line['winrate']-$line['wo_wr'])*100, 2)."%</td>".
-      // "<td>".($line['wo_wr'] > $line['winrate'] ? '+' : '').number_format(($line['wo_wr']-$line['winrate'])*100, 2)."%</td>".
-      // "<td>".number_format($line['wo_wr']*100, 2)."%</td>".
-      "<td>".($line['early_wr'] > $line['winrate'] ? '+' : '').number_format(($line['early_wr']-$line['winrate'])*100, 2)."%</td>".
-      "<td>".($line['late_wr'] > $line['winrate'] ? '+' : '').number_format(($line['late_wr']-$line['winrate'])*100, 2)."%</td>".
-      "<td>".number_format($line['grad']*100, 2)."%</td>".
-      "<td class=\"separator\">".convert_time_seconds($line['avg_time'])."</td>".
-      "<td>".convert_time_seconds($line['min_time'])."</td>".
-      "<td>".convert_time_seconds($line['q1'])."</td>".
-      "<td>".convert_time_seconds($line['median'])."</td>".
-      "<td>".convert_time_seconds($line['q3'])."</td>".
-      "<td>".convert_time_seconds($line['max_time'])."</td>".
-      "<td>".convert_time_seconds($line['q3']-$line['q1'])."</td>".
-      "<td>".convert_time_seconds($line['std_dev'])."</td>".
-    "</tr>";
-  }
-
-  $res[$tag] .= "</tbody></table>";
+  "</tr></thead><tbody>$rows</tbody></table>";
 
   return $res;
 }
