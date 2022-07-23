@@ -13,6 +13,10 @@ function rg_view_generate_items_buildspowerspikes() {
 
   $use_graphjs = true;
 
+  if (!isset($report['hero_winrate_timings'])) {
+    return null;
+  }
+
   if (is_wrapped($report['items']['stats'])) {
     $report['items']['stats'] = unwrap_data($report['items']['stats']);
   }

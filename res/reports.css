@@ -622,6 +622,12 @@ table .hero_portrait {
   transition: .25s all linear;
   user-select: none;
 }
+/* .filter-toggles label:before {
+  content: '⛛';
+  transform: scale(0.6);
+  display: inline-block;
+  margin-right: .4em;
+} */
 
 .filter-toggles input[type=checkbox] {
   display:none;
