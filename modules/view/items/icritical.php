@@ -90,7 +90,7 @@ function rg_view_generate_items_critical() {
   ];
 
   $items = array_filter($report['items']['stats'][$hero], function($v, $k) use (&$neutral_items) {
-    return ( !in_array($k, $neutral_items) || empty($v) ) && $v['grad'] < -0.01;
+    return ( !in_array($k, $neutral_items) || empty($v) ) && $v['grad'] < -0.01 && $v['grad'] != 0;
   }, ARRAY_FILTER_USE_BOTH);
 
 
@@ -102,7 +102,7 @@ function rg_view_generate_items_critical() {
   }
   $item_cats_filtered = array_unique($item_cats_filtered);
 
-  $items = array_filter($report['items']['stats'][$hero], function($v, $k) use (&$cat, &$item_cats_filtered) {
+  $items = array_filter($items, function($v, $k) use (&$cat, &$item_cats_filtered) {
     if (!empty($cat)) {
       return in_array($k, $item_cats_filtered) && !empty($v);
     }
@@ -117,6 +117,7 @@ function rg_view_generate_items_critical() {
   $items = array_psplice($items, 0, round($items_sz*0.75));
 
   $items_rc = [];
+  $matches_med = [];
 
   foreach ($items as $iid => $line) {
     $items_rc[$iid] = [
@@ -129,7 +130,7 @@ function rg_view_generate_items_critical() {
       'early_wr' => $line['early_wr'],
       'critical_time' => $line['q1'] - 60*($line['early_wr'] - $winrate)/$line['grad'],
     ];
-
+    $matches_med[] = $line['purchases'];
   }
 
   $res[$tag] .= 
@@ -164,6 +165,25 @@ function rg_view_generate_items_critical() {
     return $res;
   }
 
+  sort($matches_med);
+
+  $res[$tag] .= filter_toggles_component("items-$tag", [
+    'prate' => [
+      'value' => $matches_med[ round(count($matches_med)/2) ] ?? 0,
+      'label' => 'data_filter_items_prate'
+    ],
+    'winrate' => [
+      'value' => 50,
+      'label' => 'data_filter_items_winrate'
+    ],
+    'early_time' => [
+      'value' => 1,
+      'label' => 'data_filter_items_early_time'
+    ],
+  ], "items-$tag");
+
+  $res[$tag] .= search_filter_component("items-$tag");
+
   $res[$tag] .= "<table id=\"items-$tag\" class=\"list sortable\">";
   $res[$tag] .= "<thead><tr class=\"overhead\">".
       "<th width=\"20%\" colspan=\"2\"></th>".
@@ -185,7 +205,11 @@ function rg_view_generate_items_critical() {
   "</tr></thead><tbody>";
 
   foreach ($items_rc as $iid => $line) {
-    $res[$tag] .= "<tr>".
+    $res[$tag] .= "<tr ".
+      "data-value-prate=\"{$line['purchases']}\" ".
+      "data-value-winrate=\"".number_format($line['winrate']*100, 2)."\" ".
+      "data-value-early_time=\"".($line['q1'] > 1200 ? 0 : 1)."\" ".
+    ">".
       "<td>".item_icon($iid)."</td>".
       "<td>".item_link($iid)."</td>".
       "<td class=\"separator\">".$line['purchases']."</td>".
