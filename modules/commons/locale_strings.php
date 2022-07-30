@@ -53,10 +53,12 @@ function include_locale($locale) {
   return true;
 }
 
-function register_locale_string($string, $tag, $locale) {
-  global $strings;
+function register_locale_string($string, $tag, $reglocale = null) {
+  global $strings, $locale, $fallback_locale, $def_locale;
 
-  if (!isset($strings[$locale])) $strings[$locale] = [];
+  if (!$reglocale) $reglocale = $def_locale ?? $locale ?? $fallback_locale;
 
-  $strings[$locale][$tag] = $string;
+  if (!isset($strings[$locale])) $strings[$reglocale] = [];
+
+  $strings[$reglocale][$tag] = $string;
 }
