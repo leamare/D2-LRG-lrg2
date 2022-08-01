@@ -80,7 +80,8 @@ function join_selectors($modules, $level, $parent="") {
                             "\">".$modname."</a></span>";
       } else {
         $selectors[] = "<span class=\"mod-".$level_codes[$level][1]."-selector selector".
-                            ($first ? " active" : "")."\" onclick=\"switchTab(event, 'module-".$mn."', 'mod-".$level_codes[$level][1]."');\">".locale_string($modname)."</span>";
+                            ($first ? " active" : "")."\" onclick=\"switchTab(event, 'module-".$mn."', 'mod-".$level_codes[$level][1]."');\">".
+                            locale_string($modname)."</span>";
       }
     } else {
       $data_aliases = null;
@@ -101,12 +102,16 @@ function join_selectors($modules, $level, $parent="") {
         }
       }
 
-      if (strpos($modtag, 'team') !== false) {
+      if (strpos($modtag, 'team') !== false || strpos($modtag, 'optid') !== false) {
         global $meta;
         $mods = explode('-', $mn);
         foreach ($mods as $m) {
           if (strpos($m, 'team') == 0) {
             $tid = (int)str_replace('team', '', $m);
+            if ($tid) break;
+          }
+          if (strpos($m, 'optid') == 0) {
+            $tid = (int)str_replace('optid', '', $m);
             if ($tid) break;
           }
         }
