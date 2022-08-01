@@ -95,10 +95,10 @@ function rg_generator_hph_profile($table_id, &$context, &$context_wrs, $srcid, $
       'value' => 0,
       'label' => 'data_filter_wr_diff'
     ],
-    'dev' => $exp ? [
+    'dev' => [
       'value' => '1',
       'label' => 'data_filter_pos_deviation'
-    ] : null,
+    ],
     'lane' => [
       'value' => '25',
       'label' => 'data_filter_lane_rate'
@@ -132,7 +132,7 @@ function rg_generator_hph_profile($table_id, &$context, &$context_wrs, $srcid, $
     $res .= "<tr ".
       "data-value-match=\"".$data['matches']."\" ".
       "data-value-diff=\"".number_format(($data['winrate'] - $dt['wr'])*100,2)."\" ".
-      ($exp ? "data-value-dev=\"".number_format($data['matches']-$data['exp'], 0)."\" " : "").
+      "data-value-dev=\"".number_format($data['matches']-$data['exp'], 0)."\" ".
       "data-value-lane=\"".number_format($data['lane_rate']*100, 2)."\" ".
       ">".
       ($heroes_flag ? "<td>".hero_portrait($elid_op)."</td>" : "").
