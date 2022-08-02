@@ -122,6 +122,64 @@ function rg_view_generate_items_heroes() {
   $res['itemid'.$item] .= "</tbody></table>";
 
   // HEROES TABLE
+
+  unset($report['items']['stats']['total']);
+  $heroes = [];
+  $matches_med = [];
+
+  foreach ($report['items']['stats'] as $hero => $items) {
+    if (!empty($items[$item])) {
+      $heroes[$hero] = $items[$item];
+      $matches_med[] = $items[$item]['purchases'];
+    }
+  }
+
+  $ranks = [];
+
+  $ranking_sort = function($a, $b) {
+    return items_ranking_sort($a, $b);
+  };
+
+  uasort($heroes, $ranking_sort);
+
+  $increment = 100 / sizeof($heroes); $i = 0;
+
+  foreach ($heroes as $id => $el) {
+    if(isset($last) && $el == $last) {
+      $i++;
+      $ranks[$id] = $last_rank;
+    } else
+      $ranks[$id] = 100 - $increment*$i++;
+    $last = $el;
+    $last_rank = $ranks[$id];
+  }
+  unset($last);
+
+  sort($matches_med);
+
+  $res['itemid'.$item] .= filter_toggles_component("items-itemid$item", [
+    'prate' => [
+      'value' => $matches_med[ round(count($matches_med)/2) ] ?? 0,
+      'label' => 'data_filter_items_prate'
+    ],
+    'winrate' => [
+      'value' => 50,
+      'label' => 'data_filter_items_winrate'
+    ],
+    'grad_pos' => [
+      'value' => 1,
+      'label' => 'data_filter_items_grad_pos'
+    ],
+    'grad_neg' => [
+      'value' => 1,
+      'label' => 'data_filter_items_grad_neg'
+    ],
+    'nograd' => [
+      'value' => 1,
+      'label' => 'data_filter_items_nograd'
+    ]
+  ], "items-itemid$item", 'wide');
+
   $res['itemid'.$item] .= search_filter_component("items-itemid$item", true);
 
   $res['itemid'.$item] .= "<table id=\"items-itemid$item\" class=\"list wide sortable\">";
@@ -151,42 +209,19 @@ function rg_view_generate_items_heroes() {
     "<th data-sorter=\"time\">".locale_string("item_time_std_dev")."</th>".
   "</tr></thead><tbody>";
 
-  unset($report['items']['stats']['total']);
-  $heroes = [];
-
-  foreach ($report['items']['stats'] as $hero => $items) {
-    if (!empty($items[$item]))
-      $heroes[$hero] = $items[$item];
-  }
-
-  $ranks = [];
-
-  $ranking_sort = function($a, $b) {
-    return items_ranking_sort($a, $b);
-  };
-
-  uasort($heroes, $ranking_sort);
-
-  $increment = 100 / sizeof($heroes); $i = 0;
-
-  foreach ($heroes as $id => $el) {
-    if(isset($last) && $el == $last) {
-      $i++;
-      $ranks[$id] = $last_rank;
-    } else
-      $ranks[$id] = 100 - $increment*$i++;
-    $last = $el;
-    $last_rank = $ranks[$id];
-  }
-  unset($last);
-
   foreach ($heroes as $hero => $line) {
     if (!isset($line['prate'])) $line['prate'] = 0;
     if (!isset($line['wo_wr'])) $line['wo_wr'] = $line['winrate'];
     if (!isset($line['early_wr'])) $line['early_wr'] = $line['winrate'];
     if (!isset($line['late_wr'])) $line['late_wr'] = $line['winrate'];
 
-    $res['itemid'.$item] .= "<tr>".
+    $res['itemid'.$item] .= "<tr ".
+      "data-value-prate=\"{$line['purchases']}\" ".
+      "data-value-winrate=\"".number_format($line['winrate']*100, 2)."\" ".
+      "data-value-grad_pos=\"".($line['grad'] > 0 ? 1 : 0)."\" ".
+      "data-value-grad_neg=\"".($line['grad'] < 0 ? 1 : 0)."\" ".
+      "data-value-nograd=\"".($line['grad'] == 0 ? 1 : 0)."\" ".
+    ">".
       "<td>".hero_portrait($hero)."</td>".
       "<td>".hero_link($hero)."</td>".
       "<td class=\"separator\">".$line['purchases']."</td>".
