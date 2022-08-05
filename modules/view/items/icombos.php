@@ -47,26 +47,8 @@ function rg_view_generate_items_icombos() {
   // HEROES TABLE
 
   if ($item) {
-    $res['itemid'.$item] .= "<details class=\"content-text explainer\"><summary>".locale_string("explain_summary")."</summary>".
-      "<div class=\"explain-content\">".
-        "<div class=\"line\">".locale_string("items_combos_desc")."</div>".
-      "</div>".
-    "</details>";
-    $res['itemid'.$item] .= search_filter_component("items-itemid$item");
-    $res['itemid'.$item] .= "<table id=\"items-itemid$item\" class=\"list sortable\">";
-    $res['itemid'.$item] .= "<thead><tr class=\"overhead\">".
-        "<th width=\"12%\"></th>".
-        "<th width=\"18%\">".locale_string("item")."</th>".
-        "<th>".locale_string("matches")."</th>".
-        "<th>".locale_string("winrate")."</th>".
-        "<th>".locale_string("winrate_diff")."</th>".
-        "<th>".locale_string("time_diff")."</th>".
-        "<th>".locale_string("pair_expectation")."</th>".
-        "<th>".locale_string("deviation")."</th>".
-        "<th>".locale_string("percentage")."</th>".
-      "</tr></thead><tbody>";
-
     $items = [];
+    $matches_med = [];
     foreach ($report['items']['combos'][$item] as $iid => $v) {
       if ($iid == '_h') continue;
       if (empty($v)) continue;
@@ -81,8 +63,60 @@ function rg_view_generate_items_icombos() {
       return $b['matches'] <=> $a['matches'];
     });
 
+    $res['itemid'.$item] .= "<details class=\"content-text explainer\"><summary>".locale_string("explain_summary")."</summary>".
+      "<div class=\"explain-content\">".
+        "<div class=\"line\">".locale_string("items_combos_desc")."</div>".
+      "</div>".
+    "</details>";
+
+    $res['itemid'.$item] .= filter_toggles_component("items-itemid$item", [
+      'matches' => [
+        'value' => ($items[ round(count($items)/2) ] ?? [])['matches'] ?? 0,
+        'label' => 'data_filter_matches'
+      ],
+      'dev' => [
+        'value' => 1,
+        'label' => 'data_filter_pos_deviation'
+      ],
+      'wr_diff' => [
+        'value' => 0,
+        'label' => 'data_filter_wr_diff'
+      ],
+      'time_diff_pos' => [
+        'value' => 1,
+        'label' => 'data_filter_item_combo_time_diff_pos'
+      ],
+      'time_diff_neg' => [
+        'value' => 1,
+        'label' => 'data_filter_item_combo_time_diff_neg'
+      ],
+    ], "items-itemid$item");
+
+    $res['itemid'.$item] .= search_filter_component("items-itemid$item");
+
+    $res['itemid'.$item] .= "<table id=\"items-itemid$item\" class=\"list sortable\">";
+    $res['itemid'.$item] .= "<thead><tr class=\"overhead\">".
+        "<th width=\"12%\"></th>".
+        "<th width=\"18%\">".locale_string("item")."</th>".
+        "<th>".locale_string("matches")."</th>".
+        "<th>".locale_string("winrate")."</th>".
+        "<th>".locale_string("winrate_diff")."</th>".
+        "<th>".locale_string("time_diff")."</th>".
+        "<th>".locale_string("pair_expectation")."</th>".
+        "<th>".locale_string("deviation")."</th>".
+        "<th>".locale_string("percentage")."</th>".
+      "</tr></thead><tbody>";
+
     foreach ($items as $iid => $line) {
-      $res['itemid'.$item] .= "<tr>".
+      $dev = ($line['matches'] - $line['exp']);
+
+      $res['itemid'.$item] .= "<tr ".
+        "data-value-matches=\"{$line['matches']}\" ".
+        "data-value-dev=\"".$dev."\" ".
+        "data-value-wr_diff=\"".number_format(100*$line['wr_diff'], 2)."\" ".
+        "data-value-time_diff_pos=\"".($line['time_diff'] > 0 ? 1 : 0)."\" ".
+        "data-value-time_diff_neg=\"".($line['time_diff'] < 0 ? 1 : 0)."\" ".
+      ">".
         "<td>".item_icon($iid)."</td>".
         "<td>".item_name($iid)."</td>".
         "<td>".$line['matches']."</td>".
@@ -90,8 +124,8 @@ function rg_view_generate_items_icombos() {
         "<td>".number_format(100*$line['wr_diff'], 2)."%</td>".
         "<td>".convert_time_seconds($line['time_diff'])."</td>".
         "<td>".$line['exp']."</td>".
-        "<td>".($line['matches'] - $line['exp'])."</td>".
-        "<td>".number_format(100*($line['matches'] - $line['exp'])/$line['matches'], 2)."%</td>".
+        "<td>".$dev."</td>".
+        "<td>".number_format(100*$dev/$line['matches'], 2)."%</td>".
       "</tr>";
     }
 
