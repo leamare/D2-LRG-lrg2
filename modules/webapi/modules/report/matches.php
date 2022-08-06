@@ -1,6 +1,6 @@
 <?php 
 
-$repeatVars['matches'] = ['team'];
+$repeatVars['matches'] = ['team', 'optid'];
 
 $endpoints['matches'] = function($mods, $vars, &$report) use (&$meta) {
   if (empty($report['matches'])) 
@@ -52,10 +52,20 @@ $endpoints['matches'] = function($mods, $vars, &$report) use (&$meta) {
     }
   }
 
+  if (in_array("unteamed", $mods)) {
+    $vars['optid'] = 0;
+  }
+
   foreach ($context as $id => $data) {
     if (isset($report['matches_additional']) && isset($vars['team']) && isset($vars['region'])) {
       $region = $meta['clusters'][ $report['matches_additional'][$mid]['cluster'] ];
       if ($region != $vars['region']) continue;
+    }
+
+    if (isset($vars['optid']) && isset($report['match_participants_teams'])) {
+      if (!in_array($vars['optid'], $report['match_participants_teams'][$id]) && !(!$vars['optid'] && count($report['match_participants_teams'][$id]) < 2)) {
+        continue;
+      }
     }
 
     if (isset($vars['playerid']) && isset($vars['heroid'])) {

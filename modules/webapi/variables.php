@@ -62,6 +62,18 @@ foreach ($modline as $ml) {
     }
   }
 
+  if (strpos($ml, "optid") !== FALSE) {
+    $ml = str_replace("optid", "", $ml);
+
+    if (strpos($ml, ",") !== FALSE) {
+      $vars['optid'] = explode(',', $ml);
+    } else if ($ml == '*' && !empty($report['teams'])) {
+      $vars['optid'] = $report['teams_interest'] ?? array_keys($report['teams']);
+    } else {
+      $vars['optid'] = (int)$ml;
+    }
+  }
+
   if (strpos($ml, "itemid") !== FALSE) {
     $ml = str_replace("item", "", str_replace("itemid", "", $ml));
     if (strpos($ml, ",") !== FALSE) {

@@ -20,18 +20,51 @@ $endpoints['teams'] = function($mods, $vars, &$report) use (&$endpoints, &$repea
     return $res;
   }
 
-  if (in_array("grid", $mods)) {
+  if (in_array("grid", $mods) || in_array("opponents", $mods)) {
     $tvt = rg_generator_tvt_unwrap_data($report['tvt'], $report['teams']);
 
     if(!sizeof($tvt)) return null;
 
     if (isset($report['match_participants_teams'])) {
       foreach ($report['match_participants_teams'] as $mid => $teams) {
+        if (empty($teams['dire'])) $teams['dire'] = 0;
+        if (empty($teams['radiant'])) $teams['radiant'] = 0;
+      
+        if (isset($report['matches_additional'])) {
+          if (!isset($tvt[$teams['dire']][$teams['radiant']])) {
+            $tvt[$teams['dire']][$teams['radiant']] = [
+              'matches' => 0,
+              'wins' => 0,
+              'matchids' => []
+            ];
+          }
+      
+          if (!$teams['radiant']) {
+            $tvt[$teams['dire']][$teams['radiant']]['matches']++;
+            if ($report['matches_additional'][$mid]['radiant_win']) 
+              $tvt[$teams['dire']][$teams['radiant']]['wins']++;
+          }
+      
+          if (!isset($tvt[$teams['radiant']][$teams['dire']])) {
+            $tvt[$teams['radiant']][$teams['dire']] = [
+              'matches' => 0,
+              'wins' => 0,
+              'matchids' => []
+            ];
+          }
+      
+          if (!$teams['dire']) {
+            $tvt[$teams['radiant']][$teams['dire']]['matches']++;
+            if (!$report['matches_additional'][$mid]['radiant_win']) 
+              $tvt[$teams['radiant']][$teams['dire']]['wins']++;
+          }
+        }
+      
         if (!isset($tvt[$teams['dire']][$teams['radiant']]['matchids'])) {
           $tvt[$teams['dire']][$teams['radiant']]['matchids'] = [];
         }
         $tvt[$teams['dire']][$teams['radiant']]['matchids'][] = $mid;
-  
+      
         if (!isset($tvt[$teams['radiant']][$teams['dire']]['matchids'])) {
           $tvt[$teams['radiant']][$teams['dire']]['matchids'] = [];
         }
@@ -52,16 +85,18 @@ $endpoints['teams'] = function($mods, $vars, &$report) use (&$endpoints, &$repea
     ];
   
     foreach($tvt as $tid => $teamline) {
+      if (isset($vars['team']) && $tid != $vars['team']) continue;
       if (!empty($report['teams_interest']) && !in_array($tid, $report['teams_interest'])) continue;
       $res[$tid] = [];
       for($i=0, $end = sizeof($team_ids); $i<$end; $i++) {
         if (!empty($report['teams_interest']) && !in_array($tid, $report['teams_interest'])) continue;
+        if (!$tvt[$tid][$team_ids[$i]]['matches']) continue;
         if($tid != $team_ids[$i]) {
           $res[$tid][ $team_ids[$i] ] = [
             "matches" => $tvt[$tid][$team_ids[$i]]['matches'],
-            "winrate" => $teamline[$team_ids[$i]]['winrate'],
-            "won" => $tvt[$tid][$team_ids[$i]]['won'],
-            "lost" => $tvt[$tid][$team_ids[$i]]['lost'],
+            "winrate" => $teamline[$team_ids[$i]]['winrate'] ?? $teamline[$team_ids[$i]]['wins']/$teamline[$team_ids[$i]]['matches'],
+            "won" => $tvt[$tid][$team_ids[$i]]['won'] ?? $tvt[$tid][$team_ids[$i]]['wins'],
+            "lost" => $tvt[$tid][$team_ids[$i]]['lost'] ?? $tvt[$tid][$team_ids[$i]]['matches']-$tvt[$tid][$team_ids[$i]]['wins'],
           ];
           if (isset($context[$tid][$team_ids[$i]]['matchids'])) {
             $res[$tid][ $team_ids[$i] ]['matches'] = [];
