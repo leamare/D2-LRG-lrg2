@@ -235,7 +235,7 @@ table.pvp thead tr th span:hover {
   overflow:initial;
   padding: 0 10px;
   margin: 0;
-  background-color: inherit;
+  background-color: var(--table-bg);
 }
 table.pvp td {
     cursor: pointer;
@@ -600,7 +600,7 @@ table .hero_portrait {
 }
 .filter-toggles {
   text-align: left;
-  font-size: 18px;
+  font-size: 16px;
   line-height: 34px;
   color: var(--text);
   margin: 30px auto 0;
@@ -614,8 +614,7 @@ table .hero_portrait {
   font-size: 1em;
   line-height: inherit;
   background: var(--tagslist-bg);
-  padding-left: 1.2em;
-  padding-right: 1.2em;
+  padding: 0 .9em;
   margin-right: 1em;
   cursor: pointer;
   border-radius: 5px;

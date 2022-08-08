@@ -10,6 +10,11 @@ function generate_positions_strings() {
         $strings['en']["position_$i.$j"] = ($i ? locale_string("core") : locale_string("support"))." ".locale_string("lane_$j");
 
       //if (!$i) { break; }
+
+      register_locale_string(
+        locale_string("data_filter_role_mp", [ 'ROLE' => locale_string("position_$i.$j") ]),
+        "data_filter_positions_{$i}.{$j}_mp"
+      );
     }
   }
 }

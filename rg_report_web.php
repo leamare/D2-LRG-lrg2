@@ -54,7 +54,7 @@ $host_link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ?
 include_once("rg_report_out_settings.php");
 
 include_once("modules/commons/versions.php");
-$lg_version = [ 2, 23, 0, 0, 4 ];
+$lg_version = [ 2, 24, 0, 0, 4 ];
 
 include_once("modules/commons/merge_mods.php");
 include_once("modules/commons/metadata.php");

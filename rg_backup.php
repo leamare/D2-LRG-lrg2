@@ -253,6 +253,12 @@ if ($restore) {
     echo "OK.\n";
   }
 
+  if (file_exists("reports/report_$lrg_league_tag.json")) {
+    echo "[ ] Adding report file...";
+    $files['report.json'] = "reports/report_$lrg_league_tag.json";
+    echo "OK.\n";
+  }
+
   echo "[ ] Generating matchlist...";
   exec("php tools/backport_matchlist.php -l$lrg_league_tag");
   $files['matchlist.list'] = "matchlists/$lrg_league_tag.list";
