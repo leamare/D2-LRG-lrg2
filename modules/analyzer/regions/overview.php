@@ -198,11 +198,21 @@ if (!$row[1] || ( ($lg_settings['ana']['regions']['use_limiter'] ?? false) && $r
     if(!is_bool($query_res)) {
       $row = $query_res->fetch_row();
 
+      if (empty($row[0])) continue;
+
       $result["regions_data"][$region]["main"][$row[0]] = $row[1];
 
       $query_res->free_result();
     }
   } while($conn->next_result());
+
+  if (!isset($result["regions_data"][$region]["main"]["heroes_median_bans"])) {
+    $result["regions_data"][$region]["main"]["heroes_median_bans"] = array_insert_before(
+      $result["regions_data"][$region]["main"], 
+      "heroes_median_gpm",
+      [ "heroes_median_bans" => 0 ]
+    );
+  }
 
   require("overview/firstlast.php");
   require("overview/days.php");
