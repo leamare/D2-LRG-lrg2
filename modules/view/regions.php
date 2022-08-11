@@ -5,10 +5,12 @@ $modules['regions'] = [];
 include_once("regions/overview.php");
 
 function rg_view_generate_regions() {
-  global $mod, $parent, $unset_module, $report, $meta, $strings, $root;
+  global $mod, $parent, $unset_module, $report, $meta, $strings, $root, $carryon;
 
   if($mod == "regions") $unset_module = true;
   $parent = "regions-";
+
+  $carryon["/^regions-region(\d+)$/"] = "/^regions-region(\d+)/";
 
   foreach ($report['regions_data'] as $region => $reg_report) {
     $modstr = $parent."region".$region;

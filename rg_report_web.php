@@ -88,6 +88,7 @@ include_once("modules/view/__preset.php");
 $root = dirname(__FILE__);
 
 $linkvars = [];
+$carryon = [];
 
 $_earlypreview = empty($previewcode) ? true : false;
 
@@ -121,6 +122,8 @@ if ($lrg_use_get) {
 
   if(isset($_GET['latest'])) $latest = true;
 }
+
+$_rawmod = $mod;
 
 $use_visjs = false;
 $use_graphjs = false;

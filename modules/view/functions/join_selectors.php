@@ -6,17 +6,19 @@ function join_selectors($modules, $level, $parent="") {
   global $lrg_use_get;
   global $lrg_get_depth;
   global $level_codes;
-  global $mod;
+  global $mod, $_rawmod;
   global $strings;
   global $leaguetag;
   global $max_tabs;
   global $linkvars;
   global $_earlypreview_banlist, $_earlypreview;
+  global $carryon;
 
   $out = "";
   $first = true;
   $unset_selector = false;
-
+  $iconalias = true;
+  
   if (empty($_earlypreview_banlist)) $_earlypreview_banlist = [];
 
   if(empty($parent)) {
@@ -57,6 +59,18 @@ function join_selectors($modules, $level, $parent="") {
       continue;
     }
 
+    $carryon_change = "";
+
+    foreach ($carryon as $match => $repl) {
+      if (preg_match($match, $mn)) {
+        $repcnt = 0;
+        $carryon_change = preg_replace($repl, "", $_rawmod, -1, $repcnt);
+        if (!$repcnt) $carryon_change = "";
+        break;
+      }
+    }
+
+
     $modname = locale_string($modtag);
     if($mod_type) {
       if (strpos($parent, "profiles") == strlen($parent)-8)
@@ -69,21 +83,7 @@ function join_selectors($modules, $level, $parent="") {
         $modname .= " ...";
     }
 
-    if ($selectors_num < $max_tabs) {
-      if($lrg_use_get && $lrg_get_depth > $level) {
-        if ( $startline_check_res )
-          $selectors[] = "<span class=\"selector active\">".$modname."</span>";
-        else
-          $selectors[] = "<span class=\"selector".($unset_selector ? " active" : "").
-                            "\"><a href=\"?league=".$leaguetag."&mod=".$mn.
-                            (empty($linkvars) ? "" : "&".$linkvars).
-                            "\">".$modname."</a></span>";
-      } else {
-        $selectors[] = "<span class=\"mod-".$level_codes[$level][1]."-selector selector".
-                            ($first ? " active" : "")."\" onclick=\"switchTab(event, 'module-".$mn."', 'mod-".$level_codes[$level][1]."');\">".
-                            locale_string($modname)."</span>";
-      }
-    } else {
+    if ($iconalias) {
       $data_aliases = null;
       $data_icon = null;
 
@@ -102,7 +102,7 @@ function join_selectors($modules, $level, $parent="") {
         }
       }
 
-      if (strpos($modtag, 'team') !== false || strpos($modtag, 'optid') !== false) {
+      if ((strpos($modtag, 'team') !== false || strpos($modtag, 'optid') !== false) && $modtag != "teams") {
         global $meta;
         $mods = explode('-', $mn);
         foreach ($mods as $m) {
@@ -136,27 +136,47 @@ function join_selectors($modules, $level, $parent="") {
           $data_icon = item_icon_link($iid);
         }
       }
+    }
 
+    if ($selectors_num < $max_tabs) {
+      $icon = $data_icon ? 
+        "<img class=\"selector-icon\" alt=\"$modname image\" src=\"$data_icon\" / > " : 
+        "";
+
+      if($lrg_use_get && $lrg_get_depth > $level) {
+        if ( $startline_check_res )
+          $selectors[] = "<span class=\"selector active\">".$icon.$modname."</span>";
+        else
+          $selectors[] = "<span class=\"selector".($unset_selector ? " active" : "").
+                            "\"><a href=\"?league=".$leaguetag."&mod=".$mn.$carryon_change.
+                            (empty($linkvars) ? "" : "&".$linkvars).
+                            "\">".$icon.$modname."</a></span>";
+      } else {
+        $selectors[] = "<span class=\"mod-".$level_codes[$level][1]."-selector selector".
+                            ($first ? " active" : "")."\" onclick=\"switchTab(event, 'module-".$mn.$carryon_change."', 'mod-".$level_codes[$level][1]."');\">".
+                            $icon.locale_string($modname)."</span>";
+      }
+    } else {
       if($lrg_use_get && $lrg_get_depth > $level) {
 
         if (stripos($mod, $mn) === 0 && (
               (strlen($mod) == strlen($mn)) ||
               (strlen($mod) > strlen($mn) && $mod[strlen($mn)] == '-')
             ) )
-          $selectors[] = "<option selected=\"selected\" value=\"?league=".$leaguetag."&mod=".$mn."&".
+          $selectors[] = "<option selected=\"selected\" value=\"?league=".$leaguetag."&mod=".$mn.$carryon_change."&".
           (empty($linkvars) ? "" : "&".$linkvars)
           ."\" ".
           (isset($data_aliases) ? 'data-aliases="'.$data_aliases.'" ' : '').
           (isset($data_icon) ? 'data-icon="'.$data_icon.'" ' : '').
           ">".$modname."</option>";
         else
-          $selectors[] = "<option".($unset_selector ? "selected=\"selected\"" : "")." value=\"?league=".$leaguetag."&mod=".$mn.(empty($linkvars) ? "" : "&".$linkvars)
+          $selectors[] = "<option".($unset_selector ? "selected=\"selected\"" : "")." value=\"?league=".$leaguetag."&mod=".$mn.$carryon_change.(empty($linkvars) ? "" : "&".$linkvars)
             ."\" ".
             (isset($data_aliases) ? 'data-aliases="'.$data_aliases.'" ' : '').
             (isset($data_icon) ? 'data-icon="'.$data_icon.'" ' : '').
           ">".$modname."</option>";
       } else {
-        $selectors[] = "<option value=\"module-".$mn."\" ".
+        $selectors[] = "<option value=\"module-".$mn.$carryon_change."\" ".
           (isset($data_aliases) ? 'data-aliases="'.$data_aliases.'" ' : '').
           (isset($data_icon) ? 'data-icon="'.$data_icon.'" ' : '').
         ">".$modname."</option>";
@@ -166,7 +186,7 @@ function join_selectors($modules, $level, $parent="") {
       if(is_array($module)) {
         $module = join_selectors($module, $level+1, $mn);
       }
-      $out .= "<div id=\"module-".$mn."\" class=\"selector-module mod-".$level_codes[$level][1].($first ? " active" : "")."\">".$module."</div>";
+      $out .= "<div id=\"module-".$mn.$carryon_change."\" class=\"selector-module mod-".$level_codes[$level][1].($first ? " active" : "")."\">".$module."</div>";
       $first = false;
       $unset_selector = false;
     }

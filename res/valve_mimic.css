@@ -274,6 +274,11 @@ a:hover {
   border-bottom: 3px solid #0000;
   transition: 150ms all linear;
 }
+.selector .selector-icon {
+  height: 1.3em;
+  font-size: inherit;
+  margin-bottom: -0.3em;
+}
 .select-selectors {
   background: var(--selectors-bg);
   color: var(--selector-link);

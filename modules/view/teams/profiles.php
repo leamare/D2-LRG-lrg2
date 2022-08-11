@@ -1,9 +1,12 @@
 <?php
 
 function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "") {
-  global $mod, $root, $strings, $unset_module, $report, $icons_provider, $lg_version, $roleicon_logo_provider;
+  global $mod, $root, $strings, $unset_module, $report, $icons_provider, $lg_version, $roleicon_logo_provider, $carryon;
+
   $res = [];
   if($mod == substr($context_mod, 0, strlen($context_mod)-1)) $unset_module = true;
+
+  $carryon["/^teams-profiles-team(\d+)$/"] = "/^teams-profiles-team(\d+)/";
 
   if(!is_array(array_values($context)[0])) {
     foreach($context as $team_id => &$content) {
