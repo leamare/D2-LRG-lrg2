@@ -109,10 +109,10 @@ function rg_generator_pvp_profile($table_id, &$pvp_context, &$context_wrs, $srci
       'value' => '1',
       'label' => 'data_filter_pos_deviation'
     ] : null,
-    'lane' => [
+    'lane' => $laning ? [
       'value' => '25',
       'label' => 'data_filter_lane_rate'
-    ]
+    ] : null
   ], $table_id);
 
   $res .= search_filter_component($table_id);
@@ -153,7 +153,7 @@ function rg_generator_pvp_profile($table_id, &$pvp_context, &$context_wrs, $srci
       "data-value-match=\"".$data['matches']."\" ".
       ($exp ? "data-value-dev=\"".number_format($data['matches']-$data['expectation'], 0)."\" " : "").
       (!$nodiff ? "data-value-diff=\"".number_format($data['diff']*100,2)."\" " : "").
-      "data-value-lane=\"".number_format($data['lane_rate']*100, 2)."\" ".
+      ($laning ? "data-value-lane=\"".number_format($data['lane_rate']*100, 2)."\" " : "").
       (isset($data['matchids']) ?
                 "onclick=\"showModal('".implode(", ", $data['matchids'])."','".locale_string("matches")."')\"" :
                 "").">".
