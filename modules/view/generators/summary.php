@@ -8,20 +8,19 @@ function rg_generator_summary($table_id, &$context, $hero_flag = true, $rank = f
 
   if (is_wrapped($context)) $context = unwrap_data($context);
 
-  global $report;
-
   $keys = array_keys( array_values($context)[0] );
 
   $matches = [];
 
+  $total_matches = 0;
+  foreach ($context as $c) {
+    if ($total_matches < $c['matches_s']) $total_matches = $c['matches_s'];
+    $matches[] = $c['matches_s'];
+  } 
+
   if ($rank) {
     $ranks = [];
     $context_copy = $context;
-    $total_matches = 0;
-    foreach ($context as $c) {
-      if ($total_matches < $c['matches_s']) $total_matches = $c['matches_s'];
-      $matches[] = $c['matches_s'];
-    }
 
     uasort($context_copy, function($a, $b) use ($total_matches) {
       return positions_ranking_sort($a, $b, $total_matches);
@@ -79,7 +78,7 @@ function rg_generator_summary($table_id, &$context, $hero_flag = true, $rank = f
   sort($matches);
   $res = filter_toggles_component($table_id, [
     'summary_matches' => [
-      'value' => $matches[ round(count($matches)/2) ],
+      'value' => $matches[ round(count($matches)/2) ] ?? $matches[0],
       'label' => 'data_filter_summary_matches'
     ]
   ], $table_id, 'wide');
