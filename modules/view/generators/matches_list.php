@@ -102,12 +102,18 @@ function rg_generator_hero_matches_list($table_id, $hero, $limit = null, $wide =
     $index = array_search($hero, $heroes);
 
     if ($index !== false) {
-      $radiant = $index < 5;
+      $radiant = $data[$index]['radiant'];
 
       $matches[$mid] = [
         'is_radiant' => $radiant,
-        'allies' => array_slice($heroes, $radiant ? 0 : 5, 5),
-        'opponents' => array_slice($heroes, $radiant ? 5 : 0, 5),
+        'allies' => array_map(function($a) {
+            return $a['hero'];
+          }, array_filter($data, function($a) use ($radiant) { return $a['radiant'] == $radiant; })
+        ),
+        'opponents' => array_map(function($a) {
+            return $a['hero'];
+          }, array_filter($data, function($a) use ($radiant) { return $a['radiant'] != $radiant; })
+        ),
         'radiant_win' => $report['matches_additional'][$mid]['radiant_win'],
         'duration' => $report['matches_additional'][$mid]['duration'],
         'player' => $data[$index]['player']
