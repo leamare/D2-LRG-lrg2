@@ -534,7 +534,7 @@ function rg_view_generate_heroes_profiles() {
         if ($data['heroid'] != $hero) continue;
         
         $res['heroid'.$hero] .= "<tr>".
-          "<td>".locale_string($side ? 'dire' : 'radiant')."</td>".
+          "<td>".locale_string($side ? 'radiant' : 'dire')."</td>".
           "<td class=\"separator\">".$data['matches']."</td>".
           "<td>".number_format(100*$data['winrate'], 2)."%</td>".
           "<td>".number_format($data['gpm'],0)."</td>".
