@@ -104,14 +104,14 @@ function join_selectors($modules, $level, $parent="") {
 
       if ((strpos($modtag, 'team') !== false || strpos($modtag, 'optid') !== false) && $modtag != "teams") {
         global $meta;
-        $mods = explode('-', $mn);
+        $mods = array_reverse(explode('-', $mn));
         foreach ($mods as $m) {
-          if (strpos($m, 'team') == 0) {
-            $tid = (int)str_replace('team', '', $m);
-            if ($tid) break;
-          }
           if (strpos($m, 'optid') == 0) {
             $tid = (int)str_replace('optid', '', $m);
+            if ($tid) break;
+          }
+          if (strpos($m, 'team') == 0) {
+            $tid = (int)str_replace('team', '', $m);
             if ($tid) break;
           }
         }
