@@ -382,10 +382,10 @@ function get_stratz_response($match) {
       if ($aml['lane'] == 4 || !$aml['lane']) $aml['isCore'] = 0;
       else $aml['isCore'] = (is_numeric($pl['roleBasic']) ? $pl['roleBasic'] : $pl['roleBasic'] !== 'CORE') ? 0 : 1;
       
-      $melee = (40 * 60);
+      $melee = (40 * (60 + 8));
       $ranged = (45 * 20);
       $siege = (74 * 2);
-      $passive = (600 * 1.5);
+      $passive = (600 * 1.275);
       $starting = 625;
       $tenMinute = $melee + $ranged + $siege + $passive + $starting;
       $aml['efficiency_at10'] = $pl['stats']['networthPerMinute'][10] / $tenMinute;
