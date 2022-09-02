@@ -1,9 +1,8 @@
 <?php
 
-if (!function_exists('itembuild_item_component')) {
-  include_once($root."/modules/view/functions/itembuilds.php");
-  include_once($root."/modules/view/items/builds.php");
-}
+include_once($root."/modules/view/functions/itembuilds.php");
+include_once($root."/modules/view/generators/item_component.php");
+
 include_once($root."/modules/view/generators/laning.php");
 include_once($root."/modules/view/generators/matches_list.php");
 include_once($root."/modules/view/heroes/daily_wr.php");
@@ -534,7 +533,7 @@ function rg_view_generate_heroes_profiles() {
         if ($data['heroid'] != $hero) continue;
         
         $res['heroid'.$hero] .= "<tr>".
-          "<td>".locale_string($side ? 'dire' : 'radiant')."</td>".
+          "<td>".locale_string($side ? 'radiant' : 'dire')."</td>".
           "<td class=\"separator\">".$data['matches']."</td>".
           "<td>".number_format(100*$data['winrate'], 2)."%</td>".
           "<td>".number_format($data['gpm'],0)."</td>".

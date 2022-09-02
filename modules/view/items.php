@@ -17,9 +17,9 @@ if (isset($report['items']['combos'])) {
 }
 if (isset($report['items']['progr']) || isset($report['items']['progrole'])) {
   if (isset($report['items']['progrole'])) {
-    if (!function_exists('itembuild_item_component')) {
+    // if (!function_exists('itembuild_item_component')) {
       include($root."/modules/view/items/builds.php");
-    }
+    // }
     include($root."/modules/view/items/buildspowerspikes.php");
   }
   include($root."/modules/view/items/proglist.php");
