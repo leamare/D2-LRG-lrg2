@@ -78,7 +78,7 @@ if ($restore) {
       }
       
       $handle = fopen($dir.'/'.$t.'.csv', "r");
-      $schema = fgets($handle);
+      $schema = trim(fgets($handle));
       $_lines--;
 
       $qlines = [];
@@ -114,6 +114,7 @@ if ($restore) {
           if (!is_numeric($v) && !mb_check_encoding($v, 'UTF-8')) {
             $v = mb_convert_encoding($v, 'UTF-8');
           }
+          $v = trim($v);
           $qline .= "\"".addcslashes($v, '"\\')."\",";
         }
         $qline[strlen($qline)-1] = ")";
@@ -126,8 +127,15 @@ if ($restore) {
           $sql = "INSERT INTO $t ($schema) VALUES \n".implode(",\n", $qlines).';';
           if ($conn->multi_query($sql) === TRUE);
           else {
-            echo "[E] ERROR: ".$conn->error."\n    Details: `tmp/query_".time().".sql`\n";
-            file_put_contents('tmp/query_'.time().'.sql', $sql);
+            $fname_base = "tmp/query_${table}_".time();
+            $i = 0;
+            while(file_exists(($fname = $fname_base))) {
+              $fname = $fname_base.".$i";
+            }
+            $fname .= ".sql";
+
+            echo "[E] ERROR: ".$conn->error."\n    Details: `$fname`\n";
+            file_put_contents($fname, $sql);
           }
 
           $qcnt = 0;
@@ -206,7 +214,7 @@ if ($restore) {
         $els = [];
 
         foreach ($row as $r) {
-          if (strpos($r, ',') !== false)
+          if (strpos($r, ',') !== false || $r[0] == '"')
             $els[] = '"'.str_replace('"', '""', $r).'"';
           else 
             $els[] = $r;
