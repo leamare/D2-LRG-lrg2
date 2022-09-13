@@ -195,7 +195,7 @@ function rg_generator_hero_matches_list($table_id, $hero, $limit = null, $wide =
       $res .= "<a title=\"".hero_name($h)."\" data-aliases=\"".hero_tag($h)." ".hero_aliases($h)."\">".hero_icon($h)."</a>";
     }
 
-    $res .= "</td><td>".locale_string(($data['radiant_win'] && $data['is_radiant']) ? 'won' : 'lost')."</td>".
+    $res .= "</td><td>".locale_string(!($data['radiant_win'] xor $data['is_radiant']) ? 'won' : 'lost')."</td>".
       "<td>".convert_time_seconds($data['duration'])."</td>".
     "</tr>";
 
