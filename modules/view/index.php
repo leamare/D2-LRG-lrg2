@@ -55,6 +55,10 @@ if (!empty($__pinned)) {
   $tabsTags[] = "list-pinned";
 }
 
+if (isset($_lid)) {
+  $searchstring = ($searchstring ?? " ") . "!lid:".$_lid;
+}
+
 if (!empty($searchstring)) {
   $searchfilter = create_search_filters($searchstring);
 
@@ -355,7 +359,7 @@ if (sizeof($cache['reps']) === 0) {
     }
 
     $modules .= "<tr><td><a href=\"?league=".$report['tag'].(empty($linkvars) ? "" : "&".$linkvars)."\" data-aliases=\"".$aliases."\">".$report['name']."</a></td>".
-      "<td>".($report['id'] == "" ? "-" : $report['id'])."</td>".
+      "<td>".($report['id'] == "" ? "-" : "<a href=\"?lid=".$report['id'].(empty($linkvars) ? "" : "&".$linkvars)."\">".$report['id']."</a>")."</td>".
       "<td>".$report['desc']."</td>".
       "<td>".locale_string($event_type)."</td>".
       "<td>".$report['matches']."</td>".

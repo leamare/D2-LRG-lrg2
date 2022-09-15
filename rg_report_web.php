@@ -96,6 +96,8 @@ if ($lrg_use_get) {
   if(isset($_GET['mod'])) $mod = $_GET['mod'];
   else $mod = "";
 
+  $_lid = null;
+
   if(isset($_GET['league']) && !empty($_GET['league'])) {
     $leaguetag = $_GET['league'];
   } else $leaguetag = "";
@@ -121,6 +123,7 @@ if ($lrg_use_get) {
   }
 
   if(isset($_GET['latest'])) $latest = true;
+  if(isset($_GET['lid'])) $_lid = $_GET['lid'];
 }
 
 $_rawmod = $mod;
