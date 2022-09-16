@@ -23,9 +23,13 @@ return [
     ],
     "pt" => [
         "beta" => true,
-        "fallback" => "en",
+        "fallback" => "pt-br",
         "file" => __DIR__ . "/pt.json",
         "name" => "Português",
+    ],
+    "pt-br" => [
+        "file" => __DIR__ . "/pt-br.json",
+        "name" => "Português Brasileiro",
     ],
     "zh" => [
         "file" => __DIR__ . "/zh.json",
