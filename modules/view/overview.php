@@ -15,7 +15,7 @@ function rg_view_generate_overview() {
   if ($report['league_id'] == null || $report['league_id'] == "custom") {
     $res .= " ".locale_string("over-custom-league")." ".$report['league_name']." — ".$report['league_desc'].".";
   } else {
-    $res .= " ".$report['league_name']." (".$report['league_id'].") — ".$report['league_desc'].".";
+    $res .= " ".$report['league_name']." (<a href=\"?lid=".$report['league_id'].(empty($linkvars) ? "" : "&".$linkvars)."\">".$report['league_id']."</a>) — ".$report['league_desc'].".";
   }
 
   $res .= "</div>";
@@ -27,7 +27,7 @@ function rg_view_generate_overview() {
   if (!empty($report['sponsors'])) {
     $res .= "<div class=\"block-content\">".locale_string("sponsors").": ";
     $links = [];
-    foreach($report['sponsors'] as $type => $link) {
+    foreach((array)$report['sponsors'] as $type => $link) {
       $links[] = "<a target=\"_blank\" href=\"".$link."\">".$type."</a>";
     }
     $res .= implode(", ", $links);
@@ -50,5 +50,3 @@ function rg_view_generate_overview() {
 
   return rg_view_generator_overview("", $report, $res);
 }
-
-?>
