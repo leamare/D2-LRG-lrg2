@@ -4,6 +4,7 @@ include_once(__DIR__ . "/../../functions/draft_accuracy_test.php");
 include_once(__DIR__ . "/../../functions/pickban_overview.php");
 include_once(__DIR__ . "/../../functions/overview_uncontested.php");
 include_once(__DIR__ . "/../../functions/overview_positions.php");
+include_once(__DIR__ . "/../../functions/overview_sides.php");
 include_once(__DIR__ . "/../../functions/overview_combos.php");
 include_once(__DIR__ . "/../../../view/functions/teams_diversity_recalc.php");
 
@@ -362,6 +363,14 @@ $endpoints['overview'] = function($mods, $vars, &$report) use (&$meta, &$endpoin
         }
       }
     }
+  }
+
+  if(isset($context['hero_sides']) && ($report['settings']['overview_factions'] ?? true)) {
+    $res['sides'] = rgapi_generator_overview_sides_section(
+      $context['hero_sides'], 
+      $context['pickban'],
+      $report['settings']['overview_factions_count'] ?? $report['settings']['overview_top_picked_count'] ?? 5
+    );
   }
 
   if(($report['settings']['overview_positions'] ?? false) && isset($context['hero_positions'])) {

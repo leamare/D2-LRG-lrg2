@@ -49,6 +49,7 @@ function rgapi_generator_overview_positions_section($context, &$pickban, $count 
       });
   
       $increment = 100 / sizeof($context_copy); $k = 0;
+      $last_rank = null;
   
       foreach ($context_copy as $id => $el) {
         if(isset($last) && $el['matches_s'] == $last['matches_s'] && $el['winrate_s'] == $last['winrate_s']) {
