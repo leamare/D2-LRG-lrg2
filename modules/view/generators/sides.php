@@ -7,10 +7,11 @@ function rg_generator_sides($table_id, &$context, $heroes_flag = true) {
 
   $elements = [];
   $id = $heroes_flag ? "heroid" : "playerid";
+  $keys = [];
 
   $matches_med = [];
 
-  for ($i=0; $i<2 && !isset($keys); $i++) {
+  for ($i=0; $i<2 && empty($keys); $i++) {
       if(isset($context[$i][0])) {
         $keys = array_keys($context[$i][0]);
         break;

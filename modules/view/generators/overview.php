@@ -453,6 +453,17 @@ function rg_view_generator_overview($modlink, &$context, $foreword = "") {
     $res .= "</div>";
   }
 
+  if(isset($context['hero_sides']) && ($report['settings']['overview_factions'] ?? true)) {
+    $res .= "<div class=\"content-text\"><h1><a href=\"?league=$leaguetag&mod=".$modlink.
+      "heroes-sides".(empty($linkvars) ? "" : "&".$linkvars)."\">".locale_string("sides")."</a></h1></div>";
+    $res .= rg_generator_overview_sides_section(
+      $prefix, 
+      $context['hero_sides'], 
+      $context['pickban'],
+      $report['settings']['overview_factions_count'] ?? $report['settings']['overview_top_picked_count'] ?? 5
+    );
+  }
+
   if($report['settings']['overview_positions'] ?? true) {
     generate_positions_strings();
     $res .= "<div class=\"content-text\"><h1>".locale_string("positions")."</h1></div>";
@@ -536,4 +547,3 @@ function rg_view_generator_overview($modlink, &$context, $foreword = "") {
   return $res;
 }
 
-?>

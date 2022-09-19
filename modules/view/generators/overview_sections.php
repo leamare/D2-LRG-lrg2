@@ -207,3 +207,61 @@ function rg_generator_balance_overview($table_id, $context) {
       "<td>".number_format($vals[3]*100,1)."</td>".
     "</tr></tbody></table>";
 }
+
+function rg_generator_overview_sides_section($tables_prefix, $context, $context_pb, $count) {
+  $diff_rad_wr = [];
+  $diff_rad_match = [];
+  $heroes = [];
+
+  foreach ($context as $side => $els) {
+    foreach ($els as $el) {
+      $id = $el['heroid'];
+      if (!isset($heroes[$id])) $heroes[$id] = [];
+      $heroes[$id][$side] = $el;
+    }
+  }
+
+  foreach ($heroes as $hid => $data) {
+    if (!isset($data[0]) || !isset($data[1])) {
+      continue;
+    }
+    $diff_rad_wr[$hid] = $data[1]['winrate'] - $data[0]['winrate'];
+    $diff_rad_match[$hid] = $data[1]['matches'] - $data[0]['matches'];
+  }
+
+  arsort($diff_rad_wr);
+
+  $res = "<div class=\"small-list-wrapper\">";
+
+  $subset = array_slice($diff_rad_wr, 0, $count, true);
+
+  $res .= "<table id=\"$tables_prefix\" class=\"list list-small\"><caption>".locale_string("radiant")."</caption><thead><tr>".
+    "<th></th>".
+    "<th>".locale_string("hero")."</th>".
+    "<th>".locale_string("pickrate")."</th>".
+    "<th>".locale_string("trends_diff")."</th></tr></thead><tbody>";
+  foreach ($subset as $id => $v) {
+    $res .= "<tr><td>".hero_portrait($id)."</td><td>".hero_link($id)."</td>".
+      "<td>".($diff_rad_match[$id] > 0 ? '+' : '').number_format(100*$diff_rad_match[$id]/$context_pb[$id]['matches_picked'], 2)."%</td>".
+      "<td>".($v > 0 ? '+' : '').number_format($v*100, 2)."%</td></tr>";
+  }
+  $res .= "</tbody></table>";
+
+  $subset = array_slice(array_reverse($diff_rad_wr, true), 0, $count, true);
+
+  $res .= "<table id=\"$tables_prefix\" class=\"list list-small\"><caption>".locale_string("dire")."</caption><thead><tr>".
+    "<th></th>".
+    "<th>".locale_string("hero")."</th>".
+    "<th>".locale_string("pickrate")."</th>".
+    "<th>".locale_string("trends_diff")."</th></tr></thead><tbody>";
+  foreach ($subset as $id => $v) {
+    $res .= "<tr><td>".hero_portrait($id)."</td><td>".hero_link($id)."</td>".
+      "<td>".($diff_rad_match[$id] > 0 ? '' : '-').number_format(-100*$diff_rad_match[$id]/$context_pb[$id]['matches_picked'], 2)."%</td>".
+      "<td>".($v > 0 ? '' : '+').number_format($v*-100, 2)."%</td></tr>";
+  }
+  $res .= "</tbody></table>";
+
+  $res .= "</div>";
+
+  return $res;
+}
