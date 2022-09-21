@@ -10,7 +10,7 @@ $(document).ready(function() {
   });
   
   $(".search-filter").on("input", function() {
-    const value = $(this).val().toLowerCase();
+    const value = new RegExp( $(this).val().toLowerCase() );
     const table = $(this).attr('data-table-filter-id');
     
     $("#" + table + " tbody tr").filter(function() {
@@ -22,7 +22,7 @@ $(document).ready(function() {
         }
       }
       const line = $(this).text().toLowerCase() + (aliases ? ' ' + aliases.toLowerCase() : '');
-      $(this).toggle( line.indexOf(value) !== -1 )
+      $(this).toggle( line.match(value) !== null )
     });
   });
 
@@ -138,13 +138,13 @@ $(document).ready(function() {
       const input = $(`<input type="search" name="filter" class="search-filter-selector" placeholder="${placeholder}" />`);
 
       $(input).on('input', function() {
-        const value = $(this).val().toLowerCase();
+        const value = new RegExp( $(this).val().toLowerCase() );
         const options = $(this).parent().find('.custom-selector-list')[0];
         
         $(options).children('.custom-selector-option').filter(function() {
           const aliases = $(this).attr('data-aliases');
           const line = $(this).text().toLowerCase() + (aliases ? ' ' + aliases.toLowerCase() : '');
-          $(this).toggle( line.indexOf(value) !== -1 )
+          $(this).toggle( line.match(value) !== null )
         });
 
         $(options).find('.focused').toggleClass('focused');
@@ -345,13 +345,13 @@ $(document).ready(function() {
       const input = $(`<input type="search" class="search-filter-selector" placeholder="${placeholder}" />`);
 
       $(input).on('input', function() {
-        const value = $(this).val().toLowerCase();
+        const value = new RegExp( $(this).val().toLowerCase() );
         const options = $(this).parent().find('.custom-selector-list')[0];
         
         $(options).children('.custom-selector-option').filter(function() {
           const aliases = $(this).attr('data-aliases');
           const line = $(this).text().toLowerCase() + (aliases ? ' ' + aliases.toLowerCase() : '');
-          $(this).toggle( line.indexOf(value) !== -1 )
+          $(this).toggle( line.match(value) !== null )
         });
 
         $(options).find('.focused').toggleClass('focused');
