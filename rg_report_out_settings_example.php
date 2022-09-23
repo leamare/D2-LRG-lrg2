@@ -9,7 +9,7 @@ $max_tabs = 12;
 
 $previewcode = 123;
 $_earlypreview_banlist = [
-  // 'items-builds'
+  // 'recordext'
 ];
 
 

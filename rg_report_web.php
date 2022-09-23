@@ -173,6 +173,9 @@ if (isset($report)) {
     if (isset($report['records']))
       include_once("modules/view/records.php");
 
+    if (isset($report['records']) && isset($report['records_ext']))
+      include_once("modules/view/records_ext.php");
+
     if (isset($report['milestones']))
       include_once("modules/view/milestones.php");
 
@@ -214,6 +217,9 @@ if (isset($report)) {
   # records
   if (isset($modules['records']) && check_module("records")) {
     merge_mods($modules['records'], rg_view_generate_records());
+  }
+  if (isset($modules['recordext']) && check_module("recordext")) {
+    merge_mods($modules['recordext'], rg_view_generate_records_ext());
   }
 
   # milestones

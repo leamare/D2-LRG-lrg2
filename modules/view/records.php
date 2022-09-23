@@ -11,5 +11,3 @@ function rg_view_generate_records() {
 
   return $res;
 }
-
-?>
