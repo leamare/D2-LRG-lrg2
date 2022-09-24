@@ -66,8 +66,29 @@ $result["localized"] = $lg_settings['localized'] ?? null;
 
 $avg_limit = $lg_settings['ana']['avg_limit'];
 
-if (isset($lg_settings['teams']))
+if (isset($lg_settings['teams']) && !isset($lg_settings['players'])) {
   $result["teams_interest"] = $lg_settings['teams'];
+
+  $players_interest = [];
+  $sql = "SELECT ml.playerid from matchlines ml join teams_matches tm 
+    on ml.matchid = tm.matchid and ml.isRadiant = tm.is_radiant 
+    where tm.teamid in (".implode(',', $lg_settings['teams']).")
+  group by 1;";
+
+  if ($conn->multi_query($sql) !== TRUE) die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+
+  $query_res = $conn->store_result();
+  for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+    $players_interest[] = (int)$row[0];
+  }
+
+  $query_res->free_result();
+
+  $result["players_interest"] = $players_interest;
+} else if (isset($lg_settings['players'])) {
+  $result["players_interest"] = $lg_settings['players'];
+  $players_interest = $lg_settings['players'];
+}
 
 if(compare_ver($lg_settings['version'], $lrg_version) < 0) {
   if (!file_exists("templates/default.json")) die("[F] No default league template found, exitting.");
