@@ -76,5 +76,3 @@ echo <<<LIMITERS
 [ ] Quantile: $limiter_quantile
 
 LIMITERS;
-
-?>

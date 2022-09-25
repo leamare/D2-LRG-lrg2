@@ -1,7 +1,8 @@
 <?php
 
-$result["players"] = array();
-$sql = "SELECT playerid, nickname FROM players";
+$result["players"] = [];
+$sql = "SELECT playerid, nickname FROM players ".
+  (!empty($players_interest) ? " WHERE playerid in (".implode(',', $players_interest).")" : "");
 
 if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for PLAYERS.\n";
 else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
