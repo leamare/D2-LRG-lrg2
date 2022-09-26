@@ -89,7 +89,7 @@ function rg_generator_combos($table_id, &$context, $context_matches, $heroes_fla
       (
         $trios ?
         ($heroes_flag ? "<td>".hero_portrait($combo[$id.'3'])."</td>" : "").
-        "<td>".($heroes_flag ? hero_link($combo[$id.'3']) : player_link($combo[$id.'2']))."</td>" :
+        "<td>".($heroes_flag ? hero_link($combo[$id.'3']) : player_link($combo[$id.'3']))."</td>" :
         ""
         ).
       "<td>".$combo['matches']."</td>".
