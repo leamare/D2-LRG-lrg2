@@ -1,12 +1,19 @@
 <?php
-$result["pvp"] = array ();
+$result["pvp"] = [];
+
+$wheres = "";
+if (!empty($players_interest)) {
+  $wheres = " WHERE m1.playerid in (".implode(',', $players_interest).") AND m2.playerid in (".implode(',', $players_interest).") ";
+}
+
 
 $sql = "SELECT m1.playerid, m2.playerid, SUM(1) match_count, SUM(NOT matches.radiantWin XOR m1.isRadiant) player1_won, SUM(NOT matches.radiantWin XOR m1.isRadiant)/SUM(1) p1_winrate
     FROM matchlines m1
-      JOIN matchlines m2
-          ON m1.matchid = m2.matchid and m1.isRadiant <> m2.isRadiant and m1.playerid < m2.playerid
-        JOIN matches
-          ON m1.matchid = matches.matchid
+    JOIN matchlines m2
+      ON m1.matchid = m2.matchid and m1.isRadiant <> m2.isRadiant and m1.playerid < m2.playerid
+    JOIN matches
+      ON m1.matchid = matches.matchid
+    $wheres
     GROUP BY m1.playerid, m2.playerid;";
 
 if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for PLAYER AGAINST PLAYER.\n";
@@ -30,9 +37,9 @@ if ($lg_settings['ana']['pvp_matches']) {
   for ($i=0,$e=sizeof($result['pvp']); $i<$e; $i++) {
     $sql = "SELECT m1.matchid
         FROM matchlines m1
-          JOIN matchlines m2
-              ON m1.matchid = m2.matchid and m1.isRadiant <> m2.isRadiant
-        WHERE m1.playerid = ".$result['pvp'][$i]['playerid1']." AND m2.playerid = ".$result['pvp'][$i]['playerid2'].";";
+        JOIN matchlines m2
+            ON m1.matchid = m2.matchid and m1.isRadiant <> m2.isRadiant
+      WHERE m1.playerid = ".$result['pvp'][$i]['playerid1']." AND m2.playerid = ".$result['pvp'][$i]['playerid2'].";";
 
     if ($conn->multi_query($sql) === TRUE)  ;# echo "[S] Requested data for PLAYER AGAINST PLAYER.\n";
     else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
@@ -48,4 +55,4 @@ if ($lg_settings['ana']['pvp_matches']) {
     $query_res->free_result();
   }
 }
-?>
+

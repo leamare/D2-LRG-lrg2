@@ -3,7 +3,7 @@ $result["player_triplets"] = rg_query_player_trios(
   $conn, 
   $result['players_summary'], 
   $result['random']['matches_total'], 
-  $limiter_lower, 
+  $limiters_players['limiter_lower'],
   null
 );
 

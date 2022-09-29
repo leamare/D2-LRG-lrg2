@@ -3,7 +3,7 @@ $result["player_pairs"] = rg_query_player_pairs(
   $conn,
   $result['players_summary'],
   $result['random']['matches_total'],
-  $limiter,
+  $limiters_players['limiter_higher'],
   null
 );
 
