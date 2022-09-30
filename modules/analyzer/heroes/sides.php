@@ -1,19 +1,26 @@
 <?php
-$result["hero_sides"] = array ();
+
+$wheres = "";
+if (!empty($players_interest)) {
+  $wheres = " AND ml.playerid in (".implode(',', $players_interest).") ";
+}
+
+$result["hero_sides"] = [];
 echo "[S] Requested data for HERO SIDES.\n";
 
 for ($side = 0; $side < 2; $side++) {
   $result["hero_sides"][$side] = array();
 
   $sql = "SELECT
-            ml.heroid, SUM(1) matches, SUM(NOT m.radiantWin XOR ml.isradiant)/SUM(1) winrate,
-            SUM(ml.gpm)/SUM(1) gpm,
-            SUM(ml.xpm)/SUM(1) xpm
-          FROM matchlines ml JOIN matches m
-                ON m.matchid = ml.matchid
-          WHERE ml.isRadiant = $side
-          GROUP BY ml.heroid
-          ORDER BY matches DESC;";
+      ml.heroid, SUM(1) matches, SUM(NOT m.radiantWin XOR ml.isradiant)/SUM(1) winrate,
+      SUM(ml.gpm)/SUM(1) gpm,
+      SUM(ml.xpm)/SUM(1) xpm
+    FROM matchlines ml JOIN matches m
+          ON m.matchid = ml.matchid
+    WHERE ml.isRadiant = $side 
+      $wheres
+    GROUP BY ml.heroid
+    ORDER BY matches DESC;";
   if ($conn->multi_query($sql) === TRUE);# echo "[S] Requested data for HERO SIDES $side.\n";
   else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
 

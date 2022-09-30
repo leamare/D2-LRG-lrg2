@@ -7,13 +7,18 @@
 $r = [];
 echo "[S] Requested data for HEROES WR SPAMMERS.\n";
 
+$wheres = "";
+if (!empty($players_interest)) {
+  $wheres = " AND ml.playerid in (".implode(',', $players_interest).")";
+}
+
 foreach ($result["pickban"] as $hid => $data) {
   if ($data['matches_picked'] == 0) continue;
 
   $h = [];
 
   // unique players
-  $sql = "SELECT COUNT(DISTINCT ml.playerid) mnum FROM matchlines ml WHERE ml.heroid = $hid AND ml.playerid > 0;";
+  $sql = "SELECT COUNT(DISTINCT ml.playerid) mnum FROM matchlines ml WHERE ml.heroid = $hid AND ml.playerid > 0 $wheres;";
 
   if ($query_res = $conn->query($sql)) {
     $row = $query_res->fetch_row();
@@ -21,7 +26,7 @@ foreach ($result["pickban"] as $hid => $data) {
   } else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
   $query_res->close();
 
-  $sql = "SELECT COUNT(DISTINCT ml.matchid) mnum FROM matchlines ml WHERE ml.heroid = $hid AND ml.playerid > 0 GROUP BY ml.playerid HAVING mnum > 1;";
+  $sql = "SELECT COUNT(DISTINCT ml.matchid) mnum FROM matchlines ml WHERE ml.heroid = $hid AND ml.playerid > 0 $wheres GROUP BY ml.playerid HAVING mnum > 1;";
 
   if ($query_res = $conn->query($sql)) {
     $h['players_1plus'] = (int) $query_res->num_rows;

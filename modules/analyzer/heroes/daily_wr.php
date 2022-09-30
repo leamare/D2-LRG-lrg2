@@ -10,12 +10,18 @@ if ($lg_settings['ana']['heroes_daily_winrate'] !== true && $lg_settings['ana'][
   $multiplier = 1;
 }
 
+$wheres = "";
+if (!empty($players_interest)) {
+  $wheres = " AND ml.playerid in (".implode(',', $players_interest).") ";
+}
+
 $mday = 86400*$multiplier;
 
 $sql = "SELECT
   ml.heroid, ( (start_date-$start_timestamp) DIV $mday ) day, SUM(1) matches, SUM(NOT m.radiantWin XOR ml.isradiant)/SUM(1) winrate
   FROM matchlines ml JOIN matches m ON m.matchid = ml.matchid
-  WHERE ml.heroid > 0
+  WHERE ml.heroid > 0 
+  $wheres
   GROUP BY ml.heroid, day
   ORDER BY matches DESC;";
 
@@ -36,10 +42,21 @@ for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row(
 
 $query_res->free_result();
 
+$wheres = "";
+if (!empty($players_interest)) {
+  $wheres = " JOIN (
+    select matchid, isRadiant, CONCAT('[', GROUP_CONCAT(playerid), ']') as conc_playerid
+    from matchlines 
+    where playerid in (".implode(',', $players_interest).")
+    group by 1, 2
+  ) ml ON ml.matchid = dr.matchid AND dr.is_radiant <> ml.isRadiant ";
+}
+
 $sql = "SELECT
   dr.hero_id, ( (start_date-$start_timestamp) DIV $mday ) day, SUM(1) matches
-  FROM draft dr JOIN matches m ON m.matchid = dr.matchid
-  WHERE dr.is_pick = 0 AND dr.hero_id > 0
+  FROM draft dr JOIN matches m ON m.matchid = dr.matchid 
+  $wheres
+  WHERE dr.is_pick = 0 AND dr.hero_id > 0 
   GROUP BY dr.hero_id, day
   ORDER BY matches DESC;";
 

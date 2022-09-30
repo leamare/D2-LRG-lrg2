@@ -7,6 +7,12 @@
 $r = [];
 echo "[S] Requested data for HEROES WR TIMINGS.\n";
 
+$wheres = "";
+if (!empty($players_interest)) {
+  $wheres = " AND ml.playerid in (".implode(',', $players_interest).")";
+}
+
+
 foreach ($result["pickban"] as $hid => $data) {
   $h = [];
 
@@ -39,7 +45,7 @@ foreach ($result["pickban"] as $hid => $data) {
   // duration quantiles
 
   $sql = "SELECT m.duration FROM matchlines ml JOIN matches m ON m.matchid = ml.matchid
-    WHERE ml.heroid = $hid ORDER BY m.duration ASC LIMIT 0, 1;";
+    WHERE ml.heroid = $hid $wheres ORDER BY m.duration ASC LIMIT 0, 1;";
 
   if ($query_res = $conn->query($sql)) {
     $row = $query_res->fetch_row();
@@ -48,7 +54,7 @@ foreach ($result["pickban"] as $hid => $data) {
   $query_res->close();
 
   $sql = "SELECT m.duration FROM matchlines ml JOIN matches m ON m.matchid = ml.matchid
-    WHERE ml.heroid = $hid ORDER BY m.duration ASC LIMIT $q1, 1;";
+    WHERE ml.heroid = $hid $wheres ORDER BY m.duration ASC LIMIT $q1, 1;";
 
   if ($query_res = $conn->query($sql)) {
     $row = $query_res->fetch_row();
@@ -57,7 +63,7 @@ foreach ($result["pickban"] as $hid => $data) {
   $query_res->close();
 
   $sql = "SELECT m.duration FROM matchlines ml JOIN matches m ON m.matchid = ml.matchid
-    WHERE ml.heroid = $hid ORDER BY m.duration ASC LIMIT $q2, 1;";
+    WHERE ml.heroid = $hid $wheres ORDER BY m.duration ASC LIMIT $q2, 1;";
 
   if ($query_res = $conn->query($sql)) {
     $row = $query_res->fetch_row();
@@ -66,7 +72,7 @@ foreach ($result["pickban"] as $hid => $data) {
   $query_res->close();
 
   $sql = "SELECT m.duration FROM matchlines ml JOIN matches m ON m.matchid = ml.matchid
-    WHERE ml.heroid = $hid ORDER BY m.duration ASC LIMIT $q3, 1;";
+    WHERE ml.heroid = $hid $wheres ORDER BY m.duration ASC LIMIT $q3, 1;";
 
   if ($query_res = $conn->query($sql)) {
     $row = $query_res->fetch_row();
@@ -75,7 +81,7 @@ foreach ($result["pickban"] as $hid => $data) {
   $query_res->close();
 
   $sql = "SELECT m.duration FROM matchlines ml JOIN matches m ON m.matchid = ml.matchid
-    WHERE ml.heroid = $hid ORDER BY m.duration DESC LIMIT 0, 1;";
+    WHERE ml.heroid = $hid $wheres ORDER BY m.duration DESC LIMIT 0, 1;";
 
   if ($query_res = $conn->query($sql)) {
     $row = $query_res->fetch_row();
@@ -86,7 +92,7 @@ foreach ($result["pickban"] as $hid => $data) {
   // early winrate
 
   $sql = "SELECT SUM(1) matches, SUM(NOT m.radiantWin XOR ml.isradiant)/SUM(1) winrate FROM matchlines ml JOIN matches m ON m.matchid = ml.matchid
-    WHERE ml.heroid = $hid AND m.duration <= ".$h['q1duration'].";";
+    WHERE ml.heroid = $hid AND m.duration <= ".$h['q1duration']." $wheres ;";
 
   if ($query_res = $conn->query($sql)) {
     $row = $query_res->fetch_row();
@@ -98,7 +104,7 @@ foreach ($result["pickban"] as $hid => $data) {
   // late winrate
 
   $sql = "SELECT SUM(1) matches, SUM(NOT m.radiantWin XOR ml.isradiant)/SUM(1) winrate FROM matchlines ml JOIN matches m ON m.matchid = ml.matchid
-    WHERE ml.heroid = $hid AND m.duration >= ".$h['q3duration'].";";
+    WHERE ml.heroid = $hid AND m.duration >= ".$h['q3duration']." $wheres ;";
 
   if ($query_res = $conn->query($sql)) {
     $row = $query_res->fetch_row();
@@ -110,7 +116,7 @@ foreach ($result["pickban"] as $hid => $data) {
   // average duration
 
   $sql = "SELECT AVG(m.duration) FROM matchlines ml JOIN matches m ON m.matchid = ml.matchid
-    WHERE ml.heroid = $hid;";
+    WHERE ml.heroid = $hid $wheres ;";
 
   if ($query_res = $conn->query($sql)) {
     $row = $query_res->fetch_row();
@@ -121,7 +127,7 @@ foreach ($result["pickban"] as $hid => $data) {
   // standart deviation
 
   $sql = "SELECT m.duration-".$h['avg_duration']." FROM matchlines ml JOIN matches m ON m.matchid = ml.matchid
-    WHERE ml.heroid = $hid;";
+    WHERE ml.heroid = $hid $wheres ;";
 
   if ($query_res = $conn->query($sql)) {
     $sum = 0;
