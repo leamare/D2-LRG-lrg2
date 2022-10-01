@@ -1,12 +1,22 @@
 <?php
-$result["hvh"] = array ();
 
-$sql = "SELECT m1.heroid, m2.heroid, SUM(1) match_count, SUM(NOT matches.radiantWin XOR m1.isRadiant) hero1_won, SUM(NOT matches.radiantWin XOR m1.isRadiant)/SUM(1) h1_winrate
+$wheres = "";
+if (!empty($players_interest)) {
+  $wheres = " WHERE m1.playerid in (".implode(',', $players_interest).") and m2.playerid in (".implode(',', $players_interest).") ";
+}
+
+$result["hvh"] = [];
+
+$sql = "SELECT m1.heroid, m2.heroid, 
+      SUM(1) match_count, 
+      SUM(NOT matches.radiantWin XOR m1.isRadiant) hero1_won, 
+      SUM(NOT matches.radiantWin XOR m1.isRadiant)/SUM(1) h1_winrate
     FROM matchlines m1
-      JOIN matchlines m2
-          ON m1.matchid = m2.matchid and m1.isRadiant <> m2.isRadiant and m1.heroid < m2.heroid
-        JOIN matches
-          ON m1.matchid = matches.matchid
+    JOIN matchlines m2
+        ON m1.matchid = m2.matchid and m1.isRadiant <> m2.isRadiant and m1.heroid < m2.heroid
+    JOIN matches
+      ON m1.matchid = matches.matchid
+    $wheres
     GROUP BY m1.heroid, m2.heroid;";
 
 if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for HERO VS HERO.\n";
