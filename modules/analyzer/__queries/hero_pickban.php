@@ -1,6 +1,11 @@
 <?php 
 
-function rg_query_hero_pickban(&$conn, $team = null, $cluster = null) {
+function rg_query_hero_pickban(&$conn, $team = null, $cluster = null, $players = null) {
+  global $players_interest;
+  if (empty($players) && empty($team) && !empty($players_interest)) {
+    $players = $players_interest;
+  }
+
   $res = [];
 
   $sql = "SELECT draft.hero_id hero_id, 
@@ -8,9 +13,11 @@ function rg_query_hero_pickban(&$conn, $team = null, $cluster = null) {
     SUM(NOT matches.radiantWin XOR draft.is_radiant)/count(distinct draft.matchid) winrate
     FROM draft JOIN matches ON draft.matchid = matches.matchid ".
     ($team === null ? "" : "JOIN teams_matches ON draft.matchid = teams_matches.matchid AND draft.is_radiant = teams_matches.is_radiant ").
+    ($players === null ? "" : " JOIN matchlines ON matchlines.matchid = draft.matchid AND draft.hero_id = matchlines.heroid ").
   " WHERE is_pick = true ".
     ($cluster !== null ? " AND matches.cluster IN (".implode(",", $cluster).") " : "").
     ($team === null ? "" : " AND teams_matches.teamid = $team ").
+    ($players === null ? "" : " AND matchlines.playerid in (".implode(',', $players).")").
   " GROUP BY draft.hero_id;";
 
   if ($conn->multi_query($sql) === TRUE);
@@ -32,9 +39,15 @@ function rg_query_hero_pickban(&$conn, $team = null, $cluster = null) {
 
   $sql = "SELECT draft.hero_id hero_id, 
     count(distinct draft.matchid) matches, 
-    SUM(NOT matches.radiantWin XOR draft.is_radiant)/count(distinct draft.matchid) winrate
+    SUM(NOT matches.radiantWin XOR draft.is_radiant)/count(distinct draft.matchid)".($players !== null ? "/5" : "")." winrate
     FROM draft JOIN matches ON draft.matchid = matches.matchid ".
     ($team === null ? "" : "JOIN teams_matches ON draft.matchid = teams_matches.matchid AND draft.is_radiant = teams_matches.is_radiant ").
+    ($players === null ? "" : " JOIN (
+      select matchid, isRadiant, CONCAT('[', GROUP_CONCAT(playerid), ']') as conc_playerid
+      from matchlines 
+      where playerid in (".implode(',', $players).")
+      group by 1, 2
+    ) ml ON ml.matchid = draft.matchid AND draft.is_radiant <> ml.isRadiant ").
   " WHERE is_pick = false ".
     ($cluster !== null ? " AND matches.cluster IN (".implode(",", $cluster).") " : "").
     ($team === null ? "" : " AND teams_matches.teamid = $team ").
