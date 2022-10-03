@@ -1,8 +1,12 @@
 <?php 
 
-function rg_query_hero_laning(&$conn, $cluster = null, $team = null) {
-  $tie_factor = 0.075;
+function rg_query_hero_laning(&$conn, $cluster = null, $team = null, $players = null) {
+  global $players_interest;
+  if (empty($players) && !empty($players_interest)) {
+    $players = $players_interest;
+  }
 
+  $tie_factor = 0.075;
 
   $result = [];
   //echo "[S] Requested data for HERO DRAFT\n";
@@ -28,7 +32,8 @@ function rg_query_hero_laning(&$conn, $cluster = null, $team = null) {
       ams.heroid ams_heroid,
       se.core_lane_eff ams_efficiency_at10,
       ml.isRadiant,
-      se.lane_c lane
+      se.lane_c lane,
+      ml.playerid
     FROM adv_matchlines ams
     JOIN matchlines ml ON ams.matchid = ml.matchid AND ams.playerid = ml.playerid
     
@@ -52,6 +57,7 @@ function rg_query_hero_laning(&$conn, $cluster = null, $team = null) {
     ($team !== null || $cluster !== null ? " WHERE " : "").
     ($cluster === null ? "" : " AND m.cluster IN (".implode(",", $cluster).") ").
     ($team === null ? "" : " AND teams_matches.teamid = ".$team." ").
+    (!empty($players) ? " AND ams_q.playerid in (".implode(',', $players).")" : "").
   " GROUP BY hero";
 
   if ($conn->multi_query($sql) !== TRUE) throw new \Exception($conn->error);
@@ -98,7 +104,8 @@ function rg_query_hero_laning(&$conn, $cluster = null, $team = null) {
         ams.heroid ams_heroid,
         se.core_lane_eff ams_efficiency_at10,
         ml.isRadiant,
-        IF(ams.lane > 3, 3, ams.lane) lane
+        IF(ams.lane > 3, 3, ams.lane) lane,
+        ml.playerid
       FROM adv_matchlines ams
       JOIN matchlines ml ON ams.matchid = ml.matchid AND ams.heroid = ml.heroid
       
@@ -117,7 +124,8 @@ function rg_query_hero_laning(&$conn, $cluster = null, $team = null) {
         ams.heroid amr_heroid,
         se.core_lane_eff amr_efficiency_at10,
         ml.isRadiant,
-        4-IF(ams.lane > 3, 3, ams.lane) lane
+        4-IF(ams.lane > 3, 3, ams.lane) lane,
+        ml.playerid
       FROM adv_matchlines ams
       JOIN matchlines ml ON ams.matchid = ml.matchid AND ams.heroid = ml.heroid
       
@@ -135,6 +143,7 @@ function rg_query_hero_laning(&$conn, $cluster = null, $team = null) {
     ($team !== null || $cluster !== null ? " WHERE " : "").
     ($cluster === null ? "" : " AND m.cluster IN (".implode(",", $cluster).") ").
     ($team === null ? "" : " AND teams_matches.teamid = ".$team." ").
+    (!empty($players) ? " AND ( ams_q.playerid in (".implode(',', $players).") and amr_q.playerid in (".implode(',', $players).") )" : "").
   " GROUP BY ams_heroid, hero";
 
     if ($conn->multi_query($sql) !== TRUE) throw new \Exception($conn->error);

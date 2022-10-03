@@ -1,12 +1,23 @@
 <?php
 
-function rg_query_hero_trios(&$conn, &$pickban, $matches_total, $limiter = 0, $cluster = null, $team = null) {
+function rg_query_hero_trios(&$conn, &$pickban, $matches_total, $limiter = 0, $cluster = null, $team = null, $players = null) {
+  global $players_interest;
+  if (empty($players) && empty($team) && !empty($players_interest)) {
+    $players = $players_interest;
+  }
+
   $result = [];
 
   $wheres = [];
 
   if ($team !== null) $wheres[] = "teams_matches.teamid = ".$team;
   if ($cluster !== null) $wheres[] = "matches.cluster IN (".implode(",", $cluster).")";
+  if (!empty($players)) {
+    $wheres[] = "( m1.playerid in (".implode(',', $players_interest).") 
+      and m2.playerid in (".implode(',', $players_interest).") 
+      and m3.playerid in (".implode(',', $players_interest).")
+    )";
+  }
 
   $sql = "SELECT m1.heroid, m2.heroid, m3.heroid, SUM(1) match_count, SUM(NOT matches.radiantWin XOR m1.isRadiant)/SUM(1) winrate
           FROM matchlines m1
