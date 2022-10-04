@@ -1,7 +1,16 @@
 <?php 
 
-function rg_query_hero_summary(&$conn, $cluster = null) {
+function rg_query_hero_summary(&$conn, $cluster = null, $players = null) {
+  global $players_interest;
+  if (empty($players) && !empty($players_interest)) {
+    $players = $players_interest;
+  }
+
   $res = [];
+
+  $wheres = [];
+  if (!empty($cluster)) $wheres[] = "m.cluster IN (".implode(",", $cluster).")";
+  if (!empty($players)) $wheres[] = "ml.playerid IN (".implode(",", $players).")";
 
   $sql = "SELECT
             ml.heroid hid,
@@ -26,7 +35,7 @@ function rg_query_hero_summary(&$conn, $cluster = null) {
                 ON am.matchid = ml.matchid AND am.heroid = ml.heroid
               JOIN matches m
                 ON m.matchid = ml.matchid ".
-          ($cluster !== null ? "WHERE m.cluster IN (".implode(",", $cluster).")" : "").
+          (!empty($wheres) ? "WHERE ".implode(" AND ", $wheres) : "").
         " GROUP BY hid
           ORDER BY matches DESC, winrate DESC;";
 
