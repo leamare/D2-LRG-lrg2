@@ -1,7 +1,17 @@
 <?php 
 
-function rg_query_player_positions(&$conn, $team = null, $cluster = null) {
+function rg_query_player_positions(&$conn, $team = null, $cluster = null, $players = null) {
+  global $players_interest;
+  if (empty($players) && !empty($players_interest)) {
+    $players = $players_interest;
+  }
+
   $res = [];
+
+  $wheres = [];
+  if (!empty($cluster)) $wheres[] = "m.cluster IN (".implode(",", $cluster).")";
+  if (!empty($players)) $wheres[] = "ml.playerid IN (".implode(",", $players).")";
+  if (!empty($team)) $wheres[] = "teams_matches.teamid = $team";
 
   for ($core = 0; $core < 2; $core++) {
     if (!isset($res[$core])) $res[$core] = [];
@@ -38,8 +48,7 @@ function rg_query_player_positions(&$conn, $team = null, $cluster = null) {
               WHERE ".
             //  ($core == 0 ? "am.isCore = 0" : "am.isCore = 1 AND am.lane = $lane").
              ($core == 0 ? "am.isCore = 0 AND am.lane ".($lane == 1 ? '= 1' : '<> 1') :"am.isCore = 1 AND am.lane = $lane").
-             ($cluster !== null ? " AND m.cluster IN (".implode(",", $cluster).") " : "").
-             ($team === null ? "" : " AND teams_matches.teamid = $team ").
+             (!empty($wheres) ? " AND ".implode(" AND ", $wheres) : "").
              " GROUP BY am.playerid
               ORDER BY matches DESC, winrate DESC;";
   

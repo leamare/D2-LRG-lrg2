@@ -1,7 +1,16 @@
 <?php 
 
-function rg_query_player_summary(&$conn, $cluster = null) {
+function rg_query_player_summary(&$conn, $cluster = null, $players = null) {
+  global $players_interest;
+  if (empty($players) && !empty($players_interest)) {
+    $players = $players_interest;
+  }
+
   $res = [];
+
+  $wheres = [];
+  if (!empty($cluster)) $wheres[] = "m.cluster IN (".implode(",", $cluster).")";
+  if (!empty($players)) $wheres[] = "ml.playerid IN (".implode(",", $players).")";
 
   $sql = "SELECT
             ml.playerid pid,
@@ -31,7 +40,7 @@ function rg_query_player_summary(&$conn, $cluster = null) {
               join ( select max(heropool) mhp from
                 ( select COUNT(DISTINCT heroid) heropool, playerid from matchlines group by playerid ) _hp
               ) mhpt ".
-          ($cluster !== null ? "WHERE m.cluster IN (".implode(",", $cluster).")" : "").
+          (!empty($wheres) ? "WHERE ".implode(" AND ", $wheres) : "").
         " GROUP BY pid
           ORDER BY matches DESC, winrate DESC;";
 
