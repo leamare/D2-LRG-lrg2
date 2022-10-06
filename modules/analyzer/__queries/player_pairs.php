@@ -1,7 +1,16 @@
 <?php 
 
-function rg_query_player_pairs(&$conn, &$psummary, $matches_total, $limiter = 0, $cluster = null) {
+function rg_query_player_pairs(&$conn, &$psummary, $matches_total, $limiter = 0, $cluster = null, $players = null) {
+  global $players_interest;
+  if (empty($players) && !empty($players_interest)) {
+    $players = $players_interest;
+  }
+
   $res = [];
+
+  $wheres = [];
+  if (!empty($cluster)) $wheres[] = "matches.cluster IN (".implode(",", $cluster).")";
+  if (!empty($players)) $wheres[] = "( fm1.playerid IN (".implode(",", $players).") AND fm2.playerid IN (".implode(",", $players).") )";
 
   $sql = "SELECT fm1.playerid, fm2.playerid,
       COUNT(distinct fm1.matchid) match_count,
@@ -17,13 +26,13 @@ function rg_query_player_pairs(&$conn, &$psummary, $matches_total, $limiter = 0,
         ON m2.matchid = am2.matchid AND m2.playerid = am2.playerid ) fm2
     ON fm1.matchid = fm2.matchid and fm1.isRadiant = fm2.isRadiant and fm1.playerid < fm2.playerid
     JOIN matches ON fm1.matchid = matches.matchid ".
-    ($cluster !== null ? " WHERE matches.cluster IN (".implode(",", $cluster).") " : "").
+    (!empty($wheres) ? " WHERE ".implode(" AND ", $wheres) : "").
   " GROUP BY fm1.playerid, fm2.playerid
     HAVING match_count > $limiter
     ORDER BY match_count DESC, winrate DESC;";
 
   if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for PLAYER PAIRS.\n";
-  else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+  else die("[F] Unexpected problems when requesting database.\n".$conn->error.$sql."\n");
 
   $query_res = $conn->store_result();
 

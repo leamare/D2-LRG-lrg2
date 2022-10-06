@@ -1,6 +1,11 @@
 <?php
 
-function rg_query_player_draft(&$conn, $cluster = null, $team = null) {
+function rg_query_player_draft(&$conn, $cluster = null, $team = null, $players = null) {
+  global $players_interest;
+  if (empty($players) && empty($team) && !empty($players_interest)) {
+    $players = $players_interest;
+  }
+
   $res = [];
   #echo "[S] Requested data for PLAYERS DRAFT STAGE.\n";
 
@@ -17,6 +22,7 @@ function rg_query_player_draft(&$conn, $cluster = null, $team = null) {
               " WHERE is_pick = ".($pick ? "true" : "false")." AND stage = ".$stage.
               ($cluster !== null ? " AND matches.cluster IN (".implode(",", $cluster).")" : "").
               ($team !== null ? " AND teams_matches.teamid = $team " : "").
+              (!empty($players) ? " AND matchlines.playerid in (".implode(',', $players).") " : "").
               " GROUP BY player_id ORDER BY winrate DESC, matches DESC";
       if ($conn->multi_query($sql) === TRUE);# echo "[S] Requested data for PLAYERS DRAFT STAGE $pick $stage.\n";
       else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
@@ -42,11 +48,18 @@ function rg_query_player_draft(&$conn, $cluster = null, $team = null) {
   return $res;
 }
 
-function rg_query_player_draft_pickban(&$conn, $team = null) {
+function rg_query_player_draft_pickban(&$conn, $team = null, $players = null) {
+  global $players_interest;
+  if (empty($players) && empty($team) && !empty($players_interest)) {
+    $players = $players_interest;
+  }
+
   $sql = "SELECT matchlines.playerid, count(distinct matches.matchid), SUM(NOT matches.radiantWin XOR teams_matches.is_radiant)
     FROM matches JOIN matchlines ON matchlines.matchid = matches.matchid ".
     ($team !== null ? "JOIN teams_matches ON teams_matches.matchid = matches.matchid AND matchlines.isradiant = teams_matches.is_radiant 
-      WHERE teams_matches.teamid = $team" : "").
+      WHERE teams_matches.teamid = $team" : 
+      (!empty($players) ? "WHERE matchlines.playerid in (".implode(',', $players).")" : "")
+    ).
     " GROUP BY matchlines.playerid;";
 
   if ($conn->multi_query($sql) === TRUE); #echo "[S] Requested data for PICKS AND BANS for team $id.\n";

@@ -1,13 +1,22 @@
 <?php 
 
-function rg_query_player_graph(&$conn, &$psummary, $matches_total, $limiter = 0, $cluster = null) {
+function rg_query_player_graph(&$conn, &$psummary, $matches_total, $limiter = 0, $cluster = null, $players = null) {
+  global $players_interest;
+  if (empty($players) && !empty($players_interest)) {
+    $players = $players_interest;
+  }
+
   $res = [];
+
+  $wheres = [];
+  if (!empty($cluster)) $wheres[] = "matches.cluster IN (".implode(",", $cluster).")";
+  if (!empty($players)) $wheres[] = "( m1.playerid IN (".implode(",", $players).") and m2.playerid IN (".implode(",", $players).") )";
 
   $sql = "SELECT m1.playerid, m2.playerid, SUM(NOT matches.radiantWin XOR m1.isRadiant) wins, SUM(1) match_count
           FROM matchlines m1 JOIN matchlines m2
             ON m1.matchid = m2.matchid and m1.isRadiant = m2.isRadiant and m1.playerid < m2.playerid
             JOIN matches ON m1.matchid = matches.matchid ".
-          ($cluster !== null ? "WHERE matches.cluster IN (".implode(",", $cluster).")" : "").  
+          (!empty($wheres) ? "WHERE ".implode(" AND ", $wheres) : "").
         " GROUP BY m1.playerid, m2.playerid HAVING match_count > $limiter;";
   # only wis makes more sense for players combo graph
 

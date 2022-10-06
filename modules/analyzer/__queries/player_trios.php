@@ -1,7 +1,22 @@
 <?php 
 
-function rg_query_player_trios(&$conn, &$psummary, $matches_total, $limiter = 0, $cluster = null) {
+function rg_query_player_trios(&$conn, &$psummary, $matches_total, $limiter = 0, $cluster = null, $players = null) {
+  global $players_interest;
+  if (empty($players) && !empty($players_interest)) {
+    $players = $players_interest;
+  }
+
   $res = [];
+
+  $wheres = [];
+
+  if ($cluster !== null) $wheres[] = "matches.cluster IN (".implode(",", $cluster).")";
+  if (!empty($players)) {
+    $wheres[] = "( m1.playerid in (".implode(',', $players_interest).") 
+      and m2.playerid in (".implode(',', $players_interest).") 
+      and m3.playerid in (".implode(',', $players_interest).")
+    )";
+  }
 
   $sql = "SELECT m1.playerid, m2.playerid, m3.playerid, SUM(1) match_count, SUM(NOT matches.radiantWin XOR m1.isRadiant)/SUM(1) winrate
         FROM matchlines m1
@@ -11,7 +26,7 @@ function rg_query_player_trios(&$conn, &$psummary, $matches_total, $limiter = 0,
               ON m1.matchid = m3.matchid and m1.isRadiant = m3.isRadiant and m2.playerid < m3.playerid
             JOIN matches
               ON m1.matchid = matches.matchid ".
-        ($cluster !== null ? " WHERE matches.cluster IN (".implode(",", $cluster).")" : "").
+        (!empty($wheres) ? "WHERE ".implode(" AND ", $wheres) : "").
       " GROUP BY m1.playerid, m2.playerid, m3.playerid HAVING match_count > $limiter
         ORDER BY match_count DESC, winrate DESC;";
   # limiting match count for hero pair to 3:
