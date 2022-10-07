@@ -125,6 +125,15 @@ $sql .= "SELECT \"lowest_rampage\" cap, m.matchid, (CASE WHEN ABS(comeback) > AB
 $sql .= "SELECT \"highest_rampage\" cap, m.matchid, (CASE WHEN ABS(comeback) > ABS(stomp) THEN ABS(comeback) ELSE ABS(stomp) END) val, am.playerid playerid, am.heroid heroid 
           FROM matches m JOIN adv_matchlines am ON m.matchid = am.matchid WHERE am.multi_kill > 4 GROUP BY m.matchid ORDER BY val DESC, m.matchid DESC LIMIT $limit;";
 
+# rampage with lowest nw difference
+$sql .= "SELECT \"lowest_rampage_lost\" cap, m.matchid, (CASE WHEN ABS(comeback) > ABS(stomp) THEN ABS(comeback) ELSE ABS(stomp) END) val, am.playerid playerid, am.heroid heroid 
+          FROM matches m JOIN adv_matchlines am ON m.matchid = am.matchid JOIN matchlines ml ON am.matchid = ml.matchid AND am.playerid = ml.playerid
+          WHERE am.multi_kill > 4 AND m.radiantWin <> ml.isRadiant GROUP BY m.matchid ORDER BY val ASC, m.matchid DESC LIMIT $limit;";
+# rampage with highest nw difference
+$sql .= "SELECT \"highest_rampage_lost\" cap, m.matchid, (CASE WHEN ABS(comeback) > ABS(stomp) THEN ABS(comeback) ELSE ABS(stomp) END) val, am.playerid playerid, am.heroid heroid 
+          FROM matches m JOIN adv_matchlines am ON m.matchid = am.matchid JOIN matchlines ml ON am.matchid = ml.matchid AND am.playerid = ml.playerid
+          WHERE am.multi_kill > 4 AND m.radiantWin <> ml.isRadiant GROUP BY m.matchid ORDER BY val DESC, m.matchid DESC LIMIT $limit;";
+
 # most_matches_player
 $sql .= "SELECT \"most_matches_player\" cap, 0 matchid, COUNT(distinct matchlines.matchid) val, playerid, 0 heroid FROM matchlines WHERE playerid > 0 GROUP BY playerid ORDER BY val DESC LIMIT $limit;";
 # widest hero pool
