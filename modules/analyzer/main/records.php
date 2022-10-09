@@ -165,8 +165,6 @@ else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n"
 do {
   $query_res = $conn->store_result();
 
-  $row = $query_res->fetch_row();
-
   for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
     if (!isset($result['records'][$row[0]])) {
       $result['records'][$row[0]] = [
