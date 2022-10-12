@@ -74,15 +74,15 @@ function rg_generator_meta_graph($div_id, &$context, &$context_pickban, $heroes_
     foreach($context_pickban as $elid => $el) {
       if (!has_pair($elid, $context)) continue;
       
-      $wr = $el['won'] / $el['matches'];
-      $wr = $max_wr ? 2*($wr-0.5)/$max_wr : 0;
+      $wr_raw = $el['won'] / $el['matches'];
+      $wr = $max_wr ? 2*($wr_raw-0.5)/$max_wr : 0;
       $wr = $wr > 1 ? 1 : $wr;
 
       $nodes .= "{id: $elid, value: ".$el['matches'].
         ", label: '".addslashes(player_name($elid))."'".
         ", title: '".addslashes(player_name($elid)).", ".
         $el['matches']." ".locale_string("total").", ".
-        number_format($wr*100, 1)." ".locale_string("winrate")."', ".
+        number_format($wr_raw*100, 1)." ".locale_string("winrate")."', ".
         "color:{ background:'rgba(".number_format(126-255*$wr, 0).",124,".
           number_format(126+255*$wr, 0).", 0.7)', ".
         "border:'rgba(".number_format(126-255*$wr, 0).",124,".

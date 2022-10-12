@@ -32,7 +32,7 @@ function rg_query_player_pairs(&$conn, &$psummary, $matches_total, $limiter = 0,
     ORDER BY match_count DESC, winrate DESC;";
 
   if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for PLAYER PAIRS.\n";
-  else die("[F] Unexpected problems when requesting database.\n".$conn->error.$sql."\n");
+  else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
 
   $query_res = $conn->store_result();
 
