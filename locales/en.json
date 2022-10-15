@@ -276,6 +276,8 @@
     "biggest_nw_difference": "Biggest difference in gold earned",
     "lowest_rampage": "Rampage with lowest team networth difference",
     "highest_rampage": "Rampage with highest team networth difference",
+    "lowest_rampage_lost": "Rampage with lowest networth difference in a losing match",
+    "highest_rampage_lost": "Rampage with highest networth difference in a losing match",
     "neutral_camps_stacked": "Neutral camps stacked",
     "most_kills_by_team": "Most kills by a team in a match",
     "most_assists_by_team": "Most assists by a team in a match",
