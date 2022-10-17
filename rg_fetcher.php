@@ -151,6 +151,10 @@ if ($stratz_graphql) {
   $lastversion = ((int)$lp)*100 + count($meta['patchdates'][$lp]['dates']);
 }
 
+// checking out the schema
+
+include_once("modules/commons/schema.php");
+
 if (!$listen) {
   if (isset($options['U'])) {
     $sql = "SELECT matchid FROM matches;";
