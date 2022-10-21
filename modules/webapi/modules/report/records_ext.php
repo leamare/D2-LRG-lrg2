@@ -25,6 +25,7 @@ $endpoints['recordext'] = function($mods, $vars, &$report) use (&$endpoints) {
     $src = array_merge([ $rec ], $data_ext[$k] ?? []);
 
     foreach ($src as $v) {
+      if (empty($v)) continue;
       if ($v['matchid'] && !empty($report['match_participants_teams']))
         $v['match_card_min'] = match_card_min($v['matchid']);
       else 

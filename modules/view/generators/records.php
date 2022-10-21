@@ -62,7 +62,7 @@ function rg_generator_records_ext(&$context, &$context_ext) {
       "<th>".locale_string(strpos($k, "_team") != FALSE ? "team" : "player")."</th>".
       "<th>".locale_string("hero")."</th></tr></thead><tbody>";
     foreach ($vals as $record) {
-      if (!$record) continue;
+      if (empty($record)) continue;
       $res .= "<tr><td>". ($record['matchid'] ?
                     match_link($record['matchid']) :
                "")."</td>
