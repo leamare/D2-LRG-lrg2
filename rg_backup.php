@@ -158,6 +158,7 @@ if ($restore) {
   } 
   rmdir($dir);
 } else {
+  $lrg_sql_db   = $lrg_db_prefix."_".$lrg_league_tag;
   $conn = new mysqli($lrg_sql_host, $lrg_sql_user, $lrg_sql_pass, $lrg_sql_db);
   $conn->set_charset('utf8mb4');
   $conn->query("set names utf8mb4");
@@ -217,7 +218,7 @@ if ($restore) {
         $els = [];
 
         foreach ($row as $r) {
-          if (strpos($r, ',') !== false || $r[0] == '"')
+          if (strpos($r, ',') !== false || (!empty($r) && $r[0] == '"'))
             $els[] = '"'.str_replace('"', '""', $r).'"';
           else 
             $els[] = $r;
