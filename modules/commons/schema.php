@@ -1,13 +1,13 @@
 <?php 
 
 $schema = [
-  'runes' => false,
+  // 'runes' => false,
   'skill_builds' => false,
   'starting_items' => false,
-  'matches_opener' => false,
-  'adv_matchlines_roles' => false,
-  'players_fixname' => false,
-  'draft_order' => false,
+  'matches_opener' => false, // radiant_opener, seriesid, analysis_status
+  'adv_matchlines_roles' => false, // role, lane_won, networth
+  'players_fixname' => false, // name_fixed
+  'draft_order' => false, // order
 ];
 
 echo "[ ] Getting tables\n";
@@ -18,7 +18,7 @@ if ($conn->multi_query($sql) === FALSE)
 $query_res = $conn->store_result();
 for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
   switch($row[0]) {
-    case "runes":
+    // case "runes":
     case "starting_items":
     case "skill_builds":
       $schema[$row[0]] = true;

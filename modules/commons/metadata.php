@@ -43,5 +43,3 @@ class lrg_metadata implements ArrayAccess {
       return $this->get($offset);
   }
 }
-
-?>

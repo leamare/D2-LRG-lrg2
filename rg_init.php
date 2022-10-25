@@ -148,6 +148,9 @@ if ($conn->select_db($lrg_db_prefix."_".$lg_settings['league_tag'])) {
     `modeID` tinyint(11) UNSIGNED NOT NULL,
     `leagueID` int(11) NOT NULL,
     `start_date` int(11) NOT NULL,
+    `analysis_status` tinyint(1) NOT NULL,
+    `radiant_opener` tinyint(1),
+    `seriesid` bigint(20) UNSIGNED,
     `stomp` int(11) NOT NULL,
     `comeback` int(11) NOT NULL,
     `cluster` int(10) UNSIGNED NOT NULL,
@@ -193,6 +196,8 @@ if ($conn->select_db($lrg_db_prefix."_".$lg_settings['league_tag'])) {
     `lh_at10` tinyint(3) UNSIGNED NOT NULL,
     `isCore` tinyint(1) NOT NULL,
     `lane` tinyint(3) UNSIGNED NOT NULL,
+    `role` tinyint(3) UNSIGNED NOT NULL,
+    `lane_won` tinyint(3) UNSIGNED NOT NULL,
     `efficiency_at10` float NOT NULL,
     `wards` smallint(5) UNSIGNED NOT NULL,
     `sentries` smallint(5) UNSIGNED NOT NULL,
@@ -226,6 +231,7 @@ if ($conn->select_db($lrg_db_prefix."_".$lg_settings['league_tag'])) {
     `is_pick` tinyint(1) NOT NULL,
     `hero_id` smallint(5) UNSIGNED NOT NULL,
     `stage` tinyint(3) UNSIGNED NOT NULL,
+    `order` tinyint(3) UNSIGNED NOT NULL,
     KEY `draft_matchid_heroid_IDX` (`matchid`,`hero_id`) USING BTREE,
     KEY `draft_matchid_stage_IDX` (`matchid`,`stage`) USING BTREE,
     KEY `draft_matchid_pick_IDX` (`matchid`,`is_pick`) USING BTREE,
@@ -255,11 +261,38 @@ if ($conn->select_db($lrg_db_prefix."_".$lg_settings['league_tag'])) {
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
     if ($conn->connect_error) die("[F] Can't create table `items`: ".$conn->connect_error."\n");
 
+  echo "OK\n[ ] Creating table `starting_items`...";
+  $conn->query("CREATE TABLE `starting_items` (
+    `matchid` bigint(20) UNSIGNED NOT NULL,
+    `playerid` bigint(20) NOT NULL,
+    `hero_id` smallint(5) UNSIGNED NOT NULL,
+    `starting_items` json,
+    KEY `starting_items_matchid_player_IDX` (`matchid`,`playerid`) USING BTREE,
+    KEY `starting_items_matchid_hero_IDX` (`matchid`,`hero_id`) USING BTREE
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+    if ($conn->connect_error) die("[F] Can't create table `items`: ".$conn->connect_error."\n");
+
+  echo "OK\n[ ] Creating table `skill_builds`...";
+  $conn->query("CREATE TABLE `skill_builds` (
+    `matchid` bigint(20) UNSIGNED NOT NULL,
+    `playerid` bigint(20) NOT NULL,
+    `hero_id` smallint(5) UNSIGNED NOT NULL,
+    `skill_build` json,
+    `first_point_at` json,
+    `maxed_at` json,
+    `priority` json,
+    `talents` json,
+    KEY `skill_builds_matchid_player_IDX` (`matchid`,`playerid`) USING BTREE,
+    KEY `skill_builds_matchid_hero_IDX` (`matchid`,`hero_id`) USING BTREE
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+    if ($conn->connect_error) die("[F] Can't create table `items`: ".$conn->connect_error."\n");
+
   echo "OK\n[ ] Creating table `players`...";
 
   $conn->query("CREATE TABLE `players` (
     `playerID` bigint(20) NOT NULL,
-    `nickname` varchar(128) NOT NULL
+    `nickname` varchar(128) NOT NULL,
+    `name_fixed` tinyint(1) NOT NULL,
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
     if ($conn->connect_error) die("[F] Can't create table `draft`: ".$conn->connect_error."\n");
   echo "OK\n";
