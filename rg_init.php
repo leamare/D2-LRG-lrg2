@@ -231,7 +231,7 @@ if ($conn->select_db($lrg_db_prefix."_".$lg_settings['league_tag'])) {
     `is_pick` tinyint(1) NOT NULL,
     `hero_id` smallint(5) UNSIGNED NOT NULL,
     `stage` tinyint(3) UNSIGNED NOT NULL,
-    `order` tinyint(3) UNSIGNED NOT NULL,
+    `order` smallint(3) UNSIGNED NOT NULL,
     KEY `draft_matchid_heroid_IDX` (`matchid`,`hero_id`) USING BTREE,
     KEY `draft_matchid_stage_IDX` (`matchid`,`stage`) USING BTREE,
     KEY `draft_matchid_pick_IDX` (`matchid`,`is_pick`) USING BTREE,
@@ -292,7 +292,7 @@ if ($conn->select_db($lrg_db_prefix."_".$lg_settings['league_tag'])) {
   $conn->query("CREATE TABLE `players` (
     `playerID` bigint(20) NOT NULL,
     `nickname` varchar(128) NOT NULL,
-    `name_fixed` tinyint(1) NOT NULL,
+    `name_fixed` tinyint(1) NOT NULL
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
     if ($conn->connect_error) die("[F] Can't create table `draft`: ".$conn->connect_error."\n");
   echo "OK\n";

@@ -8,6 +8,8 @@ $schema = [
   'adv_matchlines_roles' => false, // role, lane_won, networth
   'players_fixname' => false, // name_fixed
   'draft_order' => false, // order
+  'teams' => false,
+  'items' => false,
 ];
 
 echo "[ ] Getting tables\n";
@@ -19,6 +21,12 @@ $query_res = $conn->store_result();
 for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
   switch($row[0]) {
     // case "runes":
+    case "teams_matches":
+      $schema['teams'] = true;
+      break;
+    case "items":
+      $schema['items'] = true;
+      break;
     case "starting_items":
     case "skill_builds":
       $schema[$row[0]] = true;
