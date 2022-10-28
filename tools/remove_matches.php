@@ -12,6 +12,8 @@ else
 
 $mids = [];
 
+include_once("modules/commons/schema.php");
+
 if(isset($options['T'])) {
   $endt = isset($options['e']) ? $options['e'] : 0;
   $tp = strtotime($options['T'], 0);
@@ -47,38 +49,15 @@ if(isset($options['T'])) {
 
 if( !is_array($mids) ) $mids = [$mids];
 
-if (!$lg_settings['main']['teams']) {
-  $sql = "SELECT COUNT(*) z
-  FROM information_schema.tables WHERE table_schema = '$lrg_sql_db' 
-  AND table_name = 'teams_matches' HAVING z > 0;";
-
-  $query = $conn->query($sql);
-  if (isset($query->num_rows) && $query->num_rows) {
-    $lg_settings['main']['teams'] = true;
-  }
-  echo "[N] Set &settings.teams to true.\n";
-}
-
-// items support detection
-$sql = "SELECT COUNT(*) z
-FROM information_schema.tables WHERE table_schema = '$lrg_sql_db' 
-AND table_name = 'items' HAVING z > 0;";
-
-$query = $conn->query($sql);
-if (!isset($query->num_rows) || !$query->num_rows) {
-  $lg_settings['main']['items'] = false;
-  echo "[N] Set &settings.items to false.\n";
-} else {
-  $lg_settings['main']['items'] = true;
-}
-
 foreach ($mids as $mid) {
   if (empty($mid) || $mid[0] == '#') continue;
 
   $sql = "DELETE from matchlines where matchid = $mid; DELETE from adv_matchlines where matchid = $mid; ".
-      ( $lg_settings['main']['items'] ? "delete from items where matchid = $mid;" : "").
+      ( $schema['items'] ? "delete from items where matchid = $mid;" : "").
       "DELETE from draft where matchid = $mid; ".
-      ( $lg_settings['main']['teams'] ? "delete from teams_matches where matchid = $mid;" : "").
+      ( $schema['teams'] ? "delete from teams_matches where matchid = $mid;" : "").
+      ( $schema['skill_builds'] ? "delete from skill_builds where matchid = $mid;" : "").
+      ( $schema['starting_items'] ? "delete from starting_items where matchid = $mid;" : "").
       "delete from matches where matchid = $mid;";
 
   if ($conn->multi_query($sql) === TRUE) echo "$mid\n";

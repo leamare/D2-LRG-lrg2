@@ -8,6 +8,8 @@ if ($conn->connect_error) die("[F] Connection to SQL server failed: ".$conn->con
 
 $conn->set_charset("utf8");
 
+include_once("modules/commons/schema.php");
+
 $skip = isset($options['s']);
 
 if(isset($options['c'])) {
@@ -74,6 +76,16 @@ for ($i = 0; $i < $sz; $i++) {
     join matchlines on matchlines.playerid = players.playerID 
     where matchlines.matchid = $m;";
   $match['players'] = instaquery($conn, $q);
+
+  if ($schema['skill_builds']) {
+    $q = "select * from skill_builds where matchid = $m;";
+    $match['skill_builds'] = instaquery($conn, $q);
+  }
+
+  if ($schema['starting_items']) {
+    $q = "select * from starting_items where matchid = $m;";
+    $match['starting_items'] = instaquery($conn, $q);
+  }
 
   if($lg_settings['main']['teams']) {
     $q = "select * from teams_matches where matchid = $m;";
