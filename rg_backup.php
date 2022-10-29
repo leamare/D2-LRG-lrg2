@@ -214,6 +214,10 @@ if ($restore) {
 
       $query_res = $conn->store_result();
 
+      if (!$query_res->num_rows) {
+        break;
+      }
+
       for ($i = 1, $row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row(), $i++) {
         $els = [];
 
