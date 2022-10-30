@@ -102,8 +102,13 @@ $sql .= "SELECT \"stacks\", playerid, SUM(stacks)/SUM(1) value, SUM(1) mtch FROM
 # wards
 $sql .= "SELECT \"wards_placed\", playerid, SUM(wards)/SUM(1) value, SUM(1) mtch FROM adv_matchlines $wheres
   GROUP BY playerid ORDER BY value DESC LIMIT $avg_limit;";
-# pings per minute
+# pings per game
 $sql .= "SELECT \"pings\", adv_matchlines.playerid playerid, 
+  SUM(CASE WHEN adv_matchlines.pings > 0 THEN adv_matchlines.pings ELSE 0 END)/SUM(CASE WHEN adv_matchlines.pings > 0 THEN 1 ELSE 0 END)
+  value, SUM(1) mtch FROM adv_matchlines JOIN matches ON adv_matchlines.matchid = matches.matchid $wheres
+  GROUP BY playerid HAVING $limiter_lower < mtch ORDER BY value DESC LIMIT $avg_limit;";
+# pings per minute
+$sql .= "SELECT \"pings_per_minute\", adv_matchlines.playerid playerid, 
   SUM(CASE WHEN adv_matchlines.pings > 0 THEN adv_matchlines.pings/(matches.duration/60) ELSE 0 END)/SUM(CASE WHEN adv_matchlines.pings > 0 THEN 1 ELSE 0 END)
   value, SUM(1) mtch FROM adv_matchlines JOIN matches ON adv_matchlines.matchid = matches.matchid $wheres
   GROUP BY playerid HAVING $limiter_lower < mtch ORDER BY value DESC LIMIT $avg_limit;";

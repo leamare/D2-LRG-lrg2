@@ -31,7 +31,8 @@ function rg_query_player_summary(&$conn, $cluster = null, $players = null) {
             SUM(m.duration)/(SUM(1)*60) avg_duration,
             SUM(ml.kills)/count(distinct am.matchid) kills,
             SUM(ml.deaths)/count(distinct am.matchid) deaths,
-            SUM(ml.assists)/count(distinct am.matchid) assists
+            SUM(ml.assists)/count(distinct am.matchid) assists,
+            SUM(am.pings)/count(distinct am.matchid) pings
           FROM matchlines ml LEFT JOIN
             adv_matchlines am
                 ON am.matchid = ml.matchid AND am.heroid = ml.heroid
@@ -68,6 +69,7 @@ function rg_query_player_summary(&$conn, $cluster = null, $players = null) {
       "stuns" => $row[12],
       "lh_at10" => $row[13],
       "lasthits_per_min_s" => $row[14],
+      "pings" => $row[19],
       "duration" => $row[15],
     ];
   }
