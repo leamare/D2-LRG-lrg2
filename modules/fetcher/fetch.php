@@ -6,6 +6,7 @@
  */
 
 include_once __DIR__.'/comebacks.php';
+include_once __DIR__.'/skillPriority.php';
 
 function conn_restart() {
   global $conn, $lrg_sql_host, $lrg_sql_user, $lrg_sql_pass, $lrg_sql_db;
@@ -19,7 +20,7 @@ function fetch($match) {
   $request_unparsed, $meta, $stratz_timeout_retries, $force_adding, $cache_dir, $lg_settings, $lrg_use_cache, $first_scheduled,
   $use_full_stratz, $scheduled_wait_period, $steamapikey, $force_await, $players_list, $rank_limit, $stratztoken, $ignore_stratz,
   $update_unparsed, $request_unparsed_players, $stratz_graphql, $api_cooldown_seconds, $update_names, $updated_names, $rewrite_existing,
-  $ignore_abandons, $lastversion;
+  $ignore_abandons, $lastversion, $schema;
 
   $t_match = [];
   $t_matchlines = [];
@@ -27,6 +28,9 @@ function fetch($match) {
   $t_draft = [];
   $t_items = null;
   $t_new_players = [];
+  $t_starting_items = [];
+  $t_skill_builds = [];
+  // $t_runes = [];
   $bad_replay = false;
 
   $players_update = false;
@@ -107,6 +111,8 @@ function fetch($match) {
     $t_draft = $matchdata['draft'];
     $t_adv_matchlines = $matchdata['adv_matchlines'];
     $t_items = $matchdata['items'] ?? [];
+    $t_starting_items = $matchdata['starting_items'] ?? [];
+    $t_skill_builds = $matchdata['skill_builds'] ?? [];
     foreach($matchdata['players'] as $p) {
       if(!isset($t_players[$p['playerID']]) || ($update_names && !isset($updated_names[$p['playerID']])) ) {
         $t_new_players[$p['playerID']] = $p['nickname'];
@@ -206,6 +212,9 @@ function fetch($match) {
         $t_draft = $matchdata['draft'];
         $t_adv_matchlines = $matchdata['adv_matchlines'];
         $t_items = $matchdata['items'];
+        $t_starting_items = $matchdata['starting_items'];
+        $t_skill_builds = $matchdata['skill_builds'];
+
         foreach($matchdata['players'] as $p) {
           if(!isset($t_players[$p['playerID']]) || ($update_names && !isset($updated_names[$p['playerID']]) )) {
             $t_new_players[$p['playerID']] = $p['nickname'];
@@ -614,8 +623,11 @@ function fetch($match) {
     $t_match['duration'] = $matchdata['duration'];
     $t_match['modeID'] = $matchdata['game_mode'];
     $t_match['leagueID'] = $matchdata['leagueid'];
+    $t_match['seriesid'] = $matchdata['series_id'] ?? null;
     $t_match['cluster']  = $matchdata['cluster'] ?? null;
     $t_match['start_date'] = $matchdata['start_time'];
+    $t_match['analysis_status'] = $bad_replay ? 0 : 1;
+    $t_match['radiant_opener'] = null; // wait until draft is populated to find out who has the first stage
 
     // if (isset($matchdata['stomp']))
     //     $t_match['stomp'] = $matchdata['stomp'];
@@ -625,7 +637,8 @@ function fetch($match) {
     // else $t_match['comeback'] = $bad_replay ? 0 : $matchdata['throw'];
 
     if (!$bad_replay) {
-      [ $t_match['stomp'], $t_match['comeback'] ] = find_comebacks($matchdata['radiant_gold_adv'], $matchdata['radiant_win']);
+      add_networths($matchdata);
+      [ $t_match['stomp'], $t_match['comeback'] ] = find_comebacks($matchdata['radiant_nw_adv'] ?? $matchdata['radiant_gold_adv'], $matchdata['radiant_win']);
     } else {
       $t_match['stomp'] = 0;
       $t_match['comeback'] = 0;
@@ -682,6 +695,104 @@ function fetch($match) {
   }
   
   if (empty($t_matchlines)) {
+    if (!$bad_replay) {
+      $teams_players = [[],[]];
+      $team_roles = [[],[]];
+      $laning_raw = [];
+      foreach ($matchdata['players'] as $player) {
+        $team = $player['isRadiant'] ? 1 : 0;
+        $p = [
+          'hid' => $player['hero_id'],
+          'gpm' => $player['gold_per_min'],
+          'xpm' => $player['xp_per_min'],
+          'roaming' => $player['is_roaming'],
+          'lane' => $player['lane_role'],
+          'eff' => $player['lane_efficiency'],
+        ];
+        $laning_raw[$p['hid']] = $p['eff'];
+        $teams_players[$team][] = $p;
+      }
+      
+      foreach($teams_players as $i => $tm) {
+        $roles = [];
+        $supports = [];
+        $lanes = [];
+        foreach ($tm as $p) {
+          if (!isset($lanes[$p['lane']])) $lanes[$p['lane']] = [];
+          $lanes[$p['lane']][] = $p;
+        }
+        ksort($lanes);
+        $laning_raw[$i] = $lanes;
+        foreach($lanes as $lane => $players) {
+          if ($lane > 3) {
+            if (count($roles) == 3) {
+              $supports = array_merge($supports, $players);
+              continue;
+            }
+            $lane = 1;
+            foreach ($roles as $rid => $data) {
+              if ($rid == $lane) $lane++;
+            }
+          }
+          usort($players, function($a, $b) {
+            return $b['gpm'] <=> $a['gpm'];
+          });
+          $roles[$lane] = array_shift($players);
+          $supports = array_merge($supports, $players);
+        }
+        usort($supports, function($a, $b) {
+          return $b['gpm'] <=> $a['gpm'];
+        });
+
+        foreach ($supports as $p) {
+          $roles[] = $p;
+        }
+
+        $team_roles[$i] = [];
+        foreach ($roles as $rid => $p) $team_roles[$i][ $p['hid'] ] = $rid;
+      }
+
+      $tie_factor = 0.075;
+      $laning = [];
+
+      foreach([1,2,3] as $lane) {
+        $opp_lane = 4-$lane;
+
+        $max_eff_self = array_reduce($laning_raw[0][$lane], function($carry, $item) {
+          return max($carry, $item['eff']);
+        }, 0);
+
+        $max_eff_opp = array_reduce($laning_raw[1][$opp_lane], function($carry, $item) {
+          return max($carry, $item['eff']);
+        }, 0);
+
+        $diff = $max_eff_self - $max_eff_opp;
+        $lane_state = abs($diff) > $tie_factor ? ( $diff < 1 ? 0 : 2 ) : 1;
+
+        foreach($players as $p) {
+          $laning[$p['hid']] = $lane_state;
+        }
+        $lane_state = 2-$lane_state;
+        foreach($laning_raw[1][$opp_lane] as $p) {
+          $laning[$p['hid']] = $lane_state;
+        }
+      }
+      foreach ($team_roles as $i => $roles) {
+        foreach ($roles as $hid => $role) {
+          if (isset($laning[$hid])) continue;
+          
+          $opp = array_flip($team_roles[1-$i])[$role];
+          if (isset($laning[$opp])) {
+            $laning[$hid] = 2-$laning[$opp];
+          } else {
+            $diff = $laning_raw[$hid] - $laning_raw[$opp];
+            $laning[$hid] = abs($diff) > $tie_factor ? ( $diff < 1 ? 0 : 2 ) : 1;
+            $laning[$opp] = $laning[$hid]-2;
+          }
+        }
+      }
+    }
+
     $i = sizeof($t_matchlines);
     for ($j=0, $sz=10; $j<$sz; $j++) {
         $t_matchlines[$i]['matchid'] = $match;
@@ -748,7 +859,7 @@ function fetch($match) {
         $t_matchlines[$i]['kills'] = $matchdata['players'][$j]['kills'];
         $t_matchlines[$i]['deaths'] = $matchdata['players'][$j]['deaths'];
         $t_matchlines[$i]['assists'] = $matchdata['players'][$j]['assists'];
-        $t_matchlines[$i]['networth'] = $matchdata['players'][$j]['total_gold'];
+        $t_matchlines[$i]['networth'] = $matchdata['players'][$j]['net_worth'] ?? $matchdata['players'][$j]['total_gold'];
         $t_matchlines[$i]['gpm'] = $matchdata['players'][$j]['gold_per_min'];
         $t_matchlines[$i]['xpm'] = $matchdata['players'][$j]['xp_per_min'];
         $t_matchlines[$i]['heal'] = $matchdata['players'][$j]['hero_healing'];
@@ -847,6 +958,8 @@ function fetch($match) {
 
 
         if (!$bad_replay) {
+          $t_adv_matchlines[$i]['role'] = $team_roles[ $matchdata['players'][$j]['isRadiant'] ? 1 : 0 ][ $matchdata['players'][$j]['hero_id'] ];
+          $t_adv_matchlines[$i]['lane_won'] = $laning[ $matchdata['players'][$j]['hero_id'] ];
           $t_adv_matchlines[$i]['efficiency_at10'] = $matchdata['players'][$j]['lane_efficiency'];
           $t_adv_matchlines[$i]['wards'] = $matchdata['players'][$j]['obs_placed'];
           $t_adv_matchlines[$i]['sentries'] = $matchdata['players'][$j]['sen_placed'];
@@ -952,6 +1065,7 @@ function fetch($match) {
             $t_draft[$i]['is_pick'] = $pick;
             $t_draft[$i]['hero_id'] = $draft_instance['hero_id'];
             $t_draft[$i]['stage'] = $draft_stage;
+            $t_draft[$i]['order'] = $i;
 
             $i++;
         }
@@ -972,6 +1086,7 @@ function fetch($match) {
             } else {
                 $t_draft[$i]['stage'] = 1;
             }
+            $t_draft[$i]['order'] = $i;
             $i++;
         }
     } else if (!empty($matchdata['picks_bans_stratz']) && ($matchdata['game_mode'] == 22 || $matchdata['game_mode'] == 3)) {
@@ -996,8 +1111,13 @@ function fetch($match) {
           else if ($draft_instance['order'] < 8) $t_draft[$i]['stage'] = 2;
           else $t_draft[$i]['stage'] = 3;
         }
+        $t_draft[$i]['order'] = $i;
         $i++;
       }
+    }
+
+    if ($t_match['radiant_opener'] === null) {
+      $t_match['radiant_opener'] = $t_draft[0]['is_radiant'];
     }
     
     if (empty($t_draft)) {
@@ -1014,7 +1134,7 @@ function fetch($match) {
     }
   }
 
-  if (!isset($t_items) && $lg_settings['main']['items']) {
+  if (empty($t_items)) {
     $t_items = [];
     $meta['items'];
     $meta['item_categories'];
@@ -1029,7 +1149,7 @@ function fetch($match) {
         $travel_boots_state = 0;
 
         foreach ($matchdata['players'][$j]['purchase_log'] as $e) {
-          if ($matchdata['duration'] - $e['time'] < 60) continue;
+          if ($matchdata['duration'] - $e['time'] < 60 || empty($e['time'])) continue;
 
           $r = [
             'matchid' => $match,
@@ -1073,6 +1193,58 @@ function fetch($match) {
 
         $i++;
       }
+    }
+  }
+
+  // if (empty($t_runes) && !$bad_replay) {
+  //   $t_runes = [];
+  //   foreach ($matchdata['players'] as $player) {
+  //     foreach ($player['runes_log'] as $rune) {
+  //       $t_runes[] = [
+  //         'matchid' => $match,
+  //         'playerid' => $player['account_id'],
+  //         'rune_code' => $rune['key'],
+  //         'time' => $rune['key'],
+  //       ];
+  //     }
+  //   }
+  // }
+  if (empty($t_starting_items) && !$bad_replay) {
+    $t_starting_items = [];
+    
+    $items_flip = array_flip($meta['items']);
+    foreach ($matchdata['players'] as $player) {
+      $sti = [];
+      foreach ($player['purchase_log'] as $item) {
+        if ($item['time'] > 0) {
+          break;
+        } 
+        
+        $sti[] = $items_flip[$item['key']];
+      }
+      $t_starting_items[] = [
+        'matchid' => $match,
+        'playerid' => $player['account_id'],
+        'hero_id' => $player['hero_id'],
+        'starting_items' => addslashes(\json_encode($sti)),
+      ];
+    }
+  }
+  if (empty($t_skill_builds) && !$bad_replay) {
+    // ability_upgrades_arr
+    $t_skill_builds = [];
+    foreach ($matchdata['players'] as $player) {
+      $sti = skillPriority($player['ability_upgrades_arr'], $player['hero_id'] == 74);
+      $t_skill_builds[] = [
+        'matchid' => $match,
+        'playerid' => $player['account_id'],
+        'hero_id' => $player['hero_id'],
+        'skill_build' => addslashes(\json_encode($player['ability_upgrades_arr'])),
+        'first_point_at' => addslashes(\json_encode($sti['firstPointAt'])),
+        'maxed_at' => addslashes(\json_encode($sti['maxedAt'])),
+        'priority' => addslashes(\json_encode($sti['priority'])),
+        'talents' => addslashes(\json_encode($sti['talents'])),
+      ];
     }
   }
 
@@ -1120,7 +1292,9 @@ function fetch($match) {
       'matchlines' => $t_matchlines,
       'draft' => $t_draft,
       'adv_matchlines' => $t_adv_matchlines,
-      'items' => $t_items ?? []
+      'items' => $t_items ?? [],
+      'skill_builds' => $t_skill_builds,
+      'starting_items' => $t_starting_items,
     ];
 
     $matchdata['players'] = [];
@@ -1158,7 +1332,9 @@ function fetch($match) {
   foreach ($t_new_players as $id => $player) {
     if (isset($t_players[$id])) {
       if ($update_names && !isset($updated_names[$id])) {
-        $sql = "UPDATE players SET nickname = \"".addslashes($player)."\" WHERE playerID = ".$id.";";
+        $sql = "UPDATE players SET nickname = \"".addslashes($player)."\" WHERE playerID = ".$id.
+          (($schema['players_fixname'] ?? false) ? ' AND name_fixed=0' : '').
+        ";";
         echo ".";
         if ($conn->query($sql) === TRUE) $updated_names[$id] = $player;
         else {
@@ -1174,7 +1350,12 @@ function fetch($match) {
       continue;
     }
     $player = mb_substr($player, 0, 127);
-    $sql = "INSERT INTO players (playerID, nickname) VALUES (".$id.",\"".addslashes($player)."\");";
+    $sql = "INSERT INTO players (playerID, nickname".
+      (($schema['players_fixname'] ?? false) ? ',name_fixed' : '').
+      ") VALUES (".$id.",\"".addslashes($player)."\"".
+      (($schema['players_fixname'] ?? false) ? ',0' : '').
+    ");";
+
     if ($conn->query($sql) === TRUE || stripos($conn->error, "Duplicate entry") !== FALSE) $t_players[$id] = $player;
     else {
       echo $conn->error."\n".$sql."\n";
@@ -1191,10 +1372,18 @@ function fetch($match) {
     $t_match['version'] = $lastversion;
   }
 
-  $sql = "INSERT INTO matches (matchid, radiantWin, duration, modeID, leagueID, start_date, stomp, comeback, cluster, version) VALUES "
+  $sql = "INSERT INTO matches (
+    matchid, radiantWin, duration, modeID, leagueID, start_date, ".
+    (($schema['matches_opener'] ?? false) ? "analysis_status, radiant_opener, seriesid, " : "").
+    "stomp, comeback, cluster, version
+    ) VALUES "
     ."(".$t_match['matchid'].",".($t_match['radiantWin'] ? "true" : "false" ).",".$t_match['duration'].","
-    .$t_match['modeID'].",".$t_match['leagueID'].",".$t_match['start_date'].","
-    .($t_match['stomp'] ?? 0).",".$t_match['comeback'].",".($t_match['cluster'] ?? 0).",".$t_match['version'].");";
+    .$t_match['modeID'].",".$t_match['leagueID'].",".$t_match['start_date'].",".
+    (($schema['matches_opener'] ?? false) ? 
+      $t_match['analysis_status'] ?? (!empty($t_adv_matchlines) ? '1' : '0').",".($t_match['radiant_opener'] ?? 'null').",".($t_match['seriesid'] ?? 'null')."," :
+      ""
+    ).
+    ($t_match['stomp'] ?? 0).",".$t_match['comeback'].",".($t_match['cluster'] ?? 0).",".$t_match['version'].");";
   $err_query = "delete from matches where matchid = ".$t_match['matchid'].";";
 
   if ($conn->multi_query($sql) === TRUE);
@@ -1243,12 +1432,54 @@ function fetch($match) {
   }
 
   if (!$bad_replay && !empty($t_adv_matchlines)) {
-    $sql = " INSERT INTO adv_matchlines (matchid, playerid, heroid, lh_at10, isCore, lane, efficiency_at10, wards, sentries,".
-          "couriers_killed, roshans_killed, wards_destroyed, multi_kill, streak, stacks, time_dead, buybacks, pings, stuns, teamfight_part, damage_taken) VALUES ";
+    $sql = " INSERT INTO adv_matchlines (matchid, playerid, heroid, lh_at10, isCore, lane, ".
+        (($schema['adv_matchlines_roles'] ?? false) ? 'role, lane_won, ' : '').
+        " efficiency_at10, wards, sentries, couriers_killed, roshans_killed, wards_destroyed, 
+        multi_kill, streak, stacks, time_dead, buybacks, pings, stuns, teamfight_part, damage_taken) VALUES ";
 
     foreach($t_adv_matchlines as $aml) {
+      if (!isset($aml['role'])) {
+        if ($aml['isCore']) $aml['role'] = $aml['lane'];
+        else $aml['role'] = $aml['lane'] == 1 ? 5 : 4;
+      }
+
+      if (!isset($aml['lane_won'])) {
+        $tie_factor = 0.075;
+        $opp = [];
+        $self = 0;
+
+        foreach ($t_matchlines as $ml) {
+          if ($ml['heroid'] == $aml['heroid']) {
+            $side = $ml['isRadiant'];
+            break;
+          }
+        }
+        foreach ($t_matchlines as $ml) {
+          if ($ml['isRadiant'] != $side) {
+            $opp[] = $ml['heroid'];
+          }
+        }
+        foreach ($t_adv_matchlines as $ml) {
+          if (!in_array($aml2['heroid'], $opp)) {
+            if ($aml2['lane'] == $aml['lane'] && $aml2['isCore'] && $aml2['efficiency_at10'] > $self) {
+              $self = $aml2['efficiency_at10'];
+            }
+          }
+        }
+        foreach ($t_adv_matchlines as $aml2) {
+          if (in_array($aml2['heroid'], $opp)) {
+            if (4-$aml2['lane'] == $aml['lane'] && $aml2['isCore']) {
+              $diff = $self - $aml2['efficiency_at10'];
+              $aml['lane_won'] = abs($diff) <= $tie_factor ? 1 : ($diff > 0 ? 2 : 0);
+              break;
+            }
+          }
+        }
+      }
+
       $sql .= "\n\t(".$aml['matchid'].",".$aml['playerid'].",".$aml['heroid'].",".
                   ($aml['lh_at10'] ?? 0).",".$aml['isCore'].",".$aml['lane'].",".
+                  (($schema['adv_matchlines_roles'] ?? false) ? $aml['role'].",".$aml['lane_won']."," : '').
                   $aml['efficiency_at10'].",".($aml['wards'] ?? 0).",".($aml['sentries'] ?? 0).",".
                   $aml['couriers_killed'].",".$aml['roshans_killed'].",".$aml['wards_destroyed'].",".
                   $aml['multi_kill'].",".$aml['streak'].",".($aml['stacks'] ?? 0).",".
@@ -1276,12 +1507,16 @@ function fetch($match) {
   }
 
   if(!empty($t_draft)) {
-      $sql = " INSERT INTO draft (matchid, is_radiant, is_pick, hero_id, stage) VALUES ";
+      $sql = " INSERT INTO draft (matchid, is_radiant, is_pick, hero_id, stage".
+        (($schema['draft_order'] ?? false) ? ", `order`" : '').
+      ") VALUES ";
       $len = sizeof($t_draft);
       for($i = 0; $i < $len; $i++) {
           $sql .= "\n\t(".$t_draft[$i]['matchid'].",".($t_draft[$i]['is_radiant'] ? "true" : "false").",".
-                      ($t_draft[$i]['is_pick'] ? "true" : "false").",".
-                      $t_draft[$i]['hero_id'].",".$t_draft[$i]['stage']."),";
+            ($t_draft[$i]['is_pick'] ? "true" : "false").",".
+            $t_draft[$i]['hero_id'].",".$t_draft[$i]['stage'].
+            (($schema['draft_order'] ?? false) ? ",".($t_draft[$i]['order'] ?? $i) : '').
+          "),";
       }
       $sql[strlen($sql)-1] = ";";
 
@@ -1289,7 +1524,7 @@ function fetch($match) {
 
       if ($conn->multi_query($sql) === TRUE);
       else {
-        echo "ERROR draft (".$conn->error."), reverting match.\n";
+        echo "ERROR draft (".$conn->error."), reverting match.\n".$sql;
         if ($conn->error === "MySQL server has gone away") {
           sleep(30);
           conn_restart();
@@ -1329,7 +1564,7 @@ function fetch($match) {
 
       $err_query = "DELETE from itemslines where matchid = ".$t_match['matchid'].";".$err_query;
     } else {
-      $sql = " INSERT INTO items (matchid, hero_id, playerid, item_id, category_id, time) VALUES ";
+      $sql = " INSERT INTO items (matchid, hero_id, playerid, item_id, category_id, `time`) VALUES ";
       $len = sizeof($t_items);
       for($i = 0; $i < $len; $i++) {
           $sql .= "\n\t(".$t_items[$i]['matchid'].",".
@@ -1346,7 +1581,66 @@ function fetch($match) {
 
     if ($conn->multi_query($sql) === TRUE);
     else {
-      echo "ERROR items (".$conn->error."), reverting match.\n";
+      echo "ERROR items (".$conn->error."), reverting match.\n".$sql;
+      if ($conn->error === "MySQL server has gone away") {
+        sleep(30);
+        conn_restart();
+        $matches[] = $match;
+      }
+      $conn->multi_query($err_query);
+      do {
+        $conn->store_result();
+      } while($conn->next_result());
+      return null;
+    }
+  }
+
+  if(!empty($t_skill_builds) && ($schema['skill_builds'] ?? false)) {
+    $sql = " INSERT INTO skill_builds (matchid, playerid, hero_id, 
+      skill_build, first_point_at, maxed_at, priority, talents) VALUES ";
+    foreach ($t_skill_builds as $t) {
+      $sql .= "\n\t({$t['matchid']}, {$t['playerid']}, {$t['hero_id']}, ".
+        "'".($t['skill_build'])."',".
+        "'".($t['first_point_at'])."',".
+        "'".($t['maxed_at'])."',".
+        "'".($t['priority'])."',".
+        "'".($t['talents'])."'".
+      "),";
+    }
+    $sql[strlen($sql)-1] = ";";
+
+    $err_query = "DELETE from skill_builds where matchid = ".$t_match['matchid'].";".$err_query;
+
+    if ($conn->multi_query($sql) === TRUE);
+    else {
+      echo "ERROR skill_builds (".$conn->error."), reverting match.\n";
+      if ($conn->error === "MySQL server has gone away") {
+        sleep(30);
+        conn_restart();
+        $matches[] = $match;
+      }
+      $conn->multi_query($err_query);
+      do {
+        $conn->store_result();
+      } while($conn->next_result());
+      return null;
+    }
+  }
+
+  if(!empty($t_starting_items) && ($schema['starting_items'] ?? false)) {
+    $sql = " INSERT INTO starting_items (matchid, playerid, hero_id, starting_items) VALUES ";
+    foreach ($t_starting_items as $t) {
+      $sql .= "\n\t({$t['matchid']}, {$t['playerid']}, {$t['hero_id']}, ".
+        "'".($t['starting_items'])."'".
+      "),";
+    }
+    $sql[strlen($sql)-1] = ";";
+
+    $err_query = "DELETE from starting_items where matchid = ".$t_match['matchid'].";".$err_query;
+
+    if ($conn->multi_query($sql) === TRUE);
+    else {
+      echo "ERROR starting_items (".$conn->error."), reverting match.\n";
       if ($conn->error === "MySQL server has gone away") {
         sleep(30);
         conn_restart();
