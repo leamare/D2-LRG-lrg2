@@ -1,6 +1,7 @@
 <?php 
 
 include_once __DIR__.'/comebacks.php';
+include_once __DIR__.'/skillPriority.php';
 
 const ROSHAN = [133, 134, 135, 263, 324, 325, 326, 371, 593, 594, 595, 640];
 const OBS = [110, 499, 768];
@@ -72,6 +73,7 @@ const STRATZ_GRAPHQL_QUERY = "{
   statsDateTime
   startDateTime
   leagueId
+  seriesId
   durationSeconds
   parsedDateTime
   sequenceNum
@@ -108,6 +110,11 @@ const STRATZ_GRAPHQL_QUERY = "{
     isRadiant
     leaverStatus
     stats {
+      abilities {
+        level
+        time
+        abilityId
+      }
       campStack
       heroDamageReport {
         receivedTotal {
@@ -220,8 +227,14 @@ const STRATZ_GRAPHQL_QUERY = "{
     numDenies
     towerDamage
     roleBasic
+    position
     steamAccount {
       name
+    }
+    match {
+      topLaneOutcome
+      midLaneOutcome
+      bottomLaneOutcome
     }
   }
   direTeam {
@@ -312,6 +325,9 @@ function get_stratz_response($match) {
   $r['matches']['leagueID'] = $stratz['data']['match']['leagueId'] ?? 0;
   $r['matches']['version'] = get_patchid($r['matches']['start_date'], convert_patch_id($r['matches']['start_date']), $meta);
 
+  $r['matches']['analysis_status'] = $stratz['data']['match']['parsedDateTime'] ? 1 : 0;
+  $r['matches']['seriesid'] = $stratz['data']['match']['seriesId'] ?? null;
+
   if ($stratz['data']['match']['statsDateTime']) {
     [ $r['matches']['stomp'], $r['matches']['comeback'] ] = find_comebacks($stratz['data']['match']['stats']['radiantNetworthLeads'], $stratz['data']['match']['didRadiantWin']);
   } else {
@@ -329,6 +345,8 @@ function get_stratz_response($match) {
   $r['adv_matchlines'] = [];
   $r['items'] = [];
   $r['players'] = [];
+  $r['skill_builds'] = [];
+  $r['starting_items'] = [];
 
   foreach ($stratz['data']['match']['players'] as $i => $pl) {
     $r['payload']['score_radiant'] += $pl['isRadiant'] ? $pl['kills'] : 0;
@@ -381,6 +399,24 @@ function get_stratz_response($match) {
 
       if ($aml['lane'] == 4 || !$aml['lane']) $aml['isCore'] = 0;
       else $aml['isCore'] = (is_numeric($pl['roleBasic']) ? $pl['roleBasic'] : $pl['roleBasic'] !== 'CORE') ? 0 : 1;
+
+      $aml['role'] = (int)str_replace("POSITION_", "", $pl['position']);
+
+      if (($aml['lane'] == 1 && $ml['isRadiant']) || ($aml['lane'] == 3 && !$ml['isRadiant'])) {
+        // bottom lane
+        $aml['lane_won'] = $pl['match']['bottomLaneOutcome'] == "TIE" ? 1 : (
+          $pl['match']['bottomLaneOutcome'] == "RADIANT_VICTORY" ? ($ml['isRadiant'] ? 2 : 0) : ($ml['isRadiant'] ? 0 : 2)
+        );
+      } else if ($aml['lane'] == 2) {
+        $aml['lane_won'] = $pl['match']['midLaneOutcome'] == "TIE" ? 1 : (
+          $pl['match']['midLaneOutcome'] == "RADIANT_VICTORY" ? ($ml['isRadiant'] ? 2 : 0) : ($ml['isRadiant'] ? 0 : 2)
+        );
+      } else {
+        // top lane
+        $aml['lane_won'] = $pl['match']['topLaneOutcome'] == "TIE" ? 1 : (
+          $pl['match']['topLaneOutcome'] == "RADIANT_VICTORY" ? ($ml['isRadiant'] ? 2 : 0) : ($ml['isRadiant'] ? 0 : 2)
+        );
+      }
       
       $melee = (40 * (60 + 8));
       $ranged = (45 * 20);
@@ -510,6 +546,23 @@ function get_stratz_response($match) {
 
       $r['adv_matchlines'][] = $aml;
 
+      $skillbuild = [];
+      foreach ($pl['stats']['abilities'] as $e) {
+        $skillbuild[] = $e['abilityId'];
+      }
+
+      $sti = skillPriority($skillbuild, $pl['heroId'] == 74);
+      $r['skill_builds'][] = [
+        'matchid' => $stratz['data']['match']['id'],
+        'playerid' => $pl['steamAccountId'],
+        'hero_id' => $pl['heroId'],
+        'skill_build' => addslashes(\json_encode($skillbuild)),
+        'first_point_at' => addslashes(\json_encode($sti['firstPointAt'])),
+        'maxed_at' => addslashes(\json_encode($sti['maxedAt'])),
+        'priority' => addslashes(\json_encode($sti['priority'])),
+        'talents' => addslashes(\json_encode($sti['talents'])),
+      ];
+
       $meta['items'];
       $meta['item_categories'];
       $travel_boots_state = 0;
@@ -517,9 +570,12 @@ function get_stratz_response($match) {
       $items = [];
       $items_all = [];
       $items_cats  = [];
+      $items_starting = [];
 
       foreach ($pl['stats']['itemPurchases'] as $e) {
         if ($r['matches']['duration'] - $e['time'] < 60) continue;
+
+        if ($e['time'] < -10) $items_starting[] = $e['itemId'];
 
         $it = [
           'matchid' => $stratz['data']['match']['id'],
@@ -561,6 +617,13 @@ function get_stratz_response($match) {
 
         $r['items'][] = $it;
       }
+
+      $r['starting_items'][] = [
+        'matchid' => $stratz['data']['match']['id'],
+        'playerid' => $pl['steamAccountId'],
+        'hero_id' => $pl['heroId'],
+        'starting_items' => addslashes(\json_encode($items_starting)),
+      ];
 
       foreach($pl['stats']['matchPlayerBuffEvent'] as $e) {
         if (in_array($e['itemId'], [108, 271, 247, 609, 727, 725]) && !isset($items_all[ $e['itemId'] ])) {
@@ -708,8 +771,12 @@ function get_stratz_response($match) {
         $d['stage'] = 1;
       }
 
+      $d['order'] = $dr['order'] ?? 0;
+
       $r['draft'][] = $d;
     }
+
+    $r['matches']['radiant_opener'] = $r['draft'][0]['is_radiant'];
   } else {
     foreach($stratz['data']['match']['players'] as $draft_instance) {
       if (!isset($draft_instance['heroId']) || !$draft_instance['heroId'])
@@ -719,9 +786,12 @@ function get_stratz_response($match) {
       $d['is_pick'] = 1;
       $d['hero_id'] = $draft_instance['heroId'];
       $d['stage'] = 1;
+      $d['order'] = 0;
       
       $r['draft'][] = $d;
     }
+
+    $r['matches']['radiant_opener'] = null;
   }
 
   if (!empty($stratz['data']['match']['radiantTeamId']) || !empty($stratz['data']['match']['direTeamId'])) {
