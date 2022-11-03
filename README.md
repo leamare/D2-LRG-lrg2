@@ -1,8 +1,10 @@
 # Dota 2 League Report Generator (D2-LRG-lrg2)
 
-## Current version: 2.20.0
+## Current version: 2.21.0
 
 This is the **lrg2** version that won't be updated any further.
+
+Well, kind of. I guess it will be updated eventually and the repo will be renamed, but for now it's a huge mess.
 
 **D2-LRG** (for short) is a tool for fetching stats for dota matches and forming fancy stats pages with every data you may need.
 
@@ -72,7 +74,7 @@ It would be nice to have bash on your system. For Windows it's recommended to ha
 ## Dependencies:
 * PHP 7+
 * php mbstring
-* MySQL
+* MySQL 8+
 * cURL
 
 After getting D2LRG code to your computer, run `php setup.php`. It will install the rest of dependencies:
@@ -157,7 +159,7 @@ Parameters:
 * `-U` - try to update all the matches, finding unparsed ones. Automatically enables `-u`
 * `-p` - counts matches with negative player ids are required for data update
 * `-Q` - disables unparsed matches in -U mode (to only work with matches without detailed player data)
-* `-G` - use Stratz GraphQL to populate data
+* `-G` - use Stratz GraphQL to populate data (need to specify a group size, min 2, real group size will be N-1)
 * `-n` - force update player names
 * `-f` - ignore abandons
 
