@@ -1380,7 +1380,7 @@ function fetch($match) {
     ."(".$t_match['matchid'].",".($t_match['radiantWin'] ? "true" : "false" ).",".$t_match['duration'].","
     .$t_match['modeID'].",".$t_match['leagueID'].",".$t_match['start_date'].",".
     (($schema['matches_opener'] ?? false) ? 
-      $t_match['analysis_status'] ?? (!empty($t_adv_matchlines) ? '1' : '0').",".($t_match['radiant_opener'] ?? 'null').",".($t_match['seriesid'] ?? 'null')."," :
+      ($t_match['analysis_status'] ?? (!empty($t_adv_matchlines) ? '1' : '0')).",".($t_match['radiant_opener'] ?? 'null').",".($t_match['seriesid'] ?? 'null')."," :
       ""
     ).
     ($t_match['stomp'] ?? 0).",".$t_match['comeback'].",".($t_match['cluster'] ?? 0).",".$t_match['version'].");";
