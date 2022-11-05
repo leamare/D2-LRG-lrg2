@@ -1069,6 +1069,10 @@ function fetch($match) {
 
             $i++;
         }
+
+        if ($t_match['radiant_opener'] === null) {
+          $t_match['radiant_opener'] = $t_draft[0]['is_radiant'];
+        }
     } else if ($matchdata['game_mode'] == 16) {
         foreach ($matchdata['picks_bans'] as $draft_instance) {
             if (!isset($draft_instance['hero_id']) || !$draft_instance['hero_id'])
@@ -1088,6 +1092,10 @@ function fetch($match) {
             }
             $t_draft[$i]['order'] = $i;
             $i++;
+        }
+
+        if ($t_match['radiant_opener'] === null) {
+          $t_match['radiant_opener'] = $t_draft[0]['is_radiant'];
         }
     } else if (!empty($matchdata['picks_bans_stratz']) && ($matchdata['game_mode'] == 22 || $matchdata['game_mode'] == 3)) {
       foreach ($matchdata['picks_bans_stratz'] as $draft_instance) {
@@ -1115,10 +1123,6 @@ function fetch($match) {
         $i++;
       }
     }
-
-    if ($t_match['radiant_opener'] === null) {
-      $t_match['radiant_opener'] = $t_draft[0]['is_radiant'];
-    }
     
     if (empty($t_draft)) {
       foreach($matchdata['players'] as $draft_instance) {
@@ -1129,6 +1133,7 @@ function fetch($match) {
           $t_draft[$i]['is_pick'] = 1;
           $t_draft[$i]['hero_id'] = $draft_instance['hero_id'];
           $t_draft[$i]['stage'] = 1;
+          $t_draft[$i]['order'] = 0;
           $i++;
       }
     }
