@@ -1219,6 +1219,8 @@ function fetch($match) {
     
     $items_flip = array_flip($meta['items']);
     foreach ($matchdata['players'] as $player) {
+      if (empty($player['purchase_log'])) continue;
+
       $sti = [];
       foreach ($player['purchase_log'] as $item) {
         if ($item['time'] > 0) {
@@ -1239,6 +1241,7 @@ function fetch($match) {
     // ability_upgrades_arr
     $t_skill_builds = [];
     foreach ($matchdata['players'] as $player) {
+      if (empty($player['ability_upgrades_arr'])) continue;
       $sti = skillPriority($player['ability_upgrades_arr'], $player['hero_id'] == 74);
       $t_skill_builds[] = [
         'matchid' => $match,
@@ -1464,7 +1467,7 @@ function fetch($match) {
             $opp[] = $ml['heroid'];
           }
         }
-        foreach ($t_adv_matchlines as $ml) {
+        foreach ($t_adv_matchlines as $aml2) {
           if (!in_array($aml2['heroid'], $opp)) {
             if ($aml2['lane'] == $aml['lane'] && $aml2['isCore'] && $aml2['efficiency_at10'] > $self) {
               $self = $aml2['efficiency_at10'];

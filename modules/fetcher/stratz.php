@@ -551,17 +551,19 @@ function get_stratz_response($match) {
         $skillbuild[] = $e['abilityId'];
       }
 
-      $sti = skillPriority($skillbuild, $pl['heroId'] == 74);
-      $r['skill_builds'][] = [
-        'matchid' => $stratz['data']['match']['id'],
-        'playerid' => $pl['steamAccountId'],
-        'hero_id' => $pl['heroId'],
-        'skill_build' => addslashes(\json_encode($skillbuild)),
-        'first_point_at' => addslashes(\json_encode($sti['firstPointAt'])),
-        'maxed_at' => addslashes(\json_encode($sti['maxedAt'])),
-        'priority' => addslashes(\json_encode($sti['priority'])),
-        'talents' => addslashes(\json_encode($sti['talents'])),
-      ];
+      if (!empty($skillbuild)) {
+        $sti = skillPriority($skillbuild, $pl['heroId'] == 74);
+        $r['skill_builds'][] = [
+          'matchid' => $stratz['data']['match']['id'],
+          'playerid' => $pl['steamAccountId'],
+          'hero_id' => $pl['heroId'],
+          'skill_build' => addslashes(\json_encode($skillbuild)),
+          'first_point_at' => addslashes(\json_encode($sti['firstPointAt'])),
+          'maxed_at' => addslashes(\json_encode($sti['maxedAt'])),
+          'priority' => addslashes(\json_encode($sti['priority'])),
+          'talents' => addslashes(\json_encode($sti['talents'])),
+        ];
+      }
 
       $meta['items'];
       $meta['item_categories'];
