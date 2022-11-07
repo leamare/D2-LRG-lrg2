@@ -16,7 +16,7 @@ function runquery($conn, $q) {
 if (!$schema['matches_opener']) {
   $sql = "ALTER TABLE matches ADD `radiant_opener` SMALLINT UNSIGNED DEFAULT null;";
   runquery($conn, $sql);
-  $sql = "ALTER TABLE matches ADD `seriesid` SMALLINT UNSIGNED DEFAULT null;";
+  $sql = "ALTER TABLE matches ADD `seriesid` bigint UNSIGNED DEFAULT null;";
   runquery($conn, $sql);
   $sql = "ALTER TABLE matches ADD `analysis_status` SMALLINT UNSIGNED DEFAULT 0 NOT NULL;";
   runquery($conn, $sql);
