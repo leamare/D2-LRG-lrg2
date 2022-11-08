@@ -1445,7 +1445,7 @@ function fetch($match) {
         " efficiency_at10, wards, sentries, couriers_killed, roshans_killed, wards_destroyed, 
         multi_kill, streak, stacks, time_dead, buybacks, pings, stuns, teamfight_part, damage_taken) VALUES ";
 
-    foreach($t_adv_matchlines as $aml) {
+    foreach($t_adv_matchlines as &$aml) {
       if (!isset($aml['role'])) {
         if ($aml['isCore']) $aml['role'] = $aml['lane'];
         else $aml['role'] = $aml['lane'] == 1 ? 5 : 4;
@@ -1482,6 +1482,30 @@ function fetch($match) {
               break;
             }
           }
+        }
+        if (empty($aml['lane_won'])) {
+          foreach ($t_adv_matchlines as $aml2) {
+            if (in_array($aml2['heroid'], $opp)) {
+              if ($aml2['role'] == $aml['role']) {
+                if ($aml['role'] > 3) {
+                  foreach ($t_adv_matchlines as $aml3) {
+                    if (!in_array($aml2['heroid'], $opp)) {
+                      if ($aml3['lane'] == $aml['lane'] && $aml3['isCore'] || $aml3['role'] == ($aml['role'] == 4 ? 3 : 1)) {
+                        $self = $aml3['efficiency_at10'];
+                      }
+                    } else {
+                      if ($aml3['lane'] == $aml2['lane'] && $aml3['isCore'] || $aml3['role'] == ($aml2['role'] == 4 ? 3 : 1)) {
+                        $aml2['efficiency_at10'] = $aml3['efficiency_at10'];
+                      }
+                    }
+                  }
+                }
+                $diff = $self - $aml2['efficiency_at10'];
+                $aml['lane_won'] = abs($diff) <= $tie_factor ? 1 : ($diff > 0 ? 2 : 0);
+              }
+            }
+          }
+          if (empty($aml['lane_won'])) $aml['lane_won'] = 2;
         }
       }
 
