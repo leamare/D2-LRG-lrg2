@@ -1450,7 +1450,8 @@ function fetch($match) {
         if ($aml['isCore']) $aml['role'] = $aml['lane'];
         else $aml['role'] = $aml['lane'] == 1 ? 5 : 4;
       }
-
+    }
+    foreach($t_adv_matchlines as &$aml) {
       if (!isset($aml['lane_won'])) {
         $tie_factor = 0.075;
         $opp = [];
@@ -1508,7 +1509,8 @@ function fetch($match) {
           if (empty($aml['lane_won'])) $aml['lane_won'] = 2;
         }
       }
-
+    }
+    foreach($t_adv_matchlines as &$aml) {
       $sql .= "\n\t(".$aml['matchid'].",".$aml['playerid'].",".$aml['heroid'].",".
                   ($aml['lh_at10'] ?? 0).",".$aml['isCore'].",".$aml['lane'].",".
                   (($schema['adv_matchlines_roles'] ?? false) ? $aml['role'].",".$aml['lane_won']."," : '').
