@@ -49,6 +49,8 @@ include_once("modules/analyzer/__queries/player_pairs.php");
 include_once("modules/analyzer/__queries/player_trios.php");
 include_once("modules/analyzer/__queries/player_graph.php");
 
+include_once("modules/commons/schema.php");
+
 $meta = new lrg_metadata;
 $meta['heroes'];
 
@@ -165,8 +167,14 @@ if (!isset($query->num_rows) || !$query->num_rows) {
   echo "[N] Set &settings.items to false.\n";
 }
 
+# game versions
+require_once("modules/analyzer/main/versions.php");
+# game modes
+require_once("modules/analyzer/main/modes.php");
+# regions
+require_once("modules/analyzer/main/regions.php");
 
-# Random stats
+# Overview stats
 require_once("modules/analyzer/main/overview.php");
 
 # pick/ban heroes stats
@@ -181,13 +189,6 @@ if ($lg_settings['ana']['records']) {
 if ($lg_settings['ana']['milestones']) {
   require_once("modules/analyzer/milestones.php");
 }
-
-# game versions
-require_once("modules/analyzer/main/versions.php");
-# game modes
-require_once("modules/analyzer/main/modes.php");
-# game modes
-require_once("modules/analyzer/main/regions.php");
 
 if (!empty($result["first_match"])) {
   # league days

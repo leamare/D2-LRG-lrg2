@@ -66,6 +66,27 @@ $sql .= "SELECT \"radiant_wr\", SUM(radiantWin)*100/SUM(1) FROM matches;";
 # Dire winrate
 $sql .= "SELECT \"dire_wr\", (1-(SUM(radiantWin)/SUM(1)))*100 FROM matches;";
 
+$_total = array_sum($result["modes"]);
+$_fpabile = array_sum(
+  array_map(function($a) use (&$result) {
+    return $result['modes'][$a] ?? 0;
+  }, [23, 18, 21, 17, 16, 8, 3, 2])
+);
+if ($schema['matches_opener'] ?? false && ($_fpabile/$_total) > 0.5) {
+  # First pick
+  $sql .= "SELECT \"opener_pick_winrate\", SUM(radiant_opener = radiantWin)*100/SUM(1) FROM matches;";
+  # Second pick
+  $sql .= "SELECT \"last_pick_winrate\", SUM(radiant_opener <> radiantWin)*100/SUM(1) FROM matches;";
+  # FP Radiant
+  $sql .= "SELECT \"opener_pick_radiant_winrate\", SUM(radiant_opener AND radiantWin)*100/SUM(radiant_opener) FROM matches;";
+  # FP Dire
+  $sql .= "SELECT \"opener_pick_dire_winrate\", SUM((NOT radiant_opener) AND (NOT radiantWin))*100/SUM(NOT radiant_opener)  FROM matches;";
+  # SP Radiant
+  $sql .= "SELECT \"last_pick_radiant_winrate\", 100-(SUM((NOT radiant_opener) AND (NOT radiantWin))*100/SUM(NOT radiant_opener)) FROM matches;";
+  # SP Dire
+  $sql .= "SELECT \"last_pick_dire_winrate\", 100-(SUM(radiant_opener AND radiantWin)*100/SUM(radiant_opener)) FROM matches;";
+}
+
 # roshans killed
 $sql .= "SELECT \"roshans_killed_total\", SUM(roshans_killed) FROM adv_matchlines;";
 # Radiant avg roshans

@@ -19,6 +19,9 @@ if (!$row[1] || ( ($lg_settings['ana']['regions']['use_limiter'] ?? false) && $r
   $result["regions_data"][$region]["main"] = [];
   $result["regions_data"][$region]["main"]["matches"] = $row[1];
 
+  require("overview/modes.php");
+  require("overview/versions.php");
+
   # players on event
   $sql = "SELECT \"players_on_event\", COUNT(DISTINCT players.playerID)
           FROM players JOIN (
@@ -92,6 +95,31 @@ if (!$row[1] || ( ($lg_settings['ana']['regions']['use_limiter'] ?? false) && $r
   $sql .= "SELECT \"radiant_wr\", SUM(radiantWin)*100/SUM(1) FROM matches WHERE matches.cluster IN (".implode(",", $clusters).");";
   # Dire winrate
   $sql .= "SELECT \"dire_wr\", (1-(SUM(radiantWin)/SUM(1)))*100 FROM matches WHERE matches.cluster IN (".implode(",", $clusters).");";
+
+  $_total = array_sum($result["regions_data"][$region]["modes"] ?? []);
+  $_fpabile = array_sum(
+    array_map(function($a) use (&$result, &$region) {
+      return $result["regions_data"][$region]['modes'][$a] ?? 0;
+    }, [23, 18, 21, 17, 16, 8, 3, 2])
+  );
+  if ($schema['matches_opener'] ?? false && ($_fpabile/$_total) > 0.5) {
+    # First pick
+    $sql .= "SELECT \"opener_pick_winrate\", SUM(radiant_opener = radiantWin)*100/SUM(1) FROM matches WHERE matches.cluster IN (".implode(",", $clusters).");";
+    # Second pick
+    $sql .= "SELECT \"last_pick_winrate\", SUM(radiant_opener <> radiantWin)*100/SUM(1) FROM matches WHERE matches.cluster IN (".implode(",", $clusters).");";
+    # FP Radiant
+    $sql .= "SELECT \"opener_pick_radiant_winrate\", SUM(radiant_opener AND radiantWin)*100/SUM(radiant_opener) 
+      FROM matches WHERE matches.cluster IN (".implode(",", $clusters).");";
+    # FP Dire
+    $sql .= "SELECT \"opener_pick_dire_winrate\", SUM((NOT radiant_opener) AND (NOT radiantWin))*100/SUM(NOT radiant_opener) 
+      FROM matches WHERE matches.cluster IN (".implode(",", $clusters).");";
+    # SP Radiant
+    $sql .= "SELECT \"last_pick_radiant_winrate\", 100-(SUM((NOT radiant_opener) AND (NOT radiantWin))*100/SUM(NOT radiant_opener)) 
+      FROM matches WHERE matches.cluster IN (".implode(",", $clusters).");";
+    # SP Dire
+    $sql .= "SELECT \"last_pick_dire_winrate\", 100-(SUM(radiant_opener AND radiantWin)*100/SUM(radiant_opener)) 
+      FROM matches WHERE matches.cluster IN (".implode(",", $clusters).");";
+  }
 
   # roshans killed
   $sql .= "SELECT \"roshans_killed_total\", SUM(roshans_killed) FROM adv_matchlines
@@ -216,8 +244,6 @@ if (!$row[1] || ( ($lg_settings['ana']['regions']['use_limiter'] ?? false) && $r
 
   require("overview/firstlast.php");
   require("overview/days.php");
-  require("overview/modes.php");
-  require("overview/versions.php");
 
   return 0;
 }
