@@ -17,4 +17,3 @@ for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row(
 }
 
 $query_res->free_result();
-?>
