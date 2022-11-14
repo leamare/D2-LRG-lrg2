@@ -426,12 +426,22 @@ function get_stratz_response($match) {
       $tenMinute = $melee + $ranged + $siege + $passive + $starting;
       $aml['efficiency_at10'] = $pl['stats']['networthPerMinute'][10] / $tenMinute;
       
-      $aml['wards'] = count(
-        array_filter($pl['stats']['itemPurchases'], function($a) { return $a['itemId'] == 42; })
-      );
-      $aml['sentries'] = count(
-        array_filter($pl['stats']['itemPurchases'], function($a) { return $a['itemId'] == 43; })
-      );
+      if (!empty($pl['stats']['wards'])) {
+        // only includes wards placed
+        $aml['wards'] = count(
+          array_filter($pl['stats']['wards'], function($a) { return $a['type'] == 0; })
+        );
+        $aml['sentries'] = count(
+          array_filter($pl['stats']['wards'], function($a) { return $a['type'] == 1; })
+        );
+      } else {
+        $aml['wards'] = count(
+          array_filter($pl['stats']['itemPurchases'], function($a) { return $a['itemId'] == 42; })
+        );
+        $aml['sentries'] = count(
+          array_filter($pl['stats']['itemPurchases'], function($a) { return $a['itemId'] == 43; })
+        );
+      }
 
       $aml['couriers_killed'] = count($pl['stats']['courierKills'] ?? []);
 
@@ -538,7 +548,10 @@ function get_stratz_response($match) {
       $aml['time_dead'] = array_reduce($pl['stats']['deathEvents'], function($c, $a) { return $c + $a['timeDead']; }, 0);
       $aml['pings'] = $pl['stats']['actionReport']['pingUsed'] ?? 0;
       
-      $aml['stuns'] = (($pl['stats']['heroDamageReport']['dealtTotal']['stunDuration'] ?? 0) + ($pl['stats']['heroDamageReport']['dealtTotal']['disableDuration'] ?? 0))/100;
+      // limiting Stratz stuns values only to stunDuration
+      // god only knows what counts as stuns and what doesn't
+      // $aml['stuns'] = (($pl['stats']['heroDamageReport']['dealtTotal']['stunDuration'] ?? 0) + ($pl['stats']['heroDamageReport']['dealtTotal']['disableDuration'] ?? 0))/100;
+      $aml['stuns'] = (($pl['stats']['heroDamageReport']['dealtTotal']['stunDuration'] ?? 0))/100;
 
       $aml['teamfight_part'] = $pl['isRadiant'] ? array_sum($stratz['data']['match']['stats']['radiantKills'] ?? []) : array_sum($stratz['data']['match']['stats']['direKills'] ?? []);
       $aml['teamfight_part'] = $aml['teamfight_part'] ? ($pl['kills']+$pl['assists']) / $aml['teamfight_part'] : 0;
