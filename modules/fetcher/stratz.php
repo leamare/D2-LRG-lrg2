@@ -82,21 +82,18 @@ const STRATZ_GRAPHQL_QUERY = "{
   lobbyType
   id
   isStats
-  stats {
-    matchId
-    radiantNetworthLeads
-    radiantKills
-    direKills
-    pickBans {
-      bannedHeroId
-      heroId
-      isPick
-      isRadiant
-      order
-      playerIndex
-      wasBannedSuccessfully
-      team
-    }
+  radiantNetworthLeads
+  radiantKills
+  direKills
+  pickBans {
+    bannedHeroId
+    heroId
+    isPick
+    isRadiant
+    order
+    playerIndex
+    wasBannedSuccessfully
+    team
   }
   league {
     name
@@ -329,7 +326,7 @@ function get_stratz_response($match) {
   $r['matches']['seriesid'] = $stratz['data']['match']['seriesId'] ?? null;
 
   if ($stratz['data']['match']['statsDateTime']) {
-    [ $r['matches']['stomp'], $r['matches']['comeback'] ] = find_comebacks($stratz['data']['match']['stats']['radiantNetworthLeads'], $stratz['data']['match']['didRadiantWin']);
+    [ $r['matches']['stomp'], $r['matches']['comeback'] ] = find_comebacks($stratz['data']['match']['radiantNetworthLeads'], $stratz['data']['match']['didRadiantWin']);
   } else {
     $r['matches']['stomp'] = 0;
     $r['matches']['comeback'] = 0;
@@ -553,7 +550,7 @@ function get_stratz_response($match) {
       // $aml['stuns'] = (($pl['stats']['heroDamageReport']['dealtTotal']['stunDuration'] ?? 0) + ($pl['stats']['heroDamageReport']['dealtTotal']['disableDuration'] ?? 0))/100;
       $aml['stuns'] = (($pl['stats']['heroDamageReport']['dealtTotal']['stunDuration'] ?? 0))/100;
 
-      $aml['teamfight_part'] = $pl['isRadiant'] ? array_sum($stratz['data']['match']['stats']['radiantKills'] ?? []) : array_sum($stratz['data']['match']['stats']['direKills'] ?? []);
+      $aml['teamfight_part'] = $pl['isRadiant'] ? array_sum($stratz['data']['match']['radiantKills'] ?? []) : array_sum($stratz['data']['match']['direKills'] ?? []);
       $aml['teamfight_part'] = $aml['teamfight_part'] ? ($pl['kills']+$pl['assists']) / $aml['teamfight_part'] : 0;
       $aml['damage_taken'] = array_sum($pl['stats']['heroDamageReport']['receivedTotal'] ?? []);
 
@@ -748,11 +745,11 @@ function get_stratz_response($match) {
   }
 
   $r['draft'] = [];
-  if (!empty($stratz['data']['match']['stats']['pickBans'])) {
+  if (!empty($stratz['data']['match']['pickBans'])) {
     $stage = 0;
     $last_stage_pick = null;
 
-    foreach ($stratz['data']['match']['stats']['pickBans'] as $dr) {
+    foreach ($stratz['data']['match']['pickBans'] as $dr) {
       $d = [];
 
       $d['matchid'] = $match;
