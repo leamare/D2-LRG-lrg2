@@ -173,9 +173,6 @@ if (isset($report)) {
     if (isset($report['records']))
       include_once("modules/view/records.php");
 
-    if (isset($report['records']) && isset($report['records_ext']))
-      include_once("modules/view/records_ext.php");
-
     if (isset($report['milestones']))
       include_once("modules/view/milestones.php");
 
