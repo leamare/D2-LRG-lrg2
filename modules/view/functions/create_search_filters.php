@@ -33,6 +33,7 @@ function create_search_filters(string $searchstring) {
 
   $base = [];
   $filters = [];
+  $filters_fallback = [];
   $words = [];
 
   $quotes = false;
@@ -262,11 +263,17 @@ function create_search_filters(string $searchstring) {
         $lastword .= $word;
       } else {
         $words[] = create_fuzzy_regex($word);
+        $filters_fallback[] = [ LRG_CAT_FILTER_TAG, "/".addcslashes(
+          str_replace([' ', '-', '–', '—'], "_", strtolower($word)),
+          REGEX_MASK
+        )."/" ];
       }
     }
 
     $word = strtok($token);
   }
+
+  $filters_fallback = array_merge($filters, $filters_fallback);
 
   foreach ($words as $w) {
     $filters[] = [ LRG_TAG_FILTER_NAMEDESC, "/$w/iu" ];
@@ -278,7 +285,7 @@ function create_search_filters(string $searchstring) {
       $r[] = array_merge($b, $filters);
     }
   } else {
-    $r = [ $filters ];
+    $r = [ $filters, $filters_fallback ];
   }
 
   return $r;
