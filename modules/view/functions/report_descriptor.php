@@ -61,7 +61,7 @@ function get_report_descriptor(&$report, $generate_endpoints = false) {
   $desc['endpoints'] = [];
   $desc['endpoints'][] = "overview";
   if (isset($report['records'])) $desc['endpoints'][] = "records";
-  if (isset($report['milestones'])) $desc['milestones'][] = "records";
+  if (isset($report['milestones'])) $desc['endpoints'][] = "milestones";
 
   if (isset($report['pickban'])) $desc['endpoints'][] = "heroes-pickban";
   if (isset($report['draft'])) $desc['endpoints'][] = "heroes-draft";
