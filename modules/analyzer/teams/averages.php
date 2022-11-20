@@ -173,11 +173,30 @@ $sql .= "SELECT \"dire_wr\", 1-(SUM(matches.radiantWin)/COUNT(DISTINCT matches.m
           AND teams_matches.is_radiant = 0
           WHERE teams_matches.teamid = ".$id.";";
 
+if ($schema['matches_opener'] ?? false) {
+  # first pick ratio
+  $sql .= "SELECT \"opener_ratio\", SUM(radiant_opener = is_radiant)/COUNT(DISTINCT matches.matchid)
+      FROM teams_matches join matches on matches.matchid = teams_matches.matchid
+      WHERE teamid = ".$id.";";
+  # first pick winrate
+  $sql .= "SELECT \"opener_pick_winrate\", SUM(radiantWin = is_radiant)/COUNT(DISTINCT matches.matchid)
+      FROM teams_matches join matches on matches.matchid = teams_matches.matchid
+      WHERE teamid = ".$id." and radiant_opener = is_radiant;";
+}
+
 # duration
 $sql .= "SELECT \"avg_match_len\", (SUM(matches.duration)/60)/COUNT(DISTINCT matches.matchid) FROM matches JOIN teams_matches
           ON matches.matchid = teams_matches.matchid WHERE teams_matches.teamid = ".$id.";";
 
-# duration
+# median duration
+$sql .= "set @rn := 0; select * from ( select *, @rn := @rn + 1 as rn from (
+  select \"matches_median_duration\", matches.duration/60 as value
+  FROM matches JOIN teams_matches 
+  ON matches.matchid = teams_matches.matchid WHERE teams_matches.teamid = ".$id."
+  ORDER BY `value` DESC
+) a order by a.value DESC ) b where b.rn = @rn div 2;";
+
+# win duration
 $sql .= "SELECT \"avg_win_len\", (SUM(matches.duration)/60)/COUNT(DISTINCT matches.matchid) FROM matches JOIN teams_matches
           ON matches.matchid = teams_matches.matchid WHERE teams_matches.teamid = ".$id." AND matches.radiantWin = teams_matches.is_radiant;";
 
@@ -189,10 +208,12 @@ $result['teams'][$id]['averages'] = array();
 do {
   $query_res = $conn->store_result();
 
-  $row = $query_res->fetch_row();
+  if (!is_bool($query_res)) {
+    $row = $query_res->fetch_row();
 
-  $result['teams'][$id]['averages'][$row[0]] = $row[1];
+    $result['teams'][$id]['averages'][$row[0]] = $row[1];
 
-  $query_res->free_result();
+    $query_res->free_result();
+  }
 } while($conn->next_result());
 ?>
