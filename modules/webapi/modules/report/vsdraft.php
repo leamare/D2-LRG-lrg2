@@ -3,7 +3,8 @@
 $repeatVars['vsdraft'] = ['team'];
 
 $endpoints['vsdraft'] = function($mods, $vars, &$report) {
-  $type = "heroes";
+  $type = "hero";
+  $fallback_type = "heroes";
 
   if (isset($vars['team'])) {
     $context =& $report['teams'][ $vars['team'] ]['pickban_vs'];
@@ -18,8 +19,20 @@ $endpoints['vsdraft'] = function($mods, $vars, &$report) {
     else return ($a['matches_total'] < $b['matches_total']) ? 1 : -1;
   });
 
+  foreach ($context as $hid => $data) {
+    if (!isset($data['winrate_picked'])) {
+      if (!isset($data['matches_picked'])) $data['matches_picked'] = 0;
+      $context[$hid]['winrate_picked'] = round( $data['matches_picked'] ? ($data['wins_picked'] ?? 0)/$data['matches_picked'] : 0, 4);
+      if (isset($data['wins_picked'])) unset($context[$hid]['wins_picked']);
+    }
+    if (!isset($data['winrate_banned'])) {
+      if (!isset($data['matches_banned'])) $data['matches_banned'] = 0;
+      $context[$hid]['winrate_banned'] = round($data['matches_banned'] ? ($data['wins_banned'] ?? 0)/$data['matches_banned'] : 0, 4);
+      if (isset($data['wins_banned'])) unset($context[$hid]['wins_banned']);
+    }
+  }
+
   $ranks = [];
-  $context_copy = $context;
 
   $compound_ranking_sort = function($a, $b) use ($context_total_matches) {
     return compound_ranking_sort($a, $b, $context_total_matches);
@@ -32,7 +45,7 @@ $endpoints['vsdraft'] = function($mods, $vars, &$report) {
   foreach ($context as $id => $el) {
     if(isset($last) && $el == $last) {
       $i++;
-      $ranks[$id] = $last_rank;
+      $ranks[$id] = $last_rank ?? 0;
     } else
       $ranks[$id] = 100 - $increment*$i++;
     $last = $el;
@@ -41,11 +54,12 @@ $endpoints['vsdraft'] = function($mods, $vars, &$report) {
 
   foreach($context as $id => &$el) {
     $el['rank'] = round($ranks[$id], 2);
-    $el['contest_rate'] = $el['matches_total']/$context_total_matches;
+    $el['contest_rate'] = round($el['matches_total']/$context_total_matches, 4);
   }
 
   $draft = [];
-  $id_name = $type."_id";
+  $id_name = $type."id";
+  // $id_name_fb = $fallback_type."_id";
   $draft_template = [
     "matches_total" => 0,
     "matches_picked" => 0,
