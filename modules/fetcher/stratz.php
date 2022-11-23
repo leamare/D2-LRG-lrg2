@@ -562,7 +562,7 @@ function get_stratz_response($match) {
       }
 
       if (!empty($skillbuild)) {
-        $sti = skillPriority($skillbuild, $pl['heroId'] == 74);
+        $sti = skillPriority($skillbuild, $pl['heroId'], $pl['heroId'] == 74);
         $r['skill_builds'][] = [
           'matchid' => $stratz['data']['match']['id'],
           'playerid' => $pl['steamAccountId'],

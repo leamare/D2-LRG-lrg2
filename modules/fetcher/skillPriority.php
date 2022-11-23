@@ -6,9 +6,23 @@ const LEVELS_IDS = [
 
 // "730": "special_bonus_attributes",
 
-function skillPriority($skillbuild, $noattr = false) {
+function skillPriority($skillbuild, $hid, $noattr = false) {
+  global $meta;
+  $meta['heroes_spells'];
+  $meta['spells_linked'];
+  $meta['spells_tags'];
+
+  $spell_ids = array_flip($meta['spells_tags']);
+
   $nottalents = [];
   $skillNumbers = [];
+
+  foreach ($skillbuild as $i => $sid) {
+    $tag = $meta['spells_tags'][$sid];
+    if (isset($meta['spells_linked'][$tag])) {
+      $skillbuild[$i] = $spell_ids[ $meta['spells_linked'][$tag] ];
+    }
+  }
 
   $skillbuild = array_values(
     array_filter($skillbuild, function($v) {
@@ -31,15 +45,23 @@ function skillPriority($skillbuild, $noattr = false) {
     return !in_array($k, $nottalents);
   }, ARRAY_FILTER_USE_KEY);
 
-  $ultimate = array_keys($skillNumbers, min($skillNumbers))[0];
+  $ultimate = $spell_ids[ $meta['heroes_spells'][$hid]['ultimate'] ];
 
   $maxedAt = [];
   $maxlevel = [];
   $firstPointAt = [];
+
   $talents = [];
 
+  $hero_talents = [];
+  foreach ($meta['heroes_spells'][$hid]['talents'] as $tal_lvl) {
+    foreach ($tal_lvl as $stag) {
+      $hero_talents[] = $spell_ids[ $stag ];
+    }
+  }
+
   foreach ($skillbuild as $level => $skill) {
-    if (!in_array($skill, $nottalents)) {
+    if (in_array($skill, $hero_talents)) {
       if (($noattr ? $level+1 : LEVELS_IDS[$level]) < 26) {
         $talents[] = $skill;
       }

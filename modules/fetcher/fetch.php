@@ -424,7 +424,7 @@ function fetch($match) {
         unset($stratz);
 
         if($request_unparsed && !in_array($match, $scheduled_stratz)) {
-          @file_get_contents($request);
+          // @file_get_contents($request);
           `php tools/replay_request_stratz.php -m$match`;
           echo "..Requested and scheduled $match\n";
           $first_scheduled[$match] = time();
@@ -1177,6 +1177,8 @@ function fetch($match) {
           if ($item_id == 219 && $travel_boots_state == 1) { $item_id = 220; $travel_boots_state++; }
           if ($item_id == 220 && $travel_boots_state == 1) continue;
 
+          $category = null;
+
           foreach($meta['item_categories'] as $category_name => $items) {
             if (in_array($item_id, $items)) {
               $category = $category_name;
@@ -1242,7 +1244,7 @@ function fetch($match) {
     $t_skill_builds = [];
     foreach ($matchdata['players'] as $player) {
       if (empty($player['ability_upgrades_arr'])) continue;
-      $sti = skillPriority($player['ability_upgrades_arr'], $player['hero_id'] == 74);
+      $sti = skillPriority($player['ability_upgrades_arr'], $pl['hero_id'], $player['hero_id'] == 74);
       $t_skill_builds[] = [
         'matchid' => $match,
         'playerid' => $player['account_id'],
@@ -1456,6 +1458,7 @@ function fetch($match) {
         $tie_factor = 0.075;
         $opp = [];
         $self = 0;
+        $side = null;
 
         foreach ($t_matchlines as $ml) {
           if ($ml['heroid'] == $aml['heroid']) {
