@@ -106,12 +106,12 @@ const STRATZ_GRAPHQL_QUERY = "{
     level
     isRadiant
     leaverStatus
+    abilities {
+      level
+      time
+      abilityId
+    }
     stats {
-      abilities {
-        level
-        time
-        abilityId
-      }
       campStack
       heroDamageReport {
         receivedTotal {
@@ -294,7 +294,7 @@ function get_stratz_response($match) {
     // ]);
   
     // $json = file_get_contents($stratz_request, false, $context);
-    $json = @file_get_contents($stratz_request.'?'.$q, false, stream_context_create([
+    $json = file_get_contents($stratz_request.'?'.$q, false, stream_context_create([
       'ssl' => [
         'verify_peer' => false,
         'verify_peer_name' => false,
@@ -305,6 +305,10 @@ function get_stratz_response($match) {
   
     $stratz = json_decode($json, true);
     
+    if (!empty($stratz['errors'])) {
+      throw new Exception(json_encode($stratz['errors'], JSON_PRETTY_PRINT));
+    }
+
     if (empty($stratz['data']) || empty($stratz['data']['match']) || !empty($stratz['errors'])) {
       return null;
     }
@@ -325,7 +329,7 @@ function get_stratz_response($match) {
   $r['matches']['analysis_status'] = $stratz['data']['match']['parsedDateTime'] ? 1 : 0;
   $r['matches']['seriesid'] = $stratz['data']['match']['seriesId'] ?? null;
 
-  if ($stratz['data']['match']['statsDateTime']) {
+  if ($stratz['data']['match']['statsDateTime'] && !empty($stratz['data']['match']['radiantNetworthLeads'])) {
     [ $r['matches']['stomp'], $r['matches']['comeback'] ] = find_comebacks($stratz['data']['match']['radiantNetworthLeads'], $stratz['data']['match']['didRadiantWin']);
   } else {
     $r['matches']['stomp'] = 0;
@@ -379,7 +383,7 @@ function get_stratz_response($match) {
       'nickname' => $pl['steamAccount']['name']
     ];
 
-    if ($stratz['data']['match']['statsDateTime']) {
+    if ($stratz['data']['match']['statsDateTime'] && !empty($pl['stats']['lastHitsPerMinute'])) {
       $aml = [];
 
       $aml['matchid'] = $stratz['data']['match']['id'];
@@ -557,7 +561,7 @@ function get_stratz_response($match) {
       $r['adv_matchlines'][] = $aml;
 
       $skillbuild = [];
-      foreach ($pl['stats']['abilities'] as $e) {
+      foreach ($pl['abilities'] as $e) {
         $skillbuild[] = $e['abilityId'];
       }
 
