@@ -6,12 +6,29 @@ foreach ($result['records'] as $record) {
   if (!$record['playerid']) continue;
   $pls[ $record['playerid'] ] = null;
 }
+
+$_recordext = unwrap_data($result['records_ext']);
+foreach ($_recordext as $records) {
+  foreach ($records as $record) {
+    if (empty($record) || !$record['playerid']) continue;
+    $pls[ $record['playerid'] ] = null;
+  }
+}
+
 if (!empty($result["regions_data"])) {
   foreach ($result["regions_data"] as $reg) {
     if (empty($reg['records'])) continue;
     foreach ($reg['records'] as $record) {
       if (!$record['playerid']) continue;
       $pls[ $record['playerid'] ] = null;
+    }
+
+    $_recordext = unwrap_data($reg['records_ext']);
+    foreach ($_recordext as $records) {
+      foreach ($records as $record) {
+        if (empty($record) || !$record['playerid']) continue;
+        $pls[ $record['playerid'] ] = null;
+      }
     }
   }
 }
