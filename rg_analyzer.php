@@ -11,6 +11,8 @@ ini_set('default_socket_timeout', '7200');
 ini_set('mysqli.reconnect', '1');
 ini_set('mysqlnd.net_read_timeout', '7200');
 
+const FP_ABLE = [ 23, 18, 21, 17, 16, 8, 2 ];
+
 include_once("modules/commons/utf8ize.php");
 include_once("modules/commons/quantile.php");
 include_once("modules/commons/generate_tag.php");
