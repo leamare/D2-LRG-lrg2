@@ -1244,7 +1244,7 @@ function fetch($match) {
     $t_skill_builds = [];
     foreach ($matchdata['players'] as $player) {
       if (empty($player['ability_upgrades_arr'])) continue;
-      $sti = skillPriority($player['ability_upgrades_arr'], $pl['hero_id'], $player['hero_id'] == 74);
+      $sti = skillPriority($player['ability_upgrades_arr'], $player['hero_id'], $player['hero_id'] == 74);
       $t_skill_builds[] = [
         'matchid' => $match,
         'playerid' => $player['account_id'],

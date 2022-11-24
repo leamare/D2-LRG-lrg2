@@ -105,25 +105,25 @@ if (!$row[1] || ( ($lg_settings['ana']['regions']['use_limiter'] ?? false) && $r
   if (($schema['matches_opener'] ?? false) && ($_fpabile/$_total) > 0.5) {
     # First pick radiant ratio
     $sql .= "SELECT \"opener_pick_radiant_ratio\", SUM(radiant_opener)*100/SUM(1) FROM matches 
-      WHERE matches.cluster IN (".implode(",", $clusters).") AND modeID not in (".implode(',', FP_ABLE).");";
+      WHERE matches.cluster IN (".implode(",", $clusters).") AND modeID in (".implode(',', FP_ABLE).");";
     # First pick
     $sql .= "SELECT \"opener_pick_winrate\", SUM(radiant_opener = radiantWin)*100/SUM(1) FROM matches 
-      WHERE matches.cluster IN (".implode(",", $clusters).") AND modeID not in (".implode(',', FP_ABLE).");";
+      WHERE matches.cluster IN (".implode(",", $clusters).") AND modeID in (".implode(',', FP_ABLE).");";
     # Second pick
     $sql .= "SELECT \"follower_pick_winrate\", SUM(radiant_opener <> radiantWin)*100/SUM(1) FROM matches 
-      WHERE matches.cluster IN (".implode(",", $clusters).") AND modeID not in (".implode(',', FP_ABLE).");";
+      WHERE matches.cluster IN (".implode(",", $clusters).") AND modeID in (".implode(',', FP_ABLE).");";
     # FP Radiant
     $sql .= "SELECT \"opener_pick_radiant_winrate\", SUM(radiant_opener AND radiantWin)*100/SUM(radiant_opener) 
-      FROM matches WHERE matches.cluster IN (".implode(",", $clusters).") AND modeID not in (".implode(',', FP_ABLE).");";
+      FROM matches WHERE matches.cluster IN (".implode(",", $clusters).") AND modeID in (".implode(',', FP_ABLE).");";
     # FP Dire
     $sql .= "SELECT \"opener_pick_dire_winrate\", SUM((NOT radiant_opener) AND (NOT radiantWin))*100/SUM(NOT radiant_opener) 
-      FROM matches WHERE matches.cluster IN (".implode(",", $clusters).") AND modeID not in (".implode(',', FP_ABLE).");";
+      FROM matches WHERE matches.cluster IN (".implode(",", $clusters).") AND modeID in (".implode(',', FP_ABLE).");";
     # SP Radiant
     $sql .= "SELECT \"follower_pick_radiant_winrate\", 100-(SUM((NOT radiant_opener) AND (NOT radiantWin))*100/SUM(NOT radiant_opener)) 
-      FROM matches WHERE matches.cluster IN (".implode(",", $clusters).") AND modeID not in (".implode(',', FP_ABLE).");";
+      FROM matches WHERE matches.cluster IN (".implode(",", $clusters).") AND modeID in (".implode(',', FP_ABLE).");";
     # SP Dire
     $sql .= "SELECT \"follower_pick_dire_winrate\", 100-(SUM(radiant_opener AND radiantWin)*100/SUM(radiant_opener)) 
-      FROM matches WHERE matches.cluster IN (".implode(",", $clusters).") AND modeID not in (".implode(',', FP_ABLE).");";
+      FROM matches WHERE matches.cluster IN (".implode(",", $clusters).") AND modeID in (".implode(',', FP_ABLE).");";
   }
 
   # roshans killed
