@@ -253,7 +253,7 @@ function fetch($match) {
     }
   }
   
-  if (empty($matchdata)) {
+  if (empty($matchdata) || ( empty($matchdata['items'] && !$bad_replay) )) {
     echo("Requesting.");
 
     if (!$ignore_stratz && !$stratz_graphql && (!empty($players_list) || !empty($rank_limit))) {
@@ -1144,8 +1144,8 @@ function fetch($match) {
     $meta['items'];
     $meta['item_categories'];
 
-    if (!$bad_replay) {
-      $i = sizeof($t_matchlines);
+    if (!$bad_replay && !isset($matchdata['items'])) {
+      $i = 0;
       for ($j=0, $sz=10; $j<$sz; $j++) {
         if (!isset($matchdata['players'][$j]['hero_id'])) {
           $sz++;
@@ -1158,8 +1158,8 @@ function fetch($match) {
 
           $r = [
             'matchid' => $match,
-            'playerid' => $matchdata['players'][$j]['account_id'],
-            'hero_id' => $matchdata['players'][$j]['hero_id']
+            'playerid' => $matchdata['players'][$j]['account_id'] ?? $t_matchlines[$i]['playerid'],
+            'hero_id' => $matchdata['players'][$j]['hero_id'] ?? $t_matchlines[$i]['heroid']
           ];
 
           $item_id = 0;
