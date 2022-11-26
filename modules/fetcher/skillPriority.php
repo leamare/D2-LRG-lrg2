@@ -79,6 +79,18 @@ function skillPriority($skillbuild, $hid, $noattr = false) {
     }
   }
 
+  $level = count($skillbuild);
+
+  foreach($maxlevel as $skill => $lvl) {
+    if ($skill == $ultimate) {
+      if ($lvl == 3) continue;
+      $maxedAt[$skill] = LEVELS_IDS[ $level-1 ] < 19 ? 18 : $level + (3-$lvl) - 1;
+    } else {
+      if ($lvl == 4) continue;
+      $maxedAt[$skill] = $level + (4-$lvl) - 1;
+    }
+  }
+
   $skills = array_keys($maxedAt);
 
   usort($skills, function($a, $b) use ($firstPointAt, $maxedAt, $maxlevel, $ultimate) {
