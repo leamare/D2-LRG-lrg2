@@ -23,18 +23,20 @@ function rg_view_generate_heroes_wrtimings() {
   foreach ($report['hero_winrate_timings'] as $hid => $data) {
     $matches_med[] = $data['matches'];
 
-    $rows .= "<tr data-value-match=\"".$data['matches']."\" ><td>".hero_portrait($hid)."</td><td>".hero_link($hid)."</td>".
-      "<td>".($data['matches'])."</td>".
-      "<td class=\"separator\">".convert_time_seconds($data['q1duration'])."</td>".
-      "<td>".convert_time_seconds($data['q2duration'])."</td>".
-      "<td>".convert_time_seconds($data['q3duration'])."</td>".
-      "<td>".convert_time_seconds($data['avg_duration'])."</td>".
-      "<td>".convert_time_seconds($data['std_dev'])."</td>".
-      "<td class=\"separator\">".number_format($data['early_wr']*100, 2)."%</td>".
-      "<td>".number_format($data['winrate_avg']*100, 2)."%</td>".
-      "<td>".number_format($data['late_wr']*100, 2)."%</td>".
-      "<td>".number_format($data['grad']*100, 2)."%</td>".
-      "<td class=\"separator\"><div style=\"position: relative; width: 95%; height: 50px\"><canvas id=\"hero-timings-$hid\"></canvas></div></td>".
+    $rows .= "<tr data-value-match=\"".$data['matches']."\" >".
+      "<td data-col-group=\"_index\">".hero_portrait($hid)."</td><td data-col-group=\"_index\">".hero_link($hid)."</td>".
+      "<td data-col-group=\"_index\">".($data['matches'])."</td>".
+      "<td class=\"separator\" data-col-group=\"duration\">".convert_time_seconds($data['q1duration'])."</td>".
+      "<td data-col-group=\"duration\">".convert_time_seconds($data['q2duration'])."</td>".
+      "<td data-col-group=\"duration\">".convert_time_seconds($data['q3duration'])."</td>".
+      "<td data-col-group=\"duration\">".convert_time_seconds($data['avg_duration'])."</td>".
+      "<td data-col-group=\"duration\">".convert_time_seconds($data['std_dev'])."</td>".
+      "<td class=\"separator\" data-col-group=\"winrate\">".number_format($data['early_wr']*100, 2)."%</td>".
+      "<td data-col-group=\"winrate\">".number_format($data['winrate_avg']*100, 2)."%</td>".
+      "<td data-col-group=\"winrate\">".number_format($data['late_wr']*100, 2)."%</td>".
+      "<td data-col-group=\"winrate\">".number_format($data['grad']*100, 2)."%</td>".
+      "<td class=\"separator\" data-col-group=\"chart\">".
+        "<div style=\"position: relative; width: 95%; height: 50px\"><canvas id=\"hero-timings-$hid\"></canvas></div></td>".
       // "<td></td>".
     "</tr>";
 
@@ -108,28 +110,32 @@ function rg_view_generate_heroes_wrtimings() {
     ]
   ], "heroes-wrtimings", 'wide');
 
+  $res .= table_columns_toggle("heroes-wrtimings", [
+    'duration', 'winrate', 'chart',
+  ], true);
+
   $res .= search_filter_component("heroes-wrtimings", true);
 
   $res .= "<table id=\"heroes-wrtimings\" class=\"list wide sortable\"><thead><tr class=\"overhead\">".
-      "<th colspan=\"2\"></th>".
-      "<th></th>".
-      "<th colspan=\"5\" class=\"separator\">".locale_string("duration")."</th>".
-      "<th colspan=\"4\" class=\"separator\">".locale_string("trends_winrate")."</th>".
-      "<th width=\"20%\" class=\"separator\"></th>".
+      "<th colspan=\"2\" data-col-group=\"_index\"></th>".
+      "<th data-col-group=\"_index\"></th>".
+      "<th colspan=\"5\" class=\"separator\" data-col-group=\"duration\">".locale_string("duration")."</th>".
+      "<th colspan=\"4\" class=\"separator\" data-col-group=\"winrate\">".locale_string("trends_winrate")."</th>".
+      "<th width=\"20%\" class=\"separator\" data-col-group=\"chart\"></th>".
       // "<th width=\"1%\"></th>".
     "</tr><tr>".
-      "<th></th><th>".locale_string("hero")."</th>".
-      "<th>".locale_string("matches")."</th>".
-      "<th class=\"separator\">".locale_string("q1duration")."</th>".
-      "<th>".locale_string("median")."</th>".
-      "<th>".locale_string("q3duration")."</th>".
-      "<th>".locale_string("avg_duration")."</th>".
-      "<th>".locale_string("std_dev")."</th>".
-      "<th class=\"separator\">".locale_string("early_wr")."</th>".
-      "<th>".locale_string("avg_winrate")."</th>".
-      "<th>".locale_string("late_wr")."</th>".
-      "<th>".locale_string("wr_gradient")."</th>".
-      "<th class=\"separator\">".locale_string("chart")."</th>".
+      "<th data-col-group=\"_index\"></th><th data-col-group=\"_index\">".locale_string("hero")."</th>".
+      "<th data-col-group=\"_index\">".locale_string("matches")."</th>".
+      "<th class=\"separator\" data-col-group=\"duration\">".locale_string("q1duration")."</th>".
+      "<th data-col-group=\"duration\">".locale_string("median")."</th>".
+      "<th data-col-group=\"duration\">".locale_string("q3duration")."</th>".
+      "<th data-col-group=\"duration\">".locale_string("avg_duration")."</th>".
+      "<th data-col-group=\"duration\">".locale_string("std_dev")."</th>".
+      "<th class=\"separator\" data-col-group=\"winrate\">".locale_string("early_wr")."</th>".
+      "<th data-col-group=\"winrate\">".locale_string("avg_winrate")."</th>".
+      "<th data-col-group=\"winrate\">".locale_string("late_wr")."</th>".
+      "<th data-col-group=\"winrate\">".locale_string("wr_gradient")."</th>".
+      "<th class=\"separator\" data-col-group=\"chart\">".locale_string("chart")."</th>".
       // "<th></th>".
   "</tr></thead><tbody>$rows</tbody></table>";
 

@@ -175,26 +175,26 @@ function rg_view_generate_items_stats() {
       "data-value-grad_neg=\"".($line['grad'] < 0 ? 1 : 0)."\" ".
       "data-value-nograd=\"".($line['grad'] == 0 ? 1 : 0)."\" ".
     ">".
-      "<td>".item_icon($iid)."</td>".
-      "<td>".item_link($iid)."</td>".
-      "<td class=\"separator\">".$line['purchases']."</td>".
-      "<td>".number_format($line['prate']*100, 2)."%</td>".
-      "<td>".number_format($ranks[$iid], 1)."</td>".
-      "<td class=\"separator\">".number_format($line['winrate']*100, 2)."%</td>".
-      "<td>".($line['wo_wr'] < $line['winrate'] ? '+' : '').number_format(($line['winrate']-$line['wo_wr'])*100, 2)."%</td>".
+      "<td data-col-group=\"_index\">".item_icon($iid)."</td>".
+      "<td data-col-group=\"_index\">".item_link($iid)."</td>".
+      "<td class=\"separator\" data-col-group=\"total\">".$line['purchases']."</td>".
+      "<td data-col-group=\"total\">".number_format($line['prate']*100, 2)."%</td>".
+      "<td data-col-group=\"total\">".number_format($ranks[$iid], 1)."</td>".
+      "<td class=\"separator\" data-col-group=\"items_winrate_shifts\">".number_format($line['winrate']*100, 2)."%</td>".
+      "<td data-col-group=\"items_winrate_shifts\">".($line['wo_wr'] < $line['winrate'] ? '+' : '').number_format(($line['winrate']-$line['wo_wr'])*100, 2)."%</td>".
       // "<td>".($line['wo_wr'] > $line['winrate'] ? '+' : '').number_format(($line['wo_wr']-$line['winrate'])*100, 2)."%</td>".
       // "<td>".number_format($line['wo_wr']*100, 2)."%</td>".
-      "<td>".($line['early_wr'] > $line['winrate'] ? '+' : '').number_format(($line['early_wr']-$line['winrate'])*100, 2)."%</td>".
-      "<td>".($line['late_wr'] > $line['winrate'] ? '+' : '').number_format(($line['late_wr']-$line['winrate'])*100, 2)."%</td>".
-      "<td>".number_format($line['grad']*100, 2)."%</td>".
-      "<td class=\"separator\">".convert_time_seconds($line['avg_time'])."</td>".
-      "<td>".convert_time_seconds($line['min_time'])."</td>".
-      "<td>".convert_time_seconds($line['q1'])."</td>".
-      "<td>".convert_time_seconds($line['median'])."</td>".
-      "<td>".convert_time_seconds($line['q3'])."</td>".
-      "<td>".convert_time_seconds($line['max_time'])."</td>".
-      "<td>".convert_time_seconds($line['q3']-$line['q1'])."</td>".
-      "<td>".convert_time_seconds($line['std_dev'])."</td>".
+      "<td data-col-group=\"items_winrate_shifts\">".($line['early_wr'] > $line['winrate'] ? '+' : '').number_format(($line['early_wr']-$line['winrate'])*100, 2)."%</td>".
+      "<td data-col-group=\"items_winrate_shifts\">".($line['late_wr'] > $line['winrate'] ? '+' : '').number_format(($line['late_wr']-$line['winrate'])*100, 2)."%</td>".
+      "<td data-col-group=\"items_winrate_shifts\">".number_format($line['grad']*100, 2)."%</td>".
+      "<td class=\"separator\" data-col-group=\"items_timings\">".convert_time_seconds($line['avg_time'])."</td>".
+      "<td data-col-group=\"items_timings\">".convert_time_seconds($line['min_time'])."</td>".
+      "<td data-col-group=\"items_timings\">".convert_time_seconds($line['q1'])."</td>".
+      "<td data-col-group=\"items_timings\">".convert_time_seconds($line['median'])."</td>".
+      "<td data-col-group=\"items_timings\">".convert_time_seconds($line['q3'])."</td>".
+      "<td data-col-group=\"items_timings\">".convert_time_seconds($line['max_time'])."</td>".
+      "<td data-col-group=\"items_timings\">".convert_time_seconds($line['q3']-$line['q1'])."</td>".
+      "<td data-col-group=\"items_timings\">".convert_time_seconds($line['std_dev'])."</td>".
     "</tr>";
   }
 
@@ -223,33 +223,37 @@ function rg_view_generate_items_stats() {
     ]
   ], "items-$tag", 'wide');
 
+  $res[$tag] .= table_columns_toggle("items-$tag", [
+    'total', 'items_winrate_shifts', 'items_timings',
+  ], true);
+
   $res[$tag] .= search_filter_component("items-$tag", true);
 
   $res[$tag] .= "<table id=\"items-$tag\" class=\"list wide sortable\">";
   $res[$tag] .= "<thead><tr class=\"overhead\">".
-      "<th width=\"15%\" colspan=\"2\"></th>".
-      "<th width=\"18%\" colspan=\"3\"></th>".
-      "<th class=\"separator\" width=\"30%\" colspan=\"5\">".locale_string("items_winrate_shifts")."</th>".
-      "<th class=\"separator\" colspan=\"8\">".locale_string("items_timings")."</th>".
+      "<th width=\"15%\" colspan=\"2\" data-col-group=\"_index\"></th>".
+      "<th class=\"separator\" width=\"18%\" colspan=\"3\" data-col-group=\"total\">".locale_string("total")."</th>".
+      "<th class=\"separator\" width=\"30%\" colspan=\"5\" data-col-group=\"items_winrate_shifts\">".locale_string("items_winrate_shifts")."</th>".
+      "<th class=\"separator\" colspan=\"8\" data-col-group=\"items_timings\">".locale_string("items_timings")."</th>".
     "</tr><tr>".
-    "<th></th>".
-    "<th>".locale_string("item")."</th>".
-    "<th class=\"separator\" data-sorter=\"digit\">".locale_string("purchases")."</th>".
-    "<th data-sorter=\"digit\">".locale_string("purchase_rate")."</th>".
-    "<th data-sorter=\"digit\">".locale_string("rank")."</th>".
-    "<th class=\"separator\" data-sorter=\"digit\">".locale_string("winrate")."</th>".
-    "<th data-sorter=\"digit\">".locale_string("items_wo_wr_shift")."</th>".
-    "<th data-sorter=\"digit\">".locale_string("items_early_wr_shift")."</th>".
-    "<th data-sorter=\"digit\">".locale_string("items_late_wr_shift")."</th>".
-    "<th data-sorter=\"digit\">".locale_string("items_wr_gradient")."</th>".
-    "<th class=\"separator\" data-sorter=\"time\">".locale_string("item_time_mean")."</th>".
-    "<th data-sorter=\"time\">".locale_string("item_time_min")."</th>".
-    "<th data-sorter=\"time\">".locale_string("item_time_q1")."</th>".
-    "<th data-sorter=\"time\">".locale_string("item_time_median")."</th>".
-    "<th data-sorter=\"time\">".locale_string("item_time_q3")."</th>".
-    "<th data-sorter=\"time\">".locale_string("item_time_max")."</th>".
-    "<th data-sorter=\"time\">".locale_string("item_time_window")."</th>".
-    "<th data-sorter=\"time\">".locale_string("item_time_std_dev")."</th>".
+    "<th data-col-group=\"_index\"></th>".
+    "<th data-col-group=\"_index\">".locale_string("item")."</th>".
+    "<th class=\"separator\" data-sorter=\"digit\" data-col-group=\"total\">".locale_string("purchases")."</th>".
+    "<th data-sorter=\"digit\" data-col-group=\"total\">".locale_string("purchase_rate")."</th>".
+    "<th data-sorter=\"digit\" data-col-group=\"total\">".locale_string("rank")."</th>".
+    "<th class=\"separator\" data-sorter=\"digit\" data-col-group=\"items_winrate_shifts\">".locale_string("winrate")."</th>".
+    "<th data-sorter=\"digit\" data-col-group=\"items_winrate_shifts\">".locale_string("items_wo_wr_shift")."</th>".
+    "<th data-sorter=\"digit\" data-col-group=\"items_winrate_shifts\">".locale_string("items_early_wr_shift")."</th>".
+    "<th data-sorter=\"digit\" data-col-group=\"items_winrate_shifts\">".locale_string("items_late_wr_shift")."</th>".
+    "<th data-sorter=\"digit\" data-col-group=\"items_winrate_shifts\">".locale_string("items_wr_gradient")."</th>".
+    "<th class=\"separator\" data-sorter=\"time\" data-col-group=\"items_timings\">".locale_string("item_time_mean")."</th>".
+    "<th data-sorter=\"time\" data-col-group=\"items_timings\">".locale_string("item_time_min")."</th>".
+    "<th data-sorter=\"time\" data-col-group=\"items_timings\">".locale_string("item_time_q1")."</th>".
+    "<th data-sorter=\"time\" data-col-group=\"items_timings\">".locale_string("item_time_median")."</th>".
+    "<th data-sorter=\"time\" data-col-group=\"items_timings\">".locale_string("item_time_q3")."</th>".
+    "<th data-sorter=\"time\" data-col-group=\"items_timings\">".locale_string("item_time_max")."</th>".
+    "<th data-sorter=\"time\" data-col-group=\"items_timings\">".locale_string("item_time_window")."</th>".
+    "<th data-sorter=\"time\" data-col-group=\"items_timings\">".locale_string("item_time_std_dev")."</th>".
   "</tr></thead><tbody>$rows</tbody></table>";
 
   return $res;

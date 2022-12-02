@@ -109,16 +109,22 @@ function rg_generator_draft($table_id, &$context_pickban, &$context_draft, $cont
 
     foreach($stages as $stage_num => $stage) {
       if($max_stage > 1) {
-        $draftline .= "<td class=\"separator\">".(isset($ranks_stages[$stage_num][$id]) ? number_format($ranks_stages[$stage_num][$id],2) : "-")."</td>";
-        if($stage['pick'] ?? false)
-          $draftline .= "<td>".$stage['pick']."</td><td>".number_format($stage['pick_wr']*100, 2)."%</td>";
-        else
-          $draftline .= "<td>&zwnj;-</td><td>&zwnj;-</td>";
+        $draftline .= "<td class=\"separator\" data-col-group=\"draft-stage-$stage_num\">".
+          (isset($ranks_stages[$stage_num][$id]) ? number_format($ranks_stages[$stage_num][$id],2) : "-")."</td>";
+        
+        if($stage['pick'] ?? false) {
+          $draftline .= "<td data-col-group=\"draft-stage-$stage_num\">".$stage['pick']."</td>".
+            "<td data-col-group=\"draft-stage-$stage_num\">".number_format($stage['pick_wr']*100, 2)."%</td>";
+        } else {
+          $draftline .= "<td data-col-group=\"draft-stage-$stage_num\">&zwnj;-</td><td data-col-group=\"draft-stage-$stage_num\">&zwnj;-</td>";
+        }
 
-        if($stage['ban'] ?? false)
-          $draftline .= "<td>".$stage['ban']."</td><td>".number_format($stage['ban_wr']*100, 2)."%</td>";
-        else
-          $draftline .= "<td>&zwnj;-</td><td>&zwnj;-</td>";
+        if($stage['ban'] ?? false) {
+          $draftline .= "<td data-col-group=\"draft-stage-$stage_num\">".$stage['ban']."</td>".
+            "<td data-col-group=\"draft-stage-$stage_num\">".number_format($stage['ban_wr']*100, 2)."%</td>";
+        } else {
+          $draftline .= "<td data-col-group=\"draft-stage-$stage_num\">&zwnj;-</td><td data-col-group=\"draft-stage-$stage_num\">&zwnj;-</td>";
+        }
       }
 
       $stages_passed++;
@@ -126,7 +132,11 @@ function rg_generator_draft($table_id, &$context_pickban, &$context_draft, $cont
 
     if($stages_passed < $max_stage) {
       for ($i=$stages_passed; $i<$max_stage; $i++)
-        $draftline .= "<td class=\"separator\">&zwnj;-</td><td>&zwnj;-</td><td>&zwnj;-</td><td>&zwnj;-</td><td>&zwnj;-</td>";
+        $draftline .= "<td class=\"separator\" data-col-group=\"draft-stage-$i\">&zwnj;-</td>".
+          "<td data-col-group=\"draft-stage-$i\">&zwnj;-</td>".
+          "<td data-col-group=\"draft-stage-$i\">&zwnj;-</td>".
+          "<td data-col-group=\"draft-stage-$i\">&zwnj;-</td>".
+          "<td data-col-group=\"draft-stage-$i\">&zwnj;-</td>";
     }
 
     if (empty($context_pickban[$id])) {
@@ -141,22 +151,26 @@ function rg_generator_draft($table_id, &$context_pickban, &$context_draft, $cont
 
     $draft[$id] = array ("out" => "", "matches" => $context_pickban[$id]['matches_total']);
     if($hero_flag)
-      $draft[$id]['out'] .= "<td>".hero_portrait($id)."</td><td>".hero_link($id)."</td>";
+      $draft[$id]['out'] .= "<td data-col-group=\"_index\">".hero_portrait($id)."</td><td data-col-group=\"_index\">".hero_link($id)."</td>";
     else
-      $draft[$id]['out'] .= "<td>".player_link($id, true, true)."</td>";
+      $draft[$id]['out'] .= "<td data-col-group=\"_index\">".player_link($id, true, true)."</td>";
 
-    $draft[$id]['out'] .= "<td>".$context_pickban[$id]['matches_total']."</td>";
-    $draft[$id]['out'] .= "<td>".number_format($ranks[$id] ?? 0, 2)."</td>";
+    $draft[$id]['out'] .= "<td class=\"separator\" data-col-group=\"total\">".$context_pickban[$id]['matches_total']."</td>";
+    $draft[$id]['out'] .= "<td data-col-group=\"total\">".number_format($ranks[$id] ?? 0, 2)."</td>";
 
-    if($context_pickban[$id]['matches_picked'])
-      $draft[$id]['out'] .= "<td>".$context_pickban[$id]['matches_picked']."</td><td>".number_format($context_pickban[$id]['winrate_picked']*100, 2)."%</td>";
-    else
-      $draft[$id]['out'] .= "<td>-</td><td>-</td>";
+    if($context_pickban[$id]['matches_picked']) {
+      $draft[$id]['out'] .= "<td data-col-group=\"total\">".$context_pickban[$id]['matches_picked']."</td>".
+        "<td data-col-group=\"total\">".number_format($context_pickban[$id]['winrate_picked']*100, 2)."%</td>";
+    } else {
+      $draft[$id]['out'] .= "<td data-col-group=\"total\">-</td><td data-col-group=\"total\">-</td>";
+    }
 
-    if($context_pickban[$id]['matches_banned'])
-      $draft[$id]['out'] .= "<td>".$context_pickban[$id]['matches_banned']."</td><td>".number_format($context_pickban[$id]['winrate_banned']*100, 2)."%</td>";
-    else
-      $draft[$id]['out'] .= "<td>-</td><td>-</td>";
+    if($context_pickban[$id]['matches_banned']) {
+      $draft[$id]['out'] .= "<td data-col-group=\"total\">".$context_pickban[$id]['matches_banned']."</td>".
+        "<td data-col-group=\"total\">".number_format($context_pickban[$id]['winrate_banned']*100, 2)."%</td>";
+    } else {
+      $draft[$id]['out'] .= "<td data-col-group=\"total\">-</td><td data-col-group=\"total\">-</td>";
+    }
 
     $draft[$id]['out'] .= $draftline."</tr>";
   }
@@ -167,27 +181,37 @@ function rg_generator_draft($table_id, &$context_pickban, &$context_draft, $cont
     else return ($a['matches'] < $b['matches']) ? 1 : -1;
   });
 
+
+  $colgroups = ['total'];
+  $priorities = [1];
+  for($i=1; $i<=$max_stage; $i++) {
+    $colgroups[] = "draft-stage-$i";
+    $priorities[] = $i==1 ? 2 : ($i == $max_stage ? 3 : 4);
+    register_locale_string( locale_string("stage")." ".$i, "draft-stage-$i" );
+  }
+  $res .= table_columns_toggle($table_id, $colgroups, true, $priorities);
+
   $res .= search_filter_component($table_id, true);
   $res .= "<table id=\"$table_id\" class=\"list wide sortable\"><thead><tr class=\"overhead\"><th width=\"11%\"".($hero_flag ? " colspan=\"2\"" : "")."></th>".
-          "<th colspan=\"6\">".locale_string("total")."</th>";
+          "<th colspan=\"6\" class=\"separator\" data-col-group=\"total\">".locale_string("total")."</th>";
   $heroline = "<tr>".
-                ($hero_flag ? "<th class=\"sorter-no-parser\" width=\"1%\"></th>" : "").
-                "<th data-sorter=\"text\">".locale_string($hero_flag ? "hero" : "player")."</th>".
-                "<th data-sorter=\"digit\">".locale_string("matches_s")."</th>".
-                "<th data-sorter=\"digit\">".locale_string("rank")."</th>".
-                "<th data-sorter=\"digit\">".locale_string("picks_s")."</th>".
-                "<th data-sorter=\"digit\">".locale_string("winrate_s")."</th>".
-                "<th data-sorter=\"digit\">".locale_string("bans_s")."</th>".
-                "<th data-sorter=\"digit\">".locale_string("winrate_s")."</th>";
+                ($hero_flag ? "<th class=\"sorter-no-parser\" width=\"1%\" data-col-group=\"_index\"></th>" : "").
+                "<th data-sorter=\"text\" data-col-group=\"_index\">".locale_string($hero_flag ? "hero" : "player")."</th>".
+                "<th class=\"separator\" data-sorter=\"digit\" data-col-group=\"total\">".locale_string("matches_s")."</th>".
+                "<th data-sorter=\"digit\" data-col-group=\"total\">".locale_string("rank")."</th>".
+                "<th data-sorter=\"digit\" data-col-group=\"total\">".locale_string("picks_s")."</th>".
+                "<th data-sorter=\"digit\" data-col-group=\"total\">".locale_string("winrate_s")."</th>".
+                "<th data-sorter=\"digit\" data-col-group=\"total\">".locale_string("bans_s")."</th>".
+                "<th data-sorter=\"digit\" data-col-group=\"total\">".locale_string("winrate_s")."</th>";
 
   if($max_stage > 1)
     for($i=1; $i<=$max_stage; $i++) {
-      $res .= "<th class=\"separator\" colspan=\"5\" data-sorter=\"digit\">".locale_string("stage")." $i</th>";
-      $heroline .= "<th class=\"separator\" data-sorter=\"digit\">".locale_string("rank")."</th>".
-                  "<th data-sorter=\"digit\">".locale_string("picks_s")."</th>".
-                  "<th data-sorter=\"digit\">".locale_string("winrate_s")."</th>".
-                  "<th data-sorter=\"digit\">".locale_string("bans_s")."</th>".
-                  "<th data-sorter=\"digit\">".locale_string("winrate_s")."</th>";
+      $res .= "<th class=\"separator\" colspan=\"5\" data-sorter=\"digit\" data-col-group=\"draft-stage-$i\">".locale_string("draft-stage-$i")."</th>";
+      $heroline .= "<th class=\"separator\" data-sorter=\"digit\" data-col-group=\"draft-stage-$i\">".locale_string("rank")."</th>".
+                  "<th data-sorter=\"digit\" data-col-group=\"draft-stage-$i\">".locale_string("picks_s")."</th>".
+                  "<th data-sorter=\"digit\" data-col-group=\"draft-stage-$i\">".locale_string("winrate_s")."</th>".
+                  "<th data-sorter=\"digit\" data-col-group=\"draft-stage-$i\">".locale_string("bans_s")."</th>".
+                  "<th data-sorter=\"digit\" data-col-group=\"draft-stage-$i\">".locale_string("winrate_s")."</th>";
     }
   $res .= "</tr>".$heroline."</tr></thead><tbody>";
 

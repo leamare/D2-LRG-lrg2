@@ -148,6 +148,7 @@ function rg_generator_laning_profile($table_id, &$context, $id_o, $heroes_flag =
   sort($matches_med);
 
   $res .= "<div class=\"content-text\"><h1>".locale_string($id ? "laning_opponents" : "laning_total")."</h1></div>";
+
   $res .= filter_toggles_component($table_id, [
     'match' => [
       'value' => $matches_med[ round(count($matches_med)/2) ] ?? 0,
@@ -158,34 +159,39 @@ function rg_generator_laning_profile($table_id, &$context, $id_o, $heroes_flag =
       'label' => 'data_filter_lane_wr'
     ],
   ], $table_id, 'wide');
+
+  $res .= table_columns_toggle($table_id, [
+    'total', 'lane_advantage', 'lane_won', 'lane_tie', 'lane_loss', 'winrate_diff',
+  ], true);
+
   $res .= search_filter_component($table_id, true);
   $res .= "<table id=\"$table_id\" class=\"list wide sortable\">";
   $res .= "<thead><tr class=\"overhead\">".
-            "<th width=\"12%\" colspan=\"".($heroes_flag ? "2" : "1")."\"></th>".
-            "<th width=\"18%\" colspan=\"3\"></th>".
-            "<th class=\"separator\" colspan=\"4\" data-sorter=\"digit\">".locale_string("lane_advantage")."</th>".
-            "<th class=\"separator\" colspan=\"2\" data-sorter=\"digit\">".locale_string("lane_won")."</th>".
-            "<th class=\"separator\" colspan=\"2\" data-sorter=\"digit\">".locale_string("lane_tie")."</th>".
-            "<th class=\"separator\" colspan=\"2\" data-sorter=\"digit\">".locale_string("lane_loss")."</th>".
-            "<th class=\"separator\" colspan=\"1\" data-sorter=\"digit\">".locale_string("winrate_diff")."</th>".
+            "<th width=\"12%\" colspan=\"".($heroes_flag ? "2" : "1")."\" data-col-group=\"_index\"></th>".
+            "<th class=\"separator\" width=\"18%\" colspan=\"3\" data-col-group=\"total\">".locale_string("total")."</th>".
+            "<th class=\"separator\" colspan=\"4\" data-sorter=\"digit\" data-col-group=\"lane_advantage\">".locale_string("lane_advantage")."</th>".
+            "<th class=\"separator\" colspan=\"2\" data-sorter=\"digit\" data-col-group=\"lane_won\">".locale_string("lane_won")."</th>".
+            "<th class=\"separator\" colspan=\"2\" data-sorter=\"digit\" data-col-group=\"lane_tie\">".locale_string("lane_tie")."</th>".
+            "<th class=\"separator\" colspan=\"2\" data-sorter=\"digit\" data-col-group=\"lane_loss\">".locale_string("lane_loss")."</th>".
+            "<th class=\"separator\" colspan=\"1\" data-sorter=\"digit\" data-col-group=\"winrate_diff\">".locale_string("winrate_diff")."</th>".
           "</tr><tr>".
-          ($heroes_flag ? "<th width=\"1%\"></th>" : "").
-          "<th data-sortInitialOrder=\"asc\" data-sorter=\"text\">".locale_string($id ? "opponent" : "hero")."</th>".
-          "<th data-sorter=\"digit\">".locale_string("matches")."</th>".
-          "<th data-sorter=\"digit\">".locale_string("lane_wr")."</th>".
-          "<th data-sorter=\"digit\">".locale_string("rank")."</th>".
-          "<th class=\"separator\" data-sorter=\"digit\">".locale_string("lane_win")."</th>".
-          "<th data-sorter=\"digit\">".locale_string("lane_loss")."</th>".
-          "<th data-sorter=\"digit\">".locale_string("lane_avg_gold_diff")."</th>".
-          "<th data-sorter=\"digit\">".locale_string("trends_diff")."</th>".
+          ($heroes_flag ? "<th width=\"1%\" data-col-group=\"_index\"></th>" : "").
+          "<th data-sortInitialOrder=\"asc\" data-sorter=\"text\" data-col-group=\"_index\">".locale_string($id ? "opponent" : "hero")."</th>".
+          "<th class=\"separator\" data-sorter=\"digit\" data-col-group=\"total\">".locale_string("matches")."</th>".
+          "<th data-sorter=\"digit\" data-col-group=\"total\">".locale_string("lane_wr")."</th>".
+          "<th data-sorter=\"digit\" data-col-group=\"total\">".locale_string("rank")."</th>".
+          "<th class=\"separator\" data-sorter=\"digit\" data-col-group=\"lane_advantage\">".locale_string("lane_win")."</th>".
+          "<th data-sorter=\"digit\" data-col-group=\"lane_advantage\">".locale_string("lane_loss")."</th>".
+          "<th data-sorter=\"digit\" data-col-group=\"lane_advantage\">".locale_string("lane_avg_gold_diff")."</th>".
+          "<th data-sorter=\"digit\" data-col-group=\"lane_advantage\">".locale_string("trends_diff")."</th>".
 
-          "<th class=\"separator\" data-sorter=\"digit\">".locale_string("ratio_freq")."</th>".
-          "<th data-sorter=\"digit\">".locale_string("lane_game_won")."</th>".
-          "<th class=\"separator\" data-sorter=\"digit\">".locale_string("ratio_freq")."</th>".
-          "<th data-sorter=\"digit\">".locale_string("lane_game_won")."</th>".
-          "<th class=\"separator\" data-sorter=\"digit\">".locale_string("ratio_freq")."</th>".
-          "<th data-sorter=\"digit\">".locale_string("lane_game_won")."</th>".
-          "<th class=\"separator\" data-sorter=\"digit\">".locale_string("laning_loss_to_win")."</th>".
+          "<th class=\"separator\" data-sorter=\"digit\" data-col-group=\"lane_won\">".locale_string("ratio_freq")."</th>".
+          "<th data-sorter=\"digit\" data-col-group=\"lane_won\">".locale_string("lane_game_won")."</th>".
+          "<th class=\"separator\" data-sorter=\"digit\" data-col-group=\"lane_tie\">".locale_string("ratio_freq")."</th>".
+          "<th data-sorter=\"digit\" data-col-group=\"lane_tie\">".locale_string("lane_game_won")."</th>".
+          "<th class=\"separator\" data-sorter=\"digit\" data-col-group=\"lane_loss\">".locale_string("ratio_freq")."</th>".
+          "<th data-sorter=\"digit\" data-col-group=\"lane_loss\">".locale_string("lane_game_won")."</th>".
+          "<th class=\"separator\" data-sorter=\"digit\" data-col-group=\"winrate_diff\">".locale_string("laning_loss_to_win")."</th>".
           // "<th data-sorter=\"digit\">".locale_string("gradient")."</th>".
         "</tr></thead>";
 
@@ -207,26 +213,29 @@ function rg_generator_laning_profile($table_id, &$context, $id_o, $heroes_flag =
       "data-value-match=\"".$data['matches']."\" ".
       "data-value-lane_wr=\"".($data['matches'] ? number_format($data['lane_wr']*100, 2) : 0)."\" ".
       " class=\"row\">".
-      ($heroes_flag ? "<td>".hero_portrait($elid)."</td>" : '').
-      "<td>".($heroes_flag ? hero_link($elid) : player_link($elid))."</td>".
-      "<td>".($data['matches'] ? $data['matches'] : '-')."</td>".
-      "<td>".($data['matches'] ? number_format($data['lane_wr']*100, 2).'%' : '-')."</td>".
-      "<td>".($data['matches'] ? number_format($data['rank'], 1) : '0')."</td>".
-      "<td class=\"separator\">".($data['matches'] ? number_format($data['avg_advantage']*MIN10_GOLD, 2) : '-')."</td>".
-      "<td>".($data['matches'] ? number_format($data['avg_disadvantage']*MIN10_GOLD, 2) : '-')."</td>".
-      "<td>".($data['matches'] ? number_format($data['avg_gold_diff']*MIN10_GOLD, 2) : '-')."</td>".
-      "<td>".($data['matches'] ? number_format(($data['avg_advantage']-$data['avg_disadvantage'])*MIN10_GOLD, 2) : '-')."</td>".
+      ($heroes_flag ? "<td data-col-group=\"_index\">".hero_portrait($elid)."</td>" : '').
+      "<td data-col-group=\"_index\">".($heroes_flag ? hero_link($elid) : player_link($elid))."</td>".
+      "<td class=\"separator\" data-col-group=\"total\">".($data['matches'] ? $data['matches'] : '-')."</td>".
+      "<td data-col-group=\"total\">".($data['matches'] ? number_format($data['lane_wr']*100, 2).'%' : '-')."</td>".
+      "<td data-col-group=\"total\">".($data['matches'] ? number_format($data['rank'], 1) : '0')."</td>".
+      "<td class=\"separator\" data-col-group=\"lane_advantage\">".($data['matches'] ? number_format($data['avg_advantage']*MIN10_GOLD, 2) : '-')."</td>".
+      "<td data-col-group=\"lane_advantage\">".($data['matches'] ? number_format($data['avg_disadvantage']*MIN10_GOLD, 2) : '-')."</td>".
+      "<td data-col-group=\"lane_advantage\">".($data['matches'] ? number_format($data['avg_gold_diff']*MIN10_GOLD, 2) : '-')."</td>".
+      "<td data-col-group=\"lane_advantage\">".($data['matches'] ? number_format(($data['avg_advantage']-$data['avg_disadvantage'])*MIN10_GOLD, 2) : '-')."</td>".
 
-      "<td class=\"separator\">".($data['matches'] ? number_format($data['lanes_won']*100/$data['matches'], 2).'%' : '-')."</td>".
-      "<td>".($data['matches'] ? ($data['lanes_won'] ? number_format($data['won_from_won']*100/$data['lanes_won'], 2) : '0').'%' : '-')."</td>".
+      "<td class=\"separator\" data-col-group=\"lane_won\">".($data['matches'] ? number_format($data['lanes_won']*100/$data['matches'], 2).'%' : '-')."</td>".
+      "<td data-col-group=\"lane_won\">".
+        ($data['matches'] ? ($data['lanes_won'] ? number_format($data['won_from_won']*100/$data['lanes_won'], 2) : '0').'%' : '-')."</td>".
 
-      "<td class=\"separator\">".($data['matches'] ? number_format($data['lanes_tied']*100/$data['matches'], 2).'%' : '-')."</td>".
-      "<td>".($data['matches'] ? ($data['lanes_tied'] ? number_format($data['won_from_tie']*100/$data['lanes_tied'], 2) : '0').'%' : '-')."</td>".
+      "<td class=\"separator\" data-col-group=\"lane_tie\">".($data['matches'] ? number_format($data['lanes_tied']*100/$data['matches'], 2).'%' : '-')."</td>".
+      "<td data-col-group=\"lane_tie\">".
+        ($data['matches'] ? ($data['lanes_tied'] ? number_format($data['won_from_tie']*100/$data['lanes_tied'], 2) : '0').'%' : '-')."</td>".
 
-      "<td class=\"separator\">".($data['matches'] ? number_format($data['lanes_lost']*100/$data['matches'], 2).'%' : '-')."</td>".
-      "<td>".($data['matches'] ? ($data['lanes_lost'] ? number_format($data['won_from_behind']*100/$data['lanes_lost'], 2) : '0').'%' : '-')."</td>".
+      "<td class=\"separator\" data-col-group=\"lane_loss\">".($data['matches'] ? number_format($data['lanes_lost']*100/$data['matches'], 2).'%' : '-')."</td>".
+      "<td data-col-group=\"lane_loss\">".
+        ($data['matches'] ? ($data['lanes_lost'] ? number_format($data['won_from_behind']*100/$data['lanes_lost'], 2) : '0').'%' : '-')."</td>".
 
-      "<td class=\"separator\">".($data['matches'] ? number_format($wr_diff*100, 2).'%' : '-')."</td>".
+      "<td class=\"separator\" data-col-group=\"winrate_diff\">".($data['matches'] ? number_format($wr_diff*100, 2).'%' : '-')."</td>".
       // "<td>".($data['matches'] ? '%' : '-')."</td>".
     "</tr>";
   }

@@ -126,7 +126,15 @@ function rg_generator_positions_overview($table_id, &$context, $hero_flag = true
 
   $filters['overview_total']['value'] = array_values($overview)[ floor(count($overview)*0.45) ]['total'];
 
+  $colgroups = [];
+  foreach ($position_overview_template as $k => $v) {
+    if ($k == "total") continue;
+    $colgroups[] = "position_".$k;
+  }
+
   $res = filter_toggles_component($table_id, $filters, $table_id, 'wide');
+
+  $res .= table_columns_toggle($table_id, $colgroups, true);
 
   $res .= search_filter_component($table_id, true);
 
@@ -134,21 +142,23 @@ function rg_generator_positions_overview($table_id, &$context, $hero_flag = true
 
   $heroline = "<tr>".
                 ($hero_flag ?
-                  "<th class=\"sorter-no-parser\" width=\"1%\"></th>".
-                  "<th data-sortInitialOrder=\"asc\" data-sorter=\"text\">".locale_string("hero")."</th>" :
-                  "<th data-sortInitialOrder=\"asc\" data-sorter=\"text\">".locale_string("player")."</th>"
+                  "<th class=\"sorter-no-parser\" width=\"1%\" data-col-group=\"_index\"></th>".
+                  "<th data-sortInitialOrder=\"asc\" data-sorter=\"text\" data-col-group=\"_index\">".locale_string("hero")."</th>" :
+                  "<th data-sortInitialOrder=\"asc\" data-sorter=\"text\" data-col-group=\"_index\">".locale_string("player")."</th>"
                 ).
-                "<th>".locale_string("matches_s")."</th>";
+                "<th data-col-group=\"_index\">".locale_string("matches_s")."</th>";
   $i = 2;
   foreach($position_overview_template as $k => $v) {
     if ($k == "total") continue;
 
-    $res .= "<th colspan=\"4\" class=\"separator\" data-sorter=\"digit\">".locale_string("position_$k")."</th>";
-    $heroline .= "<th class=\"separator\" data-sorter=\"digit\">".locale_string("matches_s")."</th>".
-                  "<th data-sorter=\"digit\">".locale_string("rank")."</th>".
+    $colgr = "position_".str_replace('.', '-', $k);
+
+    $res .= "<th colspan=\"4\" class=\"separator\" data-sorter=\"digit\" data-col-group=\"$colgr\">".locale_string("position_$k")."</th>";
+    $heroline .= "<th class=\"separator\" data-sorter=\"digit\" data-col-group=\"$colgr\">".locale_string("matches_s")."</th>".
+                  "<th data-sorter=\"digit\" data-col-group=\"$colgr\">".locale_string("rank")."</th>".
                   // "<th data-sorter=\"digit\">".locale_string("antirank")."</th>".
-                  "<th data-sorter=\"digit\">".locale_string("ratio_pos")."</th>".
-                  "<th data-sorter=\"digit\">".locale_string("winrate_s")."</th>";
+                  "<th data-sorter=\"digit\" data-col-group=\"$colgr\">".locale_string("ratio_pos")."</th>".
+                  "<th data-sorter=\"digit\" data-col-group=\"$colgr\">".locale_string("winrate_s")."</th>";
   }
   $res .= "</tr>".$heroline."</tr></thead>";
 
@@ -164,23 +174,25 @@ function rg_generator_positions_overview($table_id, &$context, $hero_flag = true
 
       $params[] = "data-value-position_$k=\"".$v['matches']."\"";
 
+      $colgr = "position_".str_replace('.', '-', $k);
+
       if(!$v['matches']) {
-        $elres .= "<td class=\"separator\">-</td>".
-                      "<td>-</td>".
-                      "<td>-</td>".
-                      "<td>-</th>";
+        $elres .= "<td class=\"separator\" data-col-group=\"$colgr\">-</td>".
+                      "<td data-col-group=\"$colgr\">-</td>".
+                      "<td data-col-group=\"$colgr\">-</td>".
+                      "<td data-col-group=\"$colgr\">-</th>";
       } else {
-        $elres .= "<td class=\"separator\">".$v['matches']."</td>".
-                    "<td>".number_format($v['rank'],1)."</td>".
+        $elres .= "<td class=\"separator\" data-col-group=\"$colgr\">".$v['matches']."</td>".
+                    "<td data-col-group=\"$colgr\">".number_format($v['rank'],1)."</td>".
                     // "<td>".number_format($v['antirank'],1)."</td>".
-                    "<td>".number_format($v['matches']*100/$el['total'],1)."%</td>".
-                    "<td>".number_format($v['wr']*100,1)."%</td>";
+                    "<td data-col-group=\"$colgr\">".number_format($v['matches']*100/$el['total'],1)."%</td>".
+                    "<td data-col-group=\"$colgr\">".number_format($v['wr']*100,1)."%</td>";
       }
     }
 
-    $res .= "<tr ".implode(" ", $params)."><td>".
-        ($hero_flag ? hero_portrait($elid)."</td><td>".hero_link($elid) : player_link($elid)).
-        "</td><td>".$el['total']."</td>".$elres."</tr>";
+    $res .= "<tr ".implode(" ", $params)."><td data-col-group=\"_index\">".
+        ($hero_flag ? hero_portrait($elid)."</td><td data-col-group=\"_index\">".hero_link($elid) : player_link($elid)).
+        "</td><td data-col-group=\"total\">".$el['total']."</td>".$elres."</tr>";
   }
   $res .= "</table>";
 
