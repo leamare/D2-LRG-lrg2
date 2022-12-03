@@ -1,6 +1,6 @@
 <?php 
 
-function rg_create_team_pickban_data($context_pb, $context_vs_pb, $context_total_matches) {
+function rg_create_team_pickban_data($context_pb, $context_vs_pb, $context_total_matches, $context_wins) {
   $r = [];
   $dummy = [
     "matches" => 0,
@@ -9,13 +9,17 @@ function rg_create_team_pickban_data($context_pb, $context_vs_pb, $context_total
     "matches_picked" => 0,
     "matches_banned" => 0,
     "winrate_picked" => 0,
+    "winrate_wo" => 0,
     "winrate_banned" => 0,
+    "winrate_wo_ban" => 0,
 
     "matches_total_vs" => 0,
     "matches_picked_vs" => 0,
     "matches_banned_vs" => 0,
     "winrate_picked_vs" => 0,
+    "winrate_wo_vs" => 0,
     "winrate_banned_vs" => 0,
+    "winrate_wo_ban_vs" => 0,
 
     "rank" => 0,
     "arank" => 0,
@@ -33,7 +37,9 @@ function rg_create_team_pickban_data($context_pb, $context_vs_pb, $context_total
     $r[$hid]['matches_picked'] = $line['matches_picked'];
     $r[$hid]['matches_banned'] = $line['matches_banned'];
     $r[$hid]['winrate_picked'] = $line['winrate_picked'];
+    $r[$hid]['winrate_wo'] = ($context_wins-round($line['matches_picked']*$line['winrate_picked'])) / ($context_total_matches-$line['matches_picked']);
     $r[$hid]['winrate_banned'] = $line['winrate_banned'];
+    $r[$hid]['winrate_wo_ban'] = ($context_wins-round($line['matches_banned']*$line['winrate_banned'])) / ($context_total_matches-$line['matches_banned']);
   }
 
   foreach($context_vs_pb as $hid => $line) {
@@ -46,7 +52,11 @@ function rg_create_team_pickban_data($context_pb, $context_vs_pb, $context_total
     $r[$hid]['matches_picked_vs'] = $line['matches_picked'];
     $r[$hid]['matches_banned_vs'] = $line['matches_banned'];
     $r[$hid]['winrate_picked_vs'] = $line['matches_picked'] ? round($line['wins_picked']/$line['matches_picked'], 5) : 0;
+    $r[$hid]['winrate_wo_vs'] = ($context_total_matches-$context_wins-round($line['matches_picked']*$line['winrate_picked'])) / 
+      ($context_total_matches-$line['matches_picked']);
     $r[$hid]['winrate_banned_vs'] = $line['matches_banned'] ? round($line['wins_banned']/$line['matches_banned'], 5) : 0;
+    $r[$hid]['winrate_wo_ban_vs'] = ($context_total_matches-$context_wins-round($line['matches_banned']*$r[$hid]['winrate_banned_vs'])) / 
+      ($context_total_matches-$line['matches_banned']);
   }
 
   $rank = [
@@ -118,7 +128,7 @@ function rg_create_team_pickban_data($context_pb, $context_vs_pb, $context_total
 }
 
 function rg_generator_team_pickban($table_id, $context) {
-  $pb = rg_create_team_pickban_data($context['pickban'], $context['pickban_vs'] ?? [], $context['matches_total']);
+  $pb = rg_create_team_pickban_data($context['pickban'], $context['pickban_vs'] ?? [], $context['matches_total'], $context['wins'] ?? 0);
 
   if (empty($pb)) return "";
 
@@ -139,38 +149,49 @@ function rg_generator_team_pickban($table_id, $context) {
     "</div>".
   "</details>";
 
-  $res .= search_filter_component($table_id, false);
+  $res .= table_columns_toggle($table_id, [
+    'total',
+    'team',
+    'enemy'
+  ], true, [
+    0, 1, 2
+  ]);
+  $res .= search_filter_component($table_id, true);
   $res .=  "<table id=\"$table_id\" class=\"wide list sortable\"><thead><tr class=\"overhead\">".
-      "<th colspan=\"2\"></th>".
-      "<th colspan=\"2\" class=\"separator\">".locale_string("total")."</th>".
-      "<th colspan=\"8\" class=\"separator\">".locale_string("team")."</th>".
-      "<th colspan=\"8\" class=\"separator\">".locale_string("enemy")."</th>".
+      "<th colspan=\"2\" data-col-group=\"_index\"></th>".
+      "<th colspan=\"2\" class=\"separator\" data-col-group=\"total\">".locale_string("total")."</th>".
+      "<th colspan=\"10\" class=\"separator\" data-col-group=\"team\">".locale_string("team")."</th>".
+      "<th colspan=\"10\" class=\"separator\" data-col-group=\"enemy\">".locale_string("enemy")."</th>".
     "</tr><tr>".
-    "<th class=\"sorter-no-parser\" width=\"1%\"></th>".
-    "<th data-sortInitialOrder=\"asc\">".locale_string("hero")."</th>".
-    "<th class=\"separator\">".locale_string("matches")."</th>".
-    "<th>".locale_string("contest_rate")."</th>".
+    "<th class=\"sorter-no-parser\" width=\"1%\" data-col-group=\"_index\"></th>".
+    "<th data-sortInitialOrder=\"asc\" data-col-group=\"_index\">".locale_string("hero")."</th>".
+    "<th class=\"separator\" data-col-group=\"total\">".locale_string("matches")."</th>".
+    "<th data-col-group=\"total\">".locale_string("contest_rate")."</th>".
 
-    "<th class=\"separator\">".locale_string("rank")."</th>".
-    "<th>".locale_string("antirank")."</th>".
-    "<th class=\"separator\">".locale_string("matches_picked")."</th>".
-    "<th>".locale_string("pickrate")."</th>".
-    "<th>".locale_string("winrate")."</th>".
+    "<th class=\"separator\" data-col-group=\"team\">".locale_string("rank")."</th>".
+    "<th data-col-group=\"team\">".locale_string("antirank")."</th>".
+    "<th class=\"separator\" data-col-group=\"team\">".locale_string("matches_picked")."</th>".
+    "<th data-col-group=\"team\">".locale_string("pickrate")."</th>".
+    "<th data-col-group=\"team\">".locale_string("winrate")."</th>".
+    "<th data-col-group=\"team\">".locale_string("wr_wo")."</th>".
     // "<th>".locale_string("mp")."</th>".
-    "<th class=\"separator\">".locale_string("matches_banned")."</th>".
-    "<th>".locale_string("banrate")."</th>".
-    "<th>".locale_string("winrate")."</th>".
+    "<th class=\"separator\" data-col-group=\"team\">".locale_string("matches_banned")."</th>".
+    "<th data-col-group=\"team\">".locale_string("banrate")."</th>".
+    "<th data-col-group=\"team\">".locale_string("winrate")."</th>".
+    "<th data-col-group=\"team\">".locale_string("wr_wo")."</th>".
     // "<th>".locale_string("mb")."</th>".
 
-    "<th class=\"separator\">".locale_string("rank")."</th>".
-    "<th>".locale_string("antirank")."</th>".
-    "<th class=\"separator\">".locale_string("matches_picked")."</th>".
-    "<th>".locale_string("pickrate")."</th>".
-    "<th>".locale_string("winrate")."</th>".
+    "<th class=\"separator\" data-col-group=\"enemy\">".locale_string("rank")."</th>".
+    "<th data-col-group=\"enemy\">".locale_string("antirank")."</th>".
+    "<th class=\"separator\" data-col-group=\"enemy\">".locale_string("matches_picked")."</th>".
+    "<th data-col-group=\"enemy\">".locale_string("pickrate")."</th>".
+    "<th data-col-group=\"enemy\">".locale_string("winrate")."</th>".
+    "<th data-col-group=\"enemy\">".locale_string("wr_wo")."</th>".
     // "<th>".locale_string("mp")."</th>".
-    "<th class=\"separator\">".locale_string("matches_banned")."</th>".
-    "<th>".locale_string("banrate")."</th>".
-    "<th>".locale_string("winrate")."</th>".
+    "<th class=\"separator\" data-col-group=\"enemy\">".locale_string("matches_banned")."</th>".
+    "<th data-col-group=\"enemy\">".locale_string("banrate")."</th>".
+    "<th data-col-group=\"enemy\">".locale_string("winrate")."</th>".
+    "<th data-col-group=\"enemy\">".locale_string("wr_wo")."</th>".
     // "<th>".locale_string("mb")."</th>".
 
     "</tr></thead>";
@@ -179,30 +200,34 @@ function rg_generator_team_pickban($table_id, $context) {
   
   foreach($pb as $id => $el) {
     $res .=  "<tr>".
-      "<td>".hero_portrait($id)."</td><td>".hero_link($id)."</td>".
-      "<td class=\"separator\">".$el['matches']."</td>".
-      "<td>".number_format($el['matches']/$context['matches_total']*100,2)."%</td>".
+      "<td data-col-group=\"_index\">".hero_portrait($id)."</td><td data-col-group=\"_index\">".hero_link($id)."</td>".
+      "<td class=\"separator\" data-col-group=\"total\">".$el['matches']."</td>".
+      "<td data-col-group=\"total\">".number_format($el['matches']/$context['matches_total']*100,2)."%</td>".
 
-      "<td class=\"separator\">".number_format($el['rank'],2)."</td>".
-      "<td>".number_format($el['arank'],2)."</td>".
-      "<td class=\"separator\">".$el['matches_picked']."</td>".
-      "<td>".number_format($el['matches_picked']/$context['matches_total']*100,2)."%</td>".
-      "<td>".number_format($el['winrate_picked']*100,2)."%</td>".
+      "<td class=\"separator\" data-col-group=\"team\">".number_format($el['rank'],2)."</td>".
+      "<td data-col-group=\"team\">".number_format($el['arank'],2)."</td>".
+      "<td class=\"separator\" data-col-group=\"team\">".$el['matches_picked']."</td>".
+      "<td data-col-group=\"team\">".number_format($el['matches_picked']/$context['matches_total']*100,2)."%</td>".
+      "<td data-col-group=\"team\">".number_format($el['winrate_picked']*100,2)."%</td>".
+      "<td data-col-group=\"team\">".number_format($el['winrate_wo']*100,2)."%</td>".
       // "<td>".number_format($el['matches_picked']/$mp, 1)."</td>".
-      "<td class=\"separator\">".$el['matches_banned']."</td>".
-      "<td>".number_format($el['matches_banned']/$context['matches_total']*100,2)."%</td>".
-      "<td>".number_format($el['winrate_banned']*100,2)."%</td>".
+      "<td class=\"separator\" data-col-group=\"team\">".$el['matches_banned']."</td>".
+      "<td data-col-group=\"team\">".number_format($el['matches_banned']/$context['matches_total']*100,2)."%</td>".
+      "<td data-col-group=\"team\">".number_format($el['winrate_banned']*100,2)."%</td>".
+      "<td data-col-group=\"team\">".number_format($el['winrate_wo_ban']*100,2)."%</td>".
       // "<td>".number_format($el['matches_banned']/$mb, 1)."</td>".
 
-      "<td class=\"separator\">".number_format($el['rank_vs'],2)."</td>".
-      "<td>".number_format($el['arank_vs'],2)."</td>".
-      "<td class=\"separator\">".$el['matches_picked_vs']."</td>".
-      "<td>".number_format($el['matches_picked_vs']/$context['matches_total']*100,2)."%</td>".
-      "<td>".number_format($el['winrate_picked_vs']*100,2)."%</td>".
+      "<td class=\"separator\" data-col-group=\"enemy\">".number_format($el['rank_vs'],2)."</td>".
+      "<td data-col-group=\"enemy\">".number_format($el['arank_vs'],2)."</td>".
+      "<td class=\"separator\" data-col-group=\"enemy\">".$el['matches_picked_vs']."</td>".
+      "<td data-col-group=\"enemy\">".number_format($el['matches_picked_vs']/$context['matches_total']*100,2)."%</td>".
+      "<td data-col-group=\"enemy\">".number_format($el['winrate_picked_vs']*100,2)."%</td>".
+      "<td data-col-group=\"enemy\">".number_format($el['winrate_wo_vs']*100,2)."%</td>".
       // "<td>".number_format($el['matches_picked']/$mp, 1)."</td>".
-      "<td class=\"separator\">".$el['matches_banned_vs']."</td>".
-      "<td>".number_format($el['matches_banned_vs']/$context['matches_total']*100,2)."%</td>".
-      "<td>".number_format($el['winrate_banned_vs']*100,2)."%</td>".
+      "<td class=\"separator\" data-col-group=\"enemy\">".$el['matches_banned_vs']."</td>".
+      "<td data-col-group=\"enemy\">".number_format($el['matches_banned_vs']/$context['matches_total']*100,2)."%</td>".
+      "<td data-col-group=\"enemy\">".number_format($el['winrate_banned_vs']*100,2)."%</td>".
+      "<td data-col-group=\"enemy\">".number_format($el['winrate_wo_ban_vs']*100,2)."%</td>".
       // "<td>".number_format($el['matches_banned']/$mb, 1)."</td>".
     "</tr>";
   }
@@ -213,7 +238,7 @@ function rg_generator_team_pickban($table_id, $context) {
 }
 
 function rg_generator_team_pickban_profile($context) {
-  $pb = rg_create_team_pickban_data($context['pickban'], $context['pickban_vs'] ?? [], $context['matches_total']);
+  $pb = rg_create_team_pickban_data($context['pickban'], $context['pickban_vs'] ?? [], $context['matches_total'], $context['wins']);
 
   if (empty($pb)) return "";
 
