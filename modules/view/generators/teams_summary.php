@@ -2,6 +2,16 @@
 include_once("$root/modules/view/functions/links.php");
 include_once("$root/modules/view/functions/convert_time.php");
 
+const TEAM_SUMMARY_SHORT_LIST = [
+  "kills",
+  "deaths",
+  "assists",
+  "gpm",
+  "xpm",
+  "hero_pool",
+  "avg_match_len"
+];
+
 function rg_view_generator_teams_summary($context = null, $short_flag = false) {
   global $report;
 
@@ -20,91 +30,105 @@ function rg_view_generator_teams_summary($context = null, $short_flag = false) {
     else return ($report['teams'][$a]['matches_total'] < $report['teams'][$b]['matches_total']) ? 1 : -1;
   });
 
-  $percentages = [
-    "rad_ratio",
-    "radiant_wr",
-    "dire_wr",
-    "diversity"
-  ];
-
-  $aliases = [
-    "wards_placed" => "wards_placed_s",
-    "sentries_placed" => "sentries_placed_s",
-    "wards_destroyed" => "wards_destroyed_s",
-    "wards_lost" => "wards_lost_s",
-    "radiant_wr" => "rad_wr_s",
-    "dire_wr" => "dire_wr_s",
-    "avg_match_len" => "duration_s",
-    "avg_win_len" => "avg_win_len_s",
-  ];
-
-  $short = [
-    "kills",
-    "deaths",
-    "assists",
-    "gpm",
-    "xpm",
-    "hero_pool",
-    "avg_match_len"
-  ];
-
   foreach ($report['teams'] as $vals) {
     if (!isset($vals['averages'])) continue;
 
     $keys = array_keys($vals['averages']);
     break;
   }
+  if ($short_flag) {
+    $keys = array_intersect($keys, TEAM_SUMMARY_SHORT_LIST);
+  }
 
-  if (!$short_flag)
+  $keys[] = 'matches';
+  $keys[] = 'winrate';
+
+  // COLUMNS GROUPING
+
+  $groups = [ '_index' => [], ];
+  foreach ($keys as $key) {
+    $group = get_summary_key_primary_group($key);
+    if (!isset($groups[ $group ])) $groups[ $group ] = [];
+    $groups[ $group ][] = $key;
+  }
+
+  $index_group = $groups['_index'];
+  unset($groups['_index']);
+
+  $priorities = [];
+  foreach ($groups as $gr => $cols) {
+    $priorities[] = SUMMARY_GROUPS_PRIORITIES[$gr] ?? count($groups);
+  }
+
+  // TABLE RENDERING
+
+  if (!$short_flag) {
+    $res .= table_columns_toggle('teams-summary', array_keys($groups), true, $priorities);
+
     $res .= search_filter_component("teams-summary", true);
+  }
 
   $res .= "<table id=\"teams-summary\" class=\"list ".($short_flag ? "" : "wide")." sortable\">";
 
   $table_id = "teams-summary";
   $i = 0;
 
-  $res .= "<thead><tr>".
-            "<th></th>".
-            "<th data-sortInitialOrder=\"asc\">".locale_string("team_name")."</th>".
-            "<th>".locale_string("matches_s")."</th>".
-            "<th>".locale_string("winrate")."</th>";
-  foreach($keys as $k) {
-    if($short_flag) {
-      if(!in_array($k, $short)) continue;
-    }
-    if (isset($aliases[$k])) $k = $aliases[$k];
-      $res .= "<th>".locale_string($k)."</th>";
-  }
-
-  $res .= "</tr></thead>";
+  $res .= "<thead><tr class=\"overhead\">".
+    "<th colspan=\"".(2 + count($index_group))."\" data-col-group=\"_index\"></th>".
+    implode('', array_map(
+      function($a) use (&$groups) {
+        return "<th class=\"separator\" colspan=\"".count($groups[$a])."\" data-col-group=\"$a\">".locale_string($a)."</th>";
+      }, array_keys($groups)
+    ))."</tr>".
+    "<tr>".
+      "<th data-col-group=\"_index\"></th>".
+      "<th data-sortInitialOrder=\"asc\" data-col-group=\"_index\">".locale_string("team_name")."</th>".
+      "<th data-col-group=\"_index\">".implode(
+        "</th><th data-col-group=\"_index\">", array_map(function($el) {
+          return locale_string(SUMMARY_KEYS_REPLACEMENTS[$el] ?? $el);
+        }, $index_group)
+      )."</th>".
+      implode('', array_map(
+        function($a, $k) {
+          return "<th class=\"separator\" data-col-group=\"$k\">".implode(
+            "</th><th data-col-group=\"$k\">", array_map(function($el) {
+              return locale_string(SUMMARY_KEYS_REPLACEMENTS[$el] ?? $el);
+            }, $a)
+          )."</th>";
+        }, $groups, array_keys($groups)
+      )).
+    "</tr>".
+  "</thead><tbody>";
 
   foreach($context as $team_id) {
     if (isset($report['teams_interest']) && !in_array($team_id, $report['teams_interest'])) continue;
-    $res .= "<tr>".
-              "<td>".team_logo($team_id)."</td>".
-              "<td>".team_link($team_id)."</td>".
-              "<td>".$report['teams'][$team_id]['matches_total']."</td>".
-              "<td>".number_format( $report['teams'][$team_id]['matches_total'] ? 
-                $report['teams'][$team_id]['wins']*100/$report['teams'][$team_id]['matches_total']
-                : 0,2)."%</td>";
 
-    foreach($report['teams'][$team_id]['averages'] as $k => $v) {
-      if($short_flag) {
-        if(!in_array($k, $short)) continue;
-      }
-      $res .= "<td>".
-              (
-                strpos($k, "duration") !== FALSE || strpos($k, "_len") !== FALSE ?
-                  convert_time($v) :
-                  number_format($v*(in_array($k, $percentages) ? 100 : 1),
-                    ($v > 1000) ? 0 : 1
-                    )
-              ).
-              (in_array($k, $percentages) ? "%" : "")."</td>";
+    $el = $report['teams'][$team_id]['averages'];
+    $el['matches'] = $report['teams'][$team_id]['matches_total'];
+    $el['winrate'] = $report['teams'][$team_id]['matches_total'] ? 
+      $report['teams'][$team_id]['wins']*100/$report['teams'][$team_id]['matches_total'] : 0;
+
+    $res .= "<tr>".
+      "<td data-col-group=\"_index\">".team_logo($team_id)."</td>".
+      "<td data-col-group=\"_index\">".team_link($team_id)."</td>";
+
+    foreach ($index_group as $key) {
+      $res .= "<td data-col-group=\"_index\">".summary_prepare_value($key, $el[$key] ?? '-')."</td>";
     }
+
+    $res .= implode('', array_map(
+      function($a) use (&$groups, &$el) {
+        return "<td class=\"separator\" data-col-group=\"$a\">".implode(
+          "</td><td data-col-group=\"$a\">", array_map(function($key) use (&$el) {
+            return summary_prepare_value($key, $el[$key]);
+          }, $groups[$a])
+        )."</td>";
+      }, array_keys($groups)
+    ));
+
     $res .= "</tr>";
   }
-  $res .= "</table>";
+  $res .= "</tbody></table>";
 
   return $res;
 }

@@ -38,4 +38,95 @@ $level_codes = array(
 
 $charts_colors = array( "#6af","#f66","#fa6","#66f","#62f","#a6f","#6ff","#6fa","#2f6","#6f2","#ff6","#f22","#f6f","#666", "#46f", "#4f6", "#aa3" );
 
-?>
+const SUMMARY_GROUPS = [
+  'matches' => '_index',
+  'matches_s' => '_index',
+
+  'winrate' => 'performance',
+  'winrate_s' => 'performance',
+
+  'rank' => 'performance',
+  'antirank' => 'performance',
+  'diversity' => 'performance',
+  'hero_pool' => 'performance',
+
+  'kills' => 'kda',
+  'deaths' => 'kda',
+  'assists' => 'kda',
+  'kills_s' => 'kda',
+  'deaths_s' => 'kda',
+  'assists_s' => 'kda',
+  'kda' => 'kda',
+
+  'gpm' => 'farm',
+  'xpm' => 'farm',
+  'lh_at10' => 'farm',
+  'lasthits_per_min_s' => 'farm',
+  'stacks_s' => 'farm',
+
+  'heal_per_min_s' => 'combat',
+  'hero_damage_per_min_s' => 'combat',
+  'taken_damage_per_min_s' => 'combat',
+  'stuns' => 'combat',
+
+  'wards_placed' => 'vision',
+  'sentries_placed' => 'vision',
+  'wards_destroyed' => 'vision',
+  'wards_lost' => 'vision',
+
+  'tower_damage_per_min_s' => 'objectives,combat',
+  'roshan_kills_with_team' => 'objectives',
+  'courier_kills' => 'objectives',
+  'roshan_kills' => 'objectives',
+
+  'duration' => 'duration',
+  'avg_match_len' => 'duration',
+  'matches_median_duration' => 'duration',
+  'avg_win_len' => 'duration',
+
+  'pings' => 'objectives,performance',
+
+  'rad_ratio' => 'draft',
+  'radiant_wr' => 'draft',
+  'dire_wr' => 'draft',
+  'opener_ratio' => 'draft',
+  'opener_pick_winrate' => 'draft',
+
+  'damage_to_gold_per_min_s' => 'performance,farm,combat',
+
+  'matchlinks' => 'permagroup',
+  'common_position' => 'permagroup',
+];
+
+const SUMMARY_GROUPS_PRIORITIES = [
+  '_index' => 0,
+  'performance' => 1,
+  'kda' => 2,
+  'farm' => 3,
+  'combat' => 4,
+  'draft' => 5,
+  'objectives' => 7,
+  'duration' => 7,
+  'vision' => 6,
+  'permagroup' => 0,
+];
+
+const SUMMARY_KEYS_REPLACEMENTS = [
+  'diversity' => 'diversity_s',
+  'roshan_kills_with_team' => 'roshan_kills_with_team_s',
+  'winrate_s' => 'winrate',
+  'matches_s' => 'matches',
+
+  "wards_placed" => "wards_placed_s",
+  "sentries_placed" => "sentries_placed_s",
+  "wards_destroyed" => "wards_destroyed_s",
+  "wards_lost" => "wards_lost_s",
+  "radiant_wr" => "rad_wr_s",
+  "dire_wr" => "dire_wr_s",
+  "avg_match_len" => "duration_s",
+  "avg_win_len" => "avg_win_len_s",
+  "matches_median_duration" => "matches_median_duration_s",
+  "opener_ratio" => "opener_ratio_s",
+  "opener_pick_winrate" => "opener_pick_winrate_s",
+  "duration" => "duration_s"
+];

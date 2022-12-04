@@ -33,4 +33,3 @@ if (file_exists($cache_file)) {
   ];
 }
 
-?>

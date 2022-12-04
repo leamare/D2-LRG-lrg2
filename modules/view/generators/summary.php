@@ -2,6 +2,7 @@
 include_once($root."/modules/view/functions/hero_name.php");
 include_once($root."/modules/view/functions/player_name.php");
 include_once($root."/modules/view/functions/convert_time.php");
+include_once($root."/modules/view/functions/summary_utils.php");
 
 function rg_generator_summary($table_id, &$context, $hero_flag = true, $rank = false) {
   if(!sizeof($context)) return "";
@@ -75,6 +76,30 @@ function rg_generator_summary($table_id, &$context, $hero_flag = true, $rank = f
     $keys = array_insert_before($keys, array_search("gpm", $keys), [ 'damage_to_gold_per_min_s' ]);
   }
 
+  // COLUMNS GROUPING
+
+  $groups = [];
+  foreach ($keys as $key) {
+    $group = get_summary_key_primary_group($key);
+    if (!isset($groups[ $group ])) $groups[ $group ] = [];
+    $groups[ $group ][] = $key;
+  }
+
+  if ($rank) {
+    $groups[ SUMMARY_GROUPS['rank'] ][] = 'rank';
+    $groups[ SUMMARY_GROUPS['antirank'] ][] = 'antirank';
+  }
+
+  $index_group = $groups['_index'];
+  unset($groups['_index']);
+
+  $priorities = [];
+  foreach ($groups as $gr => $cols) {
+    $priorities[] = SUMMARY_GROUPS_PRIORITIES[$gr] ?? count($groups);
+  }
+
+  // TABLE RENDERING
+
   sort($matches);
   $res = filter_toggles_component($table_id, [
     'summary_matches' => [
@@ -83,51 +108,62 @@ function rg_generator_summary($table_id, &$context, $hero_flag = true, $rank = f
     ]
   ], $table_id, 'wide');
 
+  $res .= table_columns_toggle($table_id, array_keys($groups), true, $priorities);
+
   $res .= search_filter_component($table_id, true);
 
-  $res .= "<table id=\"$table_id\" class=\"list wide sortable\"><thead><tr>".
-          ($hero_flag ? "<th class=\"sorter-no-parser\" width=\"1%\"></th>" : "").
-          "<th data-sortInitialOrder=\"asc\">".locale_string($hero_flag ? "hero" : "player")."</th>";
-
-  for($k=0, $end=sizeof($keys); $k < $end; $k++) {
-    if ($k == 2) {
-      if ($rank) {
-        $res .= "<th>".locale_string("rank")."</th>";
-        $res .= "<th>".locale_string("antirank")."</th>";
-      }
-      $res .= "<th class=\"separator\">".locale_string($keys[$k])."</th>";
-      continue;
-    }
-    $res .= "<th>".locale_string($keys[$k])."</th>";
-  }
-  $res .= "</tr></thead><tbody>";
+  $res .= "<table id=\"$table_id\" class=\"list wide sortable\"><thead><tr class=\"overhead\">".
+    // ($hero_flag ? "<th class=\"sorter-no-parser\" width=\"1%\"></th>" : "").
+    "<th colspan=\"".(($hero_flag ? 2 : 1) + count($index_group))."\" data-col-group=\"_index\"></th>".
+    implode('', array_map(
+      function($a) use (&$groups) {
+        return "<th class=\"separator\" colspan=\"".count($groups[$a])."\" data-col-group=\"$a\">".locale_string($a)."</th>";
+      }, array_keys($groups)
+    ))."</tr>".
+    "<tr>".
+    ($hero_flag ? "<th class=\"sorter-no-parser\" width=\"1%\"></th>" : "").
+    "<th data-col-group=\"_index\">".locale_string($hero_flag ? "hero" : "player")."</th>".
+    "<th data-col-group=\"_index\">".implode(
+      "</th><th data-col-group=\"_index\">", array_map(function($el) {
+        return locale_string(SUMMARY_KEYS_REPLACEMENTS[$el] ?? $el);
+      }, $index_group)
+    )."</th>".
+    implode('', array_map(
+      function($a, $k) {
+        return "<th class=\"separator\" data-col-group=\"$k\">".implode(
+          "</th><th data-col-group=\"$k\">", array_map(function($el) {
+            return locale_string(SUMMARY_KEYS_REPLACEMENTS[$el] ?? $el);
+          }, $a)
+        )."</th>";
+      }, $groups, array_keys($groups)
+    )).
+    "</tr>".
+  "</thead><tbody>";
 
   foreach($context as $id => $el) {
-    $res .= "<tr data-value-summary_matches=\"".$el['matches_s']."\"><td>".
-              ($hero_flag ? hero_portrait($id)."</td><td>".hero_link($id) : player_link($id, true, true)).
-            "</td>".
-            "<td>".$el['matches_s']."</td>".
-            "<td>".number_format($el['winrate_s']*100,1)."%</td>".
-            ($rank ? "<td>".number_format($ranks[$id],2)."</td>"."<td>".number_format($aranks[$id],2)."</td>" : "");
-
-    for($k=2, $end=sizeof($keys); $k < $end; $k++) {
-      if ($k == 2) $res .= "<td class=\"separator\">";
-      else $res .= "<td>";
-
-      if (strpos($keys[$k], "duration") !== FALSE || strpos($keys[$k], "_len") !== FALSE) {
-        $res .= convert_time($el[$keys[$k]]);
-      } else if(is_numeric($el[$keys[$k]])) {
-        if ($el[$keys[$k]] > 10)
-          $res .= number_format($el[$keys[$k]],1);
-        else if ($el[$keys[$k]] > 1)
-          $res .= number_format($el[$keys[$k]],2);
-        else
-          $res .= number_format($el[$keys[$k]],3);
-      } else {
-        $res .= $el[$keys[$k]];
-      }
-      $res .= "</td>";
+    if ($rank) {
+      $el['rank'] = number_format($ranks[$id],2);
+      $el['antirank'] = number_format($aranks[$id],2);
     }
+
+    $res .= "<tr data-value-summary_matches=\"".$el['matches_s']."\"><td data-col-group=\"_index\">".
+      ($hero_flag ? hero_portrait($id)."</td><td>".hero_link($id) : player_link($id, true, true)).
+    "</td>";
+
+    foreach ($index_group as $key) {
+      $res .= "<td data-col-group=\"_index\">".summary_prepare_value($key, $el[$key] ?? '-')."</td>";
+    } 
+
+    $res .= implode('', array_map(
+      function($a) use (&$groups, &$el) {
+        return "<td class=\"separator\" data-col-group=\"$a\">".implode(
+          "</td><td data-col-group=\"$a\">", array_map(function($key) use (&$el) {
+            return summary_prepare_value($key, $el[$key]);
+          }, $groups[$a])
+        )."</td>";
+      }, array_keys($groups)
+    ));
+
     $res .= "</tr>";
   }
   $res .= "</tbody></table>";
@@ -136,4 +172,3 @@ function rg_generator_summary($table_id, &$context, $hero_flag = true, $rank = f
   return $res;
 }
 
-?>
