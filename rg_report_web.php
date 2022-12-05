@@ -215,9 +215,6 @@ if (isset($report)) {
   if (isset($modules['records']) && check_module("records")) {
     merge_mods($modules['records'], rg_view_generate_records());
   }
-  if (isset($modules['recordext']) && check_module("recordext")) {
-    merge_mods($modules['recordext'], rg_view_generate_records_ext());
-  }
 
   # milestones
   if (isset($modules['milestones']) && check_module("milestones")) {
