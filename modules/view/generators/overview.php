@@ -179,6 +179,75 @@ function rg_view_generator_overview($modlink, &$context, $foreword = "") {
         ]);
     }
 
+    if ($report['settings']['overview_sides_graph'] && isset($context['main']['opener_pick_winrate'])) {
+      $opener_color = $charts_colors[2];
+      $closing_color = $charts_colors[3];
+      $res .= "<h1>".locale_string("opener_pick_winrate")."</h1>".
+      "<div class=\"chart-opener-bars\"><canvas id=\"overview-opener\" height=\"50px\"></canvas><script>".
+      "var opener_chart_el = document.getElementById('overview-opener'); ".
+      "var opener_chart = new Chart(opener_chart_el, {
+        type: 'horizontalBar',
+        data: {
+          labels: [
+            '".locale_string("rad_ratio")."',
+            '',
+            '".locale_string("opener_pick_winrate")."',
+            '".locale_string("radiant_wr")."',
+            '".locale_string("dire_wr")."'
+          ],
+          datasets: [
+            {
+              label: '".locale_string('opener_pick')."',
+              data: [
+              -".$context['main']['opener_pick_radiant_ratio'].",
+              null,
+              -".$context['main']['opener_pick_winrate'].",
+              -".$context['main']['opener_pick_radiant_winrate'].",
+              -".$context['main']['opener_pick_dire_winrate']."],
+              stack: 'stack_0',
+              backgroundColor: '".$opener_color."',
+            },
+            {
+              label: '".locale_string('follower_pick')."',
+              data: [".
+                (100-$context['main']['opener_pick_radiant_ratio']).",".
+                "null,".
+                $context['main']['follower_pick_winrate'].",".
+                $context['main']['follower_pick_radiant_winrate'].",".
+                $context['main']['follower_pick_dire_winrate']."],
+              stack: 'stack_0',
+              backgroundColor: '".$closing_color."',
+            }
+          ],
+        },
+        options: {
+          tooltips: {
+            callbacks: {
+              label: function(tooltip, data) {
+                console.log(tooltip, data);
+                const label = data.datasets[tooltip.datasetIndex].label || '';
+                const value = data.datasets[tooltip.datasetIndex].data[tooltip.index];
+
+                return label+': '+Math.abs(value).toFixed(2)+'%';
+              },
+              footer: function (tooltips) {
+                console.log(tooltips);
+                return '".locale_string('wrp_diff').": '+(Math.abs(tooltips[0].xLabel)-tooltips[1].xLabel).toFixed(2)+'%';
+              }
+            }
+          },
+          scales: {
+            responsive: true,
+            interaction: {
+              intersect: false,
+            },
+            x: { stacked: true },
+            y: { stacked: true },
+          }
+        }
+      });</script></div>";
+    }
+
     if ($report['settings']['overview_days_graph'] && isset($context['days'])) {
       $converted_modes = array();
       $matchcount = array();
