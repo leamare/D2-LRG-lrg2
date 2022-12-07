@@ -279,10 +279,11 @@ if (sizeof($cache['reps']) === 0) {
     $modules .= "<input name=\"filter\" class=\"search-filter wide\" data-table-filter-id=\"leagues-list\" placeholder=\"".locale_string('filter_placeholder')."\" />";
   }
 
-  $modules .= "<table id=\"leagues-list\" class=\"list wide ".(isset($cat) ? "sortable" : "")."\"><thead><tr>";
-  $modules .= "<th>".locale_string("league_name")."</th>".
+  $modules .= "<table id=\"leagues-list\" class=\"list wide ".(isset($cat) ? "sortable" : "")."\"><thead><tr class=\"overhead\">".
+    "<th width=\"50px\"></th>".
+    "<th width=\"100px\"></th>".
+    "<th>".locale_string("league_name")."</th>".
     "<th>".locale_string("league_id")."</th>".
-    "<th>".locale_string("league_desc")."</th>".
     "<th>".locale_string("type")."</th>".
     "<th>".locale_string("matches_total")."</th>".
     "<th>".locale_string("patches")."</th>".
@@ -291,7 +292,7 @@ if (sizeof($cache['reps']) === 0) {
     "<th>".locale_string("days")."</th>".
     "<th>".locale_string("start_date")."</th>".
     "<th>".locale_string("end_date")."</th>".
-    "</tr></thead>";
+  "</tr></thead>";
 
   if (!isset($cat) || $cat !== "recent") {
     uasort($reps, function($a, $b) {
@@ -358,9 +359,24 @@ if (sizeof($cache['reps']) === 0) {
       }
     }
 
-    $modules .= "<tr><td><a href=\"?league=".$report['tag'].(empty($linkvars) ? "" : "&".$linkvars)."\" data-aliases=\"".$aliases."\">".$report['name']."</a></td>".
+    $_lid = $report['id'] ?? null;
+    if (empty($_lid) && !empty($__lid_fallbacks)) {
+      foreach ($__lid_fallbacks as $preg => $lid) {
+        if (preg_match($preg, $report['tag'] ?? $cat)) {
+          $_lid = $lid;
+          break;
+        }
+      }
+    }
+    if (empty($_lid)) $_lid = "default";
+
+    $modules .= "<tr class=\"expandable primary closed\" data-group=\"report-".$report['tag']."\">".
+      "<td><span class=\"expand\"></span></td>".
+      "<td>".
+        "<img class=\"event-logo-list\" src=\"".str_replace('%LID%', $_lid, $league_logo_banner_provider)."\" alt=\"$_lid\" />".
+      "</td>".
+      "<td><a href=\"?league=".$report['tag'].(empty($linkvars) ? "" : "&".$linkvars)."\" data-aliases=\"".$aliases."\">".$report['name']."</a></td>".
       "<td>".($report['id'] == "" ? "-" : "<a href=\"?lid=".$report['id'].(empty($linkvars) ? "" : "&".$linkvars)."\">".$report['id']."</a>")."</td>".
-      "<td>".$report['desc']."</td>".
       "<td>".locale_string($event_type)."</td>".
       "<td>".$report['matches']."</td>".
       "<td>".(
@@ -374,10 +390,12 @@ if (sizeof($cache['reps']) === 0) {
       "<td>".(isset($report['regions']) ? sizeof($report['regions']) : ' - ')."</td>".
       "<td>".$report['days']."</td>".
       "<td value=\"".$report['first_match']['date']."\" data-matchid=\"".($report['first_match']['mid'] ?? 0)."\">".date(locale_string("date_format"), $report['first_match']['date'])."</td>".
-      "<td value=\"".$report['last_match']['date']."\" data-matchid=\"".($report['last_match']['mid'] ?? 0)."\">".date(locale_string("date_format"), $report['last_match']['date'])."</td></tr>";
+      "<td value=\"".$report['last_match']['date']."\" data-matchid=\"".($report['last_match']['mid'] ?? 0)."\">".date(locale_string("date_format"), $report['last_match']['date'])."</td>".
+      "</tr>".
+      "<tr class=\"collapsed secondary tablesorter-childRow\" data-group=\"report-".$report['tag']."\"><td></td><td colspan=11>".$report['desc']."</td></tr>";
   }
   if(!$index_list) {
-    $modules .= "<tr><td></td><td></td><td>...</td><td colspan=\"8\"></td></tr>";
+    $modules .= "<tr><td></td><td></td><td>...</td><td colspan=\"9\"></td></tr>";
   }
 
   $modules .= "</table>";
