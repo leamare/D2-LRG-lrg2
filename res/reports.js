@@ -1,6 +1,71 @@
 $(document).ready(function() {
-  $('.list tbody tr').on('click', function() {
+  $('.list tbody tr, .flextable .line').on('click', function() {
     $(this).toggleClass('highlighted');
+  });
+
+  $('.flextable .expandable .expand, table .expandable .expand').on('click', function() {
+    let parent = $(this).parent().parent();
+    parent.toggleClass('closed');
+    let rows = parent.parent().find('tr[data-group='+$(parent).attr('data-group')+']');
+    for (i=0; i<rows.length; i++) {
+      $(rows[i]).toggleClass('collapsed');
+    }
+  });
+
+  $('.table-column-toggles').each(function() {
+    const toggles = this;
+    const table = $(this).attr('data-table');
+
+    $(this).find('input[type=checkbox]').each(function() {
+      $(this).prop('checked', true);
+      $(this).on('change', function() {
+        const group = $(this).attr('data-group');
+        const status = this.checked;
+        $('#'+table+' td[data-col-group='+group+'], #'+table+' th[data-col-group='+group+']').each(function() {
+          $(this).toggle(status);
+        });
+      });
+    });
+
+    let tableWidth = $('#'+table).width();
+    const isWide = $('#'+table).hasClass('wide');
+    const greedy = $(this).hasClass('greedy');
+    const tableContainerWidth = $('#'+table).parent().width() * (isWide ? .98 : .82) * (greedy ? 1.05 : .875);
+
+    if (tableContainerWidth < tableWidth) {
+      let overhead = [];
+      $('#'+table+' tr.overhead th').each(function() {
+        const group = $(this).attr('data-col-group');
+        if (!group || group == '_index') return;
+
+        const toggle = $(toggles).find('input[data-group='+group+']')[0];
+        const priority = $(toggle).attr('data-group-priority');
+        if (!priority) return;
+
+        const width = $(this).width();
+        overhead.push({
+          group,
+          width,
+          priority,
+          toggle,
+        });
+      });
+
+      overhead.sort((a, b) => {
+        if (a.priority != b.priority) {
+          return b.priority - a.priority
+        }
+
+        return b.width - a.width;
+      });
+
+      for (const i in overhead) {
+        $(overhead[i].toggle).prop('checked', false);
+        $(overhead[i].toggle).trigger('change');
+        tableWidth -= overhead[i].width;
+        if (tableWidth <= tableContainerWidth) break;
+      }
+    }
   });
 
   $('table.sortable').tablesorter({
@@ -12,18 +77,43 @@ $(document).ready(function() {
   $(".search-filter").on("input", function() {
     const value = new RegExp( $(this).val().toLowerCase() );
     const table = $(this).attr('data-table-filter-id');
+
+    let rowGroups = {};
     
-    $("#" + table + " tbody tr").filter(function() {
-      const aliasesRaw = $(this).find('img[data-aliases], a[data-aliases]');
-      let aliases = $(this).attr('data-aliases');
-      if (aliasesRaw.length) {
-        for (let i=0; i<aliasesRaw.length; i++) {
-          aliases += ' ' + $(aliasesRaw[i]).attr('data-aliases');
+    $("#" + table + " tbody tr").each(function() {
+      let group = $(this).attr('data-group');
+      if (!group) {
+        if ($(this).hasClass('secondary')) {
+          group = Object.keys(rowGroups)[ Object.keys(rowGroups).length-1 ];
+        } else {
+          group = table+"_group_"+Object.keys(rowGroups).length;
         }
       }
-      const line = $(this).text().toLowerCase() + (aliases ? ' ' + aliases.toLowerCase() : '');
-      $(this).toggle( line.match(value) !== null )
+      if (!rowGroups[group]) rowGroups[group] = [];
+      rowGroups[group].push(this);
     });
+
+    for (const group in rowGroups) {
+      let line = "";
+      for (const i in rowGroups[group]) {
+        const el = rowGroups[group][i];
+        const aliasesRaw = $(el).find('img[data-aliases], a[data-aliases]');
+        let aliases = $(el).attr('data-aliases');
+        if (aliasesRaw.length) {
+          for (let i=0; i<aliasesRaw.length; i++) {
+            aliases += ' ' + $(aliasesRaw[i]).attr('data-aliases');
+          }
+        }
+
+        line +=  $(el).text().toLowerCase() + (aliases ? ' ' + aliases.toLowerCase() : '') + ' ';
+      }
+      
+      const visible = line.match(value) !== null;
+
+      for (const i in rowGroups[group]) {
+        $(rowGroups[group][i]).toggle( visible );
+      }
+    }
   });
 
   let selectors = $('.custom-selector');
@@ -432,10 +522,38 @@ $(document).ready(function() {
       const param = $(this).attr('data-param');
       const value = +$(this).attr('data-value');
       const status = this.checked;
-      
-      $("#" + table + " tbody tr").filter(function() {
-        $(this).toggleClass('filter-toggle-hidden', !(status ? +$(this).attr(param) >= value : true) );
+
+      let rowGroups = {};
+    
+      $("#" + table + " tbody tr").each(function() {
+        let group = $(this).attr('data-group');
+        if (!group) {
+          if ($(this).hasClass('secondary')) {
+            group = Object.keys(rowGroups)[ Object.keys(rowGroups).length-1 ];
+          } else {
+            group = table+"_group_"+Object.keys(rowGroups).length;
+          }
+        }
+        if (!rowGroups[group]) rowGroups[group] = [];
+        rowGroups[group].push(this);
       });
+
+      for (const group in rowGroups) {
+        let value = null;
+        for (const i in rowGroups[group]) {
+          const el = rowGroups[group][i];
+          if ($(el).attr(param) !== undefined) {
+            value = $(this).attr(param);
+            break;
+          }
+        }
+        
+        const visible = !(status ? +$(this).attr(param) >= value : true);
+  
+        for (const i in rowGroups[group]) {
+          $(rowGroups[group][i]).toggleClass('filter-toggle-hidden', visible );
+        }
+      }
     } else {
       const filters = $(`.filter-toggle[data-filter-group=${group}]`);
 
@@ -457,16 +575,41 @@ $(document).ready(function() {
       }
 
       for (let table in tables) {
-        $("#" + table + " tbody tr").filter(function() {
-          let value = true;
+        let rowGroups = {};
 
-          for (let filter in tables[table]) {
-            const filterEl = tables[table][filter];
-            value = value && (filterEl.status ? +$(this).attr(filterEl.param) >= filterEl.value : true)
+        $("#" + table + " tbody tr").each(function() {
+          let group = $(this).attr('data-group');
+          if (!group) {
+            if ($(this).hasClass('secondary')) {
+              group = Object.keys(rowGroups)[ Object.keys(rowGroups).length-1 ];
+            } else {
+              group = table+"_group_"+Object.keys(rowGroups).length;
+            }
           }
-
-          $(this).toggleClass('filter-toggle-hidden', !value);
+          if (!rowGroups[group]) rowGroups[group] = [];
+          rowGroups[group].push(this);
         });
+
+        for (const group in rowGroups) {
+          let value = true;
+          for (const i in rowGroups[group]) {
+            const el = rowGroups[group][i];
+
+            filterLoop: for (let filter in tables[table]) {
+              const filterEl = tables[table][filter];
+
+              if ($(el).attr(filterEl.param) === undefined) continue;
+
+              value = value && (filterEl.status ? +$(el).attr(filterEl.param) >= filterEl.value : true);
+
+              if (!value) break filterLoop;
+            }
+          }
+    
+          for (const i in rowGroups[group]) {
+            $(rowGroups[group][i]).toggleClass('filter-toggle-hidden', !value );
+          }
+        }
       }
     }
   });

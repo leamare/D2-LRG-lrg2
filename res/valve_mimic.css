@@ -109,6 +109,10 @@ a:hover {
   z-index: 10;
 }
 
+.event-logo-list {
+  height: 45px;
+}
+
 .section-header .league-banner img {
   height: 100%;
   width: auto;
