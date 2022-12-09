@@ -54,7 +54,7 @@ $host_link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ?
 include_once("rg_report_out_settings.php");
 
 include_once("modules/commons/versions.php");
-$lg_version = [ 2, 24, 0, 0, 4 ];
+$lg_version = [ 2, 25, 1, 0, 0 ];
 
 include_once("modules/commons/merge_mods.php");
 include_once("modules/commons/metadata.php");
@@ -68,6 +68,7 @@ include_once("modules/view/functions/team_card.php");
 include_once("modules/view/functions/match_card.php");
 include_once("modules/view/functions/filter_toggles.php");
 include_once("modules/view/functions/search_filter_component.php");
+include_once("modules/view/functions/table_columns_toggle.php");
 
 include_once("modules/view/functions/join_selectors.php");
 include_once("modules/view/functions/links.php");
@@ -138,13 +139,16 @@ $linkvars = implode("&", $linkvars);
 
 
 if (!empty($leaguetag)) {
+  $lightcache = true;
+  include_once("modules/view/__open_cache.php");
+  // this is kind of pointless, but I need it to load anyway
+  // and it's not like in real life it's not loaded all the time
+
   if(file_exists($reports_dir."/".$report_mask_search[0].$leaguetag.$report_mask_search[1])) {
     $report = file_get_contents($reports_dir."/".$report_mask_search[0].$leaguetag.$report_mask_search[1])
         or die("[F] Can't open $leaguetag, probably no such report\n");
     $report = json_decode($report, true);
   } else {
-    $lightcache = true;
-    include_once("modules/view/__open_cache.php");
     if(isset($cache['reps'][$leaguetag]['file'])) {
       $report = file_get_contents($reports_dir."/".$cache['reps'][$leaguetag]['file'])
           or die("[F] Can't open $leaguetag, probably no such report\n");
@@ -258,5 +262,8 @@ if (isset($report)) {
   include_once("modules/view/index.php");
 }
 
+if (file_exists("rg_report_out_prerender.php"))
+  include_once("rg_report_out_prerender.php");
+
 include_once("modules/view/__template.php");
-?>
+

@@ -78,7 +78,7 @@ if ( $check_libs ) {
       echo "[ ] Pulling jQuery Tablesorter plugin\n";
       file_put_contents(
         "res/dependencies/jquery.tablesorter.min.js",
-        file_get_contents("https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.0/js/jquery.tablesorter.min.js")
+        file_get_contents("https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.3/js/jquery.tablesorter.min.js")
       );
     }
 

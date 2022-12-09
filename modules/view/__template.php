@@ -1,4 +1,4 @@
-<?php  $__postfix = "?v=28210"; ?>
+<?php  $__postfix = "?v=28250"; ?>
 <!DOCTYPE html>
 <html lang="<?php echo $locale; ?>">
   <head>
@@ -109,6 +109,11 @@
           echo process_menu($title_links);
          ?>
       </div>
+      <div class="topbar-postnav">
+        <?php 
+          if (!empty($_topbar_postnav)) echo $_topbar_postnav;
+        ?>
+      </div>
       <div class="locale-changer">
         <?php
         $link = substr($_SERVER['REQUEST_URI'], strrpos($_SERVER['REQUEST_URI'], "/")+1);
@@ -203,6 +208,7 @@
       </div>
       <script type="text/javascript" src="res/dependencies/jquery.min.js<?php echo $__postfix; ?>"></script>
       <script type="text/javascript" src="res/dependencies/jquery.tablesorter.min.js<?php echo $__postfix; ?>"></script>
+      <!-- <script type="text/javascript" src="res/dependencies/jquery.tablesorter-mod.js<?php echo $__postfix; ?>"></script> -->
       <script type="text/javascript" src="res/reports.js<?php echo $__postfix; ?>"></script>
     </body>
   </html>

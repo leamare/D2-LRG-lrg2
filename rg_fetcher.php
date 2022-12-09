@@ -49,6 +49,9 @@ $cache_dir = $options['c'] ?? "cache";
 if($cache_dir === "NULL") $cache_dir = "";
 
 if (!empty($options['P'])) {
+  /**
+   * @var array|string
+   */
   $players_list = file_get_contents($options['P']);
   $players_list = json_decode($players_list);
 } else if (!empty($lg_settings['players_allowlist'])) {
@@ -110,6 +113,9 @@ $force_await = isset($options['A']);
 $scheduled_stratz = [];
 
 if ($stratz_graphql) {
+  /**
+   * @var array|string
+   */
   $stratz_patches = \file_get_contents(
     "https://api.stratz.com/api/v1/GameVersion?key=".$stratztoken,
     false,
