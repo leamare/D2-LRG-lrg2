@@ -106,6 +106,8 @@ function fetch($match) {
     echo("Reusing LRG cache.");
     $json = file_get_contents("$cache_dir/".$match.".lrgcache.json");
     $matchdata = json_decode($json, true);
+    $matchdata['iscache'] = true;
+
     $t_match = $matchdata['matches'];
     $t_matchlines = $matchdata['matchlines'];
     $t_draft = $matchdata['draft'];
@@ -113,6 +115,12 @@ function fetch($match) {
     $t_items = $matchdata['items'] ?? [];
     $t_starting_items = $matchdata['starting_items'] ?? [];
     $t_skill_builds = $matchdata['skill_builds'] ?? [];
+
+    if (empty($t_adv_matchlines)) {
+      $bad_replay = true;
+      echo "..WARNING: bad replay.";
+    }
+
     foreach($matchdata['players'] as $p) {
       if(!isset($t_players[$p['playerID']]) || ($update_names && !isset($updated_names[$p['playerID']])) ) {
         $t_new_players[$p['playerID']] = $p['nickname'];
@@ -158,6 +166,7 @@ function fetch($match) {
   if(empty($matchdata) && $stratz_graphql) {
     echo("Requesting STRATZ GraphQL.");
     $matchdata = get_stratz_response($match);
+    $matchdata['isstratz'] = true;
 
     global $stratz_graphql_group, $stratz_graphql_group_counter;
     if ($stratz_graphql_group) $stratz_graphql_group_counter--;
@@ -253,7 +262,7 @@ function fetch($match) {
     }
   }
   
-  if (empty($matchdata) || ( empty($matchdata['items'] && !$bad_replay) )) {
+  if (empty($matchdata) || ( empty($matchdata['items']) && !$bad_replay ) || ( $bad_replay && !$force_adding )) {
     echo("Requesting.");
 
     if (!$ignore_stratz && !$stratz_graphql && (!empty($players_list) || !empty($rank_limit))) {
@@ -378,8 +387,8 @@ function fetch($match) {
     }
   }
 
-  if(!empty($stratz_request) && ( (!file_exists("$cache_dir/".$match.".lrgcache.json") && !file_exists("$cache_dir/".$match.".json")) 
-        || $bad_replay
+  if (!empty($stratz_request) && ( (!file_exists("$cache_dir/".$match.".lrgcache.json") && !file_exists("$cache_dir/".$match.".json")) 
+        || ( $bad_replay && !$force_adding && !($matchdata['iscache'] || $matchdata['isstratz']) )
         || $players_update) ) {
 
     if(!isset($matchdata['lobby_type']) || $players_update || ($matchdata['lobby_type'] != 1 && $matchdata['lobby_type'] != 2 && $use_stratz && !$ignore_stratz)) {
