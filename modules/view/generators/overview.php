@@ -179,7 +179,7 @@ function rg_view_generator_overview($modlink, &$context, $foreword = "") {
         ]);
     }
 
-    if ($report['settings']['overview_sides_graph'] && isset($context['main']['opener_pick_winrate'])) {
+    if ($report['settings']['overview_sides_graph'] && isset($context['main']['opener_pick_radiant_ratio'])) {
       $opener_color = $charts_colors[2];
       $closing_color = $charts_colors[3];
       $res .= "<h1>".locale_string("opener_pick_winrate")."</h1>".

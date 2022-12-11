@@ -105,5 +105,3 @@ if(sizeof($cache["files"]) < sizeof($cache["reps"])) {
 if ($cache_update) {
   file_put_contents($cache_file, json_encode($cache));
 }
-
-?>

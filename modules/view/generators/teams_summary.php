@@ -40,8 +40,8 @@ function rg_view_generator_teams_summary($context = null, $short_flag = false) {
     $keys = array_intersect($keys, TEAM_SUMMARY_SHORT_LIST);
   }
 
-  $keys[] = 'matches';
-  $keys[] = 'winrate';
+  array_unshift($keys, 'matches');
+  array_unshift($keys, 'winrate');
 
   // COLUMNS GROUPING
 
@@ -106,7 +106,7 @@ function rg_view_generator_teams_summary($context = null, $short_flag = false) {
     $el = $report['teams'][$team_id]['averages'];
     $el['matches'] = $report['teams'][$team_id]['matches_total'];
     $el['winrate'] = $report['teams'][$team_id]['matches_total'] ? 
-      $report['teams'][$team_id]['wins']*100/$report['teams'][$team_id]['matches_total'] : 0;
+      $report['teams'][$team_id]['wins']/$report['teams'][$team_id]['matches_total'] : 0;
 
     $res .= "<tr>".
       "<td data-col-group=\"_index\">".team_logo($team_id)."</td>".

@@ -37,9 +37,13 @@ function rg_create_team_pickban_data($context_pb, $context_vs_pb, $context_total
     $r[$hid]['matches_picked'] = $line['matches_picked'];
     $r[$hid]['matches_banned'] = $line['matches_banned'];
     $r[$hid]['winrate_picked'] = $line['winrate_picked'];
-    $r[$hid]['winrate_wo'] = ($context_wins-round($line['matches_picked']*$line['winrate_picked'])) / ($context_total_matches-$line['matches_picked']);
+    $r[$hid]['winrate_wo'] = ($context_total_matches-$line['matches_picked']) ? 
+      ($context_wins-round($line['matches_picked']*$line['winrate_picked'])) / ($context_total_matches-$line['matches_picked']) : 
+      0;
     $r[$hid]['winrate_banned'] = $line['winrate_banned'];
-    $r[$hid]['winrate_wo_ban'] = ($context_wins-round($line['matches_banned']*$line['winrate_banned'])) / ($context_total_matches-$line['matches_banned']);
+    $r[$hid]['winrate_wo_ban'] = ($context_total_matches-$line['matches_banned']) ? 
+      ($context_wins-round($line['matches_banned']*$line['winrate_banned'])) / ($context_total_matches-$line['matches_banned']) :
+      0;
   }
 
   foreach($context_vs_pb as $hid => $line) {
@@ -52,11 +56,15 @@ function rg_create_team_pickban_data($context_pb, $context_vs_pb, $context_total
     $r[$hid]['matches_picked_vs'] = $line['matches_picked'];
     $r[$hid]['matches_banned_vs'] = $line['matches_banned'];
     $r[$hid]['winrate_picked_vs'] = $line['matches_picked'] ? round($line['wins_picked']/$line['matches_picked'], 5) : 0;
-    $r[$hid]['winrate_wo_vs'] = ($context_total_matches-$context_wins-round($line['matches_picked']*$line['winrate_picked'])) / 
-      ($context_total_matches-$line['matches_picked']);
+    $r[$hid]['winrate_wo_vs'] = ($context_total_matches-$line['matches_picked']) ? 
+      ($context_total_matches-$context_wins-round($line['matches_picked']*($r[$hid]['winrate_picked'] ?? 0))) / 
+        ($context_total_matches-$line['matches_picked']) : 
+      0;
     $r[$hid]['winrate_banned_vs'] = $line['matches_banned'] ? round($line['wins_banned']/$line['matches_banned'], 5) : 0;
-    $r[$hid]['winrate_wo_ban_vs'] = ($context_total_matches-$context_wins-round($line['matches_banned']*$r[$hid]['winrate_banned_vs'])) / 
-      ($context_total_matches-$line['matches_banned']);
+    $r[$hid]['winrate_wo_ban_vs'] = ($context_total_matches-$line['matches_banned']) ? 
+      ($context_total_matches-$context_wins-round($line['matches_banned']*$r[$hid]['winrate_banned_vs'])) / 
+        ($context_total_matches-$line['matches_banned']) : 
+      0;
   }
 
   $rank = [
