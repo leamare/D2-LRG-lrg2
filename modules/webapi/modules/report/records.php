@@ -3,48 +3,54 @@
 $repeatVars['records'] = ['region'];
 
 $endpoints['records'] = function($mods, $vars, &$report) use (&$endpoints) {
-  if (in_array('items', $mods)) {
-    $res = $endpoints['items-records']($mods, $vars, $report);
-    $res['__endp'] = "items-records";
-    return $res;
-  }
-
-  // parse mods for region ID
-  // check if region persists
   if (isset($vars['region']) && isset($report['regions_data'][ $vars['region'] ])) {
-    $data = $report['regions_data'][ $vars['region'] ]['records'] ?? null;
-  } else $data = $report['records'] ?? null;
+    $context =& $report['regions_data'][ $vars['region'] ];
+  } else $context =& $report;
+
+  $data = $context['records'] ?? null;
+  $data_ext = $context['records_ext'] ?? [];
 
   if (empty($data))
     throw new \Exception("Problem occured when fetching records.");
+  
+  if (!empty($data_ext)) {
+    $data_ext = unwrap_data($data_ext);
+  }
 
   $res = [];
   
-  foreach ($data as $k => $v) {
-    if ($v['matchid'] && !empty($report['match_participants_teams']))
-      $v['match_card_min'] = match_card_min($v['matchid']);
-    else 
-      $v['match_card_min'] = null;
+  foreach ($data as $k => $rec) {
+    $res[$k] = [];
 
-    if (!$v['heroid'])
-      $v['heroid'] = null;
+    $src = array_merge([ $rec ], $data_ext[$k] ?? []);
 
-    if (!$v['matchid'])
-      $v['matchid'] = null;
+    foreach ($src as $v) {
+      if (empty($v)) continue;
+      if ($v['matchid'] && !empty($report['match_participants_teams']))
+        $v['match_card_min'] = match_card_min($v['matchid']);
+      else 
+        $v['match_card_min'] = null;
 
-    if ($v['playerid']) {
-      if (strpos($k, '_team')) {
-        $v['name'] = team_name($v['playerid']);
-        $v['teamid'] = $v['playerid'];
-        $v['playerid'] = null;
+      if (!$v['heroid'])
+        $v['heroid'] = null;
+
+      if (!$v['matchid'])
+        $v['matchid'] = null;
+
+      if ($v['playerid']) {
+        if (strpos($k, '_team')) {
+          $v['name'] = team_name($v['playerid']);
+          $v['teamid'] = $v['playerid'];
+          $v['playerid'] = null;
+        } else {
+          $v['name'] = player_name($v['playerid']);
+        }
       } else {
-        $v['name'] = player_name($v['playerid']);
+        $v['playerid'] = null;
       }
-    } else {
-      $v['playerid'] = null;
+
+      $res[$k][] = $v;
     }
-    
-    $res[$k] = $v;
   }
 
   return $res;
