@@ -18,7 +18,7 @@ function skillPriority($skillbuild, $hid, $noattr = false) {
   $skillNumbers = [];
 
   foreach ($skillbuild as $i => $sid) {
-    $tag = $meta['spells_tags'][$sid];
+    $tag = $meta['spells_tags'][$sid] ?? "_unknown";
     if (isset($meta['spells_linked'][$tag])) {
       $skillbuild[$i] = $spell_ids[ $meta['spells_linked'][$tag] ];
     }
@@ -71,11 +71,11 @@ function skillPriority($skillbuild, $hid, $noattr = false) {
       $cnt = count($maxlevel)+1;
       if ($cnt > 4) continue;
 
-      $firstPointAt[$skill] = $noattr ? $level+1 : LEVELS_IDS[$level];
+      $firstPointAt[$skill] = $noattr ? $level+1 : (LEVELS_IDS[$level] ?? $level+1);
       $maxlevel[$skill] = 1;
     } else {
       $maxlevel[$skill]++;
-      $maxedAt[$skill] = $noattr ? $level+1 : LEVELS_IDS[$level];
+      $maxedAt[$skill] = $noattr ? $level+1 : (LEVELS_IDS[$level] ?? $level+1);
     }
   }
 

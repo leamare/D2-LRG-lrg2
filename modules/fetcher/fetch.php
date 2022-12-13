@@ -85,19 +85,20 @@ function fetch($match) {
     'query' => "query MatchPlayers {
       match(id: $match) { 
         parsedDateTime, players { steamAccount { id, isAnonymous, name, seasonRank, proSteamAccount { name } } },
-        stats { pickBans {
-            heroId,
-            bannedHeroId,
-            order,
-            playerIndex,
-            isPick,
-            isRadiant,
-            wasBannedSuccessfully
-          }
+        pickBans {
+          heroId,
+          bannedHeroId,
+          order,
+          playerIndex,
+          isPick,
+          isRadiant,
+          wasBannedSuccessfully
         }
       } 
     }",
   ];
+  $data['query'] = str_replace("  ", "", $data['query']);
+  $data['query'] = str_replace("\n", " ", $data['query']);
   if (!empty($stratztoken)) $data['key'] = $stratztoken;
   
   $stratz_request = "https://api.stratz.com/graphql?".http_build_query($data);
@@ -767,11 +768,11 @@ function fetch($match) {
       foreach([1,2,3] as $lane) {
         $opp_lane = 4-$lane;
 
-        $max_eff_self = array_reduce($laning_raw[0][$lane], function($carry, $item) {
+        $max_eff_self = array_reduce($laning_raw[0][$lane] ?? [], function($carry, $item) {
           return max($carry, $item['eff']);
-        }, 0);
+        }, 0.7);
 
-        $max_eff_opp = array_reduce($laning_raw[1][$opp_lane], function($carry, $item) {
+        $max_eff_opp = array_reduce($laning_raw[1][$opp_lane] ?? [], function($carry, $item) {
           return max($carry, $item['eff']);
         }, 0);
 
@@ -796,7 +797,7 @@ function fetch($match) {
           } else {
             $diff = $laning_raw[$hid] - $laning_raw[$opp];
             $laning[$hid] = abs($diff) > $tie_factor ? ( $diff < 1 ? 0 : 2 ) : 1;
-            $laning[$opp] = $laning[$hid]-2;
+            $laning[$opp] = abs($laning[$hid]-2);
           }
         }
       }
