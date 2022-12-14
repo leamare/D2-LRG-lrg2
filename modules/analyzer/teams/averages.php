@@ -210,6 +210,7 @@ do {
 
   if (!is_bool($query_res)) {
     $row = $query_res->fetch_row();
+    if (empty($row)) continue;
 
     $result['teams'][$id]['averages'][$row[0]] = $row[1];
 
