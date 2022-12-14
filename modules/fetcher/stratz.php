@@ -450,16 +450,14 @@ function get_stratz_response($match) {
       $aml['roshans_killed'] = 0;
       $aml['wards_destroyed'] = count($pl['stats']['wardDestruction']);
 
-      foreach ($pl['stats']['farmDistributionReport'] as $f) {
-        foreach ($f['creepType'] as $fc) {
-          // if (in_array($fc['id'], OBS)) $aml['wards_destroyed'] += $fc['count'];
-          if (in_array($fc['id'], ROSHAN)) $aml['roshans_killed'] += $fc['count'];
-        }
-        // foreach ($f['other'] as $fc) {
-        //   if (in_array($fc['id'], ROSHAN)) $aml['roshans_killed'] += $fc['count'];
-        //   if (in_array($fc['id'], OBS)) $aml['wards_destroyed'] += $fc['count'];
-        // }
+      foreach ($pl['stats']['farmDistributionReport']['creepType'] as $fc) {
+        // if (in_array($fc['id'], OBS)) $aml['wards_destroyed'] += $fc['count'];
+        if (in_array($fc['id'], ROSHAN)) $aml['roshans_killed'] += $fc['count'];
       }
+      // foreach ($f['other'] as $fc) {
+      //   if (in_array($fc['id'], ROSHAN)) $aml['roshans_killed'] += $fc['count'];
+      //   if (in_array($fc['id'], OBS)) $aml['wards_destroyed'] += $fc['count'];
+      // }
       
       $kde = [];
       foreach ($pl['stats']['killEvents'] as $s) {
