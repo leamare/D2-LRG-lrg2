@@ -486,6 +486,7 @@ table .hero_portrait, .flextable .hero_portrait {
 .match-team .match-heroes .match-hero {
   width: 20%;
   display: inline-block;
+  position: relative;
 }
 .match-team .match-heroes .match-hero img {
   width: 90%;
@@ -504,12 +505,66 @@ table .hero_portrait, .flextable .hero_portrait {
   text-align: right;
 }
 .match-team .match-heroes-bans .match-hero {
-  width: 12.15%;
+  width: 13%;
   display: inline-block;
+  position: relative;
 }
 .match-team .match-heroes-bans .match-hero img {
   width: 86%;
   margin: 7% 0;
+}
+
+.match-hero[data-order]:after {
+  content: attr(data-order);
+  width: 20%;
+  text-align: center;
+  font-size: 1em;
+  position: absolute;
+  color: white;
+  top: 11%;
+  opacity: .9;
+}
+.match-team.dire .match-hero[data-order]:after {
+  right: 7.5%;
+}
+.match-team.radiant .match-hero[data-order]:after {
+  left: 7.5%;
+}
+.match-heroes-bans .match-hero[data-order]:after {
+  font-size: 0.85em;
+  width: 10%;
+  top: 11.5%;
+}
+
+.match-hero[data-order]:before {
+  content: '';
+  width: 0;
+  height: 0;
+  border-style: solid;
+  position: absolute;
+  opacity: .7;
+}
+.match-team.dire .match-hero[data-order]:before {
+  border-width: 0 3em 3em 0;
+  border-color: transparent black transparent transparent;
+  right: 4.9%;
+  top: 5%;
+}
+.match-team.radiant .match-hero[data-order]:before {
+  border-width: 0 0 3em 3em;
+  border-color: transparent transparent transparent black;
+  left: 4.9%;
+  top: 5%;
+}
+.match-team.dire .match-heroes-bans .match-hero[data-order]:before {
+  border-width: 0 2em 1.75em 0;
+  right: 0;
+  top: 7%;
+}
+.match-team.radiant .match-heroes-bans .match-hero[data-order]:before {
+  border-width: 0 0 1.75em 1.75em;
+  left: 0;
+  top: 7%;
 }
 
 .match-team-name {

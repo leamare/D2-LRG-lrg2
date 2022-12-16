@@ -303,7 +303,7 @@ if (isset($lg_settings['heroes_snapshot'])) {
   if (isset($lg_settings['heroes_exclude'])) {
     foreach($lg_settings['heroes_exclude'] as $hid)
       unset($meta['heroes'][$hid]);
-  } else {
+  } elseif (!empty($result['first_match'])) {
     $last_match = $result["last_match"]["date"];
     $first_match = $result["first_match"]["date"];
   

@@ -334,7 +334,7 @@ function fetch($match) {
 
       $abandon = false;
       for($i=0; $i<10; $i++) {
-          if($matchdata['players'][$i]['abandons']) {
+          if($matchdata['players'][$i]['abandons'] ?? 0) {
               $abandon = true;
               break;
           }
@@ -1264,6 +1264,8 @@ function fetch($match) {
         'maxed_at' => addslashes(\json_encode($sti['maxedAt'])),
         'priority' => addslashes(\json_encode($sti['priority'])),
         'talents' => addslashes(\json_encode($sti['talents'])),
+        'attributes' => addslashes(\json_encode($sti['attributes'])),
+        'ultimate' => $sti['ultimate'],
       ];
     }
   }
@@ -1644,7 +1646,9 @@ function fetch($match) {
 
   if(!empty($t_skill_builds) && ($schema['skill_builds'] ?? false)) {
     $sql = " INSERT INTO skill_builds (matchid, playerid, hero_id, 
-      skill_build, first_point_at, maxed_at, priority, talents) VALUES ";
+      skill_build, first_point_at, maxed_at, priority, talents".
+        ($schema['skill_build_attr'] ? ", attributes, ultimate" : "").
+      ") VALUES ";
     foreach ($t_skill_builds as $t) {
       $sql .= "\n\t({$t['matchid']}, {$t['playerid']}, {$t['hero_id']}, ".
         "'".($t['skill_build'])."',".
@@ -1652,6 +1656,10 @@ function fetch($match) {
         "'".($t['maxed_at'])."',".
         "'".($t['priority'])."',".
         "'".($t['talents'])."'".
+        ($schema['skill_build_attr']
+        ? ",'".($t['attributes'] ?? null)."',".
+          "'".($t['ultimate'] ?? null)."'"
+        : "").
       "),";
     }
     $sql[strlen($sql)-1] = ";";
