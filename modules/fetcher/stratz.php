@@ -575,6 +575,8 @@ function get_stratz_response($match) {
           'maxed_at' => addslashes(\json_encode($sti['maxedAt'])),
           'priority' => addslashes(\json_encode($sti['priority'])),
           'talents' => addslashes(\json_encode($sti['talents'])),
+          'attributes' => addslashes(\json_encode($sti['attributes'])),
+          'ultimate' => $sti['ultimate'],
         ];
       }
 

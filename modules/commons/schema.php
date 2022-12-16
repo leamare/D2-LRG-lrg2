@@ -10,6 +10,7 @@ $schema = [
   'draft_order' => false, // order
   'teams' => false,
   'items' => false,
+  'skill_build_attr' => false,
 ];
 
 echo "[ ] Getting tables\n";
@@ -82,3 +83,17 @@ for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row(
   }
 }
 $query_res->free_result();
+
+if ($schema['skill_builds']) {
+  $sql = "DESCRIBE draft;";
+  if ($conn->multi_query($sql) === FALSE)
+    die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+  $query_res = $conn->store_result();
+  for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+    if ($row[0] == "attributes") {
+      $schema['skill_build_attr'] = true;
+      break;
+    }
+  }
+  $query_res->free_result();
+}
