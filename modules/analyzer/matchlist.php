@@ -76,6 +76,24 @@ for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row(
 
 $query_res->free_result();
 
+if ($schema['draft_order'] ?? false) {
+  $sql = "SELECT matchid, hero_id, `order` FROM draft ORDER BY `order` ASC;";
+
+  if ($conn->multi_query($sql) === TRUE);
+  else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+
+  $query_res = $conn->store_result();
+
+  for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+    if (!isset($result["matches_additional"][$row[0]]['bans'])) {
+      $result["matches_additional"][$row[0]]['order'] = [];
+    }
+    $result["matches_additional"][$row[0]]['order'][] = (int)$row[1];
+  }
+
+  $query_res->free_result();
+}
+
 if($lg_settings['main']['teams']) {
   $result["match_participants_teams"] = array();
   $sql = "SELECT matchid, teamid, is_radiant FROM teams_matches;";
