@@ -54,7 +54,9 @@ function rg_generator_pickban($table_id, &$context, &$context_main, $heroes_flag
     " (mp): $mp - ".locale_string("heroes_median_bans").
     " (mb): $mb - ".locale_string("matches_total").": $context_total_matches</div>";
 
-  $res = filter_toggles_component($table_id, [
+  $res .= rg_pbdraft_accuracy_test($context);
+
+  $res .= filter_toggles_component($table_id, [
     'mp' => [
       'value' => '0.9',
       'label' => 'data_filter_low_values_mp'

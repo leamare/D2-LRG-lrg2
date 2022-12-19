@@ -245,4 +245,15 @@ function rg_draft_accuracy_test(&$context_pickban, &$context_draft) {
   return "";
 }
 
+function rg_pbdraft_accuracy_test(&$context_pickban) {
+  $set = 0;
+  
+  foreach ($context_pickban as $dr) {
+    if (isset($dr['matches_banned'])) $set++;
+  }
+  
+  if (!$set) return INACCURATE_DRAFT_MESSAGE;
+  return "";
+}
+
 ?>
