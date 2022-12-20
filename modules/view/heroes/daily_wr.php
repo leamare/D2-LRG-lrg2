@@ -49,6 +49,7 @@ function rg_view_generate_heroes_daily_winrates() {
   $context_total_matches = $context_main['matches'] ?? $context_main["matches_total"] ?? 0;
   $mp = $context_main['heroes_median_picks'] ?? null;
   $mb = $context_main['heroes_median_bans'] ?? null;
+  $context =& $report['pickban'];
 
   if (!$mp) {
     uasort($report['pickban'], function($a, $b) {
