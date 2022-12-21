@@ -20,13 +20,21 @@ function match_card($mid) {
 
   $m = $report['matches'][$mid];
 
+  if (isset($report['matches_additional'][$mid]) && !empty($report['matches_additional'][$mid]['order'])) {
+    $orders = array_flip( $report['matches_additional'][$mid]['order'] );
+    usort($m, function($a, $b) use (&$orders) {
+      return $orders[ $a['hero'] ] <=> $orders[ $b['hero'] ];
+    });
+  }
+
   foreach ($m as $pl) {
+    $order = empty($orders) ? 0 : $orders[ $pl['hero'] ]+1;
     if($pl['radiant'] == 1) {
       $players_radi .= "<div class=\"match-player\">".player_name($pl['player'], false)."</div>";
-      $heroes_radi .= "<div class=\"match-hero\">".hero_portrait($pl['hero'])."</div>";
+      $heroes_radi .= "<div class=\"match-hero\" ".($order ? "data-order=\"$order\"" : "").">".hero_portrait($pl['hero'])."</div>";
     } else {
       $players_dire .= "<div class=\"match-player\">".player_name($pl['player'], false)."</div>";
-      $heroes_dire .= "<div class=\"match-hero\">".hero_portrait($pl['hero'])."</div>";
+      $heroes_dire .= "<div class=\"match-hero\" ".($order ? "data-order=\"$order\"" : "").">".hero_portrait($pl['hero'])."</div>";
     }
   }
   if(isset($report['teams']) && isset($report['match_participants_teams'][$mid])) {
@@ -45,15 +53,25 @@ function match_card($mid) {
 
   $radiant_bans = ""; $dire_bans = "";
   if (isset($report['matches_additional'][$mid]['bans'])) {
+    if (!empty($orders)) {
+      foreach ($report['matches_additional'][$mid]['bans'] as $i => &$bns) {
+        usort($bns, function($a, $b) use (&$orders) {
+          return $orders[ $a[0] ] <=> $orders[ $b[0] ];
+        });
+      }
+    }
+
     $radiant_bans .= "<div class=\"match-heroes-bans radiant\">";
     foreach ($report['matches_additional'][$mid]['bans'][0] as [$hero, $stage]) {
-      $radiant_bans .= "<div class=\"match-hero\">".hero_portrait($hero)."</div>";
+      $order = empty($orders) ? 0 : $orders[ $hero ]+1;
+      $radiant_bans .= "<div class=\"match-hero\" ".($order ? "data-order=\"$order\"" : "").">".hero_portrait($hero)."</div>";
     }
     $radiant_bans .= "</div>";
 
     $dire_bans .= "<div class=\"match-heroes-bans dire\">";
     foreach ($report['matches_additional'][$mid]['bans'][1] as [$hero, $stage]) {
-      $dire_bans .= "<div class=\"match-hero\">".hero_portrait($hero)."</div>";
+      $order = empty($orders) ? 0 : $orders[ $hero ]+1;
+      $dire_bans .= "<div class=\"match-hero\" ".($order ? "data-order=\"$order\"" : "").">".hero_portrait($hero)."</div>";
     }
     $dire_bans .= "</div>";
   }
