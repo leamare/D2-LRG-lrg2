@@ -502,8 +502,9 @@ function rg_view_generate_items_builds() {
       $lategame = array_slice($build['path'], $build['lategamePoint']-1);
 
       $reslocal .= "<div class=\"hero-build-overview-container hero-build\">";
-      $reslocal .= "<div class=\"build-blocks-container\">";
+      
       if (!empty($lategame)) {
+        $reslocal .= "<div class=\"build-blocks-container\">";
         $reslocal .= "<div class=\"header\">".locale_string("builds_lategame_main_route")."</div>";
     
         foreach ($lategame as $item) {
