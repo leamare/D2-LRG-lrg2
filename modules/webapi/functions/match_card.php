@@ -43,6 +43,10 @@ function match_card($mid) {
     $match['bans']['radiant'] = $report['matches_additional'][$mid]['bans'][0];
     $match['bans']['dire'] = $report['matches_additional'][$mid]['bans'][1];
   }
+
+  if (isset($report['matches_additional'][$mid]['order'])) {
+    $match['order'] = $report['matches_additional'][$mid]['order'];
+  }
   
   if(isset($report['teams']) && isset($report['match_participants_teams'][$mid])) {
     $teams = [];
