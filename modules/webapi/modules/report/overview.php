@@ -96,7 +96,7 @@ $endpoints['overview'] = function($mods, $vars, &$report) use (&$meta, &$endpoin
     }
   }
 
-  if($context['settings']['overview_last_match_winners'] || !isset($context['settings'])) {
+  if(($context['settings']['overview_last_match_winners'] || !isset($context['settings'])) && !empty($report['matches_additional'])) {
     $res['last_match_radiant_win'] = $report['matches_additional'][ $context['last_match']['mid'] ]['radiant_win'];
   }
 
@@ -134,7 +134,7 @@ $endpoints['overview'] = function($mods, $vars, &$report) use (&$meta, &$endpoin
   $res['participants'] = [];
 
   if(isset($report['players_additional']) || isset($report["teams"])) {
-    if (isset($report['teams']) && $context['settings']['overview_last_match_winners']) {
+    if (isset($report['teams']) && $context['settings']['overview_last_match_winners'] && !empty($report['matches_additional'])) {
       if($report['matches_additional'][ $context['last_match']['mid'] ]['radiant_win']) {
           if (isset( $report['match_participants_teams'][ $context['last_match']['mid'] ]['radiant'] ))
               $tid = $report['match_participants_teams'][ $context['last_match']['mid'] ]['radiant'];

@@ -61,6 +61,20 @@ $endpoints['draft'] = function($mods, $vars, &$report) {
 
   if(!sizeof($context)) return [];
 
+  foreach($context as $k => $v) {
+    if(isset($v['winrate_picked'])) break;
+
+    if($context[$k]['matches_picked'])
+      $context[$k]['winrate_picked'] = $context[$k]['wins_picked'] / $context[$k]['matches_picked'];
+    else
+      $context[$k]['winrate_picked'] = 0;
+
+    if($context[$k]['matches_banned'])
+      $context[$k]['winrate_banned'] = $context[$k]['wins_banned'] / $context[$k]['matches_banned'];
+    else
+      $context[$k]['winrate_banned'] = 0;
+  }
+
   uasort($context, function($a, $b) {
     if($a['matches_total'] == $b['matches_total']) return 0;
     else return ($a['matches_total'] < $b['matches_total']) ? 1 : -1;
@@ -80,16 +94,16 @@ $endpoints['draft'] = function($mods, $vars, &$report) {
   foreach ($context as $id => $el) {
     if(isset($last) && $el == $last) {
       $i++;
-      $ranks[$id] = $last_rank;
+      $ranks[$id] = $last_rank ?? 0;
     } else
       $ranks[$id] = 100 - $increment*$i++;
     $last = $el;
     $last_rank = $ranks[$id];
   }
 
-  foreach($context as $id => &$el) {
-    $el['rank'] = round($ranks[$id], 2);
-    $el['contest_rate'] = $el['matches_total']/$context_total_matches;
+  foreach($context as $id => $el) {
+    $context[$id]['rank'] = round($ranks[$id], 2);
+    $context[$id]['contest_rate'] = $el['matches_total']/$context_total_matches;
   }
 
   $draft = [];
