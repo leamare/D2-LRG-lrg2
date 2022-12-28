@@ -165,6 +165,13 @@ function add_networths(&$matchdata) {
   // permanent_buffs
 
   // $items_purchases
+  $purchase_log_copy = [];
+  foreach($matchdata['players'] as $i => $player) {
+    $purchase_log_copy[$i] = [
+      'purchase_log' => $player['purchase_log'],
+      'gold_t' => $player['gold_t'],
+    ];
+  }
 
   // 1. go through deaths of every hero
   // 2. for every death calculate death cost (roughly)
@@ -180,29 +187,29 @@ function add_networths(&$matchdata) {
       // $inventory = inventory_at($matchdata['players'][ $ids[$hid] ], $t);
       $has_rapier = 0;
       $has_gem = 0;
-      foreach ($matchdata['players'][ $ids[$hid] ]['purchase_log'] as $i => $e) {
+      foreach ($purchase_log_copy[ $ids[$hid] ]['purchase_log'] as $i => $e) {
         if ($e['time'] < $t || $e['time'] === null) continue;
         if ($e['key'] == "rapier") {
           $has_rapier++;
-          $matchdata['players'][ $ids[$hid] ]['purchase_log'][$i]['time'] = null;
-          $matchdata['players'][ $ids[ $death_killers[$hid][$t] ] ]['purchase_log'][] = [
+          $purchase_log_copy[ $ids[$hid] ]['purchase_log'][$i]['time'] = null;
+          $purchase_log_copy[ $ids[ $death_killers[$hid][$t] ] ]['purchase_log'][] = [
             'key' => 'rapier',
             'time' => $t,
           ];
         }
         if ($e['key'] == "gem") {
           $has_gem++;
-          $matchdata['players'][ $ids[$hid] ]['purchase_log'][$i]['time'] = null;
-          $matchdata['players'][ $ids[ $death_killers[$hid][$t] ] ]['purchase_log'][] = [
+          $purchase_log_copy[ $ids[$hid] ]['purchase_log'][$i]['time'] = null;
+          $purchase_log_copy[ $ids[ $death_killers[$hid][$t] ] ]['purchase_log'][] = [
             'key' => 'gem',
             'time' => $t,
           ];
         }
       }
       
-      if (!isset($matchdata['players'][ $ids[$hid] ]['gold_t'][$i])) $i = count($gold_times)-1;
+      if (!isset($purchase_log_copy[ $ids[$hid] ]['gold_t'][$i])) $i = count($gold_times)-1;
 
-      $delta = round($matchdata['players'][ $ids[$hid] ]['gold_t'][$i]/40)
+      $delta = round($purchase_log_copy[ $ids[$hid] ]['gold_t'][$i]/40)
         + ($has_rapier ? $meta['items_full'][133]['cost']*$has_rapier : 0)
         + ($has_gem ? $meta['items_full'][133]['cost']*$has_gem : 0);
       
@@ -215,9 +222,9 @@ function add_networths(&$matchdata) {
   foreach ($buybacks as [ $hid, $t ]) {
     $side = $sides[$hid];
 
-    if (!isset($matchdata['players'][ $ids[$hid] ]['gold_t'][$i])) $i = count($gold_times)-1;
+    if (!isset($purchase_log_copy[ $ids[$hid] ]['gold_t'][$i])) $i = count($gold_times)-1;
 
-    $delta = round(200 + $matchdata['players'][ $ids[$hid] ]['gold_t'][$i]/13);
+    $delta = round(200 + $purchase_log_copy[ $ids[$hid] ]['gold_t'][$i]/13);
     
     for ($j = $i, $c = count($gold_times); $j < $c; $j++) {
       $gold_times[$j] += $delta * ($side ? -1 : 1);
