@@ -4,6 +4,11 @@ $picks = [];
 foreach($result["pickban"] as $hero)
   $picks[] = (int)($hero["matches_picked"] ?? $hero["matches_total"]);
 
+$players = array_map(
+  function($a) { return reset($a); }, 
+  instaquery($conn, "SELECT COUNT(matchid) FROM matchlines GROUP BY playerid;")
+);
+
 function calculate_limiters(array $dataset, $teams = null, $total = null): array {
   if (!empty($dataset)) {
     if (empty($total))
@@ -58,6 +63,7 @@ function calculate_limiters(array $dataset, $teams = null, $total = null): array
 }
 
 $limiters = calculate_limiters($picks, $result['random']['teams_on_event'] ?? null, $result['random']["matches_total"]);
+$limiters_players = calculate_limiters($players, $result['random']['teams_on_event'] ?? null, $result['random']["matches_total"]);
 
 //compatibility
 $limiter = $limiters['limiter_higher'];
@@ -66,6 +72,8 @@ $limiter_lower = $limiters['limiter_lower'];
 $limiter_middle = $limiters['limiter_middle'];
 $limiter_median = $limiters['median'];
 $limiter_quantile = $limiters['limiter_quantile'];
+$pl_limiter = $limiters_players['limiter_higher'];
+$pl_limiter_median = $limiters_players['median'];
 
 echo <<<LIMITERS
 [ ] Limiter: $limiter
@@ -74,5 +82,6 @@ echo <<<LIMITERS
 [ ] Middle Limiter: $limiter_middle
 [ ] Median Limiter: $limiter_median
 [ ] Quantile: $limiter_quantile
+[ ] Limiter Players: $pl_limiter
 
 LIMITERS;
