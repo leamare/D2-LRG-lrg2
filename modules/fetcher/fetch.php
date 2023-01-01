@@ -1162,6 +1162,7 @@ function fetch($match) {
           continue;
         }
         $travel_boots_state = 0;
+        $plog = [];
 
         foreach ($matchdata['players'][$j]['purchase_log'] as $e) {
           if ($matchdata['duration'] - $e['time'] < 60 || empty($e['time'])) continue;
@@ -1196,6 +1197,8 @@ function fetch($match) {
             }
           }
 
+          $plog[$item_id] = $e['time'];
+
           // should I disable consumables?
           if (in_array($category, ['support', 'consumables', 'parts', 'recipes', 'event']) ) { //&& $e['time'] > 0) {
             continue;
@@ -1206,6 +1209,62 @@ function fetch($match) {
           $r['time'] = $e['time'];
 
           $t_items[] = $r;
+        }
+
+        // missing items workaround
+        for ($k=0; $k<6; $k++) {
+          if (!empty($matchdata['players'][$j]['item_'.$k]) && !isset($plog[ $matchdata['players'][$j]['item_'.$k] ])) {
+            $iid = $matchdata['players'][$j]['item_'.$k];
+            $cost = $meta['items_full'][ $iid ]['cost'];
+            if (!$cost || in_array($iid, $meta['item_categories']['droppable'])) continue;
+
+            foreach($meta['item_categories'] as $category_name => $items) {
+              if (in_array($iid, $items)) {
+                $category = $category_name;
+                break;
+              }
+            }
+  
+            if (in_array($category, ['support', 'consumables', 'parts', 'recipes', 'event']) ) {
+              continue;
+            }
+
+            asort($plog);
+
+            $nw_last = 0;
+            $time_last = 0;
+            $tm = 0;
+            foreach ($plog as $iid_p => $time) {
+              $min_closest = $time < 0 ? 0 : ceil( $time/60 );
+              $nw_new = $matchdata['players'][$j]['gold_t'][ $min_closest ] ?? end($matchdata['players'][$j]['gold_t']);
+              $diff = ($nw_new - $nw_last)*0.75;
+
+              $cost_self = $meta['items_full'][ $iid_p ]['cost'];
+
+              if ($diff >= $cost_self+$cost) {
+                $tm = round(60*($time_last + ($min_closest-$time_last)*($cost/$diff)));
+                break;
+              }
+
+              $time_last = $min_closest;
+              $nw_last = $nw_new;
+            }
+            
+            if (!$tm) $tm = $matchdata['duration'];
+
+            if ($iid == 133) {
+              echo 1;
+            }
+
+            $t_items[] = [
+              'matchid' => $match,
+              'playerid' => $matchdata['players'][$j]['account_id'] ?? $t_matchlines[$i]['playerid'],
+              'hero_id' => $matchdata['players'][$j]['hero_id'] ?? $t_matchlines[$i]['heroid'],
+              'item_id' => $iid,
+              'time' => $tm,
+              'category_id' => array_search($category, array_keys($meta['item_categories'])),
+            ];
+          }
         }
 
         $i++;
