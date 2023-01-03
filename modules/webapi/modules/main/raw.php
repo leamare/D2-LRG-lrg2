@@ -1,6 +1,6 @@
 <?php 
 
-$endpoints['raw'] = function($mods, $vars, &$report) use ($report_mask_search, $cache_file) {
+$endpoints['raw'] = function($mods, $vars, &$report) use ($report_mask_search, $cache_file, $reports_dir, $lg_version) {
   $leaguetag = $vars['rep'];
   if (!empty($leaguetag)) {
     $fname = $reports_dir."/".$report_mask_search[0].$leaguetag.$report_mask_search[1];
@@ -8,7 +8,7 @@ $endpoints['raw'] = function($mods, $vars, &$report) use ($report_mask_search, $
       $lightcache = true;
       include(__DIR__ . "/../../../view/__open_cache.php");
       if(isset($cache['reps'][$leaguetag]['file'])) {
-        $fname = $cache['reps'][$leaguetag]['file'];
+        $fname = $reports_dir."/".$cache['reps'][$leaguetag]['file'];
       }
     }
     $report = file_get_contents($fname);
