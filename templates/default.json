@@ -131,7 +131,9 @@
       }
     },
 
-    "items": false
+    "items": false,
+    "skill_builds": true,
+    "starting_items": true
   },
   "web": {
     "custom_style" : "",

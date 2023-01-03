@@ -19,6 +19,7 @@ include_once("modules/commons/generate_tag.php");
 include_once("modules/commons/metadata.php");
 include_once("modules/commons/wrap_data.php");
 include_once("modules/commons/array_pslice.php");
+include_once("modules/commons/instaquery.php");
 include_once("modules/view/functions/ranking.php");
 
 echo("\nConnecting to database...\n");
@@ -293,6 +294,12 @@ if ($lg_settings['ana']['items'])  {
   require_once("modules/analyzer/items/__main.php");
 }
 
+// SKILL BUILDS
+
+if ($lg_settings['ana']['skill_builds'] && $schema['skill_builds']) {
+  require_once("modules/analyzer/skill_builds.php");
+}
+
 // ...
 
 $result['settings'] = $lg_settings['web'];
@@ -353,6 +360,8 @@ $result['settings']['limiter'] = $limiter;
 $result['settings']['limiter_middle'] = $limiter_middle;
 $result['settings']['limiter_triplets'] = $limiter_lower;
 $result['settings']['limiter_combograph'] = $limiter_graph;
+$result['settings']['limiter_players'] = $pl_limiter;
+$result['settings']['limiter_players_median'] = $pl_limiter_median;
 $result['ana_version'] = $lrg_version;
 
 echo("[ ] Encoding results to JSON\n");

@@ -27,19 +27,19 @@ class lrg_metadata implements ArrayAccess {
   }
 
 
-  public function offsetSet($offset, $value) {
-      return $this->get($offset);
+  public function offsetSet($offset, $value): void {
+      $this->get($offset);
   }
 
-  public function offsetExists($offset) {
+  public function offsetExists($offset): bool {
       return isset($this->metadata[$offset]);
   }
 
-  public function offsetUnset($offset) {
+  public function offsetUnset($offset): void {
       unset($this->metadata[$offset]);
   }
 
-  public function & offsetGet($offset) {
+  public function & offsetGet($offset): array {
       return $this->get($offset);
   }
 }
