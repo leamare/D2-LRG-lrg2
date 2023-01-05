@@ -95,7 +95,7 @@ if (isset($lg_settings['teams']) && !isset($lg_settings['players'])) {
   $players_interest = $lg_settings['players'];
 }
 
-if(compare_ver($lg_settings['version'], $lrg_version) < 0) {
+if (compare_ver($lg_settings['version'], $lrg_version) < 0) {
   if (!file_exists("templates/default.json")) die("[F] No default league template found, exitting.");
   $tmp = json_decode(file_get_contents("templates/default.json"), true);
 

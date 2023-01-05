@@ -43,7 +43,7 @@ function rg_query_player_summary(&$conn, $cluster = null, $players = null) {
               join ( select max(heropool) mhp from
                 ( select COUNT(DISTINCT heroid) heropool, playerid from matchlines group by playerid ) _hp
               ) mhpt 
-          JOIN (
+          LEFT JOIN (
             SELECT ml.matchid, SUM(am.roshans_killed) rshs, ml.isradiant is_radiant 
             FROM adv_matchlines am JOIN matchlines ml ON am.playerid = ml.playerid AND am.matchid = ml.matchid 
             GROUP BY ml.matchid, ml.isradiant

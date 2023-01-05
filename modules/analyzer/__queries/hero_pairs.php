@@ -13,7 +13,7 @@ function rg_query_hero_pairs(&$conn, &$pickban, $matches_total, $limiter = 0, $c
   $wheres = [];
   if ($cluster !== null) $wheres[] = "matches.cluster IN (".implode(",", $cluster).")";
   if (!empty($players)) {
-    $wheres = "( fm1.playerid in (".implode(',', $players_interest).") 
+    $wheres[] = "( fm1.playerid in (".implode(',', $players_interest).") 
       and fm2.playerid in (".implode(',', $players_interest).")
     )";
   }

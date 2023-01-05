@@ -72,7 +72,7 @@ $limiter_lower = $limiters['limiter_lower'];
 $limiter_middle = $limiters['limiter_middle'];
 $limiter_median = $limiters['median'];
 $limiter_quantile = $limiters['limiter_quantile'];
-$pl_limiter = $limiters_players['limiter_higher'];
+$pl_limiter = $limiters_players['limiter_higher']-1;
 $pl_limiter_median = $limiters_players['median'];
 
 echo <<<LIMITERS
