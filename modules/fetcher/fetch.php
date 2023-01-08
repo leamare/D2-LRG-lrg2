@@ -1296,15 +1296,49 @@ function fetch($match) {
       foreach ($player['purchase_log'] as $item) {
         if ($item['time'] > 0) {
           break;
-        } 
+        }
         
         $sti[] = $items_flip[$item['key']];
       }
+
+      $consumables = [
+        'all' => [],
+        '5m' => [],
+        '10m' => [],
+      ];
+
+      foreach ($player['purchase_log'] as $item) {
+        $iid = $items_flip[$item['key']];
+        if (!in_array($iid, $meta['item_categories']['consumables'])) {
+          continue;
+        }
+        
+        if (!isset($consumables['all'][ $iid ])) {
+          $consumables['all'][ $iid ] = 0;
+        }
+        $consumables['all'][ $iid ]++;
+
+        if ($item['time'] < 600) {
+          if (!isset($consumables['10m'][ $iid ])) {
+            $consumables['10m'][ $iid ] = 0;
+          }
+          $consumables['10m'][ $iid ]++;
+        }
+
+        if ($item['time'] < 300) {
+          if (!isset($consumables['5m'][ $iid ])) {
+            $consumables['5m'][ $iid ] = 0;
+          }
+          $consumables['5m'][ $iid ]++;
+        }
+      }
+
       $t_starting_items[] = [
         'matchid' => $match,
         'playerid' => $player['account_id'],
         'hero_id' => $player['hero_id'],
         'starting_items' => addslashes(\json_encode($sti)),
+        'consumables' => addslashes(\json_encode($consumables)),
       ];
     }
   }
@@ -1742,10 +1776,13 @@ function fetch($match) {
   }
 
   if(!empty($t_starting_items) && ($schema['starting_items'] ?? false)) {
-    $sql = " INSERT INTO starting_items (matchid, playerid, hero_id, starting_items) VALUES ";
+    $sql = " INSERT INTO starting_items (matchid, playerid, hero_id, starting_items".
+      ($schema['starting_consumables'] ? ", consumables" : "").
+    ") VALUES ";
     foreach ($t_starting_items as $t) {
       $sql .= "\n\t({$t['matchid']}, {$t['playerid']}, {$t['hero_id']}, ".
         "'".($t['starting_items'])."'".
+        ($schema['starting_consumables'] ? ", '".($t['consumables'])."'" : "").
       "),";
     }
     $sql[strlen($sql)-1] = ";";

@@ -588,11 +588,37 @@ function get_stratz_response($match) {
       $items_all = [];
       $items_cats  = [];
       $items_starting = [];
+      $consumables = [
+        'all' => [],
+        '5m' => [],
+        '10m' => [],
+      ];
 
       foreach ($pl['stats']['itemPurchases'] as $e) {
         if ($r['matches']['duration'] - $e['time'] < 60) continue;
 
         if ($e['time'] < -10) $items_starting[] = $e['itemId'];
+
+        if (in_array($e['itemId'], $meta['item_categories']['consumables'])) {
+          if (!isset($consumables['all'][ $e['itemId'] ])) {
+            $consumables['all'][ $e['itemId'] ] = 0;
+          }
+          $consumables['all'][ $e['itemId'] ]++;
+  
+          if ($e['time'] < 600) {
+            if (!isset($consumables['10m'][ $e['itemId'] ])) {
+              $consumables['10m'][ $e['itemId'] ] = 0;
+            }
+            $consumables['10m'][ $e['itemId'] ]++;
+          }
+  
+          if ($e['time'] < 300) {
+            if (!isset($consumables['5m'][ $e['itemId'] ])) {
+              $consumables['5m'][ $e['itemId'] ] = 0;
+            }
+            $consumables['5m'][ $e['itemId'] ]++;
+          }
+        }
 
         $it = [
           'matchid' => $stratz['data']['match']['id'],
@@ -640,6 +666,7 @@ function get_stratz_response($match) {
         'playerid' => $pl['steamAccountId'],
         'hero_id' => $pl['heroId'],
         'starting_items' => addslashes(\json_encode($items_starting)),
+        'consumables' => addslashes(\json_encode($consumables)),
       ];
 
       foreach($pl['stats']['matchPlayerBuffEvent'] as $e) {
