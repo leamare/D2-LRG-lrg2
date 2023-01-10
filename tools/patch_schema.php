@@ -48,9 +48,12 @@ if (!$schema['starting_items']) {
     `playerid` bigint(20) NOT NULL,
     `hero_id` smallint(5) UNSIGNED NOT NULL,
     `starting_items` json,
+    `consumables` json,
     KEY `starting_items_matchid_player_IDX` (`matchid`,`playerid`) USING BTREE,
     KEY `starting_items_matchid_hero_IDX` (`matchid`,`hero_id`) USING BTREE
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+
+  $schema['starting_consumables'] = true;
 
   runquery($conn, $sql);
 }
@@ -65,9 +68,26 @@ if (!$schema['skill_builds']) {
     `maxed_at` json,
     `priority` json,
     `talents` json,
+    `attributes` json,
+    `ultimate` bigint UNSIGNED,
     KEY `skill_builds_matchid_player_IDX` (`matchid`,`playerid`) USING BTREE,
     KEY `skill_builds_matchid_hero_IDX` (`matchid`,`hero_id`) USING BTREE
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+
+  $schema['skill_build_attr'] = true;
+
+  runquery($conn, $sql);
+}
+
+if (!$schema['skill_build_attr']) {
+  $sql = "ALTER TABLE skill_builds ADD `attributes` json;";
+  runquery($conn, $sql);
+  $sql = "ALTER TABLE skill_builds ADD `ultimate` BIGINT UNSIGNED;";
+  runquery($conn, $sql);
+}
+
+if (!$schema['starting_consumables']) {
+  $sql = "ALTER TABLE starting_items ADD `consumables` json;";
 
   runquery($conn, $sql);
 }
