@@ -1750,8 +1750,8 @@ function fetch($match) {
         "'".($t['priority'])."',".
         "'".($t['talents'])."'".
         ($schema['skill_build_attr']
-        ? ",'".($t['attributes'] ?? null)."',".
-          "'".($t['ultimate'] ?? null)."'"
+        ? ",".($t['attributes'] ? "'".$t['attributes']."'" : "null").",".
+          "".($t['ultimate'] ?? 'null').""
         : "").
       "),";
     }

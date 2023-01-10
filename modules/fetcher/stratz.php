@@ -448,7 +448,7 @@ function get_stratz_response($match) {
       $aml['couriers_killed'] = count($pl['stats']['courierKills'] ?? []);
 
       $aml['roshans_killed'] = 0;
-      $aml['wards_destroyed'] = count($pl['stats']['wardDestruction']);
+      $aml['wards_destroyed'] = count($pl['stats']['wardDestruction'] ?? []);
 
       foreach ($pl['stats']['farmDistributionReport']['creepType'] as $fc) {
         // if (in_array($fc['id'], OBS)) $aml['wards_destroyed'] += $fc['count'];
