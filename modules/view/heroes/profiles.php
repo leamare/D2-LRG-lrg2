@@ -382,6 +382,13 @@ function rg_view_generate_heroes_profiles() {
         $dwr[] = $dwr[ sizeof($dwr)-1 ];
       }
     }
+    foreach ($dm as $i => $m) {
+      if ($m) continue;
+
+      $prev = $i ? $dwr[$i-1] : null;
+      $next = $i<count($dwr)-1 ? $dwr[$i+1] : null;
+      $dwr[$i] = (($prev ?? $next) + ($next ?? $prev))/2;
+    }
 
     $labels = [];
     foreach ($days as $timestamp) {
