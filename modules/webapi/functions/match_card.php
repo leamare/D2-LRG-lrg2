@@ -40,8 +40,8 @@ function match_card($mid) {
   $match['bans'] = null;
   if (isset($report['matches_additional'][$mid]['bans'])) {
     $match['bans'] = [];
-    $match['bans']['radiant'] = $report['matches_additional'][$mid]['bans'][0];
-    $match['bans']['dire'] = $report['matches_additional'][$mid]['bans'][1];
+    $match['bans']['radiant'] = $report['matches_additional'][$mid]['bans'][1];
+    $match['bans']['dire'] = $report['matches_additional'][$mid]['bans'][0];
   }
 
   if (isset($report['matches_additional'][$mid]['order'])) {

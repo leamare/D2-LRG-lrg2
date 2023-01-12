@@ -62,14 +62,14 @@ function match_card($mid) {
     }
 
     $radiant_bans .= "<div class=\"match-heroes-bans radiant\">";
-    foreach ($report['matches_additional'][$mid]['bans'][0] as [$hero, $stage]) {
+    foreach ($report['matches_additional'][$mid]['bans'][1] as [$hero, $stage]) {
       $order = empty($orders) ? 0 : $orders[ $hero ]+1;
       $radiant_bans .= "<div class=\"match-hero\" ".($order ? "data-order=\"$order\"" : "").">".hero_portrait($hero)."</div>";
     }
     $radiant_bans .= "</div>";
 
     $dire_bans .= "<div class=\"match-heroes-bans dire\">";
-    foreach ($report['matches_additional'][$mid]['bans'][1] as [$hero, $stage]) {
+    foreach ($report['matches_additional'][$mid]['bans'][0] as [$hero, $stage]) {
       $order = empty($orders) ? 0 : $orders[ $hero ]+1;
       $dire_bans .= "<div class=\"match-hero\" ".($order ? "data-order=\"$order\"" : "").">".hero_portrait($hero)."</div>";
     }
