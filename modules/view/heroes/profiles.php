@@ -525,6 +525,167 @@ function rg_view_generate_heroes_profiles() {
     "</div>";
   }
 
+  // records
+  if (isset($report['records'])) {
+    $player_records = [];
+
+    $tags = isset($report['regions_data']) ? array_keys($report['regions_data']) : [];
+    array_unshift($tags, null);
+
+    foreach ($tags as $reg) {
+      if (!$reg) {
+        $context_records = $report['records'];
+        $context_records_ext = $report['records_ext'] ?? [];
+      } else {
+        $context_records = $report['regions_data'][$reg]['records'];
+        $context_records_ext = $report['regions_data'][$reg]['records_ext'] ?? [];
+      }
+
+      if (is_wrapped($context_records_ext)) {
+        $context_records_ext = unwrap_data($context_records_ext);
+      }
+
+      foreach ($context_records as $rectag => $record) {
+        if (strpos($rectag, "_team") !== false) continue;
+  
+        if ($record['heroid'] == $hero) {
+          $record['tag'] = $rectag;
+          $record['placement'] = 1;
+          $record['region'] = $reg;
+          $player_records[] = $record;
+        } else if (!empty($context_records_ext)) {
+          foreach ($context_records_ext[$rectag] ?? [] as $i => $rec) {
+            if ($rec['heroid'] == $hero) {
+              $rec['tag'] = $rectag;
+              $rec['placement'] = $i+2;
+              $rec['region'] = $reg;
+              $player_records[] = $rec;
+            }
+          }
+        }
+      }
+    }
+
+    if (isset($report['items']) && isset($report['items']['records'])) {
+      if (is_wrapped($report['items']['records'])) {
+        $report['items']['records'] = unwrap_data($report['items']['records']);
+      }
+
+      foreach ($report['items']['records'] as $item => $records) {
+        if (!isset($records[$hero])) continue;
+
+        $record_pid = null;
+        if (!empty($report['matches']) && isset($report['matches'][ $records[$hero]['match'] ])) {
+          foreach ($report['matches'][ $records[$hero]['match'] ] as $part) {
+            if ($part['hero'] == $hero) {
+              $record_pid = $part['player'];
+              break;
+            }
+          }
+        }
+
+        $player_records[] = [
+          'tag' => $meta['items_full'][$item]['name']."_time",
+          'placement' => 1,
+          'region' => null,
+          'matchid' => $records[$hero]['match'],
+          'value' => $records[$hero]['time']/60,
+          'playerid' => $record_pid,
+          'item_id' => $item,
+        ];
+      }
+    }
+
+    if (empty($player_records)) {
+      $res['heroid'.$hero] .= "<div class=\"content-text\"><h1>".locale_string("records")."</h1>".locale_string("stats_no_elements")."</a></div>";
+    } else {
+      $res['heroid'.$hero] .= "<table id=\"profile-$hero-records\" class=\"list\"><caption>".locale_string("records")."</caption><thead>".
+        "<tr>".
+          "<th>".locale_string("record")."</th>".
+          "<th>".locale_string("match")."</th>".
+          "<th>".locale_string("value")."</th>".
+          "<th>".locale_string("player")."</th>".
+        "</tr>".
+      "</thead><tbody>";
+      foreach ($player_records as $record) {
+        $res['heroid'.$hero] .= "<tr>".
+          "<td>".
+            ( isset($record['item_id']) ? item_full_link($record['item_id']) : locale_string($record['tag']) ).
+            ($record['placement'] == 1 ? '' : ' #'.$record['placement']).
+            ($record['region'] ? " (".locale_string("region".$record['region']).")" : '').
+          "</td>".
+          "<td>".match_link($record['matchid'])."</td>".
+          "<td>".(
+            strpos($record['tag'], "duration") !== FALSE || strpos($record['tag'], "_len") !== FALSE ||
+            strpos($record['tag'], "_time") !== FALSE ||
+            strpos($record['tag'], "shortest") !== FALSE || strpos($record['tag'], "longest") !== FALSE ?
+            convert_time($record['value']) :
+            ( $record['value'] - floor($record['value']) != 0 ? number_format($record['value'], 2) : number_format($record['value'], 0) )
+          )."</td>".
+          "<td>".player_link($record['playerid'])."</td>".
+        "</tr>";
+      }
+      $res['heroid'.$hero] .= "</tbody></table>";
+    }
+  }
+
+  // haverages
+  if (isset($report['averages_heroes'])) {
+    $_haverages = [];
+
+    $tags = isset($report['regions_data']) ? array_keys($report['regions_data']) : [];
+    array_unshift($tags, null);
+
+    foreach ($tags as $reg) {
+      if (!$reg) {
+        $context_havg = $report['averages_heroes'] ?? $report['haverages_heroes'];
+      } else {
+        $context_havg = $report['regions_data'][$reg]['haverages_heroes'] ?? $report['regions_data'][$reg]['averages_heroes'];
+      }
+
+      foreach ($context_havg as $tag => $pls) {
+        foreach ($pls as $i => $pl) {
+          if ($pl['heroid'] == $hero) {
+            $_haverages[] = [
+              "tag" => $tag,
+              "region" => $reg,
+              "placement" => $i+1,
+              "value" => $pl['value'],
+            ];
+          }
+        }
+      }
+    }
+
+    if (!empty($_haverages)) {
+      $res['heroid'.$hero] .= "<table id=\"profile-$hero-haverages\" class=\"list\"><caption>".locale_string("haverages")."</caption><thead>".
+        "<tr>".
+          "<th>".locale_string("record")."</th>".
+          "<th>".locale_string("value")."</th>".
+        "</tr>".
+      "</thead><tbody>";
+      foreach ($_haverages as $record) {
+        $res['heroid'.$hero] .= "<tr>".
+          "<td>".
+            ( isset($record['item_id']) ? item_full_link($record['item_id']) : locale_string($record['tag']) ).
+            ($record['placement'] == 1 ? '' : ' #'.$record['placement']).
+            ($record['region'] ? " (".locale_string("region".$record['region']).")" : '').
+          "</td>".
+          "<td>".(
+            strpos($record['tag'], "duration") !== FALSE || strpos($record['tag'], "_len") !== FALSE ||
+            strpos($record['tag'], "_time") !== FALSE ||
+            strpos($record['tag'], "shortest") !== FALSE || strpos($record['tag'], "longest") !== FALSE ?
+            convert_time($record['value']) :
+            ( $record['value'] - floor($record['value']) != 0 ? number_format($record['value'], 2) : number_format($record['value'], 0) )
+          )."</td>".
+        "</tr>";
+      }
+      $res['heroid'.$hero] .= "</tbody></table>";
+    } else {
+      $res['heroid'.$hero] .= "<div class=\"content-text\"><h1>".locale_string("haverages")."</h1>".locale_string("stats_no_elements")."</a></div>";
+    }
+  }
+
   // factions
   if (isset($report['hero_sides'])) {
     $res['heroid'.$hero] .= "<table id=\"profile-$hero-pickban\" class=\"list\"><caption>".locale_string("sides")."</caption><thead><tr>".
