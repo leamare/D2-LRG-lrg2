@@ -133,6 +133,164 @@ function rg_view_generate_players_profiles() {
     $res['playerid'.$player] .= "</tbody></table>";
   }
 
+  // records
+  if (isset($report['records'])) {
+    $player_records = [];
+
+    $tags = isset($report['regions_data']) ? array_keys($report['regions_data']) : [];
+    array_unshift($tags, null);
+
+    foreach ($tags as $reg) {
+      if (!$reg) {
+        $context_records = $report['records'];
+        $context_records_ext = $report['records_ext'] ?? [];
+      } else {
+        $context_records = $report['regions_data'][$reg]['records'];
+        $context_records_ext = $report['regions_data'][$reg]['records_ext'] ?? [];
+      }
+
+      if (is_wrapped($context_records_ext)) {
+        $context_records_ext = unwrap_data($context_records_ext);
+      }
+
+      foreach ($context_records as $rectag => $record) {
+        if (strpos($rectag, "_team") !== false) continue;
+  
+        if ($record['playerid'] == $player) {
+          $record['tag'] = $rectag;
+          $record['placement'] = 1;
+          $record['region'] = $reg;
+          $player_records[] = $record;
+        } else if (!empty($context_records_ext)) {
+          foreach ($context_records_ext[$rectag] ?? [] as $i => $rec) {
+            if ($rec['playerid'] == $player) {
+              $rec['tag'] = $rectag;
+              $rec['placement'] = $i+2;
+              $rec['region'] = $reg;
+              $player_records[] = $rec;
+            }
+          }
+        }
+      }
+    }
+
+    if (isset($report['items']) && isset($report['items']['records']) && isset($heroes)) {
+      if (is_wrapped($report['items']['records'])) {
+        $report['items']['records'] = unwrap_data($report['items']['records']);
+      }
+
+      foreach ($report['items']['records'] as $item => $records) {
+        foreach ($heroes as $hero => $data) {
+          if (!isset($records[$hero])) continue;
+
+          if (!in_array($records[$hero]['match'], $data['matchlinks'])) continue;
+  
+          $player_records[] = [
+            'tag' => $meta['items_full'][$item]['name']."_time",
+            'placement' => 1,
+            'region' => null,
+            'matchid' => $records[$hero]['match'],
+            'value' => $records[$hero]['time']/60,
+            'playerid' => $player,
+            'item_id' => $item,
+            'heroid' => $hero,
+          ];
+        }
+      }
+    }
+
+    // region records
+
+    if (empty($player_records)) {
+      $res['playerid'.$player] .= "<div class=\"content-text\"><h1>".locale_string("records")."</h1>".locale_string("stats_no_elements")."</a></div>";
+    } else {
+      $res['playerid'.$player] .= "<table id=\"player-profile-pid$player-records\" class=\"list\"><caption>".locale_string("records")."</caption><thead>".
+        "<tr>".
+          "<th>".locale_string("record")."</th>".
+          "<th>".locale_string("match")."</th>".
+          "<th>".locale_string("value")."</th>".
+          "<th>".locale_string("hero")."</th>".
+        "</tr>".
+      "</thead><tbody>";
+      foreach ($player_records as $record) {
+        $res['playerid'.$player] .= "<tr>".
+          "<td>".
+            ( isset($record['item_id']) ? item_full_link($record['item_id']) : locale_string($record['tag']) ).
+            ($record['placement'] == 1 ? '' : ' #'.$record['placement']).
+            ($record['region'] ? " (".locale_string("region".$record['region']).")" : '').
+          "</td>".
+          "<td>".($record['matchid'] ? match_link($record['matchid']) : '-')."</td>".
+          "<td>".(
+            strpos($record['tag'], "duration") !== FALSE || strpos($record['tag'], "_len") !== FALSE ||
+            strpos($record['tag'], "_time") !== FALSE ||
+            strpos($record['tag'], "shortest") !== FALSE || strpos($record['tag'], "longest") !== FALSE ?
+            convert_time($record['value']) :
+            ( $record['value'] - floor($record['value']) != 0 ? number_format($record['value'], 2) : number_format($record['value'], 0) )
+          )."</td>".
+          "<td>".($record['heroid'] ? hero_full($record['heroid']) : '-')."</td>".
+        "</tr>";
+      }
+      $res['playerid'.$player] .= "</tbody></table>";
+    }
+  }
+
+  // haverages
+  if (isset($report['averages_players'])) {
+    $_haverages = [];
+
+    $tags = isset($report['regions_data']) ? array_keys($report['regions_data']) : [];
+    array_unshift($tags, null);
+
+    foreach ($tags as $reg) {
+      if (!$reg) {
+        $context_havg = $report['averages_players'] ?? $report['haverages_players'];
+      } else {
+        $context_havg = $report['regions_data'][$reg]['haverages_players'] ?? $report['regions_data'][$reg]['averages_players'];
+      }
+
+      foreach ($context_havg as $tag => $pls) {
+        foreach ($pls as $i => $pl) {
+          if ($pl['playerid'] == $player) {
+            $_haverages[] = [
+              "tag" => $tag,
+              "region" => $reg,
+              "placement" => $i+1,
+              "value" => $pl['value'],
+            ];
+          }
+        }
+      }
+    }
+
+    if (!empty($_haverages)) {
+      $res['playerid'.$player] .= "<table id=\"player-profile-pid$player-haverages\" class=\"list\"><caption>".locale_string("haverages")."</caption><thead>".
+        "<tr>".
+          "<th>".locale_string("record")."</th>".
+          "<th>".locale_string("value")."</th>".
+        "</tr>".
+      "</thead><tbody>";
+      foreach ($_haverages as $record) {
+        $res['playerid'.$player] .= "<tr>".
+          "<td>".
+            ( isset($record['item_id']) ? item_full_link($record['item_id']) : locale_string($record['tag']) ).
+            ($record['placement'] == 1 ? '' : ' #'.$record['placement']).
+            ($record['region'] ? " (".locale_string("region".$record['region']).")" : '').
+          "</td>".
+          "<td>".(
+            strpos($record['tag'], "duration") !== FALSE || strpos($record['tag'], "_len") !== FALSE ||
+            strpos($record['tag'], "_time") !== FALSE ||
+            strpos($record['tag'], "shortest") !== FALSE || strpos($record['tag'], "longest") !== FALSE ?
+            convert_time($record['value']) :
+            ( $record['value'] - floor($record['value']) != 0 ? number_format($record['value'], 2) : number_format($record['value'], 0) )
+          )."</td>".
+        "</tr>";
+      }
+      $res['playerid'.$player] .= "</tbody></table>";
+    } else {
+      $res['heroid'.$hero] .= "<div class=\"content-text\"><h1>".locale_string("haverages")."</h1>".locale_string("stats_no_elements")."</a></div>";
+    }
+  }
+
   // drafts data
   if (isset($report['players_draft'])) {
     $draft = [];
