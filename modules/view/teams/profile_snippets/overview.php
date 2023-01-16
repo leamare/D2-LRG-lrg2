@@ -293,6 +293,78 @@ if (!empty($report['match_participants_teams'])) {
     }
     $res["team".$tid]['overview'] .= "</div>";
   }
+
+  // records
+  if (isset($report['records'])) {
+    $_records = [];
+
+    $tags = isset($report['regions_data']) ? array_keys($report['regions_data']) : [];
+    array_unshift($tags, null);
+
+    foreach ($tags as $reg) {
+      if (!$reg) {
+        $context_records = $report['records'];
+        $context_records_ext = $report['records_ext'] ?? [];
+      } else {
+        $context_records = $report['regions_data'][$reg]['records'];
+        $context_records_ext = $report['regions_data'][$reg]['records_ext'] ?? [];
+      }
+
+      if (is_wrapped($context_records_ext)) {
+        $context_records_ext = unwrap_data($context_records_ext);
+      }
+
+      foreach ($context_records as $rectag => $record) {
+        if (strpos($rectag, "_team") === false) continue;
+  
+        if ($record['playerid'] == $tid) {
+          $record['tag'] = $rectag;
+          $record['placement'] = 1;
+          $record['region'] = $reg;
+          $_records[] = $record;
+        } else if (!empty($context_records_ext)) {
+          foreach ($context_records_ext[$rectag] ?? [] as $i => $rec) {
+            if ($rec['playerid'] == $tid) {
+              $rec['tag'] = $rectag;
+              $rec['placement'] = $i+2;
+              $rec['region'] = $reg;
+              $_records[] = $rec;
+            }
+          }
+        }
+      }
+    }
+
+    if (empty($_records)) {
+      $res["team".$tid]['overview'] .= "<div class=\"content-text\"><h1>".locale_string("records")."</h1>".locale_string("stats_no_elements")."</a></div>";
+    } else {
+      $res["team".$tid]['overview'] .= "<table id=\"player-profile-pid$player-records\" class=\"list wide\"><caption>".locale_string("records")."</caption><thead>".
+        "<tr class=\"overhead\">".
+          "<th>".locale_string("record")."</th>".
+          "<th>".locale_string("match")."</th>".
+          "<th>".locale_string("value")."</th>".
+        "</tr>".
+      "</thead><tbody>";
+      foreach ($_records as $record) {
+        $res["team".$tid]['overview'] .= "<tr>".
+          "<td>".
+            ( isset($record['item_id']) ? item_full_link($record['item_id']) : locale_string($record['tag']) ).
+            ($record['placement'] == 1 ? '' : ' #'.$record['placement']).
+            ($record['region'] ? " (".locale_string("region".$record['region']).")" : '').
+          "</td>".
+          "<td>".($record['matchid'] ? match_link($record['matchid']) : '-')."</td>".
+          "<td>".(
+            strpos($record['tag'], "duration") !== FALSE || strpos($record['tag'], "_len") !== FALSE ||
+            strpos($record['tag'], "_time") !== FALSE ||
+            strpos($record['tag'], "shortest") !== FALSE || strpos($record['tag'], "longest") !== FALSE ?
+            convert_time($record['value']) :
+            ( $record['value'] - floor($record['value']) != 0 ? number_format($record['value'], 2) : number_format($record['value'], 0) )
+          )."</td>".
+        "</tr>";
+      }
+      $res["team".$tid]['overview'] .= "</tbody></table>";
+    }
+  }
   
   $res["team".$tid]['overview'] .= "</div>";
 }
