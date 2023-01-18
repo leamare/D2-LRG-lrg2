@@ -4,10 +4,12 @@ $picks = [];
 foreach($result["pickban"] as $hero)
   $picks[] = (int)($hero["matches_picked"] ?? $hero["matches_total"]);
 
-$players = array_map(
-  function($a) { return reset($a); }, 
-  instaquery($conn, "SELECT COUNT(matchid) FROM matchlines GROUP BY playerid;")
-);
+if ($lg_settings['ana']['players']) {
+  $players = array_map(
+    function($a) { return reset($a); }, 
+    instaquery($conn, "SELECT COUNT(matchid) FROM matchlines GROUP BY playerid;")
+  );
+}
 
 function calculate_limiters(array $dataset, $teams = null, $total = null): array {
   if (!empty($dataset)) {
@@ -63,7 +65,9 @@ function calculate_limiters(array $dataset, $teams = null, $total = null): array
 }
 
 $limiters = calculate_limiters($picks, $result['random']['teams_on_event'] ?? null, $result['random']["matches_total"]);
-$limiters_players = calculate_limiters($players, $result['random']['teams_on_event'] ?? null, $result['random']["matches_total"]);
+
+if ($lg_settings['ana']['players'])
+  $limiters_players = calculate_limiters($players, $result['random']['teams_on_event'] ?? null, $result['random']["matches_total"]);
 
 //compatibility
 $limiter = $limiters['limiter_higher'];
@@ -72,8 +76,14 @@ $limiter_lower = $limiters['limiter_lower'];
 $limiter_middle = $limiters['limiter_middle'];
 $limiter_median = $limiters['median'];
 $limiter_quantile = $limiters['limiter_quantile'];
-$pl_limiter = $limiters_players['limiter_higher']-1;
-$pl_limiter_median = $limiters_players['median'];
+
+if ($lg_settings['ana']['players']) {
+  $pl_limiter = $limiters_players['limiter_higher']-1;
+  $pl_limiter_median = $limiters_players['median'];
+} else {
+  $pl_limiter = $limiter_median;
+  $pl_limiter_median = $limiter_graph;
+}
 
 echo <<<LIMITERS
 [ ] Limiter: $limiter
