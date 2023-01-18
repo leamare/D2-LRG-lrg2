@@ -23,13 +23,10 @@ if (!$row[1] || ( ($lg_settings['ana']['regions']['use_limiter'] ?? false) && $r
   require("overview/versions.php");
 
   # players on event
-  $sql = "SELECT \"players_on_event\", COUNT(DISTINCT players.playerID)
-          FROM players JOIN (
-            SELECT matchlines.playerid, matches.cluster FROM matchlines
-            JOIN matches ON matchlines.matchid = matches.matchid
-            WHERE matches.cluster IN (".implode(",", $clusters).")
-            GROUP BY matchlines.playerid) clp
-          ON clp.playerid = players.playerID;";
+  $sql = "SELECT \"players_on_event\", COUNT(DISTINCT matchlines.playerid)
+          FROM matchlines
+          JOIN matches ON matchlines.matchid = matches.matchid
+          WHERE matches.cluster IN (".implode(",", $clusters).");";
   if($lg_settings['main']['teams']) # teams on event
     $sql .= "SELECT \"teams_on_event\", COUNT(DISTINCT teams.teamid) FROM teams JOIN (
       SELECT teams_matches.teamid, matches.cluster FROM matches JOIN teams_matches
