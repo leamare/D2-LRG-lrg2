@@ -379,10 +379,55 @@ $endpoints['teams'] = function($mods, $vars, &$report) use (&$endpoints, &$repea
       $res['unique_heroes'] = null;
     }
 
+    // records
+    if (isset($report['records'])) {
+      $_records = [];
+
+      $tags = isset($report['regions_data']) ? array_keys($report['regions_data']) : [];
+      array_unshift($tags, null);
+
+      foreach ($tags as $reg) {
+        if (!$reg) {
+          $context_records = $report['records'];
+          $context_records_ext = $report['records_ext'] ?? [];
+        } else {
+          $context_records = $report['regions_data'][$reg]['records'];
+          $context_records_ext = $report['regions_data'][$reg]['records_ext'] ?? [];
+        }
+
+        if (is_wrapped($context_records_ext)) {
+          $context_records_ext = unwrap_data($context_records_ext);
+        }
+
+        foreach ($context_records as $rectag => $record) {
+          if (strpos($rectag, "_team") === false) continue;
+    
+          if ($record['playerid'] == $vars['team']) {
+            $record['tag'] = $rectag;
+            $record['placement'] = 1;
+            $record['region'] = $reg;
+            $_records[] = $record;
+          } else if (!empty($context_records_ext)) {
+            foreach ($context_records_ext[$rectag] ?? [] as $i => $rec) {
+              if ($rec['playerid'] == $vars['team']) {
+                $rec['tag'] = $rectag;
+                $rec['placement'] = $i+2;
+                $rec['region'] = $reg;
+                $_records[] = $rec;
+              }
+            }
+          }
+        }
+      }
+
+      $res['records'] = $_records;
+    }
+
     $pb = rg_create_team_pickban_data(
       $report['teams'][ $vars['team'] ]['pickban'], 
       $report['teams'][ $vars['team'] ]['pickban_vs'] ?? [], 
-      $report['teams'][ $vars['team'] ]['matches_total']
+      $report['teams'][ $vars['team'] ]['matches_total'],
+      $report['teams'][ $vars['team'] ]['wins']
     );
 
     $res['pickban'] = [];
