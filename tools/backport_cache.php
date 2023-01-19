@@ -61,7 +61,9 @@ for ($i = 0; $i < $sz; $i++) {
   $match = [];
 
   $q = "select * from matches where matchid = $m;";
-  $match['matches'] = instaquery($conn, $q)[0];
+  $r = instaquery($conn, $q);
+  if (empty($r)) continue;
+  $match['matches'] = $r[0];
 
   $q = "select * from matchlines where matchid = $m;";
   $match['matchlines'] = instaquery($conn, $q);

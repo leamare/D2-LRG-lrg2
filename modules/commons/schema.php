@@ -16,7 +16,7 @@ $schema = [
 
 echo "[ ] Getting tables\n";
 
-$sql = "SHOW TABLES;";
+$sql = "SHOW FULL TABLES;";
 if ($conn->multi_query($sql) === FALSE)
   die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
 $query_res = $conn->store_result();

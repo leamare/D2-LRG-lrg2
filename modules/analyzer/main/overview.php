@@ -7,7 +7,7 @@ $sql  = "SELECT \"matches_total\", COUNT(matchid) FROM matches;";
 # matches without analysis
 $sql .= "SELECT \"matches_unparsed\", COUNT(DISTINCT matchid) FROM adv_matchlines;";
 # players on event
-$sql .= "SELECT \"players_on_event\", COUNT(playerID) FROM players;";
+$sql .= "SELECT \"players_on_event\", COUNT(DISTINCT playerid) FROM matchlines;";
 if($lg_settings['main']['teams']) # teams on event
   $sql .= "SELECT \"teams_on_event\", COUNT(DISTINCT teamid) FROM teams_matches;";
 
@@ -72,7 +72,7 @@ $_fpabile = array_sum(
     return $result['modes'][$a] ?? 0;
   }, FP_ABLE)
 );
-if (($schema['matches_opener'] ?? false) && ($_fpabile/$_total) > 0.5) {
+if (($schema['matches_opener'] ?? false) && $_total && ($_fpabile/$_total) > 0.5) {
   # First pick radiant ratio
   $sql .= "SELECT \"opener_pick_radiant_ratio\", SUM(radiant_opener)*100/SUM(1) FROM matches WHERE modeID in (".implode(',', FP_ABLE).");";
   # First pick

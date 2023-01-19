@@ -150,7 +150,7 @@ function skillPriority($skillbuild, $hid, $noattr = false) {
   foreach($maxlevel as $skill => $lvl) {
     if ($skill == $ultimate) {
       if ($lvl == 3) continue;
-      $maxedAt[$skill] = LEVELS_IDS[ $level-1 ] < 19 ? 18 : $level + (3-$lvl) - 1;
+      $maxedAt[$skill] = (LEVELS_IDS[ $level-1 ] ?? $level) < 19 ? 18 : $level + (3-$lvl) - 1;
       $maxlevel[$skill] = 3;
     } else {
       if ($lvl == 4) continue;
