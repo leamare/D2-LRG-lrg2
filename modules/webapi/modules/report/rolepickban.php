@@ -93,7 +93,7 @@ $endpoints['rolepickban'] = function($mods, $vars, &$report) {
   foreach ($pb as $id => $el) {
     if(isset($last) && $el == $last) {
       $i++;
-      $ranks[$id] = $last_rank;
+      $ranks[$id] = $last_rank ?? 0;
     } else
       $ranks[$id] = 100 - $increment*$i++;
     $last = $el;

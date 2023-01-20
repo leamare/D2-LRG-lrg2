@@ -1,5 +1,7 @@
 <?php 
 
+$repeatVars['roster'] = ['team'];
+
 $endpoints['roster'] = function($mods, $vars, &$report) {
   if (isset($vars['team']) && isset($report['teams'][ $vars['team'] ])) {
     $res = [];

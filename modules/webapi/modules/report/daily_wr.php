@@ -75,6 +75,14 @@ $endpoints['daily_wr'] = function($mods, $vars, &$report) {
         $dm[] = $dm[ sizeof($dm)-1 ];
         $dwr[] = $dwr[ sizeof($dwr)-1 ];
       }
+
+      foreach ($dm as $i => $m) {
+        if ($m) continue;
+  
+        $prev = $i ? $dwr[$i-1] : null;
+        $next = $i<count($dwr)-1 ? $dwr[$i+1] : null;
+        $dwr[$i] = (($prev ?? $next) + ($next ?? $prev))/2;
+      }
     }
 
     $res[$hid] = [

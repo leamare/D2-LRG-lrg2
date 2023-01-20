@@ -15,7 +15,7 @@ $endpoints['profiles'] = function($mods, $vars, &$report) use (&$endpoints, &$me
 
     // summary
     if (is_wrapped($report['hero_summary'])) $report['hero_summary'] = unwrap_data($report['hero_summary']);
-    if (!isset($report['hero_summary'][ $vars['heroid'] ])) throw new \Exception("Hero `${$vars['heroid']}` is not in the report");
+    if (!isset($report['hero_summary'][ $vars['heroid'] ])) throw new \Exception("Hero `{$vars['heroid']}` is not in the report");
     $res['summary'] = $report['hero_summary'][ $vars['heroid'] ];
 
     if (isset($res['summary']['hero_damage_per_min_s']) && $res['summary']['gpm'] && !isset($res['summary']['damage_to_gold_per_min_s'])) {
@@ -37,6 +37,111 @@ $endpoints['profiles'] = function($mods, $vars, &$report) use (&$endpoints, &$me
       foreach($draft['stages'][ $vars['heroid'] ] as $i => $stage) {
         $res['draft']['stages'][$i] = $stage ?? null;
       }
+    }
+
+    // records
+    if (isset($report['records'])) {
+      $player_records = [];
+
+      $tags = isset($report['regions_data']) ? array_keys($report['regions_data']) : [];
+      array_unshift($tags, null);
+
+      foreach ($tags as $reg) {
+        if (!$reg) {
+          $context_records = $report['records'];
+          $context_records_ext = $report['records_ext'] ?? [];
+        } else {
+          $context_records = $report['regions_data'][$reg]['records'];
+          $context_records_ext = $report['regions_data'][$reg]['records_ext'] ?? [];
+        }
+
+        if (is_wrapped($context_records_ext)) {
+          $context_records_ext = unwrap_data($context_records_ext);
+        }
+
+        foreach ($context_records as $rectag => $record) {
+          if (strpos($rectag, "_team") !== false) continue;
+    
+          if ($record['heroid'] == $vars['heroid']) {
+            $record['tag'] = $rectag;
+            $record['placement'] = 1;
+            $record['region'] = $reg;
+            $player_records[] = $record;
+          } else if (!empty($context_records_ext)) {
+            foreach ($context_records_ext[$rectag] ?? [] as $i => $rec) {
+              if ($rec['heroid'] == $vars['heroid']) {
+                $rec['tag'] = $rectag;
+                $rec['placement'] = $i+2;
+                $rec['region'] = $reg;
+                $player_records[] = $rec;
+              }
+            }
+          }
+        }
+      }
+
+      if (isset($report['items']) && isset($report['items']['records'])) {
+        if (is_wrapped($report['items']['records'])) {
+          $report['items']['records'] = unwrap_data($report['items']['records']);
+        }
+
+        foreach ($report['items']['records'] as $item => $records) {
+          if (!isset($records[ $vars['heroid'] ])) continue;
+
+          $record_pid = null;
+          if (!empty($report['matches']) && isset($report['matches'][ $records[ $vars['heroid'] ]['match'] ])) {
+            foreach ($report['matches'][ $records[ $vars['heroid'] ]['match'] ] as $part) {
+              if ($part['hero'] == $vars['heroid']) {
+                $record_pid = $part['player'];
+                break;
+              }
+            }
+          }
+
+          $player_records[] = [
+            'tag' => $meta['items_full'][$item]['name']."_time",
+            'placement' => 1,
+            'region' => null,
+            'matchid' => $records[ $vars['heroid'] ]['match'],
+            'value' => $records[ $vars['heroid'] ]['time']/60,
+            'playerid' => $record_pid,
+            'item_id' => $item,
+          ];
+        }
+      }
+
+      $res['records'] = $player_records;
+    }
+
+    // haverages
+    if (isset($report['averages_heroes'])) {
+      $_haverages = [];
+
+      $tags = isset($report['regions_data']) ? array_keys($report['regions_data']) : [];
+      array_unshift($tags, null);
+
+      foreach ($tags as $reg) {
+        if (!$reg) {
+          $context_havg = $report['averages_heroes'] ?? $report['haverages_heroes'];
+        } else {
+          $context_havg = $report['regions_data'][$reg]['haverages_heroes'] ?? $report['regions_data'][$reg]['averages_heroes'];
+        }
+
+        foreach ($context_havg as $tag => $pls) {
+          foreach ($pls as $i => $pl) {
+            if ($pl['heroid'] == $vars['heroid']) {
+              $_haverages[] = [
+                "tag" => $tag,
+                "region" => $reg,
+                "placement" => $i+1,
+                "value" => $pl['value'],
+              ];
+            }
+          }
+        }
+      }
+
+      $res['haverages'] = $_haverages;
     }
 
     // pairs
@@ -175,7 +280,7 @@ $endpoints['profiles'] = function($mods, $vars, &$report) use (&$endpoints, &$me
 
     // summary
     if (is_wrapped($report['players_summary'])) $report['players_summary'] = unwrap_data($report['players_summary']);
-    if (!isset($report['players_summary'][ $vars['playerid'] ])) throw new \Exception("Player `${$vars['playerid']}` is not in the report");
+    if (!isset($report['players_summary'][ $vars['playerid'] ])) throw new \Exception("Player `{$vars['playerid']}` is not in the report");
     $res['summary'] = $report['players_summary'][ $vars['playerid'] ];
 
     if (isset($res['summary']['hero_damage_per_min_s']) && $res['summary']['gpm'] && !isset($res['summary']['damage_to_gold_per_min_s'])) {
@@ -192,6 +297,28 @@ $endpoints['profiles'] = function($mods, $vars, &$report) use (&$endpoints, &$me
       $res['draft']['stages'] = $draft['stages'][ $vars['playerid'] ];
     }
 
+    // played heroes
+    if (isset($report['matches'])) {
+      $res['heroes'] = [];
+      
+      foreach ($report['matches'] as $mid => $heroes) {
+        foreach ($heroes as $hero) {
+          if ($hero['player'] != $vars['playerid']) continue;
+          if (!isset($res['heroes'][ $hero['hero'] ])) {
+            $res['heroes'][ $hero['hero'] ] = [
+              'wins' => 0,
+              'matches' => 0,
+              'matchlist' => [],
+            ];
+          }
+          $res['heroes'][ $hero['hero'] ]['matches']++;
+          if ($hero['radiant'] == $report['matches_additional'][$mid]['radiant_win'])
+            $res['heroes'][ $hero['hero'] ]['wins']++;
+            $res['heroes'][ $hero['hero'] ]['matchlist'][] = $mid;
+        }
+      }
+    }
+
     // positions
     if (isset($report['player_positions'])) {
       $req = $endpoints['positions']($mods, $vars, $report);
@@ -200,6 +327,106 @@ $endpoints['profiles'] = function($mods, $vars, &$report) use (&$endpoints, &$me
       foreach($req as $role => $heroes) {
         $res['positions'][$role] = $heroes[ $vars['playerid'] ] ?? null;
       }
+    }
+
+    // records
+    if (isset($report['records'])) {
+      $player_records = [];
+
+      $tags = isset($report['regions_data']) ? array_keys($report['regions_data']) : [];
+      array_unshift($tags, null);
+
+      foreach ($tags as $reg) {
+        if (!$reg) {
+          $context_records = $report['records'];
+          $context_records_ext = $report['records_ext'] ?? [];
+        } else {
+          $context_records = $report['regions_data'][$reg]['records'];
+          $context_records_ext = $report['regions_data'][$reg]['records_ext'] ?? [];
+        }
+
+        if (is_wrapped($context_records_ext)) {
+          $context_records_ext = unwrap_data($context_records_ext);
+        }
+
+        foreach ($context_records as $rectag => $record) {
+          if (strpos($rectag, "_team") !== false) continue;
+    
+          if ($record['playerid'] == $vars['playerid']) {
+            $record['tag'] = $rectag;
+            $record['placement'] = 1;
+            $record['region'] = $reg;
+            $player_records[] = $record;
+          } else if (!empty($context_records_ext)) {
+            foreach ($context_records_ext[$rectag] ?? [] as $i => $rec) {
+              if ($rec['playerid'] == $vars['playerid']) {
+                $rec['tag'] = $rectag;
+                $rec['placement'] = $i+2;
+                $rec['region'] = $reg;
+                $player_records[] = $rec;
+              }
+            }
+          }
+        }
+      }
+
+      if (isset($report['items']) && isset($report['items']['records']) && isset($res['heroes'])) {
+        if (is_wrapped($report['items']['records'])) {
+          $report['items']['records'] = unwrap_data($report['items']['records']);
+        }
+
+        foreach ($report['items']['records'] as $item => $records) {
+          foreach ($res['heroes'] as $hero => $data) {
+            if (!isset($records[$hero])) continue;
+
+            if (!in_array($records[$hero]['match'], $data['matchlist'])) continue;
+    
+            $player_records[] = [
+              'tag' => $meta['items_full'][$item]['name']."_time",
+              'placement' => 1,
+              'region' => null,
+              'matchid' => $records[$hero]['match'],
+              'value' => $records[$hero]['time']/60,
+              'playerid' => $vars['playerid'],
+              'item_id' => $item,
+              'heroid' => $hero,
+            ];
+          }
+        }
+      }
+
+      $res['records'] = $player_records;
+    }
+
+    // haverages
+    if (isset($report['averages_players'])) {
+      $_haverages = [];
+
+      $tags = isset($report['regions_data']) ? array_keys($report['regions_data']) : [];
+      array_unshift($tags, null);
+
+      foreach ($tags as $reg) {
+        if (!$reg) {
+          $context_havg = $report['averages_players'] ?? $report['haverages_players'];
+        } else {
+          $context_havg = $report['regions_data'][$reg]['haverages_players'] ?? $report['regions_data'][$reg]['averages_players'];
+        }
+
+        foreach ($context_havg as $tag => $pls) {
+          foreach ($pls as $i => $pl) {
+            if ($pl['playerid'] == $vars['playerid']) {
+              $_haverages[] = [
+                "tag" => $tag,
+                "region" => $reg,
+                "placement" => $i+1,
+                "value" => $pl['value'],
+              ];
+            }
+          }
+        }
+      }
+
+      $res['haverages'] = $_haverages;
     }
 
     // pairs
@@ -237,26 +464,6 @@ $endpoints['profiles'] = function($mods, $vars, &$report) use (&$endpoints, &$me
               'winrate' => $data['players_draft_pb'][ $vars['playerid'] ]['winrate_picked'],
             ];
           }
-        }
-      }
-    }
-
-    // played heroes
-    if (isset($report['matches'])) {
-      $res['heroes'] = [];
-      
-      foreach ($report['matches'] as $mid => $heroes) {
-        foreach ($heroes as $hero) {
-          if ($hero['player'] != $vars['playerid']) continue;
-          if (!isset($res['heroes'][ $hero['hero'] ])) {
-            $res['heroes'][ $hero['hero'] ] = [
-              'wins' => 0,
-              'matches' => 0,
-            ];
-          }
-          $res['heroes'][ $hero['hero'] ]['matches']++;
-          if ($hero['radiant'] == $report['matches_additional'][$mid]['radiant_win'])
-            $res['heroes'][ $hero['hero'] ]['wins']++;
         }
       }
     }
