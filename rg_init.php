@@ -289,6 +289,22 @@ if ($conn->select_db($lrg_db_prefix."_".$lg_settings['league_tag'])) {
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
     if ($conn->connect_error) die("[F] Can't create table `items`: ".$conn->connect_error."\n");
 
+  echo "OK\n[ ] Creating table `wards`...";
+  $conn->query("CREATE TABLE `wards` (
+    `matchid` bigint(20) UNSIGNED NOT NULL,
+    `playerid` bigint(20) NOT NULL,
+    `hero_id` smallint(5) UNSIGNED NOT NULL,
+    `wards_log` json,
+    `sentries_log` json,
+    `destroyed_log` json,
+    UNIQUE KEY `wards_matchid_player_IDX` (`matchid`,`playerid`) USING BTREE,
+    KEY `wards_matchid_IDX` (`matchid`) USING BTREE,
+    KEY `wards_playerid_IDX` (`playerid`) USING BTREE,
+    KEY `wards_heroid_IDX` (`hero_id`) USING BTREE,
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+  if ($conn->connect_error) die("[F] Can't create table `items`: ".$conn->connect_error."\n");
+
+
   echo "OK\n[ ] Creating table `players`...";
 
   $conn->query("CREATE TABLE `players` (

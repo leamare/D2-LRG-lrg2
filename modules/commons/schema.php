@@ -12,6 +12,7 @@ $schema = [
   'items' => false,
   'skill_build_attr' => false,
   'starting_consumables' => false,
+  'wards' => false,
 ];
 
 echo "[ ] Getting tables\n";
@@ -28,6 +29,9 @@ for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row(
       break;
     case "items":
       $schema['items'] = true;
+      break;
+    case "wards":
+      $schema['wards'] = true;
       break;
     case "starting_items":
     case "skill_builds":
