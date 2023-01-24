@@ -13,6 +13,8 @@ set_error_handler(
 require_once("head.php");
 $conn = new mysqli($lrg_sql_host, $lrg_sql_user, $lrg_sql_pass, $lrg_sql_db);
 
+require_once("modules/commons/schema.php");
+
 $options = getopt("l:f:d:");
 
 $cooldown = isset($options['d']) ? (int)$options['d'] : 0;
@@ -122,8 +124,17 @@ foreach ($matches as $match) {
     }
     $update_events[] = "UPDATE matchlines SET playerid = ".$pl['steamAccountId']." WHERE heroid = ".$pl['heroId']." AND matchid = $match;";
     $update_events[] = "UPDATE adv_matchlines SET playerid = ".$pl['steamAccountId']." WHERE heroid = ".$pl['heroId']." AND matchid = $match;";
-    if ($lg_settings['main']['items']) {
+    if ($lg_settings['main']['items'] && $schema['items']) {
       $update_events[] = "UPDATE items SET playerid = ".$pl['steamAccountId']." WHERE hero_id = ".$pl['heroId']." AND matchid = $match;";
+    }
+    if ($schema['skill_builds']) {
+      $update_events[] = "UPDATE skill_builds SET playerid = ".$pl['steamAccountId']." WHERE hero_id = ".$pl['heroId']." AND matchid = $match;";
+    }
+    if ($schema['starting_items']) {
+      $update_events[] = "UPDATE starting_items SET playerid = ".$pl['steamAccountId']." WHERE hero_id = ".$pl['heroId']." AND matchid = $match;";
+    }
+    if ($schema['wards']) {
+      $update_events[] = "UPDATE wards SET playerid = ".$pl['steamAccountId']." WHERE hero_id = ".$pl['heroId']." AND matchid = $match;";
     }
   }
 
