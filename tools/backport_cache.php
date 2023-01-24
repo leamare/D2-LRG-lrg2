@@ -89,6 +89,11 @@ for ($i = 0; $i < $sz; $i++) {
     $match['starting_items'] = instaquery($conn, $q);
   }
 
+  if ($schema['wards']) {
+    $q = "select * from wards where matchid = $m;";
+    $match['wards'] = instaquery($conn, $q);
+  }
+
   if($lg_settings['main']['teams']) {
     $q = "select * from teams_matches where matchid = $m;";
     $match['teams_matches'] = instaquery($conn, $q);
