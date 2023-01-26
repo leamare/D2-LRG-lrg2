@@ -131,9 +131,6 @@ const STRATZ_GRAPHQL_QUERY = "{
       }
       lastHitsPerMinute
       networthPerMinute
-      wards {
-        type
-      }
       itemPurchases {
         time
         itemId
@@ -199,13 +196,18 @@ const STRATZ_GRAPHQL_QUERY = "{
           id
         }
       }
-      wardDestruction {
-        gold
-        time
-        experience
-      }
       actionReport {
         pingUsed
+      }
+      wards {
+        positionX
+        positionY
+        time
+        type
+      }
+      wardDestruction {
+        isWard
+        time
       }
       level
     }
@@ -349,6 +351,7 @@ function get_stratz_response($match) {
   $r['players'] = [];
   $r['skill_builds'] = [];
   $r['starting_items'] = [];
+  $r['wards'] = [];
 
   foreach ($stratz['data']['match']['players'] as $i => $pl) {
     $r['payload']['score_radiant'] += $pl['isRadiant'] ? $pl['kills'] : 0;
@@ -426,7 +429,11 @@ function get_stratz_response($match) {
       $passive = (600 * 1.275);
       $starting = 625;
       $tenMinute = $melee + $ranged + $siege + $passive + $starting;
-      $aml['efficiency_at10'] = $pl['stats']['networthPerMinute'][10] / $tenMinute;
+      $aml['efficiency_at10'] = (
+        count($pl['stats']['networthPerMinute']) > 9 ? 
+        $pl['stats']['networthPerMinute'][10] : 
+        end($pl['stats']['networthPerMinute'])
+      ) / $tenMinute;
       
       if (!empty($pl['stats']['wards'])) {
         // only includes wards placed
@@ -776,6 +783,46 @@ function get_stratz_response($match) {
     }
   }
 
+  // type 0 is obs
+  // currently lacks information about ward killer
+  foreach ($stratz['data']['match']['players'] as $pl) {
+    if (empty($pl['stats']['wards'])) continue;
+    $wards_log = [];
+    $sentries_log = [];
+    $wards_destruction_log = [];
+    foreach($pl['stats']['wards'] as $ward) {
+      if ($ward['type'] == 0) {
+        $wards_log[] = [
+          'x_c' => $ward['positionX'],
+          'y_c' => $ward['positionY'],
+          'time' => $ward['time'],
+          'alive' => 600, //TODO:
+          'destroyed_at' => null,
+          'destroyed_by' => null,
+        ];
+      } else {
+        $sentries_log[] = [
+          'x_c' => $ward['positionX'],
+          'y_c' => $ward['positionY'],
+          'time' => $ward['time'],
+        ];
+      }
+    }
+    // foreach($pl['stats']['wardDestruction'] as $ward) {
+    //   $wards_destruction_log[] = [
+
+    //   ]
+    // }
+    $r['wards'][] = [
+      'matchid' => $match,
+      'playerid' => $pl['steamAccountId'],
+      'heroid' => $pl['heroId'],
+      'wards_log' => addslashes(\json_encode($wards_log)),
+      'sentries_log' => addslashes(\json_encode($sentries_log)),
+      'destroyed_log' => addslashes(\json_encode($wards_destruction_log)),
+    ];
+  }
+
   $r['draft'] = [];
   if (!empty($stratz['data']['match']['pickBans'])) {
     $stage = 0;
@@ -911,6 +958,10 @@ function get_stratz_multiquery($group) {
   if (empty($json)) return null;
 
   $stratz = json_decode($json, true);
+
+  if (!empty($stratz['errors'])) {
+    var_dump(json_encode($stratz['errors'], JSON_PRETTY_PRINT));
+  }
 
   if (empty($stratz) || empty($stratz['data'])) return null;
 
