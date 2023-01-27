@@ -123,6 +123,9 @@ Parameters:
 * `-N / --name=` - specify league's name (if empty it will be asked anyway)
 * `-D / --desc=` - specify league's description (if empty it will be asked anyway)
 * `-S / --settings=` - set specific parameters for the league. You can check default template to see all the parameters that you can change
+* `-d / --drop` - recreate database if it already exists
+* `-v / --virtual` - create a virtual report (using views, not recommended for performance reasons)
+* `-e / --existing` - use existing config if possible
 
 ### rg_backup
 

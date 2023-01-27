@@ -5,7 +5,7 @@ ini_set('memory_limit', '16192M');
 const DISK_CACHE_COUNTER = 25000;
 const QUERY_COUNTER = 10000;
 
-$options = getopt("l:RrFf:o:");
+$options = getopt("l:RrFf:o:S:");
 
 $restore = isset($options['R']);
 
@@ -14,6 +14,8 @@ $make_report = isset($options['r']);
 $remove = isset($options['F']);
 
 $input = $options['f'] ?? '';
+
+$skipTables = explode(",", $options['S'] ?? '');
 
 $output_path = $options['o'] ?? 'backups/'.$lrg_league_tag.'_'.time().'.tar';
 if (!is_dir('backups')) mkdir('backups');
@@ -64,6 +66,8 @@ if ($restore) {
 
   foreach ($tables as $t) {
     if (file_exists($dir.'/'.$t.'.csv')) {
+      if (in_array($t, $skipTables)) continue;
+
       echo("[ ] Adding data to `$t`...");
       $table = $t;
 
@@ -181,6 +185,8 @@ if ($restore) {
   $query_res->free_result();
 
   foreach ($tables as $t) {
+    if (in_array($t, $skipTables)) continue;
+    
     echo "[ ] Fetching `$t`...";
     $schema = [];
 

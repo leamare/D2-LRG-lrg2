@@ -57,6 +57,8 @@ include_once("modules/commons/schema.php");
 $meta = new lrg_metadata;
 $meta['heroes'];
 
+$__start_time = microtime(true);
+
 $result = [];
 $result["league_name"]  = $lg_settings['league_name'];
 $result["league_desc"] = $lg_settings['league_desc'];
@@ -371,6 +373,7 @@ $filename = $options['o'] ?? "reports/report_".$lg_settings['league_tag'].".json
 $f = fopen($filename, "w") or die("[F] Couldn't open file to save results.\n");
 fwrite($f, $output);
 fclose($f);
-echo("[S] Recorded results to file `$filename`\n");
+echo "[S] Recorded results to file `$filename`\n";
 
-?>
+$minutes = (microtime(true)-$__start_time)/60;
+echo "[ ] Ended execution in ".number_format($minutes, 2)." minutes\n";

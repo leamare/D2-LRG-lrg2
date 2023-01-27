@@ -9,7 +9,22 @@ if (!file_exists("templates/default.json")) die("[F] No default league template 
 $lg_settings = json_decode(file_get_contents("templates/default.json"), true);
 
 if(isset($argv)) {
-  $options = getopt("ST:l:N:D:I:t:", [ "settings", "template", "league", "name", "desc", "id", "teams" ]);
+  $options = getopt("ST:l:N:D:I:t:dve", [
+    "settings",
+    "template",
+    "league",
+    "name",
+    "desc",
+    "id",
+    "teams",
+    "drop",
+    "virtual",
+    "existing",
+  ]);
+
+  $isVirtual = isset($options['virtual']) ? true : (isset($options['v']) ? true : false);
+  $isForce = isset($options['drop']) ? true : (isset($options['d']) ? true : false);
+  $isExisting = isset($options['existing']) ? true : (isset($options['e']) ? true : false);
 
   if(isset($options['T'])) {
     if (file_exists("templates/".$options['T'].".json")) {
@@ -22,11 +37,23 @@ if(isset($argv)) {
   if(isset($options['l'])) $lg_settings['league_tag'] = $options['l'];
   else $lg_settings['league_tag'] = readline_rg(" >  League tag: ");
 
-  if(isset($options['N'])) $lg_settings['league_name'] = $options['N'];
-  else $lg_settings['league_name'] = readline_rg(" >  League name: ");
+  if ($isExisting) {
+    if (file_exists("leagues/".$lg_settings['league_tag'].".json")) {
+      $tmp = json_decode(file_get_contents("leagues/".$lg_settings['league_tag'].".json"), true);
+      $lg_settings = array_replace_recursive($lg_settings, $tmp);
+      unset($tmp);
+    }
+  }
 
-  if(isset($options['D'])) $lg_settings['league_desc'] = $options['D'];
-  else $lg_settings['league_desc'] = readline_rg(" >  League description: ");
+  if (empty($lg_settings['league_name'])) {
+    if(isset($options['N'])) $lg_settings['league_name'] = $options['N'];
+    else $lg_settings['league_name'] = readline_rg(" >  League name: ");
+  }
+
+  if (empty($lg_settings['league_desc'])) {
+    if(isset($options['D'])) $lg_settings['league_desc'] = $options['D'];
+    else $lg_settings['league_desc'] = readline_rg(" >  League description: ");
+  }
 
   if(isset($options['I'])) {
     $lg_settings['league_id'] = (int)$options['I'];
@@ -132,14 +159,25 @@ if ($conn->connect_error) die("[F] Connection to SQL server failed: ".$conn->con
 
 if ($conn->select_db($lrg_db_prefix."_".$lg_settings['league_tag'])) {
   echo "\n[E] Database already exists\n";
-  die();
-  # TODO ask user for clearing database or changing prefix
-} else {
-  $conn->query("CREATE DATABASE ".$lrg_db_prefix."_".$lg_settings['league_tag']." CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;");
-  if ($conn->connect_error) die("[F] Can't create database: ".$conn->connect_error."\n");
-  if ($conn->error) die("[F] Can't create database: ".$conn->error."\n");
-  $conn->select_db($lrg_db_prefix."_".$lg_settings['league_tag']);
-  echo "OK\n[ ] Creating table `matches`...";
+
+  if ($isForce) {
+    echo "[ ] Dropping existing database...\n";
+    $conn->query("DROP DATABASE ".$lrg_db_prefix."_".$lg_settings['league_tag'].";");
+    if ($conn->connect_error || $conn->error) die("[F] Can't drop database: ".($conn->connect_error ?? $conn->error)."\n");
+  } else {
+    die();
+  }
+}
+
+$conn->query("CREATE DATABASE ".$lrg_db_prefix."_".$lg_settings['league_tag']." CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;");
+if ($conn->connect_error) die("[F] Can't create database: ".$conn->connect_error."\n");
+if ($conn->error) die("[F] Can't create database: ".$conn->error."\n");
+$conn->select_db($lrg_db_prefix."_".$lg_settings['league_tag']);
+
+echo "OK\n";
+
+if (!$isVirtual) {
+  echo "[ ] Creating table `matches`...";
 
   $conn->query("CREATE TABLE `matches` (
     `matchid` bigint(20) UNSIGNED NOT NULL,
@@ -284,10 +322,11 @@ if ($conn->select_db($lrg_db_prefix."_".$lg_settings['league_tag'])) {
     `priority` json,
     `talents` json,
     `attributes` json,
+    `ultimate` bigint(10) UNSIGNED,
     KEY `skill_builds_matchid_player_IDX` (`matchid`,`playerid`) USING BTREE,
     KEY `skill_builds_matchid_hero_IDX` (`matchid`,`hero_id`) USING BTREE
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
-    if ($conn->connect_error) die("[F] Can't create table `items`: ".$conn->connect_error."\n");
+  if ($conn->connect_error) die("[F] Can't create table `items`: ".$conn->connect_error."\n");
 
   echo "OK\n[ ] Creating table `wards`...";
   $conn->query("CREATE TABLE `wards` (
@@ -393,7 +432,118 @@ if ($conn->select_db($lrg_db_prefix."_".$lg_settings['league_tag'])) {
 
     echo "OK\n";
   }
+} else {
+  // check lg_settings for a virtual data source
+  if (!isset($lg_settings['virtual']) || !isset($lg_settings['virtual']['source']))
+    die("[F] Need to specify information on virtual source first.\n");
+  
+  $self = $lrg_db_prefix."_".$lg_settings['league_tag'];
+  $src = $lrg_db_prefix."_".$lg_settings['virtual']['source'];
+
+  echo "[ ] Updating schema...\n";
+
+  $res = $conn->query("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '$src'");
+  if ($conn->connect_error || $conn->error) die("[F] Can't drop database: ".($conn->connect_error ?? $conn->error)."\n");
+  if (!$res->num_rows) die("[F] No such source.\n");
+
+  // create matches and set filters
+
+  $wheres = [];
+  foreach (($lg_settings['virtual']['filters'] ?? []) as $type => $filter) {
+    switch ($type) {
+      case "players":
+        $wheres[] = "`$src`.`matches`.`matchid` in (
+          select matchid from `$src`.`matchlines` where playerid in (".implode(',', $filter).")
+        )";
+        break;
+      case "time_after":
+        $wheres[] = "`$src`.`matches`.`start_date` >= $filter";
+        break;
+      case "time_before":
+        $wheres[] = "`$src`.`matches`.`start_date` <= $filter";
+        break;
+      case "teams":
+        $wheres[] = "`$src`.`matches`.`matchid` in (
+          select matchid from `$src`.`teams_matches` where teamid in (".implode(',', $filter).")
+        )";
+        break;
+      case "league":
+        $wheres[] = "`$src`.`matches`.`leagueID` in (".implode(',', $filter)."";
+        break;
+      case "version":
+        $wheres[] = "`$src`.`matches`.`version` in (".implode(',', $filter)."";
+        break;
+      case "version_start":
+        $wheres[] = "`$src`.`matches`.`version` >= $filter";
+        break;
+      case "version_end":
+        $wheres[] = "`$src`.`matches`.`version` <= $filter";
+        break;
+      case "cluster":
+        $wheres[] = "`$src`.`matches`.`cluster` in (".implode(',', $filter)."";
+        break;
+      case "modes":
+        $wheres[] = "`$src`.`matches`.`modeID` in (".implode(',', $filter)."";
+        break;
+    }
+  }
+
+  echo "[ ] Creating `matches`...\n";
+
+  $conn->query("CREATE OR REPLACE VIEW `$self`.`matches` AS
+    select * from `$src`.`matches`".
+    (empty($wheres) ? "" : " where ".implode(" AND ", $wheres))
+  );
+  if ($conn->connect_error) die("[F] Error creating view `$self`.`matches`: ".$conn->connect_error."\n");
+
+  // specify what tables to clone
+  $existing = [];
+  $res = $conn->query("SHOW TABLES FROM $src");
+  if ($conn->connect_error) die("[F] Error fetching tables: ".$conn->connect_error."\n");
+
+  for ($row = $res->fetch_row(); $row != null; $row = $res->fetch_row()) {
+    $existing[] = $row[0];
+  }
+
+  $tables = [
+    'matchlines',
+    'adv_matchlines',
+    'draft',
+    'items',
+    'teams_matches',
+    'skill_builds',
+    'starting_items',
+    'wards',
+  ];
+
+  $tables_clone = [
+    'teams',
+    'players',
+    'teams_rosters',
+  ];
+
+  // create all other tables
+
+  foreach ($tables as $t) {
+    if (!in_array($t, $existing)) continue;
+
+    echo "[ ] Creating `$t`...\n";
+
+    $conn->query("CREATE OR REPLACE VIEW `$self`.`$t`
+    AS SELECT * FROM `$src`.`$t` WHERE matchid in (
+      select matchid from `$self`.`matches`
+    );");
+
+    if ($conn->connect_error) die("[F] Error creating view `$self`.`$t`: ".$conn->connect_error."\n");
+  }
+
+  foreach ($tables_clone as $t) {
+    if (!in_array($t, $existing)) continue;
+
+    echo "[ ] Creating `$t`...\n";
+
+    $conn->query("CREATE OR REPLACE VIEW `$self`.`$t` AS SELECT * FROM `$src`.`$t`;");
+
+    if ($conn->connect_error) die("[F] Error creating view `$self`.`$t`: ".$conn->connect_error."\n");
+  }
 }
-
-
- ?>
