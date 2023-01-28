@@ -100,8 +100,21 @@ const STRATZ_GRAPHQL_QUERY = "{
   }
   numHumanPlayers
   didRadiantWin
+  playbackData {
+    wardEvents {
+      action
+      fromPlayer
+      indexId
+      playerDestroyed
+      positionX
+      positionY
+      time
+      wardType
+    }
+  }
   players {
     steamAccountId
+    playerSlot
     heroId
     level
     isRadiant
@@ -317,6 +330,8 @@ function get_stratz_response($match) {
     }
   }
 
+  $slot_pids = [];
+
   $r = [];
 
   $r['matches'] = [];
@@ -361,6 +376,8 @@ function get_stratz_response($match) {
       $pl['leaverStatus'] = STRATZ_LEAVER_STATUS[ $pl['leaverStatus'] ] ?? 0;
     }
     if ($pl['leaverStatus'] > 1) $r['payload']['leavers']++;
+
+    $slot_pids[ $pl['playerSlot'] ] = $pl['steamAccountId'];
 
     $ml = [];
     $ml['matchid'] = $stratz['data']['match']['id'];
@@ -785,42 +802,109 @@ function get_stratz_response($match) {
 
   // type 0 is obs
   // currently lacks information about ward killer
-  foreach ($stratz['data']['match']['players'] as $pl) {
-    if (empty($pl['stats']['wards'])) continue;
+  if (isset($stratz['data']['match']['playbackData']['wardEvents'])) {
     $wards_log = [];
     $sentries_log = [];
     $wards_destruction_log = [];
-    foreach($pl['stats']['wards'] as $ward) {
-      if ($ward['type'] == 0) {
-        $wards_log[] = [
-          'x_c' => $ward['positionX'],
-          'y_c' => $ward['positionY'],
-          'time' => $ward['time'],
-          'alive' => 600, //TODO:
-          'destroyed_at' => null,
-          'destroyed_by' => null,
-        ];
-      } else {
-        $sentries_log[] = [
-          'x_c' => $ward['positionX'],
-          'y_c' => $ward['positionY'],
-          'time' => $ward['time'],
-        ];
+
+    foreach ($stratz['data']['match']['playbackData']['wardEvents'] as $ward) {
+      $pid = $slot_pids[ $ward['fromPlayer'] ];
+
+      switch ($ward['action'].'.'.$ward['wardType']) {
+        case "SPAWN.WARD":
+          if (!isset($wards_log[$pid])) $wards_log[$pid] = [];
+          if (isset($wards_log[ $pid ][ $ward['indexId'] ])) break;
+
+          $wards_log[ $pid ][ $ward['indexId'] ] = [
+            'x_c' => $ward['positionX'],
+            'y_c' => $ward['positionY'],
+            'time' => $ward['time'],
+            'alive' => 600,
+            // 'owner' => $pid, 
+            'destroyed_at' => null,
+            'destroyed_by' => null,
+          ];
+          break;
+        case "SPAWN.SENTRY":
+          if (!isset($sentries_log[$pid])) $sentries_log[$pid] = [];
+          if (isset($sentries_log[ $pid ][ $ward['indexId'] ])) break;
+
+          $sentries_log[ $pid ][ $ward['indexId'] ] = [
+            'x_c' => $ward['positionX'],
+            'y_c' => $ward['positionY'],
+            'time' => $ward['time'],
+          ];
+          break;
+        case "DESPAWN.WARD":
+          if ($wards_log[ $pid ][ $ward['indexId'] ]['destroyed_at'] !== null) {
+            break;
+          }
+
+          $wards_log[ $pid ][ $ward['indexId'] ]['destroyed_at'] = $ward['time'];
+          $wards_log[ $pid ][ $ward['indexId'] ]['destroyed_by'] = $ward['playerDestroyed'] ? $slot_pids[ $ward['playerDestroyed'] ] : null;
+          $wards_log[ $pid ][ $ward['indexId'] ]['alive'] = $ward['time'] - $wards_log[ $pid ][ $ward['indexId'] ]['time'];
+
+          if ($ward['playerDestroyed']) {
+            $d_pid = $slot_pids[ $ward['playerDestroyed'] ];
+
+            $wards_destruction_log[ $d_pid ][ $ward['indexId'] ] = [
+              'x_c' => $ward['positionX'],
+              'y_c' => $ward['positionY'],
+              'time' => $ward['time'],
+            ];
+          }
+          break;
       }
     }
-    // foreach($pl['stats']['wardDestruction'] as $ward) {
-    //   $wards_destruction_log[] = [
 
-    //   ]
-    // }
-    $r['wards'][] = [
-      'matchid' => $match,
-      'playerid' => $pl['steamAccountId'],
-      'heroid' => $pl['heroId'],
-      'wards_log' => addslashes(\json_encode($wards_log)),
-      'sentries_log' => addslashes(\json_encode($sentries_log)),
-      'destroyed_log' => addslashes(\json_encode($wards_destruction_log)),
-    ];
+    foreach ($stratz['data']['match']['players'] as $pl) {
+      $r['wards'][] = [
+        'matchid' => $match,
+        'playerid' => $pl['steamAccountId'],
+        'heroid' => $pl['heroId'],
+        'wards_log' => addslashes(\json_encode($wards_log[ $pl['steamAccountId'] ] ?? [])),
+        'sentries_log' => addslashes(\json_encode($sentries_log[ $pl['steamAccountId'] ] ?? [])),
+        'destroyed_log' => addslashes(\json_encode($wards_destruction_log[ $pl['steamAccountId'] ] ?? [])),
+      ];
+    }
+  } else {
+    foreach ($stratz['data']['match']['players'] as $pl) {
+      if (empty($pl['stats']['wards'])) continue;
+      $wards_log = [];
+      $sentries_log = [];
+      $wards_destruction_log = [];
+      foreach($pl['stats']['wards'] as $ward) {
+        if ($ward['type'] == 0) {
+          $wards_log[] = [
+            'x_c' => $ward['positionX'],
+            'y_c' => $ward['positionY'],
+            'time' => $ward['time'],
+            'alive' => 600, //TODO:
+            'destroyed_at' => null,
+            'destroyed_by' => null,
+          ];
+        } else {
+          $sentries_log[] = [
+            'x_c' => $ward['positionX'],
+            'y_c' => $ward['positionY'],
+            'time' => $ward['time'],
+          ];
+        }
+      }
+      // foreach($pl['stats']['wardDestruction'] as $ward) {
+      //   $wards_destruction_log[] = [
+  
+      //   ]
+      // }
+      $r['wards'][] = [
+        'matchid' => $match,
+        'playerid' => $pl['steamAccountId'],
+        'heroid' => $pl['heroId'],
+        'wards_log' => addslashes(\json_encode($wards_log)),
+        'sentries_log' => addslashes(\json_encode($sentries_log)),
+        'destroyed_log' => addslashes(\json_encode($wards_destruction_log)),
+      ];
+    }
   }
 
   $r['draft'] = [];
@@ -960,7 +1044,7 @@ function get_stratz_multiquery($group) {
   $stratz = json_decode($json, true);
 
   if (!empty($stratz['errors'])) {
-    var_dump(json_encode($stratz['errors'], JSON_PRETTY_PRINT));
+    throw new \Exception(json_encode($stratz['errors'], JSON_PRETTY_PRINT));
   }
 
   if (empty($stratz) || empty($stratz['data'])) return null;

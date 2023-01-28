@@ -1381,13 +1381,13 @@ function fetch($match) {
           'x_c' => $ward['x'],
           'y_c' => $ward['y'],
           'time' => $ward['time'],
-          'alive' => 600,
+          'alive' => 360,
           'destroyed_at' => null,
           'destroyed_by' => null,
         ];
       }
       foreach($pl['obs_left_log'] as $ward) {
-        $wards_log[$pl['account_id']][ $ward['ehandle'] ]['alive'] = $ward['time'] - ($wards_log[ $ward['ehandle'] ] ?? ($ward['time']-600));
+        $wards_log[$pl['account_id']][ $ward['ehandle'] ]['alive'] = $ward['time'] - ($wards_log[ $ward['ehandle'] ] ?? ($ward['time']-360));
         $wards_log[$pl['account_id']][ $ward['ehandle'] ]['destroyed_at'] = $ward['time'];
         $wards_log[$pl['account_id']][ $ward['ehandle'] ]['destroyed_by'] = $player_tags[ $ward['attackername'] ];
 
