@@ -339,9 +339,9 @@ if (!$isVirtual) {
     UNIQUE KEY `wards_matchid_player_IDX` (`matchid`,`playerid`) USING BTREE,
     KEY `wards_matchid_IDX` (`matchid`) USING BTREE,
     KEY `wards_playerid_IDX` (`playerid`) USING BTREE,
-    KEY `wards_heroid_IDX` (`hero_id`) USING BTREE,
+    KEY `wards_heroid_IDX` (`hero_id`) USING BTREE
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
-  if ($conn->connect_error) die("[F] Can't create table `items`: ".$conn->connect_error."\n");
+  if ($conn->connect_error) die("[F] Can't create table `wards`: ".$conn->connect_error."\n");
 
 
   echo "OK\n[ ] Creating table `players`...";
@@ -351,7 +351,7 @@ if (!$isVirtual) {
     `nickname` varchar(128) NOT NULL,
     `name_fixed` tinyint(1) NOT NULL
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
-    if ($conn->connect_error) die("[F] Can't create table `draft`: ".$conn->connect_error."\n");
+  if ($conn->connect_error) die("[F] Can't create table `players`: ".$conn->connect_error."\n");
   echo "OK\n";
 
   echo "[ ] Adding keys to main tables...";

@@ -30,6 +30,7 @@ function fetch($match) {
   $t_new_players = [];
   $t_starting_items = [];
   $t_skill_builds = [];
+  $t_wards = [];
   // $t_runes = [];
   $bad_replay = false;
 
@@ -1389,15 +1390,17 @@ function fetch($match) {
       foreach($pl['obs_left_log'] as $ward) {
         $wards_log[$pl['account_id']][ $ward['ehandle'] ]['alive'] = $ward['time'] - ($wards_log[ $ward['ehandle'] ] ?? ($ward['time']-360));
         $wards_log[$pl['account_id']][ $ward['ehandle'] ]['destroyed_at'] = $ward['time'];
-        $wards_log[$pl['account_id']][ $ward['ehandle'] ]['destroyed_by'] = $player_tags[ $ward['attackername'] ];
+        $wards_log[$pl['account_id']][ $ward['ehandle'] ]['destroyed_by'] = $player_tags[ $ward['attackername'] ] ?? null;
 
-        if (!isset($wards_destruction_log[ $ward['attackername'] ])) $wards_destruction_log[ $ward['attackername'] ] = [];
+        if ($wards_log[$pl['account_id']][ $ward['ehandle'] ]['destroyed_by']) {
+          if (!isset($wards_destruction_log[ $ward['attackername'] ])) $wards_destruction_log[ $ward['attackername'] ] = [];
 
-        $wards_destruction_log[ $ward['attackername'] ][] = [
-          'x_c' => $ward['x'],
-          'y_c' => $ward['y'],
-          'time' => $ward['time'],
-        ];
+          $wards_destruction_log[ $ward['attackername'] ][] = [
+            'x_c' => $ward['x'],
+            'y_c' => $ward['y'],
+            'time' => $ward['time'],
+          ];
+        }
       }
 
       foreach($pl['sen_log'] as $ward) {
@@ -1414,9 +1417,9 @@ function fetch($match) {
         'matchid' => $match,
         'playerid' => $pl['account_id'],
         'heroid' => $pl['hero_id'],
-        'wards_log' => addslashes(\json_encode(array_values($wards_log[ $pl['account_id'] ]))),
-        'sentries_log' => addslashes(\json_encode(array_values($sentries_log[ $pl['account_id'] ]))),
-        'destroyed_log' => addslashes(\json_encode(array_values($wards_destruction_log[ $pl['account_id'] ]))),
+        'wards_log' => addslashes(\json_encode(array_values($wards_log[ $pl['account_id'] ] ?? []))),
+        'sentries_log' => addslashes(\json_encode(array_values($sentries_log[ $pl['account_id'] ] ?? []))),
+        'destroyed_log' => addslashes(\json_encode(array_values($wards_destruction_log[ $pl['account_id'] ] ?? []))),
       ];
     }
   }
@@ -1796,7 +1799,7 @@ function fetch($match) {
     }
   }
 
-  if(!empty($t_skill_builds) && ($schema['skill_builds'] ?? false)) {
+  if(!empty($t_skill_builds) && ($schema['skill_builds'] ?? false) && ($lg_settings['main']['skill_builds'] ?? false)) {
     $sql = " INSERT INTO skill_builds (matchid, playerid, hero_id, 
       skill_build, first_point_at, maxed_at, priority, talents".
         ($schema['skill_build_attr'] ? ", attributes, ultimate" : "").
@@ -1809,7 +1812,7 @@ function fetch($match) {
         "'".($t['priority'])."',".
         "'".($t['talents'])."'".
         ($schema['skill_build_attr']
-        ? ",".($t['attributes'] ? "'".$t['attributes']."'" : "null").",".
+        ? ",".(($t['attributes'] ?? false) ? "'".$t['attributes']."'" : "'[]'").",".
           "".($t['ultimate'] ?? 'null').""
         : "").
       "),";
@@ -1834,7 +1837,7 @@ function fetch($match) {
     }
   }
 
-  if(!empty($t_starting_items) && ($schema['starting_items'] ?? false)) {
+  if(!empty($t_starting_items) && ($schema['starting_items'] ?? false) && ($lg_settings['main']['starting'] ?? false)) {
     $sql = " INSERT INTO starting_items (matchid, playerid, hero_id, starting_items".
       ($schema['starting_consumables'] ? ", consumables" : "").
     ") VALUES ";
@@ -1864,10 +1867,16 @@ function fetch($match) {
     }
   }
 
-  if(!empty($t_wards) && ($schema['wards'] ?? false)) {
+  if(!empty($t_wards) && ($schema['wards'] ?? false) && ($lg_settings['main']['wards'] ?? false)) {
     $sql = " INSERT INTO wards (matchid, playerid, hero_id, wards_log, sentries_log, destroyed_log) VALUES ";
-    foreach ($t_starting_items as $t) {
-      $sql .= "\n\t({$t['matchid']}, {$t['playerid']}, {$t['heroid']}, {$t['wards_log']}, {$t['sentries_log']}, {$t['destroyed_log']}),";
+    foreach ($t_wards as $t) {
+      if (empty($t['wards_log']) && empty($t['sentries_log']) && empty($t['destroyed_log'])) continue;
+
+      if (empty($t['wards_log'])) $t['wards_log'] = "[]";
+      if (empty($t['sentries_log'])) $t['sentries_log'] = "[]";
+      if (empty($t['destroyed_log'])) $t['destroyed_log'] = "[]";
+
+      $sql .= "\n\t({$t['matchid']}, {$t['playerid']}, {$t['heroid']}, '{$t['wards_log']}', '{$t['sentries_log']}', '{$t['destroyed_log']}'),";
     }
     $sql[strlen($sql)-1] = ";";
 
