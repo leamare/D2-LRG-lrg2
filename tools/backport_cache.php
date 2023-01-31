@@ -51,7 +51,7 @@ $sz = sizeof($matches);
 
 for ($i = 0; $i < $sz; $i++) {
   $m = $matches[$i];
-  if (empty($m) || $m[0] === '#') continue;
+  if (empty($m) || $m[0] === '#' || strpos($m, '[ ]') !== false) continue;
 
   if ($skip && file_exists("cache/$m.lrgcache.json")) {
     echo "[ ] ($i/$sz) cache/$m.lrgcache.json exists, skipping\n";
