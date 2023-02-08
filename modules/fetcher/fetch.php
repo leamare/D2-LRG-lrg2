@@ -1222,6 +1222,10 @@ function fetch($match) {
         for ($k=0; $k<6; $k++) {
           if (!empty($matchdata['players'][$j]['item_'.$k]) && !isset($plog[ $matchdata['players'][$j]['item_'.$k] ])) {
             $iid = $matchdata['players'][$j]['item_'.$k];
+
+            if ($iid == 725) $iid = 609;
+            if ($iid == 727) $iid = 271;
+
             $cost = $meta['items_full'][ $iid ]['cost'];
             if (!$cost || in_array($iid, $meta['item_categories']['droppable'])) continue;
 
@@ -1258,10 +1262,6 @@ function fetch($match) {
             }
             
             if (!$tm) $tm = $matchdata['duration'];
-
-            if ($iid == 133) {
-              echo 1;
-            }
 
             $t_items[] = [
               'matchid' => $match,
