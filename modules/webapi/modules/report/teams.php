@@ -409,6 +409,7 @@ $endpoints['teams'] = function($mods, $vars, &$report) use (&$endpoints, &$repea
             $_records[] = $record;
           } else if (!empty($context_records_ext)) {
             foreach ($context_records_ext[$rectag] ?? [] as $i => $rec) {
+              if (empty($rec)) continue; 
               if ($rec['playerid'] == $vars['team']) {
                 $rec['tag'] = $rectag;
                 $rec['placement'] = $i+2;

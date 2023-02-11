@@ -53,6 +53,33 @@ function rg_view_generate_matches() {
     }
   }
 
+  $res['hbanned'] = [];
+  if (check_module($parent."hbanned")) {
+    if ($mod == $parent."hbanned") $unset_module = true;
+    $parent .= "hbanned-";
+
+    global $meta, $strings;
+
+    $hnames = [];
+    foreach ($meta['heroes'] as $id => $v) {
+      $hnames[$id] = $v['name'];
+      $strings['en']["heroid".$id] = $v['name'];
+    }
+  
+    uasort($hnames, function($a, $b) {
+      if($a == $b) return 0;
+      else return ($a > $b) ? 1 : -1;
+    });
+  
+    foreach($hnames as $hid => $name) {
+      $res['hbanned']["heroid".$hid] = "";
+  
+      if(check_module($parent."heroid".$hid)) {
+        $res['hbanned']["heroid".$hid] = rg_generator_hero_matches_banned_list("matches-hbanned-$hid", $hid, null, true);
+      }
+    }
+  }
+
   return $res;
 }
 

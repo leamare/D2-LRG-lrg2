@@ -26,6 +26,7 @@ $endpoints['records'] = function($mods, $vars, &$report) use (&$endpoints) {
 
     foreach ($src as $v) {
       if (empty($v)) continue;
+
       if ($v['matchid'] && !empty($report['match_participants_teams']))
         $v['match_card_min'] = match_card_min($v['matchid']);
       else 

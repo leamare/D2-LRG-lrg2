@@ -1,4 +1,4 @@
-<?php  $__postfix = "?v=28250"; ?>
+<?php  $__postfix = "?v=28252"; ?>
 <!DOCTYPE html>
 <html lang="<?php echo $locale; ?>">
   <head>
@@ -9,26 +9,35 @@
      -->
     <?php
        if(file_exists("res/favicon.ico")) echo "<link rel=\"shortcut icon\" href=\"res/favicon.ico\" />";
+       $uni_title = "";
        $rep_sm_title = $instance_title;
        if (!empty($leaguetag)) {
           $rep_sm_title .= " $title_separator ".$report['league_name'];
           $rep_sm_desc = ($report['league_name'] ?? "Tournaments")." Stats";
           $rep_sm_desc .= " $title_separator ".$report['league_desc'];
 
+          $uni_title .= $report['orig_name'] ?? $report['league_name'];
+
           $title = explode("-", $mod);
           if ($title_slice_max) $title = array_slice($title, 0, $title_slice_max);
           $loc_titles = [];
+          $uni_names = [];
           foreach ($title as $m) {
             $loc_titles[] = locale_string($m);
+            $uni_names[] = locale_string($m, [], 'en');
           }
           $rep_sm_title .= ' '.$title_separator.' '.implode(' '.$title_separator.' ', $loc_titles);
+          $uni_title .= ' '.$title_separator.' '.implode(' '.$title_separator.' ', $uni_names);
         } else {
           $rep_sm_title .= " $title_separator $instance_title_postfix";
           $rep_sm_desc = $instance_title;
           $rep_sm_desc .= " $title_separator $instance_long_desc";
 
+          $uni_title = $instance_title_postfix;
+
           if (isset($cat) && $cat != 'main') {
             $rep_sm_title .= ' '.$title_separator.' '.$head_name;
+            $uni_title .= ' '.$title_separator.' '.$head_name;
             if (!empty($head_desc))
               $rep_sm_desc .= ' '.$title_separator.' '.$head_desc;
           }
@@ -147,6 +156,7 @@
         <h1><?php echo $report['league_name']; ?></h1>
         <h2><?php echo $report['league_desc']; ?></h2>
         <h3><?php echo locale_string($h3).": ".$report['random'][$h3]; ?></h3>
+        <?php if (isset($report['settings']['3rd_party'])) echo "<h3>".implode(', ', (array)$report['settings']['3rd_party'])."</h3>"; ?>
         <?php 
           if (isset($report['league_id']) && isset($league_logo_provider) && !isset($custom_logo)) 
             echo "<div class=\"league-banner\"><img src=\"".str_replace('%LID%', $report['league_id'], $league_logo_provider)."\" alt=\"league_banner\" /></div>"

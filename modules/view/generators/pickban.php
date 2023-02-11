@@ -141,7 +141,7 @@ function rg_generator_pickban($table_id, &$context, &$context_main, $heroes_flag
       [ $id, $role ] = explode('|', $id);
     }
     $el_mp = number_format($el['matches_picked']/$mp, 1);
-    $el_mb = number_format($el['matches_banned']/$mb, 1);
+    $el_mb = number_format((int)$el['matches_banned']/(int)$mb, 1);
     $res .=  "<tr data-value-mp=\"$el_mp\" data-value-mb=\"$el_mb\">".
             ($heroes_flag ? "<td>".hero_portrait($id)."</td><td>".hero_link($id)."</td>" : "<td>".player_link($id)."</td>").
             ($roles ? "<td>".locale_string("position_$role")."</td>" : "").
