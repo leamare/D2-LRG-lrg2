@@ -1,15 +1,17 @@
 <?php
 
-function locale_string($string_id, $vars = []) {
+function locale_string($string_id, $vars = [], $loc = null) {
   global $strings, $locale, $localesMap, $fallback_locale;
 
-  if(empty($fallback_locale) && isset($locale) && isset($localesMap[$locale]) && isset($localesMap[$locale]['fallback'])) {
-    $fallback_locale = $localesMap[$locale]['fallback'];
+  if (!$loc) $loc = $locale ?? null;
+
+  if(empty($fallback_locale) && isset($loc) && isset($localesMap[$locale]) && isset($localesMap[$loc]['fallback'])) {
+    $fallback_locale = $localesMap[$loc]['fallback'];
   }
 
-  if(isset($locale) && isset($strings[$locale][$string_id])) {
-    $string = $strings[$locale][$string_id];
-  } else if (isset($locale) && isset($fallback_locale) && isset($strings[$fallback_locale][$string_id])) {
+  if(isset($loc) && isset($strings[$loc][$string_id])) {
+    $string = $strings[$loc][$string_id];
+  } else if (isset($loc) && isset($fallback_locale) && isset($strings[$fallback_locale][$string_id])) {
     $string = $strings[$fallback_locale][$string_id];
   } else if (isset($strings['en'][$string_id]))
     $string = $strings['en'][$string_id];

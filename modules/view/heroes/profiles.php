@@ -476,9 +476,11 @@ function rg_view_generate_heroes_profiles() {
         }
         $res['heroid'.$hero] .= "</div></div>";
 
-        $res['heroid'.$hero] .= "<div class=\"content-text\">".
-          "<a href=\"?league=$leaguetag&mod=items-builds-heroid$hero".(empty($linkvars) ? "" : "&".$linkvars)."\">".locale_string('builds_more')."</a>".
-        "</div>";
+        if (isset($report['items']['progrole'])) {
+          $res['heroid'.$hero] .= "<div class=\"content-text\">".
+            "<a href=\"?league=$leaguetag&mod=items-builds-heroid$hero".(empty($linkvars) ? "" : "&".$linkvars)."\">".locale_string('builds_more')."</a>".
+          "</div>";
+        }
       } else {
         $res['heroid'.$hero] .= "<div class=\"content-text\">".
           locale_string('items_stats_empty').
