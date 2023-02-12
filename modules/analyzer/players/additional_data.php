@@ -123,24 +123,25 @@ foreach ($result['players'] as $pid => &$name) {
 
   $query_res->free_result();
 
-  $sql = "SELECT CASE WHEN aml.lane = 1 THEN 1 ELSE 3 END lane, COUNT(distinct aml.matchid) matches, SUM(NOT m.radiantWin XOR ml.isRadiant) wins FROM adv_matchlines aml
-          JOIN matches m ON m.matchid = aml.matchid
-          JOIN matchlines ml ON aml.matchid = ml.matchid AND aml.playerid = ml.playerid
-          WHERE aml.playerid = $pid AND aml.isCore = 0 GROUP BY lane ORDER BY wins DESC, matches DESC;";
+  $sql = "SELECT CASE WHEN aml.lane = 1 THEN 1 ELSE 3 END as lane, COUNT(distinct aml.matchid) matches, SUM(NOT m.radiantWin XOR ml.isRadiant) wins
+    FROM adv_matchlines aml
+    JOIN matches m ON m.matchid = aml.matchid
+    JOIN matchlines ml ON aml.matchid = ml.matchid AND aml.playerid = ml.playerid
+    WHERE aml.playerid = $pid AND aml.isCore = 0 GROUP BY 1 ORDER BY wins DESC, matches DESC;";
 
   if ($conn->multi_query($sql) === TRUE);
   else die("[F] Unexpected problems when requesting database1.\n".$conn->error."\n");
 
   $query_res = $conn->store_result();
 
-  $row = $query_res->fetch_row();
-  if($row != null)
+  for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
     $result["players_additional"][$pid]['positions'][] = array(
       "core" => 0,
       "lane" => $row[0],
       "matches" => $row[1],
       "wins" => $row[2]
     );
+  }
 
   uasort($result["players_additional"][$pid]['positions'], function($a, $b) {
     if($a['matches'] == $b['matches']) return 0;
