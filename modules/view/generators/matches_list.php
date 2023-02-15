@@ -209,3 +209,43 @@ function rg_generator_hero_matches_list($table_id, $hero, $limit = null, $wide =
 
   return $res;
 }
+
+function rg_generator_hero_matches_banned_list($table_id, $hero, $limit = null, $wide = false, $mlist_raw = null) {
+  global $report;
+
+  if (empty($report['matches']) && empty($report['matches_additional'])) return "";
+
+  if (empty($mlist_raw)) {
+    $matcheslist = $report['matches'];
+  } else {
+    $matcheslist = [];
+    foreach ($mlist_raw as $mid => $match) {
+      $matcheslist[$mid] = $report['matches'][$mid];
+    }
+  }
+
+  $matches = [];
+
+  foreach ($matcheslist as $mid => $data) {
+    if (!isset($report['matches_additional'][$mid]['bans'])) continue;
+
+    foreach ($report['matches_additional'][$mid]['bans'] as $bs) {
+      foreach ($bs as $b) {
+        if ($b[0] == $hero) {
+          $matches[] = $mid;
+          continue 3;
+        }
+      }
+    }
+  }
+
+  rsort($matches);
+  $res = "<div class=\"content-text\">".locale_string("desc_matches")."</div>";
+  $res .= "<div class=\"content-cards\">";
+  foreach($matches as $matchid) {
+    $res .= match_card($matchid);
+  }
+  $res .= "</div>";
+
+  return $res;
+}
