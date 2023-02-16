@@ -28,11 +28,13 @@ if(isset($options['T'])) {
   $wheres[] = "start_date >= ".($endt-$tp);
   $wheres[] = "start_date <= $endt";
 }
+
 if (isset($options['P'])) {
   $ver = (int)($options['P']);
 
   $wheres[] = "version = $ver";
-} 
+}
+ 
 if (isset($options['r'])) {
   $wheres[] = "matchid not in (select distinct matchid from adv_matchlines)";
 } else if (isset($options['R'])) {

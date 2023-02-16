@@ -21,4 +21,3 @@ foreach ($matches as $match) {
 }
 
 echo "[S] All matches were removed.\n";
-?>

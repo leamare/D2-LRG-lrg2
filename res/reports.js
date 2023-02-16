@@ -1,3 +1,36 @@
+function parseHashParams() {
+  let params = {};
+  window.location.hash.substring(1).split('&').forEach(v => {
+    v = v.split('=');
+    params[v[0]] = v[1] ? decodeURI(v[1]) : null;
+  });
+
+  return params;
+}
+
+function setHashParam(key, value = null) {
+  console.log(key, value);
+  let params = parseHashParams();
+
+  if (!value) delete params[key];
+  else {
+    params[key] = value;
+  }
+
+  let link = [];
+  for (let k in params) {
+    if (!k) continue;
+    link.push(k + '=' + params[k]);
+  }
+
+  if (!link.length) removeHash();
+  else window.location.hash = link.length ? '#'+link.join('&') : '';
+}
+
+function removeHash() { 
+  history.pushState('', document.title, window.location.pathname + window.location.search);
+}
+
 $(document).ready(function() {
   $('.list tbody tr, .flextable .line').on('click', function() {
     $(this).toggleClass('highlighted');
@@ -77,6 +110,8 @@ $(document).ready(function() {
   $(".search-filter").on("input", function() {
     const value = new RegExp( $(this).val().toLowerCase() );
     const table = $(this).attr('data-table-filter-id');
+
+    setHashParam('sf-'+table, $(this).val().toLowerCase());
 
     let rowGroups = {};
     
@@ -615,6 +650,15 @@ $(document).ready(function() {
   });
 
   $(document).on('click', closeAllSelect);
+
+  const hashParams = parseHashParams();
+  for (let k in hashParams) {
+    if (!k) continue;
+    if (k.indexOf('sf') === 0) {
+      const table = k.substring(3);
+      $(`input[data-table-filter-id=${table}`).val(hashParams[k]).trigger('input');
+    }
+  }
 });
 
 
