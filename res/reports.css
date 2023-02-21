@@ -522,7 +522,11 @@ table .hero_portrait, .flextable .hero_portrait {
   position: absolute;
   color: white;
   top: 11%;
-  opacity: .9;
+  transition: opacity 200ms ease;
+  opacity: .65;
+}
+.match-hero[data-order]:hover:after {
+  opacity: 1;
 }
 .match-team.dire .match-hero[data-order]:after {
   right: 7.5%;
@@ -542,16 +546,20 @@ table .hero_portrait, .flextable .hero_portrait {
   height: 0;
   border-style: solid;
   position: absolute;
-  opacity: .7;
+  opacity: .65;
+  transition: opacity 300ms ease;
+}
+.match-hero[data-order]:hover:before {
+  opacity: 1;
 }
 .match-team.dire .match-hero[data-order]:before {
-  border-width: 0 3em 3em 0;
+  border-width: 0 2.75em 2.75em 0;
   border-color: transparent black transparent transparent;
   right: 4.9%;
   top: 5%;
 }
 .match-team.radiant .match-hero[data-order]:before {
-  border-width: 0 0 3em 3em;
+  border-width: 0 0 2.75em 2.75em;
   border-color: transparent transparent transparent black;
   left: 4.9%;
   top: 5%;
