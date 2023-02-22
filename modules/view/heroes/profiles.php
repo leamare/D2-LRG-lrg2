@@ -126,13 +126,17 @@ function rg_view_generate_heroes_profiles() {
     if (is_wrapped($report['hero_summary'])) $report['hero_summary'] = unwrap_data($report['hero_summary']);
   }
 
+  $el = pickban_partial($report['pickban'], $report['random'], $hero);
+
   if (isset($report['hero_summary']) && isset($report['hero_summary'][$hero])) {
     $data = $report['hero_summary'][$hero];
   } else {
-    $data = [
-      'matches_s' => ($report['pickban'][$hero] ?? [])['matches_picked'] ?? 0,
-    ];
+    $data = [];
   }
+
+  $data['matches_s'] = $el ? 
+    $el['matches_total']." (".$el['matches_picked']." ".locale_string("picks").", ".$el['matches_banned']." ".locale_string("bans").")" :
+    ($data['matches_s'] ?? 0);
 
   if (isset($data['hero_damage_per_min_s']) && $data['gpm'] && !isset($data['damage_to_gold_per_min_s'])) {
     $data = array_insert_before($data, "gpm", [
@@ -189,7 +193,7 @@ function rg_view_generate_heroes_profiles() {
     "<div class=\"profile-name\">".hero_link($hero)."</div>".
     (!empty($meta['heroes'][$hero]['alt']) ? "<div class=\"profile-name subheader\">".$meta['heroes'][$hero]['alt']."</div>" : "").
     "<div class=\"profile-content\">";
-  
+
   $count = count($data);
   $gr_size = ceil($count / 3);
   $last_gr = $count - $gr_size*2;
@@ -316,9 +320,6 @@ function rg_view_generate_heroes_profiles() {
 
     $res['heroid'.$hero] .= "<div class=\"content-text\">".implode(" / ", $links)."</div>";
   }
-
-  // PICKBAN
-  $el = pickban_partial($report['pickban'], $report['random'], $hero);
 
   if (!$el) return $res;
 
@@ -489,6 +490,7 @@ function rg_view_generate_heroes_profiles() {
     }
   }
 
+  // PICKBAN
   $res['heroid'.$hero] .=  "<table id=\"profile-$hero-pickban\" class=\"list\"><caption>".locale_string("pickban")."</caption><thead><tr>".
     "<th>".locale_string("matches_total")."</th>".
     "<th class=\"separator\">".locale_string("contest_rate")."</th>".
