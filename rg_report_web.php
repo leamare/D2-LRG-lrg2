@@ -2,9 +2,21 @@
 
 ini_set('memory_limit', '1024M');
 
-include_once("modules/commons/locale_strings.php");
-include_once("modules/commons/array_pslice.php");
-include_once("modules/commons/get_language_code_iso6391.php");
+$imports_ignore = [
+  "schema.php",
+  "readline.php",
+  "recursive_scandir.php",
+  "check_directory.php",
+];
+
+$lg_version = [ 2, 25, 1, 0, 0 ];
+$isApi = false;
+
+$imports = scandir("modules/commons/");
+foreach ($imports as $f) {
+  if ($f[0] == '.' || in_array($f, $imports_ignore)) continue;
+  include_once("modules/commons/$f");
+}
 
 $localesMap = include_once("locales/map.php");
 
@@ -18,6 +30,7 @@ $def_locale = isset($localesMap['def']) ? $localesMap['def']['alias'] : 'en';
 
 $isBetaLocale = false;
 $locale = $_COOKIE['loc'] ?? GetLanguageCodeISO6391();
+$origLocale = GetLanguageCodeISO6391();
 
 if (isset($localesMap[ $locale ]) && ($localesMap[ $locale ]['alias'] ?? false)) {
   $locale = $localesMap[ $locale ]['alias'];
@@ -31,8 +44,10 @@ if (strpos($locale, '_beta')) {
 $linkvars = [];
 
 if(isset($_REQUEST['loc']) && !empty($_REQUEST['loc'])) {
-  $locale = $_REQUEST['loc'];
-  $linkvars[] = array("loc", $_REQUEST['loc']);
+  if (isset($localesMap[ strtolower($_REQUEST['loc']) ])) {
+    $locale = strtolower($_REQUEST['loc']);
+    $linkvars[] = array("loc", $locale);
+  }
 }
 
 // require_once('locales/en.php');
@@ -51,40 +66,28 @@ $host_link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ?
                 "https" : "http") . "://" . $_SERVER['HTTP_HOST'] .  
                 dirname($_SERVER['REQUEST_URI']); 
 
+// View functions imports
+$imports = scandir("modules/view/functions/");
+foreach ($imports as $f) {
+  if ($f[0] == '.' || in_array($f, $imports_ignore)) continue;
+  include_once("modules/view/functions/$f");
+}
+
+// Additional imports
+if (file_exists("modules/__imports/view") && is_dir("modules/__imports/view")) {
+  $imports = scandir("modules/__imports/view/");
+  foreach ($imports as $f) {
+    if ($f[0] == '.' || in_array($f, $imports_ignore)) continue;
+    include_once("modules/__imports/view/$f");
+  }
+}
+
 include_once("rg_report_out_settings.php");
 
-include_once("modules/commons/versions.php");
-$lg_version = [ 2, 25, 1, 0, 0 ];
-
-include_once("modules/commons/merge_mods.php");
-include_once("modules/commons/metadata.php");
-include_once("modules/commons/wrap_data.php");
-
-# FUNCTIONS
-include_once("modules/view/functions/modules.php");
-
-include_once("modules/view/functions/player_card.php");
-include_once("modules/view/functions/team_card.php");
-include_once("modules/view/functions/match_card.php");
-include_once("modules/view/functions/filter_toggles.php");
-include_once("modules/view/functions/search_filter_component.php");
-include_once("modules/view/functions/table_columns_toggle.php");
-
-include_once("modules/view/functions/join_selectors.php");
-include_once("modules/view/functions/links.php");
-include_once("modules/view/functions/join_matches.php");
-
-include_once("modules/view/functions/team_name.php");
-include_once("modules/view/functions/player_name.php");
-include_once("modules/view/functions/hero_name.php");
-
-include_once("modules/view/functions/has_pair.php");
-include_once("modules/view/functions/process_menu.php");
-
-# PRESETS
+// PRESETS
 include_once("modules/view/__preset.php");
 
-/* INITIALISATION */
+// INITIALISATION
 
 $root = dirname(__FILE__);
 
@@ -104,8 +107,12 @@ if ($lrg_use_get) {
   } else $leaguetag = "";
 
   if(isset($_GET['loc']) && !empty($_GET['loc'])) {
-    $locale = $_GET['loc'];
-    $linkvars[] = array("loc", $_GET['loc']);
+    if(isset($_GET['loc']) && !empty($_GET['loc'])) {
+      if (isset($localesMap[ strtolower($_GET['loc']) ])) {
+        $locale = strtolower($_GET['loc']);
+        $linkvars[] = array("loc", $locale);
+      }
+    }
   }
   if(isset($_GET['stow']) && !empty($_GET['stow'])) {
     $override_style = $_GET['stow'];
@@ -209,7 +216,6 @@ if (isset($report)) {
 
   $h3 = array_rand($report['random']);
 
-
   # overview
   if (check_module("overview")) {
     merge_mods($modules['overview'], rg_view_generate_overview());
@@ -266,4 +272,4 @@ if (file_exists("rg_report_out_prerender.php"))
   include_once("rg_report_out_prerender.php");
 
 include_once("modules/view/__template.php");
-
+require_once("modules/view/__post_render.php");

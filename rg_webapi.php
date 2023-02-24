@@ -1,5 +1,7 @@
 <?php 
 
+$isApi = true;
+
 $resp = [
   "modline" => null,
   "vars" => null,
@@ -8,10 +10,24 @@ $resp = [
   "result" => null,
 ];
 
-include_once("modules/commons/locale_strings.php");
-include_once("modules/commons/get_language_code_iso6391.php");
+$imports_ignore = [
+  "schema.php",
+  "readline.php",
+  "recursive_scandir.php",
+  "check_directory.php",
+];
+
+$lg_version = [ 2, 25, 1, 0, 0 ];
+
+$imports = scandir("modules/commons/");
+foreach ($imports as $f) {
+  if ($f[0] == '.' || in_array($f, $imports_ignore)) continue;
+  include_once("modules/commons/$f");
+}
 
 $localesMap = include_once("locales/map.php");
+
+$postrun = [];
 
 $locales = [];
 foreach ($localesMap as $lc => $lv) {
@@ -23,6 +39,7 @@ $def_locale = isset($localesMap['def']) ? $localesMap['def']['alias'] : 'en';
 
 $isBetaLocale = false;
 $locale = $_COOKIE['loc'] ?? GetLanguageCodeISO6391();
+$origLocale = GetLanguageCodeISO6391();
 
 if (isset($localesMap[ $locale ]) && ($localesMap[ $locale ]['alias'] ?? false)) {
   $locale = $localesMap[ $locale ]['alias'];
@@ -59,36 +76,45 @@ $host_link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ?
 $include_descriptor = isset($_REQUEST['desc']);
 $include_team = isset($_REQUEST['teamcard']);
 
+// View functions imports
+$imports_api = scandir("modules/webapi/functions/");
+$imports = scandir("modules/view/functions/");
+foreach ($imports as $f) {
+  if ($f[0] == '.' || in_array($f, $imports_ignore) || in_array($f, $imports_api)) continue;
+  include_once("modules/view/functions/$f");
+}
+foreach ($imports_api as $f) {
+  if ($f[0] == '.' || in_array($f, $imports_ignore)) continue;
+  include_once("modules/webapi/functions/$f");
+}
+
+// Additional imports
+if (file_exists("modules/__imports/view") && is_dir("modules/__imports/view")) {
+  $imports = scandir("modules/__imports/view/");
+  foreach ($imports as $f) {
+    if ($f[0] == '.' || in_array($f, $imports_ignore)) continue;
+    include_once("modules/__imports/view/$f");
+  }
+}
+if (file_exists("modules/__imports/api") && is_dir("modules/__imports/api")) {
+  $imports = scandir("modules/__imports/api/");
+  foreach ($imports as $f) {
+    if ($f[0] == '.' || in_array($f, $imports_ignore)) continue;
+    include_once("modules/__imports/api/$f");
+  }
+}
+
 include_once("rg_report_out_settings.php");
-include_once("modules/commons/versions.php");
-$lg_version = [ 2, 25, 1, 0, 0 ];
 
-include_once("modules/commons/merge_mods.php");
-include_once("modules/commons/metadata.php");
-include_once("modules/commons/wrap_data.php");
-include_once("modules/commons/array_pslice.php");
-
-# FUNCTIONS
-include_once("modules/view/functions/modules.php");
-include_once("modules/view/functions/report_descriptor.php");
-
-include_once("modules/view/functions/team_name.php");
-include_once("modules/view/functions/player_name.php");
-include_once("modules/view/functions/hero_name.php");
-
-include_once("modules/webapi/functions/player_card.php");
-include_once("modules/webapi/functions/team_card.php");
-include_once("modules/webapi/functions/match_card.php");
-
-include_once("modules/view/functions/join_selectors.php");
-include_once("modules/view/functions/links.php");
-include_once("modules/view/functions/join_matches.php");
-
-include_once("modules/view/functions/has_pair.php");
-include_once("modules/view/functions/check_filters.php");
-include_once("modules/view/functions/create_search_filters.php");
-
-include_once("modules/view/generators/pvp_unwrap_data.php");
+set_error_handler(
+  function ($severity, $message, $file, $line) {
+    if (strpos($message, 'file_get_contents')) {
+      $dt = strrpos($message, '):');
+      $message = substr($message, $dt+3, strlen($message)-$dt-5);
+    }
+    throw new ErrorException($message, $severity, $severity, $file, $line);
+  }
+);
 
 # PRESETS
 include_once("modules/view/__preset.php");
@@ -125,16 +151,6 @@ if (!empty($leaguetag)) {
   }
 } else $report = [];
 
-set_error_handler(
-  function ($severity, $message, $file, $line) {
-    if (strpos($message, 'file_get_contents')) {
-      $dt = strrpos($message, '):');
-      $message = substr($message, $dt+3, strlen($message)-$dt-5);
-    }
-    throw new ErrorException($message, $severity, $severity, $file, $line);
-  }
-);
-
 include_once(__DIR__ . "/modules/webapi/modules.php");
 
 
@@ -144,11 +160,11 @@ header('Access-Control-Allow-Methods: GET, POST');
 //header("Access-Control-Allow-Headers: X-Requested-With");
 header('Access-Control-Allow-Headers: token, Content-Type');
 
-set_error_handler(
-  function ($severity, $message, $file, $line) {
-    throw new \Exception($severity.' - '.$message.'('.$file.':'.$line.')', $severity);
-  }
-);
+// set_error_handler(
+//   function ($severity, $message, $file, $line) {
+//     throw new \Exception($severity.' - '.$message.'('.$file.':'.$line.')', $severity);
+//   }
+// );
 
 $resp['modline'] = $mod;
 $resp['vars'] = $vars;
@@ -164,9 +180,17 @@ if (!empty($report) && $include_team && !empty($vars['team']) && !is_array($vars
   $resp['team_card'] = team_card($vars['team']);
 }
 
+if (!empty($postrun)) {
+  foreach ($postrun as $cb) {
+    $cb($resp);
+  }
+}
+
 echo json_encode($resp, (isset($_REQUEST['pretty']) ? JSON_PRETTY_PRINT : 0) 
   | JSON_INVALID_UTF8_SUBSTITUTE 
   | JSON_UNESCAPED_UNICODE
   | JSON_NUMERIC_CHECK 
   //| JSON_THROW_ON_ERROR
 );
+
+require_once("modules/view/__post_render.php");
