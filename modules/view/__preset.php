@@ -130,3 +130,38 @@ const SUMMARY_KEYS_REPLACEMENTS = [
   "opener_pick_winrate" => "opener_pick_winrate_s",
   "duration" => "duration_s"
 ];
+
+if (isset($__lrg_onerror) && !$isApi) {
+  $projectName = $projectName ?? "LRG2";
+
+  set_error_handler(
+    function(int $errno, string $errmsg, string $errfile = null, int $errline = null, array $errcontext = []) use ($__lrg_onerror, &$projectName) {
+      $__lrg_onerror([
+        'type' => 'error',
+        'project' => $projectName ?? "LRG2",
+        'path' => $_SERVER['REQUEST_URI'] ?? null,
+        'message' => $errmsg."::",
+        'file' => str_replace(__DIR__, "", $errfile),
+        'line' => $errline,
+        'severity' => $errno
+      ]);
+    },
+    E_ALL
+  );
+
+  set_exception_handler(function(Throwable $e) use ($__lrg_onerror, &$projectName) {
+    $__lrg_onerror([
+      'type' => 'error',
+      'project' => $projectName ?? "LRG2",
+      'path' => $_SERVER['REQUEST_URI'] ?? null,
+      'message' => $e->getMessage()."::".json_encode($e->getTrace()),
+      'file' => str_replace(__DIR__, "", $e->getFile()),
+      'line' => $e->getLine(),
+      'severity' => E_ERROR | $e->getCode(),
+    ]);
+  });
+}
+
+if (isset($__lrg_onfinish)) {
+  register_shutdown_function($__lrg_onfinish);
+}
