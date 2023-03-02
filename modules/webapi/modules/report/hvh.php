@@ -27,7 +27,7 @@ $endpoints['hvh'] = function($mods, $vars, &$report) {
     foreach ($pvp_context as $elid => $el) {
       if(isset($last) && $el == $last) {
         $i++;
-        $pvp_context[$elid]['rank'] = $last_rank;
+        $pvp_context[$elid]['rank'] = $last_rank ?? 0;
       } else
         $pvp_context[$elid]['rank'] = round(100 - $increment*$i++, 2);
       $last = $el;

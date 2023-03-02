@@ -32,6 +32,9 @@ test2.sh
 rg_report_out_settings.php
 rg_report_out_prerender.php
 
+# Custom imports
+modules/__imports
+
 # Custom Styles
 res/custom_styles/
 

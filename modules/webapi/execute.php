@@ -6,7 +6,7 @@ function execute(&$modline, &$endp, &$vars, &$report) {
   try {
     $result = $endp($modline, $vars, $report);
     return $result;
-  } catch (\Exception $e) {
+  } catch (\Throwable $e) {
     if (!empty($__lrg_onerror)) {
       $__lrg_onerror([
         'type' => 'error',

@@ -343,6 +343,11 @@ while(sizeof($matches) || $listen) {
           }
         }
 
+        if (!$rewrite_existing && (file_exists("$cache_dir/".$matches[$i].".lrgcache.json") || file_exists("$cache_dir/".$matches[$i].".json"))) {
+          echo ',';
+          continue;
+        }
+
         $group[] = $matches[$i];
       }
 
