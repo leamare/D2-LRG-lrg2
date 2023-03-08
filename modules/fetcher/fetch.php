@@ -1775,7 +1775,7 @@ function fetch($match) {
               $t_items[$i]['hero_id'].",".
               $t_items[$i]['playerid'].",".
               $t_items[$i]['item_id'].",".
-              $t_items[$i]['category_id'].",".
+              ($t_items[$i]['category_id'] ?? 0).",".
               $t_items[$i]['time']."),";
       }
       $sql[strlen($sql)-1] = ";";
