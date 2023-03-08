@@ -1771,12 +1771,15 @@ function fetch($match) {
       $sql = " INSERT INTO items (matchid, hero_id, playerid, item_id, category_id, `time`) VALUES ";
       $len = sizeof($t_items);
       for($i = 0; $i < $len; $i++) {
-          $sql .= "\n\t(".$t_items[$i]['matchid'].",".
-              $t_items[$i]['hero_id'].",".
-              $t_items[$i]['playerid'].",".
-              $t_items[$i]['item_id'].",".
-              ($t_items[$i]['category_id'] ?? 0).",".
-              $t_items[$i]['time']."),";
+        if (!isset($t_items[$i]['category_id']) || !$t_items[$i]['category_id']) {
+          $t_items[$i]['category_id'] = 0;
+        }
+        $sql .= "\n\t(".$t_items[$i]['matchid'].",".
+            $t_items[$i]['hero_id'].",".
+            $t_items[$i]['playerid'].",".
+            $t_items[$i]['item_id'].",".
+            $t_items[$i]['category_id'].",".
+            $t_items[$i]['time']."),";
       }
       $sql[strlen($sql)-1] = ";";
 
