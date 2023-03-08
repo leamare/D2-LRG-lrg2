@@ -132,6 +132,7 @@ if ($stratz_graphql) {
   // which is using new IDs only for major (non-letter) patches
   $stratz_patches = \array_values(
     \array_filter($stratz_patches, function($v) {
+      if ($v['id'] == 158) $v['name'] = "7.32e";
       return (strlen($v['name']) < 5) || ($v['id'] < 137 && $v['name'][ 4 ] == 'a');
     })
   );
