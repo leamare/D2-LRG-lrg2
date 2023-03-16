@@ -300,7 +300,7 @@ function fetch($match) {
     echo("..OK.");
     if (empty($matchdata) || empty($matchdata['duration']) || empty($matchdata['players'])) {
       if (empty($matchdata_stratz)) {
-        echo("..ERROR: Unable to read JSON skipping.\n");
+        echo("..MISSING: Unable to read JSON skipping.\n");
         //if (!isset($matchdata['duration'])) var_dump($matchdata);
 
         if($request_unparsed && !in_array($match, $scheduled)) {
