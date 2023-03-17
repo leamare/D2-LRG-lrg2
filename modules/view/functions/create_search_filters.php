@@ -263,7 +263,7 @@ function create_search_filters(string $searchstring) {
         $lastword .= $word;
       } else {
         $words[] = create_fuzzy_regex($word);
-        $filters_fallback[] = [ LRG_CAT_FILTER_TAG, "/".addcslashes(
+        $filters_fallback[] = [ LRG_CAT_FILTER_TAG_ALT, "/".addcslashes(
           str_replace([' ', '-', '–', '—'], "_", strtolower($word)),
           REGEX_MASK
         )."/" ];
@@ -279,13 +279,17 @@ function create_search_filters(string $searchstring) {
     $filters[] = [ LRG_TAG_FILTER_NAMEDESC, "/$w/iu" ];
   }
 
+  $letters_group = [
+    [ LRG_TAG_FILTER_NAMEDESC_LETTERS, $searchstring ]
+  ];
+
   $r = [];
   if (!empty($base)) {
     foreach ($base as $b) {
       $r[] = array_merge($b, $filters);
     }
   } else {
-    $r = [ $filters, $filters_fallback ];
+    $r = [ $filters, $filters_fallback, $letters_group ];
   }
 
   return $r;

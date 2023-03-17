@@ -22,6 +22,8 @@ define( 'LRG_TAG_FILTER_NAMEDESC', 18 );
 define( 'LRG_TAG_FILTER_DAYS_NUM_MORE', 19 );
 define( 'LRG_TAG_FILTER_DAYS_NUM_LESS', 20 );
 define( 'LRG_TAG_FILTER_NAMEDESC_EXCLUSIVE', 21 );
+define( 'LRG_TAG_FILTER_NAMEDESC_LETTERS', 24 );
+define( 'LRG_CAT_FILTER_TAG_ALT', 25 );
 
 /*
 filters:
@@ -57,6 +59,12 @@ function check_filters($rep, $filters) {
       switch ($filter[0]) {
         case LRG_CAT_FILTER_TAG:
           $group_result = $group_result && preg_match($filter[1], $rep['tag']);
+          break;
+        case LRG_CAT_FILTER_TAG_ALT:
+          $group_result = $group_result && preg_match(
+            str_replace('_', '', $filter[1]),
+            str_replace('_', '', $rep['tag'])
+          );
           break;
         case LRG_TAG_FILTER_NAME:
           if (isset($rep['localized'])) {
@@ -99,6 +107,42 @@ function check_filters($rep, $filters) {
           } else {
             $group_result = $group_result && ( preg_match($filter[1], $rep['desc']) || preg_match($filter[1], $rep['name']) );
           }
+          break;
+        case LRG_TAG_FILTER_NAMEDESC_LETTERS:
+          $lt = strtolower($filter[1]);
+          $letterize = function($str) {
+            return array_reduce(
+              preg_split("(\s|_|\-)", strtolower(str_replace([',', '.', ':', ';'], '', $str))),
+              function($carry, $item) {
+                return empty($item) ? $carry : $carry.$item[0];
+              }
+            );
+          };
+
+          $desc = $letterize($rep['desc']);
+          $name = $letterize($rep['name']);
+          $tag = $letterize($rep['tag']);
+          $r = preg_match("/$lt/iu", $desc) || preg_match("/$lt/iu", $name) || preg_match("/$lt/iu", $tag);
+
+          if (isset($rep['localized'])) {
+            foreach ($rep['localized'] as $loc) {
+              if ($r) break;
+              if (isset($loc['desc'])) {
+                $desc = $letterize($rep['desc']);
+                $r = $r || preg_match("/$lt/iu", $desc);
+              }
+              if (isset($loc['name'])) {
+                $name = $letterize($rep['name']);
+                $r = $r || preg_match("/$lt/iu", $name);
+              }
+              if (isset($loc['tag'])) {
+                $tag = $letterize($rep['tag']);
+                $r = $r || preg_match("/$lt/iu", $tag);
+              }
+            }
+          }
+          
+          $group_result = $group_result && $r;
           break;
         case LRG_TAG_FILTER_NAMEDESC_EXCLUSIVE:
           if (isset($rep['localized'])) {
@@ -229,6 +273,8 @@ function check_filters($rep, $filters) {
     }
 
     $result = $result || $group_result;
+
+    if ($result) return $result;
   }
 
   return $result;
