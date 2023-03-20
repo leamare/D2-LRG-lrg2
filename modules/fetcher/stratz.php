@@ -342,7 +342,7 @@ function get_stratz_response($match) {
   $r['matches']['cluster'] = $stratz['data']['match']['clusterId'];
   $r['matches']['start_date'] = $stratz['data']['match']['startDateTime'];
   $r['matches']['leagueID'] = $stratz['data']['match']['leagueId'] ?? 0;
-  $r['matches']['version'] = get_patchid($r['matches']['start_date'], convert_patch_id($r['matches']['start_date']), $meta);
+  $r['matches']['version'] = get_patchid($r['matches']['start_date'], $meta);
 
   $r['matches']['analysis_status'] = $stratz['data']['match']['parsedDateTime'] ? 1 : 0;
   $r['matches']['seriesid'] = $stratz['data']['match']['seriesId'] ?? null;
