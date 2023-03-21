@@ -112,51 +112,8 @@ $force_await = isset($options['A']);
 
 $scheduled_stratz = [];
 
-if ($stratz_graphql) {
-  /**
-   * @var array|string
-   */
-  $stratz_patches = \file_get_contents(
-    "https://api.stratz.com/api/v1/GameVersion?key=".$stratztoken,
-    false,
-    stream_context_create([
-      'ssl' => [
-        'verify_peer' => false,
-        'verify_peer_name' => false,
-      ]
-    ])
-  );
-  $stratz_patches = \json_decode($stratz_patches, true);
-
-  // Altho we are using Stratz API for patches list, we are using OpenDota format
-  // which is using new IDs only for major (non-letter) patches
-  $stratz_patches = \array_values(
-    \array_filter($stratz_patches, function($v) {
-      if ($v['id'] == 158) $v['name'] = "7.32e";
-      return (strlen($v['name']) < 5) || ($v['id'] < 137 && $v['name'][ 4 ] == 'a');
-    })
-  );
-  usort($stratz_patches, function($a, $b) { return $a['id'] <=> $b['id']; });
-
-  function convert_patch_id($start_time) {
-    global $stratz_patches; 
-    foreach ($stratz_patches as $i => $patch) {
-      $p = $i;
-      if (\strtotime($patch['startDate']) >= $start_time) {
-        break;
-      }
-    }
-
-    //$d = $stratz_pid - $stratz_patches[$p-1]['id'];
-
-    return ($p - 3);
-  }
-
-  $lastversion = convert_patch_id(time());
-} else {
   $lp = array_key_last($meta['patchdates']);
   $lastversion = ((int)$lp)*100 + count($meta['patchdates'][$lp]['dates']);
-}
 
 // checking out the schema
 
