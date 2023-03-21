@@ -10,7 +10,8 @@
     "items": true,
     "wards": true,
     "skill_builds": true,
-    "starting": true
+    "starting": true,
+    "normalize_turbo": true
   },
   "ana": {
     "records": true,

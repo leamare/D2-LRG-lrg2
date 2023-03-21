@@ -411,8 +411,9 @@ function get_stratz_response($match) {
       $aml['playerid'] = $pl['steamAccountId'];
       $aml['heroid'] = $pl['heroId'];
 
+      $lm = $r['matches']['modeID'] == 23 ? 5 : 10;
       $aml['lh_at10'] = array_sum(
-        array_slice($pl['stats']['lastHitsPerMinute'], 0, 10)
+        array_slice($pl['stats']['lastHitsPerMinute'], 0, $lm)
       );
       
       $aml['lane'] = is_numeric($pl['lane'])
@@ -447,8 +448,8 @@ function get_stratz_response($match) {
       $starting = 625;
       $tenMinute = $melee + $ranged + $siege + $passive + $starting;
       $aml['efficiency_at10'] = (
-        count($pl['stats']['networthPerMinute']) > 9 ? 
-        $pl['stats']['networthPerMinute'][10] : 
+        count($pl['stats']['networthPerMinute']) > ($lm-1) ? 
+        $pl['stats']['networthPerMinute'][$lm] : 
         end($pl['stats']['networthPerMinute'])
       ) / $tenMinute;
       

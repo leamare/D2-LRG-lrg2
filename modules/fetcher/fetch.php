@@ -316,7 +316,7 @@ function fetch($match) {
         $matchdata = $matchdata_stratz;
       }
     } else {
-      if($matchdata['duration'] < 600) {
+      if($matchdata['duration'] < 600 || ($matchdata['game_mode'] == 23 && $matchdata['duration'] < 400)) {
           echo("..Duration is less than 10 minutes, skipping...\n");
           // Initially it used to be 5 minutes, but sice a lot of stuff is hardly
           // binded with 10 min mark, it's better to use 10 min as a benchmark.
@@ -892,7 +892,9 @@ function fetch($match) {
 
         if (!$bad_replay) {
           if (empty($matchdata['players'][$j]['lh_t'])) $matchdata['players'][$j]['lh_t'] = [0];
-          $t_adv_matchlines[$i]['lh_at10'] = $matchdata['players'][$j]['lh_t'][10] ?? end($matchdata['players'][$j]['lh_t']);
+
+          $lm = $matchdata['game_mode'] == 23 ? 5 : 10;
+          $t_adv_matchlines[$i]['lh_at10'] = $matchdata['players'][$j]['lh_t'][$lm] ?? end($matchdata['players'][$j]['lh_t']);
           if ($matchdata['players'][$j]['lane_role'] == 5)
               $matchdata['players'][$j]['lane_role'] = 4; # we don't care about different jungles
           //if ($matchdata['players'][$j]['is_roaming'])
@@ -913,7 +915,9 @@ function fetch($match) {
           if ($matchdata['players'][$j]['obs_placed'] > 12) $support_indicators++;
           if ($matchdata['players'][$j]['sen_placed'] > 6) $support_indicators++;
 
-          if (empty($matchdata['players'][$j]['lane_efficiency'])) $matchdata['players'][$j]['lane_efficiency'] = $t_adv_matchlines[$i]['lh_at10']/42;
+          if (empty($matchdata['players'][$j]['lane_efficiency'])) {
+            $matchdata['players'][$j]['lane_efficiency'] = $t_adv_matchlines[$i]['lh_at10']/($matchdata['game_mode'] == 23 ? 21 : 42);
+          }
 
           if ($matchdata['players'][$j]['lane_efficiency'] < 0.55 && $matchdata['players'][$j]['win']) $support_indicators++;
           if ($matchdata['players'][$j]['lane_efficiency'] < 0.50) $support_indicators++;
@@ -1547,6 +1551,33 @@ function fetch($match) {
 
   if ($t_match['version'] < 0) {
     $t_match['version'] = $lastversion;
+  }
+
+  if ($lg_settings['main']['normalize_turbo'] ?? true) {
+    $t_match['duration'] *= 2;
+
+    foreach ($t_matchlines as $i => $line) {
+      $t_matchlines[$i]['gpm'] = round($line['gpm']/2);
+      $t_matchlines[$i]['xpm'] = round($line['xpm']/2);
+      $t_matchlines[$i]['lastHits'] *= 2;
+      $t_matchlines[$i]['denies'] *= 2;
+    }
+
+    if (!empty($t_adv_matchlines)) {
+      foreach ($t_adv_matchlines as $i => $line) {
+        $t_adv_matchlines[$i]['lh_at10'] *= 2;
+        $t_adv_matchlines[$i]['wards_destroyed'] *= 2;
+        $t_adv_matchlines[$i]['wards'] *= 2;
+        $t_adv_matchlines[$i]['sentries'] *= 2;
+        $t_adv_matchlines[$i]['stacks'] *= 2;
+      }
+    }
+    
+    if(!empty($t_items)) {
+      foreach ($t_items as $i => $line) {
+        $t_items[$i]['time'] *= 2;
+      }
+    }
   }
 
   $sql = "INSERT INTO matches (
