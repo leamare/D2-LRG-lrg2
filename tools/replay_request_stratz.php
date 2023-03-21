@@ -44,7 +44,7 @@ if(isset($options['f'])) {
 foreach ($matches as $match) {
     if ($match[0] == "#") continue;
 
-    post("https://api.stratz.com/api/v1/match/$match/retry");
+    // post("https://api.stratz.com/api/v1/match/$match/retry");
 }
 
 echo "[S] All matches were requested.\n";
