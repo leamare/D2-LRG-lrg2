@@ -231,7 +231,7 @@ if (!$isVirtual) {
     `matchid` bigint(20) UNSIGNED NOT NULL,
     `playerid` bigint(20) NOT NULL,
     `heroid` smallint(5) UNSIGNED NOT NULL,
-    `lh_at10` tinyint(3) UNSIGNED NOT NULL,
+    `lh_at10` smallint(3) UNSIGNED NOT NULL,
     `isCore` tinyint(1) NOT NULL,
     `lane` tinyint(3) UNSIGNED NOT NULL,
     `role` tinyint(3) UNSIGNED NOT NULL,
