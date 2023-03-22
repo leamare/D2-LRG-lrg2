@@ -134,6 +134,8 @@ function rg_view_generate_heroes_profiles() {
     $data = [];
   }
 
+  // $total_matches = $data['matches_s'] ?? 0;
+
   $data['matches_s'] = $el ? 
     $el['matches_total']." (".$el['matches_picked']." ".locale_string("picks").", ".$el['matches_banned']." ".locale_string("bans").")" :
     ($data['matches_s'] ?? 0);
@@ -144,7 +146,6 @@ function rg_view_generate_heroes_profiles() {
     ]);
   }
 
-  $total_matches = $data['matches_s'];
   $scripts = [];
 
   if (isset($report['hero_positions'])) {
@@ -793,7 +794,7 @@ function rg_view_generate_heroes_profiles() {
           locale_string("position_$role").
         "</a></td>".
         "<td>".$data[0]."</td>".
-        "<td>".number_format(100*$data[0]/$total_matches, 2)."%</td>".
+        "<td>".number_format(100*$data[0]/$report['pickban'][$hero]['matches_picked'], 2)."%</td>".
         "<td>".number_format($data[1]*100, 2)."%</td>".
         (isset($data[2]) ? "<td>".$data[2]."</td>" : "").
       "</tr>";
