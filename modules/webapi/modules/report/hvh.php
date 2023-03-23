@@ -1,5 +1,7 @@
 <?php 
 
+$repeatVars['hvh'] = ['heroid'];
+
 $endpoints['hvh'] = function($mods, $vars, &$report) {
   if (isset($vars['team'])) {
     throw new \Exception("No team allowed");

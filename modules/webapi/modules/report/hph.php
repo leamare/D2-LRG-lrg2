@@ -1,5 +1,7 @@
 <?php 
 
+$repeatVars['hph'] = ['heroid'];
+
 $endpoints['hph'] = function($mods, $vars, &$report) {
   if (isset($vars['team'])) {
     throw new \Exception("No team allowed");
@@ -67,7 +69,7 @@ $endpoints['hph'] = function($mods, $vars, &$report) {
       foreach ($context as $elid => $el) {
         if(isset($last) && $el == $last) {
           $i++;
-          $context[$elid]['rank'] = $last_rank;
+          $context[$elid]['rank'] = $last_rank ?? 0;
         } else
           $context[$elid]['rank'] = round(100 - $increment*$i++, 2);
         $last = $el;
