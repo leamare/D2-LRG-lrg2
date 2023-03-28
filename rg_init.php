@@ -349,7 +349,7 @@ if (!$isVirtual) {
   $conn->query("CREATE TABLE `players` (
     `playerID` bigint(20) NOT NULL,
     `nickname` varchar(128) NOT NULL,
-    `name_fixed` tinyint(1) NOT NULL
+    `name_fixed` tinyint(1) NOT NULL DEFAULT 0
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
   if ($conn->connect_error) die("[F] Can't create table `players`: ".$conn->connect_error."\n");
   echo "OK\n";
