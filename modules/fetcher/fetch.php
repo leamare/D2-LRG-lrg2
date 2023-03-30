@@ -1553,7 +1553,7 @@ function fetch($match) {
     $t_match['version'] = $lastversion;
   }
 
-  if ($lg_settings['main']['normalize_turbo'] ?? true) {
+  if (($lg_settings['main']['normalize_turbo'] ?? true) && ($t_match['modeID'] == 23)) {
     $t_match['duration'] *= 2;
 
     foreach ($t_matchlines as $i => $line) {
