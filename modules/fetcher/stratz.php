@@ -64,6 +64,7 @@ const STRATZ_LEAVER_STATUS = [
   'NONE' => 0,
   'DISCONNECTED' => 1,
   'ABANDONED' => 2,
+  'DISCONNECTED_TOO_LONG' => 2,
 ];
 
 const STRATZ_GRAPHQL_QUERY = "{
