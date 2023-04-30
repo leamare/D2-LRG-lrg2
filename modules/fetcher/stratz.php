@@ -790,6 +790,10 @@ function get_stratz_response($match) {
           }
         }
 
+        if (in_array($category, ['support', 'consumables', 'parts', 'recipes', 'event'])) {
+          continue;
+        }
+
         $r['items'][] = [
           'matchid' => $stratz['data']['match']['id'],
           'playerid' => $pl['steamAccountId'],
