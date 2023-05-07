@@ -62,7 +62,7 @@ function skillPriority($skillbuild, $hid, $noattr = false) {
     foreach ($skills as $sid) {
       if ($sid == 730 || $sid == 5002) continue;
 
-      if (strpos($meta['spells_tags'][$sid], "special_bonus") !== false) {
+      if (strpos($meta['spells_tags'][$sid] ?? $sid, "special_bonus") !== false) {
         $i = array_search($sid, $skillbuild);
         $talents[ (LEVELS_IDS[$i] ?? $i+1) ] = $sid;
       }
@@ -76,7 +76,7 @@ function skillPriority($skillbuild, $hid, $noattr = false) {
 
     if ((count($skillNumbers) == 4 && !isset($skillNumbers[$sid])) || 
       (!in_array($sid, $sb_copy) && $i >= 9 && !isset($skillNumbers[$sid]) && ($maxtalents > count($talents))) || 
-      strpos($meta['spells_tags'][$sid], "special_bonus") !== false
+      strpos($meta['spells_tags'][$sid] ?? $sid, "special_bonus") !== false
     ) {
       $talents[(LEVELS_IDS[$i] ?? $i+1)] = $sid;
       continue;
@@ -147,19 +147,26 @@ function skillPriority($skillbuild, $hid, $noattr = false) {
 
   $level = count($skillbuild);
 
+  $avgLvls = [];
+  foreach ($skilledAt as $sid => $meds) {
+    $avgLvls[$sid] = array_sum($meds)/count($meds);
+  }
+
+  $_maxlvl = max($maxlevel);
+
   foreach($maxlevel as $skill => $lvl) {
     if ($skill == $ultimate) {
       if ($lvl == 3) continue;
       $maxedAt[$skill] = (LEVELS_IDS[ $level-1 ] ?? $level) < 19 ? 18 : $level + (3-$lvl) - 1;
       $maxlevel[$skill] = 3;
     } else {
-      if ($lvl == 4) continue;
-      $maxedAt[$skill] = $level + (4-$lvl) - 1;
-      $maxlevel[$skill] = 4;
+      if ($lvl == $_maxlvl) continue;
+      $maxedAt[$skill] = $level + ($_maxlvl-$lvl) - 1;
+      $maxlevel[$skill] = $_maxlvl;
     }
   }
 
-  usort($skills, function($a, $b) use ($firstPointAt, $maxedAt, $maxlevel, $ultimate) {
+  usort($skills, function($a, $b) use ($firstPointAt, $maxedAt, $maxlevel, $ultimate, $avgLvls) {
     if ($maxlevel[$a] != $maxlevel[$b]) {
       if ($maxlevel[$a] < $maxlevel[$b]) {
         if ($firstPointAt[$a] > $maxedAt[$b]) {
@@ -172,6 +179,10 @@ function skillPriority($skillbuild, $hid, $noattr = false) {
         }
         return 1;
       }
+    }
+
+    if (abs($maxedAt[$a] - $maxedAt[$b]) < 3 && abs($avgLvls[$a] - $avgLvls[$b]) >= 1.5) {
+      return $avgLvls[$a] <=> $avgLvls[$b];
     }
 
     return $maxedAt[$a] <=> $maxedAt[$b];
