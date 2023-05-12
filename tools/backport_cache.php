@@ -12,6 +12,8 @@ include_once("modules/commons/schema.php");
 
 $skip = isset($options['s']);
 
+$normturbo = $lg_settings['main']['normalize_turbo'] ?? true;
+
 if(isset($options['c'])) {
   $file = $options['c'];
   $matches = explode("\n", file_get_contents($file));
@@ -63,13 +65,34 @@ for ($i = 0; $i < $sz; $i++) {
   $q = "select * from matches where matchid = $m;";
   $r = instaquery($conn, $q);
   if (empty($r)) continue;
+  if ($normturbo && $r[0]['modeID'] == 23) {
+    $r[0]['duration'] /= 2;
+  }
+
   $match['matches'] = $r[0];
 
   $q = "select * from matchlines where matchid = $m;";
   $match['matchlines'] = instaquery($conn, $q);
+  if ($normturbo && $match['matches']['modeID'] == 23) {
+    foreach ($match['matchlines'] as $i => $line) {
+      $match['matchlines'][$i]['gpm'] *= 2;
+      $match['matchlines'][$i]['xpm'] *= 2;
+      $match['matchlines'][$i]['lastHits'] /= 2;
+      $match['matchlines'][$i]['denies'] /= 2;
+    }
+  }
 
   $q = "select * from adv_matchlines where matchid = $m;";
   $match['adv_matchlines'] = instaquery($conn, $q);
+  if ($normturbo && $match['matches']['modeID'] == 23) {
+    foreach ($match['adv_matchlines'] as $i => $line) {
+      $match['adv_matchlines'][$i]['lh_at10'] /= 2;
+      $match['adv_matchlines'][$i]['wards_destroyed'] /= 2;
+      $match['adv_matchlines'][$i]['wards'] /= 2;
+      $match['adv_matchlines'][$i]['sentries'] /= 2;
+      $match['adv_matchlines'][$i]['stacks'] /= 2;
+    }
+  }
 
   $q = "select * from draft where matchid = $m;";
   $match['draft'] = instaquery($conn, $q);
@@ -117,6 +140,12 @@ for ($i = 0; $i < $sz; $i++) {
   if($lg_settings['main']['items']) {
     $q = "select * from items where matchid = $m;";
     $match['items'] = instaquery($conn, $q);
+
+    if ($normturbo && $match['matches']['modeID'] == 23) {
+      foreach ($match['items'] as $i => $line) {
+        $match['items'][$i]['time'] /= 2;
+      }
+    }
   }
 
   $out = json_encode(utf8ize($match));
