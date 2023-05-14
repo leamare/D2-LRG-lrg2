@@ -427,11 +427,11 @@ if (!$isVirtual) {
     echo "OK\n[ ] Linking team tables...";
     $conn->query("ALTER TABLE `teams_matches` ADD CONSTRAINT `teams_matches` FOREIGN KEY (`matchid`) REFERENCES `matches` (`matchid`);");
       if ($conn->connect_error) die("[F] Can't link `teams_matches` to `matches`: ".$conn->connect_error."\n");
-    $conn->query("ALTER TABLE `teams_matches` ADD CONSTRAINT `teams_matches` FOREIGN KEY (`teamid`) REFERENCES `teams` (`teamid`);");
+    $conn->query("ALTER TABLE `teams_matches` ADD CONSTRAINT `teams_matches_teams` FOREIGN KEY (`teamid`) REFERENCES `teams` (`teamid`);");
       if ($conn->connect_error) die("[F] Can't link `teams_matches` to `teams`: ".$conn->connect_error."\n");
-    $conn->query("ALTER TABLE `teams_rosters` ADD CONSTRAINT `teams_rosters` FOREIGN KEY (`teamid`) REFERENCES `teams` (`teamid`);");
+    $conn->query("ALTER TABLE `teams_rosters` ADD CONSTRAINT `teams_rosters_teams` FOREIGN KEY (`teamid`) REFERENCES `teams` (`teamid`);");
       if ($conn->connect_error) die("[F] Can't link `teams_rosters` to `teams`: ".$conn->connect_error."\n");
-    $conn->query("ALTER TABLE `teams_rosters` ADD CONSTRAINT `teams_rosters` FOREIGN KEY (`playerid`) REFERENCES `players` (`playerID`);");
+    $conn->query("ALTER TABLE `teams_rosters` ADD CONSTRAINT `teams_rosters_players` FOREIGN KEY (`playerid`) REFERENCES `players` (`playerID`);");
       if ($conn->connect_error) die("[F] Can't link `teams_rosters` to `players`: ".$conn->connect_error."\n");
 
     echo "OK\n";
