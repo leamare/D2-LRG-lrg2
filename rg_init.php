@@ -157,16 +157,20 @@ $conn->set_charset('utf8mb4');
 
 if ($conn->connect_error) die("[F] Connection to SQL server failed: ".$conn->connect_error."\n");
 
-if ($conn->select_db($lrg_db_prefix."_".$lg_settings['league_tag'])) {
-  echo "\n[E] Database already exists\n";
-
-  if ($isForce) {
-    echo "[ ] Dropping existing database...\n";
-    $conn->query("DROP DATABASE ".$lrg_db_prefix."_".$lg_settings['league_tag'].";");
-    if ($conn->connect_error || $conn->error) die("[F] Can't drop database: ".($conn->connect_error ?? $conn->error)."\n");
-  } else {
-    die();
+try {
+  if ($conn->select_db($lrg_db_prefix."_".$lg_settings['league_tag'])) {
+    echo "\n[E] Database already exists\n";
+  
+    if ($isForce) {
+      echo "[ ] Dropping existing database...\n";
+      $conn->query("DROP DATABASE ".$lrg_db_prefix."_".$lg_settings['league_tag'].";");
+      if ($conn->connect_error || $conn->error) die("[F] Can't drop database: ".($conn->connect_error ?? $conn->error)."\n");
+    } else {
+      die();
+    }
   }
+} catch (\Throwable $e) {
+  
 }
 
 $conn->query("CREATE DATABASE ".$lrg_db_prefix."_".$lg_settings['league_tag']." CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;");

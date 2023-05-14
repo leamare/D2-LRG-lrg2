@@ -1984,7 +1984,7 @@ function fetch($match) {
       if ($conn->multi_query($sql) === TRUE || stripos($conn->error, "Duplicate entry") !== FALSE);
       else die("[F] Unexpected problems when recording to database.\n".$conn->error."\n".$sql."\n");
   
-      if($lg_settings['ana']['teams']['rosters']) {
+      if($lg_settings['ana']['teams'] && $lg_settings['ana']['teams']['rosters']) {
         //echo "[ ] Getting teams rosters\n";
   
         $sql = "";
