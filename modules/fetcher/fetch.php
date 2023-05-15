@@ -1932,37 +1932,6 @@ function fetch($match) {
     }
   }
 
-  if ($lg_settings['main']['teams'] && sizeof($t_team_matches)) {
-    $sql = "INSERT INTO teams_matches (matchid, teamid, is_radiant) VALUES ";
-
-    foreach($t_team_matches as $m) {
-        if($m['is_radiant'] > 1) {
-          echo "[W] Error when adding teams-matches data: is_radiant flag has higher value than 1\n".
-              "[ ]\t".$m['matchid']." - ".$m['teamid']." - ".$m['is_radiant']."\n";
-              continue;
-        }
-        $sql .= "\n\t(".$m['matchid'].",".$m['teamid'].",".$m['is_radiant']."),";
-    }
-    $sql[strlen($sql)-1] = ";";
-
-    $err_query = "DELETE from teams_matches where matchid = ".$t_match['matchid'].";".$err_query;
-
-    if ($conn->multi_query($sql) === TRUE);
-    else {
-      echo "ERROR teams_matches (".$conn->error."), reverting match.\n";
-      if ($conn->error === "MySQL server has gone away") {
-        sleep(30);
-        conn_restart();
-        $matches[] = $match;
-      }
-      $conn->multi_query($err_query);
-      do {
-        $conn->store_result();
-      } while($conn->next_result());
-      return null;
-    }
-  }
-
   echo "..OK.\n";
 
   if ($lg_settings['main']['teams']) {
@@ -2017,6 +1986,37 @@ function fetch($match) {
       foreach ($newteams as $id => $team) {
         $t_teams[$id]['added'] = true;
       }
+    }
+  }
+
+  if ($lg_settings['main']['teams'] && sizeof($t_team_matches)) {
+    $sql = "INSERT INTO teams_matches (matchid, teamid, is_radiant) VALUES ";
+
+    foreach($t_team_matches as $m) {
+        if($m['is_radiant'] > 1) {
+          echo "[W] Error when adding teams-matches data: is_radiant flag has higher value than 1\n".
+              "[ ]\t".$m['matchid']." - ".$m['teamid']." - ".$m['is_radiant']."\n";
+              continue;
+        }
+        $sql .= "\n\t(".$m['matchid'].",".$m['teamid'].",".$m['is_radiant']."),";
+    }
+    $sql[strlen($sql)-1] = ";";
+
+    $err_query = "DELETE from teams_matches where matchid = ".$t_match['matchid'].";".$err_query;
+
+    if ($conn->multi_query($sql) === TRUE);
+    else {
+      echo "ERROR teams_matches (".$conn->error."), reverting match.\n";
+      if ($conn->error === "MySQL server has gone away") {
+        sleep(30);
+        conn_restart();
+        $matches[] = $match;
+      }
+      $conn->multi_query($err_query);
+      do {
+        $conn->store_result();
+      } while($conn->next_result());
+      return null;
     }
   }
 
