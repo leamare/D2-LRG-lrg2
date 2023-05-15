@@ -2,6 +2,7 @@
 <?php
 ini_set('memory_limit', '4000M');
 ini_set('mysqli.reconnect', '1');
+mysqli_report(MYSQLI_REPORT_OFF); //FIXME:
 
 include_once("head.php");
 include_once("modules/fetcher/get_patchid.php");

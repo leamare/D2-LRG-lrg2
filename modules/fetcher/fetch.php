@@ -43,7 +43,7 @@ function fetch($match) {
 
   $conn->ping();
 
-  if (empty($match) || $match[0] == "#" || strlen($match) < 2) return true;
+  if (empty($match) || $match[0] == "#" || $match[0] == "[" || strlen($match) < 2) return true;
 
   $match_rules = processRules($match);
 

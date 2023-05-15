@@ -92,7 +92,7 @@ $sql .= "SELECT \"tower_damage_per_min\", matchlines.heroid heroid, SUM(matchlin
 
 # taken damage / minute
 $sql .= "SELECT \"taken_damage_per_min\", adv_matchlines.heroid heroid, SUM(adv_matchlines.damage_taken/(matches.duration/60))/SUM(1) value, SUM(1) mtch
-            FROM adv_matchlines JOIN matches ON matchlines.matchid = matches.matchid
+            FROM adv_matchlines JOIN matches ON adv_matchlines.matchid = matches.matchid
             WHERE matches.cluster IN (".implode(",", $clusters).")
             GROUP BY heroid HAVING ".$result["regions_data"][$region]['settings']['limiter_lower']." < mtch ORDER BY value DESC LIMIT $avg_limit;";
 
