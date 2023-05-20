@@ -431,8 +431,8 @@ if (!$isVirtual) {
       if ($conn->connect_error) die("[F] Can't link `teams_matches` to `teams`: ".$conn->connect_error."\n");
     $conn->query("ALTER TABLE `teams_rosters` ADD CONSTRAINT `teams_rosters_teams` FOREIGN KEY (`teamid`) REFERENCES `teams` (`teamid`);");
       if ($conn->connect_error) die("[F] Can't link `teams_rosters` to `teams`: ".$conn->connect_error."\n");
-    $conn->query("ALTER TABLE `teams_rosters` ADD CONSTRAINT `teams_rosters_players` FOREIGN KEY (`playerid`) REFERENCES `players` (`playerID`);");
-      if ($conn->connect_error) die("[F] Can't link `teams_rosters` to `players`: ".$conn->connect_error."\n");
+    // $conn->query("ALTER TABLE `teams_rosters` ADD CONSTRAINT `teams_rosters_players` FOREIGN KEY (`playerid`) REFERENCES `players` (`playerID`);");
+    //   if ($conn->connect_error) die("[F] Can't link `teams_rosters` to `players`: ".$conn->connect_error."\n");
 
     echo "OK\n";
   }
