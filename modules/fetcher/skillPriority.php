@@ -152,7 +152,7 @@ function skillPriority($skillbuild, $hid, $noattr = false) {
     $avgLvls[$sid] = array_sum($meds)/count($meds);
   }
 
-  $_maxlvl = max($maxlevel);
+  $_maxlvl = empty($maxlevel) ? 1 : max($maxlevel);
 
   foreach($maxlevel as $skill => $lvl) {
     if ($skill == $ultimate) {

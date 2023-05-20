@@ -535,7 +535,7 @@ table .hero_portrait, .flextable .hero_portrait {
   left: 7.5%;
 }
 .match-heroes-bans .match-hero[data-order]:after {
-  font-size: 0.85em;
+  font-size: 0.75em;
   width: 10%;
   top: 11.5%;
 }

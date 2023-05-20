@@ -20,7 +20,7 @@ function match_card($mid) {
 
   $m = $report['matches'][$mid];
 
-  if (isset($report['matches_additional'][$mid]) && !empty($report['matches_additional'][$mid]['order'])) {
+  if (isset($report['matches_additional'][$mid]) && !empty($report['matches_additional'][$mid]['order']) && $report['matches_additional'][$mid]['game_mode'] != 1) {
     $orders = array_flip( $report['matches_additional'][$mid]['order'] );
     usort($m, function($a, $b) use (&$orders) {
       return $orders[ $a['hero'] ] <=> $orders[ $b['hero'] ];
