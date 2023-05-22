@@ -39,7 +39,7 @@ $endpoints['list'] = function($mods, $vars, &$report) use (&$endpoints, $cat, $c
       if ($recent_last_limit ?? false) {
         $limit = null;
         foreach($reps as $k => $v) {
-          if ($v['last_update'] < $recent_last_limit) {
+          if ($v['last_update'] < ($recent_last_limit ?? 5)) {
             $limit = $k;
             break;
           }

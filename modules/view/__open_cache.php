@@ -6,6 +6,8 @@ include_once("modules/view/functions/report_descriptor.php");
 
 $cache_update = false;
 
+$cache = [];
+
 if (file_exists($cache_file)) {
   try {
     $cache = file_get_contents($cache_file);
