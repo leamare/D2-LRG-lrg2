@@ -214,6 +214,9 @@ function rg_generator_uncontested($context, $contested, $small = false, $heroes_
       locale_string($loc).
       ": ".sizeof($context)."</h1><div class=\"hero-list\">";
 
+    usort($context, function($a, $b) {
+      return $a['name'] <=> $b['name'];
+    });
     if ($heroes_flag)
       foreach($context as $el) {
         $res .= "<div class=\"hero\"><img src=\"".str_replace("%HERO%", $el['tag'], $portraits_provider)."\" alt=\"".$el['tag']."\" />".
