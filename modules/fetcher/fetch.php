@@ -186,7 +186,7 @@ function fetch($match) {
         echo("..Low score, skipping.\n");
         return true;
       }
-      if ($matchdata['payload']['leavers']) {
+      if ($matchdata['payload']['leavers'] && !$ignore_abandons) {
         echo("..Abandon detected, skipping.\n");
         return true;
       }
