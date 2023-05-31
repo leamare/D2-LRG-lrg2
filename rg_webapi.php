@@ -134,6 +134,42 @@ if(isset($_GET['league']) && !empty($_GET['league'])) {
   $leaguetag = $_GET['league'];
 } else $leaguetag = "";
 
+if(isset($_GET['latest'])) {
+  $getlatest = true;
+} else $getlatest = false;
+
+if ($getlatest) {
+  $lightcache = true;
+  include_once("modules/view/__open_cache.php");
+  include_once("modules/view/__update_cache.php");
+
+  if (isset($cat)) {
+    $cats = json_decode(file_get_contents($cats_file), true);
+    if (isset($cats[$cat])) {
+      $candidates = array_filter($cache['reps'], function($rep) use (&$cats, &$cat) {
+        return check_filters($rep, $cats[$cat]['filters']);
+      });
+    } else {
+      $candidates = [];
+    } 
+  } else {
+    $candidates = $cache['reps'];
+  }
+
+  if (!empty($candidates)) {
+    usort($candidates, function($a, $b) {
+      $lu = (($b['last_match'] ?? [])['date'] ?? 0) <=> (($a['last_match'] ?? [])['date'] ?? 0);
+
+      if ($lu) return $lu;
+
+      return ($b['matches'] ?? 0) <=> ($a['matches'] ?? 0);
+    });
+    $candidate = array_shift($candidates);
+
+    $leaguetag = $candidate['tag'];
+  }
+}
+
 if (!empty($leaguetag)) {
   if(file_exists($reports_dir."/".$report_mask_search[0].$leaguetag.$report_mask_search[1])) {
     $report = file_get_contents($reports_dir."/".$report_mask_search[0].$leaguetag.$report_mask_search[1])
@@ -141,8 +177,8 @@ if (!empty($leaguetag)) {
     $report = json_decode($report, true);
   } else {
     $lightcache = true;
-    include("modules/view/__open_cache.php");
-    include("modules/view/__update_cache.php");
+    include_once("modules/view/__open_cache.php");
+    include_once("modules/view/__update_cache.php");
     if(isset($cache['reps'][$leaguetag]['file'])) {
       $report = file_get_contents($reports_dir."/".$cache['reps'][$leaguetag]['file'])
           or die("[F] Can't open $leaguetag, probably no such report\n");

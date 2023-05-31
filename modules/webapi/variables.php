@@ -96,11 +96,16 @@ if (isset($_GET['cat']) && !empty($_GET['cat'])) {
   // } else if ($ml == '*') {
   //   $vars['cat'] = array_keys();
   } else {
-    $vars['cat'] = (int)$ml;
+    $vars['cat'] = $ml;
   }
 }
 
 // $vars['cat'] = $_GET['cat'];
+
+if (isset($_GET['latest']) && $getlatest) {
+  $vars['latest'] = $getlatest;
+  if (!empty($leaguetag)) $vars['latest_report'] = $leaguetag;
+}
 
 if (isset($_GET['gets'])) $vars['gets'] = explode(",", strtolower($_GET['gets']));
 if (isset($_GET['rep'])) $vars['rep'] = strtolower($_GET['rep']);
