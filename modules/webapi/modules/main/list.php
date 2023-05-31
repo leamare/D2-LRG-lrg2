@@ -33,8 +33,12 @@ $endpoints['list'] = function($mods, $vars, &$report) use (&$endpoints, $cat, $c
       $reps = $cache["reps"];
     } else if ($cat == "recent") {
       $reps = $cache["reps"];
-      usort($reps, function($a, $b) {
-        return $b['last_update'] - $a['last_update'];
+      uasort($reps, function($a, $b) {
+        $lu = ($b['last_update'] ?? 0) <=> ($a['last_update'] ?? 0);
+  
+        if ($lu) return $lu;
+  
+        return ($b['matches'] ?? 0) <=> ($a['matches'] ?? 0);
       });
       if ($recent_last_limit ?? false) {
         $limit = null;

@@ -109,7 +109,11 @@ if (!empty($searchstring)) {
     // $recent_last_limit;
     $reps = $cache["reps"];
     uasort($reps, function($a, $b) {
-      return ($b['last_update'] ?? 0) - ($a['last_update'] ?? 0);
+      $lu = ($b['last_update'] ?? 0) <=> ($a['last_update'] ?? 0);
+
+      if ($lu) return $lu;
+
+      return ($b['matches'] ?? 0) <=> ($a['matches'] ?? 0);
     });
     if ($recent_last_limit ?? false) {
       $limit = null;
