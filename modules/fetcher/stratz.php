@@ -581,7 +581,8 @@ function get_stratz_response($match) {
 
       $aml['teamfight_part'] = $pl['isRadiant'] ? array_sum($stratz['data']['match']['radiantKills'] ?? []) : array_sum($stratz['data']['match']['direKills'] ?? []);
       $aml['teamfight_part'] = $aml['teamfight_part'] ? ($pl['kills']+$pl['assists']) / $aml['teamfight_part'] : 0;
-      $aml['damage_taken'] = array_sum($pl['stats']['heroDamageReceivedPerMinute'] ?? []);
+      // $aml['damage_taken'] = array_sum($pl['stats']['heroDamageReceivedPerMinute'] ?? []);
+      $aml['damage_taken'] = max($pl['stats']['heroDamageReceivedPerMinute'] ?? [0]);
 
       $r['adv_matchlines'][] = $aml;
 
