@@ -3,6 +3,7 @@ include_once($root."/modules/view/functions/hero_name.php");
 include_once($root."/modules/view/functions/player_name.php");
 include_once($root."/modules/view/functions/ranking.php");
 include_once($root."/modules/view/functions/teams_diversity_recalc.php");
+include_once($root."/modules/view/generators/draft.php");
 
 function rg_generator_balance($table_id, $context) {
   $vals = balance_rank($context);

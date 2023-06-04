@@ -67,7 +67,8 @@ $endpoints['profiles'] = function($mods, $vars, &$report) use (&$endpoints, &$me
             $record['placement'] = 1;
             $record['region'] = $reg;
             $player_records[] = $record;
-          } else if (!empty($context_records_ext)) {
+          }
+          if (!empty($context_records_ext)) {
             foreach ($context_records_ext[$rectag] ?? [] as $i => $rec) {
               if (($rec['heroid'] ?? 0) == $vars['heroid']) {
                 $rec['tag'] = $rectag;

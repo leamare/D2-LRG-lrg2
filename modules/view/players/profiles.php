@@ -161,7 +161,8 @@ function rg_view_generate_players_profiles() {
           $record['placement'] = 1;
           $record['region'] = $reg;
           $player_records[] = $record;
-        } else if (!empty($context_records_ext)) {
+        }
+        if (!empty($context_records_ext)) {
           foreach ($context_records_ext[$rectag] ?? [] as $i => $rec) {
             if ($rec['playerid'] == $player) {
               $rec['tag'] = $rectag;

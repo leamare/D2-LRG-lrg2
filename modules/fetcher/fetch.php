@@ -161,6 +161,7 @@ function fetch($match) {
     $json = file_get_contents("$cache_dir/".$match.".json");
     $matchdata_od = json_decode($json, true);
     $matchdata = $matchdata_od;
+    
   // } else if($lrg_use_cache && file_exists("$cache_dir/".$match.".json") && file_exists("$cache_dir/unparsed_".$match.".json") && $force_adding) {
   //   echo("Reusing unparsed cache.");
   //   $json = file_get_contents("$cache_dir/unparsed_".$match.".json");
