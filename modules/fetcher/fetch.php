@@ -1720,7 +1720,7 @@ function fetch($match) {
                   $aml['couriers_killed'].",".$aml['roshans_killed'].",".$aml['wards_destroyed'].",".
                   $aml['multi_kill'].",".$aml['streak'].",".($aml['stacks'] ?? 0).",".
                   ($aml['time_dead'] ?? 0).",".($aml['buybacks'] ?? 0).",".$aml['pings'].",".
-                  $aml['stuns'].",".$aml['teamfight_part'].",".$aml['damage_taken']."),";
+                  ($aml['stuns'] ?? 0).",".$aml['teamfight_part'].",".$aml['damage_taken']."),";
     }
     $sql[strlen($sql)-1] = ";";
 
