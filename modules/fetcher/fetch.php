@@ -716,13 +716,14 @@ function fetch($match) {
       $team_roles = [[],[]];
       $laning_raw = [];
       foreach ($matchdata['players'] as $player) {
+        if (!$player['hero_id']) continue;
         $team = $player['isRadiant'] ? 1 : 0;
         $p = [
           'hid' => $player['hero_id'],
           'gpm' => $player['gold_per_min'],
           'xpm' => $player['xp_per_min'],
           'roaming' => $player['is_roaming'],
-          'lane' => $player['lane_role'],
+          'lane' => $player['lane_role'] ?? 4,
           'eff' => $player['lane_efficiency'],
         ];
         $laning_raw[$p['hid']] = $p['eff'];
@@ -1395,7 +1396,7 @@ function fetch($match) {
       foreach($pl['obs_left_log'] as $ward) {
         $wards_log[$pl['account_id']][ $ward['ehandle'] ]['alive'] = $ward['time'] - ($wards_log[ $ward['ehandle'] ] ?? ($ward['time']-360));
         $wards_log[$pl['account_id']][ $ward['ehandle'] ]['destroyed_at'] = $ward['time'];
-        $wards_log[$pl['account_id']][ $ward['ehandle'] ]['destroyed_by'] = $player_tags[ $ward['attackername'] ] ?? null;
+        $wards_log[$pl['account_id']][ $ward['ehandle'] ]['destroyed_by'] = $player_tags[ $ward['attackername'] ?? "null" ] ?? null;
 
         if ($wards_log[$pl['account_id']][ $ward['ehandle'] ]['destroyed_by']) {
           if (!isset($wards_destruction_log[ $ward['attackername'] ])) $wards_destruction_log[ $ward['attackername'] ] = [];
