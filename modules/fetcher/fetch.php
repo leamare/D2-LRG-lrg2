@@ -717,13 +717,14 @@ function fetch($match) {
       $laning_raw = [];
       foreach ($matchdata['players'] as $player) {
         if (!$player['hero_id']) continue;
+        if (!$player['lane_role'] || $player['lane_role'] > 4) $player['lane_role'] = 4;
         $team = $player['isRadiant'] ? 1 : 0;
         $p = [
           'hid' => $player['hero_id'],
           'gpm' => $player['gold_per_min'],
           'xpm' => $player['xp_per_min'],
           'roaming' => $player['is_roaming'],
-          'lane' => $player['lane_role'] ?? 4,
+          'lane' => $player['lane_role'],
           'eff' => $player['lane_efficiency'],
         ];
         $laning_raw[$p['hid']] = $p['eff'];
@@ -790,7 +791,7 @@ function fetch($match) {
           $laning[$p['hid']] = $lane_state;
         }
         $lane_state = 2-$lane_state;
-        foreach($laning_raw[1][$opp_lane] as $p) {
+        foreach(($laning_raw[1][$opp_lane] ?? []) as $p) {
           $laning[$p['hid']] = $lane_state;
         }
       }
@@ -815,7 +816,7 @@ function fetch($match) {
         $t_matchlines[$i]['matchid'] = $match;
 
         # for wrong numbers of players in opendota response
-        if (!isset($matchdata['players'][$j]['hero_id'])) {
+        if (!isset($matchdata['players'][$j]['hero_id']) || !$matchdata['players'][$j]['hero_id']) {
           $sz++;
           continue;
         }
@@ -897,7 +898,7 @@ function fetch($match) {
 
           $lm = $matchdata['game_mode'] == 23 ? 5 : 10;
           $t_adv_matchlines[$i]['lh_at10'] = $matchdata['players'][$j]['lh_t'][$lm] ?? end($matchdata['players'][$j]['lh_t']);
-          if ($matchdata['players'][$j]['lane_role'] == 5)
+          if ($matchdata['players'][$j]['lane_role'] == 5 || !$matchdata['players'][$j]['lane_role'])
               $matchdata['players'][$j]['lane_role'] = 4; # we don't care about different jungles
           //if ($matchdata['players'][$j]['is_roaming'])
           //    $matchdata['players'][$j]['lane_role'] = 5;
