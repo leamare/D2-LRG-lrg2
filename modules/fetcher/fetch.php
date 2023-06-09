@@ -717,7 +717,7 @@ function fetch($match) {
       $laning_raw = [];
       foreach ($matchdata['players'] as $player) {
         if (!$player['hero_id']) continue;
-        if (!$player['lane_role'] || $player['lane_role'] > 4) $player['lane_role'] = 4;
+        if (!isset($player['lane_role']) || !$player['lane_role'] || $player['lane_role'] > 4) $player['lane_role'] = 4;
         $team = $player['isRadiant'] ? 1 : 0;
         $p = [
           'hid' => $player['hero_id'],
@@ -898,7 +898,7 @@ function fetch($match) {
 
           $lm = $matchdata['game_mode'] == 23 ? 5 : 10;
           $t_adv_matchlines[$i]['lh_at10'] = $matchdata['players'][$j]['lh_t'][$lm] ?? end($matchdata['players'][$j]['lh_t']);
-          if ($matchdata['players'][$j]['lane_role'] == 5 || !$matchdata['players'][$j]['lane_role'])
+          if (!isset($matchdata['players'][$j]['lane_role']) || $matchdata['players'][$j]['lane_role'] == 5 || !$matchdata['players'][$j]['lane_role'])
               $matchdata['players'][$j]['lane_role'] = 4; # we don't care about different jungles
           //if ($matchdata['players'][$j]['is_roaming'])
           //    $matchdata['players'][$j]['lane_role'] = 5;
@@ -1018,7 +1018,7 @@ function fetch($match) {
             }
           }
           $t_adv_matchlines[$i]['damage_taken'] = 0;
-          foreach($matchdata['players'][$j]['damage_inflictor_received'] as $key => $instance) {
+          foreach(($matchdata['players'][$j]['damage_inflictor_received'] ?? []) as $key => $instance) {
             $t_adv_matchlines[$i]['damage_taken'] += $instance;
           }
         }
@@ -1385,6 +1385,7 @@ function fetch($match) {
       $wards_log[$pl['account_id']] = [];
       $sentries_log[$pl['account_id']] = [];
       foreach($pl['obs_log'] as $ward) {
+        if (empty($ward['ehandle'])) continue;
         $wards_log[$pl['account_id']][ $ward['ehandle'] ] = [
           'x_c' => $ward['x'],
           'y_c' => $ward['y'],
