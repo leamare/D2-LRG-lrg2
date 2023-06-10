@@ -1619,7 +1619,7 @@ function fetch($match) {
   $sql = "INSERT INTO matchlines (matchid, playerid, heroid, level, isRadiant, kills, deaths, assists, networth,".
           "gpm, xpm, heal, heroDamage, towerDamage, lastHits, denies) VALUES ";
   foreach($t_matchlines as $ml) {
-      if (!$ml['heroid'])
+      if (!$ml['heroid']);
       $sql .= "\n\t(".$ml['matchid'].",".$ml['playerid'].",".$ml['heroid'].",".
           $ml['level'].",".($ml['isRadiant'] ? "true" : "false").",".$ml['kills'].",".
           $ml['deaths'].",".$ml['assists'].",".$ml['networth'].",".
