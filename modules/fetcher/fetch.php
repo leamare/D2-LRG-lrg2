@@ -816,10 +816,12 @@ function fetch($match) {
         $t_matchlines[$i]['matchid'] = $match;
 
         # for wrong numbers of players in opendota response
-        if (!isset($matchdata['players'][$j]['hero_id']) || !$matchdata['players'][$j]['hero_id']) {
+        if (!isset($matchdata['players'][$j]['hero_id'])) {
           $sz++;
           continue;
         }
+
+
 
         if (isset($match_players)) {
           $matchdata['players'][$j]['account_id'] = $match_players[$i]['playerID'];
@@ -841,7 +843,7 @@ function fetch($match) {
           $t_matchlines[$i]['playerid'] = $matchdata['players'][$j]['account_id'];
         }
 
-        $player_tags[ "npc_dota_hero_".$meta['heroes'][$matchdata['players'][$j]['hero_id']]['tag'] ] = $t_matchlines[$i]['playerid'];
+        $player_tags[ "npc_dota_hero_".($meta['heroes'][$matchdata['players'][$j]['hero_id']]['tag'] ?? "none") ] = $t_matchlines[$i]['playerid'];
 
         $pid = (int)$matchdata['players'][$j]['account_id'];
         if(!isset($t_players[$pid]) || ($update_names && !isset($updated_names[$pid]))) {
@@ -1617,6 +1619,7 @@ function fetch($match) {
   $sql = "INSERT INTO matchlines (matchid, playerid, heroid, level, isRadiant, kills, deaths, assists, networth,".
           "gpm, xpm, heal, heroDamage, towerDamage, lastHits, denies) VALUES ";
   foreach($t_matchlines as $ml) {
+      if (!$ml['heroid'])
       $sql .= "\n\t(".$ml['matchid'].",".$ml['playerid'].",".$ml['heroid'].",".
           $ml['level'].",".($ml['isRadiant'] ? "true" : "false").",".$ml['kills'].",".
           $ml['deaths'].",".$ml['assists'].",".$ml['networth'].",".
@@ -1716,6 +1719,8 @@ function fetch($match) {
       }
     }
     foreach($t_adv_matchlines as &$aml) {
+      if (!$aml['heroid']) continue;
+
       $sql .= "\n\t(".$aml['matchid'].",".$aml['playerid'].",".$aml['heroid'].",".
                   ($aml['lh_at10'] ?? 0).",".$aml['isCore'].",".$aml['lane'].",".
                   (($schema['adv_matchlines_roles'] ?? false) ? $aml['role'].",".$aml['lane_won']."," : '').
@@ -1843,6 +1848,8 @@ function fetch($match) {
         ($schema['skill_build_attr'] ? ", attributes, ultimate" : "").
       ") VALUES ";
     foreach ($t_skill_builds as $t) {
+      if (!$t['hero_id']) continue;
+
       $sql .= "\n\t({$t['matchid']}, {$t['playerid']}, {$t['hero_id']}, ".
         "'".($t['skill_build'])."',".
         "'".($t['first_point_at'])."',".
@@ -1880,6 +1887,8 @@ function fetch($match) {
       ($schema['starting_consumables'] ? ", consumables" : "").
     ") VALUES ";
     foreach ($t_starting_items as $t) {
+      if (!$t['hero_id']) continue;
+      
       $sql .= "\n\t({$t['matchid']}, {$t['playerid']}, {$t['hero_id']}, ".
         "'".($t['starting_items'])."'".
         ($schema['starting_consumables'] ? ", '".($t['consumables'] ?? "[]")."'" : "").
