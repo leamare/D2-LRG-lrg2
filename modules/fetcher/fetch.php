@@ -813,15 +813,17 @@ function fetch($match) {
 
     $i = sizeof($t_matchlines);
     for ($j=0, $sz=10; $j<$sz; $j++) {
+        # for wrong numbers of players in opendota response
+        if (!isset($matchdata['players'][$j])) {
+          break;
+        }
+
         $t_matchlines[$i]['matchid'] = $match;
 
-        # for wrong numbers of players in opendota response
         if (!isset($matchdata['players'][$j]['hero_id'])) {
           $sz++;
           continue;
         }
-
-
 
         if (isset($match_players)) {
           $matchdata['players'][$j]['account_id'] = $match_players[$i]['playerID'];
@@ -1012,7 +1014,7 @@ function fetch($match) {
           $t_adv_matchlines[$i]['teamfight_part'] = $matchdata['players'][$j]['teamfight_participation'];
           if (!$t_adv_matchlines[$i]['teamfight_part']) {
             $team_score = 0; $n = $i < 5 ? 5 : 10;
-            for ($k=0; $k < $n; $k++) $team_score += $matchdata['players'][$k]['kills'];
+            for ($k=0; $k < $n; $k++) $team_score += ($matchdata['players'][$k] ?? [])['kills'] ?? 0;
             if ($team_score) {
               $t_adv_matchlines[$i]['teamfight_part'] = $matchdata['players'][$j]['kills']/$team_score;
             } else {
@@ -1173,6 +1175,9 @@ function fetch($match) {
     if (!$bad_replay && !isset($matchdata['items'])) {
       $i = 0;
       for ($j=0, $sz=10; $j<$sz; $j++) {
+        if (!isset($matchdata['players'][$j])) {
+          break;
+        }
         if (!isset($matchdata['players'][$j]['hero_id'])) {
           $sz++;
           continue;
