@@ -171,8 +171,14 @@ function fetch($match) {
   
   if(empty($matchdata) && $stratz_graphql) {
     echo("Requesting STRATZ GraphQL.");
-    $matchdata = get_stratz_response($match);
-    $matchdata['isstratz'] = true;
+
+    try {
+      $matchdata = get_stratz_response($match);
+      $matchdata['isstratz'] = true;
+    } catch (Exception $e) {
+      echo "[E] STRATZ ERROR: ".$e->getMessage()."\n";
+      $matchdata = [];
+    }
 
     global $stratz_graphql_group, $stratz_graphql_group_counter;
     if ($stratz_graphql_group) $stratz_graphql_group_counter--;
@@ -258,13 +264,14 @@ function fetch($match) {
         unset($matchdata);
       }
     } else {
-      if($request_unparsed && !in_array($match, $scheduled) && !empty($matchdata)) {
+      if(!in_array($match, $scheduled) && !empty($matchdata)) {
         //`php tools/replay_request_stratz.php -m$match`;
         echo "..Rescheduled $match STRATZ\n";
+        $requested_before = isset($first_scheduled[$match]);
         $first_scheduled[$match] = time();
         $scheduled_stratz[] = $match;
         $scheduled[] = $match;
-        return false;
+        if ($requested_before) return false;
       }
     }
   }
@@ -799,7 +806,7 @@ function fetch($match) {
         foreach ($roles as $hid => $role) {
           if (isset($laning[$hid])) continue;
           
-          $opp = array_flip($team_roles[1-$i])[$role];
+          $opp = array_flip($team_roles[1-$i])[$role] ?? "null";
           if (isset($laning[$opp])) {
             $laning[$hid] = 2-$laning[$opp];
           } else {
@@ -1402,7 +1409,7 @@ function fetch($match) {
           'destroyed_by' => null,
         ];
       }
-      foreach($pl['obs_left_log'] as $ward) {
+      foreach($pl['obs_left_log'] ?? [] as $ward) {
         $wards_log[$pl['account_id']][ $ward['ehandle'] ]['alive'] = $ward['time'] - ($wards_log[ $ward['ehandle'] ] ?? ($ward['time']-360));
         $wards_log[$pl['account_id']][ $ward['ehandle'] ]['destroyed_at'] = $ward['time'];
         $wards_log[$pl['account_id']][ $ward['ehandle'] ]['destroyed_by'] = $player_tags[ $ward['attackername'] ?? "null" ] ?? null;
@@ -1419,7 +1426,7 @@ function fetch($match) {
       }
 
       foreach($pl['sen_log'] as $ward) {
-        $sentries_log[$pl['account_id']][ $ward['ehandle'] ] = [
+        $sentries_log[$pl['account_id']][ $ward['ehandle'] ?? "null" ] = [
           'x_c' => $ward['x'],
           'y_c' => $ward['y'],
           'time' => $ward['time'],

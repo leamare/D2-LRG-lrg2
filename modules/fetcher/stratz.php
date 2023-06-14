@@ -326,7 +326,7 @@ function get_stratz_response($match) {
       throw new Exception(json_encode($stratz['errors'], JSON_PRETTY_PRINT));
     }
 
-    if (empty($stratz['data']) || empty($stratz['data']['match']) || !empty($stratz['errors'])) {
+    if (empty($stratz['data']) || empty($stratz['data']['match'])) {
       return null;
     }
   }
