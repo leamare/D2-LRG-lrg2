@@ -1978,35 +1978,35 @@ function fetch($match) {
       if ($conn->multi_query($sql) === TRUE || stripos($conn->error, "Duplicate entry") !== FALSE);
       else die("[F] Unexpected problems when recording to database.\n".$conn->error."\n".$sql."\n");
   
-      if($lg_settings['ana']['teams'] && $lg_settings['ana']['teams']['rosters']) {
-        //echo "[ ] Getting teams rosters\n";
+      // if($lg_settings['ana']['teams'] && $lg_settings['ana']['teams']['rosters']) {
+      //   //echo "[ ] Getting teams rosters\n";
   
-        $sql = "";
+      //   $sql = "";
   
-        foreach ($newteams as $id => $team) {
-          $json = file_get_contents('https://api.steampowered.com/IDOTA2Match_570/GetTeamInfoByTeamID/v001/?key='.$steamapikey.'&teams_requested=1&start_at_team_id='.$id);
-          $matchdata = json_decode($json, true);
-          # it may return more than 5 players, but we actually care only about the first 5 players
-          # others are probably coach and standins, they aren't part of official active roster
+      //   foreach ($newteams as $id => $team) {
+      //     $json = file_get_contents('https://api.steampowered.com/IDOTA2Match_570/GetTeamInfoByTeamID/v001/?key='.$steamapikey.'&teams_requested=1&start_at_team_id='.$id);
+      //     $matchdata = json_decode($json, true);
+      //     # it may return more than 5 players, but we actually care only about the first 5 players
+      //     # others are probably coach and standins, they aren't part of official active roster
   
-          # initial idea about positions was to detect player position somehow and use it in team competitions
-          # to detect heros stats based on player positions
-          # right now it's placeholder
-          # TODO
-          $position = 0;
+      //     # initial idea about positions was to detect player position somehow and use it in team competitions
+      //     # to detect heros stats based on player positions
+      //     # right now it's placeholder
+      //     # TODO
+      //     $position = 0;
   
-          for($i=0; isset($matchdata['result']['teams'][0]['player_'.$i.'_account_id']); $i++)
-              $sql .= "\n\t(".$id.",".$matchdata['result']['teams'][0]['player_'.$i.'_account_id'].", ".$position."),";
-        }
+      //     for($i=0; isset($matchdata['result']['teams'][0]['player_'.$i.'_account_id']); $i++)
+      //         $sql .= "\n\t(".$id.",".$matchdata['result']['teams'][0]['player_'.$i.'_account_id'].", ".$position."),";
+      //   }
   
-        if(!empty($sql)) {
-          $sql[strlen($sql)-1] = ";";
-          $sql = "INSERT INTO teams_rosters (teamid, playerid, position) VALUES ".$sql;
+      //   if(!empty($sql)) {
+      //     $sql[strlen($sql)-1] = ";";
+      //     $sql = "INSERT INTO teams_rosters (teamid, playerid, position) VALUES ".$sql;
   
-              if ($conn->multi_query($sql) === TRUE || stripos($conn->error, "Duplicate entry") !== FALSE) echo "[S] Successfully recorded new teams rosters to database.\n";
-              else die("[F] Unexpected problems when recording to database.\n".$conn->error."\n");
-        }
-      }
+      //         if ($conn->multi_query($sql) === TRUE || stripos($conn->error, "Duplicate entry") !== FALSE) echo "[S] Successfully recorded new teams rosters to database.\n";
+      //         else die("[F] Unexpected problems when recording to database.\n".$conn->error."\n");
+      //   }
+      // }
 
       foreach ($newteams as $id => $team) {
         $t_teams[$id]['added'] = true;
