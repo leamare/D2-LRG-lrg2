@@ -1,6 +1,6 @@
 <?php
 
-define( 'LRG_CAT_FILTER_TAG', 0 );
+define( 'LRG_TAG_FILTER_TAG', 0 );
 define( 'LRG_TAG_FILTER_NAME', 1 );
 define( 'LRG_TAG_FILTER_DESC', 2 );
 define( 'LRG_TAG_FILTER_ID', 3 );
@@ -23,7 +23,13 @@ define( 'LRG_TAG_FILTER_DAYS_NUM_MORE', 19 );
 define( 'LRG_TAG_FILTER_DAYS_NUM_LESS', 20 );
 define( 'LRG_TAG_FILTER_NAMEDESC_EXCLUSIVE', 21 );
 define( 'LRG_TAG_FILTER_NAMEDESC_LETTERS', 24 );
-define( 'LRG_CAT_FILTER_TAG_ALT', 25 );
+define( 'LRG_TAG_FILTER_TAG_ALT', 25 );
+define( 'LRG_TAG_FILTER_LAST_UPDATE_DIFF_MORE', 26 );
+define( 'LRG_TAG_FILTER_LAST_UPDATE_DIFF_LESS', 27 );
+define( 'LRG_TAG_FILTER_LAST_UPDATE_DIFF_DAYS_MORE', 28 );
+define( 'LRG_TAG_FILTER_LAST_UPDATE_DIFF_DAYS_LESS', 29 );
+define( 'LRG_TAG_FILTER_LAST_MATCH_DIFF_DAYS_MORE', 30 );
+define( 'LRG_TAG_FILTER_LAST_MATCH_DIFF_DAYS_LESS', 31 );
 
 /*
 filters:
@@ -57,10 +63,10 @@ function check_filters($rep, $filters) {
       }
 
       switch ($filter[0]) {
-        case LRG_CAT_FILTER_TAG:
+        case LRG_TAG_FILTER_TAG:
           $group_result = $group_result && preg_match($filter[1], $rep['tag']);
           break;
-        case LRG_CAT_FILTER_TAG_ALT:
+        case LRG_TAG_FILTER_TAG_ALT:
           $group_result = $group_result && preg_match(
             str_replace('_', '', $filter[1]),
             str_replace('_', '', $rep['tag'])
@@ -269,6 +275,34 @@ function check_filters($rep, $filters) {
         case LRG_TAG_FILTER_DAYS_NUM_LESS:
           $group_result = $group_result && $rep['days'] < $filter[1];
           break;
+        case LRG_TAG_FILTER_LAST_UPDATE_DIFF_LESS:
+          $diff = time() - $rep['last_update'];
+          $group_result = $group_result && $diff <= $filter[1];
+          break;
+        case LRG_TAG_FILTER_LAST_UPDATE_DIFF_MORE:
+          $diff = time() - $rep['last_update'];
+          $group_result = $group_result && $diff > $filter[1];
+          break;
+        case LRG_TAG_FILTER_LAST_UPDATE_DIFF_DAYS_LESS:
+          $diff = time() - $rep['last_update'];
+          $group_result = $group_result && $diff <= $filter[1]*24*3600;
+          break;
+        case LRG_TAG_FILTER_LAST_UPDATE_DIFF_DAYS_MORE:
+          $diff = time() - $rep['last_update'];
+          $group_result = $group_result && $diff > $filter[1]*24*3600;
+          break;
+        case LRG_TAG_FILTER_LAST_MATCH_DIFF_DAYS_LESS:
+          $diff = time() - $rep['last_match']['date'];
+          $group_result = $group_result && $diff <= $filter[1]*24*3600;
+          break;
+        case LRG_TAG_FILTER_LAST_MATCH_DIFF_DAYS_MORE:
+          $diff = time() - $rep['last_match']['date'];
+          $group_result = $group_result && $diff > $filter[1]*24*3600;
+          break;
+      }
+
+      if (!$group_result) {
+        break;
       }
     }
 
