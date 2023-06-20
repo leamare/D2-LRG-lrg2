@@ -183,7 +183,7 @@ function create_search_filters(string $searchstring) {
           case 'tag-has':
             $vals = explode(',', $command[1]);
             foreach ($vals as $v) {
-              $filters[] = [ LRG_CAT_FILTER_TAG, "/".addcslashes($v, REGEX_MASK)."/" ];
+              $filters[] = [ LRG_TAG_FILTER_TAG, "/".addcslashes($v, REGEX_MASK)."/" ];
             }
             break;
           case 'mid-from':
@@ -263,7 +263,7 @@ function create_search_filters(string $searchstring) {
         $lastword .= $word;
       } else {
         $words[] = create_fuzzy_regex($word);
-        $filters_fallback[] = [ LRG_CAT_FILTER_TAG_ALT, "/".addcslashes(
+        $filters_fallback[] = [ LRG_TAG_FILTER_TAG_ALT, "/".addcslashes(
           str_replace([' ', '-', '–', '—'], "_", strtolower($word)),
           REGEX_MASK
         )."/" ];
