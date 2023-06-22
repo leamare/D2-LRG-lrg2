@@ -74,19 +74,26 @@ if (!empty($searchstring)) {
   if (isset($cat) && isset($cats[$cat])) {
     $reps = [];
     foreach($cache["reps"] as $tag => $rep) {
-      if(check_filters($rep, $cats[$cat]['filters']))
+      if(check_filters($rep, $cats[$cat]['filters'])) {
+        if ($cats[$cat]['exclude_hidden'] && isset($cats[$hidden_cat])) {
+          if(check_filters($rep, $cats[$hidden_cat]['filters'])) {
+            continue;
+          }
+        }
         $reps[$tag] = $rep;
+      }
     }
+    
     if(isset($cats[$cat]['custom_style']) && file_exists("res/custom_styles/".$cats[$cat]['custom_style'].".css"))
       $custom_style = $cats[$cat]['custom_style'];
     if(isset($cats[$cat]['custom_logo']) && file_exists("res/custom_styles/logos/".$cats[$cat]['custom_logo'].".css"))
       $custom_logo = $cats[$cat]['custom_logo'];
 
     if(isset($cats[$cat]['names_locales'][$locale])) $head_name = $cats[$cat]['names_locales'][$locale];
-    else $head_name = $cats[$cat]['name'];
+    else $head_name = $cats[$cat]['name'] ?? locale_string('cat_'.$cat);
 
     if(isset($cats[$cat]['desc_locales'][$locale])) $head_desc = $cats[$cat]['desc_locales'][$locale];
-    else if(isset($cats[$cat]['desc'])) $head_desc = $cats[$cat]['desc'];
+    else if(isset($cats[$cat]['desc'])) $head_desc = isset($cats[$cat]['locale_desc_tag']) ? locale_string($cats[$cat]['locale_desc_tag']) : $cats[$cat]['desc'];
 
     if (isset($cats[$cat]['lid'])) $social_lid = $cats[$cat]['lid'];
   } else if(!isset($cat) || $cat == "main") {
@@ -115,25 +122,66 @@ if (!empty($searchstring)) {
 
       return ($b['matches'] ?? 0) <=> ($a['matches'] ?? 0);
     });
-    if ($recent_last_limit ?? false) {
-      $limit = null;
-      $i = 0;
-      foreach($reps as $k => $v) {
-        if (($v['last_update'] ?? 0) < $recent_last_limit) {
-          $limit = $i;
-          break;
-        }
-        $i++;
-      }
-      $r = [];
-      $i = 0;
-      foreach ($reps as $k => $v) {
-        if ($i >= $limit) break;
-        $r[$k] = $v;
-        $i++;
-      }
-      $reps = $r;
+    if (!($recent_last_limit ?? false)) {
+      $recent_last_limit = time() - 14*24*3600;
     }
+
+    $limit = null;
+    $i = 0;
+    foreach($reps as $k => $v) {
+      if (($v['last_update'] ?? 0) < $recent_last_limit) {
+        $limit = $i;
+        break;
+      }
+      $i++;
+    }
+    $r = [];
+    $i = 0;
+    foreach ($reps as $k => $v) {
+      if ($i >= $limit) break;
+      $r[$k] = $v;
+      $i++;
+    }
+    $reps = $r;
+  // } else if ($cat == "ongoing") {
+  //   $head_name = locale_string("ongoing_reports");
+  //   // $ongoing_last_limit;
+  //   // $reps = $cache["reps"];
+  //   if (!($ongoing_last_limit ?? false)) {
+  //     $ongoing_last_limit = time() - 31*24*3600;
+  //   }
+
+  //   $reps = array_filter($cache["reps"], function($el) use (&$ongoing_last_limit, &$recent_last_limit, &$hidden_cat, &$cats) {
+  //     return (
+  //       ((($el['last_match'] ?? [])['date'] ?? 0) >= $ongoing_last_limit) && 
+  //       (($el['last_update'] ?? 0) >= $recent_last_limit) && 
+  //       $el['matches'] && 
+  //       !check_filters($el['tag'], $cats[$hidden_cat]['filters'])
+  //     );
+  //   });
+
+  //   uasort($reps, function($a, $b) {
+  //     $lu = ($b['last_update'] ?? 0) <=> ($a['last_update'] ?? 0);
+
+  //     if ($lu) return $lu;
+
+  //     return ($b['matches'] ?? 0) <=> ($a['matches'] ?? 0);
+  //   });
+  // } else if ($cat == "upcoming") {
+  //   $head_name = locale_string("upcoming_reports");
+
+  //   $reps = array_filter($cache["reps"], function($el) {
+  //     return (
+  //       !$el['matches']
+  //     );
+  //   });
+
+  //   uasort($reps, function($a, $b) {
+  //     if (!$a['id']) return -1;
+  //     if (!$b['id']) return 1;
+      
+  //     return ($b['id'] ?? 0) <=> ($a['id'] ?? 0);
+  //   });
   } else {
     $head_name = $cat;
     $reps = [];
@@ -158,8 +206,11 @@ if(isset($cats) && !empty($cats)) {
   $tmp .= "<a class=\"category".(isset($cat) && "recent" == $cat ? " active" : "").
               "\" href=\"?cat=recent".(empty($linkvars) ? "" : "&".$linkvars).
               "\">".locale_string("recent_reports")."</a>";
+  // $tmp .= "<a class=\"category".(isset($cat) && "ongoing" == $cat ? " active" : "").
+  //             "\" href=\"?cat=ongoing".(empty($linkvars) ? "" : "&".$linkvars).
+  //             "\">".locale_string("ongoing_reports")."</a>";
 
-  if ($tabSelected === null && isset($cat) && ($cat == "main" || $cat == "recent")) {
+  if ($tabSelected === null && isset($cat) && ($cat == "main" || $cat == "recent" || $cat == "ongoing")) {
     $tabSelected = count($tabsNames);
   }
 
@@ -169,11 +220,13 @@ if(isset($cats) && !empty($cats)) {
     $tmp .= "<a class=\"category".(isset($cat) && $tag == $cat ? " active" : "")."\" ".
                 "href=\"?cat=".$tag.(empty($linkvars) ? "" : "&".$linkvars)."\" ".
                 (isset($desc['desc_locales'][$locale]) ? "title=\"".$desc['desc_locales'][$locale]."\"" :
-                  (isset($desc['desc']) ? "title=\"".$desc['desc']."\"" : "")
+                  (isset($desc['desc']) ? "title=\"".$desc['desc']."\"" : (
+                    !empty($desc['locale_desc_tag']) ? "title=\"".locale_string($desc['locale_desc_tag'])."\"" : ""
+                  ))
                 ).
                 ">".
                 (isset($desc['names_locales'][$locale]) ? $desc['names_locales'][$locale] :
-                  (isset($desc['name']) ? $desc['name'] : $tag)
+                  (isset($desc['name']) ? $desc['name'] : locale_string("cat_".$tag))
                 ).
                 "</a>";
 
@@ -279,6 +332,10 @@ if (sizeof($cache['reps']) === 0) {
     $modules .= "<div class=\"content-header\">".locale_string("noleague_cap")."</div>";
   $modules .= "</div>";
 
+  $modules .= "<div class=\"table-header-info wide compact\" data-table=\"$table_id\">".
+    "<span class=\"table-header-info-name\">".locale_string('reports_count').": ".count($reps)."</span>".
+  "</div>";
+
   if(isset($cat) || $index_list >= sizeof($reps)) {
     $modules .= "<input name=\"filter\" class=\"search-filter wide\" data-table-filter-id=\"leagues-list\" placeholder=\"".locale_string('filter_placeholder')."\" />";
   }
@@ -299,15 +356,29 @@ if (sizeof($cache['reps']) === 0) {
   "</tr></thead>";
 
   if (!isset($cat) || $cat !== "recent") {
-    uasort($reps, function($a, $b) {
-      if (empty($a) && empty($b)) return 0;
-      if (empty($a)) return 1;
-      if (empty($b)) return -1;
-      if($a['last_match']['date'] == $b['last_match']['date']) {
-        if($a['first_match']['date'] == $b['first_match']['date']) return 0;
-        else return ($a['first_match']['date'] < $b['first_match']['date']) ? -1 : 1;
-      } else return ($a['last_match']['date'] < $b['last_match']['date']) ? 1 : -1;
-    });
+    if (isset($cat) && isset($cats[$cat]) && isset($cats[$cat]['orderby'])) {
+      // not my finest creation
+      $orderby = $cats[$cat]['orderby'];
+      uasort($reps, function($a, $b) use (&$orderby) {
+        $res = 0;
+        foreach ($orderby as $k => $dir) {
+          $res = $dir ? (($b[$k] ?? 0) <=> ($a[$k] ?? 0)) : (($a[$k] ?? 0) <=> ($b[$k] ?? 0));
+          if ($res) break;
+        }
+
+        return $res;
+      });
+    } else {
+      uasort($reps, function($a, $b) {
+        if (empty($a) && empty($b)) return 0;
+        if (empty($a)) return 1;
+        if (empty($b)) return -1;
+        if($a['last_match']['date'] == $b['last_match']['date']) {
+          if($a['first_match']['date'] == $b['first_match']['date']) return 0;
+          else return ($a['first_match']['date'] < $b['first_match']['date']) ? -1 : 1;
+        } else return ($a['last_match']['date'] < $b['last_match']['date']) ? 1 : -1;
+      });
+    }
   }
 
   foreach($reps as $report) {
@@ -404,4 +475,3 @@ if (sizeof($cache['reps']) === 0) {
 
   $modules .= "</table>";
 }
-?>
