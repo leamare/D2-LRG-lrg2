@@ -17,8 +17,27 @@ $endpoints['list'] = function($mods, $vars, &$report) use (&$endpoints, $cat, $c
     if (isset($cats[$cat])) {
       $reps = [];
       foreach($cache["reps"] as $tag => $rep) {
-        if(check_filters($rep, $cats[$cat]['filters']))
+        if(check_filters($rep, $cats[$cat]['filters'])) {
+          if ($cats[$cat]['exclude_hidden'] && isset($cats[$hidden_cat])) {
+            if(check_filters($rep, $cats[$hidden_cat]['filters'])) {
+              continue;
+            }
+          }
           $reps[$tag] = $rep;
+        }
+      }
+
+      if (isset($cats[$cat]['orderby'])) {
+        $orderby = $cats[$cat]['orderby'];
+        uasort($reps, function($a, $b) use (&$orderby) {
+          $res = 0;
+          foreach ($orderby as $k => $dir) {
+            $res = $dir ? (($b[$k] ?? 0) <=> ($a[$k] ?? 0)) : (($a[$k] ?? 0) <=> ($b[$k] ?? 0));
+            if ($res) break;
+          }
+  
+          return $res;
+        });
       }
     } else if($cat == "main") {
       if(isset($cats[$hidden_cat])) {
@@ -66,6 +85,7 @@ $endpoints['list'] = function($mods, $vars, &$report) use (&$endpoints, $cat, $c
   return [
     "cat_selected" => $cat,
     "cat_list" => $cats_list,
+    "count" => count($reps),
     "reports" => $reps
   ];
 };
