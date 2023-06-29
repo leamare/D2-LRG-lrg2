@@ -1,4 +1,31 @@
 {
+  "upcoming": {
+    "filters": [
+      [ [ 13, 1 ], [ 29, 31 ] ]
+    ],
+    "orderby": {
+      "lid": 1
+    },
+    "exclude_hidden": true,
+    "locale_desc_tag": "cat_upcoming_description"
+  },
+  "ongoing": {
+    "filters": [
+      [ [ 14, 0 ], [ 31, 31 ], [ 29, 14 ], [11, 1], [0, "/^((?!_meta_).)*$/"] ]
+    ],
+    "orderby": {
+      "lid": 1
+    },
+    "exclude_hidden": true,
+    "locale_desc_tag": "cat_ongoing_description"
+  },
+  "ongoing_ranked": {
+    "filters": [
+      [ [ 14, 0 ], [ 31, 6 ], [ 29, 14 ], [11, 0], [0, "/^((?!_meta_).)*$/"] ]
+    ],
+    "exclude_hidden": true,
+    "locale_desc_tag": "cat_ongoing_ranked_description"
+  },
   "lans": {
     "name": "LAN finals",
     "names_locales": { "ru": "LAN финалы" },
