@@ -73,7 +73,6 @@ function find_comebacks($gold_times, $radiant_win) {
   }
 
   if ($last_rad) {
-    var_dump([ $rad_swing, $rad_swing_duration, $gold_times[$sz-1]-$rad_swing < 0 ]);
     if (!$radiant_win) $dire_swings[] = [ $rad_swing, 1, true ];
     else $rad_swings[] = [ $rad_swing, $rad_swing_duration, $gold_times[$sz-1]-$rad_swing < 0 ];
   } else {
