@@ -8,6 +8,10 @@ function find_comebacks($gold_times, $radiant_win) {
   $rad_swings = [];
 
   $sz = count($gold_times);
+
+  // $gold_times[] = $radiant_win == ($gold_times[$sz-1] > 0) ? $gold_times[$sz-1] : -$gold_times[$sz-1];
+  // $sz++;
+
   $half_sz = round(($sz-5)/2) + 5;
   $rad_swing = 0; $dire_swing = 0;
   $rad_swing_duration = 0; $dire_swing_duration = 0;
@@ -54,7 +58,7 @@ function find_comebacks($gold_times, $radiant_win) {
         $gold_times[$i-1-$rad_swing_duration] < 0
       ];
       $rad_swing = 0;
-      $rad_swing_duration++;
+      $rad_swing_duration = 0;
     }
 
     if ($reset_dire) {
@@ -69,6 +73,7 @@ function find_comebacks($gold_times, $radiant_win) {
   }
 
   if ($last_rad) {
+    var_dump([ $rad_swing, $rad_swing_duration, $gold_times[$sz-1]-$rad_swing < 0 ]);
     if (!$radiant_win) $dire_swings[] = [ $rad_swing, 1, true ];
     else $rad_swings[] = [ $rad_swing, $rad_swing_duration, $gold_times[$sz-1]-$rad_swing < 0 ];
   } else {
@@ -229,6 +234,16 @@ function add_networths(&$matchdata) {
     for ($j = $i, $c = count($gold_times); $j < $c; $j++) {
       $gold_times[$j] += $delta * ($side ? -1 : 1);
     }
+  }
+
+  $sz = count($gold_times);
+  if ($matchdata['radiant_win'] != ($gold_times[$sz-1] > 0)) {
+    $nws = [0, 0];
+    foreach ($matchdata['players'] as $i => $player) {
+      $nws[ (int)$sides[ $player['hero_id'] ] ] += $player['net_worth'] ?? $player['total_gold'];
+    }
+
+    $gold_times[] = $gold_times[$sz-1] + abs($nws[0] - $nws[1]) * ($matchdata['radiant_win'] ? 1 : -1);
   }
 
   $matchdata['radiant_nw_adv'] = $gold_times;
