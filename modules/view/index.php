@@ -72,17 +72,7 @@ if (!empty($searchstring)) {
   $head_desc = htmlspecialchars($searchstring);
 } else if (!empty($cats)) {
   if (isset($cat) && isset($cats[$cat])) {
-    $reps = [];
-    foreach($cache["reps"] as $tag => $rep) {
-      if(check_filters($rep, $cats[$cat]['filters'])) {
-        if ($cats[$cat]['exclude_hidden'] && isset($cats[$hidden_cat])) {
-          if(check_filters($rep, $cats[$hidden_cat]['filters'])) {
-            continue;
-          }
-        }
-        $reps[$tag] = $rep;
-      }
-    }
+    $reps = populate_reps($cache["reps"], $cats[$cat]['filters'], $cats[$cat]['exclude_hidden'] ?? true);
     
     if(isset($cats[$cat]['custom_style']) && file_exists("res/custom_styles/".$cats[$cat]['custom_style'].".css"))
       $custom_style = $cats[$cat]['custom_style'];
