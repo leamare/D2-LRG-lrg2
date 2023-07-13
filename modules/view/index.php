@@ -10,6 +10,25 @@ include_once("modules/view/functions/check_filters.php");
 include_once("modules/view/functions/create_search_filters.php");
 include_once("$root/modules/view/functions/convert_patch.php");
 
+function populate_reps(&$cache, &$filters, $exclude_hidden = true) {
+  global $cats, $hidden_cat;
+
+  $res = [];
+
+  foreach($cache as $tag => $rep) {
+    if(check_filters($rep, $filters)) {
+      if ($exclude_hidden && isset($cats[$hidden_cat])) {
+        if(check_filters($rep, $cats[$hidden_cat]['filters'])) {
+          continue;
+        }
+      }
+      $res[$tag] = $rep;
+    }
+  }
+
+  return $res;
+}
+
 /*
 function: checktag($reportdata, $tag),
   tags:
@@ -133,45 +152,6 @@ if (!empty($searchstring)) {
       $i++;
     }
     $reps = $r;
-  // } else if ($cat == "ongoing") {
-  //   $head_name = locale_string("ongoing_reports");
-  //   // $ongoing_last_limit;
-  //   // $reps = $cache["reps"];
-  //   if (!($ongoing_last_limit ?? false)) {
-  //     $ongoing_last_limit = time() - 31*24*3600;
-  //   }
-
-  //   $reps = array_filter($cache["reps"], function($el) use (&$ongoing_last_limit, &$recent_last_limit, &$hidden_cat, &$cats) {
-  //     return (
-  //       ((($el['last_match'] ?? [])['date'] ?? 0) >= $ongoing_last_limit) && 
-  //       (($el['last_update'] ?? 0) >= $recent_last_limit) && 
-  //       $el['matches'] && 
-  //       !check_filters($el['tag'], $cats[$hidden_cat]['filters'])
-  //     );
-  //   });
-
-  //   uasort($reps, function($a, $b) {
-  //     $lu = ($b['last_update'] ?? 0) <=> ($a['last_update'] ?? 0);
-
-  //     if ($lu) return $lu;
-
-  //     return ($b['matches'] ?? 0) <=> ($a['matches'] ?? 0);
-  //   });
-  // } else if ($cat == "upcoming") {
-  //   $head_name = locale_string("upcoming_reports");
-
-  //   $reps = array_filter($cache["reps"], function($el) {
-  //     return (
-  //       !$el['matches']
-  //     );
-  //   });
-
-  //   uasort($reps, function($a, $b) {
-  //     if (!$a['id']) return -1;
-  //     if (!$b['id']) return 1;
-      
-  //     return ($b['id'] ?? 0) <=> ($a['id'] ?? 0);
-  //   });
   } else {
     $head_name = $cat;
     $reps = [];
