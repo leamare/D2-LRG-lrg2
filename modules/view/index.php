@@ -10,7 +10,7 @@ include_once("modules/view/functions/check_filters.php");
 include_once("modules/view/functions/create_search_filters.php");
 include_once("$root/modules/view/functions/convert_patch.php");
 
-function populate_reps(&$cache, &$filters, $exclude_hidden = true) {
+function populate_reps(&$cache, $filters, $exclude_hidden = true) {
   global $cats, $hidden_cat;
 
   $res = [];
@@ -29,6 +29,83 @@ function populate_reps(&$cache, &$filters, $exclude_hidden = true) {
   return $res;
 }
 
+function report_list_element($report) {
+  global $locale, $index_list, $reps, $cat, $league_logo_banner_provider, $linkvars;
+
+  $iscat = $report['cat'] ?? false;
+
+  if (!$iscat) {
+    $event_type = $report['tvt'] ? 'tvt' : (
+      isset($report['players']) ? 'pvp' : 'ranked'
+    );
+
+    $participants = isset($report['teams']) ? sizeof($report['teams']) : (
+      isset($report['players']) ? sizeof($report['players']) : '-'
+    );
+
+    $aliases = $report['tag'];
+    $aliases .= " ".$event_type;
+    if (!empty($report['patches'])) {
+      foreach ($report['patches'] as $patch => $sz)
+        $aliases .= " ".convert_patch($patch);
+    }
+    if (!empty($report['regions'])) {
+      foreach ($report['regions'] as $reg) {
+        $aliases .= " ".locale_string("region".$reg);
+      }
+    }
+  }
+
+  if (!empty($report['orgs'])) {
+    $report['desc'] .= " - <a target=\"_blank\" href=\"".$report['orgs']."\">".locale_string("website")."</a>";
+  }
+
+  if (isset($report['localized']) && isset($report['localized'][$locale])) {
+    $report['name'] = $report['localized'][$locale]['name'] ?? $report['name'];
+    $report['desc'] = $report['localized'][$locale]['desc'] ?? $report['desc'];
+  }
+
+  $_lid = $report['id'] ?? null;
+  if (empty($_lid) && !empty($__lid_fallbacks)) {
+    foreach ($__lid_fallbacks as $preg => $lid) {
+      if (preg_match($preg, $report['tag'] ?? $cat)) {
+        $_lid = $lid;
+        break;
+      }
+    }
+  }
+  if (empty($_lid)) $_lid = "default";
+
+  $res = "<tr class=\"expandable primary closed\" data-group=\"report-".$report['tag']."\">".
+    "<td><span class=\"expand\"></span></td>".
+    "<td>".
+      "<img class=\"event-logo-list\" src=\"".str_replace('%LID%', $_lid, $league_logo_banner_provider)."\" alt=\"$_lid\" />".
+    "</td>".
+    "<td><a href=\"?".($iscat ? "cat" : "league")."=".$report['tag'].(empty($linkvars) ? "" : "&".$linkvars)."\" ".
+      ($iscat ? '' : "data-aliases=\"".$aliases."\"").
+      ">".$report['name']."</a></td>".
+    "<td>".($report['id'] == "" ? "-" : "<a href=\"?lid=".$report['id'].(empty($linkvars) ? "" : "&".$linkvars)."\">".$report['id']."</a>")."</td>".
+    "<td>".locale_string($event_type)."</td>".
+    "<td>".$report['matches']."</td>".
+    "<td>".(
+      empty($report['patches']) ? '- (1)' : (
+        sizeof($report['patches']) == 1 ?
+          convert_patch( array_keys($report['patches'])[0] ).' (1)' : 
+          convert_patch( min(array_keys($report['patches'])) ).' - '.convert_patch( max(array_keys($report['patches'])) ).' ('.sizeof($report['patches']).')'
+      )
+    )."</td>".
+    "<td>".$participants."</td>".
+    "<td>".(isset($report['regions']) ? sizeof($report['regions']) : ' - ')."</td>".
+    "<td>".$report['days']."</td>".
+    "<td value=\"".$report['first_match']['date']."\" data-matchid=\"".($report['first_match']['mid'] ?? 0)."\">".date(locale_string("date_format"), $report['first_match']['date'])."</td>".
+    "<td value=\"".$report['last_match']['date']."\" data-matchid=\"".($report['last_match']['mid'] ?? 0)."\">".date(locale_string("date_format"), $report['last_match']['date'])."</td>".
+    "</tr>".
+    "<tr class=\"collapsed secondary tablesorter-childRow\" data-group=\"report-".$report['tag']."\"><td></td><td colspan=11>".$report['desc']."</td></tr>";
+
+  return $res;
+}
+
+function report_card_element($report, $smaller = false) {
 /*
 function: checktag($reportdata, $tag),
   tags:
