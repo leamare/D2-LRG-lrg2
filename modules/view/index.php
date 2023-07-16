@@ -30,7 +30,7 @@ function populate_reps(&$cache, $filters, $exclude_hidden = true) {
 }
 
 function report_list_element($report) {
-  global $locale, $index_list, $reps, $cat, $league_logo_banner_provider, $linkvars;
+  global $locale, $index_list, $reps, $cat, $league_logo_banner_provider, $linkvars, $__lid_fallbacks;
 
   $iscat = $report['cat'] ?? false;
 
@@ -105,7 +105,110 @@ function report_list_element($report) {
   return $res;
 }
 
-function report_card_element($report, $smaller = false) {
+function report_card_element($report, $smaller = true, $catlabel = false) {
+  global $locale, $cat, $league_logo_banner_provider, $league_logo_provider, $__lid_fallbacks, $linkvars;
+
+  $iscat = $report['cat'] ?? false;
+
+  if (!$iscat) {
+    $event_type = $report['tvt'] ? 'tvt' : (
+      isset($report['players']) ? 'pvp' : 'ranked'
+    );
+
+    $participants = isset($report['teams']) ? sizeof($report['teams']) : (
+      isset($report['players']) ? sizeof($report['players']) : '-'
+    );
+
+    $aliases = $report['tag'];
+    $aliases .= " ".$event_type;
+    if (isset($report['patches'])) {
+      foreach ($report['patches'] as $patch => $sz)
+        $aliases .= " ".convert_patch($patch);
+    }
+    if (isset($report['regions'])) {
+      foreach ($report['regions'] as $reg) {
+        $aliases .= " ".locale_string("region".$reg);
+      }
+    }
+  }
+  if (isset($report['localized']) && isset($report['localized'][$locale])) {
+    $report['name'] = $report['localized'][$locale]['name'] ?? $report['name'];
+    $report['desc'] = $report['localized'][$locale]['desc'] ?? $report['desc'];
+  }
+
+  $_lid = $report['id'] ?? null;
+  if (empty($_lid) && !empty($__lid_fallbacks)) {
+    foreach ($__lid_fallbacks as $preg => $lid) {
+      if (preg_match($preg, $report['tag'] ?? $cat)) {
+        $_lid = $lid;
+        break;
+      }
+    }
+  }
+  if (empty($_lid)) $_lid = "default";
+
+  $extra = "<p>".$report['desc']."</p>".
+  "<p>LID: ".($report['id'] == "" ? "-" : "<a href=\"?lid=".$report['id'].(empty($linkvars) ? "" : "&".$linkvars)."\">".$report['id']."</a>")."</p>".
+  (isset($report['orgs']) ? "<p><a target=\"_blank\" href=\"".$report['orgs']."\">".locale_string("website")."</a></p>" : "").
+  (isset($event_type) ? "<p>".locale_string('type').": ".locale_string($event_type)."</p>" : "").
+  (isset($participants) ? "<p>".locale_string('participants').": ".locale_string($event_type)."</p>" : "").
+  (isset($report['regions']) ? "<p>".locale_string('regions').": ".sizeof($report['regions'])."</p>" : "").
+  (!$iscat ? "<p>".locale_string('days').": ".$report['days']."</p>" : "");
+
+
+  $res = "<div class=\"card ".($smaller ? 'smaller' : '')."\" data-report=\"report-".$report['tag']."\" ".
+      ($iscat ? '' : "data-aliases=\"".$aliases."\"").">".
+    "<a class=\"image\" href=\"?".($iscat ? "cat" : "league")."=".$report['tag'].(empty($linkvars) ? "" : "&".$linkvars)."\">".
+      // (
+      //   $smaller ? 
+      //   "<img class=\"event-logo-card\" src=\"".str_replace('%LID%', $_lid, $league_logo_provider)."\" alt=\"$_lid\" />" :
+        "<img class=\"event-logo-card\" src=\"".str_replace('%LID%', $_lid, $league_logo_banner_provider)."\" alt=\"$_lid\" />".
+      // ).
+      ($iscat && $catlabel ? 
+        "<span class=\"cat-label\">".locale_string('category')."</span>" : 
+        ""
+      ).
+    "</a>".
+    "<div class=\"content\">".
+      "<a class=\"card-name header\" href=\"?".($iscat ? "cat" : "league")."=".$report['tag'].(empty($linkvars) ? "" : "&".$linkvars)."\">".$report['name']."</a>".
+      "<div class=\"meta\">".
+        "<span class=\"dates\">".
+          "<span class=\"starting-date\" value=\"".$report['first_match']['date']."\" data-matchid=\"".($report['first_match']['mid'] ?? 0)."\">".
+            (!$report['first_match']['date'] ? locale_string('upcoming') : date(locale_string("date_format"), $report['first_match']['date'])).
+          "</span>".
+          (
+            $report['first_match']['date'] != $report['last_match']['date'] ?
+            " - ".
+            "<span class=\"ending-date\" value=\"".$report['last_match']['date']."\" data-matchid=\"".($report['last_match']['mid'] ?? 0)."\">".
+              // 172800 = 2 days
+              (time() - $report['last_match']['date'] < 172800 ? locale_string('ongoing') : date(locale_string("date_format"), $report['last_match']['date'])).
+            "</span>" :
+            ""
+          ).
+        "</span>".
+        "<span class=\"patches\">".
+          (
+            empty($report['patches']) ? '-' : (
+              sizeof($report['patches']) == 1 ?
+                convert_patch( array_keys($report['patches'])[0] ) : 
+                convert_patch( min(array_keys($report['patches'])) ).' - '.convert_patch( max(array_keys($report['patches'])) )
+            )
+          ).
+        "</span>".
+      "</div>".
+      ($smaller ? '' : "<div class=\"description\">".$report['desc']."</div>").
+    "</div>".
+    "<div class=\"extra content\">".
+      "<span class=\"element\">".locale_string($iscat ? 'leag_reports' : 'matches').": ".$report['matches']."</span>".
+      "<a class=\"right element\" onclick=\"showModal('".htmlspecialchars(addcslashes($extra, "'"))."', '".htmlspecialchars(addcslashes($report['name'], "'"))."');\">".
+        locale_string('details').
+      "</a>".
+    "</div>".
+  "</div>";
+
+  return $res;
+}
+
 /*
 function: checktag($reportdata, $tag),
   tags:
