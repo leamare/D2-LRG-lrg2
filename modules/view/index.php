@@ -79,7 +79,7 @@ function report_list_element($report) {
   $res = "<tr class=\"expandable primary closed\" data-group=\"report-".$report['tag']."\">".
     "<td><span class=\"expand\"></span></td>".
     "<td>".
-      "<img class=\"event-logo-list\" src=\"".str_replace('%LID%', $_lid, $league_logo_banner_provider)."\" alt=\"$_lid\" />".
+      "<img class=\"event-logo-list\" src=\"".str_replace('%LID%', $_lid, $league_logo_banner_provider)."\" alt=\"$_lid\" loading=\"lazy\" />".
     "</td>".
     "<td><a href=\"?".($iscat ? "cat" : "league")."=".$report['tag'].(empty($linkvars) ? "" : "&".$linkvars)."\" ".
       ($iscat ? '' : "data-aliases=\"".$aliases."\"").
@@ -162,7 +162,7 @@ function report_card_element($report, $smaller = true, $catlabel = false) {
       // (
       //   $smaller ? 
       //   "<img class=\"event-logo-card\" src=\"".str_replace('%LID%', $_lid, $league_logo_provider)."\" alt=\"$_lid\" />" :
-        "<img class=\"event-logo-card\" src=\"".str_replace('%LID%', $_lid, $league_logo_banner_provider)."\" alt=\"$_lid\" />".
+        "<img class=\"event-logo-card\" src=\"".str_replace('%LID%', $_lid, $league_logo_banner_provider)."\" alt=\"$_lid\" loading=\"lazy\" />".
       // ).
       ($iscat && $catlabel ? 
         "<span class=\"cat-label\">".locale_string('category')."</span>" : 
