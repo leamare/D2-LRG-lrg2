@@ -232,28 +232,6 @@ $tabsNames = [];
 $tabsContent = [];
 $tabsTags = [];
 
-if (!empty($__pinned)) {
-  $tmp = "";
-  foreach($__pinned as $pin) {
-    if ($pin[1] && !isset($cats)) continue;
-    // if ($pin[1] && !isset($cats[$pin[0]])) continue;
-    $tmp .= "<a class=\"category".($pin[1] && isset($cat) && $cat == $pin[0] ? " active" : "").
-              "\" href=\"?".($pin[1] ? "cat" : "league")."=".$pin[0].(empty($linkvars) ? "" : "&".$linkvars)."\">";
-    if ($pin[1]) {
-      $tmp .= $cats[ $pin[0] ]['names_locales'][$locale] ?? $cats[ $pin[0] ]['name'] ?? locale_string($pin[0]."_reports");
-    } else {
-      $tmp .= $cache["reps"][ $pin[0] ]['localized'][$locale]['name'] ?? $cache["reps"][ $pin[0] ]['name'] ?? $pin[0];
-    }
-    $tmp .= "</a>";
-
-    if ($pin[1] && isset($cat) && $cat == $pin[0]) $tabSelected = 0;
-  }
-
-  $tabsContent[] = $tmp;
-  $tabsNames[] = locale_string("pinned_main");
-  $tabsTags[] = "list-pinned";
-}
-
 if (isset($_lid)) {
   $searchstring = ($searchstring ?? " ") . "!lid:".$_lid;
 }
@@ -342,59 +320,6 @@ if (!empty($searchstring)) {
   $reps = $cache["reps"];
 }
 
-if(isset($cats) && !empty($cats)) {
-  // if(isset($cat) || !empty($__pinned)) {
-  //   $tmp = "<div class=\"content-text tagsshow\"><a class=\"category\">".locale_string("show_tags")."</a></div>";
-  // }
-
-  // $tmp = "<div class=\"content-text tagslist ".(isset($cat) || !empty($__pinned) ? "hidden" : "")."\" ".(isset($cat) || !empty($__pinned) ? " style=\"display: none;\"" : "").">";
-  $tmp = "";
-
-  $tmp .= "<a class=\"category".(isset($cat) && "main" == $cat ? " active" : "").
-              "\" href=\"?cat=main".(empty($linkvars) ? "" : "&".$linkvars).
-              "\">".locale_string("main_reports")."</a>";
-  $tmp .= "<a class=\"category".(isset($cat) && "recent" == $cat ? " active" : "").
-              "\" href=\"?cat=recent".(empty($linkvars) ? "" : "&".$linkvars).
-              "\">".locale_string("recent_reports")."</a>";
-  // $tmp .= "<a class=\"category".(isset($cat) && "ongoing" == $cat ? " active" : "").
-  //             "\" href=\"?cat=ongoing".(empty($linkvars) ? "" : "&".$linkvars).
-  //             "\">".locale_string("ongoing_reports")."</a>";
-
-  if ($tabSelected === null && isset($cat) && ($cat == "main" || $cat == "recent" || $cat == "ongoing")) {
-    $tabSelected = count($tabsNames);
-  }
-
-  foreach($cats as $tag => $desc) {
-    if($tag == $hidden_cat || (isset($desc['hidden']) && $desc['hidden'])) continue;
-
-    $tmp .= "<a class=\"category".(isset($cat) && $tag == $cat ? " active" : "")."\" ".
-                "href=\"?cat=".$tag.(empty($linkvars) ? "" : "&".$linkvars)."\" ".
-                (isset($desc['desc_locales'][$locale]) ? "title=\"".$desc['desc_locales'][$locale]."\"" :
-                  (isset($desc['desc']) ? "title=\"".$desc['desc']."\"" : (
-                    !empty($desc['locale_desc_tag']) ? "title=\"".locale_string($desc['locale_desc_tag'])."\"" : ""
-                  ))
-                ).
-                ">".
-                (isset($desc['names_locales'][$locale]) ? $desc['names_locales'][$locale] :
-                  (isset($desc['name']) ? $desc['name'] : locale_string("cat_".$tag))
-                ).
-                "</a>";
-
-    if ($tabSelected === null && isset($cat) && $tag == $cat) {
-      $tabSelected = count($tabsNames);
-    }
-  }
-
-  if(isset($cats[$hidden_cat]))
-    $tmp .= "<a class=\"category".(isset($cat) && "all" == $cat ? " active" : "").
-                "\" href=\"?cat=all".(empty($linkvars) ? "" : "&".$linkvars).
-                "\">".locale_string("all_reports")."</a>";
-
-  $tabsContent[] = $tmp;
-  $tabsNames[] = locale_string("all_tags");
-  $tabsTags[] = "tagslist";
-}
-
 // search block
   $tmp = "<form action=\"?".(empty($linkvars) ? "" : $linkvars)."\" method=\"get\">".
     "<input type=\"text\" name=\"search\" value=\"".htmlspecialchars($searchstring ?? (isset($cat) && $cat != "main" ? "!cat:$cat " : ""))."\" />";
@@ -417,35 +342,48 @@ if(isset($cats) && !empty($cats)) {
 
   $tmp .= "</form>";
 
-  $tabsContent[] = $tmp;
-  $tabsNames[] = locale_string("search");
-  $tabsTags[] = "searchform";
+  // $tabsContent[] = $tmp;
+  // $tabsNames[] = locale_string("search");
+  // $tabsTags[] = "searchform";
 
-  if (!empty($searchstring)) $tabSelected = count($tabsNames)-1;
+  // if (!empty($searchstring)) $tabSelected = count($tabsNames)-1;
 //
 
-if (!empty($tabsNames)) {
-  $modules .= "<div class=\"tabs-block\">";
+// don't need the tabs anymore
 
-  if ($tabSelected === null) $tabSelected = 0;
+// if (!empty($tabsNames)) {
+//   $modules .= "<div class=\"tabs-block\">";
 
-  foreach ($tabsNames as $i => $name) {
-    $modules .= "<input type=\"radio\" class=\"tab\" id=\"tabs-block-tab".($i+1)."\" name=\"css-tabs\" ".($i == $tabSelected ? "checked" : "").">";
-  }
+//   if ($tabSelected === null) $tabSelected = 0;
 
-  $modules .= "<ul class=\"tabs-container\">";
-  foreach ($tabsNames as $i => $name) {
-    $modules .= "<li class=\"tabs-container-tab\"><label for=\"tabs-block-tab".($i+1)."\">$name</label></li>";
-  }
-  $modules .= "</ul>";
+//   foreach ($tabsNames as $i => $name) {
+//     $modules .= "<input type=\"radio\" class=\"tab\" id=\"tabs-block-tab".($i+1)."\" name=\"css-tabs\" ".($i == $tabSelected ? "checked" : "").">";
+//   }
 
-  foreach ($tabsContent as $i => $content) {
-    $tags = $tabsTags[$i] ?? "";
-    $modules .= "<div class=\"tab-content $tags\">$content</div>";
-  }
+//   $modules .= "<ul class=\"tabs-container\">";
+//   foreach ($tabsNames as $i => $name) {
+//     $modules .= "<li class=\"tabs-container-tab\"><label for=\"tabs-block-tab".($i+1)."\">$name</label></li>";
+//   }
+//   $modules .= "</ul>";
 
-  $modules .= "</div>";
-}
+//   foreach ($tabsContent as $i => $content) {
+//     $tags = $tabsTags[$i] ?? "";
+//     $modules .= "<div class=\"tab-content $tags\">$content</div>";
+//   }
+
+//   $modules .= "</div>";
+// }
+
+$modules .= "<div class=\"content-text tagslist\">".
+  "<a class=\"category ".(empty($mod) && empty($cat) && empty($searchstring) ? "active" : "")."\" href=\".".(!empty($linkvars) ? "?".$linkvars : "")."\">".locale_string('pinned_main')."</a>".
+  "<a class=\"category ".($cat=="main" ? "active" : "")."\" href=\"?cat=main".(!empty($linkvars) ? "&".$linkvars : "")."\">".locale_string('main_reports')."</a>".
+  "<a class=\"category ".(check_module("cats")  ? "active" : "")."\" href=\"?mod=cats".(!empty($linkvars) ? "&".$linkvars : "")."\">".locale_string('categories')."</a>".
+  "<label class=\"category ".(!empty($searchstring) ? "active" : "")."\" for=\"search-toggle\">".locale_string('search')."</label>".
+"</div>".
+"<input type=\"checkbox\" class=\"search-toggle\" id=\"search-toggle\" name=\"search-toggle\" ".(!empty($searchstring) ? "checked" : "").">".
+"<div class=\"content-text searchform\">".
+  $tmp.
+"</div>";
 
 if (!empty($__links)) {
   $modules .= "<div class=\"content-text list-pinned friends-list\">";
@@ -476,13 +414,18 @@ if (sizeof($cache['reps']) === 0) {
     "<div class=\"content-text\">".locale_string("noreports_desc").".</div>".
   "</div>";
 } else {
+  $page = (isset($cat) || isset($searchstring) || empty($cats)) ? 'meow' : (
+    (check_module("cats") || empty($__featured_cats)) ? 'cats' : 'index'
+  );
+
   if (!empty($ads_block_main)) $modules .= "<div class=\"ads-block-main\">$ads_block_main</div>";
 
+  if ($page == 'meow') {
   if(!isset($cat) && $index_list < sizeof($reps))
     $modules .= "<div class=\"content-header\">".locale_string("noleague_cap")."</div>";
   $modules .= "</div>";
 
-  $modules .= "<div class=\"table-header-info wide compact\" data-table=\"$table_id\">".
+    $modules .= "<div class=\"table-header-info wide compact\">".
     "<span class=\"table-header-info-name\">".locale_string('reports_count').": ".count($reps)."</span>".
   "</div>";
 
@@ -533,9 +476,13 @@ if (sizeof($cache['reps']) === 0) {
 
   foreach($reps as $report) {
     if (empty($report)) continue;
+
+      $iscat = $report['cat'] ?? false;
+      
+      if (!$iscat) {
     if ($report['short_fname'][0] == '!') continue;
     if(!(isset($cat) || isset($searchstring)) && $index_list < sizeof($reps)) {
-      if(!$index_list) break;
+          if(!$index_list) return $res;
       $index_list--;
     }
 
@@ -548,14 +495,16 @@ if (sizeof($cache['reps']) === 0) {
       );
       exit();
     }
+      }
 
-    $event_type = $report['tvt'] ? 'tvt' : (
-      isset($report['players']) ? 'pvp' : 'ranked'
-    );
+      $modules .= report_list_element($report);
+    }
+    if(!$index_list) {
+      $modules .= "<tr><td></td><td></td><td>...</td><td colspan=\"9\"></td></tr>";
+    }
 
-    $participants = isset($report['teams']) ? sizeof($report['teams']) : (
-      isset($report['players']) ? sizeof($report['players']) : '-'
-    );
+    $modules .= "</table>";
+  }
 
     if (!empty($report['orgs'])) {
       $report['desc'] .= " - <a target=\"_blank\" href=\"".$report['orgs']."\">".locale_string("website")."</a>";
