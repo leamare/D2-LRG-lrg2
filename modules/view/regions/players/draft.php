@@ -16,7 +16,7 @@ function rg_view_generate_regions_players_draft($region, $reg_report) {
     ];
   }
 
-  $res = rg_generator_draft("region$region-players-draft", $context_pickban, $reg_report['players_draft'], $reg_report["main"]["matches"], false);
+  $res = rg_generator_draft("region$region-players-draft", $context_pickban, $reg_report['players_draft'], $reg_report["main"]["matches"], false, true, true);
 
   return $res;
 }

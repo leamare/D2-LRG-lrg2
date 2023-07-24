@@ -18,7 +18,7 @@ function rg_view_generate_players_draft() {
     ];
   }
 
-  $res = rg_generator_draft("players-draft", $context_pickban, $report['players_draft'], $report["random"]["matches_total"], false);
+  $res = rg_generator_draft("players-draft", $context_pickban, $report['players_draft'], $report["random"]["matches_total"], false, true, true);
 
   return $res;
 }

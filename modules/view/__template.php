@@ -1,4 +1,4 @@
-<?php  $__postfix = "?v=28252"; ?>
+<?php  $__postfix = "?v=22601"; ?>
 <!DOCTYPE html>
 <html lang="<?php echo $locale; ?>">
   <head>
@@ -35,7 +35,11 @@
 
           $uni_title = $instance_title_postfix;
 
-          if (isset($cat) && $cat != 'main') {
+          $page = (!empty($_GET['cat']) || isset($searchstring) || empty($cats)) ? 'meow' : (
+            stripos($mod, "cats") !== false ? 'cats' : 'index'
+          );
+
+          if ($page != "index") {
             $rep_sm_title .= ' '.$title_separator.' '.$head_name;
             $uni_title .= ' '.$title_separator.' '.$head_name;
             if (!empty($head_desc))
