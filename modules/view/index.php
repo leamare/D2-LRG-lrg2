@@ -420,13 +420,15 @@ if (sizeof($cache['reps']) === 0) {
 
   if (!empty($ads_block_main)) $modules .= "<div class=\"ads-block-main\">$ads_block_main</div>";
 
+  // main page as a list - present for search results, category or absent of any categories
   if ($page == 'meow') {
   if(!isset($cat) && $index_list < sizeof($reps))
     $modules .= "<div class=\"content-header\">".locale_string("noleague_cap")."</div>";
   $modules .= "</div>";
 
-    $modules .= "<div class=\"table-header-info wide compact\">".
+    $modules .= "<div class=\"table-header-info wide compact spaced\">".
     "<span class=\"table-header-info-name\">".locale_string('reports_count').": ".count($reps)."</span>".
+      ($cat != "main" ? "<a class=\"right\" href=\"?cat=$cat&latest".(empty($linkvars) ? "" : "&".$linkvars)."\">".locale_string('latest_permalink')."</a>" : "").
   "</div>";
 
   if(isset($cat) || $index_list >= sizeof($reps)) {
@@ -506,71 +508,182 @@ if (sizeof($cache['reps']) === 0) {
     $modules .= "</table>";
   }
 
-    if (!empty($report['orgs'])) {
-      $report['desc'] .= " - <a target=\"_blank\" href=\"".$report['orgs']."\">".locale_string("website")."</a>";
+  // categories list
+  if ($page == 'cats') {
+    $head_name = locale_string("categories_list");
+    $head_desc = locale_string("categories_list_desc");
+    
+    $cats_c = [];
+
+    $groups = [
+      '_' => []
+    ];
+
+    foreach ($cats as $tag => $val) {
+      if (isset($hidden_cat) && $tag == $hidden_cat) continue;
+      if ($val['hidden'] ?? false) continue;
+      
+      $reps = populate_reps($cache["reps"], $val['filters'], $val['exclude_hidden'] ?? true);
+
+      if (isset($val['groups'])) {
+        foreach($val['groups'] as $gr) {
+          $groups[$gr][] = $tag;
+        }
+      } else {
+        $groups['_'][] = $tag;
     }
 
-    // if (!empty($report['links'])) {
-    //   foreach($report['links'] as $type => $link) {
-    //     $report['desc'] .= " - <a target=\"_blank\" href=\"".$link."\">".$type."</a>";
-    //   }
-    // }
+      $cats_c[$tag] = [
+        'tag' => $tag,
+        'cat' => true,
+        'id' => $val['lid'] ?? null,
+        'name' => ($val['names_locales'] ?? [])[$locale] ?? $val['name'] ?? locale_string("cat_".$tag),
+        'desc' => ($val['desc_locales'] ?? [])[$locale] ?? $val['desc'] ?? null,
+        'matches' => count($reps),
+        'patches' => [], // TODO:,
+        'regions' => null, // TODO:,
+        'first_match' => [
+          'date' => !empty($reps) ? min(array_map(function($a) { return $a['first_match']['date']; }, $reps)) : 0,
+          'mid' => !empty($reps) ? min(array_map(function($a) { return $a['first_match']['mid']; }, $reps)) : 0,
+        ],
+        'last_match' => [
+          'date' => !empty($reps) ? max(array_map(function($a) { return $a['last_match']['date']; }, $reps)) : 0,
+          'mid' => !empty($reps) ? max(array_map(function($a) { return $a['last_match']['mid']; }, $reps)) : 0,
+        ],
+      ];
+      $cats_c[$tag]['days'] = ceil(($cats_c[$tag]['last_match']['date'] - $cats_c[$tag]['first_match']['date']) / (3600*24));
 
-    if (isset($report['localized']) && isset($report['localized'][$locale])) {
-      $report['name'] = $report['localized'][$locale]['name'] ?? $report['name'];
-      $report['desc'] = $report['localized'][$locale]['desc'] ?? $report['desc'];
+      foreach ($reps as $rep) {
+        foreach ($rep['patches'] as $pid => $ms) {
+          $cats_c[$tag]['patches'][$pid] = ($cats_c[$tag]['patches'][$pid] ?? 0) + $ms;
+        }
     }
 
-    $aliases = $report['tag'];
-    $aliases .= " ".$event_type;
-    if (isset($report['patches'])) {
-      foreach ($report['patches'] as $patch => $sz)
-        $aliases .= " ".convert_patch($patch);
+      if (isset($val['names_locales'])) {
+        foreach ($val['names_locales'] as $loc => $str) {
+          if (!isset($cats_c[$tag]['localized'][$loc])) $cats_c[$tag]['localized'][$loc] = [];
+          $cats_c[$tag]['localized'][$loc]['name'] = $str;
     }
-    if (isset($report['regions'])) {
-      foreach ($report['regions'] as $reg) {
-        $aliases .= " ".locale_string("region".$reg);
+      }
+      if (isset($val['desc_locales'])) {
+        foreach ($val['desc_locales'] as $loc => $str) {
+          if (!isset($cats_c[$tag]['localized'][$loc])) $cats_c[$tag]['localized'][$loc] = [];
+          $cats_c[$tag]['localized'][$loc]['desc'] = $str;
       }
     }
 
-    $_lid = $report['id'] ?? null;
-    if (empty($_lid) && !empty($__lid_fallbacks)) {
+      if ($val['locale_desc_tag'] ?? false) {
+        $cats_c[$tag]['desc'] = locale_string($val['locale_desc_tag']);
+      }
+
+      if (!empty($__lid_fallbacks)) {
       foreach ($__lid_fallbacks as $preg => $lid) {
-        if (preg_match($preg, $report['tag'] ?? $cat)) {
-          $_lid = $lid;
+          if (preg_match($preg, $cats_c[$tag]['tag'])) {
+            $cats_c[$tag]['id'] = $lid;
           break;
         }
       }
     }
-    if (empty($_lid)) $_lid = "default";
+    }
 
-    $modules .= "<tr class=\"expandable primary closed\" data-group=\"report-".$report['tag']."\">".
-      "<td><span class=\"expand\"></span></td>".
-      "<td>".
-        "<img class=\"event-logo-list\" src=\"".str_replace('%LID%', $_lid, $league_logo_banner_provider)."\" alt=\"$_lid\" />".
-      "</td>".
-      "<td><a href=\"?league=".$report['tag'].(empty($linkvars) ? "" : "&".$linkvars)."\" data-aliases=\"".$aliases."\">".$report['name']."</a></td>".
-      "<td>".($report['id'] == "" ? "-" : "<a href=\"?lid=".$report['id'].(empty($linkvars) ? "" : "&".$linkvars)."\">".$report['id']."</a>")."</td>".
-      "<td>".locale_string($event_type)."</td>".
-      "<td>".$report['matches']."</td>".
-      "<td>".(
-        empty($report['patches']) ? '- (1)' : (
-          sizeof($report['patches']) == 1 ?
-            convert_patch( array_keys($report['patches'])[0] ).' (1)' : 
-            convert_patch( min(array_keys($report['patches'])) ).' - '.convert_patch( max(array_keys($report['patches'])) ).' ('.sizeof($report['patches']).')'
-        )
-      )."</td>".
-      "<td>".$participants."</td>".
-      "<td>".(isset($report['regions']) ? sizeof($report['regions']) : ' - ')."</td>".
-      "<td>".$report['days']."</td>".
-      "<td value=\"".$report['first_match']['date']."\" data-matchid=\"".($report['first_match']['mid'] ?? 0)."\">".date(locale_string("date_format"), $report['first_match']['date'])."</td>".
-      "<td value=\"".$report['last_match']['date']."\" data-matchid=\"".($report['last_match']['mid'] ?? 0)."\">".date(locale_string("date_format"), $report['last_match']['date'])."</td>".
-      "</tr>".
-      "<tr class=\"collapsed secondary tablesorter-childRow\" data-group=\"report-".$report['tag']."\"><td></td><td colspan=11>".$report['desc']."</td></tr>";
+    if (isset($_GET['list'])) {
+      $modules .= "<div class=\"table-header-info wide compact\">".
+        "<span class=\"table-header-info-name\">".locale_string('cats_count').": ".count($cats_c)."</span>".
+      "</div>";
+
+      if(isset($cat) || $index_list >= sizeof($cats_c)) {
+        $modules .= "<input name=\"filter\" class=\"search-filter wide\" data-table-filter-id=\"leagues-list\" placeholder=\"".locale_string('filter_placeholder')."\" />";
   }
-  if(!$index_list) {
-    $modules .= "<tr><td></td><td></td><td>...</td><td colspan=\"9\"></td></tr>";
+
+      $modules .= "<table id=\"leagues-list\" class=\"list wide ".(isset($cat) ? "sortable" : "")."\"><thead><tr class=\"overhead\">".
+        "<th width=\"50px\"></th>".
+        "<th width=\"100px\"></th>".
+        "<th>".locale_string("cat_name")."</th>".
+        "<th>".locale_string("league_id")."</th>".
+        "<th>".locale_string("type")."</th>".
+        "<th>".locale_string("matches_total")."</th>".
+        "<th>".locale_string("patches")."</th>".
+        "<th>".locale_string("participants")."</th>".
+        "<th>".locale_string("regions")."</th>".
+        "<th>".locale_string("days")."</th>".
+        "<th>".locale_string("start_date")."</th>".
+        "<th>".locale_string("end_date")."</th>".
+      "</tr></thead>";
+      
+      foreach($cats_c as $report) {
+        if (empty($report)) continue;
+
+        $iscat = $report['cat'] ?? false;
+        
+        if (!$iscat) {
+          if ($report['short_fname'][0] == '!') continue;
+          if(!(isset($cat) || isset($searchstring)) && $index_list < sizeof($reps)) {
+            if(!$index_list) return $res;
+            $index_list--;
+          }
+        }
+        
+        $modules .= report_list_element($report);
   }
 
   $modules .= "</table>";
+    } else {
+      uksort($groups, function($a, $b) use (&$cats_groups_priority) {
+        if ($a == '_') return 1;
+        if ($b == '_') return -1;
+
+        if (!empty($cats_groups_priority) && (isset($cats_groups_priority[$a]) || isset($cats_groups_priority[$b]))) {
+          $r = ($cats_groups_priority[$a] ?? 999) <=> ($cats_groups_priority[$b] ?? 999);
+          if ($r) return $r;
+        }
+
+        return $a <=> $b;
+      });
+
+      foreach ($groups as $gt => $gl) {
+        if (empty($gl)) continue;
+
+        $modules .= "<div class=\"compact-section-header wide compact primary\">".
+          "<span class=\"group-name\">".
+            (isset($cats_groups_icons) && isset($cats_groups_icons[$gt]) ?
+              "<img class=\"inline-icon\" src=\"".str_replace('%LID%', $cats_groups_icons[$gt], $league_logo_provider)."\" alt=\"$cats_groups_icons[$gt]\" />" : 
+              ""
+            ).
+            (isset($cats_groups_names) && isset($cats_groups_names[$gt]) ?
+              $cats_groups_names[$gt] : 
+              locale_string($gt == '_' ? 'untagged_cats' : $gt)
+            ).
+          "</span>".
+        "</div>";
+
+        if (empty($gl)) {
+          // $modules .= "<div class=\"content-text left wide compact\">".locale_string('noreports')."</div>";
+        } else {
+          $modules .= "<div class=\"report-cards-container\">";
+  
+          foreach($gl as $tag) {
+            $report = $cats_c[$tag] ?? null;
+            
+            if (empty($report)) continue;
+    
+            $iscat = $report['cat'] ?? false;
+            
+            if (!$iscat) {
+              if ($report['short_fname'][0] == '!') continue;
+              if(!(isset($cat) || isset($searchstring)) && $index_list < sizeof($reps)) {
+                if(!$index_list) return $res;
+                $index_list--;
+              }
+            }
+            
+            $modules .= report_card_element($report, true);
+          }
+  
+          $modules .= "</div>";
+        }
+      }
+    }
+  }
+
+  // cards index page
 }
