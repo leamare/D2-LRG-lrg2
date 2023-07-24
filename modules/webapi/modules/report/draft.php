@@ -103,7 +103,7 @@ $endpoints['draft'] = function($mods, $vars, &$report) {
 
   foreach($context as $id => $el) {
     $context[$id]['rank'] = round($ranks[$id], 2);
-    $context[$id]['contest_rate'] = $el['matches_total']/$context_total_matches;
+    $context[$id]['contest_rate'] = round($el['matches_total']/$context_total_matches, 4);
   }
 
   $draft = [];
@@ -136,6 +136,10 @@ $endpoints['draft'] = function($mods, $vars, &$report) {
         $draft[ $el[$id_name] ][$stage_num]["matches_total"] += $el['matches'];
         $draft[ $el[$id_name] ][$stage_num]["matches_".$stage_type] = $el['matches'];
         $draft[ $el[$id_name] ][$stage_num]["winrate_".$stage_type] = $el['winrate'];
+
+        if ($i) {
+          $draft[ $el[$id_name] ][$stage_num]["ratio"] = round($context[ $el[$id_name] ]['matches_picked'] ? $el['matches']/$context[ $el[$id_name] ]['matches_picked'] : 0, 4);
+        }
       }
     }
   }
@@ -158,7 +162,7 @@ $endpoints['draft'] = function($mods, $vars, &$report) {
         $draft[$id][$i]['rank'] = $last_rank;
         $ranks_stages[$i][$id] = $last_rank;
       } else
-        $draft[$id][$i]['rank'] = 100 - $increment*$j++;
+        $draft[$id][$i]['rank'] = round(100 - $increment*$j++, 2);
       $last = $el;
       $last_rank = $draft[$id][$i]['rank'];
     }
