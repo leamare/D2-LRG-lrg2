@@ -811,10 +811,10 @@ table .hero_portrait, .flextable .hero_portrait {
   margin-top: 15px;
 }
 
-.table-column-toggles, .table-header-info {
+.table-column-toggles, .table-header-info, .compact-section-header {
   text-align: left;
   font-size: 16px;
-  line-height: 34px;
+  line-height: 2em;
   color: var(--text);
   margin: 30px auto 0;
   width: calc(82% - 0.9em * 2);
@@ -823,10 +823,13 @@ table .hero_portrait, .flextable .hero_portrait {
   border-radius: 5px;
   padding: .2em .9em;
 }
-.table-column-toggles.wide, .table-header-info.wide {
+.table-column-toggles.wide, .table-header-info.wide, .compact-section-header {
   width: calc(98% - 0.9em * 2);
 }
-.table-column-toggles.compact, .table-header-info.compact {
+.table-column-toggles.spaced, .table-header-info.spaced, .compact-section-header.spaced {
+  justify-content: space-between;
+}
+.table-column-toggles.compact, .table-header-info.compact, .compact-section-header.compact {
   font-size: 14px;
 }
 /* .table-column-toggles:before {
@@ -834,11 +837,15 @@ table .hero_portrait, .flextable .hero_portrait {
   font-size: 1.5em;
   opacity: .6;
 } */
-.table-column-toggles-name, .table-header-info-name {
+.table-column-toggles-name, .table-header-info-name, .compact-section-header span, .compact-section-header a, .table-header-info a {
   font-size: 1.2em;
   line-height: 1.7em;
   color: var(--caption);
   margin-right: .5em;
+}
+.compact-section-header.primary span, .compact-section-header.primary a {
+  font-size: 1.6em;
+  line-height: 1.5em;
 }
 .table-column-toggle-button {
   background-color: var(--table-thead-bg);
@@ -867,6 +874,10 @@ table .hero_portrait, .flextable .hero_portrait {
 }
 .table-column-toggles input[type=checkbox]:checked + .table-column-toggle-button:before {
   content: '✔';
+}
+.table-header-info > .right {
+  float: right;
+  margin-right: 0;
 }
 
 .chart-pie {
@@ -1899,4 +1910,144 @@ input[type=search]::-webkit-search-cancel-button {
 
 .filter-toggles + table.list, .table-column-toggles + table.list, .table-header-info + table.list{
   margin-top: 7px;
+}
+
+/* report cards */
+
+.report-cards-container {
+  width: 98%;
+  margin: 10px auto 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: stretch;
+  align-content: stretch;
+}
+
+.card {
+  background: var(--tagslist-bg);
+  max-width: calc(20% - 10px);
+  border-radius: 5px;
+  margin: 5px !important;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: var(--text);
+  transition: 150ms linear;
+  font-size: 14px;
+  transition: 150ms linear;
+}
+.card.smaller {
+  /* width: calc(14.2857% - 10px);
+  max-width: 23em;
+  font-size: 13px; */
+  max-width: min(max(20.5em, calc(14.2857% - 10px)), 350px);
+  font-size: 13px;
+  min-width: min(20.5em, calc(14.2857% - 10px));
+  flex: 1;
+}
+
+.card:hover {
+  transform: translateY(-7px);
+}
+
+.card .image {
+  display: block;
+  position: relative;
+}
+
+img.event-logo-card {
+  width: 100%;
+  height: auto;
+}
+
+.card .content {
+  padding: 0.75em;
+  font-size: 1em;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: stretch;
+}
+.card > .content:first-of-type {
+  flex: 1;
+}
+
+.card .card-name.header {
+  font-size: 1.283em;
+  line-height: 1.5em;
+  display: block;
+  margin-bottom: 0.28em;
+}
+
+.card .meta {
+  font-size: 1em;
+  margin-bottom: 0.36em;
+}
+
+.card .meta, .card .extra.content {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  opacity: .7;
+}
+.card .meta *, .card .extra.content * {
+  font-size: 1em;
+  line-height: 1.5em;
+}
+
+.card .meta .dates {
+  min-width: 12em;
+}
+
+.card .description {
+  font-size: 1.1415em;
+  line-height: 1.5em;
+}
+
+.card.see-more {
+  background: transparent;
+  flex-basis: 100%;
+  max-width: initial;
+}
+
+.card.see-more .content {
+  display: flex;
+  align-items: flex-start;
+}
+
+.group-name img.inline-icon {
+  height: 2.1em;
+  margin-right: .3em;
+  vertical-align: sub;
+}
+
+.card:hover .cat-label {
+  opacity: .9;
+}
+
+.card .cat-label {
+  position: absolute;
+  right: -1.5em;
+  top: 0.5em;
+  font-size: 1.25em;
+  padding: 0.2em 2em 0.2em 0.6em;
+  z-index: 0;
+  opacity: .6;
+  transition: 150ms all linear;
+}
+
+.card .cat-label:before {
+  content: '';
+  border-right: 0 solid transparent;
+  border-top: 0 solid transparent;
+  border-bottom: 1.5em solid var(--content-bg);
+  border-left: .5em solid transparent;
+  width: 100%;
+  position: absolute;
+  top: 0.1em;
+  left: -0.1em;
+  z-index: -1;
 }

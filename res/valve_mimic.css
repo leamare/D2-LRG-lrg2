@@ -184,6 +184,18 @@ a:hover {
 
 	margin: 30px 20% 0;
 }
+.content-text.left {
+  text-align: left;
+}
+.content-text.wide {
+  width: calc(98% - 0.9em * 2);
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 0.9em;
+}
+.content-text .compact {
+  margin-top: 1em;
+}
 .content-text span {
   font-size: 18px;
 }
@@ -651,9 +663,14 @@ header.navBar a, header.navBar a:hover, header.navBar a:visited, header.navBar a
 }
 .modal-text {
     color: var(--modal-text);
-    font-size: 22px;
+    font-size: 18px;
+    line-height: 1.5em;
     font-family: 'Radiance-SemiBold';
-    padding: 30px 5%;
+    padding: 1em 2.5%;
+}
+.modal-text p {
+  font-size: 1em;
+  line-height: 1.5em;
 }
 .modal-sublevel {
     color: var(--modal-text);
@@ -864,4 +881,24 @@ footer a, footer a:active, footer a:visited, footer a:focus {
 .tabs-block .tab-content.tagslist, .tabs-block .tab-content.list-pinned {
   margin-left: 2.5%;
   margin-right: 2.5%;
+}
+
+label[for=search-toggle] {
+  line-height: inherit;
+  color: var(--link);
+}
+input.search-toggle {
+  display: none;
+}
+
+.search-toggle ~ .searchform {
+  max-height: 0;
+  overflow: hidden;
+  padding-top: 0;
+  padding-bottom: 0;
+  transition: 150ms all linear;
+}
+.search-toggle:checked ~ .searchform {
+  max-height: 200px;
+  padding: 25px 5% 25px
 }
