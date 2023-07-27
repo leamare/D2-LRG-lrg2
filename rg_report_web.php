@@ -9,7 +9,7 @@ $imports_ignore = [
   "check_directory.php",
 ];
 
-$lg_version = [ 2, 25, 1, 0, 0 ];
+$lg_version = [ 2, 26, 0, 0, 0 ];
 $isApi = false;
 
 $imports = scandir("modules/commons/");

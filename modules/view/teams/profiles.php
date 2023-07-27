@@ -152,7 +152,7 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
                                                                           $context[$tid]['players_draft_pb'],
                                                                           $context[$tid]['players_draft'],
                                                                           $context[$tid]['matches_total'],
-                                                                        false);
+                                                                        false, true, true);
             }
         }
       }
