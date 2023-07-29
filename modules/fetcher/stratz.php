@@ -94,7 +94,6 @@ const STRATZ_GRAPHQL_QUERY = "{
     order
     playerIndex
     wasBannedSuccessfully
-    team
   }
   league {
     name
