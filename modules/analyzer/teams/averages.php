@@ -173,15 +173,43 @@ $sql .= "SELECT \"dire_wr\", 1-(SUM(matches.radiantWin)/COUNT(DISTINCT matches.m
           AND teams_matches.is_radiant = 0
           WHERE teams_matches.teamid = ".$id.";";
 
-if ($schema['matches_opener'] ?? false) {
+if ($schema['matches_opener'] ?? false && $schema['fpable']) {
   # first pick ratio
   $sql .= "SELECT \"opener_ratio\", SUM(radiant_opener = is_radiant)/COUNT(DISTINCT matches.matchid)
       FROM teams_matches join matches on matches.matchid = teams_matches.matchid
-      WHERE teamid = ".$id.";";
+      WHERE teamid = ".$id." AND modeID in (".implode(',', FP_ABLE).");";
   # first pick winrate
   $sql .= "SELECT \"opener_pick_winrate\", SUM(radiantWin = is_radiant)/COUNT(DISTINCT matches.matchid)
       FROM teams_matches join matches on matches.matchid = teams_matches.matchid
-      WHERE teamid = ".$id." and radiant_opener = is_radiant;";
+      WHERE teamid = ".$id." and radiant_opener = is_radiant AND modeID in (".implode(',', FP_ABLE).");";
+
+  # FP Radiant Ratio
+  $sql .= "SELECT \"opener_pick_radiant_ratio\", SUM(radiant_opener)/COUNT(DISTINCT matches.matchid)
+      FROM teams_matches join matches on matches.matchid = teams_matches.matchid
+      WHERE teamid = ".$id." AND is_radiant = true AND modeID in (".implode(',', FP_ABLE).");";
+
+  # FP Radiant
+  $sql .= "SELECT \"opener_pick_radiant_winrate\", SUM(radiantWin)/SUM(1)
+      FROM teams_matches join matches on matches.matchid = teams_matches.matchid
+      WHERE teamid = ".$id." AND is_radiant = true AND radiant_opener = true AND modeID in (".implode(',', FP_ABLE).");";
+  # FP Dire
+  $sql .= "SELECT \"opener_pick_dire_winrate\", SUM(NOT radiantWin)/SUM(1) 
+      FROM teams_matches join matches on matches.matchid = teams_matches.matchid
+      WHERE teamid = ".$id." AND is_radiant = false AND radiant_opener = false AND modeID in (".implode(',', FP_ABLE).");";
+
+  # SP Radiant Ratio
+  $sql .= "SELECT \"follower_pick_radiant_ratio\", SUM(NOT radiant_opener)/COUNT(DISTINCT matches.matchid)
+    FROM teams_matches join matches on matches.matchid = teams_matches.matchid
+    WHERE teamid = ".$id." AND is_radiant = true AND modeID in (".implode(',', FP_ABLE).");";
+
+  # SP Radiant
+  $sql .= "SELECT \"follower_pick_radiant_winrate\", SUM(radiantWin)/SUM(1)
+      FROM teams_matches join matches on matches.matchid = teams_matches.matchid
+      WHERE teamid = ".$id." AND is_radiant = true AND radiant_opener = false AND modeID in (".implode(',', FP_ABLE).");";
+  # SP Dire
+  $sql .= "SELECT \"follower_pick_dire_winrate\", SUM(NOT radiantWin)/SUM(1)
+      FROM teams_matches join matches on matches.matchid = teams_matches.matchid
+      WHERE teamid = ".$id." AND is_radiant = false AND radiant_opener = true AND modeID in (".implode(',', FP_ABLE).");";
 }
 
 # duration
