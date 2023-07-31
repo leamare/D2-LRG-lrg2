@@ -72,7 +72,9 @@ $_fpabile = array_sum(
     return $result['modes'][$a] ?? 0;
   }, FP_ABLE)
 );
-if (($schema['matches_opener'] ?? false) && $_total && ($_fpabile/$_total) > 0.5) {
+$schema['fpable'] = ($_total && ($_fpabile/$_total) > 0.5) ? true : false;
+
+if (($schema['matches_opener'] ?? false) && $schema['fpable']) {
   # First pick radiant ratio
   $sql .= "SELECT \"opener_pick_radiant_ratio\", SUM(radiant_opener)*100/SUM(1) FROM matches WHERE modeID in (".implode(',', FP_ABLE).");";
   # First pick
@@ -115,6 +117,8 @@ $sql .= "SELECT \"radiant_creeps_killed_avg\", SUM(ml.lasthits)/COUNT(distinct m
 # Dire avg creeps
 $sql .= "SELECT \"dire_creeps_killed_avg\", SUM(ml.lasthits)/COUNT(distinct ml.matchid)
   FROM matchlines ml WHERE ml.isRadiant = 0;";
+# denies
+$sql .= "SELECT \"denies\", SUM(denies) FROM matchlines;";
 
 # total wards placed
 $sql .= "SELECT \"obs_total\", SUM(wards) FROM adv_matchlines;";

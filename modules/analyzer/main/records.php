@@ -21,6 +21,8 @@ $sql .= "SELECT \"kda0\" cap, matchid, kills+assists val, playerid, heroid FROM 
 $sql .= "SELECT \"kda1\" cap, matchid, (kills+assists)/deaths val, playerid, heroid FROM matchlines WHERE deaths > 0 ORDER BY val DESC LIMIT $limit;";
 # gold earned
 $sql .= "SELECT \"gold_earned\" cap, matchid, networth, playerid, heroid FROM matchlines ORDER BY networth DESC LIMIT $limit;";
+# denies
+$sql .= "SELECT \"denies\" cap, matchid, lastHits, playerid, heroid FROM matchlines ORDER BY denies DESC LIMIT $limit;";
 # lasthits
 $sql .= "SELECT \"lasthits\" cap, matchid, lastHits, playerid, heroid FROM matchlines ORDER BY lastHits DESC LIMIT $limit;";
 # lasthits per minute

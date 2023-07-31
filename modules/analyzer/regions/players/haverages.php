@@ -111,11 +111,11 @@ $sql .= "SELECT \"wards_destroyed\", playerid, SUM(wards_destroyed)/SUM(1) value
 
 # longest killstreak
 $sql .= "SELECT \"longest_killstreak_in_match\", playerid, SUM(streak)/SUM(1) value, SUM(1) mtch FROM adv_matchlines
-          JOIN matches ON matchlines.matchid = matches.matchid
+          JOIN matches ON adv_matchlines.matchid = matches.matchid
           GROUP BY playerid HAVING $limiter_lower < mtch ORDER BY value DESC LIMIT $avg_limit;";
 # stacks
 $sql .= "SELECT \"stacks\", playerid, SUM(stacks)/SUM(1) value, SUM(1) mtch FROM adv_matchlines
-          JOIN matches ON matchlines.matchid = matches.matchid
+          JOIN matches ON adv_matchlines.matchid = matches.matchid
           GROUP BY playerid ORDER BY value DESC LIMIT $avg_limit;";
 # wards
 $sql .= "SELECT \"wards_placed\", playerid, SUM(wards)/SUM(1) value, SUM(1) mtch FROM adv_matchlines
@@ -130,7 +130,8 @@ $sql .= "SELECT \"hero_pool\", playerid, COUNT(DISTINCT heroid) value, SUM(1) mt
           JOIN matches ON matchlines.matchid = matches.matchid
           GROUP BY playerid ORDER BY value DESC LIMIT $avg_limit;";
 # plyer diversity
-$sql .= "SELECT \"diversity\", playerid, (COUNT(DISTINCT heroid)/mhpt.mhp) * (COUNT(DISTINCT heroid)/COUNT(DISTINCT matchid)) value, SUM(1) mtch, COUNT(DISTINCT matchid) matches
+$sql .= "SELECT \"diversity\", playerid, (COUNT(DISTINCT heroid)/mhpt.mhp) * (COUNT(DISTINCT heroid)/COUNT(DISTINCT matches.matchid)) value, 
+            SUM(1) mtch, COUNT(DISTINCT matches.matchid) matches
           FROM matchlines join ( select max(heropool) mhp from
               ( select COUNT(DISTINCT heroid) heropool, playerid from matchlines group by playerid ) _hp
             ) mhpt
@@ -161,4 +162,3 @@ do {
  $query_res->free_result();
 
 } while($conn->next_result());
-?>

@@ -55,6 +55,11 @@ $sql .= "SELECT \"lasthits_per_min\" cap, matches.matchid, ml.lasthits*60/matche
         JOIN matches on ml.matchid = matches.matchid
         WHERE matches.cluster IN (".implode(",", $clusters).")
         ORDER BY val DESC LIMIT $limit;";
+# denies
+$sql .= "SELECT \"denies\" cap, matches.matchid, ml.denies as val, ml.playerid, ml.heroid FROM matchlines ml
+        JOIN matches on ml.matchid = matches.matchid
+        WHERE matches.cluster IN (".implode(",", $clusters).")
+        ORDER BY val DESC LIMIT $limit;";
 # hero damage
 $sql .= "SELECT \"hero_damage\" cap, matches.matchid, ml.heroDamage, ml.playerid, ml.heroid FROM matchlines ml
         JOIN matches on ml.matchid = matches.matchid
