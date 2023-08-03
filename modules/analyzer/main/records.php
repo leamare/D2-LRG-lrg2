@@ -21,14 +21,14 @@ $sql .= "SELECT \"kda0\" cap, matchid, kills+assists val, playerid, heroid FROM 
 $sql .= "SELECT \"kda1\" cap, matchid, (kills+assists)/deaths val, playerid, heroid FROM matchlines WHERE deaths > 0 ORDER BY val DESC LIMIT $limit;";
 # gold earned
 $sql .= "SELECT \"gold_earned\" cap, matchid, networth, playerid, heroid FROM matchlines ORDER BY networth DESC LIMIT $limit;";
-# denies
-$sql .= "SELECT \"denies\" cap, matchid, lastHits, playerid, heroid FROM matchlines ORDER BY denies DESC LIMIT $limit;";
 # lasthits
 $sql .= "SELECT \"lasthits\" cap, matchid, lastHits, playerid, heroid FROM matchlines ORDER BY lastHits DESC LIMIT $limit;";
 # lasthits per minute
 $sql .= "SELECT \"lasthits_per_min\" cap, m.matchid, ml.lastHits*60/m.duration as val, ml.playerid, ml.heroid FROM matchlines ml
   JOIN matches m ON m.matchid = ml.matchid
   ORDER BY val DESC LIMIT $limit;";
+# denies
+$sql .= "SELECT \"denies\" cap, matchid, denies, playerid, heroid FROM matchlines ORDER BY denies DESC LIMIT $limit;";
 # hero damage
 $sql .= "SELECT \"hero_damage\" cap, matchid, heroDamage, playerid, heroid FROM matchlines ORDER BY heroDamage DESC LIMIT $limit;";
 # hero damage per minute
@@ -94,6 +94,10 @@ if ($lg_settings['main']['teams']) {
 $sql .= "SELECT \"couriers_killed_in_game\" cap, matchid, SUM(couriers_killed) cours, 0 playerid, 0 heroid FROM adv_matchlines GROUP BY matchid ORDER BY cours DESC LIMIT $limit;";
 # roshans killed in game
 $sql .= "SELECT \"roshans_killed_in_game\" cap, matchid, SUM(roshans_killed) roshs, 0 playerid, 0 heroid FROM adv_matchlines GROUP BY matchid ORDER BY roshs  DESC LIMIT $limit;";
+# buybacks in single game total
+$sql .= "SELECT \"buybacks_in_game\" cap, matchid, SUM(buybacks) cours, 0 playerid, 0 heroid FROM adv_matchlines GROUP BY matchid ORDER BY cours DESC LIMIT $limit;";
+# total time dead in a match
+$sql .= "SELECT \"time_dead_total_game\" cap, matchid, SUM(time_dead) cours, 0 playerid, 0 heroid FROM adv_matchlines GROUP BY matchid ORDER BY cours DESC LIMIT $limit;";
 
 # stomp
 $sql .= "SELECT \"stomp\" cap, matchid, stomp, 0 playerid, 0 heroid FROM matches ORDER BY stomp DESC LIMIT $limit;";
