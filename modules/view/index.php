@@ -257,10 +257,10 @@ if (!empty($searchstring)) {
       $custom_logo = $cats[$cat]['custom_logo'];
 
     if(isset($cats[$cat]['names_locales'][$locale])) $head_name = $cats[$cat]['names_locales'][$locale];
-    else $head_name = $cats[$cat]['name'] ?? locale_string('cat_'.$cat);
+    else $head_name = $cats[$cat]['name'] ?? locale_string(isset($cats[$cat]['locale_name_tag']) ? $cats[$cat]['locale_name_tag'] : 'cat_'.$cat);
 
     if(isset($cats[$cat]['desc_locales'][$locale])) $head_desc = $cats[$cat]['desc_locales'][$locale];
-    else if(isset($cats[$cat]['desc'])) $head_desc = isset($cats[$cat]['locale_desc_tag']) ? locale_string($cats[$cat]['locale_desc_tag']) : $cats[$cat]['desc'];
+    else $head_desc = isset($cats[$cat]['locale_desc_tag']) ? locale_string($cats[$cat]['locale_desc_tag']) : ($cats[$cat]['desc'] ?? null);
 
     if (isset($cats[$cat]['lid'])) $social_lid = $cats[$cat]['lid'];
   } else if(!isset($cat) || $cat == "main") {
@@ -280,38 +280,38 @@ if (!empty($searchstring)) {
     $head_name = $instance_name;
     $head_desc = $instance_desc;
     $reps = $cache["reps"];
-  } else if ($cat == "recent") {
-    $head_name = locale_string("recent_reports");
-    // $recent_last_limit;
-    $reps = $cache["reps"];
-    uasort($reps, function($a, $b) {
-      $lu = ($b['last_update'] ?? 0) <=> ($a['last_update'] ?? 0);
+  // } else if ($cat == "recent") {
+  //   $head_name = locale_string("recent_reports");
+  //   // $recent_last_limit;
+  //   $reps = $cache["reps"];
+  //   uasort($reps, function($a, $b) {
+  //     $lu = ($b['last_update'] ?? 0) <=> ($a['last_update'] ?? 0);
 
-      if ($lu) return $lu;
+  //     if ($lu) return $lu;
 
-      return ($b['matches'] ?? 0) <=> ($a['matches'] ?? 0);
-    });
-    if (!($recent_last_limit ?? false)) {
-      $recent_last_limit = time() - 14*24*3600;
-    }
+  //     return ($b['matches'] ?? 0) <=> ($a['matches'] ?? 0);
+  //   });
+  //   if (!($recent_last_limit ?? false)) {
+  //     $recent_last_limit = time() - 14*24*3600;
+  //   }
 
-    $limit = null;
-    $i = 0;
-    foreach($reps as $k => $v) {
-      if (($v['last_update'] ?? 0) < $recent_last_limit) {
-        $limit = $i;
-        break;
-      }
-      $i++;
-    }
-    $r = [];
-    $i = 0;
-    foreach ($reps as $k => $v) {
-      if ($i >= $limit) break;
-      $r[$k] = $v;
-      $i++;
-    }
-    $reps = $r;
+  //   $limit = null;
+  //   $i = 0;
+  //   foreach($reps as $k => $v) {
+  //     if (($v['last_update'] ?? 0) < $recent_last_limit) {
+  //       $limit = $i;
+  //       break;
+  //     }
+  //     $i++;
+  //   }
+  //   $r = [];
+  //   $i = 0;
+  //   foreach ($reps as $k => $v) {
+  //     if ($i >= $limit) break;
+  //     $r[$k] = $v;
+  //     $i++;
+  //   }
+  //   $reps = $r;
   } else {
     $head_name = $cat;
     $reps = [];
@@ -452,30 +452,29 @@ if (sizeof($cache['reps']) === 0) {
       "<th>".locale_string("end_date")."</th>".
     "</tr></thead>";
 
-    if (!isset($cat) || $cat !== "recent") {
-      if (isset($cat) && isset($cats[$cat]) && isset($cats[$cat]['orderby'])) {
-        // not my finest creation
-        $orderby = $cats[$cat]['orderby'];
-        uasort($reps, function($a, $b) use (&$orderby) {
-          $res = 0;
-          foreach ($orderby as $k => $dir) {
-            $res = $dir ? (($b[$k] ?? 0) <=> ($a[$k] ?? 0)) : (($a[$k] ?? 0) <=> ($b[$k] ?? 0));
-            if ($res) break;
-          }
+    // if (!isset($cat) || $cat !== "recent") {
+    if (isset($cat) && isset($cats[$cat]) && isset($cats[$cat]['orderby'])) {
+      // not my finest creation
+      $orderby = $cats[$cat]['orderby'];
+      uasort($reps, function($a, $b) use (&$orderby) {
+        $res = 0;
+        foreach ($orderby as $k => $dir) {
+          $res = $dir ? (($b[$k] ?? 0) <=> ($a[$k] ?? 0)) : (($a[$k] ?? 0) <=> ($b[$k] ?? 0));
+          if ($res) break;
+        }
 
-          return $res;
-        });
-      } else {
-        uasort($reps, function($a, $b) {
-          if (empty($a) && empty($b)) return 0;
-          if (empty($a)) return 1;
-          if (empty($b)) return -1;
-          if($a['last_match']['date'] == $b['last_match']['date']) {
-            if($a['first_match']['date'] == $b['first_match']['date']) return 0;
-            else return ($a['first_match']['date'] < $b['first_match']['date']) ? -1 : 1;
-          } else return ($a['last_match']['date'] < $b['last_match']['date']) ? 1 : -1;
-        });
-      }
+        return $res;
+      });
+    } else {
+      uasort($reps, function($a, $b) {
+        if (empty($a) && empty($b)) return 0;
+        if (empty($a)) return 1;
+        if (empty($b)) return -1;
+        if($a['last_match']['date'] == $b['last_match']['date']) {
+          if($a['first_match']['date'] == $b['first_match']['date']) return 0;
+          else return ($a['first_match']['date'] < $b['first_match']['date']) ? -1 : 1;
+        } else return ($a['last_match']['date'] < $b['last_match']['date']) ? 1 : -1;
+      });
     }
     
     foreach($reps as $report) {
@@ -545,7 +544,7 @@ if (sizeof($cache['reps']) === 0) {
         'tag' => $tag,
         'cat' => true,
         'id' => $val['lid'] ?? null,
-        'name' => ($val['names_locales'] ?? [])[$locale] ?? $val['name'] ?? locale_string("cat_".$tag),
+        'name' => ($val['names_locales'] ?? [])[$locale] ?? $val['name'] ?? locale_string(isset($val['locale_name_tag']) ? $val['locale_name_tag'] : 'cat_'.$tag),
         'desc' => ($val['desc_locales'] ?? [])[$locale] ?? $val['desc'] ?? null,
         'matches' => count($reps),
         'patches' => [], // TODO:,
