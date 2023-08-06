@@ -92,6 +92,13 @@ const SUMMARY_GROUPS = [
   'opener_ratio' => 'draft',
   'opener_pick_winrate' => 'draft',
 
+  'opener_pick_radiant_winrate' => 'fp_draft',
+  'opener_pick_dire_winrate' => 'fp_draft',
+  'follower_pick_radiant_winrate' => 'fp_draft',
+  'follower_pick_dire_winrate' => 'fp_draft',
+  'follower_pick_radiant_ratio' => 'fp_draft',
+  'opener_pick_radiant_ratio' => 'fp_draft',
+
   'damage_to_gold_per_min_s' => 'performance,farm,combat',
 
   'matchlinks' => 'permagroup',
@@ -128,7 +135,14 @@ const SUMMARY_KEYS_REPLACEMENTS = [
   "matches_median_duration" => "matches_median_duration_s",
   "opener_ratio" => "opener_ratio_s",
   "opener_pick_winrate" => "opener_pick_winrate_s",
-  "duration" => "duration_s"
+  "duration" => "duration_s",
+
+  "opener_pick_radiant_winrate" => "opener_pick_radiant_winrate_s",
+  "opener_pick_dire_winrate" => "opener_pick_dire_winrate_s",
+  "follower_pick_radiant_winrate" => "follower_pick_radiant_winrate_s",
+  "follower_pick_dire_winrate" => "follower_pick_dire_winrate_s",
+  "follower_pick_radiant_ratio" => "follower_pick_radiant_ratio_s",
+  "opener_pick_radiant_ratio" => "follower_pick_radiant_ratio_s",
 ];
 
 if (isset($__lrg_onerror) && !$isApi) {
