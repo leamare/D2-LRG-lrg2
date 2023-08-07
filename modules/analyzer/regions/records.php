@@ -139,6 +139,18 @@ $sql .= "SELECT \"roshans_killed_in_game\" cap, matches.matchid, SUM(ml.roshans_
         WHERE matches.cluster IN (".implode(",", $clusters).")
         GROUP BY ml.matchid
         ORDER BY roshs DESC LIMIT $limit;";
+# buybacks in single game total
+$sql .= "SELECT \"buybacks_in_game\" cap, matches.matchid, SUM(ml.buybacks) val, 0 playerid, 0 heroid FROM adv_matchlines ml
+        JOIN matches on ml.matchid = matches.matchid
+        WHERE matches.cluster IN (".implode(",", $clusters).")
+        GROUP BY ml.matchid
+        ORDER BY val DESC LIMIT $limit;";
+# total time dead in a match
+$sql .= "SELECT \"time_dead_total_game\" cap, matches.matchid, SUM(ml.time_dead) val, 0 playerid, 0 heroid FROM adv_matchlines ml
+        JOIN matches on ml.matchid = matches.matchid
+        WHERE matches.cluster IN (".implode(",", $clusters).")
+        GROUP BY ml.matchid
+        ORDER BY val DESC LIMIT $limit;";
 
 # stomp
 $sql .= "SELECT \"stomp\" cap, matchid, stomp, 0 playerid, 0 heroid FROM matches
