@@ -62,6 +62,9 @@ if (!empty($options['N'])) {
   $rank_limit = (int)$options['N'];
 }
 
+$min_duration_seconds = $lg_settings['min_duration'] ?? 600;
+$min_score_side = $lg_settings['min_score_side'] ?? 5;
+
 if (!empty($options['d'])) {
   $api_cooldown = ((int)$options['d'])*1000;
   $api_cooldown_seconds = ((int)$options['d']);

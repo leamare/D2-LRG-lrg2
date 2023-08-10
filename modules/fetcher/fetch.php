@@ -20,7 +20,7 @@ function fetch($match) {
   $request_unparsed, $meta, $stratz_timeout_retries, $force_adding, $cache_dir, $lg_settings, $lrg_use_cache, $first_scheduled,
   $use_full_stratz, $scheduled_wait_period, $steamapikey, $force_await, $players_list, $rank_limit, $stratztoken, $ignore_stratz,
   $update_unparsed, $request_unparsed_players, $stratz_graphql, $api_cooldown_seconds, $update_names, $updated_names, $rewrite_existing,
-  $ignore_abandons, $lastversion, $schema;
+  $ignore_abandons, $lastversion, $schema, $min_duration_seconds, $min_score_side;
 
   $t_match = [];
   $t_matchlines = [];
@@ -156,6 +156,19 @@ function fetch($match) {
         return true;
       }
     }
+
+    if (!empty($lg_settings['version_allowlist'])) {
+      if (!in_array($matchdata['matches']['version'] ?? 0, $lg_settings['version_allowlist'])) {
+        echo("..Version ".($matchdata['matches']['version'] ?? 0)." is not in allowlist, skipping...\n");
+        return true;
+      }
+    }
+    if (!empty($lg_settings['version_denylist'])) {
+      if (in_array($matchdata['matches']['version'] ?? 0, $lg_settings['version_denylist'])) {
+        echo("..Version ".($matchdata['matches']['version'] ?? 0)." is in denylist, skipping...\n");
+        return true;
+      }
+    }
   } elseif($lrg_use_cache && file_exists("$cache_dir/".$match.".json") && !$players_update) {
     echo("Reusing cache.");
     $json = file_get_contents("$cache_dir/".$match.".json");
@@ -185,11 +198,11 @@ function fetch($match) {
 
     $stratz_request = null;
     if (!empty($matchdata)) {
-      if($matchdata['matches']['duration'] < 600) {
-        echo("..Duration is less than 10 minutes, skipping...\n");
+      if($matchdata['matches']['duration'] < $min_duration_seconds) {
+        echo("..Duration is less than ".($min_duration_seconds/60)." minutes, skipping...\n");
         return true;
       }
-      if($matchdata['payload']['score_radiant'] < 5 && $matchdata['payload']['score_dire'] < 5) {
+      if($matchdata['payload']['score_radiant'] < $min_score_side && $matchdata['payload']['score_dire'] < $min_score_side) {
         echo("..Low score, skipping.\n");
         return true;
       }
@@ -207,6 +220,19 @@ function fetch($match) {
       if (!empty($lg_settings['cluster_denylist'])) {
         if (in_array($matchdata['matches']['cluster'] ?? 0, $lg_settings['cluster_denylist'])) {
           echo("..Cluster ".($matchdata['matches']['cluster'] ?? 0)." is in denylist, skipping...\n");
+          return true;
+        }
+      }
+
+      if (!empty($lg_settings['version_allowlist'])) {
+        if (!in_array($matchdata['matches']['version'] ?? 0, $lg_settings['version_allowlist'])) {
+          echo("..Version ".($matchdata['matches']['version'] ?? 0)." is not in allowlist, skipping...\n");
+          return true;
+        }
+      }
+      if (!empty($lg_settings['version_denylist'])) {
+        if (in_array($matchdata['matches']['version'] ?? 0, $lg_settings['version_denylist'])) {
+          echo("..Version ".($matchdata['matches']['version'] ?? 0)." is in denylist, skipping...\n");
           return true;
         }
       }
@@ -324,10 +350,8 @@ function fetch($match) {
         $matchdata = $matchdata_stratz;
       }
     } else {
-      if($matchdata['duration'] < 600 || ($matchdata['game_mode'] == 23 && $matchdata['duration'] < 400)) {
-          echo("..Duration is less than 10 minutes, skipping...\n");
-          // Initially it used to be 5 minutes, but sice a lot of stuff is hardly
-          // binded with 10 min mark, it's better to use 10 min as a benchmark.
+      if($matchdata['duration'] < $min_duration_seconds) {
+          echo("..Duration is less than ".($min_duration_seconds/60)." minutes, skipping...\n");
           return true;
       }
       if (!$matchdata['radiant_score']) {
@@ -340,7 +364,7 @@ function fetch($match) {
         $n = sizeof($matchdata['players']);
         for ($i=5; $i<$n; $i++) $matchdata['dire_score'] += $matchdata['players'][$i]['kills'];
       }
-      if($matchdata['radiant_score'] < 5 && $matchdata['dire_score'] < 5) {
+      if($matchdata['radiant_score'] < $min_score_side && $matchdata['dire_score'] < $min_score_side) {
           echo("..Low score, skipping.\n");
           return true;
       }
@@ -364,10 +388,23 @@ function fetch($match) {
           return true;
         }
       }
-
       if (!empty($lg_settings['cluster_denylist'])) {
         if (in_array($matchdata['cluster'] ?? 0, $lg_settings['cluster_denylist'])) {
           echo("..Cluster ".($matchdata['cluster'] ?? 0)." is in denylist, skipping...\n");
+          return true;
+        }
+      }
+
+      $t_version = get_patchid($matchdata['start_time'], $meta);
+      if (!empty($lg_settings['version_allowlist'])) {
+        if (!in_array($t_version, $lg_settings['version_allowlist'])) {
+          echo("..Version ".($t_version)." is not in allowlist, skipping...\n");
+          return true;
+        }
+      }
+      if (!empty($lg_settings['version_denylist'])) {
+        if (in_array($t_version, $lg_settings['version_denylist'])) {
+          echo("..Version ".($t_version)." is in denylist, skipping...\n");
           return true;
         }
       }
