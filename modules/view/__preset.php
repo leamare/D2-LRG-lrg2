@@ -142,7 +142,7 @@ const SUMMARY_KEYS_REPLACEMENTS = [
   "follower_pick_radiant_winrate" => "follower_pick_radiant_winrate_s",
   "follower_pick_dire_winrate" => "follower_pick_dire_winrate_s",
   "follower_pick_radiant_ratio" => "follower_pick_radiant_ratio_s",
-  "opener_pick_radiant_ratio" => "follower_pick_radiant_ratio_s",
+  "opener_pick_radiant_ratio" => "opener_pick_radiant_ratio_s",
 ];
 
 if (isset($__lrg_onerror) && !$isApi) {

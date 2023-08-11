@@ -6,6 +6,16 @@ $percentages = [
   "radiant_wr",
   "dire_wr",
   "diversity",
+
+  "opener_ratio",
+  "opener_pick_winrate",
+
+  "opener_pick_radiant_winrate",
+  "opener_pick_dire_winrate",
+  "follower_pick_radiant_winrate",
+  "follower_pick_dire_winrate",
+  "follower_pick_radiant_ratio",
+  "opener_pick_radiant_ratio",
 ];
 
 $context[$tid]['averages']['diversity'] = teams_diversity_recalc($context[$tid]);

@@ -249,7 +249,7 @@ if (!empty($searchstring)) {
   $head_desc = htmlspecialchars($searchstring);
 } else if (!empty($cats)) {
   if (isset($cat) && isset($cats[$cat])) {
-    $reps = populate_reps($cache["reps"], $cats[$cat]['filters'], $cats[$cat]['exclude_hidden'] ?? true);
+    $reps = populate_reps($cache["reps"], $cats[$cat]['filters'], $cats[$cat]['exclude_hidden'] ?? false);
     
     if(isset($cats[$cat]['custom_style']) && file_exists("res/custom_styles/".$cats[$cat]['custom_style'].".css"))
       $custom_style = $cats[$cat]['custom_style'];
@@ -524,7 +524,7 @@ if (sizeof($cache['reps']) === 0) {
       if (isset($hidden_cat) && $tag == $hidden_cat) continue;
       if ($val['hidden'] ?? false) continue;
       
-      $reps = populate_reps($cache["reps"], $val['filters'], $val['exclude_hidden'] ?? true);
+      $reps = populate_reps($cache["reps"], $val['filters'], $val['exclude_hidden'] ?? false);
 
       if (!empty($val['groups'])) {
         foreach($val['groups'] as $gr) {
@@ -711,7 +711,7 @@ if (sizeof($cache['reps']) === 0) {
         } else if (empty($cat)) {
           $reps = populate_reps($cache['reps'], [], $cat['exclude_hidden'] ?? true);
         } else {
-          $reps = populate_reps($cache['reps'], $cat['filters'], $cat['exclude_hidden'] ?? true);
+          $reps = populate_reps($cache['reps'], $cat['filters'], $cat['exclude_hidden'] ?? false);
         }
 
         if (isset($cat['orderby']) || isset($section['orderby'])) {
@@ -826,7 +826,7 @@ if (sizeof($cache['reps']) === 0) {
       }
 
       $modules .= "<div class=\"compact-section-header wide compact primary\">".
-        ($section['type'] == 0 ?
+        (($section['type'] == 0 || !empty($section['linkto'])) ?
           "<a class=\"group-name\" href=\"?cat=".($section['linkto'] ?? $cat_tag).(empty($linkvars) ? "" : "&".$linkvars)."\">".$name."</a>" :
           "<span class=\"group-name\">".$name."</span>"
         ).
