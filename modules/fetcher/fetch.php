@@ -126,6 +126,11 @@ function fetch($match) {
       echo "..WARNING: bad replay.";
     }
 
+    if($matchdata['matches']['duration'] < $min_duration_seconds) {
+      echo("..Duration is less than ".($min_duration_seconds/60)." minutes, skipping...\n");
+      return true;
+    }
+
     foreach($matchdata['players'] as $p) {
       if(!isset($t_players[$p['playerID']]) || ($update_names && !isset($updated_names[$p['playerID']])) ) {
         $t_new_players[$p['playerID']] = $p['nickname'];
