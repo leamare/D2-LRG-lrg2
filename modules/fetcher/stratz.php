@@ -446,10 +446,10 @@ function get_stratz_response($match) {
       $siege = (74 * 2);
       $passive = (600 * 1.275);
       $starting = 625;
-      $tenMinute = $melee + $ranged + $siege + $passive + $starting;
+      $tenMinute = $lm * ($melee + $ranged + $siege + $passive + $starting)/10;
       $aml['efficiency_at10'] = (
         count($pl['stats']['networthPerMinute']) > ($lm-1) ? 
-        $pl['stats']['networthPerMinute'][$lm] : 
+        $pl['stats']['networthPerMinute'][$lm-1] : 
         end($pl['stats']['networthPerMinute'])
       ) / $tenMinute;
       
