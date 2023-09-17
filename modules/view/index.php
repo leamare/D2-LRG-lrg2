@@ -740,7 +740,7 @@ if (sizeof($cache['reps']) === 0) {
 
         $reps = [];
         foreach ($section['value'] as $el) {
-          if ($el[1]) { // category
+          if ($el[1] == 1) { // category
             if (!isset($cats[$el[0]])) continue;
 
             $val = $cats[$el[0]];
@@ -808,6 +808,32 @@ if (sizeof($cache['reps']) === 0) {
             }
 
             $reps[] = $cat;
+          } else if ($el[1] == 2) { // last in a category
+            if (!isset($cats[$el[0]])) continue;
+
+            $val = $cats[$el[0]];
+
+            $reps_c = populate_reps($cache["reps"], $val['filters'], $val['exclude_hidden'] ?? true);
+
+            if (isset($val['orderby'])) {
+              // not my finest creation
+              $orderby = $cat['orderby'];
+              uasort($reps_c, function($a, $b) use (&$orderby) {
+                $res = 0;
+                foreach ($orderby as $k => $dir) {
+                  $res = $dir ? (($b[$k] ?? 0) <=> ($a[$k] ?? 0)) : (($a[$k] ?? 0) <=> ($b[$k] ?? 0));
+                  if ($res) break;
+                }
+      
+                return $res;
+              });
+            } else {
+              uasort($reps_c, function($a, $b) {
+                return $b['last_match']['date'] <=> $a['last_match']['date'];
+              });
+            }
+
+            $reps[] = array_shift($reps_c);
           } else {
             if (!isset($cache['reps'][$el[0]])) continue;
 
