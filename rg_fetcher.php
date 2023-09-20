@@ -317,7 +317,11 @@ while(sizeof($matches) || $listen) {
       
       echo "[Z] Requesting group of $stratz_graphql_group matches\n";
 
-      get_stratz_multiquery($group);
+      try {
+        get_stratz_multiquery($group);
+      } catch (\Throwable $e) {
+        echo "[E] Error requesting following group: [".implode(', ', $group)."], skipping\n";
+      }
     }
   }
 
