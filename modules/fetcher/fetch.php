@@ -880,14 +880,14 @@ function fetch($match) {
         }
         
         # support for botmatches
-        if ($matchdata['players'][$j]['account_id'] != null)
+        if ($matchdata['players'][$j]['account_id'] != null && $matchdata['players'][$j]['account_id'])
           $t_matchlines[$i]['playerid'] = $matchdata['players'][$j]['account_id'];
         else {
           if (isset($matchdata['radiant_team'])) {
             if($matchdata['players'][$j]['isRadiant'])
                 $matchdata['players'][$j]['account_id'] = $matchdata['radiant_team']['team_id'];
             else
-                $matchdata['players'][$j]['account_id'] = $matchdata['dire_team']['team_id'];
+                $matchdata['players'][$j]['account_id'] = isset($matchdata['dire_team']) ? $matchdata['dire_team']['team_id'] : 1;
           } else $matchdata['players'][$j]['account_id'] = 1;
 
           $matchdata['players'][$j]['account_id'] *= (-1)*$matchdata['players'][$j]['hero_id'];
@@ -1056,7 +1056,7 @@ function fetch($match) {
               unset($tmp);
           }
           $t_adv_matchlines[$i]['stacks'] = $matchdata['players'][$j]['camps_stacked'];
-          $t_adv_matchlines[$i]['time_dead'] = $matchdata['players'][$j]['life_state_dead'];
+          $t_adv_matchlines[$i]['time_dead'] = $matchdata['players'][$j]['life_state_dead'] ?? 0;
           $t_adv_matchlines[$i]['buybacks'] = $matchdata['players'][$j]['buyback_count'];
           $t_adv_matchlines[$i]['pings'] = isset($matchdata['players'][$j]['pings']) ? $matchdata['players'][$j]['pings'] : 0;
           $t_adv_matchlines[$i]['stuns'] = $matchdata['players'][$j]['stuns'];
