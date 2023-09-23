@@ -1443,8 +1443,8 @@ function fetch($match) {
       foreach($pl['obs_log'] as $ward) {
         if (empty($ward['ehandle'])) continue;
         $wards_log[$pl['account_id']][ $ward['ehandle'] ] = [
-          'x_c' => $ward['x'],
-          'y_c' => $ward['y'],
+          'x_c' => $ward['x'] ?? $ward['key'][0],
+          'y_c' => $ward['y'] ?? $ward['key'][1],
           'time' => $ward['time'],
           'alive' => 360,
           'destroyed_at' => null,
@@ -1460,8 +1460,8 @@ function fetch($match) {
           if (!isset($wards_destruction_log[ $ward['attackername'] ])) $wards_destruction_log[ $ward['attackername'] ] = [];
 
           $wards_destruction_log[ $ward['attackername'] ][] = [
-            'x_c' => $ward['x'],
-            'y_c' => $ward['y'],
+            'x_c' => $ward['x'] ?? $ward['key'][0],
+            'y_c' => $ward['y'] ?? $ward['key'][1],
             'time' => $ward['time'],
           ];
         }
@@ -1469,8 +1469,8 @@ function fetch($match) {
 
       foreach($pl['sen_log'] as $ward) {
         $sentries_log[$pl['account_id']][ $ward['ehandle'] ?? "null" ] = [
-          'x_c' => $ward['x'],
-          'y_c' => $ward['y'],
+          'x_c' => $ward['x'] ?? $ward['key'][0],
+          'y_c' => $ward['y'] ?? $ward['key'][1],
           'time' => $ward['time'],
         ];
       }
