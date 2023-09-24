@@ -1093,13 +1093,12 @@ function fetch($match) {
     # > 20 = after 7.07
     # TODO Draft information from Stratz for ranked all pick (22)
 
+    if (isset($matchdata['picks_bans']))
+      $drafts =& $matchdata['picks_bans'];
+    else 
+      $drafts =& $matchdata['draft_timings'];
 
-    if ($matchdata['game_mode'] == 2 || $matchdata['game_mode'] == 9) {
-        if (isset($matchdata['picks_bans']))
-          $drafts =& $matchdata['picks_bans'];
-        else 
-          $drafts =& $matchdata['draft_timings'];
-
+    if (($matchdata['game_mode'] == 2 || $matchdata['game_mode'] == 9) && !empty($drafts)) {
         $stage = 0;
         $last_stage_pick = null;
 
