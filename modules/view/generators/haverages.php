@@ -17,7 +17,7 @@ function rg_generator_haverages($table_id, &$context, $hero_flag = true) {
       $res .= "<tr>".($hero_flag ? "<td>".hero_portrait($el[$id])."</td>" : "").
               "<td>".($hero_flag ?
                     hero_link($el[$id]) :
-                      ( stripos($key, "team") !== FALSE ?
+                      ( (stripos($key, "team") !== FALSE && stripos($key, "with") === FALSE) ?
                         team_link($el[$id]) :
                         player_link($el[$id], true, true)
                       )
