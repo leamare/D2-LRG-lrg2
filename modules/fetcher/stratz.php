@@ -817,6 +817,7 @@ function get_stratz_response($match) {
       $pid = $slot_pids[ $ward['fromPlayer'] ];
 
       switch ($ward['action'].'.'.$ward['wardType']) {
+        case "SPAWN.OBSERVER":
         case "SPAWN.WARD":
           if (!isset($wards_log[$pid])) $wards_log[$pid] = [];
           if (isset($wards_log[ $pid ][ $ward['indexId'] ])) break;
