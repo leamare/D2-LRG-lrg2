@@ -64,6 +64,7 @@
 
     "pvp" : true,
     "pvp_matches" : true,
+    "player_cards_heroes": true,
 
     "player_pairs" : true,
     "player_pairs_matches": true,
