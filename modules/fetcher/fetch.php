@@ -444,7 +444,7 @@ function fetch($match) {
   }
 
   if (!empty($stratz_request) && ( (!file_exists("$cache_dir/".$match.".lrgcache.json") && !file_exists("$cache_dir/".$match.".json")) 
-        || ( $bad_replay && !$force_adding && !(($matchdata['iscache'] ?? false) || $matchdata['isstratz']) )
+        || ( $bad_replay && !$force_adding && !(($matchdata['iscache'] ?? false) || ($matchdata['isstratz'] ?? false) ) )
         || $players_update) ) {
 
     if(!isset($matchdata['lobby_type']) || $players_update || ($matchdata['lobby_type'] != 1 && $matchdata['lobby_type'] != 2 && $use_stratz && !$ignore_stratz)) {
