@@ -701,7 +701,7 @@ function fetch($match) {
     //     $t_match['comeback'] = $matchdata['comeback'];
     // else $t_match['comeback'] = $bad_replay ? 0 : $matchdata['throw'];
 
-    if (!$bad_replay) {
+    if (!$bad_replay && (!empty($matchdata['radiant_gold_adv']) || !empty($matchdata['radiant_nw_adv']))) {
       add_networths($matchdata);
       [ $t_match['stomp'], $t_match['comeback'] ] = find_comebacks($matchdata['radiant_nw_adv'] ?? $matchdata['radiant_gold_adv'], $matchdata['radiant_win']);
     } else {
@@ -1150,16 +1150,26 @@ function fetch($match) {
           $t_match['radiant_opener'] = $t_draft[0]['is_radiant'];
         }
     } else if ($matchdata['game_mode'] == 16) {
-        foreach ($matchdata['picks_bans'] as $draft_instance) {
+        foreach ($drafts as $draft_instance) {
             if (!isset($draft_instance['hero_id']) || !$draft_instance['hero_id'])
               continue;
+
+            if (isset($draft_instance['team'])) {
+              $team = $draft_instance['team'];
+            } else if (isset($draft_instance['player_slot'])) {
+              $team = $draft_instance['player_slot'] >= 5;
+            } else {
+              $team = $draft_instance['active_team']-2;
+            }
+
+            $pick = $draft_instance['is_pick'] ?? $draft_instance['pick'];
         
             $t_draft[$i]['matchid'] = $match;
-            $t_draft[$i]['is_radiant'] = $draft_instance['team'] ? 0 : 1;
-            $t_draft[$i]['is_pick'] = $draft_instance['is_pick'];
+            $t_draft[$i]['is_radiant'] = $team;
+            $t_draft[$i]['is_pick'] = $pick;
             $t_draft[$i]['hero_id'] = $draft_instance['hero_id'];
 
-            if ($draft_instance['is_pick']) {
+            if ($pick) {
                 if ($draft_instance['order'] < 11) $t_draft[$i]['stage'] = 1;
                 else if ($draft_instance['order'] < 15) $t_draft[$i]['stage'] = 2;
                 else $t_draft[$i]['stage'] = 3;
