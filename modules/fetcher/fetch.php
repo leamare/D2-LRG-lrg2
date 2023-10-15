@@ -776,7 +776,8 @@ function fetch($match) {
           'lane' => $player['lane_role'],
           'eff' => $player['lane_efficiency'],
         ];
-        $laning_raw[$p['hid']] = $p['eff'];
+        if (!isset($laning_raw[$p['hid']])) $laning_raw[$p['hid']] = [];
+        $laning_raw[$p['hid']][$p['lane']] = $p;
         $teams_players[$team][] = $p;
       }
       
@@ -825,23 +826,35 @@ function fetch($match) {
       foreach([1,2,3] as $lane) {
         $opp_lane = 4-$lane;
 
-        $max_eff_self = array_reduce($laning_raw[0][$lane] ?? [], function($carry, $item) {
-          return max($carry, $item['eff']);
+        $lane_self = [];
+        foreach ($laning_raw as $i => $lanes) {
+          foreach ($lanes as $ln => $v) {
+            if ($ln == $lane) $lane_self[$i] = $v;
+          }
+        }
+        $max_eff_self = array_reduce($lane_self ?? [], function($carry, $item) {
+          return max($carry, $item['eff'] ?? 0);
         }, 0.7);
 
-        $max_eff_opp = array_reduce($laning_raw[1][$opp_lane] ?? [], function($carry, $item) {
-          return max($carry, $item['eff']);
+        $lane_opp = [];
+        foreach ($laning_raw as $i => $lanes) {
+          foreach ($lanes as $ln => $v) {
+            if ($ln == $opp_lane) $lane_opp[$i] = $v;
+          }
+        }
+        $max_eff_opp = array_reduce($lane_opp ?? [], function($carry, $item) {
+          return max($carry, $item['eff'] ?? 0);
         }, 0);
 
         $diff = $max_eff_self - $max_eff_opp;
         $lane_state = abs($diff) > $tie_factor ? ( $diff < 1 ? 0 : 2 ) : 1;
 
-        foreach($players as $p) {
-          $laning[$p['hid']] = $lane_state;
+        foreach($lane_self as $hid => $v) {
+          $laning[$hid] = $lane_state;
         }
         $lane_state = 2-$lane_state;
-        foreach(($laning_raw[1][$opp_lane] ?? []) as $p) {
-          $laning[$p['hid']] = $lane_state;
+        foreach($lane_opp as $hid => $v) {
+          $laning[$hid] = $lane_state;
         }
       }
       foreach ($team_roles as $i => $roles) {
@@ -852,7 +865,11 @@ function fetch($match) {
           if (isset($laning[$opp])) {
             $laning[$hid] = 2-$laning[$opp];
           } else {
-            $diff = $laning_raw[$hid] - $laning_raw[$opp];
+            $diff = array_reduce($laning_raw[$hid] ?? [], function($carry, $item) {
+              return max($carry, $item['eff'] ?? 0);
+            }, 0) - array_reduce($laning_raw[$opp] ?? [], function($carry, $item) {
+              return max($carry, $item['eff'] ?? 0);
+            }, 0);
             $laning[$hid] = abs($diff) > $tie_factor ? ( $diff < 1 ? 0 : 2 ) : 1;
             $laning[$opp] = abs($laning[$hid]-2);
           }
@@ -1387,6 +1404,10 @@ function fetch($match) {
       ];
 
       foreach ($player['purchase_log'] as $item) {
+        // FIXME:
+        if ($item['key'] == "helm_of_the_dominator_2") {
+          $item['key'] = "helm_of_the_overlord";
+        }
         $iid = $items_flip[$item['key']];
         if (!in_array($iid, $meta['item_categories']['consumables'])) {
           continue;
