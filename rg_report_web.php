@@ -12,6 +12,8 @@ $imports_ignore = [
 $lg_version = [ 2, 26, 0, 0, 0 ];
 $isApi = false;
 
+$root = dirname(__FILE__);
+
 $imports = scandir("modules/commons/");
 foreach ($imports as $f) {
   if ($f[0] == '.' || in_array($f, $imports_ignore)) continue;
@@ -88,8 +90,6 @@ include_once("rg_report_out_settings.php");
 include_once("modules/view/__preset.php");
 
 // INITIALISATION
-
-$root = dirname(__FILE__);
 
 $linkvars = [];
 $carryon = [];

@@ -25,7 +25,7 @@ function locale_string($string_id, $vars = [], $loc = null) {
 }
 
 function include_locale($locale) {
-  global $strings, $localesMap, $isBetaLocale;
+  global $strings, $localesMap, $isBetaLocale, $root;
 
   if (isset($localesMap[ $locale ]) && ($localesMap[ $locale ]['alias'] ?? false)) {
     $locale = $localesMap[ $locale ]['alias'];
@@ -37,7 +37,7 @@ function include_locale($locale) {
     return false;
   }
 
-  $file = $localesMap[$locale]['file'] ?? 'locales/'.$locale.'.json';
+  $file = $localesMap[$locale]['file'] ?? $root.'/locales/'.$locale.'.json';
 
   if (!isset($strings[$locale])) $strings[$locale] = [];
 
@@ -47,7 +47,7 @@ function include_locale($locale) {
   if (file_exists($file)) {
     $strings[$locale] = array_merge(
       $strings[$locale],
-      json_decode(file_get_contents('locales/'.$locale.'.json'), true)
+      json_decode(file_get_contents($root.'/locales/'.$locale.'.json'), true)
     );
     
   } else return false;

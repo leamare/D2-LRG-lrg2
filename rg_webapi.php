@@ -19,6 +19,8 @@ $imports_ignore = [
 
 $lg_version = [ 2, 26, 0, 0, 0 ];
 
+$root = dirname(__FILE__);
+
 $imports = scandir("modules/commons/");
 foreach ($imports as $f) {
   if ($f[0] == '.' || in_array($f, $imports_ignore)) continue;
@@ -120,8 +122,6 @@ set_error_handler(
 include_once("modules/view/__preset.php");
 
 /* INITIALISATION */
-
-$root = dirname(__FILE__);
 
 if(isset($_GET['mod'])) $mod = strtolower($_GET['mod']);
 else $mod = "";
