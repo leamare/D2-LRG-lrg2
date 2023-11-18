@@ -68,7 +68,6 @@ $limiters = calculate_limiters($picks, $result['random']['teams_on_event'] ?? nu
 
 if ($lg_settings['ana']['players'])
   $limiters_players = calculate_limiters($players, $result['random']['teams_on_event'] ?? null, $result['random']["matches_total"]);
-var_dump($limiters_players);
 
 //compatibility
 $limiter = $limiters['limiter_higher'];

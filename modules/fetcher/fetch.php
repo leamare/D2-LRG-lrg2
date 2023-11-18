@@ -1182,13 +1182,17 @@ function fetch($match) {
             $pick = $draft_instance['is_pick'] ?? $draft_instance['pick'];
         
             $t_draft[$i]['matchid'] = $match;
-            $t_draft[$i]['is_radiant'] = $team;
+            $t_draft[$i]['is_radiant'] = $team ? 0 : 1;
             $t_draft[$i]['is_pick'] = $pick;
             $t_draft[$i]['hero_id'] = $draft_instance['hero_id'];
 
+            if (!isset($t_match['radiant_opener']) && $pick) {
+              $t_match['radiant_opener'] = (int)$t_draft[$i]['is_radiant'];
+            }
+
             if ($pick) {
-                if ($draft_instance['order'] < 11) $t_draft[$i]['stage'] = 1;
-                else if ($draft_instance['order'] < 15) $t_draft[$i]['stage'] = 2;
+                if ($draft_instance['order'] < 10) $t_draft[$i]['stage'] = 1;
+                else if ($draft_instance['order'] < 14) $t_draft[$i]['stage'] = 2;
                 else $t_draft[$i]['stage'] = 3;
             } else {
                 $t_draft[$i]['stage'] = 1;
