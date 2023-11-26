@@ -800,3 +800,14 @@ function multiselectSubmit(source, link, param) {
   }
   window.location = link + (link.indexOf('?') != -1 ? '&' : '?') + (vals.length ? param + '=' + vals.join(',') : '');
 }
+
+$.tablesorter.addParser({
+  id: 'valuesort',
+  is: function(s, table, cell, $cell) {
+    return false;
+  },
+  format: function(s, table, cell, cellIndex) {
+    return $(cell).attr('value');
+  },
+  type: 'numeric'
+});
