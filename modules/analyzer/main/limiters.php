@@ -78,11 +78,11 @@ $limiter_median = $limiters['median'];
 $limiter_quantile = $limiters['limiter_quantile'];
 
 if ($lg_settings['ana']['players']) {
-  $pl_limiter = $limiters_players['limiter_higher']-1;
+  $pl_limiter = $limiters_players['limiter_higher'];
   $pl_limiter_median = $limiters_players['median'];
 } else {
-  $pl_limiter = $limiter_median;
-  $pl_limiter_median = $limiter_graph;
+  $pl_limiter = $limiter_graph;
+  $pl_limiter_median = $limiter_median;
 }
 
 echo <<<LIMITERS
