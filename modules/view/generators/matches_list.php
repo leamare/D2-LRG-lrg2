@@ -13,9 +13,9 @@ function rg_generator_matches_list($table_id, &$context) {
           "<th>".locale_string("match")."</th>".
           "<th data-sortInitialOrder=\"asc\">".locale_string("radiant")."</th>".
           "<th data-sortInitialOrder=\"asc\">".locale_string("dire")."</th>".
-          "<th>".locale_string("duration")."</th>".
+          "<th class=\"sorter-valuesort\">".locale_string("duration")."</th>".
           "<th>".locale_string("kills_combined")."</th>".
-          "<th>".locale_string("date")."</th>".
+          "<th class=\"sorter-valuesort\">".locale_string("date")."</th>".
         "</tr></thead><tbody>";
   foreach($matches as $mid) {
     if(isset($report['teams']) && isset($report['match_participants_teams'][$mid])) {
@@ -148,6 +148,7 @@ function rg_generator_hero_matches_list($table_id, $hero, $limit = null, $wide =
         foreach ($report['hero_positions_matches'][$i][$j][$hero] as $mid) {
           if (!isset($matches[$mid])) continue;
           $matches[$mid]['role'] = "$i.$j";
+          $matches[$mid]['rolenum'] = $i ? $j : ($j == 1 ? 5 : 4);
         }
       }
     }
@@ -162,14 +163,14 @@ function rg_generator_hero_matches_list($table_id, $hero, $limit = null, $wide =
   krsort($matches);
 
   $res .= "<table id=\"$table_id\" class=\"list sortable ".($wide ? 'wide' : '')."\"><thead><tr>".
-    "<th>".locale_string("match")."</th>".
+    "<th class=\"sorter-valuesort\">".locale_string("match")."</th>".
     "<th>".locale_string("player")."</th>".
-    ($keys['role'] ? "<th>".locale_string("position")."</th>" : "").
+    ($keys['role'] ? "<th class=\"sorter-valuesort\">".locale_string("position")."</th>" : "").
     "<th>".locale_string("side")."</th>".
     "<th>".locale_string("allies")."</th>".
     "<th>".locale_string("enemy")."</th>".
     "<th>".locale_string("won")."</th>".
-    "<th>".locale_string("duration")."</th>".
+    "<th class=\"sorter-valuesort\">".locale_string("duration")."</th>".
   "</tr>".
   "</thead><tbody>";
 
@@ -178,10 +179,12 @@ function rg_generator_hero_matches_list($table_id, $hero, $limit = null, $wide =
   }
 
   foreach ($matches as $mid => $data) {
+    $posnum = $data['rolenum'];
+
     $res .= "<tr ".($keys['team'] ? "data-aliases=\"".team_name($data['team_self'])." ".team_name($data['team_enemy'])."\"" : "").">".
-      "<td>".match_link($mid)."</td>".
+      "<td value=\"$mid\">".match_link($mid)."</td>".
       "<td>".player_link($data['player'])."</td>".
-      ($keys['role'] ? "<td>".locale_string(isset($data['role']) ? "position_".$data['role'] : "none")."</td>" : "").
+      ($keys['role'] ? "<td value=\"$posnum\">".locale_string(isset($data['role']) ? "position_".$data['role'] : "none")."</td>" : "").
       "<td>".locale_string($data['is_radiant'] ? 'radiant' : 'dire')."</td>".
       "<td>";
     
@@ -196,7 +199,7 @@ function rg_generator_hero_matches_list($table_id, $hero, $limit = null, $wide =
     }
 
     $res .= "</td><td>".locale_string(!($data['radiant_win'] xor $data['is_radiant']) ? 'won' : 'lost')."</td>".
-      "<td>".convert_time_seconds($data['duration'])."</td>".
+      "<td value=\"{$data['duration']}\">".convert_time_seconds($data['duration'])."</td>".
     "</tr>";
 
     if ($limit) {
