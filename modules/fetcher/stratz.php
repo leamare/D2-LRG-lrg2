@@ -346,7 +346,7 @@ function get_stratz_response($match) {
 
   $r['matches']['analysis_status'] = $stratz['data']['match']['parsedDateTime'] ? 1 : 0;
   $r['matches']['seriesid'] = $stratz['data']['match']['seriesId'] ?? null;
-
+  
   if ($stratz['data']['match']['statsDateTime'] && !empty($stratz['data']['match']['radiantNetworthLeads'])) {
     [ $r['matches']['stomp'], $r['matches']['comeback'] ] = find_comebacks($stratz['data']['match']['radiantNetworthLeads'], $stratz['data']['match']['didRadiantWin']);
   } else {

@@ -63,8 +63,8 @@ function rg_view_generate_items_irecords() {
     <tr>
       <th>".locale_string("match")."</th>
       <th colspan=\"2\">".locale_string("hero")."</th>
-      <th>".locale_string("item_timing")."</th>
-      <th>".locale_string("item_timing_diff")."</th>
+      <th data-sorter=\"valuesort\">".locale_string("item_timing")."</th>
+      <th data-sorter=\"valuesort\">".locale_string("item_timing_diff")."</th>
     </tr></thead></tbody>";
 
     foreach ($report['items']['records'][$item] as $hero => $line) {
@@ -72,8 +72,8 @@ function rg_view_generate_items_irecords() {
       $res[$tag] .=  "<tr><td>".match_link($line['match'])."</td>".
         "<td>".hero_portrait($hero)."</td>".
         "<td>".hero_link($hero)."</td>".
-        "<td data-sorter=\"time\">".convert_time_seconds($line['time'])."</td>".
-        "<td data-sorter=\"time\">".convert_time_seconds($line['diff'])."</td>".
+        "<td value=\"{$line['time']}\">".convert_time_seconds($line['time'])."</td>".
+        "<td value=\"{$line['diff']}\">".convert_time_seconds($line['diff'])."</td>".
       "</tr>";
     }
 
@@ -133,8 +133,8 @@ function rg_view_generate_items_irecords() {
       <th>".locale_string("match")."</th>
       <th colspan=\"2\">".locale_string("item")."</th>
       <th colspan=\"2\">".locale_string("hero")."</th>
-      <th data-sorter=\"time\">".locale_string("item_timing")."</th>
-      <th data-sorter=\"time\">".locale_string("item_timing_diff")."</th>
+      <th data-sorter=\"valuesort\">".locale_string("item_timing")."</th>
+      <th data-sorter=\"valuesort\">".locale_string("item_timing_diff")."</th>
     </tr></thead></tbody>";
 
     foreach ($overview as $line) {
@@ -143,8 +143,8 @@ function rg_view_generate_items_irecords() {
         "<td>".item_link($line['item'])."</td>".
         "<td>".hero_portrait($line['hero'])."</td>".
         "<td>".hero_link($line['hero'])."</td>".
-        "<td>".convert_time_seconds($line['time'])."</td>".
-        "<td>".convert_time_seconds($line['diff'])."</td>".
+        "<td value=\"{$line['time']}\">".convert_time_seconds($line['time'])."</td>".
+        "<td value=\"{$line['diff']}\">".convert_time_seconds($line['diff'])."</td>".
       "</tr>";
     }
 

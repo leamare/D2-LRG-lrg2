@@ -203,14 +203,14 @@ function rg_view_generate_items_heroes() {
     "<th data-sorter=\"digit\" data-col-group=\"items_winrate_shifts\">".locale_string("items_early_wr_shift")."</th>".
     "<th data-sorter=\"digit\" data-col-group=\"items_winrate_shifts\">".locale_string("items_late_wr_shift")."</th>".
     "<th data-sorter=\"digit\" data-col-group=\"items_winrate_shifts\">".locale_string("items_wr_gradient")."</th>".
-    "<th class=\"separator\" data-sorter=\"time\" data-col-group=\"items_timings\">".locale_string("item_time_mean")."</th>".
-    "<th data-sorter=\"time\" data-col-group=\"items_timings\">".locale_string("item_time_min")."</th>".
-    "<th data-sorter=\"time\" data-col-group=\"items_timings\">".locale_string("item_time_q1")."</th>".
-    "<th data-sorter=\"time\" data-col-group=\"items_timings\">".locale_string("item_time_median")."</th>".
-    "<th data-sorter=\"time\" data-col-group=\"items_timings\">".locale_string("item_time_q3")."</th>".
-    "<th data-sorter=\"time\" data-col-group=\"items_timings\">".locale_string("item_time_max")."</th>".
-    "<th data-sorter=\"time\" data-col-group=\"items_timings\">".locale_string("item_time_window")."</th>".
-    "<th data-sorter=\"time\" data-col-group=\"items_timings\">".locale_string("item_time_std_dev")."</th>".
+    "<th class=\"separator\" data-sorter=\"valuesort\" data-col-group=\"items_timings\">".locale_string("item_time_mean")."</th>".
+    "<th data-sorter=\"valuesort\" data-col-group=\"items_timings\">".locale_string("item_time_min")."</th>".
+    "<th data-sorter=\"valuesort\" data-col-group=\"items_timings\">".locale_string("item_time_q1")."</th>".
+    "<th data-sorter=\"valuesort\" data-col-group=\"items_timings\">".locale_string("item_time_median")."</th>".
+    "<th data-sorter=\"valuesort\" data-col-group=\"items_timings\">".locale_string("item_time_q3")."</th>".
+    "<th data-sorter=\"valuesort\" data-col-group=\"items_timings\">".locale_string("item_time_max")."</th>".
+    "<th data-sorter=\"valuesort\" data-col-group=\"items_timings\">".locale_string("item_time_window")."</th>".
+    "<th data-sorter=\"valuesort\" data-col-group=\"items_timings\">".locale_string("item_time_std_dev")."</th>".
   "</tr></thead><tbody>";
 
   foreach ($heroes as $hero => $line) {
@@ -238,14 +238,14 @@ function rg_view_generate_items_heroes() {
       "<td data-col-group=\"items_winrate_shifts\">".($line['early_wr'] > $line['winrate'] ? '+' : '').number_format(($line['early_wr']-$line['winrate'])*100, 2)."%</td>".
       "<td data-col-group=\"items_winrate_shifts\">".($line['late_wr'] > $line['winrate'] ? '+' : '').number_format(($line['late_wr']-$line['winrate'])*100, 2)."%</td>".
       "<td data-col-group=\"items_winrate_shifts\">".number_format($line['grad']*100, 2)."%</td>".
-      "<td class=\"separator\" data-col-group=\"items_timings\">".convert_time_seconds($line['avg_time'])."</td>".
-      "<td data-col-group=\"items_timings\">".convert_time_seconds($line['min_time'])."</td>".
-      "<td data-col-group=\"items_timings\">".convert_time_seconds($line['q1'])."</td>".
-      "<td data-col-group=\"items_timings\">".convert_time_seconds($line['median'])."</td>".
-      "<td data-col-group=\"items_timings\">".convert_time_seconds($line['q3'])."</td>".
-      "<td data-col-group=\"items_timings\">".convert_time_seconds($line['max_time'])."</td>".
-      "<td data-col-group=\"items_timings\">".convert_time_seconds($line['q3']-$line['q1'])."</td>".
-      "<td data-col-group=\"items_timings\">".convert_time_seconds($line['std_dev'])."</td>".
+      "<td class=\"separator\" data-col-group=\"items_timings\" value=\"{$line['avg_time']}\">".convert_time_seconds($line['avg_time'])."</td>".
+      "<td data-col-group=\"items_timings\" value=\"{$line['min_time']}\">".convert_time_seconds($line['min_time'])."</td>".
+      "<td data-col-group=\"items_timings\" value=\"{$line['q1']}\">".convert_time_seconds($line['q1'])."</td>".
+      "<td data-col-group=\"items_timings\" value=\"{$line['median']}\">".convert_time_seconds($line['median'])."</td>".
+      "<td data-col-group=\"items_timings\" value=\"{$line['q3']}\">".convert_time_seconds($line['q3'])."</td>".
+      "<td data-col-group=\"items_timings\" value=\"{$line['max_time']}\">".convert_time_seconds($line['max_time'])."</td>".
+      "<td data-col-group=\"items_timings\" value=\"".($line['q3']-$line['q1'])."\">".convert_time_seconds($line['q3']-$line['q1'])."</td>".
+      "<td data-col-group=\"items_timings\" value=\"{$line['std_dev']}\">".convert_time_seconds($line['std_dev'])."</td>".
     "</tr>";
   }
 
