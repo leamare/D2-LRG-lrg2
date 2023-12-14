@@ -1509,9 +1509,9 @@ function fetch($match) {
         ];
       }
     }
-
+    
     foreach ($matchdata['players'] as $pl) {
-      $r['wards'][] = [
+      $t_wards[] = [
         'matchid' => $match,
         'playerid' => $pl['account_id'],
         'heroid' => $pl['hero_id'],
@@ -1520,6 +1520,7 @@ function fetch($match) {
         'destroyed_log' => addslashes(\json_encode(array_values($wards_destruction_log[ $pl['account_id'] ] ?? []))),
       ];
     }
+    $r['wards'] = $t_wards;
   }
 
   $n = array_search($match, $scheduled);
