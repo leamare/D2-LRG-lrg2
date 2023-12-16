@@ -529,15 +529,15 @@ table .hero_portrait, .flextable .hero_portrait {
   opacity: 1;
 }
 .match-team.dire .match-hero[data-order]:after {
-  right: 7.5%;
+  right: 6.5%;
 }
 .match-team.radiant .match-hero[data-order]:after {
-  left: 7.5%;
+  left: 6.5%;
 }
 .match-heroes-bans .match-hero[data-order]:after {
   font-size: 0.75em;
   width: 10%;
-  top: 11.5%;
+  top: 12.5%;
 }
 
 .match-hero[data-order]:before {
@@ -546,7 +546,7 @@ table .hero_portrait, .flextable .hero_portrait {
   height: 0;
   border-style: solid;
   position: absolute;
-  opacity: .65;
+  opacity: .75;
   transition: opacity 300ms ease;
 }
 .match-hero[data-order]:hover:before {
@@ -556,13 +556,13 @@ table .hero_portrait, .flextable .hero_portrait {
   border-width: 0 2.75em 2.75em 0;
   border-color: transparent black transparent transparent;
   right: 4.9%;
-  top: 5%;
+  top: 7%;
 }
 .match-team.radiant .match-hero[data-order]:before {
   border-width: 0 0 2.75em 2.75em;
   border-color: transparent transparent transparent black;
   left: 4.9%;
-  top: 5%;
+  top: 7%;
 }
 .match-team.dire .match-heroes-bans .match-hero[data-order]:before {
   border-width: 0 2em 1.75em 0;
