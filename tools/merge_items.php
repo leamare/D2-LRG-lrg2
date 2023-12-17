@@ -23,7 +23,7 @@ $report['items'] = [];
 $report['items']['stats'] = [];
 
 //stats
-foreach ($source_reports as &$rep) {
+foreach ($source_reports as $s => &$rep) {
   $rep['items']['stats'] = unwrap_data($rep['items']['stats']);
 
   if (empty($report['items']['stats'])) {

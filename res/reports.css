@@ -1939,13 +1939,19 @@ input[type=search]::-webkit-search-cancel-button {
   transition: 150ms linear;
 }
 .card.smaller {
-  /* width: calc(14.2857% - 10px);
-  max-width: 23em;
-  font-size: 13px; */
-  max-width: min(max(20.5em, calc(14.2857% - 10px)), 350px);
   font-size: 13px;
-  min-width: min(20.5em, calc(14.2857% - 10px));
-  flex: 1;
+}
+@media screen and (max-width: 2600px) {
+  .card.smaller {
+    width: calc(14.2857% - 10px);
+    min-width: min(20.5em, calc(14.2857% - 10px));
+  }
+}
+@media screen and (min-width: 2600px) {
+  .card.smaller {
+    width: calc(12.5% - 10px);
+    min-width: min(20.5em, calc(12.5% - 10px));
+  }
 }
 
 .card:hover {
