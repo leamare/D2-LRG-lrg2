@@ -145,6 +145,13 @@ const SUMMARY_KEYS_REPLACEMENTS = [
   "opener_pick_radiant_ratio" => "opener_pick_radiant_ratio_s",
 ];
 
+const VALUESORT_COLS_KEYS = [
+  'duration',
+  'avg_match_len',
+  'matches_median_duration',
+  'avg_win_len',
+];
+
 if (isset($__lrg_onerror) && !$isApi) {
   $projectName = $projectName ?? "LRG2";
 

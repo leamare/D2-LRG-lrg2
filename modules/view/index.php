@@ -38,6 +38,9 @@ function report_list_element($report) {
     $event_type = $report['tvt'] ? 'tvt' : (
       isset($report['players']) ? 'pvp' : 'ranked'
     );
+    $event_type_i = $report['tvt'] ? 0 : (
+      isset($report['players']) ? 1 : 2
+    );
 
     $participants = isset($report['teams']) ? sizeof($report['teams']) : (
       isset($report['players']) ? sizeof($report['players']) : '-'
@@ -85,9 +88,9 @@ function report_list_element($report) {
       ($iscat ? '' : "data-aliases=\"".$aliases."\"").
       ">".$report['name']."</a></td>".
     "<td>".($report['id'] == "" ? "-" : "<a href=\"?lid=".$report['id'].(empty($linkvars) ? "" : "&".$linkvars)."\">".$report['id']."</a>")."</td>".
-    "<td>".locale_string($event_type)."</td>".
+    "<td value=\"$event_type_i\">".locale_string($event_type)."</td>".
     "<td>".$report['matches']."</td>".
-    "<td>".(
+    "<td value=\"".min(array_keys($report['patches']))."\">".(
       empty($report['patches']) ? '- (1)' : (
         sizeof($report['patches']) == 1 ?
           convert_patch( array_keys($report['patches'])[0] ).' (1)' : 
@@ -607,14 +610,14 @@ if (sizeof($cache['reps']) === 0) {
         "<th width=\"100px\"></th>".
         "<th>".locale_string("cat_name")."</th>".
         "<th>".locale_string("league_id")."</th>".
-        "<th>".locale_string("type")."</th>".
+        "<th class=\"sorter-valuesort\">".locale_string("type")."</th>".
         "<th>".locale_string("matches_total")."</th>".
-        "<th>".locale_string("patches")."</th>".
+        "<th class=\"sorter-valuesort\">".locale_string("patches")."</th>".
         "<th>".locale_string("participants")."</th>".
         "<th>".locale_string("regions")."</th>".
         "<th>".locale_string("days")."</th>".
-        "<th>".locale_string("start_date")."</th>".
-        "<th>".locale_string("end_date")."</th>".
+        "<th class=\"sorter-valuesort\">".locale_string("start_date")."</th>".
+        "<th class=\"sorter-valuesort\">".locale_string("end_date")."</th>".
       "</tr></thead>";
       
       foreach($cats_c as $report) {
