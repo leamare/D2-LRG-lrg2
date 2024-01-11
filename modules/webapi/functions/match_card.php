@@ -77,7 +77,7 @@ function match_card($mid) {
 
   $match['cluster'] = $report['matches_additional'][$mid]['cluster'];
 
-  $match['region'] = $meta['clusters'][ $report['matches_additional'][$mid]['cluster'] ];
+  $match['region'] = $meta['clusters'][ $report['matches_additional'][$mid]['cluster'] ] ?? 0;
 
   $match['game_mode'] = $report['matches_additional'][$mid]['game_mode'];
 
