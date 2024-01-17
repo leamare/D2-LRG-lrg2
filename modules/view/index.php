@@ -652,6 +652,7 @@ if (sizeof($cache['reps']) === 0) {
 
       foreach ($groups as $gt => $gl) {
         if (empty($gl)) continue;
+        if (in_array($gt, $cats_groups_hidden ?? [])) continue;
 
         $modules .= "<div class=\"compact-section-header wide compact primary\">".
           "<span class=\"group-name\">".
