@@ -134,7 +134,7 @@ if ($restore) {
           $sql = "INSERT INTO $t ($schema) VALUES \n".implode(",\n", $qlines).';';
           if ($conn->multi_query($sql) === TRUE);
           else {
-            $fname_base = "tmp/query_${table}_".time();
+            $fname_base = "tmp/query_{$table}_".time();
             $i = 0;
             while(file_exists(($fname = $fname_base))) {
               $fname = $fname_base.".$i";
@@ -203,7 +203,7 @@ if ($restore) {
     $query_res->free_result();
 
     // fetching data
-    $fname = $t.'_'.time().'.csv';
+    $fname = 'tmp/'.$t.'_'.$lrg_league_tag.'_'.time().'.csv';
     $files[$t.'.csv'] = $fname;
 
     $fp = fopen($fname, "w+");
@@ -268,16 +268,28 @@ if ($restore) {
   unset($buffer);
   $conn->close();
 
+  if (!file_exists("leagues/$lrg_league_tag.json")) {
+    $descriptor = json_decode(file_get_contents("templates/default.json"), true);
+    $descriptor['league_tag'] = $lrg_league_tag;
+    $descriptor['league_desc'] = '';
+    $descriptor['league_name'] = $lrg_league_tag;
+    $descriptor['version'] = $lrg_version;
+    file_put_contents("leagues/$lrg_league_tag.json", json_encode($descriptor));
+  }
+
+  $descriptor = json_decode(file_get_contents("leagues/$lrg_league_tag.json"), true);
+  $out_tag = $descriptor['league_tag'];
+
   if ($make_report) {
     echo "[ ] Generating report...";
     exec("php rg_analyzer.php -l$lrg_league_tag");
-    $files['report.json'] = "reports/report_$lrg_league_tag.json";
+    $files['report.json'] = "reports/report_$out_tag.json";
     echo "OK.\n";
   }
 
-  if (file_exists("reports/report_$lrg_league_tag.json")) {
+  if (file_exists("reports/report_$out_tag.json")) {
     echo "[ ] Adding report file...";
-    $files['report.json'] = "reports/report_$lrg_league_tag.json";
+    $files['report.json'] = "reports/report_$out_tag.json";
     echo "OK.\n";
   }
 
@@ -300,9 +312,16 @@ if ($restore) {
 
   echo "[ ] Packing files...";
   $a = new PharData($output_path);
+
   foreach ($files as $n => $l) {
-    $a->addFile($l, $n);
+    try {
+      $a->addFile($l, $n);
+    } catch (\Throwable $e) {
+      echo "\n[E] Couldn't pack file `$n`: ".$e->getMessage()."\n";
+      echo "\t...";
+    }
   }
+  
   $a->compress(Phar::GZ);
   unlink($output_path);
   echo "OK\n";
