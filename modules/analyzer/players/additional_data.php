@@ -2,10 +2,10 @@
 
 $result["players"] = [];
 $sql = "SELECT p.playerid, min(nickname) FROM matchlines ml JOIN players p ON ml.playerid = p.playerid ".
-  (!empty($players_interest) ? " WHERE playerid in (".implode(',', $players_interest).")" : "").
+  (!empty($players_interest) ? " WHERE ml.playerid in (".implode(',', $players_interest).")" : "").
   " GROUP BY 1;";
 
-if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for PLAYERS.\n";
+ if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for PLAYERS.\n";
 else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
 
 $query_res = $conn->store_result();
