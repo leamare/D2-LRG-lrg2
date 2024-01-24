@@ -1,6 +1,16 @@
 <?php 
 
-$endpoints['list'] = function($mods, $vars, &$report) use (&$endpoints, $cat, $cats_file, $hidden_cat) {
+$endpoints['list'] = function($mods, $vars, &$report) use (
+  &$endpoints,
+  $cat,
+  $cats_file,
+  $hidden_cat,
+  &$cats_groups_priority,
+  &$cats_groups_names,
+  &$cats_groups_icons,
+  &$cats_groups_hidden,
+  &$__featured_cats
+) {
   $cache = $endpoints['getcache']($mods, $vars, $report);
   $reps = [];
 
@@ -18,7 +28,7 @@ $endpoints['list'] = function($mods, $vars, &$report) use (&$endpoints, $cat, $c
       $reps = [];
       foreach($cache["reps"] as $tag => $rep) {
         if(check_filters($rep, $cats[$cat]['filters'])) {
-          if ($cats[$cat]['exclude_hidden'] && isset($cats[$hidden_cat])) {
+          if (($cats[$cat]['exclude_hidden'] ?? true) && isset($cats[$hidden_cat])) {
             if(check_filters($rep, $cats[$hidden_cat]['filters'])) {
               continue;
             }
@@ -86,6 +96,13 @@ $endpoints['list'] = function($mods, $vars, &$report) use (&$endpoints, $cat, $c
     "cat_selected" => $cat,
     "cat_list" => $cats_list,
     "count" => count($reps),
-    "reports" => $reps
+    "reports" => $reps,
+    "cat_groups" => [
+      "priority" => $cats_groups_priority ?? [],
+      "names" => $cats_groups_names ?? [],
+      "icons" => $cats_groups_icons ?? [],
+      "hidden" => $cats_groups_hidden ?? []
+    ],
+    "featured" => $__featured_cats ?? []
   ];
 };
