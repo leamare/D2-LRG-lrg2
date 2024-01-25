@@ -414,7 +414,7 @@ function fetch($match) {
         }
       }
 
-      if ($matchdata['players'][0]['lh_t'] == null) {
+      if (empty($matchdata['players'][0]['lh_t'])) {
         if($request_unparsed && !in_array($match, $scheduled)) {
           $opendota->request_match($match);
           echo "..Unparsed. Requested and scheduled $match\n";
