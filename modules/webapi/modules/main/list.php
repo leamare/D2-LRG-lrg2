@@ -60,25 +60,25 @@ $endpoints['list'] = function($mods, $vars, &$report) use (
       }
     } else if ($cat == "all") {
       $reps = $cache["reps"];
-    } else if ($cat == "recent") {
-      $reps = $cache["reps"];
-      uasort($reps, function($a, $b) {
-        $lu = ($b['last_update'] ?? 0) <=> ($a['last_update'] ?? 0);
+    // } else if ($cat == "recent") {
+    //   $reps = $cache["reps"];
+    //   uasort($reps, function($a, $b) {
+    //     $lu = ($b['last_update'] ?? 0) <=> ($a['last_update'] ?? 0);
   
-        if ($lu) return $lu;
+    //     if ($lu) return $lu;
   
-        return ($b['matches'] ?? 0) <=> ($a['matches'] ?? 0);
-      });
-      if ($recent_last_limit ?? false) {
-        $limit = null;
-        foreach($reps as $k => $v) {
-          if ($v['last_update'] < ($recent_last_limit ?? 5)) {
-            $limit = $k;
-            break;
-          }
-        }
-        $reps = array_slice($reps, 0, $limit);
-      }
+    //     return ($b['matches'] ?? 0) <=> ($a['matches'] ?? 0);
+    //   });
+    //   if ($recent_last_limit ?? false) {
+    //     $limit = null;
+    //     foreach($reps as $k => $v) {
+    //       if ($v['last_update'] < ($recent_last_limit ?? 5)) {
+    //         $limit = $k;
+    //         break;
+    //       }
+    //     }
+    //     $reps = array_slice($reps, 0, $limit);
+    //   }
     } else {
       throw new \Exception("No such category.");
     }

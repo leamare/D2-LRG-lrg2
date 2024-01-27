@@ -18,7 +18,7 @@
     "players": true,
     "players_names": true,
     "anon_records": false,
-    "milestones": false,
+    "milestones": true,
 
     "records_extended": 6,
     "avg_limit" : 5,

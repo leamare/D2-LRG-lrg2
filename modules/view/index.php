@@ -79,6 +79,8 @@ function report_list_element($report) {
   }
   if (empty($_lid)) $_lid = "default";
 
+  if (empty($report['patches'])) $report['patches'] = [0];
+
   $res = "<tr class=\"expandable primary closed\" data-group=\"report-".$report['tag']."\">".
     "<td><span class=\"expand\"></span></td>".
     "<td>".
