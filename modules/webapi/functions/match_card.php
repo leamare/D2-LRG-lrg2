@@ -83,6 +83,52 @@ function match_card($mid) {
 
   $match['date'] = $report['matches_additional'][$mid]['date'];
 
+  if (isset($report['records'])) {
+    $match_records = [];
+
+    $tags = isset($report['regions_data']) ? array_keys($report['regions_data']) : [];
+    array_unshift($tags, null);
+
+    foreach ($tags as $reg) {
+      if (!$reg) {
+        $context_records = $report['records'];
+        $context_records_ext = $report['records_ext'] ?? [];
+      } else {
+        $context_records = $report['regions_data'][$reg]['records'];
+        $context_records_ext = $report['regions_data'][$reg]['records_ext'] ?? [];
+      }
+
+      if (is_wrapped($context_records_ext)) {
+        $context_records_ext = unwrap_data($context_records_ext);
+      }
+
+      foreach ($context_records as $rectag => $record) {
+        if (strpos($rectag, "_team") !== false) continue;
+  
+        if ($record['matchid'] == $mid) {
+          $record['tag'] = $rectag;
+          $record['placement'] = 1;
+          $record['region'] = $reg;
+          $match_records[] = $record;
+        }
+
+        if (!empty($context_records_ext)) {
+          foreach ($context_records_ext[$rectag] ?? [] as $i => $rec) {
+            if (empty($rec)) continue;
+            if ($rec['matchid'] == $mid) {
+              $rec['tag'] = $rectag;
+              $rec['placement'] = $i+2;
+              $rec['region'] = $reg;
+              $match_records[] = $rec;
+            }
+          }
+        }
+      }
+    }
+
+    $match['records'] = $match_records;
+  }
+
   return $match;
 }
 
