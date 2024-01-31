@@ -3,7 +3,7 @@ $result["players_combo_graph"] = rg_query_player_graph(
   $conn,
   $result['players_summary'],
   $result['random']['matches_total'],
-  $limiters_players['limiter_higher'], // has limiter_graph parameter, but it's way too low
+  $limiters_players_pvp['limiter_higher'], // has limiter_graph parameter, but it's way too low
   null
 );
 
