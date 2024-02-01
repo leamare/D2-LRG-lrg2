@@ -466,8 +466,8 @@ table .hero_portrait, .flextable .hero_portrait {
   float:left;
 }
 .match-team {
-  width: 34%;
-  margin: 10px 2% 0;
+  width: 38%;
+  margin: 10px 1% 0;
   font-size: inherit;
   line-height: inherit;
 }
@@ -518,7 +518,7 @@ table .hero_portrait, .flextable .hero_portrait {
   content: attr(data-order);
   width: 20%;
   text-align: center;
-  font-size: 1em;
+  font-size: 1.1em;
   position: absolute;
   color: white;
   top: 11%;
@@ -529,10 +529,10 @@ table .hero_portrait, .flextable .hero_portrait {
   opacity: 1;
 }
 .match-team.dire .match-hero[data-order]:after {
-  right: 6.5%;
+  right: 5.5%;
 }
 .match-team.radiant .match-hero[data-order]:after {
-  left: 6.5%;
+  left: 5.5%;
 }
 .match-heroes-bans .match-hero[data-order]:after {
   font-size: 0.75em;
@@ -553,24 +553,24 @@ table .hero_portrait, .flextable .hero_portrait {
   opacity: 1;
 }
 .match-team.dire .match-hero[data-order]:before {
-  border-width: 0 2.75em 2.75em 0;
+  border-width: 0 3.4em 3.4em 0;
   border-color: transparent black transparent transparent;
   right: 4.9%;
   top: 7%;
 }
 .match-team.radiant .match-hero[data-order]:before {
-  border-width: 0 0 2.75em 2.75em;
+  border-width: 0 0 3.4em 3.4em;
   border-color: transparent transparent transparent black;
   left: 4.9%;
   top: 7%;
 }
 .match-team.dire .match-heroes-bans .match-hero[data-order]:before {
-  border-width: 0 2em 1.75em 0;
+  border-width: 0 2.25em 2.25em 0;
   right: 0;
   top: 7%;
 }
 .match-team.radiant .match-heroes-bans .match-hero[data-order]:before {
-  border-width: 0 0 1.75em 1.75em;
+  border-width: 0 0 2.25em 2.25em;
   left: 0;
   top: 7%;
 }
@@ -596,6 +596,7 @@ table .hero_portrait, .flextable .hero_portrait {
   float: right;
   width: 20%;
   padding-top: 10px;
+  margin-top: 36px;
 }
 .match-info-line {
   font-size: 16px;
@@ -614,6 +615,43 @@ table .hero_portrait, .flextable .hero_portrait {
 }
 .dire .match-team-score {
   float: left;
+}
+
+.match-records-container {
+  clear: both;
+  font-size: 1.3em;
+  text-align: left;
+  width: 97%;
+  margin: 0 auto;
+}
+.match-records-header {
+  font-size: 20px;
+  letter-spacing: 2px;
+  text-align: left;
+  font-weight: bold;
+  color: var(--link);
+  line-height: 1.5em;
+}
+.match-records-subheader {
+  font-size: 14px;
+  text-align: left;
+  line-height: 1.25em;
+  margin-bottom: .5em;
+}
+.match-record-element {
+  line-height: 1.5em;
+  flex-basis: 50%;
+}
+.match-record-element label {
+  font-weight: bold;
+}
+.match-record-element .hero_icon {
+  height: 1.4em;
+}
+.match-records-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
 }
 
 .player-name {

@@ -1,11 +1,7 @@
 <?php
 
 function match_card($mid) {
-  global $report;
-  global $meta;
-  global $strings;
-  global $linkvars;
-  global $leaguetag;
+  global $report, $meta, $match_card_records_cnt;
   if (empty($mid)) return "";
 
   $output = "<div class=\"match-card\"><div class=\"match-id\">".match_link($mid)."</div>";
@@ -118,7 +114,93 @@ function match_card($mid) {
                     date(locale_string("time_format")." ".locale_string("date_format"), $report['matches_additional'][$mid]['date'] + $report['matches_additional'][$mid]['duration'])."</div>
               </div>";
 
+  if (isset($report['records'])) {
+    $match_records = [];
+    $reccnt = 0;
+
+    $tags = isset($report['regions_data']) ? array_keys($report['regions_data']) : [];
+    array_unshift($tags, null);
+
+    foreach ($tags as $reg) {
+      if (!$reg) {
+        $context_records = $report['records'];
+        $context_records_ext = $report['records_ext'] ?? [];
+      } else {
+        $context_records = $report['regions_data'][$reg]['records'];
+        $context_records_ext = $report['regions_data'][$reg]['records_ext'] ?? [];
+      }
+
+      if (is_wrapped($context_records_ext)) {
+        $context_records_ext = unwrap_data($context_records_ext);
+      }
+
+      foreach ($context_records as $rectag => $record) {
+        if (strpos($rectag, "_team") !== false) continue;
+  
+        if ($record['matchid'] == $mid) {
+          $record['tag'] = $rectag;
+          $record['placement'] = 1;
+          $record['region'] = $reg;
+          $match_records[] = $record;
+          $reccnt++;
+        }
+      }
+      if (!empty($context_records_ext)) {
+        foreach ($context_records as $rectag => $record) {
+          if (strpos($rectag, "_team") !== false) continue;
+
+          foreach ($context_records_ext[$rectag] ?? [] as $i => $rec) {
+            if ($rec['matchid'] == $mid) {
+              if (empty($rec)) continue;
+              $rec['tag'] = $rectag;
+              $rec['placement'] = $i+2;
+              $rec['region'] = $reg;
+              $match_records[] = $rec;
+              $reccnt++;
+            }
+          }
+        }
+      }
+    }
+
+    if (!empty($match_records)) {
+      usort($match_records, function($a, $b) {
+        if ((!$a['region'] || !$b['region']) && ($a['region'] != $b['region'])) {
+          return !$a['region'] ? -1 : ( !$b['region'] ? 1 : 0 );
+        }
+
+        if ((!$a['playerid'] || !$b['playerid']) && ($a['playerid'] != $b['playerid'])) {
+          return !$a['playerid'] ? -1 : ( !$b['playerid'] ? 1 : 0 );
+        }
+
+        return $a['placement'] <=> $b['placement'];
+      });
+      $match_records = array_slice($match_records, 0, $match_card_records_cnt);
+
+      $output .= "<div class=\"match-records-container\">".
+        "<div class=\"match-records-header\">".locale_string('records')."</div>".
+        "<div class=\"match-records-subheader\">".locale_string('total').": $reccnt</div>".
+      "<div class=\"match-records-list\">";
+      foreach ($match_records as $record) {
+        $output .= "<div class=\"match-record-element\"><label>".
+            ( isset($record['item_id']) ? item_full_link($record['item_id']) : locale_string($record['tag']) ).
+            ($record['placement'] == 1 ? '' : ' #'.$record['placement']).
+            ($record['region'] ? " (".locale_string("region".$record['region']).")" : '').
+          "</label>: ".(
+            strpos($record['tag'], "duration") !== FALSE || strpos($record['tag'], "_len") !== FALSE ||
+            strpos($record['tag'], "_time") !== FALSE ||
+            strpos($record['tag'], "shortest") !== FALSE || strpos($record['tag'], "longest") !== FALSE ?
+            convert_time($record['value']) :
+            ( $record['value'] - floor($record['value']) != 0 ? number_format($record['value'], 2) : number_format($record['value'], 0) )
+          ).($record['heroid'] ? " @ ".hero_icon($record['heroid']) : '').(!empty($record['playerid']) ? " ".player_link($record['playerid'])."" : "").
+        "</div>";
+      }
+      if ($reccnt > $match_card_records_cnt) {
+        $output .= "<div class=\"match-record-element\">...</div>";
+      }
+      $output .= "</div></div>";
+    }
+  }
+
   return $output."</div>";
 }
-
-?>
