@@ -328,7 +328,7 @@ if ($restore) {
 
   echo "[ ] Cleaning up...";
   foreach ($files as $n => $l) {
-    if (strpos($l, '/') !== false && !$remove) continue;
+    if (strpos($l, '.csv') === false && !$remove) continue;
     unlink($l);
   }
   echo "OK.\n";
