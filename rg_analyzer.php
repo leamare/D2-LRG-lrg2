@@ -51,6 +51,7 @@ include_once("modules/analyzer/__queries/player_positions.php");
 include_once("modules/analyzer/__queries/player_pairs.php");
 include_once("modules/analyzer/__queries/player_trios.php");
 include_once("modules/analyzer/__queries/player_graph.php");
+include_once("modules/analyzer/__queries/player_laning.php");
 
 include_once("modules/commons/schema.php");
 
@@ -224,6 +225,11 @@ if ($lg_settings['ana']['players'] && $lg_settings['ana']['player_positions']) {
 if($lg_settings['ana']['players'] && $lg_settings['ana']['players_draft']) {
   # player draft
   require_once("modules/analyzer/players/draft.php");
+}
+
+if($lg_settings['ana']['players'] && $lg_settings['ana']['player_laning']) {
+  # player laning
+  require_once("modules/analyzer/players/laning.php");
 }
 
 if ($lg_settings['main']['teams']) {

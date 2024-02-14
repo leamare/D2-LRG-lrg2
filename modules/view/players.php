@@ -11,6 +11,9 @@ if (isset($report['players_draft']))
 if (isset($report['player_positions']) )
   include("players/positions.php");
 
+if (isset($report['player_laning']) )
+  include("players/laning.php");
+
 if (isset($report['pvp']) )
   include("players/pvp.php");
 
@@ -46,6 +49,11 @@ if (isset($report['players_summary']) ) {
     if (isset($report['player_positions'])) {
       if(check_module($parent."positions")) {
         $res['positions'] = rg_view_generate_players_positions();
+      }
+    }
+    if (isset($report['player_laning'])) {
+      if(check_module($parent."laning")) {
+        $res['laning'] = rg_view_generate_players_laning();
       }
     }
     if (isset($report['pvp'])) {
