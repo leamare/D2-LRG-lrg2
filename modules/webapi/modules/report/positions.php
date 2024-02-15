@@ -124,7 +124,7 @@ function positions_ranking(&$context, $total_matches) {
     foreach ($context_copy as $id => $el) {
       if(isset($last) && $el['matches_s'] == $last['matches_s'] && $el['winrate_s'] == $last['winrate_s']) {
         $i++;
-        $context[$id]['rank'] = $last_rank;
+        $context[$id]['rank'] = $last_rank ?? 0;
       } else {
         $context[$id]['rank'] = round(100 - $increment*$i++, 2);
       }

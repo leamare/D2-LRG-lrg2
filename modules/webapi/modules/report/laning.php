@@ -11,15 +11,28 @@ $endpoints['laning'] = function($mods, $vars, &$report) {
     throw new \Exception("No region allowed");
   }
 
+  if (in_array("players", $mods))
+    $type = "player";
+  else 
+    $type = "hero";
+
   $ranks = [];
   $ids = [ 0 ];
-  if (!empty($vars['heroid'])) $ids[] = $vars['heroid'];
+  if (!empty($vars[$type.'id'])) $ids[] = $vars[$type.'id'];
 
-  if (is_wrapped($report['hero_laning'])) {
-    $report['hero_laning'] = unwrap_data($report['hero_laning']);
+  if ($type == "hero") {
+    if (is_wrapped($report['hero_laning'])) {
+      $report['hero_laning'] = unwrap_data($report['hero_laning']);
+    }
+  
+    $context =& $report['hero_laning'];
+  } else {
+    if (is_wrapped($report['player_laning'])) {
+      $report['player_laning'] = unwrap_data($report['player_laning']);
+    }
+  
+    $context =& $report['player_laning'];
   }
-
-  $context =& $report['hero_laning'];
 
   foreach ($ids as $id) {
     $mm = 0;
@@ -56,7 +69,7 @@ $endpoints['laning'] = function($mods, $vars, &$report) {
     foreach ($context[$id] as $elid => $el) {
       if(isset($last) && $el == $last) {
         $i++;
-        $context[$id][$elid]['rank'] = $last_rank;
+        $context[$id][$elid]['rank'] = $last_rank ?? 0;
       } else
         $context[$id][$elid]['rank'] = round(100 - $increment*$i++, 2);
       $last = $el;
@@ -66,10 +79,10 @@ $endpoints['laning'] = function($mods, $vars, &$report) {
     unset($last);
   }
 
-  if (!empty($vars['heroid'])) {
-    $context[0][ $vars['heroid'] ]['avg_advantage_gold'] = MIN10_GOLD*$context[0][ $vars['heroid'] ]['avg_advantage'];
-    $context[0][ $vars['heroid'] ]['avg_disadvantage_gold'] = MIN10_GOLD*$context[0][ $vars['heroid'] ]['avg_disadvantage'];
-    $el =& $context[0][ $vars['heroid'] ];
+  if (!empty($vars[$type.'id'])) {
+    $context[0][ $vars[$type.'id'] ]['avg_advantage_gold'] = MIN10_GOLD*$context[0][ $vars[$type.'id'] ]['avg_advantage'];
+    $context[0][ $vars[$type.'id'] ]['avg_disadvantage_gold'] = MIN10_GOLD*$context[0][ $vars[$type.'id'] ]['avg_disadvantage'];
+    $el =& $context[0][ $vars[$type.'id'] ];
     if (!isset($el['avg_gold_diff'])) {
       $el['avg_gold_diff'] = $el['matches'] ? round( (
         $el['avg_advantage']*$el['lanes_won'] + 
@@ -79,7 +92,7 @@ $endpoints['laning'] = function($mods, $vars, &$report) {
     }
     $el['avg_gold_diff_gold'] = MIN10_GOLD*$el['avg_gold_diff'];
 
-    foreach($context[ $vars['heroid'] ] as &$el) {
+    foreach($context[ $vars[$type.'id'] ] as &$el) {
       $el['avg_advantage_gold'] = MIN10_GOLD*$el['avg_advantage'];
       $el['avg_disadvantage_gold'] = MIN10_GOLD*$el['avg_disadvantage'];
       if (!isset($el['avg_gold_diff'])) {
@@ -93,8 +106,8 @@ $endpoints['laning'] = function($mods, $vars, &$report) {
     }
 
     return [
-      'total' => $context[0][ $vars['heroid'] ],
-      'opponents' => $context[ $vars['heroid'] ]
+      'total' => $context[0][ $vars[$type.'id'] ],
+      'opponents' => $context[ $vars[$type.'id'] ]
     ];
   }
 
