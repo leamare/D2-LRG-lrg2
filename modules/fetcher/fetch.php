@@ -149,6 +149,30 @@ function fetch($match) {
       }
     }
 
+    if($matchdata['matches']['duration'] < $min_duration_seconds) {
+      echo("..Duration is less than ".($min_duration_seconds/60)." minutes, skipping...\n");
+      return true;
+    }
+
+    if (!isset($matchdata['payload'])) {
+      $matchdata['payload'] = [
+        'score_radiant' => 0,
+        'score_dire' => 0,
+      ];
+
+      foreach ($matchdata['matchlines'] as $pl) {
+        $matchdata['payload'][ $pl['isRadiant'] ? 'score_radiant' : 'score_dire' ] += $pl['kills'];
+      }
+    }
+    if($matchdata['payload']['score_radiant'] < $min_score_side && $matchdata['payload']['score_dire'] < $min_score_side) {
+      echo("..Low score, skipping.\n");
+      return true;
+    }
+    // if ($matchdata['payload']['leavers'] && !$ignore_abandons) {
+    //   echo("..Abandon detected, skipping.\n");
+    //   return true;
+    // }
+
     if (!empty($lg_settings['cluster_allowlist'])) {
       if (!in_array($matchdata['matches']['cluster'] ?? 0, $lg_settings['cluster_allowlist'])) {
         echo("..Cluster ".($matchdata['matches']['cluster'] ?? 0)." is not in allowlist, skipping...\n");
@@ -1437,6 +1461,7 @@ function fetch($match) {
         }
       }
 
+      sort($sti);
       $t_starting_items[] = [
         'matchid' => $match,
         'playerid' => $player['account_id'],
