@@ -20,6 +20,8 @@
     "main_default_instance_title": "Lordgenome",
     "main_default_instance_name": "League Report Generator Instance",
     "main_default_intance_desc": "Header description",
+    "notice": "Notice",
+    "shady_alert": "This league (or org) was confirmed (or strong reasons for suspicions) to be involved with matchfixing, payments issues and/or have ethical issues and was marked Untrustworthy until further notice.",
     "game_num": "Game",
     "meet_num": "Series",
     "minute_short": "min",
