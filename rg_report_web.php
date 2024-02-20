@@ -9,7 +9,7 @@ $imports_ignore = [
   "check_directory.php",
 ];
 
-$lg_version = [ 2, 26, 0, 0, 0 ];
+$lg_version = [ 2, 26, 1, 0, 0 ];
 $isApi = false;
 
 $root = dirname(__FILE__);
@@ -164,6 +164,11 @@ if (!empty($leaguetag)) {
   }
 }
 
+if (file_exists($cats_file)) {
+  $cats = file_get_contents($cats_file);
+  $cats = json_decode($cats, true);
+}
+
 $meta = new lrg_metadata;
 
 if (isset($report)) {
@@ -270,6 +275,17 @@ if (isset($report)) {
 
 if (file_exists("rg_report_out_prerender.php"))
   include_once("rg_report_out_prerender.php");
+
+$__tmpl_trust = true;
+if (isset($shady_cat) && isset($cats[$shady_cat])) {
+  if (isset($leaguetag)) {
+    $__tmpl_trust = !check_filters($cache['reps'][$leaguetag], $cats[$shady_cat]['filters']);
+  } else if (isset($cat)) {
+    $__tmpl_trust = $cat != $shady_cat;
+  } else {
+    $__tmpl_trust = true;
+  }
+}
 
 include_once("modules/view/__template.php");
 require_once("modules/view/__post_render.php");

@@ -66,10 +66,13 @@ $cache_file = "res/cachelist.json";
 $cats_file = "res/meowslist.json";
 // hidden reports category
 $hidden_cat = "hidden";
+// untrustworthy events
+// $shady_cat = "shameonyou";
 
 // legacy main page - number of reports: -1 all, 0 none, other - number of reports on main page
 $index_list = 5;
 $title_slice_max = 4;
+$match_card_records_cnt = 12;
 
 // $link_provider = "stratz.com"; //opendota.com dotabuff.com
 $links_providers = [

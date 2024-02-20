@@ -1,9 +1,4 @@
 <?php
-if (file_exists($cats_file)) {
-  $cats = file_get_contents($cats_file);
-  $cats = json_decode($cats, true);
-}
-
 include_once("modules/view/__open_cache.php");
 include_once("modules/view/__update_cache.php");
 include_once("modules/view/functions/check_filters.php");
@@ -81,9 +76,15 @@ function report_list_element($report) {
 
   if (empty($report['patches'])) $report['patches'] = [0];
 
-  $res = "<tr class=\"expandable primary closed\" data-group=\"report-".$report['tag']."\">".
+  if (!isset($report['trust'])) $report['trust'] = true;
+
+  $res = "<tr class=\"expandable primary closed ".($report['trust'] ? '' : "shady")."\" data-group=\"report-".$report['tag']."\">".
     "<td><span class=\"expand\"></span></td>".
-    "<td>".
+    "<td class=\"banner-row\">".
+      ($report['trust'] 
+        ? "" 
+        : "<span class=\"shady-notice\" onclick=\"showModal('".htmlspecialchars(addcslashes(locale_string("shady_alert"), "'"))."', '".htmlspecialchars(addcslashes(locale_string("notice"), "'"))."');\"></span>"
+      ).
       "<img class=\"event-logo-list\" src=\"".str_replace('%LID%', $_lid, $league_logo_banner_provider)."\" alt=\"$_lid\" loading=\"lazy\" />".
     "</td>".
     "<td><a href=\"?".($iscat ? "cat" : "league")."=".$report['tag'].(empty($linkvars) ? "" : "&".$linkvars)."\" ".
@@ -152,6 +153,8 @@ function report_card_element($report, $smaller = true, $catlabel = false) {
   }
   if (empty($_lid)) $_lid = "default";
 
+  if (!isset($report['trust'])) $report['trust'] = true;
+
   $extra = "<p>".$report['desc']."</p>".
   "<p>LID: ".($report['id'] == "" ? "-" : "<a href=\"?lid=".$report['id'].(empty($linkvars) ? "" : "&".$linkvars)."\">".$report['id']."</a>")."</p>".
   (isset($report['orgs']) ? "<p><a target=\"_blank\" href=\"".$report['orgs']."\">".locale_string("website")."</a></p>" : "").
@@ -161,8 +164,12 @@ function report_card_element($report, $smaller = true, $catlabel = false) {
   (!$iscat ? "<p>".locale_string('days').": ".$report['days']."</p>" : "");
 
 
-  $res = "<div class=\"card ".($smaller ? 'smaller' : '')."\" data-report=\"report-".$report['tag']."\" ".
+  $res = "<div class=\"card ".($smaller ? 'smaller' : '').' '.($report['trust'] ? '' : 'shady')."\" data-report=\"report-".$report['tag']."\" ".
       ($iscat ? '' : "data-aliases=\"".$aliases."\"").">".
+    ($report['trust'] 
+      ? "" 
+      : "<span class=\"shady-notice\" onclick=\"showModal('".htmlspecialchars(addcslashes(locale_string("shady_alert"), "'"))."', '".htmlspecialchars(addcslashes(locale_string("notice"), "'"))."');\"></span>"
+    ).
     "<a class=\"image\" href=\"?".($iscat ? "cat" : "league")."=".$report['tag'].(empty($linkvars) ? "" : "&".$linkvars)."\">".
       // (
       //   $smaller ? 
@@ -503,6 +510,10 @@ if (sizeof($cache['reps']) === 0) {
           );
           exit();
         }
+
+        if (isset($shady_cat) && isset($cats[$shady_cat])) {
+          $report['trust'] = !check_filters($report, $cats[$shady_cat]['filters']);
+        }
       }
       
       $modules .= report_list_element($report);
@@ -564,6 +575,9 @@ if (sizeof($cache['reps']) === 0) {
         ],
       ];
       $cats_c[$tag]['days'] = ceil(($cats_c[$tag]['last_match']['date'] - $cats_c[$tag]['first_match']['date']) / (3600*24));
+      if (isset($shady_cat) && isset($cats[$shady_cat])) {
+        $cats_c[$tag]['trust'] = !($tag == $shady_cat);
+      }
 
       foreach ($reps as $rep) {
         foreach ($rep['patches'] as $pid => $ms) {
@@ -738,6 +752,12 @@ if (sizeof($cache['reps']) === 0) {
           });
         }
 
+        if (isset($shady_cat) && isset($cats[$shady_cat])) {
+          foreach ($reps as $rt => $rv) {
+            $reps[$rt]['trust'] = !check_filters($rv, $cats[$shady_cat]['filters']);
+          }
+        }
+
         if (isset($cat['id']) || isset($cat['icon'])) {
           $section['icon_lid'] = $section['icon_lid'] ?? $cat['icon'] ?? $cat['icon'];
         }
@@ -781,6 +801,10 @@ if (sizeof($cache['reps']) === 0) {
             ];
             $cat['days'] = ceil(($cat['last_match']['date'] - $cat['first_match']['date']) / (3600*24));
 
+            if (isset($shady_cat) && isset($cats[$shady_cat])) {
+              $cat['trust'] = !($cat['tag'] == $shady_cat);
+            }
+
             foreach ($reps_c as $rep) {
               foreach ($rep['patches'] as $pid => $ms) {
                 $cat['patches'][$pid] = ($cat['patches'][$pid] ?? 0) + $ms;
@@ -819,7 +843,7 @@ if (sizeof($cache['reps']) === 0) {
 
             $val = $cats[$el[0]];
 
-            $reps_c = populate_reps($cache["reps"], $val['filters'], $val['exclude_hidden'] ?? true);
+            $reps_c = populate_reps($cache['reps'], $val['filters'], $val['exclude_hidden'] ?? true);
 
             if (isset($val['orderby'])) {
               // not my finest creation
@@ -839,9 +863,17 @@ if (sizeof($cache['reps']) === 0) {
               });
             }
 
-            $reps[] = array_shift($reps_c);
+            $rep = array_shift($reps_c);
+            if (isset($shady_cat) && isset($cats[$shady_cat])) {
+              $rep['trust'] = !check_filters($rep, $cats[$shady_cat]['filters']);
+            }
+            $reps[] = $rep;
           } else {
             if (!isset($cache['reps'][$el[0]])) continue;
+
+            if (isset($shady_cat) && isset($cats[$shady_cat])) {
+              $cache['reps'][$el[0]]['trust'] = !check_filters($cache['reps'][$el[0]], $cats[$shady_cat]['filters']);
+            }
 
             $reps[] = $cache['reps'][$el[0]];
           }

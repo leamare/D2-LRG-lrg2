@@ -413,7 +413,7 @@ foreach ($r as $hid => $items) {
         $dataset[$iid][$hid]['wow'] = 0;
       }
     }
-  }  
+  }
 }
 
 foreach ($r as $hid => $items) {

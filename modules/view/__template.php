@@ -1,4 +1,4 @@
-<?php  $__postfix = "?v=22612"; ?>
+<?php  $__postfix = "?v=22617"; ?>
 <!DOCTYPE html>
 <html lang="<?php echo $locale; ?>">
   <head>
@@ -153,7 +153,7 @@
     <?php 
       if (!empty($ads_block) && !empty($leaguetag)) echo "<div class=\"ads-block-report\">$ads_block</div>";
     ?>
-    <div id="content-wrapper">
+    <div id="content-wrapper" <?php echo $__tmpl_trust ? "" : "class=\"shady\""; ?>>
       <div id="header-image" class="section-header">
     <?php if (!empty($leaguetag)) { ?>
       <?php if(!isset($custom_logo)) {?>
@@ -177,20 +177,24 @@
         <?php } ?>
     <?php } ?>
     <?php 
-      if (!empty($global_partners) || (!empty($leaguetag) && !empty($report['sponsors']))) {
-        echo "<div class=\"partners-list ".(isset($custom_logo) ? "special-logo" : "")."\">";
-        
-        $partners_raw = (!empty($leaguetag) && !empty($report['sponsors'])) ? $report['sponsors'] : ($global_partners ?? []);
-        $partners = [];
-        foreach ($partners_raw as $type => $link) {
-          $partners[] = "<a target=\"_blank\" href=\"".$link."\" class=\"shoutout-link\">".
-          // FIXME:
-            (stripos($type, "stratz") !== false ? "<img src=\"https://spectral.gg/res/social/stratz_white.png\" class=\"sponsor-icon\"> " : "").
-          $type."</a>";
-        }
-        echo implode(", ", $partners);
+      if ($__tmpl_trust) {
+        if (!empty($global_partners) || (!empty($leaguetag) && !empty($report['sponsors']))) {
+          echo "<div class=\"partners-list ".(isset($custom_logo) ? "special-logo" : "")."\">";
+          
+          $partners_raw = (!empty($leaguetag) && !empty($report['sponsors'])) ? $report['sponsors'] : ($global_partners ?? []);
+          $partners = [];
+          foreach ($partners_raw as $type => $link) {
+            $partners[] = "<a target=\"_blank\" href=\"".$link."\" class=\"shoutout-link\">".
+            // FIXME:
+              (stripos($type, "stratz") !== false ? "<img src=\"https://spectral.gg/res/social/stratz_white.png\" class=\"sponsor-icon\"> " : "").
+            $type."</a>";
+          }
+          echo implode(", ", $partners);
 
-        echo "</div>";
+          echo "</div>";
+        }
+      } else {
+        echo "<div class=\"partners-list special-logo\"><img src=\"res/warning.png\" class=\"sponsor-icon\" /> ".locale_string('shady_alert')."</div>";
       }
     ?>
     </div>
