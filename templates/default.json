@@ -58,7 +58,7 @@
 
     "player_positions" : true,
     "player_positions_matches" : true,
-    "player_laning": false,
+    "player_laning": true,
 
     "players_draft": true,
 
@@ -138,8 +138,9 @@
     },
 
     "items": false,
-    "skill_builds": true,
-    "starting_items": true
+    "skill_builds": false,
+    "starting_items": false,
+    "consumables": false
   },
   "web": {
     "custom_style" : "",
