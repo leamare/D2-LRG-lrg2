@@ -13,6 +13,8 @@ $schema = [
   'skill_build_attr' => false,
   'starting_consumables' => false,
   'wards' => false,
+  'medians_available' => false,
+  'percentile_available' => false,
 ];
 
 echo "[ ] Getting tables\n";
@@ -116,3 +118,19 @@ if ($schema['starting_items']) {
   }
   $query_res->free_result();
 }
+
+$sql = "SELECT * FROM mysql.func WHERE name like \"percentile_cont\";";
+$query_res = $conn->query($sql);
+if ($query_res === FALSE) die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+if ($query_res->num_rows ?? 0) {
+  $schema['percentile_available'] = true;
+}
+$query_res->free();
+
+$sql = "SELECT * FROM mysql.func WHERE name like \"percentile_cont\";";
+$query_res = $conn->query($sql);
+if ($query_res === FALSE) die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+if ($query_res->num_rows ?? 0) {
+  $schema['medians_available'] = true;
+}
+$query_res->free();
