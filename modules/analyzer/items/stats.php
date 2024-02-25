@@ -10,6 +10,9 @@ include __DIR__ . "/stats/pi_ph.php";
 
 $dataset = [];
 
+if ($schema['percentile_available']) {
+  include __DIR__ . "/stats/query_percentile.php";
+} else 
 if ($schema['medians_available']) {
   include __DIR__ . "/stats/query_medians.php";
 } else {
