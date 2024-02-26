@@ -921,7 +921,7 @@ function fetch($match) {
         }
         
         # support for botmatches
-        if ($matchdata['players'][$j]['account_id'] != null && $matchdata['players'][$j]['account_id'])
+        if (isset($matchdata['players'][$j]['account_id']) && $matchdata['players'][$j]['account_id'])
           $t_matchlines[$i]['playerid'] = $matchdata['players'][$j]['account_id'];
         else {
           if (isset($matchdata['radiant_team'])) {

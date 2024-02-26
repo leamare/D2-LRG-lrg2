@@ -147,16 +147,14 @@ $sql = <<<SQL
     iit.q1_time,
     SUM(CASE WHEN it.`mintime` <= iit.q1_time THEN ml.isRadiant = m.radiantWin ELSE 0 END) q1_wr,
     SUM(CASE WHEN it.`mintime` <= iit.q1_time THEN 1 ELSE 0 END) q1_mtchs,
-    
     iit.q2_time,
-    
     iit.q3_time,
     SUM(CASE WHEN it.`mintime` >= iit.q3_time THEN ml.isRadiant = m.radiantWin ELSE 0 END) q3_wr,
     SUM(CASE WHEN it.`mintime` >= iit.q3_time THEN 1 ELSE 0 END) q3_mtchs,
     iit.min_time,
     iit.max_time,
     SUM(ml.isRadiant = m.radiantWin) total_wins,
-    COUNT(DISTINCT it.matchid) total_matches,
+    COUNT(it.matchid) total_matches,
     iit.avg_time
   FROM (
       SELECT *, min(`time`) mintime
@@ -214,7 +212,7 @@ for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row(
   $dataset[$iid][$hid]['wom'] = $_totals[$hid]['matches'] - $row[12];
 
   if ($dataset[$iid][$hid]['wom']) {
-    $dataset[$iid][$hid]['wow'] = $_totals[$hid]['wins'] - $row[10];
+    $dataset[$iid][$hid]['wow'] = $_totals[$hid]['wins'] - $row[11];
   } else {
     $dataset[$iid][$hid]['wom'] = 1;
     $dataset[$iid][$hid]['wow'] = 0;
