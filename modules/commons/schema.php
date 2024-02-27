@@ -10,6 +10,8 @@ $schema = [
   'draft_order' => false, // order
   'teams' => false,
   'items' => false,
+  'itemslines' => false,
+  'items_blocks' => false,
   'skill_build_attr' => false,
   'starting_consumables' => false,
   'wards' => false,
@@ -30,6 +32,14 @@ for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row(
       $schema['teams'] = true;
       break;
     case "items":
+      $schema['items'] = true;
+      break;
+    case "itemslines":
+      $schema['itemslines'] = true;
+      $schema['items'] = true;
+      break;
+    case "items_blocks":
+      $schema['items_blocks'] = true;
       $schema['items'] = true;
       break;
     case "wards":
