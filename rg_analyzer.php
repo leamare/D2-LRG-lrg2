@@ -285,15 +285,10 @@ if ($lg_settings['ana']['players']) {
 
 // ITEMS
 
-if ($lg_settings['ana']['items'])  {
-  $sql = "SELECT COUNT(*) z
-  FROM information_schema.tables WHERE table_schema = '$lrg_sql_db' 
-  AND table_name = 'itemslines' HAVING z > 0;";
-
-  $query = $conn->query($sql);
-  if (!isset($query->num_rows) || !$query->num_rows) {
-    $lg_settings['main']['itemslines'] = false;
-    echo "[N] Set &settings.items to false.\n";
+if ($lg_settings['ana']['items'] && $schema['items'])  {
+  if ($schema['itemslines']) {
+    $lg_settings['main']['itemslines'] = true;
+    echo "[N] Set &settings.itemslines to false.\n";
   } else {
     $lg_settings['main']['itemslines'] = true;
     echo "[N] Set &settings.itemslines to true.\n";
@@ -301,6 +296,7 @@ if ($lg_settings['ana']['items'])  {
 
   require_once("modules/analyzer/items/__main.php");
 }
+
 
 // SKILL BUILDS
 
