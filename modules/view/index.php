@@ -278,7 +278,7 @@ if (!empty($searchstring)) {
   } else if(!isset($cat) || $cat == "main") {
     // $head_name = $instance_name;
     // $head_desc = $instance_desc;
-    $head_name = $cat == "main" ? locale_string('main_reports') : $instance_name;
+    $head_name = isset($cat) ? locale_string('main_reports') : $instance_name;
     $head_desc = $instance_desc;
     if(isset($cats[$hidden_cat])) {
       foreach($cache["reps"] as $tag => $rep) {
@@ -390,7 +390,7 @@ if (!empty($searchstring)) {
 
 $modules .= "<div class=\"content-text tagslist\">".
   "<a class=\"category ".(empty($mod) && empty($cat) && empty($searchstring) ? "active" : "")."\" href=\".".(!empty($linkvars) ? "?".$linkvars : "")."\">".locale_string('pinned_main')."</a>".
-  "<a class=\"category ".($cat=="main" ? "active" : "")."\" href=\"?cat=main".(!empty($linkvars) ? "&".$linkvars : "")."\">".locale_string('main_reports')."</a>".
+  "<a class=\"category ".(($cat ?? "")=="main" ? "active" : "")."\" href=\"?cat=main".(!empty($linkvars) ? "&".$linkvars : "")."\">".locale_string('main_reports')."</a>".
   "<a class=\"category ".(check_module("cats")  ? "active" : "")."\" href=\"?mod=cats".(!empty($linkvars) ? "&".$linkvars : "")."\">".locale_string('categories')."</a>".
   "<label class=\"category ".(!empty($searchstring) ? "active" : "")."\" for=\"search-toggle\">".locale_string('search')."</label>".
 "</div>".
@@ -806,7 +806,7 @@ if (sizeof($cache['reps']) === 0) {
             }
 
             foreach ($reps_c as $rep) {
-              foreach ($rep['patches'] as $pid => $ms) {
+              foreach ($rep['patches'] ?? [] as $pid => $ms) {
                 $cat['patches'][$pid] = ($cat['patches'][$pid] ?? 0) + $ms;
               }
             }

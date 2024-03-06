@@ -136,6 +136,7 @@ function rg_view_generate_heroes_profiles() {
 
   // $total_matches = $data['matches_s'] ?? 0;
 
+  $picks_src = $el['matches_picked'] ?? 0;
   $data['matches_s'] = $el ? 
     $el['matches_total']." (".$el['matches_picked']." ".locale_string("picks").", ".$el['matches_banned']." ".locale_string("bans").")" :
     ($data['matches_s'] ?? 0);
@@ -234,7 +235,7 @@ function rg_view_generate_heroes_profiles() {
 
   $combos = [];
   $combos_limit = 5;
-  $combos_threshold = $data['matches_s'] * 0.025;
+  $combos_threshold = $picks_src * 0.025;
 
   if (isset($report['hph'])) {
     if (is_wrapped($report['hph'])) {
@@ -560,6 +561,7 @@ function rg_view_generate_heroes_profiles() {
           $player_records[] = $record;
         } else if (!empty($context_records_ext)) {
           foreach ($context_records_ext[$rectag] ?? [] as $i => $rec) {
+            if (empty($rec)) continue;
             if ($rec['heroid'] == $hero) {
               $rec['tag'] = $rectag;
               $rec['placement'] = $i+2;

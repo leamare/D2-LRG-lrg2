@@ -157,10 +157,6 @@ const STRATZ_GRAPHQL_QUERY = "{
       killEvents {
         time
       }
-      itemPurchases {
-        time
-        itemId
-      }
       inventoryReport {
         neutral0 {
           itemId
@@ -1037,16 +1033,25 @@ function get_stratz_multiquery($group) {
   $stratz_request = "https://api.stratz.com/graphql";
 
   $q = http_build_query($data);
-  
+
   $json = @file_get_contents($stratz_request.'?'.$q, false, stream_context_create([
     'ssl' => [
       'verify_peer' => false,
       'verify_peer_name' => false,
+    ],
+    'http' => [
+      'method' => 'POST',
+      'header'  => 'Content-Type: application/json',
+      'content' => json_encode($data),
+      'timeout' => 60,
     ]
   ]));
-  //$json = @file_get_contents($stratz_request.'?'.$q);
+
+  $json = @file_get_contents($stratz_request.'?'.$q);
   
-  if (empty($json)) return null;
+  if (empty($json)) {
+    return null;
+  }
 
   $stratz = json_decode($json, true);
 
@@ -1061,6 +1066,7 @@ function get_stratz_multiquery($group) {
     $stratz_cache[ $match['id'] ] = $match;
   }
 
+  var_dump($api_cooldown_seconds);
   sleep($api_cooldown_seconds);
 
   return $stratz_cache;

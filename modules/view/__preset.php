@@ -152,6 +152,24 @@ const VALUESORT_COLS_KEYS = [
   'avg_win_len',
 ];
 
+const ROLES_IDS = [
+  'total',
+  'position_1.1',
+  'position_1.2',
+  'position_1.3',
+  'position_0.3',
+  'position_0.1',
+];
+
+const ROLES_IDS_SIMPLE = [
+  '',
+  '1.1',
+  '1.2',
+  '1.3',
+  '0.3',
+  '0.1',
+];
+
 if (isset($__lrg_onerror) && !$isApi) {
   $projectName = $projectName ?? "LRG2";
 

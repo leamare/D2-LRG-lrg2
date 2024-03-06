@@ -61,7 +61,7 @@ function rg_generator_positions_overview($table_id, &$context, $hero_flag = true
       sort($matches);
       $filters["position_$i.$j"] = [
         'value' => $matches[ round(count($matches)/2) ],
-        'label' => "data_filter_positions_${i}.${j}_mp"
+        'label' => "data_filter_positions_{$i}.{$j}_mp"
       ];
   
       uasort($context_copy, function($a, $b) use ($total_matches) {

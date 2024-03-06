@@ -54,7 +54,7 @@ function rg_view_generate_items_profiles() {
   foreach ($report['items']['stats']['total'] as $id => $el) {
     if(isset($last) && $el == $last) {
       $i++;
-      $ranks[$id] = $last_rank;
+      $ranks[$id] = $last_rank ?? 0;
     } else
       $ranks[$id] = 100 - $increment*$i++;
     $last = $el;
