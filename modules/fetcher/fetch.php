@@ -411,6 +411,15 @@ function fetch($match) {
           return true;
       }
 
+      if (!isset($matchdata['players'][0]['hero_damage'])) {
+        if ($ignore_abandons) {
+          echo("..Warning: no damage stats!\n");
+        } else {
+          echo("..Damage stats missing, skipping match.\n");
+          return null;
+        }
+      }
+
       if (!empty($lg_settings['cluster_allowlist'])) {
         if (!in_array($matchdata['cluster'] ?? 0, $lg_settings['cluster_allowlist'])) {
           echo("..Cluster ".($matchdata['cluster'] ?? 0)." is not in allowlist, skipping...\n");
@@ -976,9 +985,9 @@ function fetch($match) {
         $t_matchlines[$i]['networth'] = $matchdata['players'][$j]['net_worth'] ?? $matchdata['players'][$j]['total_gold'];
         $t_matchlines[$i]['gpm'] = $matchdata['players'][$j]['gold_per_min'];
         $t_matchlines[$i]['xpm'] = $matchdata['players'][$j]['xp_per_min'];
-        $t_matchlines[$i]['heal'] = $matchdata['players'][$j]['hero_healing'];
-        $t_matchlines[$i]['heroDamage'] = $matchdata['players'][$j]['hero_damage'];
-        $t_matchlines[$i]['towerDamage'] = $matchdata['players'][$j]['tower_damage'];
+        $t_matchlines[$i]['heal'] = $matchdata['players'][$j]['hero_healing'] ?? 0;
+        $t_matchlines[$i]['heroDamage'] = $matchdata['players'][$j]['hero_damage'] ?? 0;
+        $t_matchlines[$i]['towerDamage'] = $matchdata['players'][$j]['tower_damage'] ?? 0;
         $t_matchlines[$i]['lastHits'] = $matchdata['players'][$j]['last_hits'];
         $t_matchlines[$i]['denies'] = $matchdata['players'][$j]['denies'];
 
