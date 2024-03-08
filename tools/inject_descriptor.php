@@ -34,4 +34,4 @@ $rep["links"] = $desc['links'] ?? null;
 
 $rep["localized"] = $desc['localized'] ?? null;
 
-file_put_contents($output_file, json_encode($rep, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+file_put_contents($output_file, json_encode($rep, JSON_UNESCAPED_UNICODE));
