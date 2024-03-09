@@ -25,7 +25,7 @@ function join_selectors($modules, $level, $parent="") {
     $selectors = explode("-", $mod);
     if(!isset($modules[$selectors[0]])) $unset_selector = true;
   } else {
-    $selectors = explode("-", str_replace($parent."-", "", $mod));
+    $selectors = explode("-", substr($mod, strlen($parent)+1));
     if(!isset($modules[$selectors[0]])) $unset_selector = true;
   }
   # reusing assets Kappa

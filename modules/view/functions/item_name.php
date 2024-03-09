@@ -1,8 +1,7 @@
 <?php
 
-function item_icon($iid) {
-  global $item_icons_provider;
-  return "<img class=\"hero_portrait\" src=\"".str_replace("%HERO%", item_tag($iid), $item_icons_provider)."\" alt=\"".item_tag($iid)."\" />";
+function item_icon($iid, $classes = '') {
+  return "<img class=\"hero_portrait $classes\" src=\"".item_icon_link($iid)."\" alt=\"".item_tag($iid)."\" data-aliases=\"".item_name($iid)."\" />";
 }
 
 function item_big_icon($iid) {
@@ -12,7 +11,11 @@ function item_big_icon($iid) {
 
 function item_icon_link($iid) {
   global $item_icons_provider;
-  return str_replace("%HERO%", item_tag($iid), $item_icons_provider);
+  $tag = item_tag($iid);
+  if (strpos($tag, "recipe") === 0) {
+    $tag = "recipe";
+  }
+  return str_replace("%HERO%", $tag, $item_icons_provider);
 }
 
 function item_tag($iid) {

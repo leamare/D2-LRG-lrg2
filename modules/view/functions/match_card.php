@@ -150,6 +150,7 @@ function match_card($mid) {
           if (strpos($rectag, "_team") !== false) continue;
 
           foreach ($context_records_ext[$rectag] ?? [] as $i => $rec) {
+            if (empty($rec)) continue;
             if ($rec['matchid'] == $mid) {
               if (empty($rec)) continue;
               $rec['tag'] = $rectag;
