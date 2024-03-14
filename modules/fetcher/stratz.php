@@ -1066,7 +1066,6 @@ function get_stratz_multiquery($group) {
     $stratz_cache[ $match['id'] ] = $match;
   }
 
-  var_dump($api_cooldown_seconds);
   sleep($api_cooldown_seconds);
 
   return $stratz_cache;

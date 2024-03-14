@@ -411,7 +411,7 @@ function fetch($match) {
           return true;
       }
 
-      if (!isset($matchdata['players'][0]['hero_damage'])) {
+      if (!isset($matchdata['players'][0]['hero_damage']) && empty($t_matchlines)) {
         if ($ignore_abandons) {
           echo("..Warning: no damage stats!\n");
         } else {
