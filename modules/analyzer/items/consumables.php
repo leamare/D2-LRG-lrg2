@@ -1,6 +1,6 @@
 <?php 
 
-function sti_consumables_query($_isheroes, $_isroles) {
+function sti_consumables_query($_isheroes, $_isroles, $_isLimitRoles, $si_matches = []) {
   global $conn, $__sttime;
 
   $_tag = $_isheroes ? "hero_id" : "playerid";
@@ -50,7 +50,7 @@ function sti_consumables_query($_isheroes, $_isroles) {
             $_tag, 
             JSON_UNQUOTE( JSON_EXTRACT( JSON_KEYS(JSON_EXTRACT(consumables, CONCAT('$."', $blk_q, '"'))), CONCAT("$[", idx, "]") ) ) item_id,
             JSON_EXTRACT(consumables, CONCAT('$."', $blk_q, '".', JSON_EXTRACT( JSON_KEYS(JSON_EXTRACT(consumables, CONCAT('$."', $blk_q, '"'))), CONCAT("$[", idx, "]") ), '') ) item_count,
-            hero_id
+            hero_id as hid
           FROM starting_items si 
           JOIN ( 
             $_indexes_tbl
@@ -58,7 +58,7 @@ function sti_consumables_query($_isheroes, $_isroles) {
           WHERE idx < JSON_LENGTH(consumables, CONCAT('$."', $blk_q, '"'))
           ORDER BY 1, 2, 4 DESC
         ) si
-          JOIN adv_matchlines am on si.matchid = am.matchid and am.heroid = si.hero_id
+          JOIN adv_matchlines am on si.matchid = am.matchid and am.heroid = si.hid
         GROUP BY 1, 2, 3
         ORDER BY 1, 2, 3
       SQL;
@@ -180,6 +180,39 @@ function sti_consumables_query($_isheroes, $_isroles) {
     echo ' [ '.echobltime().' ] ';
   }
 
+    // filtering low roles
+
+    if ($_isLimitRoles) {
+      if (empty($si_matches)) {
+        $si_matches = [];
+
+        foreach ($si_cons['all'] as $rid => $heroes) {
+          $si_matches[$rid] = [];
+          foreach ($heroes as $hid => $items) {
+            $si_matches[$rid][$hid] = [ 'm' => max(
+              array_map(function($a) {
+                return $a['matches'];
+              }, $items)
+            ) ];
+          }
+        }
+      }
+
+      foreach ($si_matches as $rid => $heroes) {
+        if (is_wrapped($heroes)) {
+          $heroes = $si_matches[$rid] = unwrap_data($heroes);
+        }
+        if (!$rid) continue;
+        foreach ($heroes as $hid => $bs) {
+          if ($si_matches[$rid][$hid]['m'] <= $si_matches[0][$hid]['m'] * 0.025) {
+            foreach (array_keys($si_cons) as $blk) {
+              unset($si_cons[$blk][$rid][$hid]);
+            }
+          }
+        }
+      }
+    }
+
   // output
 
   $r = [
@@ -206,13 +239,23 @@ function sti_consumables_query($_isheroes, $_isroles) {
 if ($lg_settings['ana']['consumables']) {
   if (!isset($result['starting_items'])) $result['starting_items'] = [];
 
-  foreach (sti_consumables_query(true, $lg_settings['ana']['consumables_roles']) as $k => &$v)
+  foreach (sti_consumables_query(
+    true, 
+    $lg_settings['ana']['consumables_roles'], 
+    $lg_settings['ana']['starting_builds_roles_limit'],
+    $result['starting_items']['matches'] ?? []
+  ) as $k => &$v)
     $result['starting_items'][$k] = $v;
 }
 
 if ($lg_settings['ana']['consumables_players'] && $lg_settings['ana']['players']) {
   if (!isset($result['starting_items_players'])) $result['starting_items_players'] = [];
 
-  foreach (sti_consumables_query(false, $lg_settings['ana']['consumables_players_roles']) as $k => &$v)
+  foreach (sti_consumables_query(
+    false, 
+    $lg_settings['ana']['consumables_players_roles'], 
+    $lg_settings['ana']['starting_builds_roles_players_limit'],
+    $result['starting_items_players']['matches'] ?? []
+  ) as $k => &$v)
     $result['starting_items_players'][$k] = $v;
 }
