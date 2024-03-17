@@ -187,16 +187,6 @@ function sti_item_builds_query($_isheroes, $_isBuilds, $_isItems, $_isRolesItems
         return $a['matches'] <=> $b['matches'];
       });
 
-      // filtering low roles
-      
-      if ($_isLimitRoles) {
-        if ($role['matches'] <= $maxtotal*0.025) {
-          unset($si_res[$rid][$hid]);
-          unset($si_items[$rid][$hid]);
-          continue;
-        }
-      }
-
       // rebuilding the builds
 
       $builds_new = [];
@@ -205,9 +195,9 @@ function sti_item_builds_query($_isheroes, $_isBuilds, $_isItems, $_isRolesItems
         $build['lane_wr'] = round( $build['lane_wins']/$build['matches'], 4);
         $build['ratio'] = round( $build['matches']/$role['matches'], 4);
 
-        if (!$_islimit || ($build['ratio'] > 0.015 && $role['matches'] > $maxtotal*0.025)) {  
+        // if (!$_islimit || ($build['ratio'] > 0.015 && $role['matches'] > $maxtotal*0.025)) {  
           $builds_new[] = $build;
-        }
+        // }
       }
 
       $si_matches[$rid][$hid] = [
@@ -221,6 +211,39 @@ function sti_item_builds_query($_isheroes, $_isBuilds, $_isItems, $_isRolesItems
 
   echo " [ ".echobltime()." ] \n";
 
+  // filtering low builds
+
+  if ($_islimit) {
+    foreach ($si_res as $rid => $heroes) {
+      foreach ($heroes as $hid => $bs) {
+        if (empty($bs)) continue;
+        $vals = array_map(function($a) {
+          return $a['matches'];
+        }, $bs);
+        $limit = max( quantile($vals, 0.75), $si_matches[$rid][$hid]['m'] * 0.005 );
+        $si_matches[$rid][$hid]['l'] = round($limit);
+        $si_res[$rid][$hid] = array_filter($si_res[$rid][$hid], function($a) use (&$limit) {
+          return $a['matches'] > $limit;
+        });
+      }
+    }
+  }
+
+  // filtering low roles
+
+  if ($_isLimitRoles) {
+    foreach ($si_res as $rid => $heroes) {
+      if (!$rid) continue;
+      foreach ($heroes as $hid => $bs) {
+        if ($si_matches[$rid][$hid]['m'] <= $si_matches[0][$hid]['m'] * 0.025) {
+          unset($si_res[$rid][$hid]);
+          unset($si_items[$rid][$hid]);
+          continue;
+        }
+      }
+    }
+  }
+
   // output
 
   $r = [
@@ -229,7 +252,7 @@ function sti_item_builds_query($_isheroes, $_isBuilds, $_isItems, $_isRolesItems
     'matches' => $si_matches,
   ];
 
-  $r['items_head'] = [ "matches", "wins", "lane_wins", "freq", "winrate" ];
+  $r['items_head'] = [ "matches", "wins", "lane_wins", "freq" ];
 
   // Starting items and builds are calculated and fetched with roles in mind
   // so roles params are just unsetting some of them
