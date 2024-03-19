@@ -139,8 +139,28 @@
 
     "items": false,
     "skill_builds": false,
-    "starting_items": false,
-    "consumables": false
+
+    "starting_items": true,
+    "starting_items_roles": true,
+
+    "starting_builds": true,
+    "starting_builds_roles": true,
+    "starting_builds_limit": true,
+    "starting_builds_roles_limit": false,
+
+    "consumables": true,
+    "consumables_roles": true,
+    
+    "starting_items_players": true,
+    "starting_items_players_roles": false,
+
+    "starting_builds_players": false,
+    "starting_builds_players_roles": false,
+    "starting_builds_players_limit": true,
+    "starting_builds_roles_players_limit": true,
+    
+    "consumables_players": true,
+    "consumables_players_roles": false
   },
   "web": {
     "custom_style" : "",
