@@ -182,8 +182,11 @@ function sti_consumables_query($_isheroes, $_isroles, $_isLimitRoles, $si_matche
 
     // filtering low roles
 
+    $fallback_matches = false;
+
     if ($_isLimitRoles) {
       if (empty($si_matches)) {
+        $fallback_matches = true;
         $si_matches = [];
 
         foreach ($si_cons['all'] as $rid => $heroes) {
@@ -218,6 +221,13 @@ function sti_consumables_query($_isheroes, $_isroles, $_isLimitRoles, $si_matche
   $r = [
     'consumables' => $si_cons,
   ];
+
+  if ($fallback_matches) {
+    $r['matches'] = [];
+    foreach ($si_matches as $rid => $heroes) {
+      $r['matches'][$rid] = wrap_data($heroes, true, true, true);
+    }
+  }
 
   foreach ($r['consumables'] as $blk => $roles) {
     foreach (range(0, 5) as $rid) {
