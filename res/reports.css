@@ -87,23 +87,7 @@ table.list-fixed {
   table-layout: fixed;
 }
 table.list-small {
-  width: 40%;
-  float: left;
-  /* min-width: 250px; */
-}
-table.list-small:nth-child(2n-1) {
-  margin: 0 1% 30px 9%;
-  float: left;
-}
-table.list-small:nth-child(2n) {
-  margin: 0 9% 30px 1%;
-  float: left;
-}
-/*div:not(#module-overview) >
-.small-list-wrapper > */
-table.list-small:last-of-type:not(:nth-child(2n)) {
-    margin: 0 auto 30px auto;
-    float: none;
+  width: 48%;
 }
 #heroes-draft-0-3, #heroes-draft-1-3 {
   margin: 0 auto;
@@ -200,8 +184,13 @@ table .separator, .flextable .separator {
 }
 
 .small-list-wrapper {
-  margin-top: 30px;
+  margin: 30px 9% 0;
   overflow: hidden;
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
 }
 
 
@@ -291,6 +280,9 @@ table .hero_portrait, .flextable .hero_portrait {
   display: inline-block;
   vertical-align: sub;
   margin-bottom: 3px;
+}
+table .hero_portrait.bigger, .flextable .hero_portrait.bigger {
+  height: 2.5em;
 }
 
 .flextable {
@@ -423,10 +415,14 @@ table .hero_portrait, .flextable .hero_portrait {
   max-height: 500px;
   transition: all 300ms ease;
 }
+.match-card {
+  max-width: 1550px;
+}
 .team-card {
   max-height: 300px;
   transition: all 300ms ease;
   margin-bottom: 20px;
+  flex-basis: 100%;
 }
 .team-card:hover {
   max-height: 4000px;
@@ -434,6 +430,10 @@ table .hero_portrait, .flextable .hero_portrait {
 }
 .team-card.full {
   max-height: none;
+}
+.player-card {
+  flex-basis: 100%;
+  max-width: 1200px;
 }
 .player-card.full {
   max-height: none;
@@ -1313,6 +1313,10 @@ table.list thead {
   flex-wrap: wrap;
   align-items: stretch;
   justify-content: center;
+}
+
+.hero-build.starting-items-builds {
+  text-align: left;
 }
 
 .hero-build-overview-container .header {

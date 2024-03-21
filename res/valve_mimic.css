@@ -207,11 +207,19 @@ a:hover {
   line-height: 14px;
 }
 
-.content-text.alert {
+.content-text.alert, .content-text.notice, .content-text.info {
   border-radius: 10px;
   color: var(--caption);
-  background-color: rgba(255,0,0,0.1);
   padding: 3px 5px;
+}
+.content-text.alert {
+  background-color: rgba(255,0,0,0.1);
+}
+.content-text.notice {
+  background-color: rgba(64,127,256,0.1);
+}
+.content-text.info {
+  background-color: rgba(127,127,127,0.1);
 }
 
 .content-cards {
@@ -220,11 +228,15 @@ a:hover {
 	font-size: 18px;
 	line-height: 34px;
 	color: var(--text);
-
-
-	margin: 30px 10% 0;
+	margin: 30px 7.5% 0;
 
 	margin-top: 30px;
+
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  align-content: center;
+  justify-content: center;
 }
 
 .selector-modules {

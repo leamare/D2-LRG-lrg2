@@ -9,7 +9,6 @@ function parseHashParams() {
 }
 
 function setHashParam(key, value = null) {
-  console.log(key, value);
   let params = parseHashParams();
 
   if (!value) delete params[key];
