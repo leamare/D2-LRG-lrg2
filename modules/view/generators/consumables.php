@@ -2,8 +2,9 @@
 
 include_once($root."/modules/view/functions/hero_name.php");
 include_once($root."/modules/view/functions/player_name.php");
+include_once($root."/modules/view/functions/explainer.php");
 
-function rg_generator_sticonsumables($table_id, $ishero, $selected_id, $selected_rid, $data, $context) {
+function rg_generator_sticonsumables($table_id, $ishero, $selected_id, $selected_rid, $data, $context, $is_roles_limit) {
   // TODO: Explainers
 
   $locres = "";
@@ -12,7 +13,21 @@ function rg_generator_sticonsumables($table_id, $ishero, $selected_id, $selected
 
   $lc = "locale_string";
 
+  if ($is_roles_limit) {
+    $locres .= "<div class=\"content-text info\">".
+      locale_string("sti_builds_roles_limited").
+    "</div>";
+  }
+
+  $locres .= explainer_block(locale_string("sti_consumables_explainer"));
+
   $matches_total = $context['m'];
+
+  if (!$matches_total) {
+    return "<div class=\"content-text\">".
+      locale_string("stats_empty").
+    "</div>";
+  }
 
   $locres .= table_columns_toggle($table_id, [
     'sti_consumables_5m',
