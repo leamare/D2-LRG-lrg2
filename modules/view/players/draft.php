@@ -23,4 +23,3 @@ function rg_view_generate_players_draft() {
   return $res;
 }
 
-?>

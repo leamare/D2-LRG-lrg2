@@ -35,7 +35,8 @@ function rg_view_generate_players_pvp() {
 
   uasort($names, function($a, $b) {
     if($a == $b) return 0;
-    else return ($a > $b) ? 1 : -1;
+    
+    return strcasecmp($a, $b);
   });
 
   if($report['settings']['pvp_grid']) {

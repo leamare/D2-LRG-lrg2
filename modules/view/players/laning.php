@@ -13,16 +13,18 @@ function rg_view_generate_players_laning() {
     $report['player_laning'] = unwrap_data($report['player_laning']);
   }
 
-  $pnames = array_keys($report['player_laning']);
-  $pnames = array_map(function($a) {
-    return [ 'name' => player_name($a), 'id' => $a ];
-  }, $pnames);
-  $pnames = array_combine(array_keys($report['player_laning']), $pnames);
-  unset($pnames[0]);
+  $pids = array_keys($report['player_laning']);
+  $pnames = [];
+  foreach ($pids as $id) {
+    if (!$id) continue;
+
+    $pnames[$id] = player_name($id, false);
+  }
 
   uasort($pnames, function($a, $b) {
-    if($a['name'] == $b['name']) return 0;
-    else return ($a['name'] > $b['name']) ? 1 : -1;
+    if($a == $b) return 0;
+    
+    return strcasecmp($a, $b);
   });
 
   $explainer = "<details class=\"content-text explainer\"><summary>".locale_string("explain_summary")."</summary>".
