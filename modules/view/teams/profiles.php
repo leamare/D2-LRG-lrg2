@@ -157,6 +157,14 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
         }
       }
 
+      if (isset($report['starting_items_players'])) {
+        $res["team".$tid]['items'] = [];
+
+        if(check_module($context_mod."team".$tid."-items")) {
+          include_once __DIR__ . "/profile_snippets/items.php";
+        }
+      }
+
       if (isset($report['tvt'])) {
         if (isset($report['match_participants_teams'])) {
           $res["team".$tid]['opponents'] = "";
