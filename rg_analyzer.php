@@ -20,6 +20,7 @@ include_once("modules/commons/metadata.php");
 include_once("modules/commons/wrap_data.php");
 include_once("modules/commons/array_pslice.php");
 include_once("modules/commons/instaquery.php");
+include_once("modules/commons/echobltime.php");
 include_once("modules/view/functions/ranking.php");
 
 echo("\nConnecting to database...\n");
@@ -297,6 +298,18 @@ if ($lg_settings['ana']['items'] && $schema['items'])  {
   require_once("modules/analyzer/items/__main.php");
 }
 
+// STARTING ITEMS
+
+if ($schema['starting_items']) {
+  if ($lg_settings['ana']['starting_items'] || $lg_settings['ana']['starting_builds'] 
+    || $lg_settings['ana']['starting_items_players'] || $lg_settings['ana']['starting_builds_players']
+  ) {
+    require_once("modules/analyzer/items/starting_items.php");
+  }
+  if ($lg_settings['ana']['consumables'] || $lg_settings['ana']['consumables_players']) {
+    require_once("modules/analyzer/items/consumables.php");
+  }
+}
 
 // SKILL BUILDS
 
@@ -359,6 +372,12 @@ if (isset($lg_settings['heroes_snapshot'])) {
 }
 $result['settings']['heroes_exclude'] = $lg_settings['heroes_exclude'] ?? null;
 
+if ($schema['starting_items']) {
+  $result['settings']['sti_builds_players_limit'] = $lg_settings['ana']['starting_builds_players_limit'];
+  $result['settings']['sti_builds_roles_players_limit'] = $lg_settings['ana']['starting_builds_roles_players_limit'];
+  $result['settings']['sti_builds_limit'] = $lg_settings['ana']['starting_builds_limit'];
+  $result['settings']['sti_builds_roles_limit'] = $lg_settings['ana']['starting_builds_roles_limit'];
+}
 
 $result['settings']['limiter'] = $limiter;
 $result['settings']['limiter_middle'] = $limiter_middle;
@@ -368,7 +387,7 @@ $result['settings']['limiter_players'] = $pl_limiter;
 $result['settings']['limiter_players_median'] = $pl_limiter_median;
 $result['ana_version'] = $lrg_version;
 
-echo("[ ] Encoding results to JSON\n");
+echo("[~] Encoding results to JSON\n");
 $output = json_encode(utf8ize($result));
 
 $filename = $options['o'] ?? "reports/report_".$lg_settings['league_tag'].".json";
