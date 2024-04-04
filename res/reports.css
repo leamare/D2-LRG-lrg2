@@ -1408,6 +1408,7 @@ table.list thead {
   margin: 5px 5px 10px 5px !important;
   border-radius: 5px;
   background-color: rgba(0,0,0,0.2);
+  text-align: center;
 }
 
 .build-item-component .item-image {

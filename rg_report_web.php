@@ -196,8 +196,9 @@ if (isset($report)) {
         isset($report['hero_sides']) || isset($report['hero_pairs']) || isset($report['hero_triplets']))
           include_once("modules/view/heroes.php");
 
-    if (!empty($report['items']) && !empty($report['items']['pi']))
+    if ((!empty($report['items']) && !empty($report['items']['pi'])) || !empty($report['starting_items'])) {
       include_once("modules/view/items.php");
+    }
 
     if (isset($report['players']) || isset($report['players_summary']))
       include_once("modules/view/players.php");
@@ -242,7 +243,7 @@ if (isset($report)) {
   }
 
   # items
-  if (isset($modules['items']) && check_module("items") && !empty($report['items'])) {
+  if (isset($modules['items']) && check_module("items") && (!empty($report['items']) || !empty($report['starting_items']))) {
     merge_mods($modules['items'], rg_view_generate_items());
   }
 
@@ -278,7 +279,7 @@ if (file_exists("rg_report_out_prerender.php"))
 
 $__tmpl_trust = true;
 if (isset($shady_cat) && isset($cats[$shady_cat])) {
-  if (isset($leaguetag)) {
+  if (!empty($leaguetag)) {
     $__tmpl_trust = !check_filters($cache['reps'][$leaguetag], $cats[$shady_cat]['filters']);
   } else if (isset($cat)) {
     $__tmpl_trust = $cat != $shady_cat;
