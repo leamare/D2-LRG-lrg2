@@ -1337,6 +1337,7 @@ table.list thead {
   background-color: var(--selectors-bg);
 
   flex: 1;
+  flex-basis: 100%;
 }
 
 .build-overview-container {
@@ -1466,6 +1467,7 @@ table.list thead {
 
   width: 86px;
   height: 62px;
+  margin-bottom: 5px;
 
   border-radius: 5px;
   border: 2px solid var(--selectors-bg);
@@ -1480,12 +1482,39 @@ table.list thead {
   font-weight: bold;
   text-decoration: none;
 }
+.build-item-component .item-text.smaller {
+  font-size: 24px;
+}
+.build-overview-container.small .build-item-component .item-text.smaller {
+  font-size: 18px;
+}
 .build-item-component.tbc .item-text {
   background-color: var(--table-bg);
   opacity: .5;
 }
 .build-item-component.tbc .item-text:hover {
   opacity: 1;
+}
+
+.build-overview-container.small {
+  margin-bottom: 0;
+}
+.build-overview-container.small .item-text, .build-overview-container.small .item-image {
+  width: 66px;
+  height: 46px;
+}
+.build-overview-container.small .build-item-arrow:after {
+  width: 24px;
+  height: 50px;
+  font-size: 14px;
+}
+.build-overview-container.small .build-item-component .item-stat-tooltip-line, 
+.build-overview-container.small .build-item-component .item-stat-tooltip {
+  font-size: 10px;
+}
+
+.build-overview-container.primary {
+  flex-basis: 100%;
 }
 
 .build-item-component .item-stat-tooltip-line, .build-item-component .item-stat-tooltip  {
