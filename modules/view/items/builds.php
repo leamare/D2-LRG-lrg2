@@ -305,6 +305,113 @@ function rg_view_generate_items_builds() {
 
   // BUILD OVERVIEW
 
+  if (isset($report['starting_items'])) {
+    $sti_builds = [];
+    $sti_stats = [];
+    $sti_matches_context = [];
+
+    $srid = array_search($crole, ROLES_IDS_SIMPLE);
+
+    if (isset($report['starting_items']['items'])) {
+      if (isset($report['starting_items']['items'][$srid][$hero])) {
+        $sti_context =& $report['starting_items']['items'][$srid][$hero];
+      } else if (isset($report['starting_items']['items'][0][$hero])) {
+        $sti_context =& $report['starting_items']['items'][0][$hero];
+      } else if (isset($report['starting_items']['items'][$srid][0])) {
+        $sti_context =& $report['starting_items']['items'][$srid][0];
+      } else {
+        $sti_context =& $report['starting_items']['items'][0][0];
+      }
+
+      $sti_context['head'] = $report['starting_items']['items_head'];
+      $sti_stats = unwrap_data($sti_context);
+    }
+
+    $report['starting_items']['matches'][$srid] = unwrap_data($report['starting_items']['matches'][$srid]);
+    $report['starting_items']['matches'][0] = unwrap_data($report['starting_items']['matches'][0]);
+
+    if (isset($report['starting_items']['matches'][$srid][$hero])) {
+      $sti_matches_context =& $report['starting_items']['matches'][$srid][$hero];
+    } else if (isset($report['starting_items']['items'][0][$hero])) {
+      $sti_matches_context =& $report['starting_items']['matches'][0][$hero];
+    } else if (isset($report['starting_items']['items'][$srid][0])) {
+      $sti_matches_context =& $report['starting_items']['matches'][$srid][0];
+    } else {
+      $sti_matches_context =& $report['starting_items']['matches'][0][0];
+    }
+
+    if (isset($report['starting_items']['builds'])) {
+      $report['starting_items']['builds'][$srid] = unwrap_data($report['starting_items']['builds'][$srid]);
+      $report['starting_items']['builds'][0] = unwrap_data($report['starting_items']['builds'][0]);
+
+      if (isset($report['starting_items']['builds'][$srid][$hero])) {
+        $stib_context =& $report['starting_items']['builds'][$srid][$hero];
+      } else if (isset($report['starting_items']['builds'][0][$hero])) {
+        $stib_context =& $report['starting_items']['builds'][0][$hero];
+      } else if (isset($report['starting_items']['builds'][$srid][0])) {
+        $stib_context =& $report['starting_items']['builds'][$srid][0];
+      } else {
+        $stib_context =& $report['starting_items']['builds'][0][0];
+      }
+
+      usort($stib_context, function($a, $b) {
+        return $b['wins'] <=> $a['wins'];
+      });
+
+      $i = 0;
+      foreach ($stib_context as $stibuild) {
+        if (empty($stibuild)) continue;
+        $sti_builds[] = $stibuild;
+        if (++$i == 3) break;
+      }
+    } else if (!empty($sti_stats)) {
+
+    }
+  }
+
+  if (!empty($sti_builds)) {
+    $sti_matches_context['wins'] = round($sti_matches_context['wr'] * $sti_matches_context['m']);
+
+    $reslocal .= "<div class=\"content-header\">".locale_string("builds_starting")."</div>".
+      "<div class=\"hero-build-overview-container hero-build starting-items-builds main\">";
+    foreach ($sti_builds as $i => $stibuild) {
+      $cnts = [];
+      $reslocal .= "<div class=\"build-overview-container ".($i ? "small" : "primary")."\"><div class=\"items-list\">".
+        "<div class=\"build-item-component text common\">".
+          "<a class=\"item-text smaller\" title=\"".locale_string("ratio")."\">".number_format($stibuild['ratio'] * 100, 0)."%</a>".
+          "<div class=\"labels\">".
+            // "<a class=\"item-stat-tooltip item-stat-tooltip-line item-winrate\" title=\"".locale_string("ratio")."\">R ".number_format($stibuild['ratio'] * 100, 1)."%</a>".
+            "<a class=\"item-stat-tooltip item-stat-tooltip-line item-winrate\" title=\"".locale_string("winrate")."\">WR ".number_format($stibuild['winrate'] * 100, 1)."%</a>".
+            "<a class=\"item-stat-tooltip item-stat-tooltip-line item-winrate\" title=\"".locale_string("lane_wr")."\">LWR ".number_format($stibuild['lane_wr'] * 100, 1)."%</a>".
+          "</div>".
+        "</div>".
+        "<div class=\"build-item-arrow build-item-arrow-right\"></div>".
+      "<div class=\"items-list items-list-inner\">";
+      foreach($stibuild['build'] as $item) {
+        if (!isset($cnts[$item])) $cnts[$item] = 0;
+        $cnts[$item]++;
+        $stiid = $cnts[$item] + $item*100;
+        
+        // $m_wo = $sti_matches_context['m']-$sti_matches_context['matches'];
+        // if ($m_wo) {
+        //   $wr_wo = ($sti_matches_context['wins']-$sti_stats[$stiid]['wins'])/$m_wo;
+        // } else {
+        //   $wr_wo = 0;
+        // }
+
+        $reslocal .= itembuild_item_component_simple($item, [
+          'pcnt' => $cnts[$item],
+          'winrate' => $sti_stats[$stiid]['wins']/$sti_stats[$stiid]['matches'],
+          'lane_wr' => $sti_stats[$stiid]['lane_wins']/$sti_stats[$stiid]['matches'],
+          'prate' => $sti_stats[$stiid]['matches']/$sti_matches_context['m'],
+          // 'wr_incr' => $sti_stats[$stiid]['winrate'] - $wr_wo,
+        ]);
+      }
+      $reslocal .= "</div></div></div>";
+    }
+    $reslocal .= "</div>";
+  }
+
   $reslocal .= "<div class=\"content-header\">".locale_string("builds_main_build")."</div>";
 
   $reslocal .= "<div class=\"hero-build-overview-container hero-build\">";
