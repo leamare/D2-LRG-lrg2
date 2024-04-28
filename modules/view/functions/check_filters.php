@@ -115,7 +115,7 @@ function check_filters($rep, $filters) {
           }
           break;
         case LRG_TAG_FILTER_NAMEDESC_LETTERS:
-          $lt = strtolower($filter[1]);
+          $lt = addcslashes(strtolower($filter[1]), "\\");
           $letterize = function($str) {
             return array_reduce(
               preg_split("(\s|_|\-)", strtolower(str_replace([',', '.', ':', ';'], '', $str))),
