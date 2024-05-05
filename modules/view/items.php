@@ -4,9 +4,8 @@ $modules['items'] = [];
 
 include_once($root."/modules/view/functions/item_name.php");
 
-include($root."/modules/view/items/overview.php");
-
 if (isset($report['items'])) {
+  include($root."/modules/view/items/overview.php");
   if (isset($report['items']['stats'])) {
     include($root."/modules/view/items/stats.php");
     include($root."/modules/view/items/icritical.php");
@@ -60,10 +59,10 @@ function rg_view_generate_items() {
     "/^items-(stitems|stibuilds|sticonsumables|stats|icritical|builds|buildspowerspikes|progression)/";
 
   if (isset($report['items'])) {
-    if (check_module($parent."overview")) {
-      $res['overview'] = rg_view_generate_items_overview();
-    }
     if (isset($report['items']['stats'])) {
+      if (check_module($parent."overview")) {
+        $res['overview'] = rg_view_generate_items_overview();
+      }
       if (check_module($parent."stats")) {
         $res['stats'] = rg_view_generate_items_stats();
       }

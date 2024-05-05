@@ -26,7 +26,7 @@ function rg_view_generate_items_sti_builds() {
 
   $carryon["/^items-stibuilds-(heroid\d+|total)$/"] = "/^items-stibuilds-(heroid\d+|total)/";
 
-  $roles = array_keys($report['starting_items']['items']);
+  $roles = array_keys($report['starting_items']['items'] ?? $report['starting_items']['builds']);
 
   $res['total'] = [];
   if(check_module($parent_module.'total')) {

@@ -202,7 +202,7 @@ function sti_item_builds_query($_isheroes, $_isBuilds, $_isItems, $_isRolesItems
 
       $si_matches[$rid][$hid] = [
         'm' => $si_res[$rid][$hid]['matches'],
-        'wr' => round( $si_res[$rid][$hid]['wins']/$si_res[$rid][$hid]['matches'] , 4),
+        'wr' => $si_res[$rid][$hid]['matches'] ? round( $si_res[$rid][$hid]['wins']/$si_res[$rid][$hid]['matches'], 4) : 0,
       ];
 
       $si_res[$rid][$hid] = $builds_new;
@@ -262,6 +262,10 @@ function sti_item_builds_query($_isheroes, $_isBuilds, $_isItems, $_isRolesItems
       unset($r['items'][$rid]);
     } else {
       foreach ($r['items'][$rid] as $hid => $items) {
+        if (empty($items)) {
+          unset($r['items'][$rid][$hid]);
+          continue;
+        }
         $r['items'][$rid][$hid] = wrap_data($items, true, true, true);
         unset($r['items'][$rid][$hid]['head']);
       }
@@ -270,6 +274,11 @@ function sti_item_builds_query($_isheroes, $_isBuilds, $_isItems, $_isRolesItems
     if ($rid && !$_isRolesBuilds) {
       unset($r['items'][$rid]);
     } else {
+      foreach ($r['builds'][$rid] as $hid => $items) {
+        if (empty($items)) {
+          unset($r['builds'][$rid][$hid]);
+        }
+      }
       $r['builds'][$rid] = wrap_data($r['builds'][$rid], true, true, true);
     }
 
