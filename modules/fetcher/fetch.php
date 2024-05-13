@@ -7,6 +7,7 @@
 
 include_once __DIR__.'/comebacks.php';
 include_once __DIR__.'/skillPriority.php';
+include_once __DIR__.'/fetch_valve_api.php';
 
 function conn_restart() {
   global $conn, $lrg_sql_host, $lrg_sql_user, $lrg_sql_pass, $lrg_sql_db;
@@ -20,7 +21,7 @@ function fetch($match) {
   $request_unparsed, $meta, $stratz_timeout_retries, $force_adding, $cache_dir, $lg_settings, $lrg_use_cache, $first_scheduled,
   $use_full_stratz, $scheduled_wait_period, $steamapikey, $force_await, $players_list, $rank_limit, $stratztoken, $ignore_stratz,
   $update_unparsed, $request_unparsed_players, $stratz_graphql, $api_cooldown_seconds, $update_names, $updated_names, $rewrite_existing,
-  $ignore_abandons, $lastversion, $schema, $min_duration_seconds, $min_score_side;
+  $ignore_abandons, $lastversion, $schema, $min_duration_seconds, $min_score_side, $fallback_valveapi;
 
   $t_match = [];
   $t_matchlines = [];
@@ -361,7 +362,27 @@ function fetch($match) {
     $matchdata_stratz = $matchdata ?? null;
     $matchdata = empty($matchdata_od) ? $opendota->match($match) : $matchdata_od;
     echo("..OK.");
+    
     if (empty($matchdata) || empty($matchdata['duration']) || empty($matchdata['players'])) {
+      if (empty($matchdata_stratz) && ($fallback_valveapi ?? true)) {
+        // fallback to Valve API
+        echo("..Trying Steam API.");
+        $matchdata_stratz = fetch_valve_api($match);
+
+        if (!empty($matchdata_stratz)) {
+          $bad_replay = true;
+          $t_match = $matchdata_stratz['matches'];
+          $t_team_matches = $matchdata_stratz['teams_matches'];
+          $t_matchlines = $matchdata_stratz['matchlines'];
+          $t_draft = $matchdata_stratz['draft'];
+          foreach($matchdata_stratz['players'] as $p) {
+            if(!isset($t_players[$p['playerID']]) || ($update_names && !isset($updated_names[$p['playerID']]) )) {
+              $t_new_players[$p['playerID']] = $p['nickname'];
+            }
+          }
+        }
+        $stratz_request = "";
+      }
       if (empty($matchdata_stratz)) {
         echo("..MISSING: Unable to read JSON skipping.\n");
         //if (!isset($matchdata['duration'])) var_dump($matchdata);

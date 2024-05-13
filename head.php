@@ -43,6 +43,7 @@ if(isset($argv)) {
   $stratztoken   = $settings['stratztoken'] ?? '';
   $odapikey      = $settings['odapikey'] ?? '';
   $mysql_median  = (bool)($settings['mysql_stats_func'] ?? false);
+  $fallback_valveapi = $settings['steampi_fallback'] ?? false;
 
   unset($settings);
 

@@ -348,6 +348,7 @@ while(sizeof($matches) || $listen) {
     }
   }
 
+
   $r = fetch($match);
   if ($r === FALSE) { //|| ($force_await && $request_unparsed && $r !== TRUE)) {
     array_push($matches, $match);
