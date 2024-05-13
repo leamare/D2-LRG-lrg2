@@ -1,6 +1,6 @@
 <?php 
 
-function fetch_valve_api(string|int $match_id): array {
+function fetch_valve_api($match_id): array {
   global $steamapikey, $api_cooldown_seconds, $meta;
 
   $json = @file_get_contents("https://api.steampowered.com/IDOTA2Match_570/GetMatchDetails/V001/?match_id={$match_id}&key=$steamapikey");
