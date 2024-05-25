@@ -209,6 +209,7 @@ if (!$isVirtual) {
     `matchid` bigint(20) UNSIGNED NOT NULL,
     `playerid` bigint(20) NOT NULL,
     `heroid` smallint(6) NOT NULL,
+    `variant` SMALLINT(6) UNSIGNED DEFAULT null NULL,
     `level` tinyint(3) UNSIGNED NOT NULL,
     `isRadiant` tinyint(1) NOT NULL,
     `kills` smallint(6) NOT NULL,

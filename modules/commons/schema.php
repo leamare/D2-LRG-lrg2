@@ -17,6 +17,7 @@ $schema = [
   'wards' => false,
   'medians_available' => false,
   'percentile_available' => false,
+  'variant' => false,
 ];
 
 echo "[ ] Getting tables\n";
@@ -60,6 +61,18 @@ $query_res = $conn->store_result();
 for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
   if ($row[0] == "radiant_opener") {
     $schema['matches_opener'] = true;
+    break;
+  }
+}
+$query_res->free_result();
+
+$sql = "DESCRIBE matchlines;";
+if ($conn->multi_query($sql) === FALSE)
+  die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+$query_res = $conn->store_result();
+for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+  if ($row[0] == "variant") {
+    $schema['variant'] = true;
     break;
   }
 }
