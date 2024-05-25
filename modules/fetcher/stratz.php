@@ -116,6 +116,7 @@ const STRATZ_GRAPHQL_QUERY = "{
     steamAccountId
     playerSlot
     heroId
+    variant
     level
     isRadiant
     leaverStatus
@@ -379,6 +380,7 @@ function get_stratz_response($match) {
     $ml['matchid'] = $stratz['data']['match']['id'];
     $ml['playerid'] = $pl['steamAccountId'];
     $ml['heroid'] = $pl['heroId'];
+    $ml['variant'] = $pl['variant'];
     $ml['isRadiant'] = $pl['isRadiant'];
     $ml['level'] = $pl['level'];
     $ml['kills'] = $pl['kills'];

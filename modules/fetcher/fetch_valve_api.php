@@ -70,6 +70,7 @@ function fetch_valve_api($match_id): array {
     $ml['matchid'] = $match_id;
     $ml['playerid'] = $pl['account_id'];
     $ml['heroid'] = $pl['hero_id'];
+    $ml['variant'] = $pl['hero_variant'] ?? null;
     $ml['isRadiant'] = $pl['team_number'] == 0;
     $ml['level'] = $pl['level'];
     $ml['kills'] = $pl['kills'];

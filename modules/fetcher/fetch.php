@@ -998,6 +998,7 @@ function fetch($match) {
 
 
         $t_matchlines[$i]['heroid'] = $matchdata['players'][$j]['hero_id'];
+        $t_matchlines[$i]['variant'] = $matchdata['players'][$j]['hero_variant'] ?? null;
         $t_matchlines[$i]['isRadiant'] = $matchdata['players'][$j]['isRadiant'];
         $t_matchlines[$i]['level'] = $matchdata['players'][$j]['level'];
         $t_matchlines[$i]['kills'] = $matchdata['players'][$j]['kills'];
@@ -1505,7 +1506,29 @@ function fetch($match) {
     // ability_upgrades_arr
     $t_skill_builds = [];
     foreach ($matchdata['players'] as $player) {
-      if (empty($player['ability_upgrades_arr'])) continue;
+      if (empty($player['ability_upgrades_arr'])) {
+        if (empty($player['ability_level_times'])) {
+          continue;
+        }
+        
+        $player['ability_upgrades_arr'] = [];
+        foreach ($player['ability_level_times'] as $time => $ability_tag_orig) {
+          if (isset($meta['spells_linked'][$ability_tag_orig])) {
+            $ability_tag = $meta['spells_linked'][$ability_tag_orig];
+          } else {
+            $ability_tag = $ability_tag_orig;
+          }
+          if ($t_match['modeID'] != 18 && $player['hero_id'] == 86) {
+            foreach ($matchdata['players'] as $pl) {
+              if (in_array($ability_tag, $pl['ability_level_times']) || in_array($ability_tag_orig, $pl['ability_level_times'])) {
+                continue 2;
+              }
+            }
+          }
+          $ability = array_flip($meta['spells_tags'])[$ability_tag];
+          $player['ability_upgrades_arr'][] = $ability;
+        }
+      }
       $sti = skillPriority($player['ability_upgrades_arr'], $player['hero_id'], $player['hero_id'] == 74);
       $t_skill_builds[] = [
         'matchid' => $match,
@@ -1760,11 +1783,12 @@ function fetch($match) {
     return null;
   }
 
-  $sql = "INSERT INTO matchlines (matchid, playerid, heroid, level, isRadiant, kills, deaths, assists, networth,".
+  $sql = "INSERT INTO matchlines (matchid, playerid, heroid, ".($schema['variant'] ? "variant, " : "")."level, isRadiant, kills, deaths, assists, networth,".
           "gpm, xpm, heal, heroDamage, towerDamage, lastHits, denies) VALUES ";
   foreach($t_matchlines as $ml) {
       if (!$ml['heroid']);
       $sql .= "\n\t(".$ml['matchid'].",".$ml['playerid'].",".$ml['heroid'].",".
+          ($schema['variant'] ? (isset($ml['variant']) ? $ml['variant'] : "null")."," : "").
           $ml['level'].",".($ml['isRadiant'] ? "true" : "false").",".$ml['kills'].",".
           $ml['deaths'].",".$ml['assists'].",".$ml['networth'].",".
           $ml['gpm'].",".$ml['xpm'].",".($ml['heal'] ?? 0).",".
