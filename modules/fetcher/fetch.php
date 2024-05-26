@@ -1788,7 +1788,7 @@ function fetch($match) {
   foreach($t_matchlines as $ml) {
       if (!$ml['heroid']);
       $sql .= "\n\t(".$ml['matchid'].",".$ml['playerid'].",".$ml['heroid'].",".
-          ($schema['variant'] ? (isset($ml['variant']) ? $ml['variant'] : "null")."," : "").
+          ($schema['variant'] ? (($ml['variant'] ?? null) ? $ml['variant'] : "null")."," : "").
           $ml['level'].",".($ml['isRadiant'] ? "true" : "false").",".$ml['kills'].",".
           $ml['deaths'].",".$ml['assists'].",".$ml['networth'].",".
           $ml['gpm'].",".$ml['xpm'].",".($ml['heal'] ?? 0).",".
