@@ -118,7 +118,7 @@ foreach ($matches as $match) {
   foreach ($stratz['data']['match']['players'] as $pl) {
     if (empty($pl['steamAccountId'])) continue;
     if (!isset($t_players[$pl['steamAccountId']])) {
-      $name = $pl['steamAccount']['proSteamAccount']['name'] ?? $pl['steamAccount']['name'];
+      $name = $pl['steamAccount']['proSteamAccount']['name'] ?? $pl['steamAccount']['name'] ?? "Player ".$pl['steamAccountId'];
       $update_events[] = "INSERT INTO players (playerID, nickname) VALUES (".$pl['steamAccountId'].",\"".addslashes($name)."\");";
       $t_players[$pl['steamAccountId']] = $name;
     }
