@@ -51,6 +51,19 @@ function fetch($match) {
   echo("[$rnum\t] Match $match: ");
   $rnum++;
 
+  if (!empty($lg_settings['match_limit_after'])) {
+    if ($match < $lg_settings['time_limit_after']) {
+      echo("..Match outside the time range, skipping...\n");
+      return true;
+    }
+  }
+  if (!empty($lg_settings['match_limit_before'])) {
+    if ($match > $lg_settings['time_limit_after']) {
+      echo("..Match outside the time range, skipping...\n");
+      return true;
+    }
+  }
+
   $query = $conn->query("SELECT matchid FROM matches WHERE matchid = ".$match.";");
 
   if (isset($query->num_rows) && $query->num_rows) {
@@ -199,6 +212,19 @@ function fetch($match) {
         return true;
       }
     }
+
+    if (!empty($lg_settings['time_limit_after'])) {
+      if ($matchdata['matches']['start_time'] < $lg_settings['time_limit_after']) {
+        echo("..Match outside the time range, skipping...\n");
+        return true;
+      }
+    }
+    if (!empty($lg_settings['time_limit_before'])) {
+      if ($matchdata['matches']['start_time'] > $lg_settings['time_limit_after']) {
+        echo("..Match outside the time range, skipping...\n");
+        return true;
+      }
+    }
   } elseif($lrg_use_cache && file_exists("$cache_dir/".$match.".json") && !$players_update) {
     echo("Reusing cache.");
     $json = file_get_contents("$cache_dir/".$match.".json");
@@ -263,6 +289,19 @@ function fetch($match) {
       if (!empty($lg_settings['version_denylist'])) {
         if (in_array($matchdata['matches']['version'] ?? 0, $lg_settings['version_denylist'])) {
           echo("..Version ".($matchdata['matches']['version'] ?? 0)." is in denylist, skipping...\n");
+          return true;
+        }
+      }
+
+      if (!empty($lg_settings['time_limit_after'])) {
+        if ($matchdata['matches']['start_time'] < $lg_settings['time_limit_after']) {
+          echo("..Match outside the time range, skipping...\n");
+          return true;
+        }
+      }
+      if (!empty($lg_settings['time_limit_before'])) {
+        if ($matchdata['matches']['start_time'] > $lg_settings['time_limit_after']) {
+          echo("..Match outside the time range, skipping...\n");
           return true;
         }
       }
@@ -464,6 +503,19 @@ function fetch($match) {
       if (!empty($lg_settings['version_denylist'])) {
         if (in_array($t_version, $lg_settings['version_denylist'])) {
           echo("..Version ".($t_version)." is in denylist, skipping...\n");
+          return true;
+        }
+      }
+
+      if (!empty($lg_settings['time_limit_after'])) {
+        if ($matchdata['start_time'] < $lg_settings['time_limit_after']) {
+          echo("..Match outside the time range, skipping...\n");
+          return true;
+        }
+      }
+      if (!empty($lg_settings['time_limit_before'])) {
+        if ($matchdata['start_time'] > $lg_settings['time_limit_after']) {
+          echo("..Match outside the time range, skipping...\n");
           return true;
         }
       }
