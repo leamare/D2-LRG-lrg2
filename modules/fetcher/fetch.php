@@ -214,13 +214,13 @@ function fetch($match) {
     }
 
     if (!empty($lg_settings['time_limit_after'])) {
-      if ($matchdata['matches']['start_time'] < $lg_settings['time_limit_after']) {
+      if ($matchdata['matches']['start_date'] < $lg_settings['time_limit_after']) {
         echo("..Match outside the time range, skipping...\n");
         return true;
       }
     }
     if (!empty($lg_settings['time_limit_before'])) {
-      if ($matchdata['matches']['start_time'] > $lg_settings['time_limit_after']) {
+      if ($matchdata['matches']['start_date'] > $lg_settings['time_limit_after']) {
         echo("..Match outside the time range, skipping...\n");
         return true;
       }
@@ -294,13 +294,13 @@ function fetch($match) {
       }
 
       if (!empty($lg_settings['time_limit_after'])) {
-        if ($matchdata['matches']['start_time'] < $lg_settings['time_limit_after']) {
+        if ($matchdata['matches']['start_date'] < $lg_settings['time_limit_after']) {
           echo("..Match outside the time range, skipping...\n");
           return true;
         }
       }
       if (!empty($lg_settings['time_limit_before'])) {
-        if ($matchdata['matches']['start_time'] > $lg_settings['time_limit_after']) {
+        if ($matchdata['matches']['start_date'] > $lg_settings['time_limit_after']) {
           echo("..Match outside the time range, skipping...\n");
           return true;
         }
