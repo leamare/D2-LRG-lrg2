@@ -217,13 +217,13 @@
           echo "LRG web version: <a>".parse_ver($lg_version)."</a>. ";
         ?>
       </footer>
-      <div class="modal" id="modal-box">
-        <div class="modal-content">
+      <dialog class="modal-content" id="modal-box">
+        <div class="modal-dialog-container">
           <div class="modal-header"></div>
           <div id="modal-text" class="modal-text"></div>
           <div id="modal-sublevel" class="modal-sublevel"></div>
         </div>
-      </div>
+      </dialog>
       <script type="text/javascript" src="res/dependencies/jquery.min.js<?php echo $__postfix; ?>"></script>
       <script type="text/javascript" src="res/dependencies/jquery.tablesorter.min.js<?php echo $__postfix; ?>"></script>
       <!-- <script type="text/javascript" src="res/dependencies/jquery.tablesorter-mod.js<?php echo $__postfix; ?>"></script> -->

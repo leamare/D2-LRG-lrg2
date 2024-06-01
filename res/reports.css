@@ -390,6 +390,7 @@ table .hero_portrait.bigger, .flextable .hero_portrait.bigger {
   margin: 7px;
   line-height: 32px;
   font-size: 20px;
+  flex-basis: 100%;
 }
 .unique-heroes-card .line .caption {
   font-size: inherit;
@@ -2161,4 +2162,22 @@ tr.shady td.banner-row .shady-notice {
   opacity: 0.8;
   width: 70%;
   left: 15%;
+}
+
+.match-link-modal {
+  font-size: 1em;
+  line-height: 2em;
+  min-width: 550px;
+  display: inline-block;
+}
+.team-focus {
+  font-size: 1em;
+  text-decoration: underline;
+  text-underline-offset: .25em;
+}
+.team-focus.team-loser {
+  text-shadow: 0 0 .5em var(--low-wr-bright), 0 0 .5em var(--low-wr-bright), 0 0 .5em var(--low-wr-bright), 0 0 .5em var(--low-wr-bright), 0 0 .5em var(--low-wr-bright);
+}
+.team-focus.team-winner {
+  text-shadow: 0 0 .5em var(--high-wr-bright), 0 0 .5em var(--high-wr-bright), 0 0 .5em var(--high-wr-bright), 0 0 .5em var(--high-wr-bright), 0 0 .5em var(--high-wr-bright);
 }

@@ -681,14 +681,14 @@ function scrollTo(container, elem) {
 function showModal(text, cap) {
     document.getElementById('modal-text').innerHTML = text;
     document.getElementsByClassName('modal-header')[0].innerHTML = cap;
-    document.getElementById('modal-box').style.display = "block";
+    document.getElementById('modal-box').showModal();
 }
-window.onclick = function(event) {
-    if (event.target == document.getElementById('modal-box')) {
-        document.getElementById('modal-box').style.display = "none";
-        document.getElementById('modal-sublevel').style.display = "none";
-    }
-}
+const dialog = document.querySelector("dialog");
+dialog.addEventListener("click", function(event) {
+  if (event.target === dialog) {
+    dialog.close();
+  }
+});
 
 function expandSubModal(text) {
     document.getElementById('modal-sublevel').innerHTML = text;
