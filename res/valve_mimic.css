@@ -487,6 +487,7 @@ a:hover {
     text-align: center;
     font-weight: bold;
     color: var(--caption);
+    flex-basis: 100%;
 }
 
 .faqAnswer {
@@ -647,8 +648,7 @@ header.navBar a, header.navBar a:hover, header.navBar a:visited, header.navBar a
   height: .95em;
 }
 
-.modal {
-    display: none;
+.modal, dialog[open]::backdrop {
     position: fixed;
     z-index: 1001;
     left: 0;
@@ -657,21 +657,32 @@ header.navBar a, header.navBar a:hover, header.navBar a:visited, header.navBar a
     height: 100%;
     overflow: auto;
     background-color: rgb(0,0,0);
-    background-color: rgba(0,0,0,0.4);
+    background-color: rgba(0,0,0,0.5);
     -webkit-animation-name: fadeIn;
     -webkit-animation-duration: 0.4s;
     animation-name: fadeIn;
     animation-duration: 0.4s
 }
-.modal-content {
+dialog, .modal-content {
     position: fixed;
-    bottom: 0;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     background-color: var(--modal-content-bg);
-    width: 100%;
+    width: 90%;
+    max-height: 80%;
+    min-height: 60%;
+    border: none;
+    z-index: 1000;
     -webkit-animation-name: slideIn;
     -webkit-animation-duration: 0.4s;
     animation-name: slideIn;
     animation-duration: 0.4s;
+}
+.modal-dialog-container {
+  position: absolute;
+  top: 0; left: 0;
+  bottom: 0; right: 0;
 }
 .modal-text {
     color: var(--modal-text);
