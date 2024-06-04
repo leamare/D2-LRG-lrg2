@@ -59,8 +59,8 @@ if ($restore) {
     'starting_items',
     'runes',
     'skill_builds',
-    'teams_matches',
     'teams',
+    'teams_matches',
     'teams_rosters',
   ];
 
@@ -92,11 +92,13 @@ if ($restore) {
       $qcnt = 0;
       $hsz = count(explode(',', $schema));
 
+      $schema = '`'.implode('`,`', explode(',', $schema)).'`';
+
       while (($line = fgets($handle)) !== false) {
         if (empty($line)) continue;
 
         $qline = "";
-        $_vals = explode(',', $line);
+        $_vals = explode(',', trim($line));
 
         $vals = []; $jstr = false;
         foreach ($_vals as $v) {
@@ -106,7 +108,7 @@ if ($restore) {
               $jstr = false;
             }
           } else {
-            if (!empty($v) && $v[0] == '"') {
+            if (!empty($v) && $v[0] == '"' && ((strlen($v) == 1) || ($v[strlen($v)-1] != '"'))) {
               $jstr = true;
             }
             $vals[] = $v;
@@ -114,15 +116,21 @@ if ($restore) {
         }
 
         foreach ($vals as $v) {
+          if (empty($v)) {
+            $qline .= "'0',";
+            continue;
+          }
           if (strpos($v, ',') !== false) {
-            $v = substr($v, 1, strlen($v)-2);
+            // $v = substr($v, 1, strlen($v)-2);
             $v = str_replace('""', '"', $v);
+            $v = substr($v, 1, strlen($v)-2);
+            // $v = trim($v, '"');
           }
           if (!is_numeric($v) && !mb_check_encoding($v, 'UTF-8')) {
             $v = mb_convert_encoding($v, 'UTF-8');
           }
           $v = trim($v);
-          $qline .= "\"".addcslashes($v, '"\\')."\",";
+          $qline .= "'".addcslashes($v, "'\\")."',";
         }
         $qline[strlen($qline)-1] = ")";
 
@@ -132,8 +140,12 @@ if ($restore) {
 
         if ($qcnt >= QUERY_COUNTER || $_lines <= 1) {
           $sql = "INSERT INTO $t ($schema) VALUES \n".implode(",\n", $qlines).';';
-          if ($conn->multi_query($sql) === TRUE);
-          else {
+          try {
+            if ($conn->multi_query($sql) === TRUE);
+            else {
+              throw new Exception($conn->error);
+            }
+          } catch (Exception $e) {
             $fname_base = "tmp/query_{$table}_".time();
             $i = 0;
             while(file_exists(($fname = $fname_base))) {
@@ -141,8 +153,10 @@ if ($restore) {
             }
             $fname .= ".sql";
 
-            echo "[E] ERROR: ".$conn->error."\n    Details: `$fname`\n";
+            echo "\n[E] ERROR: ".$conn->error."\n    Details: `$fname`\n";
             file_put_contents($fname, $sql);
+
+            die();
           }
 
           $qcnt = 0;

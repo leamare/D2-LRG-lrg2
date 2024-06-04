@@ -188,7 +188,7 @@ if (!$isVirtual) {
     `radiantWin` tinyint(1) NOT NULL,
     `duration` int(11) NOT NULL,
     `modeID` tinyint(11) UNSIGNED NOT NULL,
-    `leagueID` int(11) NOT NULL,
+    `leagueID` int(11),
     `start_date` int(11) NOT NULL,
     `analysis_status` tinyint(1) NOT NULL,
     `radiant_opener` tinyint(1),
@@ -357,7 +357,7 @@ if (!$isVirtual) {
 
   $conn->query("CREATE TABLE `players` (
     `playerID` bigint(20) NOT NULL,
-    `nickname` varchar(128) NOT NULL,
+    `nickname` varchar(128),
     `name_fixed` tinyint(1) NOT NULL DEFAULT 0
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
   if ($conn->connect_error) die("[F] Can't create table `players`: ".$conn->connect_error."\n");
