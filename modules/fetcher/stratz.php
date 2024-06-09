@@ -621,7 +621,14 @@ function get_stratz_response($match) {
       foreach ($pl['stats']['itemPurchases'] as $e) {
         if ($r['matches']['duration'] - $e['time'] < 60) continue;
 
-        if ($e['time'] < -10) $items_starting[] = $e['itemId'];
+        if ($e['time'] < -20) {
+          // Startz Starting items seem to be broken
+          // so I'll be skipping them here and only recording the
+          // minute 0 inventory snapshot
+
+          // $items_starting[] = $e['itemId'];
+          continue;
+        }
 
         if (in_array($e['itemId'], $meta['item_categories']['consumables'])) {
           if (!isset($consumables['all'][ $e['itemId'] ])) {
@@ -685,14 +692,6 @@ function get_stratz_response($match) {
         $r['items'][] = $it;
       }
 
-      $r['starting_items'][] = [
-        'matchid' => $stratz['data']['match']['id'],
-        'playerid' => $pl['steamAccountId'],
-        'hero_id' => $pl['heroId'],
-        'starting_items' => addslashes(\json_encode($items_starting)),
-        'consumables' => addslashes(\json_encode($consumables)),
-      ];
-
       foreach($pl['stats']['matchPlayerBuffEvent'] as $e) {
         if (in_array($e['itemId'], [108, 271, 247, 609, 727, 725]) && !isset($items_all[ $e['itemId'] ])) {
           // rosh aghs
@@ -725,6 +724,14 @@ function get_stratz_response($match) {
         for($i = 0; $i < 3; $i++) {
           $inventory[] = $e['backPack'.$i] ? $e['backPack'.$i]['itemId'] : null;
         }
+
+        if (!$t) {
+          // Startz Starting items seem to be broken
+          // so I'll be skipping them here and only recording the
+          // minute 0 inventory snapshot
+          $items_starting = $inventory;
+        }
+
         foreach($inventory as $item_id) {
           // rosh aghs
           if ($item_id == 725 || $item_id == 727)
@@ -732,7 +739,7 @@ function get_stratz_response($match) {
           // $item_id = 609;
           // if ($item_id == 727) $item_id = 271;
 
-          $time = ($t-1)*60;
+          $time = $t ? ($t-1)*60 : -80;
 
           // && abs($items_all[ $item_id ]-60) < 60)
           if (!$item_id || isset($items_all[ $item_id ]) )
@@ -774,6 +781,14 @@ function get_stratz_response($match) {
           $items_cats[ $category_id ] = ($items_cats[ $category_id ] ?? 0) + 1;
         }
       }
+
+      $r['starting_items'][] = [
+        'matchid' => $stratz['data']['match']['id'],
+        'playerid' => $pl['steamAccountId'],
+        'hero_id' => $pl['heroId'],
+        'starting_items' => addslashes(\json_encode($items_starting)),
+        'consumables' => addslashes(\json_encode($consumables)),
+      ];
 
       $last = null; 
       //$neutrals = [];
