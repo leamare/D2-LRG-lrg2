@@ -32,11 +32,15 @@ if ($restore) {
   
   echo("[ ] Restoring $input to $lrg_league_tag\n");
 
-  echo("[ ] Unpacking...\n");
-  $a = new PharData($input);
-  $dir = '_restore_'.$lrg_league_tag;
-  mkdir($dir);
-  $a->extractTo($dir);
+  if ($remove) {
+    $dir = $input;
+  } else {
+    echo("[ ] Unpacking...\n");
+    $a = new PharData($input);
+    $dir = '_restore_'.$lrg_league_tag;
+    mkdir($dir);
+    $a->extractTo($dir);
+  }
 
   echo("[ ] Initializing db...\n");
   exec("php rg_init.php -l$lrg_league_tag -Nq -Dq");
