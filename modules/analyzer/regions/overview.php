@@ -237,7 +237,7 @@ if (!$row[1] || ( ($lg_settings['ana']['regions']['use_limiter'] ?? false) && $r
   } while($conn->next_result());
 
   if (!isset($result["regions_data"][$region]["main"]["heroes_median_bans"])) {
-    $result["regions_data"][$region]["main"]["heroes_median_bans"] = array_insert_before(
+    $result["regions_data"][$region]["main"] = array_insert_before(
       $result["regions_data"][$region]["main"], 
       "heroes_median_gpm",
       [ "heroes_median_bans" => 0 ]

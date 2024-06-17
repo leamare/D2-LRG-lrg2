@@ -25,6 +25,7 @@ function rg_generator_pickban($table_id, &$context, &$context_main, $heroes_flag
   $context_total_matches = $context_main['matches'] ?? $context_main["matches_total"] ?? 0;
   $mp = $context_main['heroes_median_picks'] ?? null;
   $mb = $context_main['heroes_median_bans'] ?? null;
+  if (is_array($mb)) $mb = null;
 
   if (!$mp) {
     uasort($context, function($a, $b) {
