@@ -302,6 +302,10 @@ a:hover {
   border-bottom: 3px solid #0000;
   transition: 150ms all linear;
 }
+.selector.has-children:after {
+  content: ' ☰';
+  font-size: .8em;
+}
 .selector .selector-icon {
   height: 1.3em;
   font-size: inherit;

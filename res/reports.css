@@ -1025,6 +1025,7 @@ table .hero_portrait.bigger, .flextable .hero_portrait.bigger {
   transition: 300ms opacity linear;
   margin-top: 10px;
   line-height: 1em;
+  flex-wrap: wrap;
 }
 .friends-list:hover {
   opacity: 1;
