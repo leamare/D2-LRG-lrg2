@@ -9,6 +9,7 @@ reports/
 libs/
 metadata/
 tmp/
+locales_additional/
 .vscode/
 
 # Settings container
