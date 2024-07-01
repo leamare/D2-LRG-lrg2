@@ -4,6 +4,7 @@ return [
     "en" => [
         "file" => __DIR__ . "/en.json",
         "name" => "English",
+        'vpk'  => "english",
     ],
     "def" => [
         "alias" => "en",
@@ -11,12 +12,14 @@ return [
     "ru" => [
         "file" => __DIR__ . "/ru.json",
         "name" => "Русский",
+        'vpk'  => "russian",
     ],
     "uk" => [
         "beta" => true,
         "fallback" => "ru",
         "file" => __DIR__ . "/uk.json",
         "name" => "Українська",
+        'vpk'  => "ukrainian",
     ],
     "ua" => [
         "alias" => "uk",
@@ -26,13 +29,16 @@ return [
         "fallback" => "pt-br",
         "file" => __DIR__ . "/pt.json",
         "name" => "Português",
+        'vpk'  => "portuguese",
     ],
     "pt-br" => [
         "file" => __DIR__ . "/pt-br.json",
         "name" => "Português Brasileiro",
+        'vpk'  => "brazilian",
     ],
     "zh" => [
         "file" => __DIR__ . "/zh.json",
         "name" => "普通话",
+        'vpk'  => "schinese",
     ]
 ];
