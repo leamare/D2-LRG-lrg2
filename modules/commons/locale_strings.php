@@ -27,7 +27,7 @@ function locale_string($string_id, $vars = [], $loc = null) {
 }
 
 function include_locale($locale, $component = null) {
-  global $strings, $localesMap, $isBetaLocale, $root, $fallback_locale, $rootLocale;
+  global $strings, $localesMap, $isBetaLocale, $root, $fallback_locale, $rootLocale, $_locales_imported;
 
   if (isset($localesMap[ $locale ]) && ($localesMap[ $locale ]['alias'] ?? false)) {
     $locale = $localesMap[ $locale ]['alias'];
@@ -73,11 +73,12 @@ function include_locale($locale, $component = null) {
   //   require_once('locales/'.$locale.'.php');
   // } else
   foreach ($file as [ $f, $l ]) {
-    if (file_exists($f)) {
+    if (file_exists($f) && !isset($_locales_imported[$f])) {
       $strings[$l] = array_merge(
         $strings[$l],
         json_decode(file_get_contents($f), true)
       );
+      $_locales_imported[$f] = true;
     }
   }
 
