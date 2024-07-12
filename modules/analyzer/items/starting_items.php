@@ -66,7 +66,10 @@ function sti_item_builds_query($_isheroes, $_isBuilds, $_isItems, $_isRolesItems
   for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
     [ $build, $hid, $role, $wins, $mtchs, $lane_wins ] = $row;
 
-    $build = json_decode($build);
+    $build = (array)json_decode($build);
+    $build = array_filter($build, function($el) {
+      return +$el;
+    });
     sort($build);
 
     if (!isset($si_res[$role][$hid])) $si_res[$role][$hid] = SI_ROLE_DUMMY;
