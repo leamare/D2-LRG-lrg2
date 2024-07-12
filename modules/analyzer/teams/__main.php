@@ -62,6 +62,10 @@ if ($lg_settings['ana']['teams'])
       # heroes pickbans
       require("pickban.php");
 
+      if ($schema['variant']) {
+        require("heroes/variants.php");
+      }
+
       if ($lg_settings['ana']['teams']['draft']) {
         # heroes draft
         require("heroes/draft.php");
