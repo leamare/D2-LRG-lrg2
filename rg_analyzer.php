@@ -5,11 +5,11 @@ ini_set('memory_limit', '4096M');
 ini_set('mysqli.allow_persistent', '1');
 ini_set('mysql.allow_persistent', '1');
 
-ini_set('mysql.connect_timeout', '7200');
-ini_set('default_socket_timeout', '7200');
+ini_set('mysql.connect_timeout', '72000');
+ini_set('default_socket_timeout', '72000');
 
 ini_set('mysqli.reconnect', '1');
-ini_set('mysqlnd.net_read_timeout', '7200');
+ini_set('mysqlnd.net_read_timeout', '72000');
 
 const FP_ABLE = [ 23, 18, 21, 17, 16, 8, 2 ];
 
@@ -25,7 +25,11 @@ include_once("modules/view/functions/ranking.php");
 
 echo("\nConnecting to database...\n");
 
-$conn = new mysqli($lrg_sql_host, $lrg_sql_user, $lrg_sql_pass, $lrg_sql_db);
+try {
+  $conn = new mysqli($lrg_sql_host, $lrg_sql_user, $lrg_sql_pass, $lrg_sql_db);
+} catch (Exception $e) {
+  die("[F] Error: ".$e->getMessage()."\n");
+}
 $conn->set_charset('utf8mb4');
 
 if ($conn->connect_error) die("[F] Connection to SQL server failed: ".$conn->connect_error."\n");
@@ -38,13 +42,17 @@ if ($conn->connect_error) die("[F] Connection to SQL server failed: ".$conn->con
 // e.g. formulas or structure
 include_once("modules/analyzer/__queries/hero_pairs.php");
 include_once("modules/analyzer/__queries/hero_pickban.php");
+include_once("modules/analyzer/__queries/hero_variants.php");
 include_once("modules/analyzer/__queries/hero_draft.php");
 include_once("modules/analyzer/__queries/hero_draft_tree.php");
 include_once("modules/analyzer/__queries/hero_trios.php");
 include_once("modules/analyzer/__queries/lane_combos.php");
+include_once("modules/analyzer/__queries/lane_combos_variants.php");
 include_once("modules/analyzer/__queries/hero_positions.php");
 include_once("modules/analyzer/__queries/hero_summary.php");
+include_once("modules/analyzer/__queries/hero_summary_variants.php");
 include_once("modules/analyzer/__queries/hero_laning.php");
+include_once("modules/analyzer/__queries/hero_laning_variants.php");
 
 include_once("modules/analyzer/__queries/player_summary.php");
 include_once("modules/analyzer/__queries/player_draft.php");
@@ -186,6 +194,10 @@ require_once("modules/analyzer/main/overview.php");
 
 # pick/ban heroes stats
 require_once("modules/analyzer/heroes/pickban.php");
+
+if ($schema['variant']) {
+  require_once("modules/analyzer/heroes/variants.php");
+}
 
 # limiters
 require_once("modules/analyzer/main/limiters.php");
@@ -377,6 +389,18 @@ if ($schema['starting_items']) {
   $result['settings']['sti_builds_roles_players_limit'] = $lg_settings['ana']['starting_builds_roles_players_limit'];
   $result['settings']['sti_builds_limit'] = $lg_settings['ana']['starting_builds_limit'];
   $result['settings']['sti_builds_roles_limit'] = $lg_settings['ana']['starting_builds_roles_limit'];
+}
+
+$result['meta'] = [];
+if ($schema['variant']) {
+  $result['meta']['variants'] = [];
+  foreach ($meta['facets']['heroes'] as $hid => $data) {
+    $result['meta']['variants'][$hid] = [];
+    foreach ($data as $el) {
+      $result['meta']['variants'][$hid][ $el['name'] ] = [ $el['icon'], array_search($el['color'], $meta['facets']['colors']) ];
+    }
+  }
+  $result['meta']['variants_colors'] = $meta['facets']['colors'];
 }
 
 $result['settings']['limiter'] = $limiter;
