@@ -73,3 +73,34 @@ if ($lg_settings['ana']['heroes_winrate_spammers']) {
   # heroes laning
   require_once("modules/analyzer/heroes/winrate_spammers.php");
 }
+
+if ($schema['variant']) {
+  if ($lg_settings['ana']['hero_vs_hero']) {
+    require_once("modules/analyzer/heroes/versus_hero_variants.php");
+    if ($lg_settings['ana']['hero_laning']) {
+      require_once("modules/analyzer/heroes/laning_variants.php");
+    }
+
+    $result["hvh_v"] = wrap_data($result["hvh_v"], true, true, true);
+  }
+
+  if ($lg_settings['ana']['full_hero_pairs']) {
+    require_once("modules/analyzer/heroes/full_combos_variants.php");
+
+    // if ($lg_settings['ana']['hero_lane_combos']) {
+    //   require_once("modules/analyzer/heroes/laning_combos_variants.php");
+    // }
+    
+    $result["hph_v"] = wrap_data($result["hph_v"], true, true, true);
+  }
+  
+  if ($lg_settings['ana']['heroes_daily_winrate'] && !empty($result["first_match"])) {
+    # heroes laning
+    require_once("modules/analyzer/heroes/daily_wr_variants.php");
+  }
+
+  if ($lg_settings['ana']['hero_summary']) {
+    # heroes summary
+    require_once("modules/analyzer/heroes/summary_variants.php");
+  }
+}
