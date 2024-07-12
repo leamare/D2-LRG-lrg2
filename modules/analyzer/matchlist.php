@@ -1,7 +1,7 @@
 <?php
 $result["matches"] = array();
 
-$sql = "SELECT matchid, heroid, playerid, isRadiant FROM matchlines;";
+$sql = "SELECT matchid, heroid, playerid, isRadiant".($schema['variant'] ? ", variant" : "")." FROM matchlines;";
 
 if ($conn->multi_query($sql) === TRUE) echo "[S] MATCHES LIST.\n";
 else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
@@ -14,11 +14,17 @@ for ($row = $query_res->fetch_row();
   if (!isset($result["matches"][$row[0]])) {
     $result["matches"][$row[0]] = [];
   }
-  $result["matches"][$row[0]][] = [
+  $hero = [
     "hero" => (int)$row[1],
     "player" => (int)$row[2],
     "radiant" => (int)$row[3]
   ];
+
+  if ($schema['variant'] && (+$row[4])) {
+    $hero['var'] = +$row[4];
+  }
+
+  $result["matches"][$row[0]][] = $hero;
 }
 
 
