@@ -17,6 +17,7 @@ $schema = [
   'wards' => false,
   'medians_available' => false,
   'percentile_available' => false,
+  'variant_supported' => false,
   'variant' => false,
 ];
 
@@ -72,11 +73,21 @@ if ($conn->multi_query($sql) === FALSE)
 $query_res = $conn->store_result();
 for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
   if ($row[0] == "variant") {
-    $schema['variant'] = true;
+    $schema['variant_supported'] = true;
     break;
   }
 }
 $query_res->free_result();
+
+if ($schema['variant_supported']) {
+  $sql = "SELECT * FROM matchlines WHERE variant is not null AND variant > 0;";
+  $mres = $conn->query($sql);
+  if ($mres === FALSE)
+    die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+  if ($mres->num_rows > 0) {
+    $schema['variant'] = true;
+  }
+}
 
 $sql = "DESCRIBE adv_matchlines;";
 if ($conn->multi_query($sql) === FALSE)

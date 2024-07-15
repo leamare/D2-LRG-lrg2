@@ -61,7 +61,7 @@ function rg_query_hero_summary_variants(&$conn, $role = 0, $cluster = null, $pla
             GROUP BY ml.matchid, ml.isradiant
           ) rs ON ml.matchid = rs.matchid AND ml.isradiant = rs.is_radiant ".
           (!empty($wheres) ? "WHERE ".implode(" AND ", $wheres) : "").
-        " GROUP BY hid
+        " GROUP BY hid, variant
           ORDER BY matches DESC, winrate DESC;";
 
   if ($conn->multi_query($sql) === TRUE);// echo "[S] Requested data for HERO SUMMARY.\n";
