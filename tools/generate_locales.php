@@ -239,7 +239,8 @@ foreach ($localesMap as $lt => $loc) {
           }
           $tag = \preg_replace("/\{s\:(bonus_)?".$k."(.*?)\}/", $v, $tag);  
         }
-      } else {
+      }
+      if (preg_match_all("/\{s\:(.*?)\}/", $tag) > 0) {
         if (isset($talentValues[$spell]['value']) && is_array($talentValues[$spell]['value'])) {
           $talentValues[$spell]['value'] = implode(",", $talentValues[$spell]['value']);
         }
@@ -291,8 +292,12 @@ foreach ($localesMap as $lt => $loc) {
 
     $desc = $strings['lang']['Tokens']['DOTA_Tooltip_Facet_'.$facet.'_Description'] ?? 
       $strings['lang']['Tokens']['DOTA_Tooltip_facet_'.$facet.'_Description'] ?? 
+      $strings['lang']['Tokens']['DOTA_Tooltip_Facet_'.$facet.'_description'] ?? 
+      $strings['lang']['Tokens']['DOTA_Tooltip_facet_'.$facet.'_description'] ?? 
       $strings['lang']['Tokens']['DOTA_Tooltip_ability_'.$facet.'_Description'] ?? 
       $strings['lang']['Tokens']['DOTA_Tooltip_Ability_'.$facet.'_Description'] ?? 
+      $strings['lang']['Tokens']['DOTA_Tooltip_ability_'.$facet.'_description'] ?? 
+      $strings['lang']['Tokens']['DOTA_Tooltip_Ability_'.$facet.'_description'] ?? 
     null;
 
     if (!$tag) {
