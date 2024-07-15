@@ -64,6 +64,19 @@ if ( $check_libs ) {
         chdir("..");
     }
 
+    # KV Decode
+    if ( check_directory("libs/keyvalues-php") ) {
+        chdir("libs/keyvalues-php");
+        echo("[ ] Git: Pulling updates for Simple OpenDota API for PHP\n");
+        `git pull`;
+        chdir("../..");
+    } else {
+        chdir("libs");
+        echo("[ ] Git: Downloading KeyValues-PHP\n");
+        `git clone git@github.com:leamare/keyvalues-php.git`;
+        chdir("..");
+    }
+
     check_directory("res/dependencies");
     # jQuery and tablesorter
     if ( !file_exists("res/dependencies/jquery.min.js") ) {

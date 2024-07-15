@@ -53,6 +53,8 @@ if(isset($_REQUEST['loc']) && !empty($_REQUEST['loc'])) {
 }
 
 // require_once('locales/en.php');
+$rootLocale = $localesMap['def']['alias'];
+
 include_locale('en');
 if(strtolower($locale) != "en") {
   include_locale($locale) or $locale = "en";
