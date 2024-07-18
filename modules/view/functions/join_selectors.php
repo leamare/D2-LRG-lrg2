@@ -72,15 +72,20 @@ function join_selectors($modules, $level, $parent="") {
 
 
     $modname = locale_string($modtag);
+    $child_indicator = false;
+
     if($mod_type) {
-      if (strpos($parent, "profiles") == strlen($parent)-8)
+      if (strpos($parent, "profiles") == strlen($parent)-8) {
         $modname .= "";
         // FIXME: Remove this block later, using class-based modules with a parameter
         //       either show child indicator or not
-      else if ($selectors_num < $max_tabs)
-        $modname .= " &#9776;";
-      else
+      } else if ($selectors_num < $max_tabs) {
+        $child_indicator = true;
+        // $modname .= ""; //" &#9776;";
+      } else {
+        $child_indicator = true;
         $modname .= " ...";
+      }
     }
 
     if ($iconalias) {
@@ -145,12 +150,14 @@ function join_selectors($modules, $level, $parent="") {
 
       if($lrg_use_get && $lrg_get_depth > $level) {
         if ( $startline_check_res )
-          $selectors[] = "<span class=\"selector active\">".$icon.$modname."</span>";
+          $selectors[] = "<span class=\"selector active".($child_indicator ? " has-children" : "")."\">".$icon.$modname."</span>";
         else
-          $selectors[] = "<span class=\"selector".($unset_selector ? " active" : "").
-                            "\"><a href=\"?league=".$leaguetag."&mod=".$mn.$carryon_change.
-                            (empty($linkvars) ? "" : "&".$linkvars).
-                            "\">".$icon.$modname."</a></span>";
+          $selectors[] = "<span class=\"selector".
+            ($unset_selector ? " active" : "").
+            ($child_indicator ? " has-children" : "").
+            "\"><a href=\"?league=".$leaguetag."&mod=".$mn.$carryon_change.
+            (empty($linkvars) ? "" : "&".$linkvars).
+          "\">".$icon.$modname."</a></span>";
       } else {
         $selectors[] = "<span class=\"mod-".$level_codes[$level][1]."-selector selector".
                             ($first ? " active" : "")."\" onclick=\"switchTab(event, 'module-".$mn.$carryon_change."', 'mod-".$level_codes[$level][1]."');\">".
