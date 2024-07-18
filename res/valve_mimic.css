@@ -673,9 +673,9 @@ dialog, .modal-content {
     left: 50%;
     transform: translate(-50%, -50%);
     background-color: var(--modal-content-bg);
-    width: 90%;
+    width: auto;
     max-height: 80%;
-    min-height: 60%;
+    min-height: 30%;
     border: none;
     z-index: 1000;
     -webkit-animation-name: slideIn;

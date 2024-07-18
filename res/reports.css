@@ -38,6 +38,16 @@ html {
 
   --low-wr-bright: #601616;
   --high-wr-bright: #166016;
+
+  --facet-text: #fff;
+  --facet-purple: #624a75;
+  --facet-yellow: #776b3e;
+  --facet-red: #713d36;
+  --facet-green: #546f30;
+  /* --facet-blue: #30416f; */
+  --facet-blue: #445477;
+  --facet-gray: #4e4c4c;
+  --facet-black: #111;
 }
 
 @keyframes collapseAnimationCell {
@@ -72,6 +82,10 @@ body {
   min-width: 1300px;
 }
 
+font, b {
+  font-size: inherit;
+}
+
 table.list , table.pvp, .flextable {
   border: 1px solid var(--table-border);
   width: 82%;
@@ -94,7 +108,6 @@ table.list-small {
   float: none;
   clear: both;
 }
-
 
 
 table.list , table.pvp * {
@@ -276,7 +289,8 @@ table.pvp tr td:hover {
 }
 
 table .hero_portrait, .flextable .hero_portrait {
-  height: 18px;
+  /* height: 1.75em; */
+  height: 2em;
   display: inline-block;
   vertical-align: sub;
   margin-bottom: 3px;
@@ -418,6 +432,7 @@ table .hero_portrait.bigger, .flextable .hero_portrait.bigger {
 }
 .match-card {
   max-width: 1550px;
+  min-width: 130em;
 }
 .team-card {
   max-height: 300px;
@@ -472,8 +487,12 @@ table .hero_portrait.bigger, .flextable .hero_portrait.bigger {
   font-size: inherit;
   line-height: inherit;
 }
+.match-heroes {
+  display: flex;
+}
 .match-team .match-players {
   position: relative;
+  line-height: 1.5;
 }
 .match-team .match-players .match-player {
   font-size: 14px;
@@ -486,12 +505,12 @@ table .hero_portrait.bigger, .flextable .hero_portrait.bigger {
 
 .match-team .match-heroes .match-hero {
   width: 20%;
-  display: inline-block;
+  display: inline-flex;
   position: relative;
 }
 .match-team .match-heroes .match-hero img {
   width: 90%;
-  margin:5% 0 ;
+  margin: 5% .9ch;
 }
 
 .match-team .match-heroes-bans {
@@ -2181,4 +2200,115 @@ tr.shady td.banner-row .shady-notice {
 }
 .team-focus.team-winner {
   text-shadow: 0 0 .5em var(--high-wr-bright), 0 0 .5em var(--high-wr-bright), 0 0 .5em var(--high-wr-bright), 0 0 .5em var(--high-wr-bright), 0 0 .5em var(--high-wr-bright);
+}
+.match-string {
+  font-size: inherit;
+}
+
+/* FACETS */
+
+.hero-facet-element {
+  display: inline-flex;
+  margin-top: -.2em !important;
+  align-items: stretch;
+  font-size: inherit;
+  min-width: 10em;
+  border-radius: .15em;
+}
+.hero-facet-element.facet-Blue, .facet-micro.facet-Blue .facet-name {
+  background-color: var(--facet-blue);
+}
+.hero-facet-element.facet-Yellow, .facet-micro.facet-Yellow .facet-name  {
+  background-color: var(--facet-yellow);
+}
+.hero-facet-element.facet-Purple, .facet-micro.facet-Purple .facet-name  {
+  background-color: var(--facet-purple);
+}
+.hero-facet-element.facet-Red, .facet-micro.facet-Red .facet-name  {
+  background-color: var(--facet-red);
+}
+.hero-facet-element.facet-Gray, .facet-micro.facet-Gray .facet-name  {
+  background-color: var(--facet-gray);
+}
+.hero-facet-element.facet-Green, .facet-micro.facet-Green .facet-name  {
+  background-color: var(--facet-green);
+}
+.hero-facet-element.facet-Black, .facet-micro.facet-Black .facet-name  {
+  background-color: var(--facet-black);
+}
+.facet-name {
+  font-size: inherit;
+  line-height: 1.2em;
+  padding: .2em .35em .1em;
+  letter-spacing: normal;
+  color: var(--facet-text);
+}
+.facet-icon {
+  padding: .25em;
+  font-size: inherit;
+  display: inline-flex;
+  padding: .2em;
+  align-items: center;
+  background-color: rgba(255,255,255,.1);
+  height: 1.2em;
+  width: 1.2em;
+  justify-content: center;
+}
+.facet-icon img {
+  height: 1.6em;
+}
+.facet-micro {
+  min-width: auto;
+  position: relative;
+  font-size: .9em;
+  transition: 50ms all linear;
+}
+.facet-micro .facet-icon {
+  padding: .15em;
+}
+.facet-micro .facet-icon img {
+  height: 1.5em;
+}
+.facet-micro .facet-name {
+  display: block;
+  transform: translateX(-50%) scaleX(0);
+  position: absolute;
+  left: 100%;
+  transition: 100ms all linear;
+  width: max-content;
+  font-size: 1em;
+  /* min-width: 200px; */
+  z-index: 1002;
+}
+.facet-micro:hover .facet-name {
+  transform: translateX(0) scaleX(1);
+}
+.facet-micro:hover {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.match-hero .hero-facet-element {
+  position: absolute;
+  bottom: 7.5%;
+  font-size: 1.4em;
+  z-index: 999;
+}
+.match-team.radiant .match-hero .hero-facet-element {
+  right: 2.5%;
+}
+.match-team.dire .match-hero .hero-facet-element {
+  left: 2.5%;
+}
+.match-hero .hero-facet-element .facet-icon img {
+  width: auto;
+  height: 1em;
+  margin: 0;
+}
+.match-hero .hero-facet-element:hover {
+  z-index: 1001;
+}
+.match-link-modal .hero-facet-element {
+  vertical-align: middle;
+  font-size: .7em;
 }
