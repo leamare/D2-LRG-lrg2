@@ -1,22 +1,30 @@
 <?php
 
-function match_link($mid, $team = null, $winner = false) {
+function match_link($mid, $team = null, $winner = null) {
   global $link_provider, $links_providers, $report;
   $midText = $mid;
 
+  $team_result = "match-string";
+  if ($winner !== null) {
+    $team_result = "team-focus ".($winner ? "team-winner" : "team-loser");
+  }
+
   if (!empty($report['match_parts_strings'])) {
     $midText .= ' - '.$report['match_parts_strings'][$mid];
-  }
-  if ($team) {
-    if ($team > 0) {
-      $tn = team_tag($team);
-    } else {
-      $tn = $team == -1 ? locale_string("radiant") : locale_string("dire");
-    }
 
-    if ($team > 0) {
-      $midText = str_replace(' '.$tn.' ', " <span class=\"team-focus ".($winner ? "team-winner" : "team-loser")."\">".$tn."</span> ", $midText);
+    if ($team) {
+      if ($team > 0) {
+        $tn = team_tag($team);
+      } else {
+        $tn = $team == -1 ? locale_string("radiant") : locale_string("dire");
+      }
+  
+      if ($team > 0) {
+        $midText = str_replace(' '.$tn.' ', " <span class=\"$team_result\">".$tn."</span> ", $midText);
+      }
     }
+  } else {
+    $midText = "<span class=\"$team_result\">".$midText."</span>";
   }
 
   if (empty($links_providers))
