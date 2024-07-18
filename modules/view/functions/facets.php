@@ -3,6 +3,8 @@
 function get_facet_name($hid, $variant) {
   global $report, $meta;
 
+  if (!is_numeric($variant)) $variant = 0;
+
   if (!$variant) return "_no_facet_";
 
   if (!empty($report['meta']['variants'])) {
@@ -19,6 +21,8 @@ function get_facet_name($hid, $variant) {
 
 function get_facet_icon($hid, $variant) {
   global $report, $meta;
+
+  if (!is_numeric($variant)) $variant = 0;
 
   if (!empty($report['meta']['variants'])) {
     if (empty($report['meta']['variants'][$hid]) || !is_numeric($variant)) {
@@ -51,6 +55,8 @@ function get_hero_variants_list($hid) {
 function get_facet_color($hid, $variant) {
   global $report, $meta;
 
+  if (!is_numeric($variant)) $variant = 0;
+
   if (!$variant) return "Black";
 
   if (!empty($report['meta']['variants'])) {
@@ -70,6 +76,8 @@ function get_facet_color($hid, $variant) {
 function facet_icon_link($hid, $variant) {
   global $varianticon_logo_provider;
 
+  if (!is_numeric($variant)) $variant = 0;
+
   $icon = get_facet_icon($hid, $variant);
   // $name = get_facet_name($hid, $variant);
 
@@ -79,6 +87,8 @@ function facet_icon_link($hid, $variant) {
 function facet_full_element($hid, $variant, $nopopup = false) {
   global $locale;
   include_locale($locale, "facets");
+
+  if (!is_numeric($variant)) $variant = 0;
 
   $icon_link = facet_icon_link($hid, $variant);
   $color = get_facet_color($hid, $variant);
@@ -97,6 +107,8 @@ function facet_full_element($hid, $variant, $nopopup = false) {
 function facet_micro_element($hid, $variant, $modal = true) {
   global $locale;
   include_locale($locale, "facets");
+
+  if (!is_numeric($variant)) $variant = 0;
 
   $icon_link = facet_icon_link($hid, $variant);
   $color = get_facet_color($hid, $variant);
