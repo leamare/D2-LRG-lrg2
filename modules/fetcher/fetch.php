@@ -1050,7 +1050,7 @@ function fetch($match) {
 
 
         $t_matchlines[$i]['heroid'] = $matchdata['players'][$j]['hero_id'];
-        $t_matchlines[$i]['variant'] = $matchdata['players'][$j]['hero_variant'] ?? null;
+        $t_matchlines[$i]['variant'] = $matchdata['players'][$j]['hero_variant'] ?? $matchdata['players'][$j]['variant'] ?? null;
         $t_matchlines[$i]['isRadiant'] = $matchdata['players'][$j]['isRadiant'];
         $t_matchlines[$i]['level'] = $matchdata['players'][$j]['level'];
         $t_matchlines[$i]['kills'] = $matchdata['players'][$j]['kills'];
