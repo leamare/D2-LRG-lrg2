@@ -27,10 +27,16 @@ function match_card($mid) {
     $order = empty($orders) ? 0 : $orders[ $pl['hero'] ]+1;
     if($pl['radiant'] == 1) {
       $players_radi .= "<div class=\"match-player\">".player_name($pl['player'], false)."</div>";
-      $heroes_radi .= "<div class=\"match-hero\" ".($order ? "data-order=\"$order\"" : "").">".hero_portrait($pl['hero'])."</div>";
+      $heroes_radi .= "<div class=\"match-hero\" ".($order ? "data-order=\"$order\"" : "").">".
+        hero_portrait($pl['hero']).
+        (!empty($pl['var']) ? facet_micro_element($pl['hero'], $pl['var']) : "").
+      "</div>";
     } else {
       $players_dire .= "<div class=\"match-player\">".player_name($pl['player'], false)."</div>";
-      $heroes_dire .= "<div class=\"match-hero\" ".($order ? "data-order=\"$order\"" : "").">".hero_portrait($pl['hero'])."</div>";
+      $heroes_dire .= "<div class=\"match-hero\" ".($order ? "data-order=\"$order\"" : "").">".
+        hero_portrait($pl['hero']).
+        (!empty($pl['var']) ? facet_micro_element($pl['hero'], $pl['var']) : "").
+      "</div>";
     }
   }
   if(isset($report['teams']) && isset($report['match_participants_teams'][$mid])) {
