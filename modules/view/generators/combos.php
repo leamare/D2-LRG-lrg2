@@ -2,8 +2,9 @@
 
 include_once($root."/modules/view/functions/hero_name.php");
 include_once($root."/modules/view/functions/player_name.php");
+include_once($root."/modules/view/functions/facets.php");
 
-function rg_generator_combos($table_id, &$context, $context_matches, $heroes_flag = true) {
+function rg_generator_combos($table_id, &$context, $context_matches, $heroes_flag = true, $facets = false) {
   $id = $heroes_flag ? "heroid" : "playerid";
 
   if(!sizeof($context))
@@ -57,8 +58,10 @@ function rg_generator_combos($table_id, &$context, $context_matches, $heroes_fla
 
   $res .= search_filter_component($table_id);
 
+  $colspan = ($heroes_flag ? ($facets ? 3 : 2) : 1) * ($trios ? 3 : 2);
+
   $res .= "<table id=\"$table_id\" class=\"list sortable\"><thead><tr class=\"thead\">".
-         ($heroes_flag ? "<th colspan=\"".($trios ? 6 : 4)."\">".locale_string("heroes")."</th>" : "<th colspan=\"".($trios ? 3 : 2)."\">".locale_string("players")."</th>").
+         "<th colspan=\"$colspan\">".locale_string($heroes_flag ? "heroes" : "players")."</th>".
          "<th>".locale_string("matches")."</th>".
          "<th>".locale_string("winrate")."</th>".
          ($wr_diff ? "<th>".locale_string("winrate_diff")."</th>" : "").
@@ -83,9 +86,11 @@ function rg_generator_combos($table_id, &$context, $context_matches, $heroes_fla
         (isset($combo['lane_rate']) ? "data-value-lane=\"".number_format($combo['lane_rate']*100, 2)."\" " : "").
       ">".
       ($heroes_flag ? "<td>".hero_portrait($combo[$id.'1'])."</td>" : "").
-      "<td>".($heroes_flag ? hero_link($combo[$id.'1']) : player_link($combo[$id.'1']))."</td>".
+      ($heroes_flag && $facets ? "<td>".facet_micro_element($combo[$id.'1'], $combo['variant1']) : "").
+      "<td>".($heroes_flag ? hero_link($combo[$id.'1']).($facets ? ' '.locale_string("facet_short").$combo['variant1'] : '') : player_link($combo[$id.'1']))."</td>".
       ($heroes_flag ? "<td>".hero_portrait($combo[$id.'2'])."</td>" : "").
-      "<td>".($heroes_flag ? hero_link($combo[$id.'2']) : player_link($combo[$id.'2']))."</td>".
+      ($heroes_flag && $facets ? "<td>".facet_micro_element($combo[$id.'2'], $combo['variant2']) : "").
+      "<td>".($heroes_flag ? hero_link($combo[$id.'2']).($facets ? ' '.locale_string("facet_short").$combo['variant2'] : '') : player_link($combo[$id.'2']))."</td>".
       (
         $trios ?
         ($heroes_flag ? "<td>".hero_portrait($combo[$id.'3'])."</td>" : "").
@@ -111,5 +116,3 @@ function rg_generator_combos($table_id, &$context, $context_matches, $heroes_fla
 
   return $res;
 }
-
-?>
