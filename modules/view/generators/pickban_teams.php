@@ -108,27 +108,21 @@ function rg_create_team_pickban_data($context_pb, $context_vs_pb, $context_total
     ];
   }
 
-  $increment = 100 / sizeof($r);
-
-  $compound_ranking_sort = function($a, $b) use ($context_total_matches) {
-    return compound_ranking_sort($a, $b, $context_total_matches);
-  };
-
   foreach ($rank as $type => $pb) {
     $key = (strpos($type, "_rev") > 0 ? "a" : "") . "rank" . (strpos($type, "enemy") === 0 ? "_vs" : "");
 
-    uasort($pb, $compound_ranking_sort);
+    compound_ranking($pb, $context_total_matches);
 
-    $i = 0; $last = null; $last_rank = 0;
-
+    uasort($pb, function($a, $b) {
+      return $b['wrank'] <=> $a['wrank'];
+    });
+  
+    $min = end($pb)['wrank'];
+    $max = reset($pb)['wrank'];
+  
     foreach ($pb as $id => $el) {
-      if(isset($last) && $el == $last) {
-        $i++;
-        $r[$id][$key] = $last_rank;
-      } else
-        $r[$id][$key] = round(100 - $increment*$i++, 2);
-      $last = $el;
-      $last_rank = $r[$id][$key];
+      unset($pb[$id]['wrank']);
+      $r[$id][$key] = 100 * ($el['wrank']-$min) / ($max-$min);
     }
   }
 
