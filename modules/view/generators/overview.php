@@ -277,7 +277,7 @@ function rg_view_generator_overview($modlink, &$context, $foreword = "") {
 
   if($report['settings']['overview_random_stats']) {
     //$res .= "<div class=\"content-header\">".locale_string("random")."</div>";
-    if (is_array($context['main']['heroes_median_bans'])) {
+    if (!isset($context['main']['heroes_median_bans']) || is_array($context['main']['heroes_median_bans'])) {
       $context['main']['heroes_median_bans'] = 0;
     }
     $res .= "<table class=\"list\" id=\"overview-table\">";

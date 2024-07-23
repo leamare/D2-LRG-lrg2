@@ -39,6 +39,7 @@ function rg_generator_stitems($table_id, $ishero, $selected_id, $selected_rid, $
   foreach ($data as $ciid => $stats) {
     $cnt = $ciid % 100;
     $item = floor($ciid / 100);
+    if (!(+$item)) continue;
     $isfirst = $cnt > 1 ? 0 : 1;
     $matches_med[] = $stats['matches'];
 
