@@ -48,23 +48,20 @@ function rg_generator_overview_positions_section($tables_prefix, &$context, &$pi
       foreach ($context_copy as $c) {
         if ($total_matches < $c['matches_s']) $total_matches = $c['matches_s'];
       }
-  
-      uasort($context_copy, function($a, $b) use ($total_matches) {
-        return positions_ranking_sort($a, $b, $total_matches);
+
+      positions_ranking($context_copy, $total_matches);
+    
+      uasort($context_copy, function($a, $b) {
+        return $b['wrank'] <=> $a['wrank'];
       });
-  
-      $increment = 100 / sizeof($context_copy); $k = 0; $last_rank = 0;
-  
+    
+      $min = end($context_copy)['wrank'];
+      $max = reset($context_copy)['wrank'];
+    
       foreach ($context_copy as $id => $el) {
-        if(isset($last) && $el['matches_s'] == $last['matches_s'] && $el['winrate_s'] == $last['winrate_s']) {
-          $k++;
-          $ranks[$i][$j][$id] = $last_rank;
-        } else
-          $ranks[$i][$j][$id] = 100 - $increment*$k++;
-        $last = $el;
-        $last_rank = $ranks[$i][$j][$id];
+        $ranks[$i][$j][$id] = 100 * ($el['wrank']-$min) / ($max-$min);
       }
-      unset($last);
+
       unset($context_copy);
 
       $overview["$i.$j"] = [];
