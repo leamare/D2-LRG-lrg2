@@ -196,7 +196,7 @@ function rg_generator_hero_matches_list($table_id, $hero, $limit = null, $wide =
       "<td value=\"$mid\">".match_link($mid)."</td>".
       "<td>".player_link($data['player'])."</td>".
       ($keys['role'] ? "<td value=\"$posnum\">".locale_string(isset($data['role']) ? "position_".$data['role'] : "none")."</td>" : "").
-      ($keys['variant'] ? "<td value=\"{$data['variant']}\">".facet_full_element($hero, $data['variant'])."</td>" : "").
+      ($keys['variant'] ? "<td value=\"{$data['variant']}\">".facet_full_element($hero, $data['variant'] ?? 0)."</td>" : "").
       "<td>".locale_string($data['is_radiant'] ? 'radiant' : 'dire')."</td>".
       "<td>";
     
