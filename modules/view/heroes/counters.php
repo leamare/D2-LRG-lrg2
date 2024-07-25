@@ -12,25 +12,53 @@ function rg_view_generate_heroes_counters() {
   $hvh = []; 
   $devs = [];
 
-  if (is_wrapped($report['hvh'])) {
-    $report['hvh'] = unwrap_data($report['hvh']);
-  }
-  
-  foreach ($report['hvh'] as $line) {
-    if ($line['matches'] < $report['settings']['limiter_combograph']) 
-      continue;
+  if (check_module($parent_module."pairs") || check_module($parent_module."graph") || !isset($report['hvh_v']) || !check_module($parent_module."pairs_var")) {
+    if (is_wrapped($report['hvh'])) {
+      $report['hvh'] = unwrap_data($report['hvh']);
+    }
     
-    $p = [
-      'heroid1' => $line['heroid1'],
-      'heroid2' => $line['heroid2'],
-      'matches' => $line['matches'],
-      'winrate' => $line['h1winrate'],
-      'wr_diff' => round($line['h1winrate']-$report['pickban'][$line['heroid1']]['winrate_picked'], 5),
-      'expectation' => $line['exp'] ?? 0
-    ];
-    $hvh[] = $p;
-    $devs[] = ($p['matches']-$p['expectation']);
+    foreach ($report['hvh'] as $line) {
+      if ($line['matches'] < $report['settings']['limiter_combograph']) 
+        continue;
+      
+      $p = [
+        'heroid1' => $line['heroid1'],
+        'heroid2' => $line['heroid2'],
+        'matches' => $line['matches'],
+        'winrate' => $line['h1winrate'],
+        'wr_diff' => round($line['h1winrate']-$report['pickban'][$line['heroid1']]['winrate_picked'], 5),
+        'expectation' => $line['exp'] ?? 0
+      ];
+      $hvh[] = $p;
+      $devs[] = ($p['matches']-$p['expectation']);
+    }
+  } else {
+    if (is_wrapped($report['hvh_v'])) {
+      $report['hvh_v'] = unwrap_data($report['hvh_v']);
+    }
+    
+    foreach ($report['hvh_v'] as $line) {
+      if ($line['matches'] < $report['settings']['limiter_combograph']) 
+        continue;
+      
+      $srcline = $line['heroid1'];
+      $line['heroid1'] = explode('-', $line['heroid1']);
+      $line['heroid2'] = explode('-', $line['heroid2']);
+      $p = [
+        'heroid1' => +$line['heroid1'][0],
+        'variant1' => +$line['heroid1'][1],
+        'heroid2' => +$line['heroid2'][0],
+        'variant2' => +$line['heroid2'][1],
+        'matches' => $line['matches'],
+        'winrate' => $line['h1winrate'],
+        'wr_diff' => round($line['h1winrate']-($report['hero_variants'][$srcline]['w']/$report['hero_variants'][$srcline]['m']), 5),
+        'expectation' => $line['exp'] ?? 0
+      ];
+      $hvh[] = $p;
+      $devs[] = ($p['matches']-$p['expectation']);
+    }
   }
+
   uasort($hvh, function($a, $b) { return $b['matches'] <=> $a['matches']; });
 
   $res['pairs'] = "";
@@ -42,6 +70,19 @@ function rg_view_generate_heroes_counters() {
         "</details>";
 
     $res['pairs'] .=  rg_generator_combos("hero-pairs", $hvh, null);
+  }
+
+  if (isset($report['hvh_v'])) {
+    $res['pairs_var'] = "";
+    if (check_module($parent_module."pairs_var")) {
+      $res['pairs_var'] .= "<details class=\"content-text explainer\"><summary>".locale_string("explain_summary")."</summary>".
+            "<div class=\"explain-content\">".
+              "<div class=\"line\">".locale_string("desc_heroes_counters_pairs", [ "lim"=>$report['settings']['limiter_combograph']+1 ] )."</div>".
+            "</div>".
+          "</details>";
+
+      $res['pairs_var'] .=  rg_generator_combos("hero-pairs-variants", $hvh, null, true, true);
+    }
   }
 
   $res['graph'] = "";

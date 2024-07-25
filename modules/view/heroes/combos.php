@@ -86,5 +86,3 @@ function rg_view_generate_heroes_combos() {
 
   return $res;
 }
-
-?>
