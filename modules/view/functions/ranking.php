@@ -225,6 +225,9 @@ function items_ranking_sort($a, $b) {
 
 function items_ranking(&$arr) {
   foreach ($arr as $k => $v) {
+    if (!$v['purchases'] || !$v['prate']) {
+      $arr[$k]['wrank'] = 0; continue;
+    }
     $arr[$k]['wrank'] = wilson_rating( $v['wins'], $v['purchases'], 1-$v['prate'] );
   }
 }
