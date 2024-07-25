@@ -36,11 +36,27 @@ function rg_view_generate_heroes_laning() {
   $res['total'] = '';
 
   if(check_module($parent_module."total")) {
-    $res["total"] = "<div class=\"content-text\">".locale_string("desc_heroes_hvh")."</div>";
+    // $res["total"] = "<div class=\"content-text\">".locale_string("desc_heroes_hvh")."</div>";
     
     $res["total"] = $explainer;
 
     $res["total"] .= rg_generator_laning_profile("$parent_module-total", $report['hero_laning'], 0);
+  }
+
+  if(!empty($report['hero_laning_v'])) {
+    $res['variants'] = '';
+
+    if (check_module($parent_module."variants")) {
+      if (is_wrapped($report['hero_laning_v'])) {
+        $report['hero_laning_v'] = [ unwrap_data($report['hero_laning_v']) ];
+      }
+
+      // $res["variants"] = "<div class=\"content-text\">".locale_string("desc_heroes_hvh")."</div>";
+      
+      $res["variants"] = $explainer;
+
+      $res["variants"] .= rg_generator_laning_profile("$parent_module-variants", $report['hero_laning_v'], 0, true, true);
+    }
   }
 
   foreach($hnames as $hid => $name) {
