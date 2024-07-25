@@ -371,7 +371,7 @@ function fetch($match) {
     }
   }
   
-  if (empty($matchdata) || ( empty($matchdata['items']) && !$bad_replay ) || ( $bad_replay && !$force_adding )) {
+  if (empty($matchdata) || ( empty($matchdata['items']) && !$bad_replay && !$force_adding ) || ( $bad_replay && !$force_adding )) {
     echo("Requesting.");
 
     if (!$ignore_stratz && !$stratz_graphql && (!empty($players_list) || !empty($rank_limit))) {
