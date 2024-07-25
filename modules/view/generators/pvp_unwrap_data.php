@@ -1,6 +1,6 @@
 <?php
 
-function rg_generator_pvp_unwrap_data(&$context, &$context_wrs, $heroes_flag = true) {
+function rg_generator_pvp_unwrap_data(&$context, &$context_wrs, $heroes_flag = true, $facets = false) {
   if(!sizeof($context)) return [];
 
   $pvp = [];
@@ -29,7 +29,10 @@ function rg_generator_pvp_unwrap_data(&$context, &$context_wrs, $heroes_flag = t
       "won" => $line[$sid.'1won'],
       "lost" => $line['matches']-$line[$sid.'1won']
     ];
-    if(!$nodiff) $pvp[ $line[$id.'1'] ][ $line[$id.'2'] ]['diff'] = round($line[$sid.'1winrate']-$context_wrs[$line[$id.'1']][$wr_id], 5);
+    if ($facets) {
+      $context_wrs[$line[$id.'1']][$wr_id] = $context_wrs[$line[$id.'1']]['w']/$context_wrs[$line[$id.'1']]['m'];
+    }
+    if (!$nodiff) $pvp[ $line[$id.'1'] ][ $line[$id.'2'] ]['diff'] = round($line[$sid.'1winrate']-$context_wrs[$line[$id.'1']][$wr_id], 5);
 
     $pvp[ $line[$id.'2'] ][ $line[$id.'1'] ] = [
       "winrate" => round(1-$line[$sid.'1winrate'], 5),
@@ -37,12 +40,23 @@ function rg_generator_pvp_unwrap_data(&$context, &$context_wrs, $heroes_flag = t
       "won" => $line['matches']-$line[$sid.'1won'],
       "lost" => $line[$sid.'1won']
     ];
+    if ($facets) {
+      $context_wrs[$line[$id.'2']][$wr_id] = $context_wrs[$line[$id.'2']]['w']/$context_wrs[$line[$id.'2']]['m'];
+    }
     if(!$nodiff) $pvp[ $line[$id.'2'] ][ $line[$id.'1'] ]['diff'] = round(1-$line[$sid.'1winrate']-$context_wrs[$line[$id.'2']][$wr_id], 5);
 
     if(isset($line['exp'])) {
       $pvp[ $line[$id.'2'] ][ $line[$id.'1'] ]['expectation'] = $line['exp'];
 
       $pvp[ $line[$id.'1'] ][ $line[$id.'2'] ]['expectation'] = $line['exp'];
+    }
+
+    if(isset($line['lane_rate'])) {
+      $pvp[ $line[$id.'2'] ][ $line[$id.'1'] ]['lane_rate'] = $line['lane_rate'];
+      $pvp[ $line[$id.'2'] ][ $line[$id.'1'] ]['lane_wr'] = 1-$line['lane_wr'];
+
+      $pvp[ $line[$id.'1'] ][ $line[$id.'2'] ]['lane_rate'] = $line['lane_rate'];
+      $pvp[ $line[$id.'1'] ][ $line[$id.'2'] ]['lane_wr'] = $line['lane_wr'];
     }
   }
 
