@@ -42,47 +42,36 @@ function pickban_partial($context, $context_main, $hero) {
   $antiranks = [];
   $context_copy = $context;
 
-  $compound_ranking_sort = function($a, $b) use ($context_total_matches) {
-    return compound_ranking_sort($a, $b, $context_total_matches);
-  };
-
-  uasort($context, $compound_ranking_sort);
-
-  $increment = 100 / sizeof($context); $i = 0;
-  $last_rank = 0;
-
-  foreach ($context as $id => $el) {
-    if(isset($last) && $el == $last) {
-      $i++;
-      $ranks[$id] = $last_rank;
-    } else
-      $ranks[$id] = 100 - $increment*$i++;
-    $last = $el;
-    $last_rank = $ranks[$id];
-  }
-  unset($last);
-  unset($context_copy);
+  compound_ranking($context, $context_total_matches);
 
   $context_copy = $context;
-  foreach($context_copy as &$el)  {
-    $el['winrate_picked'] = 1-$el['winrate_picked'];
-    $el['winrate_banned'] = 1-$el['winrate_banned'];
+
+  uasort($context, function($a, $b) {
+    return $b['wrank'] <=> $a['wrank'];
+  });
+
+  $min = end($context)['wrank'];
+  $max = reset($context)['wrank'];
+
+  foreach ($context as $id => $el) {
+    $ranks[$id] = 100 * ($el['wrank']-$min) / ($max-$min);
+
+    $context_copy[$id]['winrate_picked'] = 1-$el['winrate_picked'];
+    $context_copy[$id]['winrate_banned'] = 1-$el['winrate_banned'];
   }
+  compound_ranking($context_copy, $context_total_matches);
 
-  uasort($context_copy, $compound_ranking_sort);
+  uasort($context_copy, function($a, $b) {
+    return $b['wrank'] <=> $a['wrank'];
+  });
 
-  $increment = 100 / sizeof($context_copy); $i = 0;
+  $min = end($context_copy)['wrank'];
+  $max = reset($context_copy)['wrank'];
 
   foreach ($context_copy as $id => $el) {
-    if(isset($last) && $el == $last) {
-      $i++;
-      $antiranks[$id] = $last_rank;
-    } else
-      $antiranks[$id] = 100 - $increment*$i++;
-    $last = $el;
-    $last_rank = $antiranks[$id];
+    $antiranks[$id] = 100 * ($el['wrank']-$min) / ($max-$min);
   }
-  unset($last);
+  
   unset($context_copy);
 
   $context[$hero]['contest_rate'] = $el['matches_total']/$context_total_matches;
@@ -531,6 +520,38 @@ function rg_view_generate_heroes_profiles() {
     "</div>";
   }
 
+  if (isset($report['hero_variants'])) {
+    $res['heroid'.$hero] .= "<div class=\"content-text\"><h1>".locale_string("variants")."</h1></div>";
+    $res['heroid'.$hero] .= "<table id=\"profile-$hero-variants\" class=\"list\"><thead><tr>".
+      "<th>".locale_string("facet")."</th>".
+      "<th>".locale_string("ratio")."</th>".
+      "<th>".locale_string("matches")."</th>".
+      "<th>".locale_string("winrate")."</th>".
+    "</tr></thead><tbody>";
+
+    $facets_list = isset($report['meta']['variants']) ? array_keys($report['meta']['variants'][$hero]) : $meta['facets']['heroes'][$hero];
+    foreach ($facets_list as $i => $facet) {
+      $i++;
+      $hvid = $hero.'-'.$i;
+      $stats = [
+        'm' => 0,
+        'w' => 0,
+        'f' => 0,
+      ];
+      if (isset($report['hero_variants'][$hvid])) {
+        $stats = $report['hero_variants'][$hvid];
+      }
+      $res['heroid'.$hero] .= "<tbody><tr>".
+        "<td>".facet_full_element($hero, $i)."</td>".
+        "<td>".number_format(100*$stats['f'], 2)."%</td>".
+        "<td>".$stats['m']."</td>".
+        "<td>".number_format($stats['m'] ? 100*$stats['w']/$stats['m'] : 0, 2)."%</td>".
+      "</tr>";
+    }
+
+    $res['heroid'.$hero] .= "</tbody></table>";
+  }
+
   // records
   if (isset($report['records'])) {
     $player_records = [];
@@ -723,7 +744,6 @@ function rg_view_generate_heroes_profiles() {
   }
 
   // Draft stages
-
   if (isset($report['draft'])) {
     $stages = [];
 
@@ -779,7 +799,6 @@ function rg_view_generate_heroes_profiles() {
   }
   
   // ROLES
-  
   if (!empty($roles)) {
     $res['heroid'.$hero] .=  "<table id=\"profile-$hero-roles\" class=\"list sortable\"><caption>".locale_string("positions")."</caption><thead><tr>".
       "<th>".locale_string("position")."</th>".
@@ -805,8 +824,80 @@ function rg_view_generate_heroes_profiles() {
     $res['heroid'.$hero] .= "</tbody></table>";
   }
 
-  // REGIONS - pickban stats
+  // Variants Roles
+  if (!empty($report['hero_summary_variants'])) {
+    if (is_wrapped($report['hero_summary_variants'])) {
+      $report['hero_summary_variants'] = unwrap_data($report['hero_summary_variants']);
+    }
+    $keys = [
+      'matches_s', 'winrate_s', 'kills', 'deaths', 'assists', 'gpm', 'xpm', 
+    ];
 
+    $stats = [];
+    $facets_list = isset($report['meta']['variants']) ? array_keys($report['meta']['variants'][$hero]) : $meta['facets']['heroes'][$hero];
+    foreach ($facets_list as $i => $facet) {
+      $i++;
+      $hvid = $hero.'-'.$i;
+      
+      foreach ($report['hero_summary_variants'] as $j => $data) {
+        $hero_stats = $data[$hvid] ?? [];
+
+        $stats[] = [
+          'variant' => $i,
+          'position' => ROLES_IDS[$j],
+          'matches' => $hero_stats['matches_s'] ?? 0,
+          'winrate' => $hero_stats['winrate_s'] ?? '-',
+          'kills' => isset($hero_stats['kills']) ? round($hero_stats['kills'], 1) : '-',
+          'deaths' => isset($hero_stats['deaths']) ? round($hero_stats['deaths'], 1) : '-',
+          'assists' => isset($hero_stats['assists']) ? round($hero_stats['assists'], 1) : '-',
+          'gpm' => isset($hero_stats['gpm']) ? round($hero_stats['gpm'], 1) : '-',
+          'xpm' => isset($hero_stats['xpm']) ? round($hero_stats['xpm'], 1) : '-',
+        ];
+      }
+    }
+
+    $res['heroid'.$hero] .= "<div class=\"content-text\"><h1>".locale_string("variants_roles")."</h1></div>";
+
+    $res['heroid'.$hero] .= search_filter_component("profile-$hero-variants-summary");
+    $res['heroid'.$hero] .=  "<table id=\"profile-$hero-variants-summary\" class=\"list sortable\"><thead><tr>".
+      "<th>".locale_string("variant")."</th>".
+      "<th>".locale_string("position")."</th>".
+      "<th>".locale_string("matches")."</th>".
+      "<th>".locale_string("winrate")."</th>".
+      "<th>".locale_string("kills")."</th>".
+      "<th>".locale_string("deaths")."</th>".
+      "<th>".locale_string("assists")."</th>".
+      "<th>".locale_string("gpm")."</th>".
+      "<th>".locale_string("xpm")."</th>".
+      "</tr>".
+    "</thead><tbody>";
+
+    foreach ($stats as $line) {
+      $res['heroid'.$hero] .= "<tr>".
+        "<td>".facet_full_element($hero, $line['variant'])."</td>".
+        "<td>".
+          "<a href=\"?league=$leaguetag&mod=heroes-vsummary-".$line['position'].(empty($linkvars) ? "" : "&".$linkvars)."\">".
+            locale_string($line['position']).
+          "</a>".
+        "</td>".
+        "<td>".$line['matches']."</td>".
+        "<td>".($line['matches'] ? number_format($line['winrate']*100, 2).'%' : $line['winrate'])."</td>".
+        "<td>".$line['kills']."</td>".
+        "<td>".$line['deaths']."</td>".
+        "<td>".$line['assists']."</td>".
+        "<td>".$line['gpm']."</td>".
+        "<td>".$line['xpm']."</td>".
+      "</tr>";
+    }
+
+    $res['heroid'.$hero] .= "</tbody></table>";
+
+    $res['heroid'.$hero] .= "<div class=\"content-text\">".
+      "<a href=\"?league=$leaguetag&mod=heroes-vsummary".(empty($linkvars) ? "" : "&".$linkvars)."\">".locale_string('vsummary_more')."</a>".
+    "</div>";
+  }
+
+  // REGIONS - pickban stats
   if (isset($report['regions_data'])) {
     $regions = [];
     $positions = false;
@@ -894,8 +985,58 @@ function rg_view_generate_heroes_profiles() {
     }
   }
 
-  // Laning stats -> link
+  // Variants Regions
+  if (!empty($report['regions_data']) && !empty(reset($report['regions_data'])['hvariants'])) {
+    $stats = [];
 
+    $facets_list = isset($report['meta']['variants']) ? array_keys($report['meta']['variants'][$hero]) : $meta['facets']['heroes'][$hero];
+    foreach ($facets_list as $i => $facet) {
+      $i++;
+      $hvid = $hero.'-'.$i;
+      
+      foreach ($report['regions_data'] as $regid => $data) {
+        $hero_stats = $data['hvariants'][$hvid] ?? [];
+
+        $stats[] = [
+          'variant' => $i,
+          'region' => $regid,
+          'matches' => $hero_stats['m'] ?? 0,
+          'winrate' => !empty($hero_stats['m']) ? $hero_stats['w']/$hero_stats['m'] : null,
+          'ratio' => $hero_stats['f'] ?? 0,
+        ];
+      }
+    }
+
+    $res['heroid'.$hero] .= "<div class=\"content-text\"><h1>".locale_string("variants_regions")."</h1></div>";
+
+    $res['heroid'.$hero] .= search_filter_component("profile-$hero-variants-regions");
+    $res['heroid'.$hero] .=  "<table id=\"profile-$hero-variants-regions\" class=\"list sortable\"><thead><tr>".
+      "<th>".locale_string("variant")."</th>".
+      "<th>".locale_string("region")."</th>".
+      "<th>".locale_string("ratio")."</th>".
+      "<th>".locale_string("matches")."</th>".
+      "<th>".locale_string("winrate")."</th>".
+      "</tr>".
+    "</thead><tbody>";
+
+    foreach ($stats as $line) {
+      $res['heroid'.$hero] .= "<tr>".
+        "<td>".facet_full_element($hero, $line['variant'])."</td>".
+        "<td>".
+          "<a href=\"?league=$leaguetag&mod=regions-region{$line['region']}-heroes-variantspb".(empty($linkvars) ? "" : "&".$linkvars)."\">".
+            locale_string('region'.$line['region']).
+          "</a>".
+        "</td>".
+        "<td>".number_format($line['ratio']*100, 2)."%</td>".
+        "<td>".$line['matches']."</td>".
+        "<td>".($line['matches'] ? number_format($line['winrate']*100, 2).'%' : '-')."</td>".
+      "</tr>";
+    }
+
+    $res['heroid'.$hero] .= "</tbody></table>";
+  }
+
+  // Laning stats -> link
   if (isset($report['hero_laning'])) {
     if (is_wrapped($report['hero_laning'])) {
       $report['hero_laning'] = unwrap_data($report['hero_laning']);
@@ -941,27 +1082,19 @@ function rg_view_generate_heroes_profiles() {
       $mk = array_keys($context[0]);
       $median_disadv = $context[0][ $mk[ floor( count($mk)/2 ) ] ]['avg_disadvantage'];
 
-      $compound_ranking_sort = function($a, $b) use ($mm, $median_adv, $median_disadv) {
-        if ($a['matches'] == 0) return 1;
-        if ($b['matches'] == 0) return -1;
-        return compound_ranking_laning_sort($a, $b, $mm, $median_adv, $median_disadv);
-      };
-      uasort($context[0], $compound_ranking_sort);
-
-      $increment = 100 / sizeof($context[0]); $i = 0;
-      $last_rank = 0;
-
-      foreach ($context[0] as $elid => $eldata) {
-        if(isset($last) && $eldata == $last) {
-          $i++;
-          $context[0][$elid]['rank'] = $last_rank;
-        } else
-          $context[0][$elid]['rank'] = round(100 - $increment*$i++, 2);
-        $last = $eldata;
-        $last_rank = $context[0][$elid]['rank'];
+      compound_ranking_laning($context[0], $mm, $median_adv, $median_disadv);
+  
+      uasort($context[0], function($a, $b) {
+        return $b['wrank'] <=> $a['wrank'];
+      });
+    
+      $min = end($context[0])['wrank'];
+      $max = reset($context[0])['wrank'];
+    
+      foreach ($context[0] as $k => $el) {
+        $context[0][$k]['rank'] = 100 * ($el['wrank']-$min) / ($max-$min);
+        unset($context[0][$k]['wrank']);
       }
-
-      unset($last);
     }
 
     $data = $context[0][$hero];
