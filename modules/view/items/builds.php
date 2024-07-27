@@ -228,6 +228,82 @@ function rg_view_generate_items_builds() {
     "</tr></tbody></table></div>";
   }
 
+  // variants
+  if (!empty($report['hero_summary_variants'])) {
+    if (is_wrapped($report['hero_summary_variants'])) {
+      $report['hero_summary_variants'] = unwrap_data($report['hero_summary_variants']);
+    }
+    $keys = [
+      'matches_s', 'winrate_s', 'kills', 'deaths', 'assists', 'gpm', 'xpm', 
+    ];
+
+    $stats = [];
+    $facets_list = isset($report['meta']['variants']) ? array_keys($report['meta']['variants'][$hero]) : $meta['facets']['heroes'][$hero];
+    $rid = array_search($core.'.'.$lane, ROLES_IDS_SIMPLE);
+    foreach ($facets_list as $i => $facet) {
+      $i++;
+      $hvid = $hero.'-'.$i;
+    
+      $hero_stats = $report['hero_summary_variants'][$rid][$hvid] ?? [];
+
+      $stats[] = [
+        'variant' => $i,
+        'ratio' => $hero_stats['matches_s']/$pbdata['role_matches'],
+        'matches' => $hero_stats['matches_s'] ?? 0,
+        'winrate' => $hero_stats['winrate_s'] ?? '-',
+      ];
+    }
+
+    $reslocal .=  "<div class=\"content-text\">".
+      "<table id=\"build-$hero-variants-summary\" class=\"list sortable\"><thead><tr>".
+      "<th>".locale_string("facet")."</th>".
+      "<th>".locale_string("ratio")."</th>".
+      "<th>".locale_string("matches")."</th>".
+      "<th>".locale_string("winrate")."</th>".
+      "</tr>".
+    "</thead><tbody>";
+
+    foreach ($stats as $line) {
+      $reslocal .= "<tr>".
+        "<td>".facet_full_element($hero, $line['variant'])."</td>".
+        "<td>".number_format($line['ratio']*100, 2)."%</td>".
+        "<td>".$line['matches']."</td>".
+        "<td>".($line['matches'] ? number_format($line['winrate']*100, 2).'%' : $line['winrate'])."</td>".
+      "</tr>";
+    }
+
+    $reslocal .= "</tbody></table></div>";
+  } else if (isset($report['hero_variants'])) {
+    $reslocal .= "<div class=\"content-text\"><table id=\"profile-$hero-variants\" class=\"list\"><thead><tr>".
+      "<th>".locale_string("facet")."</th>".
+      "<th>".locale_string("ratio")."</th>".
+      "<th>".locale_string("matches")."</th>".
+      "<th>".locale_string("winrate")."</th>".
+    "</tr></thead><tbody>";
+
+    $facets_list = isset($report['meta']['variants']) ? array_keys($report['meta']['variants'][$hero]) : $meta['facets']['heroes'][$hero];
+    foreach ($facets_list as $i => $facet) {
+      $i++;
+      $hvid = $hero.'-'.$i;
+      $stats = [
+        'm' => 0,
+        'w' => 0,
+        'f' => 0,
+      ];
+      if (isset($report['hero_variants'][$hvid])) {
+        $stats = $report['hero_variants'][$hvid];
+      }
+      $reslocal .= "<tbody><tr>".
+        "<td>".facet_full_element($hero, $i)."</td>".
+        "<td>".number_format(100*$stats['f'], 2)."%</td>".
+        "<td>".$stats['m']."</td>".
+        "<td>".number_format($stats['m'] ? 100*$stats['w']/$stats['m'] : 0, 2)."%</td>".
+      "</tr>";
+    }
+
+    $reslocal .= "</tbody></table></div>";
+  }
+
   // DEMO BLOCKS FOR EXPLAINER
 
   $demoblocks = "";
@@ -354,6 +430,8 @@ function rg_view_generate_items_builds() {
         $stib_context =& $report['starting_items']['builds'][0][0];
       }
 
+      $stib_context = array_filter($stib_context, function($el) { return !empty($el); });
+
       usort($stib_context, function($a, $b) {
         return $b['wins'] <=> $a['wins'];
       });
@@ -366,6 +444,27 @@ function rg_view_generate_items_builds() {
       }
     } else if (!empty($sti_stats)) {
 
+    }
+  }
+
+  if (empty($sti_stats)) {
+    $sti_stats = [];
+
+    foreach ($sti_builds as $i => $stibuild) {
+      $cnts = [];
+      foreach($stibuild['build'] as $item) {
+        if (!isset($cnts[$item])) $cnts[$item] = 0;
+        $cnts[$item]++;
+        $stiid = $cnts[$item] + $item*100;
+
+        if (!isset($sti_stats[$stiid])) {
+          $sti_stats[$stiid] = [ 'wins' => 0, 'matches' => 0, 'lane_wins' => 0 ];
+        }
+
+        $sti_stats[$stiid]['wins'] += $stibuild['wins'];
+        $sti_stats[$stiid]['matches'] += $stibuild['matches'];
+        $sti_stats[$stiid]['lane_wins'] += $stibuild['lane_wins'];
+      }
     }
   }
 
