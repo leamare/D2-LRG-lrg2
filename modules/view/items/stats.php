@@ -62,31 +62,23 @@ function rg_view_generate_items_stats() {
     if (empty($v)) unset($report['items']['stats'][$hero][$iid]);
   }
 
-  $ranks = [];
+  items_ranking($report['items']['stats'][$hero]);
 
-  $ranking_sort = function($a, $b) {
-    return items_ranking_sort($a, $b);
-  };
+  uasort($report['items']['stats'][$hero], function($a, $b) {
+    return $b['wrank'] <=> $a['wrank'];
+  });
 
-  uasort($report['items']['stats'][$hero], $ranking_sort);
-
-  $increment = 100 / sizeof($report['items']['stats'][$hero]); $i = 0;
-  $last_rank = 0;
+  $min = end($report['items']['stats'][$hero])['wrank'];
+  $max = reset($report['items']['stats'][$hero])['wrank'];
 
   foreach ($report['items']['stats'][$hero] as $id => $el) {
-    if(isset($last) && $el == $last) {
-      $i++;
-      $ranks[$id] = $last_rank;
-    } else
-      $ranks[$id] = 100 - $increment*$i++;
-    $last = $el;
-    $last_rank = $ranks[$id];
+    $report['items']['stats'][$hero][$id]['rank'] = 100 * ($el['wrank']-$min) / ($max-$min);
+    unset($report['items']['stats'][$hero][$id]['wrank']);
 
     if (!$enable_neutrals && in_array($id, $neutral_items)) {
       $enable_neutrals = true;
     }
   }
-  unset($last);
 
   $res[$tag] .= "<div class=\"selector-modules-level-4\">";
 
@@ -180,7 +172,7 @@ function rg_view_generate_items_stats() {
       "<td data-col-group=\"_index\">".item_link($iid)."</td>".
       "<td class=\"separator\" data-col-group=\"total\">".$line['purchases']."</td>".
       "<td data-col-group=\"total\">".number_format($line['prate']*100, 2)."%</td>".
-      "<td data-col-group=\"total\">".number_format($ranks[$iid], 1)."</td>".
+      "<td data-col-group=\"total\">".number_format($line['rank'], 1)."</td>".
       "<td class=\"separator\" data-col-group=\"items_winrate_shifts\">".number_format($line['winrate']*100, 2)."%</td>".
       "<td data-col-group=\"items_winrate_shifts\">".($line['wo_wr'] < $line['winrate'] ? '+' : '').number_format(($line['winrate']-$line['wo_wr'])*100, 2)."%</td>".
       // "<td>".($line['wo_wr'] > $line['winrate'] ? '+' : '').number_format(($line['wo_wr']-$line['winrate'])*100, 2)."%</td>".
