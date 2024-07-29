@@ -199,7 +199,7 @@ if (!empty($report['match_participants_teams'])) {
       foreach ($first_matches_heroes as $hid => $mid) {
         $title = addcslashes(hero_name($hid), "'");
         $res["team".$tid]['overview'] .= "<a title=\"".$title."\" ".
-        "onclick=\"showModal('".htmlspecialchars(join_matches_team([$mid], $tid))."', '".$title."')\"".
+        "onclick=\"showModal('".htmlspecialchars(join_matches_add([$mid], true, $hid, true))."', '".$title."')\"".
         ">".hero_icon($hid)."</a>";
       }
     }
@@ -226,7 +226,7 @@ if (!empty($report['match_participants_teams'])) {
         foreach ($rolems as $hid => $mid) {
           $title = addcslashes(hero_name($hid)." - ".locale_string("position_$role"), "'");
           $line .= "<a title=\"".$title."\" ".
-          "onclick=\"showModal('".htmlspecialchars(join_matches_team([$mid], $tid))."', '".$title."')\"".
+          "onclick=\"showModal('".htmlspecialchars(join_matches_add([$mid], true, $hid, true))."', '".$title."')\"".
           ">".hero_icon($hid)."</a>";
         }
         $line .= " ]</span> ";
@@ -244,7 +244,7 @@ if (!empty($report['match_participants_teams'])) {
         foreach ($rolems as $hid => $mid) {
           $title = addcslashes(hero_name($hid)." - ".locale_string("region$region"), "'");
           $line .= "<a title=\"".$title."\" ".
-          "onclick=\"showModal('".htmlspecialchars(join_matches_team([$mid], $tid))."', '".$title."')\"".
+          "onclick=\"showModal('".htmlspecialchars(join_matches_add([$mid], true, $hid, true))."', '".$title."')\"".
           ">".hero_icon($hid)."</a>";
         }
       }
@@ -267,14 +267,14 @@ if (!empty($report['match_participants_teams'])) {
           foreach ($rolems as $hid => $mid) {
             $title = addcslashes(hero_name($hid)." - ".locale_string("position_$role"), "'");
             $line .= "<a title=\"".$title."\" ".
-            "onclick=\"showModal('".htmlspecialchars(join_matches_team([$mid], $tid))."', '".$title."')\"".
+            "onclick=\"showModal('".htmlspecialchars(join_matches_add([$mid], true, $hid, true))."', '".$title."')\"".
             ">".hero_icon($hid)."</a>";
           }
           $line .= " ]</span> ";
         }
         $line .= " } </span> ";
       }
-      if (empty($line)) $line = locale_string('stats_no_emelents');
+      if (empty($line)) $line = locale_string('stats_no_elements');
       $res["team".$tid]['overview'] .= $line."</div>";
     }
 
@@ -298,7 +298,7 @@ if (!empty($report['match_participants_teams'])) {
         (isset($context[$tid]['pickban'][$hero]) ? $context[$tid]['pickban'][$hero]['matches_picked'] : $num).") - ".
         locale_string('winrate_s')." ".round($wr*100, 2)."%";
       $res["team".$tid]['overview'] .= "<a title=\"".$title."\" ".
-        "onclick=\"showModal('".htmlspecialchars(join_matches_team($ms, $tid))."', '".addcslashes(player_name($player), "'")." - $title')\"".
+        "onclick=\"showModal('".htmlspecialchars(join_matches_add($ms, true, $hero, true))."', '".addcslashes(player_name($player), "'")." - $title')\"".
         ">".hero_icon($hero)."</a>";
     }
     $res["team".$tid]['overview'] .= "</div>";

@@ -442,7 +442,7 @@ if (sizeof($cache['reps']) === 0) {
 
     $modules .= "<div class=\"table-header-info wide compact spaced\">".
       "<span class=\"table-header-info-name\">".locale_string('reports_count').": ".count($reps)."</span>".
-      ($cat != "main" ? "<a class=\"right\" href=\"?cat=$cat&latest".(empty($linkvars) ? "" : "&".$linkvars)."\">".locale_string('latest_permalink')."</a>" : "").
+      (isset($cat) && $cat != "main" ? "<a class=\"right\" href=\"?cat=$cat&latest".(empty($linkvars) ? "" : "&".$linkvars)."\">".locale_string('latest_permalink')."</a>" : "").
     "</div>";
 
     if(isset($cat) || $index_list >= sizeof($reps)) {
@@ -580,7 +580,7 @@ if (sizeof($cache['reps']) === 0) {
       }
 
       foreach ($reps as $rep) {
-        foreach ($rep['patches'] as $pid => $ms) {
+        foreach (($rep['patches'] ?? []) as $pid => $ms) {
           $cats_c[$tag]['patches'][$pid] = ($cats_c[$tag]['patches'][$pid] ?? 0) + $ms;
         }
       }

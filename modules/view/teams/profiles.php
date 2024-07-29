@@ -72,6 +72,15 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
       $res["team".$tid]['heroes'] = [];
       if ($mod == $context_mod."team".$tid."-heroes") $unset_module = true;
 
+      if (isset($context[$tid]['hvariants'])) {
+        $res["team".$tid]['heroes']['hvariants'] = "";
+
+        if(check_module($context_mod."team".$tid."-heroes-hvariants")) {
+          include_once __DIR__ . "/profile_snippets/hvariants.php";
+        }
+
+        // $res["team".$tid]['heroes']['rolepickban'] = [];
+      }
       if (isset($context[$tid]['hero_positions'])) {
         $res["team".$tid]['heroes']['positions'] = [];
 
