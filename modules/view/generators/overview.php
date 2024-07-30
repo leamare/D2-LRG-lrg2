@@ -166,7 +166,7 @@ function rg_view_generator_overview($modlink, &$context, $foreword = "") {
     if ($report['settings']['overview_sides_graph']) {
       $res .= rg_generator_overview_chart( "$prefix-sides",
         [ locale_string("radiant"), locale_string("dire") ],
-        [ $context['main']['radiant_wr'].",".$context['main']['dire_wr'] ]);
+        [ $context['main']['radiant_wr'], $context['main']['dire_wr'] ]);
     }
 
     if ($report['settings']['overview_heroes_contested_graph']) {
