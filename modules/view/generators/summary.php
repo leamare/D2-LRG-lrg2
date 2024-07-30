@@ -4,7 +4,7 @@ include_once($root."/modules/view/functions/player_name.php");
 include_once($root."/modules/view/functions/convert_time.php");
 include_once($root."/modules/view/functions/summary_utils.php");
 
-function rg_generator_summary($table_id, &$context, $hero_flag = true, $rank = false) {
+function rg_generator_summary($table_id, &$context, $hero_flag = true, $rank = false, $variants = false) {
   if(!sizeof($context)) return "";
 
   if (is_wrapped($context)) $context = unwrap_data($context);
@@ -14,7 +14,8 @@ function rg_generator_summary($table_id, &$context, $hero_flag = true, $rank = f
   $matches = [];
 
   $total_matches = 0;
-  foreach ($context as $c) {
+  foreach ($context as $id => $c) {
+    if (empty($c) || !$id) continue;
     if ($total_matches < $c['matches_s']) $total_matches = $c['matches_s'];
     $matches[] = $c['matches_s'];
   } 
@@ -23,51 +24,41 @@ function rg_generator_summary($table_id, &$context, $hero_flag = true, $rank = f
     $ranks = [];
     $context_copy = $context;
 
-    uasort($context_copy, function($a, $b) use ($total_matches) {
-      return positions_ranking_sort($a, $b, $total_matches);
+    positions_ranking($context, $total_matches);
+
+    uasort($context, function($a, $b) {
+      return $b['wrank'] <=> $a['wrank'];
     });
-
-    $increment = 100 / sizeof($context_copy); $i = 0; $last_rank = 0;
-
-    foreach ($context_copy as $id => $el) {
-      if(isset($last) && $el['matches_s'] == $last['matches_s'] && $el['winrate_s'] == $last['winrate_s']) {
-        $i++;
-        $ranks[$id] = $last_rank;
-      } else
-        $ranks[$id] = 100 - $increment*$i++;
-      $last = $el;
-      $last_rank = $ranks[$id];
+  
+    $min = end($context)['wrank'];
+    $max = reset($context)['wrank'];
+  
+    foreach ($context as $id => $el) {
+      $ranks[$id] = 100 * ($el['wrank']-$min) / ($max-$min);
+      $context_copy[$id]['winrate_s'] = 1-($el['winrate'] ?? $el['winrate_s']);
     }
-    unset($last);
 
     $aranks = [];
-    $context_copy = $context;
-    foreach ($context_copy as &$data) {
-      $data['winrate_s'] = 1-$data['winrate_s'];
-    }
-
-    uasort($context_copy, function($a, $b) use ($total_matches) {
-      return positions_ranking_sort($a, $b, $total_matches);
+  
+    positions_ranking($context_copy, $total_matches);
+  
+    uasort($context_copy, function($a, $b) {
+      return $b['wrank'] <=> $a['wrank'];
     });
-
-    $i = 0;
-
+  
+    $min = end($context_copy)['wrank'];
+    $max = reset($context_copy)['wrank'];
+  
     foreach ($context_copy as $id => $el) {
-      if(isset($last) && $el['matches_s'] == $last['matches_s'] && $el['winrate_s'] == $last['winrate_s']) {
-        $i++;
-        $aranks[$id] = $last_rank;
-      } else
-        $aranks[$id] = 100 - $increment*$i++;
-      $last = $el;
-      $last_rank = $aranks[$id];
+      $aranks[$id] = 100 * ($el['wrank']-$min) / ($max-$min);
     }
-    unset($last);
 
     unset($context_copy);
   }
 
   if (in_array("hero_damage_per_min_s", $keys) && in_array("gpm", $keys) && !in_array("damage_to_gold_per_min_s", $keys)) {
     foreach ($context as $id => $el) {
+      if (empty($el) || !$id) continue;
       $context[$id] = array_insert_before($context[$id], "gpm", [
         "damage_to_gold_per_min_s" => ($context[$id]['hero_damage_per_min_s'] ?? 0)/($context[$id]['gpm'] ?? 1),
       ]);
@@ -112,9 +103,11 @@ function rg_generator_summary($table_id, &$context, $hero_flag = true, $rank = f
 
   $res .= search_filter_component($table_id, true);
 
+  $colspan = ($hero_flag ? ($variants ? 3 : 2) : 1) + count($index_group);
+
   $res .= "<table id=\"$table_id\" class=\"list wide sortable\"><thead><tr class=\"overhead\">".
     // ($hero_flag ? "<th class=\"sorter-no-parser\" width=\"1%\"></th>" : "").
-    "<th colspan=\"".(($hero_flag ? 2 : 1) + count($index_group))."\" data-col-group=\"_index\"></th>".
+    "<th colspan=\"".$colspan."\" data-col-group=\"_index\"></th>".
     implode('', array_map(
       function($a) use (&$groups) {
         return "<th class=\"separator\" colspan=\"".count($groups[$a])."\" data-col-group=\"$a\">".locale_string($a)."</th>";
@@ -122,6 +115,7 @@ function rg_generator_summary($table_id, &$context, $hero_flag = true, $rank = f
     ))."</tr>".
     "<tr>".
     ($hero_flag ? "<th class=\"sorter-no-parser\" width=\"1%\"></th>" : "").
+    ($hero_flag && $variants ? "<th class=\"sorter-no-parser\" width=\"1%\">".locale_string("facet")."</th>" : "").
     "<th data-col-group=\"_index\">".locale_string($hero_flag ? "hero" : "player")."</th>".
     "<th data-col-group=\"_index\">".implode(
       "</th><th data-col-group=\"_index\">", array_map(function($el) {
@@ -146,13 +140,24 @@ function rg_generator_summary($table_id, &$context, $hero_flag = true, $rank = f
   "</thead><tbody>";
 
   foreach($context as $id => $el) {
+    if (empty($el) || !$id) continue;
+
     if ($rank) {
       $el['rank'] = number_format($ranks[$id],2);
       $el['antirank'] = number_format($aranks[$id],2);
     }
 
+    if ($variants) {
+      [$id, $var] = explode('-', $id);
+    }
+
     $res .= "<tr data-value-summary_matches=\"".$el['matches_s']."\"><td data-col-group=\"_index\">".
-      ($hero_flag ? hero_portrait($id)."</td><td>".hero_link($id) : player_link($id, true, true)).
+      ($hero_flag ?
+        hero_portrait($id)."</td>".
+        ($variants ? "<td>".facet_micro_element($id, $var)."</td>" : "").
+        "<td>".hero_link($id).($variants ? ' '.locale_string("facet_short").$var : "") : 
+        player_link($id, true, true)
+      ).
     "</td>";
 
     foreach ($index_group as $key) {
