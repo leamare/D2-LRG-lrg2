@@ -39,6 +39,15 @@ foreach ($modline as $ml) {
     }
   }
 
+  if (strpos($ml, "variant") !== FALSE) {
+    $ml = str_replace("variant", "", $ml);
+    if (strpos($ml, ",") !== FALSE) {
+      $vars['variant'] = explode(',', $ml);
+    } else {
+      $vars['variant'] = is_numeric($ml) ? +$ml : null;
+    }
+  }
+
   if (strpos($ml, "playerid") !== FALSE) {
     $ml = str_replace("playerid", "", $ml);
     if (strpos($ml, ",") !== FALSE) {
