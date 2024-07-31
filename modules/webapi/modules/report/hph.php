@@ -2,7 +2,7 @@
 
 $repeatVars['hph'] = ['heroid'];
 
-$endpoints['hph'] = function($mods, $vars, &$report) {
+$endpoints['hph'] = function($mods, $vars, &$report) use (&$endpoints) {
   if (isset($vars['team'])) {
     throw new \Exception("No team allowed");
   } else if (isset($vars['region'])) {
@@ -10,6 +10,10 @@ $endpoints['hph'] = function($mods, $vars, &$report) {
   }
   if (!isset($vars['heroid'])) {
     throw new \Exception("Can't give you data without hero ID");
+  }
+
+  if (isset($vars['variant']) || in_array("variants", $mods)) {
+    return $endpoints['variants-hph']($mods, $vars, $report);
   }
 
   if (is_wrapped($report['hph'])) {
@@ -38,6 +42,8 @@ $endpoints['hph'] = function($mods, $vars, &$report) {
     if ($srcid) {
       $context =& $report['hph'][$srcid];
 
+      if (empty($context)) return [];
+
       foreach ($context as $id => $el) {
         if ($el == null) unset($context[$id]);
         if ($el === true) $context[$id] = $report['hph'][$id][$srcid];
@@ -58,44 +64,41 @@ $endpoints['hph'] = function($mods, $vars, &$report) {
         $context[$id]['wr_diff'] = round($context[$id]['winrate'] - $dt['wr'], 5);
       }
 
-      $compound_ranking_sort = function($a, $b) use ($dt) {
-        return positions_ranking_sort($a, $b, $dt['ms']);
-      };
-      uasort($context, $compound_ranking_sort);
+      positions_ranking($context, $dt['ms']);
       $context_cpy = $context;
+
+      uasort($context, function($a, $b) {
+        return $b['wrank'] <=> $a['wrank'];
+      });
     
-      $increment = 100 / sizeof($context); $i = 0;
+      $min = end($context)['wrank'];
+      $max = reset($context)['wrank'] + 0.01;
     
       foreach ($context as $elid => $el) {
-        if(isset($last) && $el == $last) {
-          $i++;
-          $context[$elid]['rank'] = $last_rank ?? 0;
-        } else
-          $context[$elid]['rank'] = round(100 - $increment*$i++, 2);
-        $last = $el;
-        $last_rank = $context[$elid]['rank'];
-
+        $context[$elid]['rank'] = 100 * ($el['wrank']-$min) / ($max-$min);
         $context_cpy[$elid]['winrate'] = 1-$context_cpy[$elid]['winrate'];
       }
+
+      positions_ranking($context_cpy, $dt['ms']);
+
+      uasort($context_cpy, function($a, $b) {
+        return $b['wrank'] <=> $a['wrank'];
+      });
     
-      unset($last);
-  
-      uasort($context_cpy, $compound_ranking_sort);
-      $i = 0;
+      $min = end($context_cpy)['wrank'];
+      $max = reset($context_cpy)['wrank'] + 0.01;
     
       foreach ($context_cpy as $elid => $el) {
-        if(isset($last) && $el == $last) {
-          $i++;
-          $context[$elid]['arank'] = $last_rank;
-        } else
-          $context[$elid]['arank'] = round(100 - $increment*$i++, 2);
-        $last = $el;
-        $last_rank = $context[$elid]['arank'];
-      }
-    
-      unset($last);
+        $context[$elid]['arank'] = 100 * ($el['wrank']-$min) / ($max-$min);
+        unset($context[$elid]['wrank']);
 
-      $isrank = true; $i = 0;
+        if (isset($el['expectation']) && !isset($el['deviation'])) {
+          $context[$elid]['deviation'] = $el['matches']-$el['expectation'];
+          $context[$elid]['deviation_pct'] = round(($el['matches']-$el['expectation'])*100/$el['matches'], 2);
+        }
+      }
+
+      $isrank = true;
     }
   }
 
@@ -113,4 +116,150 @@ $endpoints['hph'] = function($mods, $vars, &$report) {
     ];
   }
   return $report['hph'];
+};
+
+$endpoints['variants-hph'] = function($mods, $vars, &$report) use (&$endpoints) {
+  if (isset($vars['team'])) {
+    throw new \Exception("No team allowed");
+  } else if (isset($vars['region'])) {
+    throw new \Exception("No region allowed");
+  }
+  if (!isset($vars['heroid'])) {
+    throw new \Exception("Can't give you data without hero ID");
+  }
+
+  if (is_wrapped($report['hph_v'])) {
+    $report['hph_v'] = unwrap_data($report['hph_v']);
+  }
+
+  if (!isset($vars['variant'])) {
+    $hid = $vars['heroid'];
+
+    $variants = get_hero_variants_list($vars['heroid']);
+    if (isset($report['hph'][$hid.'-0'])) {
+      array_unshift($variants, "_no_variant_");
+    }
+    $report['hero_variants'][$hid."-x"] = [
+      'm' => 0,
+      'w' => 0,
+      'f' => 1,
+    ];
+    $report['hph_v'][$hid."-x"] = [];
+    foreach ($variants as $i => $tag) {
+      $i++;
+      if (empty($report['hero_variants'][$hid."-".$i])) continue;
+      $report['hero_variants'][$hid."-x"]['m'] += $report['hero_variants'][$hid."-".$i]['m'];
+      $report['hero_variants'][$hid."-x"]['w'] += $report['hero_variants'][$hid."-".$i]['w'];
+
+      foreach ($report['hph_v'][$hid."-".$i] as $opid => $data) {
+        if (empty($data) || $data['matches'] == -1) continue;
+        
+        if (!isset($report['hph_v'][$hid."-x"][$opid])) {
+          $report['hph_v'][$hid."-x"][$opid] = [
+            "matches" => 0,
+            "exp" => 0,
+            "won" => 0,
+            "lost" => 0,
+            "winrate" => null,
+            "diff" => null,
+            "lane_rate" => 0,
+            "lane_wr" => 0,
+          ];
+        }
+
+        $report['hph_v'][$hid."-x"][$opid]['matches'] += $data['matches'];
+        $report['hph_v'][$hid."-x"][$opid]['exp'] += $data['exp'];
+        $report['hph_v'][$hid."-x"][$opid]['won'] += $data['won'];
+        $report['hph_v'][$hid."-x"][$opid]['lane_rate'] += round($data['lane_rate'] * $data['matches']);
+        $report['hph_v'][$hid."-x"][$opid]['lane_wr'] += $data['lane_rate'] * $data['matches'] * $data['lane_wr'];
+      }
+    }
+    $wr = $report['hero_variants'][$hid."-x"]['w']/$report['hero_variants'][$hid."-x"]['m'];
+    foreach ($report['hph_v'][$hid."-x"] as $opid => $data) {
+      if (!$data['matches']) continue;
+      $report['hph_v'][$hid."-x"][$opid]['winrate'] = $data['won']/$data['matches'];
+      $report['hph_v'][$hid."-x"][$opid]['diff'] = $report['hph_v'][$hid."-x"][$opid]['winrate'] - $wr;
+      $report['hph_v'][$hid."-x"][$opid]['lane_wr'] = $data['lane_wr']/($data['lane_rate'] ?: 1);
+      $report['hph_v'][$hid."-x"][$opid]['lane_rate'] = $data['lane_rate']/$data['matches'];
+    }
+  }
+
+  $srcid = $vars['heroid'].'-'.($vars['variant'] ?? 'x');
+
+  $dt = [
+    'wr' => $report['hero_variants'][$srcid]['w']/$report['hero_variants'][$srcid]['m'],
+    'ms' => $report['hero_variants'][$srcid]['m'],
+  ];
+
+  $hero_reference = [
+    "id" => isset($vars['variant']) ? $srcid : +$vars['heroid'],
+    "matches" => $dt['ms'],
+    "wins" => $report['hero_variants'][$srcid]['w'],
+    "winrate" => $dt['wr']
+  ];
+
+  if ($srcid) {
+    $context =& $report['hph_v'][$srcid];
+
+    if (empty($context)) return [];
+
+    foreach ($context as $id => $el) {
+      if ($el == null) unset($context[$id]);
+      if ($el === true) $context[$id] = $report['hph'][$id][$srcid];
+    }
+
+    foreach ($report['hph_v'][$srcid] as $id => $line) {
+      if ($id == '_h') {
+        unset($report['hph_v'][$srcid][$id]);
+        continue;
+      }
+      if ($line == null) {
+        unset($context[$id]);
+        continue;
+      }
+      if ($line === true || is_array($line) && $line['matches'] === -1)
+        $report['hph_v'][$srcid][$id] = $report['hph_v'][$id][$srcid];
+
+      $context[$id]['wr_diff'] = round($context[$id]['winrate'] - $dt['wr'], 5);
+    }
+
+    positions_ranking($context, $dt['ms']);
+    $context_cpy = $context;
+
+    uasort($context, function($a, $b) {
+      return $b['wrank'] <=> $a['wrank'];
+    });
+  
+    $min = end($context)['wrank'];
+    $max = reset($context)['wrank'] + 0.01;
+  
+    foreach ($context as $elid => $el) {
+      $context[$elid]['rank'] = 100 * ($el['wrank']-$min) / ($max-$min);
+      $context_cpy[$elid]['winrate'] = 1-$context_cpy[$elid]['winrate'];
+    }
+
+    positions_ranking($context_cpy, $dt['ms']);
+
+    uasort($context_cpy, function($a, $b) {
+      return $b['wrank'] <=> $a['wrank'];
+    });
+  
+    $min = end($context_cpy)['wrank'];
+    $max = reset($context_cpy)['wrank'] + 0.01;
+  
+    foreach ($context_cpy as $elid => $el) {
+      $context[$elid]['arank'] = 100 * ($el['wrank']-$min) / ($max-$min);
+      unset($context[$elid]['wrank']);
+
+      if (isset($el['expectation']) && !isset($el['deviation'])) {
+        $context[$elid]['deviation'] = $el['matches']-$el['expectation'];
+        $context[$elid]['deviation_pct'] = round(($el['matches']-$el['expectation'])*100/$el['matches'], 2);
+      }
+    }
+  }
+
+  return [
+    'reference' => $hero_reference ?? null,
+    'pairs' => $context ?? null
+  ];
 };
