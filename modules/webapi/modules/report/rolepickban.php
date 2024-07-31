@@ -82,49 +82,43 @@ $endpoints['rolepickban'] = function($mods, $vars, &$report) {
 
   $ranks = [];
 
-  $compound_ranking_sort = function($a, $b) use ($context_total_matches) {
-    return compound_ranking_sort($a, $b, $context_total_matches);
-  };
+  compound_ranking($pb, $context_total_matches);
 
-  uasort($pb, $compound_ranking_sort);
+  $context_copy = $pb;
 
-  $increment = 100 / sizeof($pb); $i = 0;
+  uasort($pb, function($a, $b) {
+    return $b['wrank'] <=> $a['wrank'];
+  });
+
+  $min = end($pb)['wrank'];
+  $max = reset($pb)['wrank'];
 
   foreach ($pb as $id => $el) {
-    if(isset($last) && $el == $last) {
-      $i++;
-      $ranks[$id] = $last_rank ?? 0;
-    } else
-      $ranks[$id] = 100 - $increment*$i++;
-    $last = $el;
-    $last_rank = $ranks[$id];
-  }
-  $last = null;
+    $ranks[$id] = 100 * ($el['wrank']-$min) / ($max-$min);
 
-  $context_cpy = [];
-  foreach($pb as $hid => $data) {
-    $context_cpy[$hid] = $data;
-    $context_cpy[$hid]['winrate_picked'] = 1-$context_cpy[$hid]['winrate_picked'];
-    $context_cpy[$hid]['winrate_banned'] = 1-$context_cpy[$hid]['winrate_banned'];
+    $context_copy[$id]['winrate_picked'] = 1-$el['winrate_picked'];
+    $context_copy[$id]['winrate_banned'] = 1-$el['winrate_banned'];
   }
 
   $aranks = [];
 
-  uasort($context_cpy, $compound_ranking_sort);
+  compound_ranking($context_copy, $context_total_matches);
 
-  $increment = 100 / sizeof($context); $i = 0;
+  uasort($context_copy, function($a, $b) {
+    return $b['wrank'] <=> $a['wrank'];
+  });
 
-  foreach ($context_cpy as $id => $el) {
-    if(isset($last) && $el == $last) {
-      $i++;
-      $aranks[$id] = $last_rank;
-    } else
-      $aranks[$id] = 100 - $increment*$i++;
-    $last = $el;
-    $last_rank = $aranks[$id];
+  $min = end($context_copy)['wrank'];
+  $max = reset($context_copy)['wrank'];
+
+  foreach ($context_copy as $id => $el) {
+    $aranks[$id] = 100 * ($el['wrank']-$min) / ($max-$min);
   }
+
+  unset($context_copy);
   
   foreach($pb as $id => &$el) {
+    unset($el['wrank']);
     $el['rank'] = round($ranks[$id], 2);
     $el['arank'] = round($aranks[$id], 2);
     $el['contest_rate'] = round($el['matches_total']/$context_total_matches, 5);
