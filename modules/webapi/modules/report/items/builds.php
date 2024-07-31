@@ -2,7 +2,7 @@
 
 include_once($root."/modules/view/functions/itembuilds.php");
 
-$endpoints['items-builds'] = function($mods, $vars, &$report) use (&$endpoints) {
+$endpoints['items-builds'] = function($mods, $vars, &$report) use (&$endpoints, &$meta) {
   if (!isset($report['items']) || empty($report['items']['pi']) || !isset($report['items']['progr']))
     throw new \Exception("No items data");
 
@@ -103,6 +103,55 @@ $endpoints['items-builds'] = function($mods, $vars, &$report) use (&$endpoints) 
     $report['items']['stats'][$hero] = array_filter($report['items']['stats'][$hero], function($a) {
       return !empty($a);
     });
+
+    $facets = null;
+
+      // variants
+  if (!empty($report['hero_summary_variants'])) {
+    if (is_wrapped($report['hero_summary_variants'])) {
+      $report['hero_summary_variants'] = unwrap_data($report['hero_summary_variants']);
+    }
+
+    $facets = [];
+    $facets_list = isset($report['meta']['variants']) ? array_keys($report['meta']['variants'][$hero]) : $meta['facets']['heroes'][$hero];
+    $rid = array_search($core.'.'.$lane, ROLES_IDS_SIMPLE);
+    foreach ($facets_list as $i => $facet) {
+      $i++;
+      $hvid = $hero.'-'.$i;
+    
+      $hero_stats = $report['hero_summary_variants'][$rid][$hvid] ?? [];
+
+      $facets[] = [
+        'variant' => $i,
+        'is_role' => true,
+        'ratio' => $hero_stats['matches_s']/$pbdata['role_matches'],
+        'matches' => $hero_stats['matches_s'] ?? 0,
+        'winrate' => $hero_stats['winrate_s'] ?? '-',
+      ];
+    }
+  } else if (isset($report['hero_variants'])) {
+    $facets_list = isset($report['meta']['variants']) ? array_keys($report['meta']['variants'][$hero]) : $meta['facets']['heroes'][$hero];
+    $facets = [];
+    foreach ($facets_list as $i => $facet) {
+      $i++;
+      $hvid = $hero.'-'.$i;
+      $stats = [
+        'm' => 0,
+        'w' => 0,
+        'f' => 0,
+      ];
+      if (isset($report['hero_variants'][$hvid])) {
+        $stats = $report['hero_variants'][$hvid];
+      }
+      $facets[] = [
+        'variant' => $i,
+        'is_role' => false,
+        'ratio' => $stats['f'],
+        'matches' => $stats['m'],
+        'winrate' => $stats['m'] ? $stats['w']/$stats['m'] : 0,
+      ];
+    }
+  }
   
     [ $build, $tree ] = generate_item_builds($pairs, $report['items']['stats'][$hero], $pbdata);
 
@@ -112,6 +161,10 @@ $endpoints['items-builds'] = function($mods, $vars, &$report) use (&$endpoints) 
       'stats' => $pbdata,
       'build' => $build,
     ];
+
+    if (!empty($facets)) {
+      $res['facets'] = $facets;
+    }
 
     if (isset($vars['gets']) && in_array("tree", $vars['gets'])) {
       $res['tree'] = $tree;
