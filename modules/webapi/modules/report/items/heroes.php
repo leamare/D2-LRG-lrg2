@@ -22,27 +22,19 @@ $endpoints['items-heroes'] = function($mods, $vars, &$report) use (&$endpoints) 
       'heroes' => null
     ];
 
-  $ranks = [];
+  items_ranking($report['items']['stats']['total']);
 
-  $ranking_sort = function($a, $b) {
-    return items_ranking_sort($a, $b);
-  };
+  uasort($report['items']['stats']['total'], function($a, $b) {
+    return $b['wrank'] <=> $a['wrank'];
+  });
 
-  uasort($report['items']['stats']['total'], $ranking_sort);
-
-  $increment = 100 / sizeof($report['items']['stats']['total']); $i = 0;
+  $min = end($report['items']['stats']['total'])['wrank'];
+  $max = reset($report['items']['stats']['total'])['wrank'];
 
   foreach ($report['items']['stats']['total'] as $id => $el) {
-    if(isset($last) && $el == $last) {
-      $i++;
-      $ranks[$id] = $last_rank;
-    } else
-      $ranks[$id] = 100 - $increment*$i++;
-    $report['items']['stats']['total'][$id]['rank'] = round($ranks[$id], 2);
-    $last = $el;
-    $last_rank = $ranks[$id];
+    $report['items']['stats']['total'][$id]['rank'] = 100 * ($el['wrank']-$min) / ($max-$min);
+    unset($report['items']['stats']['total'][$id]['wrank']);
   }
-  unset($last);
 
   $total = $report['items']['stats']['total'][$item];
   unset($report['items']['stats']['total']);
@@ -54,28 +46,35 @@ $endpoints['items-heroes'] = function($mods, $vars, &$report) use (&$endpoints) 
       $heroes[$hero] = $items[$item];
   }
 
-  $ranks = [];
+  items_ranking($heroes);
 
-  $ranking_sort = function($a, $b) {
-    return items_ranking_sort($a, $b);
-  };
+  uasort($heroes, function($a, $b) {
+    return $b['wrank'] <=> $a['wrank'];
+  });
 
-  uasort($heroes, $ranking_sort);
-
-  $increment = 100 / sizeof($heroes); $i = 0;
+  $min = end($heroes)['wrank'];
+  $max = reset($heroes)['wrank'];
 
   foreach ($heroes as $id => $el) {
-    if(isset($last) && $el == $last) {
-      $i++;
-      $ranks[$id] = $last_rank;
-    } else
-      $ranks[$id] = 100 - $increment*$i++;
-    $heroes[$id]['rank'] = round($ranks[$id], 2);
+    $heroes[$id]['rank'] = 100 * ($el['wrank']-$min) / ($max-$min);
+    unset($heroes[$id]['wrank']);
     unset($heroes[$id]['category']);
-    $last = $el;
-    $last_rank = $ranks[$id];
   }
-  unset($last);
+
+  // $increment = 100 / sizeof($heroes); $i = 0;
+
+  // foreach ($heroes as $id => $el) {
+  //   if(isset($last) && $el == $last) {
+  //     $i++;
+  //     $ranks[$id] = $last_rank;
+  //   } else
+  //     $ranks[$id] = 100 - $increment*$i++;
+  //   $heroes[$id]['rank'] = round($ranks[$id], 2);
+  //   unset($heroes[$id]['category']);
+  //   $last = $el;
+  //   $last_rank = $ranks[$id];
+  // }
+  // unset($last);
 
   $res['item'] = $item;
   $res['total'] = $total;
