@@ -30,11 +30,15 @@ function match_card($mid) {
   ];
 
   foreach ($m as $pl) {
-    $match['players'][$pl['radiant'] == 1 ? 'radiant' : 'dire'][] = [
+    $player = [
       "player_id" => $pl['player'],
       "player_name" => player_name($pl['player']),
       "hero_id" => $pl['hero']
     ];
+    if (!empty($pl['var'])) {
+      $player['variant'] = $pl['var'];
+    }
+    $match['players'][$pl['radiant'] == 1 ? 'radiant' : 'dire'][] = $player;
   }
 
   $match['bans'] = null;
