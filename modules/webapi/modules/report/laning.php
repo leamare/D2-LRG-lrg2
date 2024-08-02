@@ -16,7 +16,6 @@ $endpoints['laning'] = function($mods, $vars, &$report) {
   else 
     $type = "hero";
 
-  $ranks = [];
   $ids = [ 0 ];
   if (!empty($vars[$type.'id'])) $ids[] = $vars[$type.'id'];
 
@@ -57,26 +56,19 @@ $endpoints['laning'] = function($mods, $vars, &$report) {
     $mk = array_keys($context[$id]);
     $median_disadv = $context[$id][ $mk[ floor( count($mk)/2 ) ] ]['avg_disadvantage'];
 
-    $compound_ranking_sort = function($a, $b) use ($mm, $median_adv, $median_disadv) {
-      if ($a['matches'] == 0) return 1;
-      if ($b['matches'] == 0) return -1;
-      return compound_ranking_laning_sort($a, $b, $mm, $median_adv, $median_disadv);
-    };
-    uasort($context[$id], $compound_ranking_sort);
-
-    $increment = 100 / sizeof($context[$id]); $i = 0;
-
-    foreach ($context[$id] as $elid => $el) {
-      if(isset($last) && $el == $last) {
-        $i++;
-        $context[$id][$elid]['rank'] = $last_rank ?? 0;
-      } else
-        $context[$id][$elid]['rank'] = round(100 - $increment*$i++, 2);
-      $last = $el;
-      $last_rank = $context[$id][$elid]['rank'];
+    compound_ranking_laning($context[$id], $mm, $median_adv, $median_disadv);
+  
+    uasort($context[$id], function($a, $b) {
+      return $b['wrank'] <=> $a['wrank'];
+    });
+  
+    $min = end($context[$id])['wrank'];
+    $max = reset($context[$id])['wrank'];
+  
+    foreach ($context[$id] as $k => $el) {
+      $context[$id][$k]['rank'] = 100 * ($el['wrank']-$min) / ($max-$min);
+      unset($context[$id][$k]['wrank']);
     }
-
-    unset($last);
   }
 
   if (!empty($vars[$type.'id'])) {
