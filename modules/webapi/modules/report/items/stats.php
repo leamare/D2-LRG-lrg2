@@ -35,28 +35,19 @@ $endpoints['items-stats'] = function($mods, $vars, &$report) use (&$endpoints, &
   }
 
   if (!empty($report['items']['stats'][$hero])) {
-    $ranks = [];
+    items_ranking($report['items']['stats'][$hero]);
 
-    $ranking_sort = function($a, $b) {
-      return items_ranking_sort($a, $b);
-    };
+    uasort($report['items']['stats'][$hero], function($a, $b) {
+      return $b['wrank'] <=> $a['wrank'];
+    });
 
-    uasort($report['items']['stats'][$hero], $ranking_sort);
-
-    $increment = 100 / sizeof($report['items']['stats'][$hero]); $i = 0;
+    $min = end($report['items']['stats'][$hero])['wrank'];
+    $max = reset($report['items']['stats'][$hero])['wrank'];
 
     foreach ($report['items']['stats'][$hero] as $id => $el) {
-      if(isset($last) && $el == $last) {
-        $i++;
-        $ranks[$id] = $last_rank;
-      } else {
-        $ranks[$id] = 100 - $increment*$i++;
-      }
-      $report['items']['stats'][$hero][$id]['rank'] = round($ranks[$id], 2);
-      $last = $el;
-      $last_rank = $ranks[$id];
+      $report['items']['stats'][$hero][$id]['rank'] = 100 * ($el['wrank']-$min) / ($max-$min);
+      unset($report['items']['stats'][$hero][$id]['wrank']);
     }
-    unset($last);
   }
 
   $res['categories'] = $items_categories;
