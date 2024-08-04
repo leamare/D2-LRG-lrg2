@@ -17,7 +17,7 @@ $imports_ignore = [
   "check_directory.php",
 ];
 
-$lg_version = [ 2, 26, 0, 0, 0 ];
+$lg_version = [ 2, 27, 0, 0, 0 ];
 
 $root = dirname(__FILE__);
 
@@ -172,6 +172,7 @@ if ($getlatest) {
 
 if (!empty($leaguetag)) {
   if(file_exists($reports_dir."/".$report_mask_search[0].$leaguetag.$report_mask_search[1])) {
+    unset($cache);
     $report = file_get_contents($reports_dir."/".$report_mask_search[0].$leaguetag.$report_mask_search[1])
         or die("[F] Can't open $teaguetag, probably no such report\n");
     $report = json_decode($report, true);
@@ -180,12 +181,16 @@ if (!empty($leaguetag)) {
     include_once("modules/view/__open_cache.php");
     include_once("modules/view/__update_cache.php");
     if(isset($cache['reps'][$leaguetag]['file'])) {
-      $report = file_get_contents($reports_dir."/".$cache['reps'][$leaguetag]['file'])
+      $fname = $cache['reps'][$leaguetag]['file'];
+      unset($cache);
+      $report = file_get_contents($reports_dir."/".$fname)
           or die("[F] Can't open $leaguetag, probably no such report\n");
       $report = json_decode($report, true);
     } else $leaguetag = "";
   }
-} else $report = [];
+} else {
+  $report = [];
+}
 
 include_once(__DIR__ . "/modules/webapi/modules.php");
 
@@ -196,11 +201,11 @@ header('Access-Control-Allow-Methods: GET, POST');
 //header("Access-Control-Allow-Headers: X-Requested-With");
 header('Access-Control-Allow-Headers: token, Content-Type');
 
-// set_error_handler(
-//   function ($severity, $message, $file, $line) {
-//     throw new \Exception($severity.' - '.$message.'('.$file.':'.$line.')', $severity);
-//   }
-// );
+set_error_handler(
+  function ($severity, $message, $file, $line) {
+    throw new \Exception($severity.' - '.$message.'('.$file.':'.$line.')', $severity);
+  }
+);
 
 $resp['modline'] = $mod;
 $resp['vars'] = $vars;
@@ -228,5 +233,35 @@ echo json_encode($resp, (isset($_REQUEST['pretty']) ? JSON_PRETTY_PRINT : 0)
   // | JSON_NUMERIC_CHECK 
   //| JSON_THROW_ON_ERROR
 );
+
+if (json_last_error()) {
+  // if (isset($_GET['dump'])) var_dump($resp);
+
+  $e = new \Exception(json_last_error_msg());
+
+  if (!empty($__lrg_onerror)) {
+    $__lrg_onerror([
+      'type' => 'error',
+      'project' => $projectName ?? "LRG2",
+      'path' => $_SERVER['REQUEST_URI'] ?? null,
+      'message' => $e->getMessage()."::".json_encode($e->getTrace()),
+      'file' => str_replace(__DIR__, "", $e->getFile()),
+      'line' => $e->getLine(),
+      'severity' => E_ERROR | $e->getCode(),
+    ]);
+  }
+
+  if (!isset($resp['errors'])) $resp['errors'] = [];
+  $resp['result'] = null;
+
+  $resp['errors'][] = $e->getMessage().' ('.$e->getFile().':'.$e->getLine().')';
+
+  echo json_encode($resp, (isset($_REQUEST['pretty']) ? JSON_PRETTY_PRINT : 0) 
+    | JSON_INVALID_UTF8_SUBSTITUTE 
+    | JSON_UNESCAPED_UNICODE
+    // | JSON_NUMERIC_CHECK 
+    //| JSON_THROW_ON_ERROR
+  );
+}
 
 require_once("modules/view/__post_render.php");

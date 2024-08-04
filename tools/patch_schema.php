@@ -110,3 +110,9 @@ if (!$schema['wards']) {
 
   runquery($conn, $sql);
 }
+
+if (!$schema['variant_supported']) {
+  $sql = "ALTER TABLE matchlines ADD `variant` SMALLINT UNSIGNED DEFAULT null NULL;";
+
+  runquery($conn, $sql);
+}

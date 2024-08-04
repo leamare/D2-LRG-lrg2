@@ -929,3 +929,7 @@ input.search-toggle {
   max-height: 200px;
   padding: 25px 5% 25px
 }
+
+svg {
+  overflow: visible;
+}
