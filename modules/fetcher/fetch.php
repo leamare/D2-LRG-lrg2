@@ -1835,7 +1835,7 @@ function fetch($match) {
     return null;
   }
 
-  $sql = "INSERT INTO matchlines (matchid, playerid, heroid, ".($schema['variant'] ? "variant, " : "")."level, isRadiant, kills, deaths, assists, networth,".
+  $sql = "INSERT INTO matchlines (matchid, playerid, heroid, ".($schema['variant_supported'] ? "variant, " : "")."level, isRadiant, kills, deaths, assists, networth,".
           "gpm, xpm, heal, heroDamage, towerDamage, lastHits, denies) VALUES ";
   foreach($t_matchlines as $ml) {
       if (!$ml['heroid']);
