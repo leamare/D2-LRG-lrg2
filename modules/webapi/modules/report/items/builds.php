@@ -121,10 +121,13 @@ $endpoints['items-builds'] = function($mods, $vars, &$report) use (&$endpoints, 
     
       $hero_stats = $report['hero_summary_variants'][$rid][$hvid] ?? [];
 
+      // TODO: add deprecated support
+      if (empty($hero_stats)) continue;
+
       $facets[] = [
         'variant' => $i,
         'is_role' => true,
-        'ratio' => $hero_stats['matches_s']/$pbdata['role_matches'],
+        'ratio' => ($hero_stats['matches_s'] ?? 0)/$pbdata['role_matches'],
         'matches' => $hero_stats['matches_s'] ?? 0,
         'winrate' => $hero_stats['winrate_s'] ?? '-',
       ];

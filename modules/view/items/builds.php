@@ -246,6 +246,9 @@ function rg_view_generate_items_builds() {
     
       $hero_stats = $report['hero_summary_variants'][$rid][$hvid] ?? [];
 
+      // TODO: add deprecated support
+      if (empty($hero_stats)) continue;
+
       $stats[] = [
         'variant' => $i,
         'ratio' => $hero_stats['matches_s']/$pbdata['role_matches'],
