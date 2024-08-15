@@ -67,6 +67,10 @@ foreach ($source_reports as $s => &$rep) {
       foreach($stats as $item => $vals) {
         $oldstats =& $report['starting_items']['items'][$role][$hid][$item];
 
+        if (empty($oldstats['matches'])) $oldstats['matches'] = 0;
+        if (empty($oldstats['wins'])) $oldstats['wins'] = 0;
+        if (empty($oldstats['lane_wins'])) $oldstats['lane_wins'] = 0;
+
         $oldstats['matches'] += $vals['matches'];
         $oldstats['wins'] += $vals['wins'];
         $oldstats['lane_wins'] += $vals['lane_wins'];
@@ -100,6 +104,10 @@ foreach ($source_reports as $s => &$rep) {
         }
 
         $oldstats =& $report['starting_items']['builds'][$role][$hid][$tag];
+
+        if (empty($oldstats['matches'])) $oldstats['matches'] = 0;
+        if (empty($oldstats['wins'])) $oldstats['wins'] = 0;
+        if (empty($oldstats['lane_wins'])) $oldstats['lane_wins'] = 0;
 
         $oldstats['matches'] += $build['matches'];
         $oldstats['wins'] += $build['wins'];
@@ -139,33 +147,37 @@ foreach ($source_reports as $s => &$rep) {
 
         foreach ($items as $iid => $stats) {
           if (empty($report['starting_items']['consumables'][$t][$role][$hid][$iid])) {
-            $report['starting_items']['consumables'][$t][$role][$hid][$iid] = $items;
+            $report['starting_items']['consumables'][$t][$role][$hid][$iid] = $stats;
             continue;
           }
 
           $oldstats =& $report['starting_items']['consumables'][$t][$role][$hid][$iid];
 
-          $m = $oldstats['matches'];
+          $m = $oldstats['matches'] ?? 0;
 
-          $oldstats['min'] = min($oldstats['min'], $stats['min']);
-          $oldstats['max'] = min($oldstats['max'], $stats['max']);
-          $oldstats['total'] = min($oldstats['total'], $stats['total']);
-          $oldstats['matches'] = min($oldstats['matches'], $stats['matches']);
+          $oldstats['min'] = min($oldstats['min'] ?? 0, $stats['min']);
+          $oldstats['max'] = max($oldstats['max'] ?? 0, $stats['max']);
+          $oldstats['total'] = ($oldstats['total'] ?? 0) + $stats['total'];
+          $oldstats['matches'] = ($oldstats['matches'] ?? 0) + $stats['matches'];
+
+          if (empty($oldstats['q1'])) $oldstats['q1'] = 0;
+          if (empty($oldstats['q3'])) $oldstats['q3'] = 0;
+          if (empty($oldstats['med'])) $oldstats['med'] = 0;
 
           $oldstats['q1'] = round( (
             ($oldstats['q1'] * $m) + 
-            ($stats['q1'] * $st['matches'])
-          ) / ($m + $st['matches']) );
+            ($stats['q1'] * $stats['matches'])
+          ) / ($m + $stats['matches']) );
 
           $oldstats['q3'] = round( (
             ($oldstats['q3'] * $m) + 
-            ($stats['q3'] * $st['matches'])
-          ) / ($m + $st['matches']) );
+            ($stats['q3'] * $stats['matches'])
+          ) / ($m + $stats['matches']) );
 
           $oldstats['med'] = round( (
             ($oldstats['med'] * $m) + 
-            ($stats['med'] * $st['matches'])
-          ) / ($m + $st['matches']) );
+            ($stats['med'] * $stats['matches'])
+          ) / ($m + $stats['matches']) );
         }
       }
     }
@@ -173,14 +185,16 @@ foreach ($source_reports as $s => &$rep) {
 }
 
 // filter builds by L
-foreach ($report['starting_items']['builds'] as $role => $data) {
-  foreach ($data as $hid => $builds) {
-    foreach ($builds as $tag => $build) {
-      if ($build['matches'] < $report['starting_items']['matches'][$role][$hid]['l']) {
-        unset($report['starting_items']['builds'][$role][$hid][$tag]);
+if (!empty($report['starting_items']['builds'])) {
+  foreach ($report['starting_items']['builds'] as $role => $data) {
+    foreach ($data as $hid => $builds) {
+      foreach ($builds as $tag => $build) {
+        if ($build['matches'] < $report['starting_items']['matches'][$role][$hid]['l']) {
+          unset($report['starting_items']['builds'][$role][$hid][$tag]);
+        }
       }
+      $report['starting_items']['builds'][$role][$hid] = array_values($report['starting_items']['builds'][$role][$hid]);
     }
-    $report['starting_items']['builds'][$role][$hid] = array_values($report['starting_items']['builds'][$role][$hid]);
   }
 }
 
