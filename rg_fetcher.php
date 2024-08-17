@@ -363,7 +363,7 @@ if (sizeof($failed_matches)) {
   echo "[_] Recording failed matches to file...\n";
 
   $output = implode("\n", $failed_matches);
-  $filename = "tmp/failed".time();
+  $filename = "tmp/failed_$lrg_league_tag".'_'.time();
   $f = fopen($filename, "w");
   fwrite($f, $output);
   fclose($f);
