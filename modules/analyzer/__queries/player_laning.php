@@ -57,7 +57,7 @@ function rg_query_player_laning(&$conn, $cluster = null, $team = null, $players 
     ($team !== null || $cluster !== null ? " WHERE " : "").
     ($cluster === null ? "" : " AND m.cluster IN (".implode(",", $cluster).") ").
     ($team === null ? "" : " AND teams_matches.teamid = ".$team." ").
-    (!empty($players) ? " AND ams_q.playerid in (".implode(',', $players).")" : "").
+    (!empty($players) ? " AND ams_playerid in (".implode(',', $players).")" : "").
   " GROUP BY player";
 
   if ($conn->multi_query($sql) !== TRUE) throw new \Exception($conn->error);
@@ -143,7 +143,7 @@ function rg_query_player_laning(&$conn, $cluster = null, $team = null, $players 
     ($team !== null || $cluster !== null ? " WHERE " : "").
     ($cluster === null ? "" : " AND m.cluster IN (".implode(",", $cluster).") ").
     ($team === null ? "" : " AND teams_matches.teamid = ".$team." ").
-    (!empty($players) ? " AND ( ams_q.playerid in (".implode(',', $players).") and amr_q.playerid in (".implode(',', $players).") )" : "").
+    (!empty($players) ? " AND ( ams_playerid in (".implode(',', $players).") and amr_q.playerid in (".implode(',', $players).") )" : "").
   " GROUP BY ams_playerid, player";
 
     if ($conn->multi_query($sql) !== TRUE) throw new \Exception($conn->error);

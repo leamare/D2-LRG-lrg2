@@ -2143,6 +2143,8 @@ function fetch($match) {
       if (empty($t['sentries_log'])) $t['sentries_log'] = "[]";
       if (empty($t['destroyed_log'])) $t['destroyed_log'] = "[]";
 
+      $t['heroid'] = $t['hero_id'] ?? $t['heroid'];
+
       $sql .= "\n\t({$t['matchid']}, {$t['playerid']}, {$t['heroid']}, '{$t['wards_log']}', '{$t['sentries_log']}', '{$t['destroyed_log']}'),";
     }
     $sql[strlen($sql)-1] = ";";
