@@ -36,6 +36,7 @@ $endpoints['variantspb'] = function($mods, $vars, &$report) {
       ];
       $pb[$hvid]['matches_total'] = $pb[$hvid]['matches_picked'] + $pb[$hvid]['matches_banned'];
       $pb[$hvid]['variant'] = +$v;
+      $pb[$hvid]['hero_id'] = +$hid;
     }
   } else {
     $context_total_matches = $report['random']['matches_total'];
@@ -53,6 +54,7 @@ $endpoints['variantspb'] = function($mods, $vars, &$report) {
       ];
       $pb[$hvid]['matches_total'] = $pb[$hvid]['matches_picked'] + $pb[$hvid]['matches_banned'];
       $pb[$hvid]['variant'] = +$v;
+      $pb[$hvid]['hero_id'] = +$hid;
     }
   }
 

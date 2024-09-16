@@ -156,6 +156,10 @@ function compound_ranking_laning(&$arr, $total_matches, $median_adv, $median_dis
       ) * $v_adv_factor;
     } else $v_m = 0;
 
+    if ($v_matches < $v_m) {
+      $v_m = $v_matches;
+    }
+
     $arr[$k]['wrank'] = wilson_rating( $v_m, $v_matches, 1-$v_popularity );
   }
 }
