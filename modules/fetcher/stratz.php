@@ -162,33 +162,6 @@ const STRATZ_GRAPHQL_QUERY = "{
         neutral0 {
           itemId
         }
-        item0 {
-          itemId
-        }
-        item1 {
-          itemId
-        }
-        item2 {
-          itemId
-        }
-        item3 {
-          itemId
-        }
-        item4 {
-          itemId
-        }
-        item5 {
-          itemId
-        }
-        backPack0 {
-          itemId
-        }
-        backPack1 {
-          itemId
-        }
-        backPack2 {
-          itemId
-        }
       }
       matchPlayerBuffEvent {
         abilityId
@@ -296,26 +269,22 @@ function get_stratz_response($match) {
     $q = http_build_query($data);
 
     sleep($api_cooldown_seconds);
-      
-    // $context  = stream_context_create([
-    //   'https' => [
-    //     'method' => 'POST',
-    //     'header'  => 'Content-Type: application/x-www-form-urlencoded'. 
-    //       "\r\ncontent-length: ".strlen($q)."\r\ncontent-type: application/json",
-    //     'content' => $q
-    //   ]
-    // ]);
   
-    // $json = file_get_contents($stratz_request, false, $context);
-    $json = file_get_contents($stratz_request.'?'.$q, false, stream_context_create([
+    $json = @file_get_contents($stratz_request.'?'.$q, false, stream_context_create([
       'ssl' => [
         'verify_peer' => false,
         'verify_peer_name' => false,
+      ],
+      'http' => [
+        'method' => 'POST',
+        'header'  => "Content-Type: application/json\r\nKey: $stratztoken\r\nUser-Agent: STRATZ_API\r\n",
+        'content' => json_encode($data),
+        'timeout' => 60,
       ]
     ]));
-    
+
     if (empty($json)) return null;
-  
+    
     $stratz = json_decode($json, true);
     
     if (!empty($stratz['errors'])) {
@@ -444,7 +413,7 @@ function get_stratz_response($match) {
       $siege = (74 * 2);
       $passive = (600 * 1.275);
       $starting = 625;
-      $tenMinute = $lm * ($melee + $ranged + $siege + $passive + $starting)/10;
+      $tenMinute = $starting + $lm * ($melee + $ranged + $siege + $passive)/10;
       $aml['efficiency_at10'] = (
         count($pl['stats']['networthPerMinute']) > ($lm-1) ? 
         $pl['stats']['networthPerMinute'][$lm-1] : 
@@ -626,7 +595,7 @@ function get_stratz_response($match) {
           // so I'll be skipping them here and only recording the
           // minute 0 inventory snapshot
 
-          // $items_starting[] = $e['itemId'];
+          $items_starting[] = $e['itemId'];
           continue;
         }
 
@@ -716,70 +685,72 @@ function get_stratz_response($match) {
 
       asort($items_all);
 
+      // there should be inventory report for all item slots as additional means of recording some items
+      // but it's gone now, RIP
       foreach($pl['stats']['inventoryReport'] as $t => $e) {
-        $inventory = [];
-        for($i = 0; $i < 6; $i++) {
-          $inventory[] = $e['item'.$i] ? $e['item'.$i]['itemId'] : null;
-        }
-        for($i = 0; $i < 3; $i++) {
-          $inventory[] = $e['backPack'.$i] ? $e['backPack'.$i]['itemId'] : null;
-        }
+        // $inventory = [];
+        // for($i = 0; $i < 6; $i++) {
+        //   $inventory[] = $e['item'.$i] ? $e['item'.$i]['itemId'] : null;
+        // }
+        // for($i = 0; $i < 3; $i++) {
+        //   $inventory[] = $e['backPack'.$i] ? $e['backPack'.$i]['itemId'] : null;
+        // }
 
-        if (!$t) {
+        // if (!$t) {
           // Startz Starting items seem to be broken
           // so I'll be skipping them here and only recording the
           // minute 0 inventory snapshot
-          $items_starting = $inventory;
-        }
+          // $items_starting = $inventory;
+        // }
 
-        foreach($inventory as $item_id) {
-          // rosh aghs
-          if ($item_id == 725 || $item_id == 727)
-            continue;
-          // $item_id = 609;
-          // if ($item_id == 727) $item_id = 271;
+        // foreach($inventory as $item_id) {
+        //   // rosh aghs
+        //   if ($item_id == 725 || $item_id == 727)
+        //     continue;
+        //   // $item_id = 609;
+        //   // if ($item_id == 727) $item_id = 271;
 
-          $time = $t ? ($t-1)*60 : -80;
+        //   $time = $t ? ($t-1)*60 : -80;
 
-          // && abs($items_all[ $item_id ]-60) < 60)
-          if (!$item_id || isset($items_all[ $item_id ]) )
-            continue;
+        //   // && abs($items_all[ $item_id ]-60) < 60)
+        //   if (!$item_id || isset($items_all[ $item_id ]) )
+        //     continue;
 
-          foreach($meta['item_categories'] as $category_name => $items) {
-            if (in_array($item_id, $items)) {
-              $category = $category_name;
-              break;
-            }
-          }
+        //   foreach($meta['item_categories'] as $category_name => $items) {
+        //     if (in_array($item_id, $items)) {
+        //       $category = $category_name;
+        //       break;
+        //     }
+        //   }
 
-          $last = null;
-          foreach ($items_all as $iid => $ita) {
-            if (in_array($iid, $meta['item_categories']['consumables'])) continue;
-            if ($ita < $time) $last = $ita;
-            else break;
-          }
-          $time = $last && $time-$last < 30 ? $last : $time;
+        //   $last = null;
+        //   foreach ($items_all as $iid => $ita) {
+        //     if (in_array($iid, $meta['item_categories']['consumables'])) continue;
+        //     if ($ita < $time) $last = $ita;
+        //     else break;
+        //   }
+        //   $time = $last && $time-$last < 30 ? $last : $time;
 
-          $items_all[$item_id] = $time;
+        //   $items_all[$item_id] = $time;
 
-          if (in_array($category, ['support', 'consumables', 'parts', 'recipes', 'event']) || strpos($category, "neutral_tier_") !== FALSE ) { //&& $e['time'] > 0) {
-            continue;
-          }
+        //   if (in_array($category, ['support', 'consumables', 'parts', 'recipes', 'event']) || strpos($category, "neutral_tier_") !== FALSE ) { //&& $e['time'] > 0) {
+        //     continue;
+        //   }
 
-          $category_id = array_search($category, array_keys($meta['item_categories']));
+        //   $category_id = array_search($category, array_keys($meta['item_categories']));
 
-          $r['items'][] = [
-            'matchid' => $stratz['data']['match']['id'],
-            'playerid' => $pl['steamAccountId'],
-            'hero_id' => $pl['heroId'],
-            'item_id' => $item_id, 
-            'category_id' => $category_id,
-            'time' => $time
-          ];
+        //   $r['items'][] = [
+        //     'matchid' => $stratz['data']['match']['id'],
+        //     'playerid' => $pl['steamAccountId'],
+        //     'hero_id' => $pl['heroId'],
+        //     'item_id' => $item_id, 
+        //     'category_id' => $category_id,
+        //     'time' => $time
+        //   ];
 
-          $items[$item_id] = $time;
-          $items_cats[ $category_id ] = ($items_cats[ $category_id ] ?? 0) + 1;
-        }
+        //   $items[$item_id] = $time;
+        //   $items_cats[ $category_id ] = ($items_cats[ $category_id ] ?? 0) + 1;
+        // }
       }
 
       $r['starting_items'][] = [
@@ -1049,22 +1020,20 @@ function get_stratz_multiquery($group) {
     
   $stratz_request = "https://api.stratz.com/graphql";
 
-  $q = http_build_query($data);
-
-  $json = @file_get_contents($stratz_request.'?'.$q, false, stream_context_create([
+  $json = @file_get_contents($stratz_request, false, stream_context_create([
     'ssl' => [
       'verify_peer' => false,
       'verify_peer_name' => false,
     ],
     'http' => [
       'method' => 'POST',
-      'header'  => 'Content-Type: application/json',
+      'header'  => "Content-Type: application/json\r\nKey: $stratztoken\r\nUser-Agent: STRATZ_API\r\n",
       'content' => json_encode($data),
       'timeout' => 60,
     ]
   ]));
 
-  $json = @file_get_contents($stratz_request.'?'.$q);
+  // $json = @file_get_contents($stratz_request.'?'.$q);
   
   if (empty($json)) {
     return null;

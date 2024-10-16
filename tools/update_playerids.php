@@ -77,15 +77,24 @@ foreach ($matches as $match) {
       } 
     }",
   ];
-  if (!empty($stratztoken)) $data['key'] = $stratztoken;
   
   $stratz_request = "https://api.stratz.com/graphql";
 
-  $q = http_build_query($data);
   $error = null;
 
   try {
-    $json = file_get_contents($stratz_request.'?'.$q);
+    $json = file_get_contents($stratz_request, false, stream_context_create([
+      'ssl' => [
+        'verify_peer' => false,
+        'verify_peer_name' => false,
+      ],
+      'http' => [
+        'method' => 'POST',
+        'header'  => "Content-Type: application/json\r\nKey: $stratztoken\r\nUser-Agent: STRATZ_API\r\n",
+        'content' => json_encode($data),
+        'timeout' => 60,
+      ]
+    ]));
   } catch (Exception $e) {
     $json = null;
     $error = $e->getMessage();
