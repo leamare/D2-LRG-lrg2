@@ -52,14 +52,14 @@ function fetch($match) {
   $rnum++;
 
   if (!empty($lg_settings['match_limit_after'])) {
-    if ($match < $lg_settings['time_limit_after']) {
-      echo("..Match outside the time range, skipping...\n");
+    if ($match < $lg_settings['match_limit_after']) {
+      echo("..Match outside the match id range, skipping...\n");
       return true;
     }
   }
   if (!empty($lg_settings['match_limit_before'])) {
-    if ($match > $lg_settings['time_limit_after']) {
-      echo("..Match outside the time range, skipping...\n");
+    if ($match > $lg_settings['match_limit_before']) {
+      echo("..Match outside the match id range, skipping...\n");
       return true;
     }
   }
@@ -244,6 +244,9 @@ function fetch($match) {
     try {
       $matchdata = get_stratz_response($match);
       $matchdata['isstratz'] = true;
+      if (empty($matchdata) || empty($matchdata['matches'])) {
+        throw new Exception("Unknown Stratz error, likely a failed request and/or 503");
+      }
     } catch (Exception $e) {
       echo "[E] STRATZ ERROR: ".$e->getMessage()."\n";
       $matchdata = [];
@@ -1940,6 +1943,7 @@ function fetch($match) {
     }
     foreach($t_adv_matchlines as &$aml) {
       if (!$aml['heroid']) continue;
+      if (!isset($aml['time_dead']) || $aml['time_dead'] < 0) $aml['time_dead'] = 0;
 
       $sql .= "\n\t(".$aml['matchid'].",".$aml['playerid'].",".$aml['heroid'].",".
                   ($aml['lh_at10'] ?? 0).",".$aml['isCore'].",".$aml['lane'].",".
@@ -1947,7 +1951,7 @@ function fetch($match) {
                   $aml['efficiency_at10'].",".($aml['wards'] ?? 0).",".($aml['sentries'] ?? 0).",".
                   $aml['couriers_killed'].",".$aml['roshans_killed'].",".$aml['wards_destroyed'].",".
                   $aml['multi_kill'].",".$aml['streak'].",".($aml['stacks'] ?? 0).",".
-                  ($aml['time_dead'] ?? 0).",".($aml['buybacks'] ?? 0).",".$aml['pings'].",".
+                  $aml['time_dead'].",".($aml['buybacks'] ?? 0).",".$aml['pings'].",".
                   ($aml['stuns'] ?? 0).",".$aml['teamfight_part'].",".$aml['damage_taken']."),";
     }
     $sql[strlen($sql)-1] = ";";
