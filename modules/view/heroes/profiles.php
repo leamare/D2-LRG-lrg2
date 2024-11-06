@@ -529,6 +529,7 @@ function rg_view_generate_heroes_profiles() {
       "<th>".locale_string("winrate")."</th>".
     "</tr></thead><tbody>";
 
+    $meta['facets'];
     $facets_list = isset($report['meta']['variants']) ? array_keys($report['meta']['variants'][$hero]) : $meta['facets']['heroes'][$hero];
     foreach ($facets_list as $i => $facet) {
       $i++;
@@ -541,7 +542,12 @@ function rg_view_generate_heroes_profiles() {
       if (isset($report['hero_variants'][$hvid])) {
         $stats = $report['hero_variants'][$hvid];
       }
-      $res['heroid'.$hero] .= "<tbody><tr>".
+
+      if (($meta['facets']['heroes'][$hero][$i-1]['deprecated'] ?? false) && !$stats['m']) {
+        continue;
+      }
+
+      $res['heroid'.$hero] .= "<tr>".
         "<td>".facet_full_element($hero, $i)."</td>".
         "<td>".number_format(100*$stats['f'], 2)."%</td>".
         "<td>".$stats['m']."</td>".

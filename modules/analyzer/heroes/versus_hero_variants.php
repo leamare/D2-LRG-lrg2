@@ -24,17 +24,17 @@ else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n"
 $query_res = $conn->store_result();
 
 for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
-  if (!isset($result['pickban'][$row[0]]) || !isset($result['pickban'][$row[1]])) continue;
+  if (!isset($result['pickban'][(+$row[0])]) || !isset($result['pickban'][(+$row[1])])) continue;
   
-  $expected_pair  = $result['random']['matches_total'] ? ( $result['hero_variants'][$row[0].'-'.$row[1]]['m']
-  * $result['hero_variants'][$row[2].'-'.$row[3]]['m']
+  $expected_pair  = $result['random']['matches_total'] ? ( $result['hero_variants'][(+$row[0]).'-'.(+$row[1])]['m']
+  * $result['hero_variants'][(+$row[2]).'-'.(+$row[3])]['m']
   / $result['random']['matches_total'] )
   / 2
   : 0;
 
   $result["hvh_v"][] = [
-    "heroid1" => $row[0].'-'.$row[1],
-    "heroid2" => $row[2].'-'.$row[3],
+    "heroid1" => (+$row[0]).'-'.(+$row[1]),
+    "heroid2" => (+$row[2]).'-'.(+$row[3]),
     "matches" => $row[4],
     "h1won" => $row[5],
     "h1winrate" => round($row[5]/$row[4], 4),
