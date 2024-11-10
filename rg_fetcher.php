@@ -66,8 +66,8 @@ $min_duration_seconds = $lg_settings['min_duration'] ?? 600;
 $min_score_side = $lg_settings['min_score_side'] ?? 5;
 
 if (!empty($options['d'])) {
-  $api_cooldown = ((int)$options['d'])*1000;
-  $api_cooldown_seconds = ((int)$options['d']);
+  $api_cooldown = ((float)$options['d'])*1000;
+  $api_cooldown_seconds = ((float)$options['d']);
 } else {
   $api_cooldown_seconds = 2;
 }
@@ -282,7 +282,7 @@ while(sizeof($matches) || $listen) {
 
   if ($stratz_graphql_group) {
     if (!$stratz_graphql_group_counter) {
-      $stratz_graphql_group_counter = $stratz_graphql_group-1;
+      $stratz_graphql_group_counter = $stratz_graphql_group;
 
       $stratz_cache = [];
 
