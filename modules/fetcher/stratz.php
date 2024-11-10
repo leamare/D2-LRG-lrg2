@@ -67,6 +67,22 @@ const STRATZ_LEAVER_STATUS = [
   'DISCONNECTED_TOO_LONG' => 2,
 ];
 
+// Removed blocks
+// farmDistributionReport {
+//   creepType {
+//     count
+//     id
+//   }
+//   other {
+//     count
+//     id
+//   }
+// }
+// wardDestruction {
+//   isWard
+//   time
+// }
+
 const STRATZ_GRAPHQL_QUERY = "{
   clusterId
   gameMode
@@ -139,7 +155,6 @@ const STRATZ_GRAPHQL_QUERY = "{
           disableDuration
         }
       }
-      deniesPerMinute
       courierKills {
         time
       }
@@ -162,22 +177,30 @@ const STRATZ_GRAPHQL_QUERY = "{
         neutral0 {
           itemId
         }
+        item5 {
+          itemId
+        }
+        item4 {
+          itemId
+        }
+        item3 {
+          itemId
+        }
+        item2 {
+          itemId
+        }
+        item1 {
+          itemId
+        }
+        item0 {
+          itemId
+        }
       }
       matchPlayerBuffEvent {
         abilityId
         itemId
         stackCount
         time
-      }
-      farmDistributionReport {
-        creepType {
-          count
-          id
-        }
-        other {
-          count
-          id
-        }
       }
       actionReport {
         pingUsed
@@ -187,10 +210,6 @@ const STRATZ_GRAPHQL_QUERY = "{
         positionY
         time
         type
-      }
-      wardDestruction {
-        isWard
-        time
       }
       level
     }
@@ -214,11 +233,6 @@ const STRATZ_GRAPHQL_QUERY = "{
     steamAccount {
       name
     }
-    match {
-      topLaneOutcome
-      midLaneOutcome
-      bottomLaneOutcome
-    }
   }
   direTeam {
     name
@@ -230,6 +244,9 @@ const STRATZ_GRAPHQL_QUERY = "{
     name
     tag
   }
+  bottomLaneOutcome
+  topLaneOutcome
+  midLaneOutcome
 }";
 
 function get_stratz_response($match) {
@@ -394,17 +411,17 @@ function get_stratz_response($match) {
 
       if (($aml['lane'] == 1 && $ml['isRadiant']) || ($aml['lane'] == 3 && !$ml['isRadiant'])) {
         // bottom lane
-        $aml['lane_won'] = $pl['match']['bottomLaneOutcome'] == "TIE" ? 1 : (
-          $pl['match']['bottomLaneOutcome'] == "RADIANT_VICTORY" ? ($ml['isRadiant'] ? 2 : 0) : ($ml['isRadiant'] ? 0 : 2)
+        $aml['lane_won'] = $stratz['data']['match']['bottomLaneOutcome'] == "TIE" ? 1 : (
+          $stratz['data']['match']['bottomLaneOutcome'] == "RADIANT_VICTORY" ? ($ml['isRadiant'] ? 2 : 0) : ($ml['isRadiant'] ? 0 : 2)
         );
       } else if ($aml['lane'] == 2) {
-        $aml['lane_won'] = $pl['match']['midLaneOutcome'] == "TIE" ? 1 : (
-          $pl['match']['midLaneOutcome'] == "RADIANT_VICTORY" ? ($ml['isRadiant'] ? 2 : 0) : ($ml['isRadiant'] ? 0 : 2)
+        $aml['lane_won'] = $stratz['data']['match']['midLaneOutcome'] == "TIE" ? 1 : (
+          $stratz['data']['match']['midLaneOutcome'] == "RADIANT_VICTORY" ? ($ml['isRadiant'] ? 2 : 0) : ($ml['isRadiant'] ? 0 : 2)
         );
       } else {
         // top lane
-        $aml['lane_won'] = $pl['match']['topLaneOutcome'] == "TIE" ? 1 : (
-          $pl['match']['topLaneOutcome'] == "RADIANT_VICTORY" ? ($ml['isRadiant'] ? 2 : 0) : ($ml['isRadiant'] ? 0 : 2)
+        $aml['lane_won'] = $stratz['data']['match']['topLaneOutcome'] == "TIE" ? 1 : (
+          $stratz['data']['match']['topLaneOutcome'] == "RADIANT_VICTORY" ? ($ml['isRadiant'] ? 2 : 0) : ($ml['isRadiant'] ? 0 : 2)
         );
       }
       
@@ -442,14 +459,29 @@ function get_stratz_response($match) {
       $aml['roshans_killed'] = 0;
       $aml['wards_destroyed'] = count($pl['stats']['wardDestruction'] ?? []);
 
-      foreach ($pl['stats']['farmDistributionReport']['creepType'] as $fc) {
-        // if (in_array($fc['id'], OBS)) $aml['wards_destroyed'] += $fc['count'];
-        if (in_array($fc['id'], ROSHAN)) $aml['roshans_killed'] += $fc['count'];
+      if (isset($pl['stats']['farmDistributionReport'])) {
+        foreach ($pl['stats']['farmDistributionReport']['creepType'] as $fc) {
+          // if (in_array($fc['id'], OBS)) $aml['wards_destroyed'] += $fc['count'];
+          if (in_array($fc['id'], ROSHAN)) $aml['roshans_killed'] += $fc['count'];
+        }
+        // foreach ($f['other'] as $fc) {
+        //   if (in_array($fc['id'], ROSHAN)) $aml['roshans_killed'] += $fc['count'];
+        //   if (in_array($fc['id'], OBS)) $aml['wards_destroyed'] += $fc['count'];
+        // }
+      } else {
+        $hasAegis = false;
+        foreach ($pl['stats']['inventoryReport'] as $time => $rep) {
+          foreach ($rep as $slot => $item) {
+            if (empty($item)) continue;
+            if ($item['itemId'] == 117 && !$hasAegis) {
+              $aml['roshans_killed']++;
+              $hasAegis = true;
+            } elseif ($hasAegis && !in_array(117, array_column($rep, 'itemId'))) {
+              $hasAegis = false;
+            }
+          }
+        }
       }
-      // foreach ($f['other'] as $fc) {
-      //   if (in_array($fc['id'], ROSHAN)) $aml['roshans_killed'] += $fc['count'];
-      //   if (in_array($fc['id'], OBS)) $aml['wards_destroyed'] += $fc['count'];
-      // }
       
       $kde = [];
       foreach ($pl['stats']['killEvents'] as $s) {
@@ -595,7 +627,7 @@ function get_stratz_response($match) {
           // so I'll be skipping them here and only recording the
           // minute 0 inventory snapshot
 
-          $items_starting[] = $e['itemId'];
+          // $items_starting[] = $e['itemId'];
           continue;
         }
 
@@ -688,69 +720,69 @@ function get_stratz_response($match) {
       // there should be inventory report for all item slots as additional means of recording some items
       // but it's gone now, RIP
       foreach($pl['stats']['inventoryReport'] as $t => $e) {
-        // $inventory = [];
-        // for($i = 0; $i < 6; $i++) {
-        //   $inventory[] = $e['item'.$i] ? $e['item'.$i]['itemId'] : null;
-        // }
+        $inventory = [];
+        for($i = 0; $i < 6; $i++) {
+          $inventory[] = $e['item'.$i] ? $e['item'.$i]['itemId'] : null;
+        }
         // for($i = 0; $i < 3; $i++) {
         //   $inventory[] = $e['backPack'.$i] ? $e['backPack'.$i]['itemId'] : null;
         // }
 
-        // if (!$t) {
+        if (!$t) {
           // Startz Starting items seem to be broken
           // so I'll be skipping them here and only recording the
           // minute 0 inventory snapshot
-          // $items_starting = $inventory;
-        // }
+          $items_starting = $inventory;
+        }
 
-        // foreach($inventory as $item_id) {
-        //   // rosh aghs
-        //   if ($item_id == 725 || $item_id == 727)
-        //     continue;
-        //   // $item_id = 609;
-        //   // if ($item_id == 727) $item_id = 271;
+        foreach($inventory as $item_id) {
+          // rosh aghs
+          if ($item_id == 725 || $item_id == 727)
+            continue;
+          // $item_id = 609;
+          // if ($item_id == 727) $item_id = 271;
 
-        //   $time = $t ? ($t-1)*60 : -80;
+          $time = $t ? ($t-1)*60 : -80;
 
-        //   // && abs($items_all[ $item_id ]-60) < 60)
-        //   if (!$item_id || isset($items_all[ $item_id ]) )
-        //     continue;
+          // && abs($items_all[ $item_id ]-60) < 60)
+          if (!$item_id || isset($items_all[ $item_id ]) )
+            continue;
 
-        //   foreach($meta['item_categories'] as $category_name => $items) {
-        //     if (in_array($item_id, $items)) {
-        //       $category = $category_name;
-        //       break;
-        //     }
-        //   }
+          foreach($meta['item_categories'] as $category_name => $items) {
+            if (in_array($item_id, $items)) {
+              $category = $category_name;
+              break;
+            }
+          }
 
-        //   $last = null;
-        //   foreach ($items_all as $iid => $ita) {
-        //     if (in_array($iid, $meta['item_categories']['consumables'])) continue;
-        //     if ($ita < $time) $last = $ita;
-        //     else break;
-        //   }
-        //   $time = $last && $time-$last < 30 ? $last : $time;
+          $last = null;
+          foreach ($items_all as $iid => $ita) {
+            if (in_array($iid, $meta['item_categories']['consumables'])) continue;
+            if ($ita < $time) $last = $ita;
+            else break;
+          }
+          $time = $last && $time-$last < 30 ? $last : $time;
 
-        //   $items_all[$item_id] = $time;
+          $items_all[$item_id] = $time;
 
-        //   if (in_array($category, ['support', 'consumables', 'parts', 'recipes', 'event']) || strpos($category, "neutral_tier_") !== FALSE ) { //&& $e['time'] > 0) {
-        //     continue;
-        //   }
+          if (in_array($category, ['support', 'consumables', 'parts', 'recipes', 'event']) || strpos($category, "neutral_tier_") !== FALSE ) { //&& $e['time'] > 0) {
+            continue;
+          }
 
-        //   $category_id = array_search($category, array_keys($meta['item_categories']));
+          $category_id = array_search($category, array_keys($meta['item_categories']));
 
-        //   $r['items'][] = [
-        //     'matchid' => $stratz['data']['match']['id'],
-        //     'playerid' => $pl['steamAccountId'],
-        //     'hero_id' => $pl['heroId'],
-        //     'item_id' => $item_id, 
-        //     'category_id' => $category_id,
-        //     'time' => $time
-        //   ];
+          $r['items'][] = [
+            'matchid' => $stratz['data']['match']['id'],
+            'playerid' => $pl['steamAccountId'],
+            'hero_id' => $pl['heroId'],
+            'item_id' => $item_id, 
+            'category_id' => $category_id,
+            'time' => $time
+          ];
 
-        //   $items[$item_id] = $time;
-        //   $items_cats[ $category_id ] = ($items_cats[ $category_id ] ?? 0) + 1;
-        // }
+          $items[$item_id] = $time;
+          $items_cats[ $category_id ] = ($items_cats[ $category_id ] ?? 0) + 1;
+        }
       }
 
       $r['starting_items'][] = [
@@ -762,10 +794,13 @@ function get_stratz_response($match) {
       ];
 
       $last = null; 
-      //$neutrals = [];
+      $neutrals = [];
       foreach($pl['stats']['inventoryReport'] as $i => $e) {
         if (!$e['neutral0'] || $e['neutral0']['itemId'] == $last) continue;
         $last = $e['neutral0']['itemId'];
+        if (in_array($last, $neutrals)) {
+          continue;
+        }
 
         foreach($meta['item_categories'] as $category_name => $items) {
           if (in_array($last, $items)) {
@@ -786,6 +821,7 @@ function get_stratz_response($match) {
           'category_id' => array_search($category, array_keys($meta['item_categories'])),
           'time' => ($i-1)*60
         ];
+        $neutrals[] = $last;
       } 
     }
   }
