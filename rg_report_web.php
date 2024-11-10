@@ -123,6 +123,7 @@ if ($lrg_use_get) {
   if(!empty($previewcode) && isset($_GET['earlypreview']) && ($_GET['earlypreview'] == $previewcode)) {
     $linkvars[] = [ "earlypreview", $previewcode ];
     $_earlypreview = true;
+    $hide_sti_block = false;
   }
   if(isset($_GET['cat']) && !empty($_GET['cat'])) {
     $cat = $_GET['cat'];

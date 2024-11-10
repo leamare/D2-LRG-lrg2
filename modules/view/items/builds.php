@@ -10,6 +10,9 @@ if (!empty($report['items']) && !empty($report['items']['pi'])) {
 function rg_view_generate_items_builds() {
   global $report, $parent, $root, $unset_module, $mod, $meta, $strings, $roleicon_logo_provider, $leaguetag, $linkvars;
 
+  global $hide_sti_block;
+  $hide_sti_block = $hide_sti_block ?? false;
+
   if($mod == $parent."builds") $unset_module = true;
   $parent_module = $parent."builds-";
   $res = [];
@@ -389,7 +392,7 @@ function rg_view_generate_items_builds() {
 
   // BUILD OVERVIEW
 
-  if (isset($report['starting_items'])) {
+  if (isset($report['starting_items']) && !$hide_sti_block) {
     $sti_builds = [];
     $sti_stats = [];
     $sti_matches_context = [];
