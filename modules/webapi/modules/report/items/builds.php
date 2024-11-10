@@ -115,6 +115,7 @@ $endpoints['items-builds'] = function($mods, $vars, &$report) use (&$endpoints, 
     $facets = [];
     $facets_list = isset($report['meta']['variants']) ? array_keys($report['meta']['variants'][$hero]) : $meta['facets']['heroes'][$hero];
     $rid = array_search($core.'.'.$lane, ROLES_IDS_SIMPLE);
+    $role_matches = 0;
     foreach ($facets_list as $i => $facet) {
       $i++;
       $hvid = $hero.'-'.$i;
@@ -124,13 +125,18 @@ $endpoints['items-builds'] = function($mods, $vars, &$report) use (&$endpoints, 
       // TODO: add deprecated support
       if (empty($hero_stats)) continue;
 
+      $role_matches += $hero_stats['matches_s'];
+
       $facets[] = [
         'variant' => $i,
         'is_role' => true,
-        'ratio' => ($hero_stats['matches_s'] ?? 0)/$pbdata['role_matches'],
+        // 'ratio' => ($hero_stats['matches_s'] ?? 0)/$pbdata['role_matches'],
         'matches' => $hero_stats['matches_s'] ?? 0,
         'winrate' => $hero_stats['winrate_s'] ?? '-',
       ];
+    }
+    foreach ($facets as $i => $facet) {
+      $facets[$i]['ratio'] = $facet['matches']/($role_matches ? $role_matches : 1);
     }
   } else if (isset($report['hero_variants'])) {
     $facets_list = isset($report['meta']['variants']) ? array_keys($report['meta']['variants'][$hero]) : $meta['facets']['heroes'][$hero];

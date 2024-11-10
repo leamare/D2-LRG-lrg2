@@ -240,6 +240,7 @@ function rg_view_generate_items_builds() {
     $stats = [];
     $facets_list = isset($report['meta']['variants']) ? array_keys($report['meta']['variants'][$hero]) : $meta['facets']['heroes'][$hero];
     $rid = array_search($core.'.'.$lane, ROLES_IDS_SIMPLE);
+    $role_matches = 0;
     foreach ($facets_list as $i => $facet) {
       $i++;
       $hvid = $hero.'-'.$i;
@@ -249,9 +250,11 @@ function rg_view_generate_items_builds() {
       // TODO: add deprecated support
       if (empty($hero_stats)) continue;
 
+      $role_matches += $hero_stats['matches_s'];
+
       $stats[] = [
         'variant' => $i,
-        'ratio' => $hero_stats['matches_s']/$pbdata['role_matches'],
+        // 'ratio' => $hero_stats['matches_s']/$pbdata['role_matches'],
         'matches' => $hero_stats['matches_s'] ?? 0,
         'winrate' => $hero_stats['winrate_s'] ?? '-',
       ];
@@ -267,6 +270,8 @@ function rg_view_generate_items_builds() {
     "</thead><tbody>";
 
     foreach ($stats as $line) {
+      $line['ratio'] = $hero_stats['matches_s']/($role_matches ? $role_matches : 1);
+
       $reslocal .= "<tr>".
         "<td>".facet_full_element($hero, $line['variant'])."</td>".
         "<td>".number_format($line['ratio']*100, 2)."%</td>".
