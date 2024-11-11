@@ -83,6 +83,20 @@ const STRATZ_LEAVER_STATUS = [
 //   time
 // }
 
+// match: 
+// playbackData {
+//   wardEvents {
+//     action
+//     fromPlayer
+//     indexId
+//     playerDestroyed
+//     positionX
+//     positionY
+//     time
+//     wardType
+//   }
+// }
+
 const STRATZ_GRAPHQL_QUERY = "{
   clusterId
   gameMode
@@ -116,18 +130,6 @@ const STRATZ_GRAPHQL_QUERY = "{
   }
   numHumanPlayers
   didRadiantWin
-  playbackData {
-    wardEvents {
-      action
-      fromPlayer
-      indexId
-      playerDestroyed
-      positionX
-      positionY
-      time
-      wardType
-    }
-  }
   players {
     steamAccountId
     playerSlot
@@ -828,7 +830,7 @@ function get_stratz_response($match) {
 
   // type 0 is obs
   // currently lacks information about ward killer
-  if (isset($stratz['data']['match']['playbackData']['wardEvents'])) {
+  if (!empty($stratz['data']['match']['playbackData']) && isset($stratz['data']['match']['playbackData']['wardEvents'])) {
     $wards_log = [];
     $sentries_log = [];
     $wards_destruction_log = [];
