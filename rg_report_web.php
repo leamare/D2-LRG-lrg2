@@ -120,6 +120,12 @@ if ($lrg_use_get) {
     $override_style = $_GET['stow'];
     $linkvars[] = array("stow", $_GET['stow']);
   }
+  if(isset($_GET['oldschool']) && !empty($_GET['oldschool'])) {
+    $_oldschool_mode = true;
+    $linkvars[] = ['oldschool', 1];
+  } else {
+    $_oldschool_mode = false;
+  }
   if(!empty($previewcode) && isset($_GET['earlypreview']) && ($_GET['earlypreview'] == $previewcode)) {
     $linkvars[] = [ "earlypreview", $previewcode ];
     $_earlypreview = true;
