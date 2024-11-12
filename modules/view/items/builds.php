@@ -273,7 +273,7 @@ function rg_view_generate_items_builds() {
     "</thead><tbody>";
 
     foreach ($stats as $line) {
-      $line['ratio'] = $hero_stats['matches_s']/($role_matches ? $role_matches : 1);
+      $line['ratio'] = $line['matches']/($role_matches ? $role_matches : 1);
 
       $reslocal .= "<tr>".
         "<td>".facet_full_element($hero, $line['variant'])."</td>".
