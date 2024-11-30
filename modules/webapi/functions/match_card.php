@@ -48,7 +48,10 @@ function match_card($mid) {
     $match['bans']['dire'] = $report['matches_additional'][$mid]['bans'][0];
   }
 
-  if (isset($report['matches_additional'][$mid]['order'])) {
+  if (isset($report['matches_additional'][$mid]['order']) && !(
+    $report['matches_additional'][$mid]['game_mode'] == 1 || $report['matches_additional'][$mid]['game_mode'] == 23 || 
+    $report['matches_additional'][$mid]['game_mode'] == 4 || $report['matches_additional'][$mid]['game_mode'] == 11
+  )) {
     $match['order'] = $report['matches_additional'][$mid]['order'];
   }
   
