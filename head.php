@@ -45,6 +45,9 @@ if(isset($argv)) {
   $mysql_median  = (bool)($settings['mysql_stats_func'] ?? false);
   $fallback_valveapi = $settings['steampi_fallback'] ?? false;
 
+  $sti_blocks_query = $settings['sti_blocks_query'] ?? false;
+  $sti_blocks_size  = $settings['sti_blocks_size'] ?? null;
+
   unset($settings);
 
   if(isset($lrg_league_tag) && file_exists("leagues/".$lrg_league_tag.".json")) {
