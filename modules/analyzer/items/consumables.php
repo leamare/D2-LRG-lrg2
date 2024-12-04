@@ -90,9 +90,14 @@ function sti_consumables_query($_isheroes, $_isroles, $_isLimitRoles, $si_matche
         SQL;
 
         if ($conn->multi_query($sql) === TRUE);
-        else die("[F] Unexpected problems when recording to database.\n".$conn->error."\n".$sql."\n");
+        else die("[F] Unexpected problems when requesting consumables.\n".$conn->error."\n".$sql."\n");
 
         $query_res = $conn->store_result();
+
+        if ($query_res == false) {
+          echo("[X] Received empty result. Retrying...\n".$conn->error."\n".$sql."\n");
+          continue;
+        }
 
         for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
           [ $hid, $iid, $rid, $max_cnt, $min_cnt, $q1_cnt, $med_cnt, $q3_cnt, $total, $mtch ] = $row;
