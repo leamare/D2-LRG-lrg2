@@ -3,6 +3,8 @@
 include_once($root."/modules/view/functions/itembuilds.php");
 include_once($root."/modules/view/generators/item_component.php");
 
+const STARTING_GOLD = 600;
+
 if (!empty($report['items']) && !empty($report['items']['pi'])) {
   $modules['items']['builds'] = [];
 }
@@ -64,7 +66,6 @@ function rg_view_generate_items_builds() {
   }
 
   if ($hero === null) {
-
     if (isset($roleicon_logo_provider)) {
       $roleicons = [
         "0.1" => "hardsupporticon",
@@ -392,7 +393,7 @@ function rg_view_generate_items_builds() {
 
   // BUILD OVERVIEW
 
-  if (isset($report['starting_items']) && !$hide_sti_block) {
+  if (isset($report['starting_items'])) {
     $sti_builds = [];
     $sti_stats = [];
     $sti_matches_context = [];
@@ -427,6 +428,8 @@ function rg_view_generate_items_builds() {
       $sti_matches_context =& $report['starting_items']['matches'][0][0];
     }
 
+    $builds_fallback = false;
+
     if (isset($report['starting_items']['builds'])) {
       $report['starting_items']['builds'][$srid] = unwrap_data($report['starting_items']['builds'][$srid]);
       $report['starting_items']['builds'][0] = unwrap_data($report['starting_items']['builds'][0]);
@@ -454,7 +457,38 @@ function rg_view_generate_items_builds() {
         if (++$i == 3) break;
       }
     } else if (!empty($sti_stats)) {
+      $builds_fallback = true;
+      $sort_factors = ['matches', 'wins', 'lane_wins'];
+      foreach ($sort_factors as $factor) {
+        $gold = STARTING_GOLD;
+        $lane_wins = [];
+        $matches = [];
+        $wins = [];
+        $items = [];
+        uasort($sti_stats, function($a, $b) use (&$factor) {
+          return $b[$factor] <=> $a[$factor];
+        });
 
+        foreach ($sti_stats as $i => $stats) {
+          $iid = floor($i/100);
+          $gold -= $meta['items_full'][$iid]['cost'];
+          if ($gold < 0) break;
+
+          $lane_wins[] = $stats['lane_wins'];
+          $matches[] = $stats['matches'];
+          $wins[] = $stats['wins'];
+          $items[] = $iid;
+        }
+
+        $sti_builds[] = [
+          'build' => $items,
+          'matches' => array_sum($matches)/count($matches),
+          'winrate' => array_sum($wins)/array_sum($matches),
+          'lane_wr' => array_sum($lane_wins)/array_sum($matches),
+          'ratio' => min($matches)/($pbdata['role_matches'] ?? $pbdata['matches_picked']),
+          'factor' => $factor,
+        ];
+      }
     }
   }
 
@@ -483,12 +517,16 @@ function rg_view_generate_items_builds() {
     $sti_matches_context['wins'] = round($sti_matches_context['wr'] * $sti_matches_context['m']);
 
     $reslocal .= "<div class=\"content-header\">".locale_string("builds_starting")."</div>".
+      ($builds_fallback ? "<div class=\"content-text alert\">".locale_string("sti_builds_fallback_alert")."</div>" : "").
       "<div class=\"hero-build-overview-container hero-build starting-items-builds main\">";
     foreach ($sti_builds as $i => $stibuild) {
       $cnts = [];
       $reslocal .= "<div class=\"build-overview-container ".($i ? "small" : "primary")."\"><div class=\"items-list\">".
         "<div class=\"build-item-component text common\">".
-          "<a class=\"item-text smaller\" title=\"".locale_string("ratio")."\">".number_format($stibuild['ratio'] * 100, 0)."%</a>".
+          (isset($stibuild['factor']) ? 
+            "<a class=\"item-text smaller\" title=\"".locale_string("sti_factor")."\">".strtoupper($stibuild['factor'][0])."</a>" : 
+            "<a class=\"item-text smaller\" title=\"".locale_string("ratio")."\">".number_format($stibuild['ratio'] * 100, 0)."%</a>"
+          ).
           "<div class=\"labels\">".
             // "<a class=\"item-stat-tooltip item-stat-tooltip-line item-winrate\" title=\"".locale_string("ratio")."\">R ".number_format($stibuild['ratio'] * 100, 1)."%</a>".
             "<a class=\"item-stat-tooltip item-stat-tooltip-line item-winrate\" title=\"".locale_string("winrate")."\">WR ".number_format($stibuild['winrate'] * 100, 1)."%</a>".
