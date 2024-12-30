@@ -5,8 +5,6 @@ include_once($root."/modules/view/functions/player_name.php");
 include_once($root."/modules/view/functions/explainer.php");
 
 function rg_generator_stitems($table_id, $ishero, $selected_id, $selected_rid, $data, $context, $is_roles_limit) {
-  // TODO: Explainers
-
   $locres = "";
   $table = "";
 
