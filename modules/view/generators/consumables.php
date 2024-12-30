@@ -5,11 +5,7 @@ include_once($root."/modules/view/functions/player_name.php");
 include_once($root."/modules/view/functions/explainer.php");
 
 function rg_generator_sticonsumables($table_id, $ishero, $selected_id, $selected_rid, $data, $context, $is_roles_limit) {
-  // TODO: Explainers
-
   $locres = "";
-
-  // TODO: Explainers
 
   $lc = "locale_string";
 
@@ -20,6 +16,10 @@ function rg_generator_sticonsumables($table_id, $ishero, $selected_id, $selected
   }
 
   $locres .= explainer_block(locale_string("sti_consumables_explainer"));
+
+  if (strpos($table_id, "-team") !== false) {
+    $locres .= "<div class=\"content-text alert\">".locale_string("sti_consumables_partial_notice")."</div>";
+  }
 
   $matches_total = $context['m'];
 
