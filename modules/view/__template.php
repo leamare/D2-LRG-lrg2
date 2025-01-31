@@ -1,4 +1,4 @@
-<?php  $__postfix = "?v=227000"; ?>
+<?php  $__postfix = "?v=227006"; ?>
 <!DOCTYPE html>
 <html lang="<?php echo $locale; ?>">
   <head>
@@ -145,7 +145,12 @@
     </header>
     <?php 
       if (!empty($previewcode) && $_earlypreview) echo "<div class=\"support-me-block early-access\">".locale_string("earlypreview")."</div>";
-      else if (!empty($support_me_block)) echo "<div class=\"support-me-block\">$support_me_block</div>";
+      else if (!empty($support_me_block)) {
+        if (isset($support_me_block_link))
+          echo "<a href=\"$support_me_block_link\" target=\"_blank\" class=\"support-me-block support-me-block-link\">$support_me_block</a>";
+        else
+          echo "<div class=\"support-me-block\">$support_me_block</div>";
+      }
     ?>
     <?php 
       if (!empty($support_me_block_second)) echo "<div class=\"support-me-block-secondary\">$support_me_block_second</div>";
@@ -179,16 +184,19 @@
     <?php 
       if ($__tmpl_trust) {
         if (!empty($global_partners) || (!empty($leaguetag) && !empty($report['sponsors']))) {
-          echo "<div class=\"partners-list ".(isset($custom_logo) ? "special-logo" : "")."\">";
-          
+          $stratz_partner = false;
           $partners_raw = (!empty($leaguetag) && !empty($report['sponsors'])) ? $report['sponsors'] : ($global_partners ?? []);
           $partners = [];
           foreach ($partners_raw as $type => $link) {
+            if (stripos($type, "stratz") !== false) $stratz_partner = true;
             $partners[] = "<a target=\"_blank\" href=\"".$link."\" class=\"shoutout-link\">".
             // FIXME:
               (stripos($type, "stratz") !== false ? "<img src=\"https://spectral.gg/res/social/stratz_white.png\" class=\"sponsor-icon\"> " : "").
             $type."</a>";
           }
+
+          echo "<div class=\"partners-list".(isset($custom_logo) ? " special-logo" : "").($stratz_partner ? " stratz-partner" : "")."\">";
+          
           echo implode(", ", $partners);
 
           echo "</div>";
