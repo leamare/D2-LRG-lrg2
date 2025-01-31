@@ -9,12 +9,20 @@ include_once(__DIR__ . "/items/progression.php");
 include_once(__DIR__ . "/items/irecords.php");
 include_once(__DIR__ . "/items/progrole.php");
 include_once(__DIR__ . "/items/builds.php");
+include_once(__DIR__ . "/items/stitems.php");
+include_once(__DIR__ . "/items/sticonsumables.php");
+include_once(__DIR__ . "/items/stibuilds.php");
+include_once(__DIR__ . "/items/profile.php");
 
 $repeatVars['items'] = ['heroid', 'itemid', 'position'];
 
 $endpoints['items'] = function($mods, $vars, &$report) use (&$endpoints) {
-  if (!isset($report['items']) || empty($report['items']['pi']))
+  if ((!isset($report['items']) || empty($report['items']['pi'])) &&
+    empty($report['starting_items']) &&
+    empty($report['starting_items_players'])
+  ) {
     throw new \Exception("No items data");
+  }
 
   if (in_array('heroes', $mods) || in_array('heroboxplots', $mods) || in_array('hboxplots', $mods)) {
     $res = $endpoints['items-heroes']($mods, $vars, $report);
@@ -48,6 +56,16 @@ $endpoints['items'] = function($mods, $vars, &$report) use (&$endpoints) {
     $res = $endpoints['items-critical']($mods, $vars, $report);
     $res['__endp'] = "items-critical";
     $res['__stopRepeater'] = "itemid";
+  } else if (in_array('stitems', $mods)) {
+    $res = $endpoints['items-stitems']($mods, $vars, $report);
+    $res['__endp'] = "items-stitems";
+    $res['__stopRepeater'] = true;
+  } else if (in_array('sticonsumables', $mods)) {
+    $res = $endpoints['items-sticonsumables']($mods, $vars, $report);
+    $res['__endp'] = "items-sticonsumables";
+  } else if (in_array('stibuilds', $mods)) {
+    $res = $endpoints['items-stibuilds']($mods, $vars, $report);
+    $res['__endp'] = "items-stibuilds";
   } else {
     $res = $endpoints['items-overview']($mods, $vars, $report);
     $res['__endp'] = "items-overview";
