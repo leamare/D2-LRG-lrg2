@@ -41,6 +41,27 @@ foreach ($source_reports as $s => &$rep) {
       }
     }
 
+    if (!isset($report['items']['stats'][$hid][29])) {
+      $report['items']['stats'][$hid] = [
+        29 => [
+          'prate' => 1,
+          'purchases' => 0,
+          'matchcount' => 0,
+          'winrate' => 0,
+          'wins' => 0,
+          'avg_time' => 0,
+          'min_time' => 0,
+          'max_time' => 0,
+          'q1' => 0,
+          'q3' => 0,
+          'median' => 0,
+          'early_wr' => 0,
+          'late_wr' => 0,
+          'wo_wr' => 0,
+        ],
+      ];
+    }
+
     $total_items_matches = round($report['items']['stats'][$hid][29]['matchcount'] / $report['items']['stats'][$hid][29]['prate']);
     $items_matches = round($items[29]['matchcount'] / $items[29]['prate']);
 
@@ -62,7 +83,7 @@ foreach ($source_reports as $s => &$rep) {
       // ) / ($p + $st['purchases']);
 
       $report['items']['stats'][$hid][$iid]['wins'] += $st['wins'];
-      $report['items']['stats'][$hid][$iid]['winrate'] = $report['items']['stats'][$hid][$iid]['wins']/$report['items']['stats'][$hid][$iid]['purchases'];
+      $report['items']['stats'][$hid][$iid]['winrate'] = round($report['items']['stats'][$hid][$iid]['wins']/$report['items']['stats'][$hid][$iid]['purchases'], 4);
 
       $report['items']['stats'][$hid][$iid]['min_time'] = min($report['items']['stats'][$hid][$iid]['min_time'], $st['min_time']);
       $report['items']['stats'][$hid][$iid]['max_time'] = max($report['items']['stats'][$hid][$iid]['max_time'], $st['max_time']);
@@ -113,8 +134,8 @@ foreach ($source_reports as $s => &$rep) {
         4
       );
   
-      $report['items']['stats'][$hid][$iid]['prate'] = $report['items']['stats'][$hid][$iid]['matchcount']
-        / ($total_items_matches + $items_matches);
+      $report['items']['stats'][$hid][$iid]['prate'] = round($report['items']['stats'][$hid][$iid]['matchcount']
+        / ($total_items_matches + $items_matches), 4);
         // ($hid == "total" ? 10 : 1)
     }
   }
