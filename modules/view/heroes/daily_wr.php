@@ -1,6 +1,57 @@
 <?php 
 
+require_once $root."/libs/SVGGraph/autoloader.php";
+
 $modules['heroes']['daily_wr'] = "";
+
+function __rg_view_generate_heroes_daily_wr_svg($color, $labels, $data, $minmax, &$lastscript) {
+  $settings = [
+    'auto_fit' => true,
+    'back_colour' => 'transparent',
+    'back_stroke_width' => 0,
+    'stroke_width' => 0,
+    'line_stroke_width' => 3,
+    'stroke_colour' => $color,
+    'sort' => false,
+    'show_labels' => false,
+    'show_label_amount' => true,
+    'link_target' => '_top',
+    'label_font' => 'Arial',
+    'label_font_size' => '11',
+    'tooltip_font_size' => 12,
+    'tooltip_back_colour' => 'white',
+    'tooltip_callback' => function($d, $k, $v) {
+      return "$k - $v%";
+    },
+    "guideline" => [50, "", "y"],
+    'marker_type' => ['circle'],
+    'marker_size' => 5,
+    'axis_max_v' => $minmax[1],
+    'axis_min_v' => $minmax[0],
+    'show_grid' => false,
+    'show_axes' => false,
+    'crosshairs' => false,
+  ];
+  
+  $width = 350;
+  $height = 70;
+  
+  $graph = new Goat1000\SVGGraph\SVGGraph($width, $height, $settings);
+  /** @disregard */
+  $graph->colours([$color]);
+
+  $vals = [];
+  foreach (array_values($data) as $i => $v) {
+    $vals[ $labels[$i] ?? $i ] = $v;
+  }
+  
+  /** @disregard */
+  $graph->values($vals);
+
+  $lastscript = $graph->fetchJavascript();
+  
+  return $graph->fetch('LineGraph', false);
+}
 
 function __rg_view_generate_heroes_daily_winrates_generate_scripts($color, $labels, $data, $id, $full = false) {
   return "new Chart(document.getElementById(\"$id\").getContext(\"2d\"), {
@@ -50,6 +101,12 @@ function rg_view_generate_heroes_daily_winrates() {
   $mp = $context_main['heroes_median_picks'] ?? null;
   $mb = $context_main['heroes_median_bans'] ?? null;
   $context =& $report['pickban'];
+
+  $minmax = [
+    'w' => [40, 60],
+    'pr' => [15, 30],
+    'br' => [5, 10],
+  ];
 
   if (!$mp) {
     uasort($report['pickban'], function($a, $b) {
@@ -142,6 +199,9 @@ function rg_view_generate_heroes_daily_winrates() {
     "<th>".locale_string("trends_last")."</th>".
     "<th>".locale_string("trends_diff")."</th>".
   "</thead><tbody>";
+
+  $heroes = [];
+
   foreach ($report['hero_daily_wr'] as $hid => $days_data) {
     $dwr = []; $dm = []; $dmb = []; $prev = null; $prev_b = null;
     $prev_dt = null;
@@ -158,7 +218,7 @@ function rg_view_generate_heroes_daily_winrates() {
           $dmb[] = round(100*($dd['bn'] ?? 0)/$global_days[$dt], 2);
   //       }
         if (!$first_msb && ($dd['bn'] ?? 0)) {
-          $first_msb = round(100*$dd['bn']/$global_days[$dt], 2);
+          $first_msb = $dmb[0];
         }
 
   //       if (isset($prev) && $prev*0.15 > $dd['ms']) {
@@ -194,40 +254,89 @@ function rg_view_generate_heroes_daily_winrates() {
     $el_mp = max($dm); //array_sum($dm)/count($dm);
     $el_mb = max($dmb); //array_sum($dmb)/count($dmb);
 
-    $res .= "<tr data-value-pickrate=\"$el_mp\" data-value-banrate=\"$el_mb\">".
-      "<td>".hero_portrait($hid)."</td><td>".hero_link($hid)."</td>".
-      "<td class=\"separator\">".number_format($first_wr, 2)."%</td>".
-      "<td><div style=\"position: relative; width: 100%; height: 70px\"><canvas id=\"hero-daily-wr-$hid\"></canvas></div></td>".
-      "<td>".number_format($dwr[ count($dwr)-1 ], 2)."%</td>".
-      "<td>".number_format($dwr[ count($dwr)-1 ]-$first_wr, 2)."%</td>".
+    $scripts = '';
 
-      "<td class=\"separator\">".number_format($first_ms, 2)."%</td>".
-      "<td><div style=\"position: relative; width: 100%; height: 70px\"><canvas id=\"hero-daily-matches-$hid\"></canvas></div></td>".
-      "<td>".number_format($dm[ count($dm)-1 ], 2)."%</td>".
-      "<td>".number_format($dm[ count($dm)-1 ]-$first_ms, 2)."%</td>".
+    // $dmb = array_map(function($el) { return $el*100; }, $dmb);
+    // $first_msb *= 100;
 
-      "<td class=\"separator\">".number_format($first_msb, 2)."%</td>".
-      "<td><div style=\"position: relative; width: 100%; height: 70px\"><canvas id=\"hero-daily-bans-$hid\"></canvas></div></td>".
-      "<td>".number_format($dmb[ count($dmb)-1 ], 2)."%</td>".
-      "<td>".number_format($dmb[ count($dmb)-1 ]-$first_msb, 2)."%</td>".
-    "</tr>";
+    foreach ($dwr as $i => $v) {
+      if($v > $minmax['w'][1]) $minmax['w'][1] = $v;
+      if($v < $minmax['w'][0]) $minmax['w'][0] = $v;
+
+      if($dmb[$i] > $minmax['br'][1]) $minmax['br'][1] = $dmb[$i];
+      if($dmb[$i] < $minmax['br'][0]) $minmax['br'][0] = $dmb[$i];
+
+      if($dm[$i] > $minmax['pr'][1]) $minmax['pr'][1] = $dm[$i];
+      if($dm[$i] < $minmax['pr'][0]) $minmax['pr'][0] = $dm[$i];
+    }
+
+    $heroes[$hid] = [
+      'dwr' => $dwr,
+      'dmb' => $dmb,
+      'dm'  => $dm,
+      'first_wr' => $first_wr,
+      'first_ms' => $first_ms,
+      'first_msb' => $first_msb,
+      'el_mp' => $el_mp,
+      'el_mb' => $el_mb,
+    ];
 
     // winrate
-    $scripts[] = __rg_view_generate_heroes_daily_winrates_generate_scripts("'rgb(92, 176, 255)'", $labels, $dwr, "hero-daily-wr-$hid");
+    // $scripts[] = __rg_view_generate_heroes_daily_winrates_generate_scripts("'rgb(92, 176, 255)'", $labels, $dwr, "hero-daily-wr-$hid");
 
     // bans
-    $scripts[] = __rg_view_generate_heroes_daily_winrates_generate_scripts("'rgb(255, 164, 96)'", $labels, $dmb, "hero-daily-bans-$hid");
+    // $scripts[] = __rg_view_generate_heroes_daily_winrates_generate_scripts("'rgb(255, 164, 96)'", $labels, $dmb, "hero-daily-bans-$hid");
 
     // pickrate
-    $scripts[] = __rg_view_generate_heroes_daily_winrates_generate_scripts("'rgb(128, 224, 96)'", $labels, $dm, "hero-daily-matches-$hid");
+    // $scripts[] = __rg_view_generate_heroes_daily_winrates_generate_scripts("'rgb(128, 224, 96)'", $labels, $dm, "hero-daily-matches-$hid");
   }
+
+  $minmax['w'][2] = 50;
+  $minmax['br'][2] = array_sum($minmax['br'])/2;
+  $minmax['pr'][2] = array_sum($minmax['pr'])/2;
+
+  foreach ($heroes as $hid => $v) {
+    $dwr = $v['dwr'];
+    $dm = $v['dm'];
+    $dmb = $v['dmb'];
+    $el_mp = $v['el_mp'];
+    $el_mb = $v['el_mb'];
+    $first_wr = $v['first_wr'];
+    $first_ms = $v['first_ms'];
+    $first_msb = $v['first_msb'];
+
+    $res .= "<tr data-value-pickrate=\"$el_mp\" data-value-banrate=\"$el_mb\">".
+    "<td>".hero_portrait($hid)."</td><td>".hero_link($hid)."</td>".
+    "<td class=\"separator\">".number_format($first_wr, 2)."%</td>".
+    "<td><div style=\"position: relative; width: 100%; height: 70px\">".
+    __rg_view_generate_heroes_daily_wr_svg("rgb(92, 176, 255)", $labels, $dwr, $minmax['w'], $scripts).
+    "</div></td>".
+    "<td>".number_format($dwr[ count($dwr)-1 ], 2)."%</td>".
+    "<td>".number_format($dwr[ count($dwr)-1 ]-$first_wr, 2)."%</td>".
+
+    "<td class=\"separator\">".number_format($first_ms, 2)."%</td>".
+    "<td><div style=\"position: relative; width: 100%; height: 70px\">".
+    __rg_view_generate_heroes_daily_wr_svg("rgb(128, 224, 96)", $labels, $dm, $minmax['pr'], $scripts).
+    "</div></td>".
+    "<td>".number_format($dm[ count($dm)-1 ], 2)."%</td>".
+    "<td>".number_format($dm[ count($dm)-1 ]-$first_ms, 2)."%</td>".
+
+    "<td class=\"separator\">".number_format($first_msb, 2)."%</td>".
+    "<td><div style=\"position: relative; width: 100%; height: 70px\">".
+    __rg_view_generate_heroes_daily_wr_svg("rgb(255, 164, 96)", $labels, $dmb, $minmax['br'], $scripts).
+    "</div></td>".
+    "<td>".number_format($dmb[ count($dmb)-1 ], 2)."%</td>".
+    "<td>".number_format($dmb[ count($dmb)-1 ]-$first_msb, 2)."%</td>".
+  "</tr>";
+  }
+
   $res .= "</tbody></table>";
 
   // $res .= "<div id=\"hero-daily-wr\" style=\"width: 90%; margin: 0 auto;\">
   //   <canvas id=\"canvas\" style=\"width: 100%; height: ".(sizeof($report['hero_daily_wr'])*4)."vh\"></canvas>
   // </div>";
 
-  $res .= "<script>window.onload = () => { ".implode(";\n", $scripts)." };</script>";
+  $res .= $scripts;
 
   return $res;
 }

@@ -2,6 +2,8 @@
 
 include_once($root."/modules/view/functions/itembuilds.php");
 
+require_once $root."/libs/SVGGraph/autoloader.php";
+
 $modules['items']['buildspowerspikes'] = [];
 
 function rg_view_generate_items_buildspowerspikes() {
@@ -198,10 +200,54 @@ function rg_view_generate_items_buildspowerspikes() {
 
   $reslocal = "";
 
-  $reslocal .= "<div id=\"items-powerspikes-$tag\" style=\"width: 90%; margin: 0 auto;\">
-    <canvas id=\"canvas\" style=\"width: 100%; height: 800px\"></canvas>
-  </div>";
-  $reslocal .= "<script>";
+  // $reslocal .= "<div id=\"items-powerspikes-$tag\" style=\"width: 90%; margin: 0 auto;\">
+  //   <canvas id=\"canvas\" style=\"width: 100%; height: 800px\"></canvas>
+  // </div>";
+  // $reslocal .= "<script>";
+
+  $settings = [
+    'auto_fit' => true,
+    'back_colour' => '#eee',
+    'back_stroke_width' => 0,
+    'back_stroke_colour' => '#eee',
+    'stroke_colour' => '#000',
+    'axis_colour' => '#333',
+    'axis_overlap' => 2,
+    'grid_colour' => '#666',
+    'label_colour' => '#000',
+    'axis_font' => 'Arial',
+    'axis_font_size' => 10,
+    'fill_under' => [true, true],
+    'pad_right' => 20,
+    'pad_left' => 20,
+    'marker_type' => ['circle', 'square'],
+    'marker_size' => 3,
+    'marker_colour' => ['blue', 'red'],
+    'link_base' => '/',
+    'link_target' => '_top',
+    'minimum_grid_spacing' => 20,
+    'show_subdivisions' => true,
+    'show_grid_subdivisions' => true,
+    'grid_subdivision_colour' => '#ccc',
+    'best_fit' => 'straight',
+    'best_fit_colour' => ['red', 'blue', 'green', 'orange'],
+    'best_fit_dash' => '2,2',
+    'line_curve' => [0.75, 0.9],
+    'structured_data' => true,
+    'structure' => [ 'key' => 0, 'value' => 2, 'x' => 1 ],
+    'show_axis_text_v' => true,
+    'show_axis_text_x' => false,
+    'crosshairs' => true,
+  ];
+
+  $width = 1000;
+  $height = 400;
+  $type = 'PSMultiLineGraph';
+  $values = [];
+
+  $colours = [ [ 'rgba(64,164,232,0.35)' ] ];
+
+  // $links = [];
 
   if (is_wrapped($report['hero_winrate_timings'])) {
     $report['hero_winrate_timings'] = unwrap_data($report['hero_winrate_timings']);
@@ -226,6 +272,8 @@ function rg_view_generate_items_buildspowerspikes() {
   $items[] = "{x:0,y:".$wr.", item:0}";
   $items_wr[] = "{x:0,y:".$wr2.", item:0}";
 
+  $values[] = [ '_start', 0.01, $wr ];
+
   $prev = 0;
   foreach ($build['path'] as $i => $item) {
     $wr2 = $build['stats'][ $item ]['winrate'];
@@ -240,6 +288,9 @@ function rg_view_generate_items_buildspowerspikes() {
     
     $time+=$build['times'][$i];
     // $time = $build['stats'][$item]['med_time']/60;
+
+    $values[] = [item_tag($item), $time, $wr ];
+    // $links[ item_tag($item) ] = "?league=$leaguetag&mod=items-heroes".(empty($linkvars) ? "" : "&".$linkvars).
 
     $items[] = "\n{x: ".( $time ).", y: ".( $wr ).", item:'".item_tag($item)."'}";
     $items_wr[] = "\n{x: ".( $time ).", y: ".( $wr2 ).", item:'".item_tag($item)."'}";
@@ -279,78 +330,96 @@ function rg_view_generate_items_buildspowerspikes() {
   //   borderWidth: 3,
   // }
 
-  $reslocal .= "
-  const data = {
-    // define label tree
-    labels: ['".implode("','", $labels)."'],
-    datasets: [{
-      label: '".locale_string('powerspikes_wr')."',
-      backgroundColor: 'rgba(64,164,232,0.35)',
-      borderColor: 'rgba(64,164,255,1)',
-      data: [".implode(',', $items_wr)."],
-      pointStyle: [createItemIcon('".implode("'), createItemIcon('", $labels)."')],
-      spanGaps: true,
-      borderWidth: 5,
-    },
-  ]
-  };
+  // $reslocal .= "
+  // const data = {
+  //   // define label tree
+  //   labels: ['".implode("','", $labels)."'],
+  //   datasets: [{
+  //     label: '".locale_string('powerspikes_wr')."',
+  //     backgroundColor: 'rgba(64,164,232,0.35)',
+  //     borderColor: 'rgba(64,164,255,1)',
+  //     data: [".implode(',', $items_wr)."],
+  //     pointStyle: [createItemIcon('".implode("'), createItemIcon('", $labels)."')],
+  //     spanGaps: true,
+  //     borderWidth: 5,
+  //   },
+  // ]
+  // };
 
-  function createItemIcon(itemtag) {
-    const icon = new Image;
-    icon.src = `".str_replace("%HERO%", '${itemtag}', $item_profile_icons_provider ?? $item_icons_provider)."`;
-    icon.width = 48;
-    icon.height = 48;
+  // function createItemIcon(itemtag) {
+  //   const icon = new Image;
+  //   icon.src = `".str_replace("%HERO%", '${itemtag}', $item_profile_icons_provider ?? $item_icons_provider)."`;
+  //   icon.width = 48;
+  //   icon.height = 48;
 
-    return icon;
+  //   return icon;
+  // }
+
+  // window.onload = () => {
+  //   const ctx = document.getElementById(\"canvas\").getContext(\"2d\");
+  //   const config = {
+  //     type: 'line',
+  //     data: data,
+  //     options: {
+  //       responsive: true,
+  //       plugins: {
+  //         legend: {
+  //           position: 'top',
+  //         },
+  //         title: {
+  //           display: true,
+  //           text: 'Chart.js Line Chart'
+  //         },
+  //         tooltip: {
+  //           usePointStyle: true,
+  //           callbacks: {
+  //             footer: function(context) {
+  //               console.log(context);
+
+  //               return '123';
+  //             }
+  //           }
+  //         }
+  //       },
+  //       scales: {
+  //         xAxes: [{
+  //           type: 'linear',
+  //           ticks: {
+  //             min: 0,
+  //             max: 60,
+  //           },
+  //         }],
+  //         yAxes: [{
+  //           ticks: {
+  //             min: 0.35,
+  //             max: 1,
+  //           },
+  //         }]
+  //       }
+  //     },
+  //   };
+
+  //   window.myBar = new Chart(ctx, config);
+  // };
+  // </script>";
+
+  $settings['axis_min_h'] = 0;
+  $settings['axis_max_h'] = ceil(end($values)[1]);
+
+  $dataset = [];
+  for($i = floor($settings['axis_min_h']), $sz = ceil($settings['axis_max_h']); $i < $sz; $i++) {
+    $dataset[] = [ $i, $i, 0 ];
   }
 
-  window.onload = () => {
-    const ctx = document.getElementById(\"canvas\").getContext(\"2d\");
-    const config = {
-      type: 'line',
-      data: data,
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            position: 'top',
-          },
-          title: {
-            display: true,
-            text: 'Chart.js Line Chart'
-          },
-          tooltip: {
-            usePointStyle: true,
-            callbacks: {
-              footer: function(context) {
-                console.log(context);
+  $graph = new Goat1000\SVGGraph\SVGGraph($width, $height, $settings);
+  /** @disregard */
+  $graph->colours($colours);
 
-                return '123';
-              }
-            }
-          }
-        },
-        scales: {
-          xAxes: [{
-            type: 'linear',
-            ticks: {
-              min: 0,
-              max: 60,
-            },
-          }],
-          yAxes: [{
-            ticks: {
-              min: 0.35,
-              max: 1,
-            },
-          }]
-        }
-      },
-    };
+  /** @disregard */
+  $graph->values($values);
 
-    window.myBar = new Chart(ctx, config);
-  };
-  </script>";
+  $reslocal .= $graph->fetch($type, false);
+  $reslocal .= $graph->fetchJavascript();
 
   $res[$tag][$roletag] .= $reslocal;
 

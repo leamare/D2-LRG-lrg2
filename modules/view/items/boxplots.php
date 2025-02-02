@@ -1,5 +1,7 @@
 <?php
 
+require_once $root."/libs/SVGGraph/autoloader.php";
+
 $modules['items']['bplots']['boxplots'] = [];
 
 function rg_view_generate_items_boxplots() {
@@ -144,10 +146,64 @@ function rg_view_generate_items_boxplots() {
     return $res;
   }
 
-  $res[$tag] .= "<div id=\"items-boxplots-$tag\" style=\"width: 90%; margin: 0 auto;\">
-    <canvas id=\"canvas\" style=\"width: 100%; height: ".(sizeof($items)*4)."vh\"></canvas>
-  </div>";
-  $res[$tag] .= "<script>";
+  // $res[$tag] .= "<div id=\"items-boxplots-$tag\" style=\"width: 90%; margin: 0 auto;\">
+  //   <canvas id=\"canvas\" style=\"width: 100%; height: ".(sizeof($items)*4)."vh\"></canvas>
+  // </div>";
+  // $res[$tag] .= "<script>";
+
+  $settings = [
+    'auto_fit' => true,
+    'back_colour' => 'transparent',
+    'back_stroke_width' => 0,
+    'stroke_width' => 0.5,
+    'sort' => false,
+    'show_labels' => false,
+    'show_label_amount' => true,
+    'label_font' => 'Arial',
+    'bar_width' => 40,
+    'tooltip_font_size' => 11,
+    'tooltip_back_colour' => 'black',
+    'tooltip_colour' => 'white',
+    'tooltip_round' => 5,
+    'tooltip_callback' => function($d, $k, $v) {
+      return "$k :: ".
+        convert_time_seconds($v->wbottom)." -- ".
+        " [ Q1 ".convert_time_seconds($v->bottom)." - ".
+        "Median ".convert_time_seconds($v->value)." - ".
+        "Q2 ".convert_time_seconds($v->top)." ] ".
+        " -- ".convert_time_seconds($v->wtop);
+    },
+    'marker_type' => ['circle', 'square'],
+    'marker_size' => 5,
+    'show_grid' => false,
+    'show_axes' => false,
+    'crosshairs' => false,
+    'stroke_colour' => 'rgb(96,128,255)',
+    'pad_right' => 0,
+    'pad_left' => 0,
+    'pad_top' => 0,
+    'pad_bottom' => 0,
+    // 'minimum_grid_spacing' => 20,
+    // 'show_subdivisions' => true,
+    // 'show_grid_subdivisions' => true,
+    // 'grid_subdivision_colour' => '#ccc',
+    'structured_data' => true,
+    'axis_max_h' => max(array_map(function($el) { return $el['max_time']; }, $items)),
+    'axis_min_h' => -100,
+    'median_colour' => 'rgb(96,128,255)',
+    // rgb(20,144,255)
+    // rgba(200,200,200,0.8)
+    'structure' => [
+      'key' => 0, 
+      // 'value' => 3,
+      // 'end' => 2,
+      'value' => 1,
+      'top' => 2, 'bottom' => 3, 'wtop' => 4, 'wbottom' => 5,
+      'line' => 6,
+    ],
+  ];
+
+  $res[$tag] .= "<table class=\"list\"><thead><tr><th width=\"15%\">item</th><th>boxplot</th></tr></thead><tbody>";
 
   $entries = [];
   $labels = [];
@@ -156,6 +212,25 @@ function rg_view_generate_items_boxplots() {
   $lineFactor = 0.7;
   $d = 0.25*0.7;
   foreach ($items as $iid => $line) {
+    $res[$tag] .= "<tr><td>".item_full($iid)."</td><td>";
+
+    $width = 1600;
+    $height = 60;
+
+    $graph = new Goat1000\SVGGraph\SVGGraph($width, $height, $settings);
+    $values = [
+      [ item_name($iid), +$line['median'], +$line['q3'], +$line['q1'], +$line['max_time'], +$line['min_time'], 0 ]
+    ];
+    /** @disregard */
+    $graph->values($values);
+
+    $colours = [ [ 'rgba(20,144,255,0.55)', 'rgba(96,96,255,0.55)' ] ];
+    /** @disregard */
+    $graph->colours($colours);
+
+    // HorizontalFloatingBarGraph
+    $res[$tag] .= $graph->fetch('HorizontalBoxAndWhiskerGraph', false);
+
     $entries[] = "{ min: ".$line['min_time'].", q1: ".$line['q1'].", median: ".$line['median'].", q3: ".$line['q3'].", max: ".$line['max_time'].", mean: ".$line['avg_time']." }";
     $labels[] = addslashes(item_name($iid))." (".$line['purchases'].")";
     $line['avg_time'] = $line['avg_time'] > $line['q3'] ? ($line['q1']+$line['q3'])/2 : $line['avg_time'];
@@ -169,73 +244,78 @@ function rg_view_generate_items_boxplots() {
       data: [
       {x: ".$line['q1']."+1, y: ".($sz+$lineFactor*(0.5-$line['early_wr']))."}, {x: ".($line['avg_time']).", y: ".($sz+$lineFactor*(0.5-$line['winrate']))."}, {x: ".$line['q3']."-1, y: ".($sz+$lineFactor*(0.5-$line['late_wr']))."}
     ] }";
+
     $sz++;
   }
 
-  $res[$tag] .= "
-  function vh(v) {
-    var h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
-    return (v * h) / 100;
-  }
-  const vhc = vh(1);
-  const boxplotData = {
-    // define label tree
-    labels: ['".implode("','", $labels)."'],
-    datasets: [{
-      label: 'Timings',
-      backgroundColor: 'rgba(20,144,255,0.55)',
-      borderColor: 'rgb(20,144,255)',
-      borderWidth: 1,
-      outlierColor: '#999999',
-      padding: 10,
-      itemRadius: 0,
-      order: 1,
-      data: [ ".implode(", \n", $entries)." ]
-    },
-    ".implode(", \n", $lines)."
-    ]
-  };
-  window.onload = () => {
-    const ctx = document.getElementById(\"canvas\").getContext(\"2d\");
-    window.myBar = new Chart(ctx, {
-      type: 'horizontalBoxplot',
-      data: boxplotData,
-      options: {
-        responsive: true,
-        legend: {
-          display: false,
-        },
-        scales: {
-          yAxes: [{
-              ticks: {
-                  fontColor: 'rgb(174,174,174)',
-                  fontSize: 14,
-                  stepSize: 1,
-                  beginAtZero: true
-              }
-          }],
-          xAxes: [{
-              ticks: {
-                  fontColor: 'grey',
-                  fontSize: 14,
-                  stepSize: 240,
-                  beginAtZero: true
-              }
-          }]
-        },
-        title: {
-          display: false,
-        },
-        tooltips: {
-          position: 'nearest',
-          filter: function (tooltipItem) {
-            return tooltipItem.datasetIndex === 0;
-          }
-        }
-      }
-    });
-  };
-  </script>";
+  $res[$tag] .= "</tbody></table>";
+
+  $res[$tag] .= $graph->fetchJavascript();
+
+  // $res[$tag] .= "
+  // function vh(v) {
+  //   var h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+  //   return (v * h) / 100;
+  // }
+  // const vhc = vh(1);
+  // const boxplotData = {
+  //   // define label tree
+  //   labels: ['".implode("','", $labels)."'],
+  //   datasets: [{
+  //     label: 'Timings',
+  //     backgroundColor: 'rgba(20,144,255,0.55)',
+  //     borderColor: 'rgb(20,144,255)',
+  //     borderWidth: 1,
+  //     outlierColor: '#999999',
+  //     padding: 10,
+  //     itemRadius: 0,
+  //     order: 1,
+  //     data: [ ".implode(", \n", $entries)." ]
+  //   },
+  //   ".implode(", \n", $lines)."
+  //   ]
+  // };
+  // window.onload = () => {
+  //   const ctx = document.getElementById(\"canvas\").getContext(\"2d\");
+  //   window.myBar = new Chart(ctx, {
+  //     type: 'horizontalBoxplot',
+  //     data: boxplotData,
+  //     options: {
+  //       responsive: true,
+  //       legend: {
+  //         display: false,
+  //       },
+  //       scales: {
+  //         yAxes: [{
+  //             ticks: {
+  //                 fontColor: 'rgb(174,174,174)',
+  //                 fontSize: 14,
+  //                 stepSize: 1,
+  //                 beginAtZero: true
+  //             }
+  //         }],
+  //         xAxes: [{
+  //             ticks: {
+  //                 fontColor: 'grey',
+  //                 fontSize: 14,
+  //                 stepSize: 240,
+  //                 beginAtZero: true
+  //             }
+  //         }]
+  //       },
+  //       title: {
+  //         display: false,
+  //       },
+  //       tooltips: {
+  //         position: 'nearest',
+  //         filter: function (tooltipItem) {
+  //           return tooltipItem.datasetIndex === 0;
+  //         }
+  //       }
+  //     }
+  //   });
+  // };
+  // </script>";
 
   return $res;
 }

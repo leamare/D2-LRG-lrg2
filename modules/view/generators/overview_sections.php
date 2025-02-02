@@ -6,24 +6,81 @@ include_once($root."/modules/view/generators/draft.php");
 include_once($root."/modules/view/generators/positions_overview_section.php");
 include_once($root."/modules/view/functions/teams_diversity_recalc.php");
 
+require_once $root."/libs/SVGGraph/autoloader.php";
+
 function rg_generator_overview_chart($name, $labels, $context) {
   if(!sizeof($context)) return "";
   global $charts_colors;
 
   $colors = array_slice($charts_colors, 0, sizeof($labels));
-  $res = "<div class=\"chart-pie\"><canvas id=\"$name\" width=\"undefined\" height=\"undefined\"></canvas><script>".
-                        "var modes_chart_el = document.getElementById('$name'); ".
-                        "var modes_chart = new Chart(modes_chart_el, {
-                          type: 'pie',
-                          data: {
-                            labels: [ '".implode("','", $labels)."' ],
-                            datasets: [{data: [ ".implode(",", $context)." ],
-                            borderWidth: 0,
-                            backgroundColor:['".implode("','", $colors)."']}]
-                          }
-                        });</script></div>";
+  // $res = "<div class=\"chart-pie\"><canvas id=\"$name\" width=\"undefined\" height=\"undefined\"></canvas><script>".
+  //                       "var modes_chart_el = document.getElementById('$name'); ".
+  //                       "var modes_chart = new Chart(modes_chart_el, {
+  //                         type: 'pie',
+  //                         data: {
+  //                           labels: [ '".implode("','", $labels)."' ],
+  //                           datasets: [{data: [ ".implode(",", $context)." ],
+  //                           borderWidth: 0,
+  //                           backgroundColor:['".implode("','", $colors)."']}]
+  //                         }
+  //                       });</script></div>";
 
-  return $res;
+  $settings = [
+    'auto_fit' => true,
+    'back_colour' => 'transparent',
+    'back_stroke_width' => 0,
+    'back_stroke_colour' => '#eee',
+    'stroke_width' => 0,
+    'label_colour' => '#000',
+    'pad_right' => 50,
+    'pad_left' => 50,
+    'pad_bottom' => 90,
+    'pad_top' => 50,
+    'sort' => false,
+    'show_labels' => false,
+    'show_label_amount' => true,
+    'link_target' => '_top',
+    'label_font' => 'Arial',
+    'label_font_size' => '11',
+    'legend_entries' => $labels,
+    'legend_shadow_opacity' => 0,
+    'legend_colour' => 'white',
+    'legend_back_colour' => 'transparent',
+    'legend_stroke_width' => 0,
+    'legend_position' => 'outer bottom 10 1',
+    'legend_columns' => 6,
+    'legend_draggable' => false,
+    'legend_column_spacing' => 20,
+    // 'legend_autohide' => 'true',
+    'tooltip_font_size' => 12,
+    'tooltip_back_colour' => 'black',
+    'tooltip_colour' => 'white',
+    'tooltip_round' => 5,
+    'tooltip_shadow_opacity' => 0,
+    'tooltip_callback' => function($d, $k, $v) {
+      return "$k - $v";
+    },
+    'use_mbstring' => true,
+  ];
+  
+  $width = 700;
+  $height = 450;
+  
+  $graph = new Goat1000\SVGGraph\SVGGraph($width, $height, $settings);
+  /** @disregard */
+  $graph->colours($colors);
+
+  $vals = [];
+  foreach (array_values($context) as $i => $v) {
+    $vals[ $labels[$i] ?? $i ] = $v;
+  }
+  
+  /** @disregard */
+  $graph->values($vals);
+  
+  return "<div class=\"chart-pie\">".$graph->fetch('PieGraph', false).$graph->fetchJavascript()."</div>";
+
+  // return $res;
 }
 
 function rg_generator_overview_combos($table_id, $caption, $context, $limiter = 10, $heroes_flag = true) {
