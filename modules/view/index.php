@@ -1,9 +1,4 @@
 <?php
-if (file_exists($cats_file)) {
-  $cats = file_get_contents($cats_file);
-  $cats = json_decode($cats, true);
-}
-
 include_once("modules/view/__open_cache.php");
 include_once("modules/view/__update_cache.php");
 include_once("modules/view/functions/check_filters.php");
@@ -37,6 +32,9 @@ function report_list_element($report) {
   if (!$iscat) {
     $event_type = $report['tvt'] ? 'tvt' : (
       isset($report['players']) ? 'pvp' : 'ranked'
+    );
+    $event_type_i = $report['tvt'] ? 0 : (
+      isset($report['players']) ? 1 : 2
     );
 
     $participants = isset($report['teams']) ? sizeof($report['teams']) : (
@@ -76,18 +74,26 @@ function report_list_element($report) {
   }
   if (empty($_lid)) $_lid = "default";
 
-  $res = "<tr class=\"expandable primary closed\" data-group=\"report-".$report['tag']."\">".
+  if (empty($report['patches'])) $report['patches'] = [0];
+
+  if (!isset($report['trust'])) $report['trust'] = true;
+
+  $res = "<tr class=\"expandable primary closed ".($report['trust'] ? '' : "shady")."\" data-group=\"report-".$report['tag']."\">".
     "<td><span class=\"expand\"></span></td>".
-    "<td>".
+    "<td class=\"banner-row\">".
+      ($report['trust'] 
+        ? "" 
+        : "<span class=\"shady-notice\" onclick=\"showModal('".htmlspecialchars(addcslashes(locale_string("shady_alert"), "'"))."', '".htmlspecialchars(addcslashes(locale_string("notice"), "'"))."');\"></span>"
+      ).
       "<img class=\"event-logo-list\" src=\"".str_replace('%LID%', $_lid, $league_logo_banner_provider)."\" alt=\"$_lid\" loading=\"lazy\" />".
     "</td>".
     "<td><a href=\"?".($iscat ? "cat" : "league")."=".$report['tag'].(empty($linkvars) ? "" : "&".$linkvars)."\" ".
       ($iscat ? '' : "data-aliases=\"".$aliases."\"").
       ">".$report['name']."</a></td>".
     "<td>".($report['id'] == "" ? "-" : "<a href=\"?lid=".$report['id'].(empty($linkvars) ? "" : "&".$linkvars)."\">".$report['id']."</a>")."</td>".
-    "<td>".locale_string($event_type)."</td>".
+    "<td value=\"$event_type_i\">".locale_string($event_type)."</td>".
     "<td>".$report['matches']."</td>".
-    "<td>".(
+    "<td value=\"".min(array_keys($report['patches']))."\">".(
       empty($report['patches']) ? '- (1)' : (
         sizeof($report['patches']) == 1 ?
           convert_patch( array_keys($report['patches'])[0] ).' (1)' : 
@@ -147,6 +153,8 @@ function report_card_element($report, $smaller = true, $catlabel = false) {
   }
   if (empty($_lid)) $_lid = "default";
 
+  if (!isset($report['trust'])) $report['trust'] = true;
+
   $extra = "<p>".$report['desc']."</p>".
   "<p>LID: ".($report['id'] == "" ? "-" : "<a href=\"?lid=".$report['id'].(empty($linkvars) ? "" : "&".$linkvars)."\">".$report['id']."</a>")."</p>".
   (isset($report['orgs']) ? "<p><a target=\"_blank\" href=\"".$report['orgs']."\">".locale_string("website")."</a></p>" : "").
@@ -156,8 +164,12 @@ function report_card_element($report, $smaller = true, $catlabel = false) {
   (!$iscat ? "<p>".locale_string('days').": ".$report['days']."</p>" : "");
 
 
-  $res = "<div class=\"card ".($smaller ? 'smaller' : '')."\" data-report=\"report-".$report['tag']."\" ".
+  $res = "<div class=\"card ".($smaller ? 'smaller' : '').' '.($report['trust'] ? '' : 'shady')."\" data-report=\"report-".$report['tag']."\" ".
       ($iscat ? '' : "data-aliases=\"".$aliases."\"").">".
+    ($report['trust'] 
+      ? "" 
+      : "<span class=\"shady-notice\" onclick=\"showModal('".htmlspecialchars(addcslashes(locale_string("shady_alert"), "'"))."', '".htmlspecialchars(addcslashes(locale_string("notice"), "'"))."');\"></span>"
+    ).
     "<a class=\"image\" href=\"?".($iscat ? "cat" : "league")."=".$report['tag'].(empty($linkvars) ? "" : "&".$linkvars)."\">".
       // (
       //   $smaller ? 
@@ -249,7 +261,7 @@ if (!empty($searchstring)) {
   $head_desc = htmlspecialchars($searchstring);
 } else if (!empty($cats)) {
   if (isset($cat) && isset($cats[$cat])) {
-    $reps = populate_reps($cache["reps"], $cats[$cat]['filters'], $cats[$cat]['exclude_hidden'] ?? true);
+    $reps = populate_reps($cache["reps"], $cats[$cat]['filters'], $cats[$cat]['exclude_hidden'] ?? false);
     
     if(isset($cats[$cat]['custom_style']) && file_exists("res/custom_styles/".$cats[$cat]['custom_style'].".css"))
       $custom_style = $cats[$cat]['custom_style'];
@@ -266,7 +278,7 @@ if (!empty($searchstring)) {
   } else if(!isset($cat) || $cat == "main") {
     // $head_name = $instance_name;
     // $head_desc = $instance_desc;
-    $head_name = $cat == "main" ? locale_string('main_reports') : $instance_name;
+    $head_name = isset($cat) ? locale_string('main_reports') : $instance_name;
     $head_desc = $instance_desc;
     if(isset($cats[$hidden_cat])) {
       foreach($cache["reps"] as $tag => $rep) {
@@ -378,7 +390,7 @@ if (!empty($searchstring)) {
 
 $modules .= "<div class=\"content-text tagslist\">".
   "<a class=\"category ".(empty($mod) && empty($cat) && empty($searchstring) ? "active" : "")."\" href=\".".(!empty($linkvars) ? "?".$linkvars : "")."\">".locale_string('pinned_main')."</a>".
-  "<a class=\"category ".($cat=="main" ? "active" : "")."\" href=\"?cat=main".(!empty($linkvars) ? "&".$linkvars : "")."\">".locale_string('main_reports')."</a>".
+  "<a class=\"category ".(($cat ?? "")=="main" ? "active" : "")."\" href=\"?cat=main".(!empty($linkvars) ? "&".$linkvars : "")."\">".locale_string('main_reports')."</a>".
   "<a class=\"category ".(check_module("cats")  ? "active" : "")."\" href=\"?mod=cats".(!empty($linkvars) ? "&".$linkvars : "")."\">".locale_string('categories')."</a>".
   "<label class=\"category ".(!empty($searchstring) ? "active" : "")."\" for=\"search-toggle\">".locale_string('search')."</label>".
 "</div>".
@@ -430,7 +442,7 @@ if (sizeof($cache['reps']) === 0) {
 
     $modules .= "<div class=\"table-header-info wide compact spaced\">".
       "<span class=\"table-header-info-name\">".locale_string('reports_count').": ".count($reps)."</span>".
-      ($cat != "main" ? "<a class=\"right\" href=\"?cat=$cat&latest".(empty($linkvars) ? "" : "&".$linkvars)."\">".locale_string('latest_permalink')."</a>" : "").
+      (isset($cat) && $cat != "main" ? "<a class=\"right\" href=\"?cat=$cat&latest".(empty($linkvars) ? "" : "&".$linkvars)."\">".locale_string('latest_permalink')."</a>" : "").
     "</div>";
 
     if(isset($cat) || $index_list >= sizeof($reps)) {
@@ -498,6 +510,10 @@ if (sizeof($cache['reps']) === 0) {
           );
           exit();
         }
+
+        if (isset($shady_cat) && isset($cats[$shady_cat])) {
+          $report['trust'] = !check_filters($report, $cats[$shady_cat]['filters']);
+        }
       }
       
       $modules .= report_list_element($report);
@@ -524,7 +540,7 @@ if (sizeof($cache['reps']) === 0) {
       if (isset($hidden_cat) && $tag == $hidden_cat) continue;
       if ($val['hidden'] ?? false) continue;
       
-      $reps = populate_reps($cache["reps"], $val['filters'], $val['exclude_hidden'] ?? true);
+      $reps = populate_reps($cache["reps"], $val['filters'], $val['exclude_hidden'] ?? false);
 
       if (!empty($val['groups'])) {
         foreach($val['groups'] as $gr) {
@@ -559,9 +575,12 @@ if (sizeof($cache['reps']) === 0) {
         ],
       ];
       $cats_c[$tag]['days'] = ceil(($cats_c[$tag]['last_match']['date'] - $cats_c[$tag]['first_match']['date']) / (3600*24));
+      if (isset($shady_cat) && isset($cats[$shady_cat])) {
+        $cats_c[$tag]['trust'] = !($tag == $shady_cat);
+      }
 
       foreach ($reps as $rep) {
-        foreach ($rep['patches'] as $pid => $ms) {
+        foreach (($rep['patches'] ?? []) as $pid => $ms) {
           $cats_c[$tag]['patches'][$pid] = ($cats_c[$tag]['patches'][$pid] ?? 0) + $ms;
         }
       }
@@ -607,14 +626,14 @@ if (sizeof($cache['reps']) === 0) {
         "<th width=\"100px\"></th>".
         "<th>".locale_string("cat_name")."</th>".
         "<th>".locale_string("league_id")."</th>".
-        "<th>".locale_string("type")."</th>".
+        "<th class=\"sorter-valuesort\">".locale_string("type")."</th>".
         "<th>".locale_string("matches_total")."</th>".
-        "<th>".locale_string("patches")."</th>".
+        "<th class=\"sorter-valuesort\">".locale_string("patches")."</th>".
         "<th>".locale_string("participants")."</th>".
         "<th>".locale_string("regions")."</th>".
         "<th>".locale_string("days")."</th>".
-        "<th>".locale_string("start_date")."</th>".
-        "<th>".locale_string("end_date")."</th>".
+        "<th class=\"sorter-valuesort\">".locale_string("start_date")."</th>".
+        "<th class=\"sorter-valuesort\">".locale_string("end_date")."</th>".
       "</tr></thead>";
       
       foreach($cats_c as $report) {
@@ -649,6 +668,7 @@ if (sizeof($cache['reps']) === 0) {
 
       foreach ($groups as $gt => $gl) {
         if (empty($gl)) continue;
+        if (in_array($gt, $cats_groups_hidden ?? [])) continue;
 
         $modules .= "<div class=\"compact-section-header wide compact primary\">".
           "<span class=\"group-name\">".
@@ -711,7 +731,7 @@ if (sizeof($cache['reps']) === 0) {
         } else if (empty($cat)) {
           $reps = populate_reps($cache['reps'], [], $cat['exclude_hidden'] ?? true);
         } else {
-          $reps = populate_reps($cache['reps'], $cat['filters'], $cat['exclude_hidden'] ?? true);
+          $reps = populate_reps($cache['reps'], $cat['filters'], $cat['exclude_hidden'] ?? false);
         }
 
         if (isset($cat['orderby']) || isset($section['orderby'])) {
@@ -732,6 +752,12 @@ if (sizeof($cache['reps']) === 0) {
           });
         }
 
+        if (isset($shady_cat) && isset($cats[$shady_cat])) {
+          foreach ($reps as $rt => $rv) {
+            $reps[$rt]['trust'] = !check_filters($rv, $cats[$shady_cat]['filters']);
+          }
+        }
+
         if (isset($cat['id']) || isset($cat['icon'])) {
           $section['icon_lid'] = $section['icon_lid'] ?? $cat['icon'] ?? $cat['icon'];
         }
@@ -740,7 +766,7 @@ if (sizeof($cache['reps']) === 0) {
 
         $reps = [];
         foreach ($section['value'] as $el) {
-          if ($el[1]) { // category
+          if ($el[1] == 1) { // category
             if (!isset($cats[$el[0]])) continue;
 
             $val = $cats[$el[0]];
@@ -775,8 +801,12 @@ if (sizeof($cache['reps']) === 0) {
             ];
             $cat['days'] = ceil(($cat['last_match']['date'] - $cat['first_match']['date']) / (3600*24));
 
+            if (isset($shady_cat) && isset($cats[$shady_cat])) {
+              $cat['trust'] = !($cat['tag'] == $shady_cat);
+            }
+
             foreach ($reps_c as $rep) {
-              foreach ($rep['patches'] as $pid => $ms) {
+              foreach ($rep['patches'] ?? [] as $pid => $ms) {
                 $cat['patches'][$pid] = ($cat['patches'][$pid] ?? 0) + $ms;
               }
             }
@@ -808,8 +838,42 @@ if (sizeof($cache['reps']) === 0) {
             }
 
             $reps[] = $cat;
+          } else if ($el[1] == 2) { // last in a category
+            if (!isset($cats[$el[0]])) continue;
+
+            $val = $cats[$el[0]];
+
+            $reps_c = populate_reps($cache['reps'], $val['filters'], $val['exclude_hidden'] ?? true);
+
+            if (isset($val['orderby'])) {
+              // not my finest creation
+              $orderby = $cat['orderby'];
+              uasort($reps_c, function($a, $b) use (&$orderby) {
+                $res = 0;
+                foreach ($orderby as $k => $dir) {
+                  $res = $dir ? (($b[$k] ?? 0) <=> ($a[$k] ?? 0)) : (($a[$k] ?? 0) <=> ($b[$k] ?? 0));
+                  if ($res) break;
+                }
+      
+                return $res;
+              });
+            } else {
+              uasort($reps_c, function($a, $b) {
+                return $b['last_match']['date'] <=> $a['last_match']['date'];
+              });
+            }
+
+            $rep = array_shift($reps_c);
+            if (isset($shady_cat) && isset($cats[$shady_cat])) {
+              $rep['trust'] = !check_filters($rep, $cats[$shady_cat]['filters']);
+            }
+            $reps[] = $rep;
           } else {
             if (!isset($cache['reps'][$el[0]])) continue;
+
+            if (isset($shady_cat) && isset($cats[$shady_cat])) {
+              $cache['reps'][$el[0]]['trust'] = !check_filters($cache['reps'][$el[0]], $cats[$shady_cat]['filters']);
+            }
 
             $reps[] = $cache['reps'][$el[0]];
           }
@@ -826,7 +890,7 @@ if (sizeof($cache['reps']) === 0) {
       }
 
       $modules .= "<div class=\"compact-section-header wide compact primary\">".
-        ($section['type'] == 0 ?
+        (($section['type'] == 0 || !empty($section['linkto'])) ?
           "<a class=\"group-name\" href=\"?cat=".($section['linkto'] ?? $cat_tag).(empty($linkvars) ? "" : "&".$linkvars)."\">".$name."</a>" :
           "<span class=\"group-name\">".$name."</span>"
         ).

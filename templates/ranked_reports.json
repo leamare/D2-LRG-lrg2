@@ -14,7 +14,18 @@
     "full_hero_pairs" : true,
     "items": true,
     "heroes_winrate_boxplots": true,
-    "heroes_winrate_spammers": true
+    "heroes_winrate_spammers": true,
+    
+    "starting_items": true,
+    "starting_items_roles": true,
+
+    "starting_builds": true,
+    "starting_builds_roles": true,
+    "starting_builds_limit": true,
+    "starting_builds_roles_limit": true,
+
+    "consumables": true,
+    "consumables_roles": true
   },
   "web": {
     "custom_style": "ranked",

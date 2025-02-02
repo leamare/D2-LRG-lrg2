@@ -22,6 +22,10 @@ if (isset($report['hero_positions'])) {
   include("heroes/rolepickban.php");
 }
 
+if (isset($report['hero_variants'])) {
+  include("heroes/variants_pickban.php");
+}
+
 if (isset($report['items']) && isset($report['items']['progrole'])) {
   $modules['heroes']['&builds'] = [
     'type' => 1,
@@ -56,8 +60,12 @@ if (isset($report['hero_winrate_timings']))
 if (isset($report['hero_winrate_spammers']))
   include("heroes/winrate_spammers.php");
 
-if (isset($report['hero_summary']))
+if (isset($report['hero_summary'])) {
   include("heroes/summary.php");
+}
+if (isset($report['hero_summary_variants'])) {
+  include("heroes/variants_summary.php");
+}
 
 include("heroes/profiles.php");
 
@@ -99,7 +107,12 @@ function rg_view_generate_heroes() {
       $res['positions'] = rg_view_generate_heroes_positions();
     }
     if(check_module($parent."rolepickban")) {
-      $res['rolepickban'] = rg_view_generate_heroes_rolepickban();
+      $res['pickban'] = rg_view_generate_heroes_rolepickban();
+    }
+  }
+  if (isset($report['hero_variants'])) {
+    if(check_module($parent."variantspb")) {
+      $res['pickban'] = rg_view_generate_heroes_variants_pickban();
     }
   }
   if (isset($report['hero_laning'])) {
@@ -150,6 +163,11 @@ function rg_view_generate_heroes() {
   if (isset($report['hero_summary'])) {
     if(check_module($parent."summary")) {
       $res['summary'] = rg_view_generate_heroes_summary();
+    }
+  }
+  if (isset($report['hero_summary_variants'])) {
+    if(check_module($parent."vsummary")) {
+      $res['vsummary'] = rg_view_generate_heroes_variants_summary();
     }
   }
 

@@ -5,14 +5,11 @@ include_once($root."/modules/view/functions/player_name.php");
 
 const MIN10_GOLD = 4973;
 
-function rg_generator_laning_profile($table_id, &$context, $id_o, $heroes_flag = true) {
+function rg_generator_laning_profile($table_id, &$context, $id_o, $heroes_flag = true, $variants = false) {
   $res = "";
-
-  $i = 0;
 
   if(!sizeof($context)) return "";
 
-  $ranks = [];
   $ids = [ 0 ];
   $matches_med = [];
   if (!empty($id_o)) $ids[] = $id_o;
@@ -49,34 +46,31 @@ function rg_generator_laning_profile($table_id, &$context, $id_o, $heroes_flag =
     $mk = array_keys($context[$id]);
     $median_disadv = $context[$id][ $mk[ floor( count($mk)/2 ) ] ]['avg_disadvantage'];
 
-    $compound_ranking_sort = function($a, $b) use ($mm, $median_adv, $median_disadv) {
-      if ($a['matches'] == 0) return 1;
-      if ($b['matches'] == 0) return -1;
-      return compound_ranking_laning_sort($a, $b, $mm, $median_adv, $median_disadv);
-    };
-    uasort($context[$id], $compound_ranking_sort);
-
-    $increment = 100 / sizeof($context[$id]); $i = 0; $last_rank = 0;
-
-    foreach ($context[$id] as $elid => $el) {
-      if(isset($last) && $el == $last) {
-        $i++;
-        $context[$id][$elid]['rank'] = $last_rank;
-      } else
-        $context[$id][$elid]['rank'] = round(100 - $increment*$i++, 2);
-      $last = $el;
-      $last_rank = $context[$id][$elid]['rank'];
+    compound_ranking_laning($context[$id], $mm, $median_adv, $median_disadv);
+  
+    uasort($context[$id], function($a, $b) {
+      return $b['wrank'] <=> $a['wrank'];
+    });
+  
+    $min = end($context[$id])['wrank'];
+    $max = reset($context[$id])['wrank'];
+  
+    foreach ($context[$id] as $k => $el) {
+      $context[$id][$k]['rank'] = 100 * ($el['wrank']-$min) / ($max-$min);
+      unset($context[$id][$k]['wrank']);
     }
-
-    unset($last);
   }
 
-
+  $colspan = $heroes_flag ? ($variants ? 3 : 2) : 1;
 
   if ($id_o) {
+    if ($variants) {
+      [$id, $var] = explode('-', $id_o);
+    }
+
     $res = "<table id=\"$table_id-reference\" class=\"list wide\"><caption>".locale_string("laning_reference")."</caption>";
     $res .= "<thead><tr class=\"overhead\">".
-            "<th width=\"12%\" colspan=\"".($heroes_flag ? "2" : "1")."\"></th>".
+            "<th width=\"12%\" colspan=\"".$colspan."\"></th>".
             "<th width=\"18%\" colspan=\"3\"></th>".
             "<th class=\"separator\" colspan=\"4\">".locale_string("lane_advantage")."</th>".
             "<th class=\"separator\" colspan=\"2\">".locale_string("lane_won")."</th>".
@@ -85,6 +79,7 @@ function rg_generator_laning_profile($table_id, &$context, $id_o, $heroes_flag =
             "<th class=\"separator\" colspan=\"1\">".locale_string("winrate_diff")."</th>".
           "</tr><tr>".
           ($heroes_flag ? "<th width=\"1%\"></th>" : "").
+          ($heroes_flag && $variants ? "<th width=\"1%\">".locale_string("facet")."</th>" : "").
           "<th>".locale_string("hero")."</th>".
           "<th>".locale_string("matches")."</th>".
           "<th>".locale_string("lane_wr")."</th>".
@@ -120,7 +115,8 @@ function rg_generator_laning_profile($table_id, &$context, $id_o, $heroes_flag =
 
     $res .= "<tr>".
       ($heroes_flag ? "<td>".hero_portrait($id_o)."</td>" : '').
-      "<td>".($heroes_flag ? hero_link($id_o) : player_link($id_o))."</td>".
+      ($heroes_flag && $variants ? "<td width=\"1%\">".facet_micro_element($id, $var)."</td>" : "").
+      "<td>".($heroes_flag ? hero_link($id_o) : player_link($id_o)).($variants ? ' '.locale_string("facet_short").$var : '')."</td>".
       "<td>".($data['matches'] ? $data['matches'] : '-')."</td>".
       "<td>".($data['matches'] ? number_format($data['lane_wr']*100, 2).'%' : '-')."</td>".
       "<td>".($data['matches'] ? number_format($data['rank'], 1) : '0')."</td>".
@@ -167,7 +163,7 @@ function rg_generator_laning_profile($table_id, &$context, $id_o, $heroes_flag =
   $res .= search_filter_component($table_id, true);
   $res .= "<table id=\"$table_id\" class=\"list wide sortable\">";
   $res .= "<thead><tr class=\"overhead\">".
-            "<th width=\"12%\" colspan=\"".($heroes_flag ? "2" : "1")."\" data-col-group=\"_index\"></th>".
+            "<th width=\"12%\" colspan=\"".$colspan."\" data-col-group=\"_index\"></th>".
             "<th class=\"separator\" width=\"18%\" colspan=\"3\" data-col-group=\"total\">".locale_string("total")."</th>".
             "<th class=\"separator\" colspan=\"4\" data-sorter=\"digit\" data-col-group=\"lane_advantage\">".locale_string("lane_advantage")."</th>".
             "<th class=\"separator\" colspan=\"2\" data-sorter=\"digit\" data-col-group=\"lane_won\">".locale_string("lane_won")."</th>".
@@ -176,6 +172,7 @@ function rg_generator_laning_profile($table_id, &$context, $id_o, $heroes_flag =
             "<th class=\"separator\" colspan=\"1\" data-sorter=\"digit\" data-col-group=\"winrate_diff\">".locale_string("winrate_diff")."</th>".
           "</tr><tr>".
           ($heroes_flag ? "<th width=\"1%\" data-col-group=\"_index\"></th>" : "").
+          ($heroes_flag && $variants ? "<th width=\"1%\" data-col-group=\"_index\">".locale_string("facet")."</th>" : "").
           "<th data-sortInitialOrder=\"asc\" data-sorter=\"text\" data-col-group=\"_index\">".locale_string($id ? "opponent" : "hero")."</th>".
           "<th class=\"separator\" data-sorter=\"digit\" data-col-group=\"total\">".locale_string("matches")."</th>".
           "<th data-sorter=\"digit\" data-col-group=\"total\">".locale_string("lane_wr")."</th>".
@@ -196,6 +193,10 @@ function rg_generator_laning_profile($table_id, &$context, $id_o, $heroes_flag =
         "</tr></thead>";
 
   foreach($context[$id_o] as $elid => $data) {
+    if ($variants) {
+      [$elid, $var] = explode('-', $elid);
+    }
+
     $data['matches'] = $data['matches'] ?? 0;
     $wr_diff = $data['matches'] ? (
         ( $data['lanes_won'] ? $data['won_from_won']/$data['lanes_won'] : ( $data['lanes_tied'] ? $data['won_from_tie']/$data['lanes_tied'] : 0 ) ) - 
@@ -214,7 +215,8 @@ function rg_generator_laning_profile($table_id, &$context, $id_o, $heroes_flag =
       "data-value-lane_wr=\"".($data['matches'] ? number_format($data['lane_wr']*100, 2) : 0)."\" ".
       " class=\"row\">".
       ($heroes_flag ? "<td data-col-group=\"_index\">".hero_portrait($elid)."</td>" : '').
-      "<td data-col-group=\"_index\">".($heroes_flag ? hero_link($elid) : player_link($elid))."</td>".
+      ($heroes_flag && $variants ? "<td width=\"1%\" data-col-group=\"_index\">".facet_micro_element($elid, $var)."</td>" : "").
+      "<td data-col-group=\"_index\">".($heroes_flag ? hero_link($elid) : player_link($elid)).($variants ? ' '.locale_string("facet_short").$var : '')."</td>".
       "<td class=\"separator\" data-col-group=\"total\">".($data['matches'] ? $data['matches'] : '-')."</td>".
       "<td data-col-group=\"total\">".($data['matches'] ? number_format($data['lane_wr']*100, 2).'%' : '-')."</td>".
       "<td data-col-group=\"total\">".($data['matches'] ? number_format($data['rank'], 1) : '0')."</td>".

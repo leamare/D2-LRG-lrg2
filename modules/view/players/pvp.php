@@ -2,6 +2,7 @@
 
 include_once($root."/modules/view/generators/pvp_unwrap_data.php");
 include_once($root."/modules/view/generators/pvp_profile.php");
+include_once($root."/modules/view/players/enemies.php");
 
 $modules['players']['pvp'] = [];
 
@@ -22,12 +23,22 @@ function rg_view_generate_players_pvp() {
 
   $names = $report['players'];
 
+  $res = [];
+
+  $out = [];
+
+  $out['pvpover'] = "";
+  if (check_module($parent_module."pvpover")) {
+    $parent = $parent_module;
+    $out['pvpover'] = rg_view_generate_players_enemies();
+  }
+
   uasort($names, function($a, $b) {
     if($a == $b) return 0;
-    else return ($a > $b) ? 1 : -1;
+    
+    return strcasecmp($a, $b);
   });
 
-  $res = [];
   if($report['settings']['pvp_grid']) {
     $res['grid'] = "";
     if(check_module($parent_module."grid")) {
@@ -39,8 +50,6 @@ function rg_view_generate_players_pvp() {
       if($mod == $parent_module."profiles") $unset_module = true;
     }
   }
-  $out = [];
-
 
   foreach($names as $id => $name) {
     $strings['en']["playerid".$id] = player_name($id);

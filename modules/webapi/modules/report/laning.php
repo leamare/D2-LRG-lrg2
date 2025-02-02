@@ -11,15 +11,27 @@ $endpoints['laning'] = function($mods, $vars, &$report) {
     throw new \Exception("No region allowed");
   }
 
-  $ranks = [];
+  if (in_array("players", $mods))
+    $type = "player";
+  else 
+    $type = "hero";
+
   $ids = [ 0 ];
-  if (!empty($vars['heroid'])) $ids[] = $vars['heroid'];
+  if (!empty($vars[$type.'id'])) $ids[] = $vars[$type.'id'];
 
-  if (is_wrapped($report['hero_laning'])) {
-    $report['hero_laning'] = unwrap_data($report['hero_laning']);
+  if ($type == "hero") {
+    if (is_wrapped($report['hero_laning'])) {
+      $report['hero_laning'] = unwrap_data($report['hero_laning']);
+    }
+  
+    $context =& $report['hero_laning'];
+  } else {
+    if (is_wrapped($report['player_laning'])) {
+      $report['player_laning'] = unwrap_data($report['player_laning']);
+    }
+  
+    $context =& $report['player_laning'];
   }
-
-  $context =& $report['hero_laning'];
 
   foreach ($ids as $id) {
     $mm = 0;
@@ -44,32 +56,25 @@ $endpoints['laning'] = function($mods, $vars, &$report) {
     $mk = array_keys($context[$id]);
     $median_disadv = $context[$id][ $mk[ floor( count($mk)/2 ) ] ]['avg_disadvantage'];
 
-    $compound_ranking_sort = function($a, $b) use ($mm, $median_adv, $median_disadv) {
-      if ($a['matches'] == 0) return 1;
-      if ($b['matches'] == 0) return -1;
-      return compound_ranking_laning_sort($a, $b, $mm, $median_adv, $median_disadv);
-    };
-    uasort($context[$id], $compound_ranking_sort);
-
-    $increment = 100 / sizeof($context[$id]); $i = 0;
-
-    foreach ($context[$id] as $elid => $el) {
-      if(isset($last) && $el == $last) {
-        $i++;
-        $context[$id][$elid]['rank'] = $last_rank;
-      } else
-        $context[$id][$elid]['rank'] = round(100 - $increment*$i++, 2);
-      $last = $el;
-      $last_rank = $context[$id][$elid]['rank'];
+    compound_ranking_laning($context[$id], $mm, $median_adv, $median_disadv);
+  
+    uasort($context[$id], function($a, $b) {
+      return $b['wrank'] <=> $a['wrank'];
+    });
+  
+    $min = end($context[$id])['wrank'];
+    $max = reset($context[$id])['wrank'];
+  
+    foreach ($context[$id] as $k => $el) {
+      $context[$id][$k]['rank'] = 100 * ($el['wrank']-$min) / ($max-$min);
+      unset($context[$id][$k]['wrank']);
     }
-
-    unset($last);
   }
 
-  if (!empty($vars['heroid'])) {
-    $context[0][ $vars['heroid'] ]['avg_advantage_gold'] = MIN10_GOLD*$context[0][ $vars['heroid'] ]['avg_advantage'];
-    $context[0][ $vars['heroid'] ]['avg_disadvantage_gold'] = MIN10_GOLD*$context[0][ $vars['heroid'] ]['avg_disadvantage'];
-    $el =& $context[0][ $vars['heroid'] ];
+  if (!empty($vars[$type.'id'])) {
+    $context[0][ $vars[$type.'id'] ]['avg_advantage_gold'] = MIN10_GOLD*$context[0][ $vars[$type.'id'] ]['avg_advantage'];
+    $context[0][ $vars[$type.'id'] ]['avg_disadvantage_gold'] = MIN10_GOLD*$context[0][ $vars[$type.'id'] ]['avg_disadvantage'];
+    $el =& $context[0][ $vars[$type.'id'] ];
     if (!isset($el['avg_gold_diff'])) {
       $el['avg_gold_diff'] = $el['matches'] ? round( (
         $el['avg_advantage']*$el['lanes_won'] + 
@@ -79,7 +84,7 @@ $endpoints['laning'] = function($mods, $vars, &$report) {
     }
     $el['avg_gold_diff_gold'] = MIN10_GOLD*$el['avg_gold_diff'];
 
-    foreach($context[ $vars['heroid'] ] as &$el) {
+    foreach($context[ $vars[$type.'id'] ] as &$el) {
       $el['avg_advantage_gold'] = MIN10_GOLD*$el['avg_advantage'];
       $el['avg_disadvantage_gold'] = MIN10_GOLD*$el['avg_disadvantage'];
       if (!isset($el['avg_gold_diff'])) {
@@ -93,8 +98,8 @@ $endpoints['laning'] = function($mods, $vars, &$report) {
     }
 
     return [
-      'total' => $context[0][ $vars['heroid'] ],
-      'opponents' => $context[ $vars['heroid'] ]
+      'total' => $context[0][ $vars[$type.'id'] ],
+      'opponents' => $context[ $vars[$type.'id'] ]
     ];
   }
 

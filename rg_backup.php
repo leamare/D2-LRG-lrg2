@@ -32,11 +32,15 @@ if ($restore) {
   
   echo("[ ] Restoring $input to $lrg_league_tag\n");
 
-  echo("[ ] Unpacking...\n");
-  $a = new PharData($input);
-  $dir = '_restore_'.$lrg_league_tag;
-  mkdir($dir);
-  $a->extractTo($dir);
+  if ($remove) {
+    $dir = $input;
+  } else {
+    echo("[ ] Unpacking...\n");
+    $a = new PharData($input);
+    $dir = '_restore_'.$lrg_league_tag;
+    mkdir($dir);
+    $a->extractTo($dir);
+  }
 
   echo("[ ] Initializing db...\n");
   exec("php rg_init.php -l$lrg_league_tag -Nq -Dq");
@@ -59,8 +63,8 @@ if ($restore) {
     'starting_items',
     'runes',
     'skill_builds',
-    'teams_matches',
     'teams',
+    'teams_matches',
     'teams_rosters',
   ];
 
@@ -92,11 +96,13 @@ if ($restore) {
       $qcnt = 0;
       $hsz = count(explode(',', $schema));
 
+      $schema = '`'.implode('`,`', explode(',', $schema)).'`';
+
       while (($line = fgets($handle)) !== false) {
         if (empty($line)) continue;
 
         $qline = "";
-        $_vals = explode(',', $line);
+        $_vals = explode(',', trim($line));
 
         $vals = []; $jstr = false;
         foreach ($_vals as $v) {
@@ -106,7 +112,7 @@ if ($restore) {
               $jstr = false;
             }
           } else {
-            if (!empty($v) && $v[0] == '"') {
+            if (!empty($v) && $v[0] == '"' && ((strlen($v) == 1) || ($v[strlen($v)-1] != '"'))) {
               $jstr = true;
             }
             $vals[] = $v;
@@ -114,15 +120,21 @@ if ($restore) {
         }
 
         foreach ($vals as $v) {
+          if (empty($v)) {
+            $qline .= "'0',";
+            continue;
+          }
           if (strpos($v, ',') !== false) {
-            $v = substr($v, 1, strlen($v)-2);
+            // $v = substr($v, 1, strlen($v)-2);
             $v = str_replace('""', '"', $v);
+            $v = substr($v, 1, strlen($v)-2);
+            // $v = trim($v, '"');
           }
           if (!is_numeric($v) && !mb_check_encoding($v, 'UTF-8')) {
             $v = mb_convert_encoding($v, 'UTF-8');
           }
           $v = trim($v);
-          $qline .= "\"".addcslashes($v, '"\\')."\",";
+          $qline .= "'".addcslashes($v, "'\\")."',";
         }
         $qline[strlen($qline)-1] = ")";
 
@@ -132,17 +144,23 @@ if ($restore) {
 
         if ($qcnt >= QUERY_COUNTER || $_lines <= 1) {
           $sql = "INSERT INTO $t ($schema) VALUES \n".implode(",\n", $qlines).';';
-          if ($conn->multi_query($sql) === TRUE);
-          else {
-            $fname_base = "tmp/query_${table}_".time();
+          try {
+            if ($conn->multi_query($sql) === TRUE);
+            else {
+              throw new Exception($conn->error);
+            }
+          } catch (Exception $e) {
+            $fname_base = "tmp/query_{$table}_".time();
             $i = 0;
             while(file_exists(($fname = $fname_base))) {
               $fname = $fname_base.".$i";
             }
             $fname .= ".sql";
 
-            echo "[E] ERROR: ".$conn->error."\n    Details: `$fname`\n";
+            echo "\n[E] ERROR: ".$conn->error."\n    Details: `$fname`\n";
             file_put_contents($fname, $sql);
+
+            die();
           }
 
           $qcnt = 0;
@@ -203,7 +221,7 @@ if ($restore) {
     $query_res->free_result();
 
     // fetching data
-    $fname = $t.'_'.time().'.csv';
+    $fname = 'tmp/'.$t.'_'.$lrg_league_tag.'_'.time().'.csv';
     $files[$t.'.csv'] = $fname;
 
     $fp = fopen($fname, "w+");
@@ -268,16 +286,28 @@ if ($restore) {
   unset($buffer);
   $conn->close();
 
+  if (!file_exists("leagues/$lrg_league_tag.json")) {
+    $descriptor = json_decode(file_get_contents("templates/default.json"), true);
+    $descriptor['league_tag'] = $lrg_league_tag;
+    $descriptor['league_desc'] = '';
+    $descriptor['league_name'] = $lrg_league_tag;
+    $descriptor['version'] = $lrg_version;
+    file_put_contents("leagues/$lrg_league_tag.json", json_encode($descriptor));
+  }
+
+  $descriptor = json_decode(file_get_contents("leagues/$lrg_league_tag.json"), true);
+  $out_tag = $descriptor['league_tag'];
+
   if ($make_report) {
     echo "[ ] Generating report...";
     exec("php rg_analyzer.php -l$lrg_league_tag");
-    $files['report.json'] = "reports/report_$lrg_league_tag.json";
+    $files['report.json'] = "reports/report_$out_tag.json";
     echo "OK.\n";
   }
 
-  if (file_exists("reports/report_$lrg_league_tag.json")) {
+  if (file_exists("reports/report_$out_tag.json")) {
     echo "[ ] Adding report file...";
-    $files['report.json'] = "reports/report_$lrg_league_tag.json";
+    $files['report.json'] = "reports/report_$out_tag.json";
     echo "OK.\n";
   }
 
@@ -300,16 +330,23 @@ if ($restore) {
 
   echo "[ ] Packing files...";
   $a = new PharData($output_path);
+
   foreach ($files as $n => $l) {
-    $a->addFile($l, $n);
+    try {
+      $a->addFile($l, $n);
+    } catch (\Throwable $e) {
+      echo "\n[E] Couldn't pack file `$n`: ".$e->getMessage()."\n";
+      echo "\t...";
+    }
   }
+  
   $a->compress(Phar::GZ);
   unlink($output_path);
   echo "OK\n";
 
   echo "[ ] Cleaning up...";
   foreach ($files as $n => $l) {
-    if (strpos($l, '/') !== false && !$remove) continue;
+    if (strpos($l, '.csv') === false && !$remove) continue;
     unlink($l);
   }
   echo "OK.\n";

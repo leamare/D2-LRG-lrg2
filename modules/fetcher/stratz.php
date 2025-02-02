@@ -67,6 +67,36 @@ const STRATZ_LEAVER_STATUS = [
   'DISCONNECTED_TOO_LONG' => 2,
 ];
 
+// Removed blocks
+// farmDistributionReport {
+//   creepType {
+//     count
+//     id
+//   }
+//   other {
+//     count
+//     id
+//   }
+// }
+// wardDestruction {
+//   isWard
+//   time
+// }
+
+// match: 
+// playbackData {
+//   wardEvents {
+//     action
+//     fromPlayer
+//     indexId
+//     playerDestroyed
+//     positionX
+//     positionY
+//     time
+//     wardType
+//   }
+// }
+
 const STRATZ_GRAPHQL_QUERY = "{
   clusterId
   gameMode
@@ -100,22 +130,11 @@ const STRATZ_GRAPHQL_QUERY = "{
   }
   numHumanPlayers
   didRadiantWin
-  playbackData {
-    wardEvents {
-      action
-      fromPlayer
-      indexId
-      playerDestroyed
-      positionX
-      positionY
-      time
-      wardType
-    }
-  }
   players {
     steamAccountId
     playerSlot
     heroId
+    variant
     level
     isRadiant
     leaverStatus
@@ -138,7 +157,6 @@ const STRATZ_GRAPHQL_QUERY = "{
           disableDuration
         }
       }
-      deniesPerMinute
       courierKills {
         time
       }
@@ -157,39 +175,26 @@ const STRATZ_GRAPHQL_QUERY = "{
       killEvents {
         time
       }
-      itemPurchases {
-        time
-        itemId
-      }
       inventoryReport {
         neutral0 {
-          itemId
-        }
-        item0 {
-          itemId
-        }
-        item1 {
-          itemId
-        }
-        item2 {
-          itemId
-        }
-        item3 {
-          itemId
-        }
-        item4 {
           itemId
         }
         item5 {
           itemId
         }
-        backPack0 {
+        item4 {
           itemId
         }
-        backPack1 {
+        item3 {
           itemId
         }
-        backPack2 {
+        item2 {
+          itemId
+        }
+        item1 {
+          itemId
+        }
+        item0 {
           itemId
         }
       }
@@ -199,16 +204,6 @@ const STRATZ_GRAPHQL_QUERY = "{
         stackCount
         time
       }
-      farmDistributionReport {
-        creepType {
-          count
-          id
-        }
-        other {
-          count
-          id
-        }
-      }
       actionReport {
         pingUsed
       }
@@ -217,10 +212,6 @@ const STRATZ_GRAPHQL_QUERY = "{
         positionY
         time
         type
-      }
-      wardDestruction {
-        isWard
-        time
       }
       level
     }
@@ -244,11 +235,6 @@ const STRATZ_GRAPHQL_QUERY = "{
     steamAccount {
       name
     }
-    match {
-      topLaneOutcome
-      midLaneOutcome
-      bottomLaneOutcome
-    }
   }
   direTeam {
     name
@@ -260,6 +246,9 @@ const STRATZ_GRAPHQL_QUERY = "{
     name
     tag
   }
+  bottomLaneOutcome
+  topLaneOutcome
+  midLaneOutcome
 }";
 
 function get_stratz_response($match) {
@@ -299,26 +288,22 @@ function get_stratz_response($match) {
     $q = http_build_query($data);
 
     sleep($api_cooldown_seconds);
-      
-    // $context  = stream_context_create([
-    //   'https' => [
-    //     'method' => 'POST',
-    //     'header'  => 'Content-Type: application/x-www-form-urlencoded'. 
-    //       "\r\ncontent-length: ".strlen($q)."\r\ncontent-type: application/json",
-    //     'content' => $q
-    //   ]
-    // ]);
   
-    // $json = file_get_contents($stratz_request, false, $context);
-    $json = file_get_contents($stratz_request.'?'.$q, false, stream_context_create([
+    $json = @file_get_contents($stratz_request.'?'.$q, false, stream_context_create([
       'ssl' => [
         'verify_peer' => false,
         'verify_peer_name' => false,
+      ],
+      'http' => [
+        'method' => 'POST',
+        'header'  => "Content-Type: application/json\r\nKey: $stratztoken\r\nUser-Agent: STRATZ_API\r\n",
+        'content' => json_encode($data),
+        'timeout' => 60,
       ]
     ]));
-    
+
     if (empty($json)) return null;
-  
+    
     $stratz = json_decode($json, true);
     
     if (!empty($stratz['errors'])) {
@@ -346,7 +331,7 @@ function get_stratz_response($match) {
 
   $r['matches']['analysis_status'] = $stratz['data']['match']['parsedDateTime'] ? 1 : 0;
   $r['matches']['seriesid'] = $stratz['data']['match']['seriesId'] ?? null;
-
+  
   if ($stratz['data']['match']['statsDateTime'] && !empty($stratz['data']['match']['radiantNetworthLeads'])) {
     [ $r['matches']['stomp'], $r['matches']['comeback'] ] = find_comebacks($stratz['data']['match']['radiantNetworthLeads'], $stratz['data']['match']['didRadiantWin']);
   } else {
@@ -383,6 +368,7 @@ function get_stratz_response($match) {
     $ml['matchid'] = $stratz['data']['match']['id'];
     $ml['playerid'] = $pl['steamAccountId'];
     $ml['heroid'] = $pl['heroId'];
+    $ml['variant'] = $pl['variant'];
     $ml['isRadiant'] = $pl['isRadiant'];
     $ml['level'] = $pl['level'];
     $ml['kills'] = $pl['kills'];
@@ -427,17 +413,17 @@ function get_stratz_response($match) {
 
       if (($aml['lane'] == 1 && $ml['isRadiant']) || ($aml['lane'] == 3 && !$ml['isRadiant'])) {
         // bottom lane
-        $aml['lane_won'] = $pl['match']['bottomLaneOutcome'] == "TIE" ? 1 : (
-          $pl['match']['bottomLaneOutcome'] == "RADIANT_VICTORY" ? ($ml['isRadiant'] ? 2 : 0) : ($ml['isRadiant'] ? 0 : 2)
+        $aml['lane_won'] = $stratz['data']['match']['bottomLaneOutcome'] == "TIE" ? 1 : (
+          $stratz['data']['match']['bottomLaneOutcome'] == "RADIANT_VICTORY" ? ($ml['isRadiant'] ? 2 : 0) : ($ml['isRadiant'] ? 0 : 2)
         );
       } else if ($aml['lane'] == 2) {
-        $aml['lane_won'] = $pl['match']['midLaneOutcome'] == "TIE" ? 1 : (
-          $pl['match']['midLaneOutcome'] == "RADIANT_VICTORY" ? ($ml['isRadiant'] ? 2 : 0) : ($ml['isRadiant'] ? 0 : 2)
+        $aml['lane_won'] = $stratz['data']['match']['midLaneOutcome'] == "TIE" ? 1 : (
+          $stratz['data']['match']['midLaneOutcome'] == "RADIANT_VICTORY" ? ($ml['isRadiant'] ? 2 : 0) : ($ml['isRadiant'] ? 0 : 2)
         );
       } else {
         // top lane
-        $aml['lane_won'] = $pl['match']['topLaneOutcome'] == "TIE" ? 1 : (
-          $pl['match']['topLaneOutcome'] == "RADIANT_VICTORY" ? ($ml['isRadiant'] ? 2 : 0) : ($ml['isRadiant'] ? 0 : 2)
+        $aml['lane_won'] = $stratz['data']['match']['topLaneOutcome'] == "TIE" ? 1 : (
+          $stratz['data']['match']['topLaneOutcome'] == "RADIANT_VICTORY" ? ($ml['isRadiant'] ? 2 : 0) : ($ml['isRadiant'] ? 0 : 2)
         );
       }
       
@@ -446,10 +432,10 @@ function get_stratz_response($match) {
       $siege = (74 * 2);
       $passive = (600 * 1.275);
       $starting = 625;
-      $tenMinute = $melee + $ranged + $siege + $passive + $starting;
+      $tenMinute = $starting + $lm * ($melee + $ranged + $siege + $passive)/10;
       $aml['efficiency_at10'] = (
         count($pl['stats']['networthPerMinute']) > ($lm-1) ? 
-        $pl['stats']['networthPerMinute'][$lm] : 
+        $pl['stats']['networthPerMinute'][$lm-1] : 
         end($pl['stats']['networthPerMinute'])
       ) / $tenMinute;
       
@@ -475,14 +461,29 @@ function get_stratz_response($match) {
       $aml['roshans_killed'] = 0;
       $aml['wards_destroyed'] = count($pl['stats']['wardDestruction'] ?? []);
 
-      foreach ($pl['stats']['farmDistributionReport']['creepType'] as $fc) {
-        // if (in_array($fc['id'], OBS)) $aml['wards_destroyed'] += $fc['count'];
-        if (in_array($fc['id'], ROSHAN)) $aml['roshans_killed'] += $fc['count'];
+      if (isset($pl['stats']['farmDistributionReport'])) {
+        foreach ($pl['stats']['farmDistributionReport']['creepType'] as $fc) {
+          // if (in_array($fc['id'], OBS)) $aml['wards_destroyed'] += $fc['count'];
+          if (in_array($fc['id'], ROSHAN)) $aml['roshans_killed'] += $fc['count'];
+        }
+        // foreach ($f['other'] as $fc) {
+        //   if (in_array($fc['id'], ROSHAN)) $aml['roshans_killed'] += $fc['count'];
+        //   if (in_array($fc['id'], OBS)) $aml['wards_destroyed'] += $fc['count'];
+        // }
+      } else {
+        $hasAegis = false;
+        foreach ($pl['stats']['inventoryReport'] as $time => $rep) {
+          foreach ($rep as $slot => $item) {
+            if (empty($item)) continue;
+            if ($item['itemId'] == 117 && !$hasAegis) {
+              $aml['roshans_killed']++;
+              $hasAegis = true;
+            } elseif ($hasAegis && !in_array(117, array_column($rep, 'itemId'))) {
+              $hasAegis = false;
+            }
+          }
+        }
       }
-      // foreach ($f['other'] as $fc) {
-      //   if (in_array($fc['id'], ROSHAN)) $aml['roshans_killed'] += $fc['count'];
-      //   if (in_array($fc['id'], OBS)) $aml['wards_destroyed'] += $fc['count'];
-      // }
       
       $kde = [];
       foreach ($pl['stats']['killEvents'] as $s) {
@@ -623,7 +624,14 @@ function get_stratz_response($match) {
       foreach ($pl['stats']['itemPurchases'] as $e) {
         if ($r['matches']['duration'] - $e['time'] < 60) continue;
 
-        if ($e['time'] < -10) $items_starting[] = $e['itemId'];
+        if ($e['time'] < -20) {
+          // Startz Starting items seem to be broken
+          // so I'll be skipping them here and only recording the
+          // minute 0 inventory snapshot
+
+          // $items_starting[] = $e['itemId'];
+          continue;
+        }
 
         if (in_array($e['itemId'], $meta['item_categories']['consumables'])) {
           if (!isset($consumables['all'][ $e['itemId'] ])) {
@@ -687,14 +695,6 @@ function get_stratz_response($match) {
         $r['items'][] = $it;
       }
 
-      $r['starting_items'][] = [
-        'matchid' => $stratz['data']['match']['id'],
-        'playerid' => $pl['steamAccountId'],
-        'hero_id' => $pl['heroId'],
-        'starting_items' => addslashes(\json_encode($items_starting)),
-        'consumables' => addslashes(\json_encode($consumables)),
-      ];
-
       foreach($pl['stats']['matchPlayerBuffEvent'] as $e) {
         if (in_array($e['itemId'], [108, 271, 247, 609, 727, 725]) && !isset($items_all[ $e['itemId'] ])) {
           // rosh aghs
@@ -719,14 +719,24 @@ function get_stratz_response($match) {
 
       asort($items_all);
 
+      // there should be inventory report for all item slots as additional means of recording some items
+      // but it's gone now, RIP
       foreach($pl['stats']['inventoryReport'] as $t => $e) {
         $inventory = [];
         for($i = 0; $i < 6; $i++) {
           $inventory[] = $e['item'.$i] ? $e['item'.$i]['itemId'] : null;
         }
-        for($i = 0; $i < 3; $i++) {
-          $inventory[] = $e['backPack'.$i] ? $e['backPack'.$i]['itemId'] : null;
+        // for($i = 0; $i < 3; $i++) {
+        //   $inventory[] = $e['backPack'.$i] ? $e['backPack'.$i]['itemId'] : null;
+        // }
+
+        if (!$t) {
+          // Startz Starting items seem to be broken
+          // so I'll be skipping them here and only recording the
+          // minute 0 inventory snapshot
+          $items_starting = $inventory;
         }
+
         foreach($inventory as $item_id) {
           // rosh aghs
           if ($item_id == 725 || $item_id == 727)
@@ -734,7 +744,7 @@ function get_stratz_response($match) {
           // $item_id = 609;
           // if ($item_id == 727) $item_id = 271;
 
-          $time = ($t-1)*60;
+          $time = $t ? ($t-1)*60 : -80;
 
           // && abs($items_all[ $item_id ]-60) < 60)
           if (!$item_id || isset($items_all[ $item_id ]) )
@@ -777,11 +787,22 @@ function get_stratz_response($match) {
         }
       }
 
+      $r['starting_items'][] = [
+        'matchid' => $stratz['data']['match']['id'],
+        'playerid' => $pl['steamAccountId'],
+        'hero_id' => $pl['heroId'],
+        'starting_items' => addslashes(\json_encode($items_starting)),
+        'consumables' => addslashes(\json_encode($consumables)),
+      ];
+
       $last = null; 
-      //$neutrals = [];
+      $neutrals = [];
       foreach($pl['stats']['inventoryReport'] as $i => $e) {
         if (!$e['neutral0'] || $e['neutral0']['itemId'] == $last) continue;
         $last = $e['neutral0']['itemId'];
+        if (in_array($last, $neutrals)) {
+          continue;
+        }
 
         foreach($meta['item_categories'] as $category_name => $items) {
           if (in_array($last, $items)) {
@@ -802,13 +823,14 @@ function get_stratz_response($match) {
           'category_id' => array_search($category, array_keys($meta['item_categories'])),
           'time' => ($i-1)*60
         ];
+        $neutrals[] = $last;
       } 
     }
   }
 
   // type 0 is obs
   // currently lacks information about ward killer
-  if (isset($stratz['data']['match']['playbackData']['wardEvents'])) {
+  if (!empty($stratz['data']['match']['playbackData']) && isset($stratz['data']['match']['playbackData']['wardEvents'])) {
     $wards_log = [];
     $sentries_log = [];
     $wards_destruction_log = [];
@@ -817,6 +839,7 @@ function get_stratz_response($match) {
       $pid = $slot_pids[ $ward['fromPlayer'] ];
 
       switch ($ward['action'].'.'.$ward['wardType']) {
+        case "SPAWN.OBSERVER":
         case "SPAWN.WARD":
           if (!isset($wards_log[$pid])) $wards_log[$pid] = [];
           if (isset($wards_log[ $pid ][ $ward['indexId'] ])) break;
@@ -1035,17 +1058,24 @@ function get_stratz_multiquery($group) {
     
   $stratz_request = "https://api.stratz.com/graphql";
 
-  $q = http_build_query($data);
-  
-  $json = @file_get_contents($stratz_request.'?'.$q, false, stream_context_create([
+  $json = @file_get_contents($stratz_request, false, stream_context_create([
     'ssl' => [
       'verify_peer' => false,
       'verify_peer_name' => false,
+    ],
+    'http' => [
+      'method' => 'POST',
+      'header'  => "Content-Type: application/json\r\nKey: $stratztoken\r\nUser-Agent: STRATZ_API\r\n",
+      'content' => json_encode($data),
+      'timeout' => 60,
     ]
   ]));
-  //$json = @file_get_contents($stratz_request.'?'.$q);
+
+  // $json = @file_get_contents($stratz_request.'?'.$q);
   
-  if (empty($json)) return null;
+  if (empty($json)) {
+    return null;
+  }
 
   $stratz = json_decode($json, true);
 

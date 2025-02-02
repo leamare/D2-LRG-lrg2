@@ -75,35 +75,19 @@ $endpoints['draft'] = function($mods, $vars, &$report) {
       $context[$k]['winrate_banned'] = 0;
   }
 
+  compound_ranking($context, $context_total_matches);
+
   uasort($context, function($a, $b) {
-    if($a['matches_total'] == $b['matches_total']) return 0;
-    else return ($a['matches_total'] < $b['matches_total']) ? 1 : -1;
+    return $b['wrank'] <=> $a['wrank'];
   });
 
-  $ranks = [];
-  $context_copy = $context;
-
-  $compound_ranking_sort = function($a, $b) use ($context_total_matches) {
-    return compound_ranking_sort($a, $b, $context_total_matches);
-  };
-
-  uasort($context, $compound_ranking_sort);
-
-  $increment = 100 / sizeof($context); $i = 0;
+  $min = end($context)['wrank'];
+  $max = reset($context)['wrank'];
 
   foreach ($context as $id => $el) {
-    if(isset($last) && $el == $last) {
-      $i++;
-      $ranks[$id] = $last_rank ?? 0;
-    } else
-      $ranks[$id] = 100 - $increment*$i++;
-    $last = $el;
-    $last_rank = $ranks[$id];
-  }
-
-  foreach($context as $id => $el) {
-    $context[$id]['rank'] = round($ranks[$id], 2);
+    $context[$id]['rank'] = round(100 * ($el['wrank']-$min) / ($max-$min), 2);
     $context[$id]['contest_rate'] = round($el['matches_total']/$context_total_matches, 4);
+    unset($context[$id]['wrank']);
   }
 
   $draft = [];
@@ -152,19 +136,18 @@ $endpoints['draft'] = function($mods, $vars, &$report) {
       if(isset($stages[$i]) && ($stages[$i]['matches_picked']+$stages[$i]['matches_banned']))
         $scores[$id] = $stages[$i];
     }
-    uasort($scores, $compound_ranking_sort);
+    compound_ranking($scores, $context_total_matches);
 
-    $increment = 100 / sizeof($scores); $j = 0;
-
+    uasort($scores, function($a, $b) {
+      return $b['wrank'] <=> $a['wrank'];
+    });
+  
+    $min = end($scores)['wrank'];
+    $max = reset($scores)['wrank'];
+  
     foreach ($scores as $id => $el) {
-      if(isset($last) && $el == $last) {
-        $j++;
-        $draft[$id][$i]['rank'] = $last_rank;
-        $ranks_stages[$i][$id] = $last_rank;
-      } else
-        $draft[$id][$i]['rank'] = round(100 - $increment*$j++, 2);
-      $last = $el;
-      $last_rank = $draft[$id][$i]['rank'];
+      $draft[$id][$i]['rank'] = 100 * ($el['wrank']-$min) / ($max-$min);
+      $ranks_stages[$i][$id] = $draft[$id][$i]['rank'];
     }
   }
 

@@ -29,10 +29,10 @@ function rg_query_player_summary(&$conn, $cluster = null, $players = null) {
             SUM(am.lh_at10)/count(distinct am.matchid) lh_10,
             SUM(ml.lasthits)/(SUM(m.duration)/60) lh,
             SUM(m.duration)/(SUM(1)*60) avg_duration,
-            SUM(ml.kills)/count(distinct am.matchid) kills,
-            SUM(ml.deaths)/count(distinct am.matchid) deaths,
-            SUM(ml.assists)/count(distinct am.matchid) assists,
-            SUM(am.pings)/count(distinct am.matchid) pings,
+            SUM(ml.kills)/count(distinct ml.matchid) kills,
+            SUM(ml.deaths)/count(distinct ml.matchid) deaths,
+            SUM(ml.assists)/count(distinct ml.matchid) assists,
+            SUM(am.pings)/count(distinct ml.matchid) pings,
             SUM(CASE WHEN am.stuns >= 0 THEN 1 ELSE 0 END) stuns_cnt,
             SUM(rs.rshs)/SUM(1) roshs_cnt
           FROM matchlines ml LEFT JOIN

@@ -24,24 +24,40 @@ $endpoints['pvp'] = function($mods, $vars, &$report) {
       'ms' => $winrates[ $srcid ]['matches']
     ];
 
-    $compound_ranking_sort = function($a, $b) use ($dt) {
-      return positions_ranking_sort($a, $b, $dt['ms']);
-    };
-    uasort($pvp_context, $compound_ranking_sort);
+    $pvp_context_cpy = $pvp_context;
+
+    positions_ranking($pvp_context, $dt['ms']);
+
+    uasort($pvp_context, function($a, $b) {
+      return $b['wrank'] <=> $a['wrank'];
+    });
   
-    $increment = 100 / sizeof($pvp_context); $i = 0;
+    $min = end($pvp_context)['wrank'];
+    $max = reset($pvp_context)['wrank'];
   
     foreach ($pvp_context as $elid => $el) {
-      if(isset($last) && $el == $last) {
-        $i++;
-        $pvp_context[$elid]['rank'] = $last_rank;
-      } else
-        $pvp_context[$elid]['rank'] = round(100 - $increment*$i++, 2);
-      $last = $el;
-      $last_rank = $pvp_context[$elid]['rank'];
+      $pvp_context[$elid]['rank'] = 100 * ($el['wrank']-$min) / ($max-$min);
+      $pvp_context_cpy[$elid]['winrate'] = 1-$pvp_context_cpy[$elid]['winrate'];
     }
+
+    positions_ranking($pvp_context_cpy, $dt['ms']);
+
+    uasort($pvp_context_cpy, function($a, $b) {
+      return $b['wrank'] <=> $a['wrank'];
+    });
   
-    unset($last);
+    $min = end($pvp_context_cpy)['wrank'];
+    $max = reset($pvp_context_cpy)['wrank'];
+  
+    foreach ($pvp_context_cpy as $elid => $el) {
+      $pvp_context[$elid]['arank'] = 100 * ($el['wrank']-$min) / ($max-$min);
+      unset($pvp_context[$elid]['wrank']);
+
+      if (isset($el['expectation']) && !isset($el['deviation'])) {
+        $pvp_context[$elid]['deviation'] = $el['matches']-$el['expectation'];
+        $pvp_context[$elid]['deviation_pct'] = round(($el['matches']-$el['expectation'])*100/$el['matches'], 2);
+      }
+    }
   }
 
   if (isset($vars['playerid'])) {

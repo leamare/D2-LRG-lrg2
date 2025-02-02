@@ -90,11 +90,16 @@ function rg_view_generator_teams_summary($context = null, $short_flag = false) {
       )."</th>".
       implode('', array_map(
         function($a, $k) {
-          return "<th class=\"separator\" data-col-group=\"$k\">".implode(
-            "</th><th data-col-group=\"$k\">", array_map(function($el) {
-              return locale_string(SUMMARY_KEYS_REPLACEMENTS[$el] ?? $el);
-            }, $a)
-          )."</th>";
+          return implode(
+            "", array_map(function($el, $i) use ($k) {
+              return "<th class=\"".
+                (!$i ? "separator " : "").
+                (in_array($el, VALUESORT_COLS_KEYS) ? "sorter-valuesort " : "").
+                "\" data-col-group=\"$k\">".
+                locale_string(SUMMARY_KEYS_REPLACEMENTS[$el] ?? $el).
+              "</th>";
+            }, $a, array_keys($a))
+          );
         }, $groups, array_keys($groups)
       )).
     "</tr>".
@@ -119,11 +124,16 @@ function rg_view_generator_teams_summary($context = null, $short_flag = false) {
 
     $res .= implode('', array_map(
       function($a) use (&$groups, &$el) {
-        return "<td class=\"separator\" data-col-group=\"$a\">".implode(
-          "</td><td data-col-group=\"$a\">", array_map(function($key) use (&$el) {
-            return summary_prepare_value($key, $el[$key]);
-          }, $groups[$a])
-        )."</td>";
+        return implode(
+          "", array_map(function($key, $i) use (&$el, &$a) {
+            return "<td ".
+              (!$i ? "class=\"separator\"" : "").
+              (in_array($key, VALUESORT_COLS_KEYS) ? " value=\"{$el[$key]}\"" : "").
+              " data-col-group=\"$a\">".
+              summary_prepare_value($key, $el[$key]).
+            "</td>";
+          }, $groups[$a], array_keys($groups[$a]))
+        );
       }, array_keys($groups)
     ));
 

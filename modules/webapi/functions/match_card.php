@@ -30,11 +30,15 @@ function match_card($mid) {
   ];
 
   foreach ($m as $pl) {
-    $match['players'][$pl['radiant'] == 1 ? 'radiant' : 'dire'][] = [
+    $player = [
       "player_id" => $pl['player'],
       "player_name" => player_name($pl['player']),
       "hero_id" => $pl['hero']
     ];
+    if (!empty($pl['var'])) {
+      $player['variant'] = $pl['var'];
+    }
+    $match['players'][$pl['radiant'] == 1 ? 'radiant' : 'dire'][] = $player;
   }
 
   $match['bans'] = null;
@@ -44,7 +48,10 @@ function match_card($mid) {
     $match['bans']['dire'] = $report['matches_additional'][$mid]['bans'][0];
   }
 
-  if (isset($report['matches_additional'][$mid]['order'])) {
+  if (isset($report['matches_additional'][$mid]['order']) && !(
+    $report['matches_additional'][$mid]['game_mode'] == 1 || $report['matches_additional'][$mid]['game_mode'] == 23 || 
+    $report['matches_additional'][$mid]['game_mode'] == 4 || $report['matches_additional'][$mid]['game_mode'] == 11
+  )) {
     $match['order'] = $report['matches_additional'][$mid]['order'];
   }
   
@@ -77,11 +84,57 @@ function match_card($mid) {
 
   $match['cluster'] = $report['matches_additional'][$mid]['cluster'];
 
-  $match['region'] = $meta['clusters'][ $report['matches_additional'][$mid]['cluster'] ];
+  $match['region'] = $meta['clusters'][ $report['matches_additional'][$mid]['cluster'] ] ?? 0;
 
   $match['game_mode'] = $report['matches_additional'][$mid]['game_mode'];
 
   $match['date'] = $report['matches_additional'][$mid]['date'];
+
+  if (isset($report['records'])) {
+    $match_records = [];
+
+    $tags = isset($report['regions_data']) ? array_keys($report['regions_data']) : [];
+    array_unshift($tags, null);
+
+    foreach ($tags as $reg) {
+      if (!$reg) {
+        $context_records = $report['records'];
+        $context_records_ext = $report['records_ext'] ?? [];
+      } else {
+        $context_records = $report['regions_data'][$reg]['records'];
+        $context_records_ext = $report['regions_data'][$reg]['records_ext'] ?? [];
+      }
+
+      if (is_wrapped($context_records_ext)) {
+        $context_records_ext = unwrap_data($context_records_ext);
+      }
+
+      foreach ($context_records as $rectag => $record) {
+        if (strpos($rectag, "_team") !== false) continue;
+  
+        if ($record['matchid'] == $mid) {
+          $record['tag'] = $rectag;
+          $record['placement'] = 1;
+          $record['region'] = $reg;
+          $match_records[] = $record;
+        }
+
+        if (!empty($context_records_ext)) {
+          foreach ($context_records_ext[$rectag] ?? [] as $i => $rec) {
+            if (empty($rec)) continue;
+            if ($rec['matchid'] == $mid) {
+              $rec['tag'] = $rectag;
+              $rec['placement'] = $i+2;
+              $rec['region'] = $reg;
+              $match_records[] = $rec;
+            }
+          }
+        }
+      }
+    }
+
+    $match['records'] = $match_records;
+  }
 
   return $match;
 }

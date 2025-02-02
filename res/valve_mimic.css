@@ -207,11 +207,19 @@ a:hover {
   line-height: 14px;
 }
 
-.content-text.alert {
+.content-text.alert, .content-text.notice, .content-text.info {
   border-radius: 10px;
   color: var(--caption);
-  background-color: rgba(255,0,0,0.1);
   padding: 3px 5px;
+}
+.content-text.alert {
+  background-color: rgba(255,0,0,0.1);
+}
+.content-text.notice {
+  background-color: rgba(64,127,256,0.1);
+}
+.content-text.info {
+  background-color: rgba(127,127,127,0.1);
 }
 
 .content-cards {
@@ -220,11 +228,15 @@ a:hover {
 	font-size: 18px;
 	line-height: 34px;
 	color: var(--text);
-
-
-	margin: 30px 15% 0;
+	margin: 30px 7.5% 0;
 
 	margin-top: 30px;
+
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  align-content: center;
+  justify-content: center;
 }
 
 .selector-modules {
@@ -289,6 +301,10 @@ a:hover {
   display: inline-block;
   border-bottom: 3px solid #0000;
   transition: 150ms all linear;
+}
+.selector.has-children:after {
+  content: ' ☰';
+  font-size: .8em;
 }
 .selector .selector-icon {
   height: 1.3em;
@@ -475,6 +491,7 @@ a:hover {
     text-align: center;
     font-weight: bold;
     color: var(--caption);
+    flex-basis: 100%;
 }
 
 .faqAnswer {
@@ -635,8 +652,7 @@ header.navBar a, header.navBar a:hover, header.navBar a:visited, header.navBar a
   height: .95em;
 }
 
-.modal {
-    display: none;
+.modal, dialog[open]::backdrop {
     position: fixed;
     z-index: 1001;
     left: 0;
@@ -645,21 +661,32 @@ header.navBar a, header.navBar a:hover, header.navBar a:visited, header.navBar a
     height: 100%;
     overflow: auto;
     background-color: rgb(0,0,0);
-    background-color: rgba(0,0,0,0.4);
+    background-color: rgba(0,0,0,0.5);
     -webkit-animation-name: fadeIn;
     -webkit-animation-duration: 0.4s;
     animation-name: fadeIn;
     animation-duration: 0.4s
 }
-.modal-content {
+dialog, .modal-content {
     position: fixed;
-    bottom: 0;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     background-color: var(--modal-content-bg);
-    width: 100%;
+    width: auto;
+    max-height: 80%;
+    min-height: 30%;
+    border: none;
+    z-index: 1000;
     -webkit-animation-name: slideIn;
     -webkit-animation-duration: 0.4s;
     animation-name: slideIn;
     animation-duration: 0.4s;
+}
+.modal-dialog-container {
+  position: absolute;
+  top: 0; left: 0;
+  bottom: 0; right: 0;
 }
 .modal-text {
     color: var(--modal-text);
@@ -901,4 +928,8 @@ input.search-toggle {
 .search-toggle:checked ~ .searchform {
   max-height: 200px;
   padding: 25px 5% 25px
+}
+
+svg {
+  overflow: visible;
 }

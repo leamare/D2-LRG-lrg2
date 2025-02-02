@@ -164,7 +164,7 @@ function rg_view_generate_items_icombos() {
         "<th>".locale_string("matches")."</th>".
         "<th>".locale_string("winrate")."</th>".
         "<th>".locale_string("winrate_diff")."</th>".
-        "<th>".locale_string("time_diff")."</th>".
+        "<th data-sorter=\"valuesort\">".locale_string("time_diff")."</th>".
         "<th>".locale_string("pair_expectation")."</th>".
         "<th>".locale_string("deviation")."</th>".
         "<th>".locale_string("percentage")."</th>".
@@ -183,7 +183,7 @@ function rg_view_generate_items_icombos() {
         "<td>".$line['matches']."</td>".
         "<td>".number_format(100*$line['wins']/$line['matches'], 2)."%</td>".
         "<td>".number_format(100*$line['wr_diff'], 2)."%</td>".
-        "<td>".convert_time_seconds($line['time_diff'])."</td>".
+        "<td value=\"{$line['time_diff']}\">".convert_time_seconds($line['time_diff'])."</td>".
         "<td>".$line['exp']."</td>".
         "<td>".($line['matches'] - $line['exp'])."</td>".
         "<td>".number_format(100*($line['matches'] - $line['exp'])/$line['matches'], 2)."%</td>".

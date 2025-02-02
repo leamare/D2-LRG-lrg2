@@ -1,0 +1,240 @@
+{
+  "recent": {
+    "filters": [
+      [ [ 29, 14 ] ]
+    ],
+    "orderby": {
+      "last_update": 1,
+      "matches": 0
+    },
+    "exclude_hidden": true,
+    "locale_name_tag": "recent_reports",
+    "groups": ["meta"],
+    "lid": "upcoming"
+  },
+  "upcoming": {
+    "filters": [
+      [ [ 13, 1 ], [ 29, 31 ] ]
+    ],
+    "orderby": {
+      "id": 1
+    },
+    "exclude_hidden": true,
+    "locale_desc_tag": "cat_upcoming_description",
+    "groups": ["meta"],
+    "lid": "upcoming"
+  },
+  "ongoing": {
+    "filters": [
+      [ [ 14, 0 ], [ 31, 31 ], [ 29, 14 ], [11, 1], [0, "/^((?!_meta_).)*$/"] ]
+    ],
+    "exclude_hidden": true,
+    "locale_desc_tag": "cat_ongoing_description",
+    "groups": ["meta"],
+    "lid": "live"
+  },
+  "ongoing_ranked": {
+    "filters": [
+      [ [ 14, 0 ], [ 31, 6 ], [ 29, 14 ], [11, 0], [0, "/^((?!_meta_).)*$/"] ]
+    ],
+    "exclude_hidden": true,
+    "locale_desc_tag": "cat_ongoing_ranked_description",
+    "groups": ["meta"],
+    "lid": "ranked"
+  },
+  "main_nometa": {
+    "filters": [
+      [
+        [0, "/^((?!_meta_).)*$/"],
+        [0, "/^((?!_ranked_).)*$/"],
+        [0, "/^((?!competitive_).)*$/"]
+      ]
+    ],
+    "exclude_hidden": true,
+    "hidden": true,
+    "locale_desc_tag": "main_reports",
+    "groups": ["meta"]
+  },
+  "meta": {
+    "locale_desc_tag": "cat_ongoing_description",
+    "filters": [
+      [ [ 0, "/_meta_/"] ]
+    ],
+    "custom_style": "sa",
+    "lid": "element",
+    "groups": ["meta"]
+  },
+  "ranked": {
+    "name": "Immortal Meta Trends",
+    "names_locales": { "ru": "Тренды Титанов" },
+    "desc": "Ranked Meta Trends for Immortal Rank",
+    "desc_locales": { "ru": "Тренды рейтинговых матчей на ранге Immortal" },
+    "filters": [
+      [ [ 0, "/^imm_ranked_(\\d+)([a-z]?)$/" ] ],
+      [ [ 0, "/^div5_ranked_(\\d+)([a-z]?)$/" ] ],
+      [ [ 0, "/^imm_ranked_meta_last_7$/" ] ],
+      [ [ 0, "/^imm_ranked_meta_prev_7$/" ] ]
+    ],
+    "custom_style": "ranked",
+    "lid": "ranked",
+    "groups": ["ranked"]
+  },
+  "ranked_high": {
+    "name": "High Rank Meta Trends",
+    "names_locales": { "ru": "Мета Высоких Рангов" },
+    "desc": "Ranked Meta Trends for top-50% leaderboards",
+    "desc_locales": { "ru": "Тренды рейтинговых матчей для топ-50% лидеров по рангу" },
+    "filters": [
+      [ [ 0, "/^imm_ranked_(\\d+)([a-z]?)_(\\d+)$/" ] ],
+      [ [ 0, "/^div5_ranked_(\\d+)([a-z]?)_(\\d+)$/" ] ],
+      [ [ 0, "/^imm_ranked_meta_last_7_(\\d+)$/" ] ],
+      [ [ 0, "/^imm_ranked_meta_prev_7_(\\d+)$/" ] ]
+    ],
+    "custom_style": "ranked100",
+    "lid": "ranked100",
+    "groups": ["ranked"]
+  },
+  "ranked_patches": {
+    "name": "Immortal Meta Trends (patches only)",
+    "groups": ["ranked"],
+    "filters": [
+      [ [ 0, "/^imm_ranked_(\\d+)([a-z]?)$/" ] ],
+      [ [ 0, "/^div5_ranked_(\\d+)([a-z]?)$/" ] ]
+    ],
+    "custom_style": "ranked",
+    "lid": "ranked"
+  },
+  "competitive": {
+    "name": "Competitive",
+    "names_locales": { "ru": "Соревнования" },
+    "desc": "Competitive tournaments and leagues",
+    "desc_locales": { "ru": "Соревновательные турниры и лиги" },
+    "filters": [
+      [ [ 0, "/pro_circuit/" ] ],
+      [ [ 2, "/Pro Circuit/" ] ],
+      [ [ 0, "/^ti(\\d+)$/"] ],
+      [ [ 12, "competitive_2019-2020" ] ],
+      [ [ 12, "competitive" ] ],
+      [ [ 12, "leagues" ] ],
+      [ [ 0, "/^competitive(\\d+)_premium$/" ] ]
+    ],
+    "custom_style": "pro_circuit",
+    "lid": "dpc_green",
+    "groups": ["basic"]
+  },
+  "leagues": {
+    "name": "Leagues",
+    "names_locales": { "ru": "Лиги" },
+    "desc": "Competitive leagues only",
+    "desc_locales": { "ru": "Соревновательные лиги" },
+    "filters": [
+      [ [ 12, "leagues" ] ],
+      [ [ 0, "/_league/" ] ],
+      [ [ 1, "/League/" ] ]
+    ],
+    "custom_style": "pro_circuit",
+    "lid": "dpc_green",
+    "groups": ["basic"]
+  },
+  "pro_circuit": {
+    "name": "Dota Pro Circuit",
+    "filters": [
+      [ [ 0, "/pro_circuit/" ] ],
+      [ [ 2, "/Pro Circuit/" ] ],
+      [ [ 0, "/^ti(\\d+)$/"] ],
+      [ [ 0, "/^ti(\\d+)_(.+)_quali$/" ] ],
+      [ [ 0, "/^dpc_20/" ] ],
+      [ [ 0, "/^competitive(\\d+)_premium$/" ] ]
+    ],
+    "custom_style": "dpc2021_green",
+    "lid": "dpc",
+    "groups": ["dpc", "valve"]
+  },
+  "tis": {
+    "name": "The Internationals",
+    "filters": [
+      [ [ 0, "/^ti(\\d+)(_lan)?(_quali)?(_final)?(s)?$/" ] ],
+      [ [ 0, "/^pre_ti(\\d+)/" ] ],
+      [ [ 0, "/ti_alltime/" ] ]
+    ],
+    "custom_style": "pro_circuit",
+    "custom_logo": "ti",
+    "lid": "int",
+    "groups": ["tis","valve","series"]
+  },
+  "lans": {
+    "name": "LAN finals",
+    "names_locales": { "ru": "LAN финалы" },
+    "filters": [
+      [ [ 0, "/_lan$/" ] ],
+      [ [ 0, "/_fina?l?s?/" ] ],
+      [ [ 1, "/LAN/" ] ],
+      [ [ 1, "/final(s?)/" ] ],
+      [ [ 2, "/final(s?)/" ] ]
+    ],
+    "groups": ["basic"],
+    "lid": "spectral"
+  },
+  "qualis": {
+    "name": "Qualifiers",
+    "names_locales": { "ru": "Квалификации" },
+    "filters": [
+      [ [ 0, "/_quali(s?)/" ] ],
+      [ [ 1, "/Qualifiers/" ] ]
+    ],
+    "lid": "bracket",
+    "groups": ["basic"]
+  },
+  "amateur": {
+    "filters": [
+      [ [ 12, "amateur" ] ],
+      [ [ 12, "amateur_2020-2021" ] ],
+      [ [ 1, "/amateur/i" ] ],
+      [ [ 0, "/nadcl/" ] ]
+    ],
+    "groups": ["basic", "meta", "amateur"],
+    "lid": "brawl"
+  },
+  "shameonyou": {
+    "name": "Shady Leagues",
+    "desc": "Shady leagues or events hosted by shady individuals",
+    "filters": [
+      [ [ 0, "/epicenter/" ] ],
+      [ [ 0, "/d2cl/" ] ],
+      [ [ 1, "/Epicenter/" ] ],
+      [ [ 2, "/RESF/i" ] ],
+      [ [ 1, "/Phygital/i" ] ],
+      [ [ 1, "/Megafon/i" ] ],
+      [ [ 0, "/gotf_/"] ],
+      [ [ 0, "/esl_one/"], [4, 1640984400] ],
+      [ [ 0, "/dreamleague/"], [4, 1640984400] ],
+      [ [ 0, "/riyadh/" ] ],
+      [ [ 0, "/united_ua/" ] ]
+    ],
+    "lid": 14130,
+    "groups": []
+  },
+  "other": {
+    "name": "Other Tournaments",
+    "names_locales": { "ru": "Прочие турниры" },
+    "filters": [
+      [ [ 0, "/^summit9/" ] ],
+      [ [ 0, "/^midas_mode$/" ] ],
+      [ [ 0, "/^galaxy_battles/" ] ],
+      [ [ 0, "/^wesg/" ] ],
+      [ [ 0, "/^maincast/" ] ],
+      [ [ 12, "other" ] ]
+    ],
+    "groups": ["meta", "basic"],
+    "lid": "element"
+  },
+  "hidden": {
+    "filters": [
+      [ [2, "/^\\.\\.\\.$/"] ],
+      [ [0, "/^_(.*)$/"] ],
+      [ [0, "/^(.*)_hid$/"] ],
+      [ [ 0, "/^imm_ranked_(\\d+)([a-z]?)_(\\d+)$/" ] ],
+      [ [12, "hidden"] ]
+    ]
+  }
+}

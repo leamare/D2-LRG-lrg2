@@ -7,6 +7,7 @@
 
 include_once __DIR__.'/comebacks.php';
 include_once __DIR__.'/skillPriority.php';
+include_once __DIR__.'/fetch_valve_api.php';
 
 function conn_restart() {
   global $conn, $lrg_sql_host, $lrg_sql_user, $lrg_sql_pass, $lrg_sql_db;
@@ -20,7 +21,7 @@ function fetch($match) {
   $request_unparsed, $meta, $stratz_timeout_retries, $force_adding, $cache_dir, $lg_settings, $lrg_use_cache, $first_scheduled,
   $use_full_stratz, $scheduled_wait_period, $steamapikey, $force_await, $players_list, $rank_limit, $stratztoken, $ignore_stratz,
   $update_unparsed, $request_unparsed_players, $stratz_graphql, $api_cooldown_seconds, $update_names, $updated_names, $rewrite_existing,
-  $ignore_abandons, $lastversion, $schema;
+  $ignore_abandons, $lastversion, $schema, $min_duration_seconds, $min_score_side, $fallback_valveapi;
 
   $t_match = [];
   $t_matchlines = [];
@@ -49,6 +50,19 @@ function fetch($match) {
 
   echo("[$rnum\t] Match $match: ");
   $rnum++;
+
+  if (!empty($lg_settings['match_limit_after'])) {
+    if ($match < $lg_settings['match_limit_after']) {
+      echo("..Match outside the match id range, skipping...\n");
+      return true;
+    }
+  }
+  if (!empty($lg_settings['match_limit_before'])) {
+    if ($match > $lg_settings['match_limit_before']) {
+      echo("..Match outside the match id range, skipping...\n");
+      return true;
+    }
+  }
 
   $query = $conn->query("SELECT matchid FROM matches WHERE matchid = ".$match.";");
 
@@ -126,6 +140,11 @@ function fetch($match) {
       echo "..WARNING: bad replay.";
     }
 
+    if($matchdata['matches']['duration'] < $min_duration_seconds) {
+      echo("..Duration is less than ".($min_duration_seconds/60)." minutes, skipping...\n");
+      return true;
+    }
+
     foreach($matchdata['players'] as $p) {
       if(!isset($t_players[$p['playerID']]) || ($update_names && !isset($updated_names[$p['playerID']])) ) {
         $t_new_players[$p['playerID']] = $p['nickname'];
@@ -144,6 +163,30 @@ function fetch($match) {
       }
     }
 
+    if($matchdata['matches']['duration'] < $min_duration_seconds) {
+      echo("..Duration is less than ".($min_duration_seconds/60)." minutes, skipping...\n");
+      return true;
+    }
+
+    if (!isset($matchdata['payload'])) {
+      $matchdata['payload'] = [
+        'score_radiant' => 0,
+        'score_dire' => 0,
+      ];
+
+      foreach ($matchdata['matchlines'] as $pl) {
+        $matchdata['payload'][ $pl['isRadiant'] ? 'score_radiant' : 'score_dire' ] += $pl['kills'];
+      }
+    }
+    if($matchdata['payload']['score_radiant'] < $min_score_side && $matchdata['payload']['score_dire'] < $min_score_side) {
+      echo("..Low score, skipping.\n");
+      return true;
+    }
+    // if ($matchdata['payload']['leavers'] && !$ignore_abandons) {
+    //   echo("..Abandon detected, skipping.\n");
+    //   return true;
+    // }
+
     if (!empty($lg_settings['cluster_allowlist'])) {
       if (!in_array($matchdata['matches']['cluster'] ?? 0, $lg_settings['cluster_allowlist'])) {
         echo("..Cluster ".($matchdata['matches']['cluster'] ?? 0)." is not in allowlist, skipping...\n");
@@ -153,6 +196,32 @@ function fetch($match) {
     if (!empty($lg_settings['cluster_denylist'])) {
       if (in_array($matchdata['matches']['cluster'] ?? 0, $lg_settings['cluster_denylist'])) {
         echo("..Cluster ".($matchdata['matches']['cluster'] ?? 0)." is in denylist, skipping...\n");
+        return true;
+      }
+    }
+
+    if (!empty($lg_settings['version_allowlist'])) {
+      if (!in_array($matchdata['matches']['version'] ?? 0, $lg_settings['version_allowlist'])) {
+        echo("..Version ".($matchdata['matches']['version'] ?? 0)." is not in allowlist, skipping...\n");
+        return true;
+      }
+    }
+    if (!empty($lg_settings['version_denylist'])) {
+      if (in_array($matchdata['matches']['version'] ?? 0, $lg_settings['version_denylist'])) {
+        echo("..Version ".($matchdata['matches']['version'] ?? 0)." is in denylist, skipping...\n");
+        return true;
+      }
+    }
+
+    if (!empty($lg_settings['time_limit_after'])) {
+      if ($matchdata['matches']['start_date'] < $lg_settings['time_limit_after']) {
+        echo("..Match outside the time range, skipping...\n");
+        return true;
+      }
+    }
+    if (!empty($lg_settings['time_limit_before'])) {
+      if ($matchdata['matches']['start_date'] > $lg_settings['time_limit_after']) {
+        echo("..Match outside the time range, skipping...\n");
         return true;
       }
     }
@@ -175,6 +244,9 @@ function fetch($match) {
     try {
       $matchdata = get_stratz_response($match);
       $matchdata['isstratz'] = true;
+      if (empty($matchdata) || empty($matchdata['matches'])) {
+        throw new Exception("Unknown Stratz error, likely a failed request and/or 503");
+      }
     } catch (Exception $e) {
       echo "[E] STRATZ ERROR: ".$e->getMessage()."\n";
       $matchdata = [];
@@ -185,11 +257,11 @@ function fetch($match) {
 
     $stratz_request = null;
     if (!empty($matchdata)) {
-      if($matchdata['matches']['duration'] < 600) {
-        echo("..Duration is less than 10 minutes, skipping...\n");
+      if($matchdata['matches']['duration'] < $min_duration_seconds) {
+        echo("..Duration is less than ".($min_duration_seconds/60)." minutes, skipping...\n");
         return true;
       }
-      if($matchdata['payload']['score_radiant'] < 5 && $matchdata['payload']['score_dire'] < 5) {
+      if($matchdata['payload']['score_radiant'] < $min_score_side && $matchdata['payload']['score_dire'] < $min_score_side) {
         echo("..Low score, skipping.\n");
         return true;
       }
@@ -207,6 +279,32 @@ function fetch($match) {
       if (!empty($lg_settings['cluster_denylist'])) {
         if (in_array($matchdata['matches']['cluster'] ?? 0, $lg_settings['cluster_denylist'])) {
           echo("..Cluster ".($matchdata['matches']['cluster'] ?? 0)." is in denylist, skipping...\n");
+          return true;
+        }
+      }
+
+      if (!empty($lg_settings['version_allowlist'])) {
+        if (!in_array($matchdata['matches']['version'] ?? 0, $lg_settings['version_allowlist'])) {
+          echo("..Version ".($matchdata['matches']['version'] ?? 0)." is not in allowlist, skipping...\n");
+          return true;
+        }
+      }
+      if (!empty($lg_settings['version_denylist'])) {
+        if (in_array($matchdata['matches']['version'] ?? 0, $lg_settings['version_denylist'])) {
+          echo("..Version ".($matchdata['matches']['version'] ?? 0)." is in denylist, skipping...\n");
+          return true;
+        }
+      }
+
+      if (!empty($lg_settings['time_limit_after'])) {
+        if ($matchdata['matches']['start_date'] < $lg_settings['time_limit_after']) {
+          echo("..Match outside the time range, skipping...\n");
+          return true;
+        }
+      }
+      if (!empty($lg_settings['time_limit_before'])) {
+        if ($matchdata['matches']['start_date'] > $lg_settings['time_limit_after']) {
+          echo("..Match outside the time range, skipping...\n");
           return true;
         }
       }
@@ -276,7 +374,7 @@ function fetch($match) {
     }
   }
   
-  if (empty($matchdata) || ( empty($matchdata['items']) && !$bad_replay ) || ( $bad_replay && !$force_adding )) {
+  if (empty($matchdata) || ( empty($matchdata['items']) && !$bad_replay && !$force_adding ) || ( $bad_replay && !$force_adding )) {
     echo("Requesting.");
 
     if (!$ignore_stratz && !$stratz_graphql && (!empty($players_list) || !empty($rank_limit))) {
@@ -306,7 +404,27 @@ function fetch($match) {
     $matchdata_stratz = $matchdata ?? null;
     $matchdata = empty($matchdata_od) ? $opendota->match($match) : $matchdata_od;
     echo("..OK.");
+    
     if (empty($matchdata) || empty($matchdata['duration']) || empty($matchdata['players'])) {
+      if (empty($matchdata_stratz) && ($fallback_valveapi ?? true)) {
+        // fallback to Valve API
+        echo("..Trying Steam API.");
+        $matchdata_stratz = fetch_valve_api($match);
+
+        if (!empty($matchdata_stratz)) {
+          $bad_replay = true;
+          $t_match = $matchdata_stratz['matches'];
+          $t_team_matches = $matchdata_stratz['teams_matches'];
+          $t_matchlines = $matchdata_stratz['matchlines'];
+          $t_draft = $matchdata_stratz['draft'];
+          foreach($matchdata_stratz['players'] as $p) {
+            if(!isset($t_players[$p['playerID']]) || ($update_names && !isset($updated_names[$p['playerID']]) )) {
+              $t_new_players[$p['playerID']] = $p['nickname'];
+            }
+          }
+        }
+        $stratz_request = "";
+      }
       if (empty($matchdata_stratz)) {
         echo("..MISSING: Unable to read JSON skipping.\n");
         //if (!isset($matchdata['duration'])) var_dump($matchdata);
@@ -324,10 +442,8 @@ function fetch($match) {
         $matchdata = $matchdata_stratz;
       }
     } else {
-      if($matchdata['duration'] < 600 || ($matchdata['game_mode'] == 23 && $matchdata['duration'] < 400)) {
-          echo("..Duration is less than 10 minutes, skipping...\n");
-          // Initially it used to be 5 minutes, but sice a lot of stuff is hardly
-          // binded with 10 min mark, it's better to use 10 min as a benchmark.
+      if($matchdata['duration'] < $min_duration_seconds) {
+          echo("..Duration is less than ".($min_duration_seconds/60)." minutes, skipping...\n");
           return true;
       }
       if (!$matchdata['radiant_score']) {
@@ -340,7 +456,7 @@ function fetch($match) {
         $n = sizeof($matchdata['players']);
         for ($i=5; $i<$n; $i++) $matchdata['dire_score'] += $matchdata['players'][$i]['kills'];
       }
-      if($matchdata['radiant_score'] < 5 && $matchdata['dire_score'] < 5) {
+      if($matchdata['radiant_score'] < $min_score_side && $matchdata['dire_score'] < $min_score_side) {
           echo("..Low score, skipping.\n");
           return true;
       }
@@ -358,13 +474,21 @@ function fetch($match) {
           return true;
       }
 
+      if (!isset($matchdata['players'][0]['hero_damage']) && empty($t_matchlines)) {
+        if ($ignore_abandons) {
+          echo("..Warning: no damage stats!\n");
+        } else {
+          echo("..Damage stats missing, skipping match.\n");
+          return null;
+        }
+      }
+
       if (!empty($lg_settings['cluster_allowlist'])) {
         if (!in_array($matchdata['cluster'] ?? 0, $lg_settings['cluster_allowlist'])) {
           echo("..Cluster ".($matchdata['cluster'] ?? 0)." is not in allowlist, skipping...\n");
           return true;
         }
       }
-
       if (!empty($lg_settings['cluster_denylist'])) {
         if (in_array($matchdata['cluster'] ?? 0, $lg_settings['cluster_denylist'])) {
           echo("..Cluster ".($matchdata['cluster'] ?? 0)." is in denylist, skipping...\n");
@@ -372,7 +496,34 @@ function fetch($match) {
         }
       }
 
-      if ($matchdata['players'][0]['lh_t'] == null) {
+      $t_version = get_patchid($matchdata['start_time'], $meta);
+      if (!empty($lg_settings['version_allowlist'])) {
+        if (!in_array($t_version, $lg_settings['version_allowlist'])) {
+          echo("..Version ".($t_version)." is not in allowlist, skipping...\n");
+          return true;
+        }
+      }
+      if (!empty($lg_settings['version_denylist'])) {
+        if (in_array($t_version, $lg_settings['version_denylist'])) {
+          echo("..Version ".($t_version)." is in denylist, skipping...\n");
+          return true;
+        }
+      }
+
+      if (!empty($lg_settings['time_limit_after'])) {
+        if ($matchdata['start_time'] < $lg_settings['time_limit_after']) {
+          echo("..Match outside the time range, skipping...\n");
+          return true;
+        }
+      }
+      if (!empty($lg_settings['time_limit_before'])) {
+        if ($matchdata['start_time'] > $lg_settings['time_limit_after']) {
+          echo("..Match outside the time range, skipping...\n");
+          return true;
+        }
+      }
+
+      if (empty($matchdata['players'][0]['lh_t'])) {
         if($request_unparsed && !in_array($match, $scheduled)) {
           $opendota->request_match($match);
           echo "..Unparsed. Requested and scheduled $match\n";
@@ -402,7 +553,7 @@ function fetch($match) {
   }
 
   if (!empty($stratz_request) && ( (!file_exists("$cache_dir/".$match.".lrgcache.json") && !file_exists("$cache_dir/".$match.".json")) 
-        || ( $bad_replay && !$force_adding && !(($matchdata['iscache'] ?? false) || $matchdata['isstratz']) )
+        || ( $bad_replay && !$force_adding && !(($matchdata['iscache'] ?? false) || ($matchdata['isstratz'] ?? false) ) )
         || $players_update) ) {
 
     if(!isset($matchdata['lobby_type']) || $players_update || ($matchdata['lobby_type'] != 1 && $matchdata['lobby_type'] != 2 && $use_stratz && !$ignore_stratz)) {
@@ -659,7 +810,7 @@ function fetch($match) {
     //     $t_match['comeback'] = $matchdata['comeback'];
     // else $t_match['comeback'] = $bad_replay ? 0 : $matchdata['throw'];
 
-    if (!$bad_replay) {
+    if (!$bad_replay && (!empty($matchdata['radiant_gold_adv']) || !empty($matchdata['radiant_nw_adv']))) {
       add_networths($matchdata);
       [ $t_match['stomp'], $t_match['comeback'] ] = find_comebacks($matchdata['radiant_nw_adv'] ?? $matchdata['radiant_gold_adv'], $matchdata['radiant_win']);
     } else {
@@ -734,7 +885,8 @@ function fetch($match) {
           'lane' => $player['lane_role'],
           'eff' => $player['lane_efficiency'],
         ];
-        $laning_raw[$p['hid']] = $p['eff'];
+        if (!isset($laning_raw[$p['hid']])) $laning_raw[$p['hid']] = [];
+        $laning_raw[$p['hid']][$p['lane']] = $p;
         $teams_players[$team][] = $p;
       }
       
@@ -783,23 +935,35 @@ function fetch($match) {
       foreach([1,2,3] as $lane) {
         $opp_lane = 4-$lane;
 
-        $max_eff_self = array_reduce($laning_raw[0][$lane] ?? [], function($carry, $item) {
-          return max($carry, $item['eff']);
+        $lane_self = [];
+        foreach ($laning_raw as $i => $lanes) {
+          foreach ($lanes as $ln => $v) {
+            if ($ln == $lane) $lane_self[$i] = $v;
+          }
+        }
+        $max_eff_self = array_reduce($lane_self ?? [], function($carry, $item) {
+          return max($carry, $item['eff'] ?? 0);
         }, 0.7);
 
-        $max_eff_opp = array_reduce($laning_raw[1][$opp_lane] ?? [], function($carry, $item) {
-          return max($carry, $item['eff']);
+        $lane_opp = [];
+        foreach ($laning_raw as $i => $lanes) {
+          foreach ($lanes as $ln => $v) {
+            if ($ln == $opp_lane) $lane_opp[$i] = $v;
+          }
+        }
+        $max_eff_opp = array_reduce($lane_opp ?? [], function($carry, $item) {
+          return max($carry, $item['eff'] ?? 0);
         }, 0);
 
         $diff = $max_eff_self - $max_eff_opp;
         $lane_state = abs($diff) > $tie_factor ? ( $diff < 1 ? 0 : 2 ) : 1;
 
-        foreach($players as $p) {
-          $laning[$p['hid']] = $lane_state;
+        foreach($lane_self as $hid => $v) {
+          $laning[$hid] = $lane_state;
         }
         $lane_state = 2-$lane_state;
-        foreach(($laning_raw[1][$opp_lane] ?? []) as $p) {
-          $laning[$p['hid']] = $lane_state;
+        foreach($lane_opp as $hid => $v) {
+          $laning[$hid] = $lane_state;
         }
       }
       foreach ($team_roles as $i => $roles) {
@@ -810,7 +974,11 @@ function fetch($match) {
           if (isset($laning[$opp])) {
             $laning[$hid] = 2-$laning[$opp];
           } else {
-            $diff = $laning_raw[$hid] - $laning_raw[$opp];
+            $diff = array_reduce($laning_raw[$hid] ?? [], function($carry, $item) {
+              return max($carry, $item['eff'] ?? 0);
+            }, 0) - array_reduce($laning_raw[$opp] ?? [], function($carry, $item) {
+              return max($carry, $item['eff'] ?? 0);
+            }, 0);
             $laning[$hid] = abs($diff) > $tie_factor ? ( $diff < 1 ? 0 : 2 ) : 1;
             $laning[$opp] = abs($laning[$hid]-2);
           }
@@ -838,14 +1006,14 @@ function fetch($match) {
         }
         
         # support for botmatches
-        if ($matchdata['players'][$j]['account_id'] != null)
+        if (isset($matchdata['players'][$j]['account_id']) && $matchdata['players'][$j]['account_id'])
           $t_matchlines[$i]['playerid'] = $matchdata['players'][$j]['account_id'];
         else {
           if (isset($matchdata['radiant_team'])) {
             if($matchdata['players'][$j]['isRadiant'])
                 $matchdata['players'][$j]['account_id'] = $matchdata['radiant_team']['team_id'];
             else
-                $matchdata['players'][$j]['account_id'] = $matchdata['dire_team']['team_id'];
+                $matchdata['players'][$j]['account_id'] = isset($matchdata['dire_team']) ? $matchdata['dire_team']['team_id'] : 1;
           } else $matchdata['players'][$j]['account_id'] = 1;
 
           $matchdata['players'][$j]['account_id'] *= (-1)*$matchdata['players'][$j]['hero_id'];
@@ -885,6 +1053,7 @@ function fetch($match) {
 
 
         $t_matchlines[$i]['heroid'] = $matchdata['players'][$j]['hero_id'];
+        $t_matchlines[$i]['variant'] = $matchdata['players'][$j]['hero_variant'] ?? $matchdata['players'][$j]['variant'] ?? null;
         $t_matchlines[$i]['isRadiant'] = $matchdata['players'][$j]['isRadiant'];
         $t_matchlines[$i]['level'] = $matchdata['players'][$j]['level'];
         $t_matchlines[$i]['kills'] = $matchdata['players'][$j]['kills'];
@@ -893,9 +1062,9 @@ function fetch($match) {
         $t_matchlines[$i]['networth'] = $matchdata['players'][$j]['net_worth'] ?? $matchdata['players'][$j]['total_gold'];
         $t_matchlines[$i]['gpm'] = $matchdata['players'][$j]['gold_per_min'];
         $t_matchlines[$i]['xpm'] = $matchdata['players'][$j]['xp_per_min'];
-        $t_matchlines[$i]['heal'] = $matchdata['players'][$j]['hero_healing'];
-        $t_matchlines[$i]['heroDamage'] = $matchdata['players'][$j]['hero_damage'];
-        $t_matchlines[$i]['towerDamage'] = $matchdata['players'][$j]['tower_damage'];
+        $t_matchlines[$i]['heal'] = $matchdata['players'][$j]['hero_healing'] ?? 0;
+        $t_matchlines[$i]['heroDamage'] = $matchdata['players'][$j]['hero_damage'] ?? 0;
+        $t_matchlines[$i]['towerDamage'] = $matchdata['players'][$j]['tower_damage'] ?? 0;
         $t_matchlines[$i]['lastHits'] = $matchdata['players'][$j]['last_hits'];
         $t_matchlines[$i]['denies'] = $matchdata['players'][$j]['denies'];
 
@@ -1014,7 +1183,7 @@ function fetch($match) {
               unset($tmp);
           }
           $t_adv_matchlines[$i]['stacks'] = $matchdata['players'][$j]['camps_stacked'];
-          $t_adv_matchlines[$i]['time_dead'] = $matchdata['players'][$j]['life_state_dead'];
+          $t_adv_matchlines[$i]['time_dead'] = $matchdata['players'][$j]['life_state_dead'] ?? 0;
           $t_adv_matchlines[$i]['buybacks'] = $matchdata['players'][$j]['buyback_count'];
           $t_adv_matchlines[$i]['pings'] = isset($matchdata['players'][$j]['pings']) ? $matchdata['players'][$j]['pings'] : 0;
           $t_adv_matchlines[$i]['stuns'] = $matchdata['players'][$j]['stuns'];
@@ -1051,13 +1220,12 @@ function fetch($match) {
     # > 20 = after 7.07
     # TODO Draft information from Stratz for ranked all pick (22)
 
+    if (isset($matchdata['picks_bans']))
+      $drafts =& $matchdata['picks_bans'];
+    else 
+      $drafts =& $matchdata['draft_timings'];
 
-    if ($matchdata['game_mode'] == 2 || $matchdata['game_mode'] == 9) {
-        if (isset($matchdata['picks_bans']))
-          $drafts =& $matchdata['picks_bans'];
-        else 
-          $drafts =& $matchdata['draft_timings'];
-
+    if (($matchdata['game_mode'] == 2 || $matchdata['game_mode'] == 9) && !empty($drafts)) {
         $stage = 0;
         $last_stage_pick = null;
 
@@ -1109,18 +1277,32 @@ function fetch($match) {
           $t_match['radiant_opener'] = $t_draft[0]['is_radiant'];
         }
     } else if ($matchdata['game_mode'] == 16) {
-        foreach ($matchdata['picks_bans'] as $draft_instance) {
+        foreach ($drafts as $draft_instance) {
             if (!isset($draft_instance['hero_id']) || !$draft_instance['hero_id'])
               continue;
+
+            if (isset($draft_instance['team'])) {
+              $team = $draft_instance['team'];
+            } else if (isset($draft_instance['player_slot'])) {
+              $team = $draft_instance['player_slot'] >= 5;
+            } else {
+              $team = $draft_instance['active_team']-2;
+            }
+
+            $pick = $draft_instance['is_pick'] ?? $draft_instance['pick'];
         
             $t_draft[$i]['matchid'] = $match;
-            $t_draft[$i]['is_radiant'] = $draft_instance['team'] ? 0 : 1;
-            $t_draft[$i]['is_pick'] = $draft_instance['is_pick'];
+            $t_draft[$i]['is_radiant'] = $team ? 0 : 1;
+            $t_draft[$i]['is_pick'] = $pick;
             $t_draft[$i]['hero_id'] = $draft_instance['hero_id'];
 
-            if ($draft_instance['is_pick']) {
-                if ($draft_instance['order'] < 11) $t_draft[$i]['stage'] = 1;
-                else if ($draft_instance['order'] < 15) $t_draft[$i]['stage'] = 2;
+            if (!isset($t_match['radiant_opener']) && $pick) {
+              $t_match['radiant_opener'] = (int)$t_draft[$i]['is_radiant'];
+            }
+
+            if ($pick) {
+                if ($draft_instance['order'] < 10) $t_draft[$i]['stage'] = 1;
+                else if ($draft_instance['order'] < 14) $t_draft[$i]['stage'] = 2;
                 else $t_draft[$i]['stage'] = 3;
             } else {
                 $t_draft[$i]['stage'] = 1;
@@ -1336,6 +1518,10 @@ function fetch($match) {
       ];
 
       foreach ($player['purchase_log'] as $item) {
+        // FIXME:
+        if ($item['key'] == "helm_of_the_dominator_2") {
+          $item['key'] = "helm_of_the_overlord";
+        }
         $iid = $items_flip[$item['key']];
         if (!in_array($iid, $meta['item_categories']['consumables'])) {
           continue;
@@ -1361,6 +1547,7 @@ function fetch($match) {
         }
       }
 
+      sort($sti);
       $t_starting_items[] = [
         'matchid' => $match,
         'playerid' => $player['account_id'],
@@ -1374,7 +1561,29 @@ function fetch($match) {
     // ability_upgrades_arr
     $t_skill_builds = [];
     foreach ($matchdata['players'] as $player) {
-      if (empty($player['ability_upgrades_arr'])) continue;
+      if (empty($player['ability_upgrades_arr'])) {
+        if (empty($player['ability_level_times'])) {
+          continue;
+        }
+        
+        $player['ability_upgrades_arr'] = [];
+        foreach ($player['ability_level_times'] as $time => $ability_tag_orig) {
+          if (isset($meta['spells_linked'][$ability_tag_orig])) {
+            $ability_tag = $meta['spells_linked'][$ability_tag_orig];
+          } else {
+            $ability_tag = $ability_tag_orig;
+          }
+          if ($t_match['modeID'] != 18 && $player['hero_id'] == 86) {
+            foreach ($matchdata['players'] as $pl) {
+              if (in_array($ability_tag, $pl['ability_level_times']) || in_array($ability_tag_orig, $pl['ability_level_times'])) {
+                continue 2;
+              }
+            }
+          }
+          $ability = array_flip($meta['spells_tags'])[$ability_tag];
+          $player['ability_upgrades_arr'][] = $ability;
+        }
+      }
       $sti = skillPriority($player['ability_upgrades_arr'], $player['hero_id'], $player['hero_id'] == 74);
       $t_skill_builds[] = [
         'matchid' => $match,
@@ -1401,8 +1610,8 @@ function fetch($match) {
       foreach($pl['obs_log'] as $ward) {
         if (empty($ward['ehandle'])) continue;
         $wards_log[$pl['account_id']][ $ward['ehandle'] ] = [
-          'x_c' => $ward['x'],
-          'y_c' => $ward['y'],
+          'x_c' => $ward['x'] ?? $ward['key'][0],
+          'y_c' => $ward['y'] ?? $ward['key'][1],
           'time' => $ward['time'],
           'alive' => 360,
           'destroyed_at' => null,
@@ -1418,8 +1627,8 @@ function fetch($match) {
           if (!isset($wards_destruction_log[ $ward['attackername'] ])) $wards_destruction_log[ $ward['attackername'] ] = [];
 
           $wards_destruction_log[ $ward['attackername'] ][] = [
-            'x_c' => $ward['x'],
-            'y_c' => $ward['y'],
+            'x_c' => $ward['x'] ?? $ward['key'][0],
+            'y_c' => $ward['y'] ?? $ward['key'][1],
             'time' => $ward['time'],
           ];
         }
@@ -1427,15 +1636,15 @@ function fetch($match) {
 
       foreach($pl['sen_log'] as $ward) {
         $sentries_log[$pl['account_id']][ $ward['ehandle'] ?? "null" ] = [
-          'x_c' => $ward['x'],
-          'y_c' => $ward['y'],
+          'x_c' => $ward['x'] ?? $ward['key'][0],
+          'y_c' => $ward['y'] ?? $ward['key'][1],
           'time' => $ward['time'],
         ];
       }
     }
-
+    
     foreach ($matchdata['players'] as $pl) {
-      $r['wards'][] = [
+      $t_wards[] = [
         'matchid' => $match,
         'playerid' => $pl['account_id'],
         'heroid' => $pl['hero_id'],
@@ -1444,6 +1653,7 @@ function fetch($match) {
         'destroyed_log' => addslashes(\json_encode(array_values($wards_destruction_log[ $pl['account_id'] ] ?? []))),
       ];
     }
+    $r['wards'] = $t_wards;
   }
 
   $n = array_search($match, $scheduled);
@@ -1628,11 +1838,12 @@ function fetch($match) {
     return null;
   }
 
-  $sql = "INSERT INTO matchlines (matchid, playerid, heroid, level, isRadiant, kills, deaths, assists, networth,".
+  $sql = "INSERT INTO matchlines (matchid, playerid, heroid, ".($schema['variant_supported'] ? "variant, " : "")."level, isRadiant, kills, deaths, assists, networth,".
           "gpm, xpm, heal, heroDamage, towerDamage, lastHits, denies) VALUES ";
   foreach($t_matchlines as $ml) {
       if (!$ml['heroid']);
       $sql .= "\n\t(".$ml['matchid'].",".$ml['playerid'].",".$ml['heroid'].",".
+          ($schema['variant_supported'] ? (($ml['variant'] ?? null) ? $ml['variant'] : "null")."," : "").
           $ml['level'].",".($ml['isRadiant'] ? "true" : "false").",".$ml['kills'].",".
           $ml['deaths'].",".$ml['assists'].",".$ml['networth'].",".
           $ml['gpm'].",".$ml['xpm'].",".($ml['heal'] ?? 0).",".
@@ -1732,6 +1943,7 @@ function fetch($match) {
     }
     foreach($t_adv_matchlines as &$aml) {
       if (!$aml['heroid']) continue;
+      if (!isset($aml['time_dead']) || $aml['time_dead'] < 0) $aml['time_dead'] = 0;
 
       $sql .= "\n\t(".$aml['matchid'].",".$aml['playerid'].",".$aml['heroid'].",".
                   ($aml['lh_at10'] ?? 0).",".$aml['isCore'].",".$aml['lane'].",".
@@ -1739,7 +1951,7 @@ function fetch($match) {
                   $aml['efficiency_at10'].",".($aml['wards'] ?? 0).",".($aml['sentries'] ?? 0).",".
                   $aml['couriers_killed'].",".$aml['roshans_killed'].",".$aml['wards_destroyed'].",".
                   $aml['multi_kill'].",".$aml['streak'].",".($aml['stacks'] ?? 0).",".
-                  ($aml['time_dead'] ?? 0).",".($aml['buybacks'] ?? 0).",".$aml['pings'].",".
+                  $aml['time_dead'].",".($aml['buybacks'] ?? 0).",".$aml['pings'].",".
                   ($aml['stuns'] ?? 0).",".$aml['teamfight_part'].",".$aml['damage_taken']."),";
     }
     $sql[strlen($sql)-1] = ";";
@@ -1934,6 +2146,8 @@ function fetch($match) {
       if (empty($t['wards_log'])) $t['wards_log'] = "[]";
       if (empty($t['sentries_log'])) $t['sentries_log'] = "[]";
       if (empty($t['destroyed_log'])) $t['destroyed_log'] = "[]";
+
+      $t['heroid'] = $t['hero_id'] ?? $t['heroid'];
 
       $sql .= "\n\t({$t['matchid']}, {$t['playerid']}, {$t['heroid']}, '{$t['wards_log']}', '{$t['sentries_log']}', '{$t['destroyed_log']}'),";
     }

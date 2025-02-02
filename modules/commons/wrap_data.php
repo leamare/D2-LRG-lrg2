@@ -40,7 +40,9 @@ function wrap_data ($array, $with_keys = false, $deep = false, $explicit = false
       $r['data'][] = $a;
       continue;
     }
-    if ($explicit) {
+    if (empty($a)) {
+      $r['data'][] = [];
+    } else if ($explicit) {
       $data = [];
       foreach ($r['head'] as $key) {
         if (isset($a[$key]))

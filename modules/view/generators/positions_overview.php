@@ -61,50 +61,25 @@ function rg_generator_positions_overview($table_id, &$context, $hero_flag = true
       sort($matches);
       $filters["position_$i.$j"] = [
         'value' => $matches[ round(count($matches)/2) ],
-        'label' => "data_filter_positions_${i}.${j}_mp"
+        'label' => "data_filter_positions_{$i}.{$j}_mp"
       ];
-  
-      uasort($context_copy, function($a, $b) use ($total_matches) {
-        return positions_ranking_sort($a, $b, $total_matches);
+
+      positions_ranking($context_copy, $total_matches);
+    
+      uasort($context_copy, function($a, $b) {
+        return $b['wrank'] <=> $a['wrank'];
       });
-  
-      $increment = 100 / sizeof($context_copy); $k = 0; $last_rank = 0;
-  
+    
+      $min = end($context_copy)['wrank'];
+      $max = reset($context_copy)['wrank'];
+    
       foreach ($context_copy as $id => $el) {
-        if(isset($last) && $el['matches_s'] == $last['matches_s'] && $el['winrate_s'] == $last['winrate_s']) {
-          $k++;
-          $ranks[$i][$j][$id] = $last_rank;
-        } else
-          $ranks[$i][$j][$id] = 100 - $increment*$k++;
-        $last = $el;
-        $last_rank = $ranks[$i][$j][$id];
+        $ranks[$i][$j][$id] = 100 * ($el['wrank']-$min) / ($max-$min);
       }
-      unset($last);
+
       unset($context_copy);
 
-      // $antiranks = [];
-      // $context_copy = $context[$i][$j];
-      // foreach($context_copy as &$el)  {
-      //   $el['winrate_s'] = 1-$el['winrate_s'];
-      // }    
-  
-      // uasort($context_copy, function($a, $b) use ($total_matches) {
-      //   return positions_ranking_sort($a, $b, $total_matches);
-      // });
-  
-      // $increment = 100 / sizeof($context_copy); $k = 0;
-  
-      // foreach ($context_copy as $id => $el) {
-      //   if(isset($last) && $el['matches_s'] == $last['matches_s'] && $el['winrate_s'] == $last['winrate_s']) {
-      //     $k++;
-      //     $antiranks[$i][$j][$id] = $last_rank;
-      //   } else
-      //     $antiranks[$i][$j][$id] = 100 - $increment*$k++;
-      //   $last = $el;
-      //   $last_rank = $antiranks[$i][$j][$id];
-      // }
-      // unset($last);
-      // unset($context_copy);
+      // antiranks here
 
       foreach($context[$i][$j] as $id => $el) {
         if (!isset($overview[ $id ])) $overview[ $id ] = $position_overview_template;

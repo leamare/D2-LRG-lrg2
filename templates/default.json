@@ -18,7 +18,7 @@
     "players": true,
     "players_names": true,
     "anon_records": false,
-    "milestones": false,
+    "milestones": true,
 
     "records_extended": 6,
     "avg_limit" : 5,
@@ -58,12 +58,13 @@
 
     "player_positions" : true,
     "player_positions_matches" : true,
-    "player_laning": false,
+    "player_laning": true,
 
     "players_draft": true,
 
     "pvp" : true,
     "pvp_matches" : true,
+    "player_cards_heroes": true,
 
     "player_pairs" : true,
     "player_pairs_matches": true,
@@ -104,9 +105,10 @@
         "101": [1, 2],
         "1021": [3],
         "1022": [8, 9],
-        "103": [4, 5, 6, 16, 19],
+        "103": [4, 5, 16, 19],
         "105": [14, 15, 10],
         "107": [12, 13, 17, 18, 20, 25],
+        "106": [6],
         "199": []
       },
       "records" : true,
@@ -136,8 +138,29 @@
     },
 
     "items": false,
-    "skill_builds": true,
-    "starting_items": true
+    "skill_builds": false,
+    "starting_items": false,
+    "starting_builds": false,
+    "consumables": false,
+    "starting_items_players": false,
+    "starting_builds_players": false,
+    "consumables_players": false,
+    
+    "starting_items_roles": true,
+
+    "starting_builds_roles": true,
+    "starting_builds_limit": true,
+    "starting_builds_roles_limit": false,
+
+    "consumables_roles": true,
+    
+    "starting_items_players_roles": false,
+    
+    "starting_builds_players_roles": false,
+    "starting_builds_players_limit": true,
+    "starting_builds_roles_players_limit": true,
+    
+    "consumables_players_roles": false
   },
   "web": {
     "custom_style" : "",

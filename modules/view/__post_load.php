@@ -126,12 +126,14 @@ if (!empty($report['settings']['heroes_snapshot'])) {
   $meta['heroes'];
   $diff = array_diff(array_keys($meta['heroes']), $report['settings']['heroes_snapshot']);
   foreach ($diff as $hid) {
-    unset($meta['heroes'][$hid]);
+    if (!isset($report['pickban'][$hid]))
+      unset($meta['heroes'][$hid]);
   }
 } else if (!empty($report['settings']['heroes_exclude'])) {
   $meta['heroes'];
   foreach ($report['settings']['heroes_exclude'] as $hid) {
-    unset($meta['heroes'][$hid]);
+    if (!isset($report['pickban'][$hid]))
+      unset($meta['heroes'][$hid]);
   }
 }
 

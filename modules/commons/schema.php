@@ -10,9 +10,15 @@ $schema = [
   'draft_order' => false, // order
   'teams' => false,
   'items' => false,
+  'itemslines' => false,
+  'items_blocks' => false,
   'skill_build_attr' => false,
   'starting_consumables' => false,
   'wards' => false,
+  'medians_available' => false,
+  'percentile_available' => false,
+  'variant_supported' => false,
+  'variant' => false,
 ];
 
 echo "[ ] Getting tables\n";
@@ -28,6 +34,14 @@ for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row(
       $schema['teams'] = true;
       break;
     case "items":
+      $schema['items'] = true;
+      break;
+    case "itemslines":
+      $schema['itemslines'] = true;
+      $schema['items'] = true;
+      break;
+    case "items_blocks":
+      $schema['items_blocks'] = true;
       $schema['items'] = true;
       break;
     case "wards":
@@ -52,6 +66,28 @@ for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row(
   }
 }
 $query_res->free_result();
+
+$sql = "DESCRIBE matchlines;";
+if ($conn->multi_query($sql) === FALSE)
+  die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+$query_res = $conn->store_result();
+for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+  if ($row[0] == "variant") {
+    $schema['variant_supported'] = true;
+    break;
+  }
+}
+$query_res->free_result();
+
+if ($schema['variant_supported']) {
+  $sql = "SELECT * FROM matchlines WHERE variant is not null AND variant > 0;";
+  $mres = $conn->query($sql);
+  if ($mres === FALSE)
+    die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+  if ($mres->num_rows > 0) {
+    $schema['variant'] = true;
+  }
+}
 
 $sql = "DESCRIBE adv_matchlines;";
 if ($conn->multi_query($sql) === FALSE)
@@ -116,3 +152,19 @@ if ($schema['starting_items']) {
   }
   $query_res->free_result();
 }
+
+$sql = "SELECT * FROM mysql.func WHERE name like \"percentile_cont\";";
+$query_res = $conn->query($sql);
+if ($query_res === FALSE) die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+if ($query_res->num_rows ?? 0) {
+  $schema['percentile_available'] = true;
+}
+$query_res->free();
+
+$sql = "SELECT * FROM mysql.func WHERE name like \"percentile_cont\";";
+$query_res = $conn->query($sql);
+if ($query_res === FALSE) die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+if ($query_res->num_rows ?? 0) {
+  $schema['medians_available'] = true;
+}
+$query_res->free();

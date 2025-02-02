@@ -26,12 +26,16 @@ while (true) {
     
   $stratz_request = "https://api.stratz.com/graphql";
 
-  $q = http_build_query($data);
-
-  $json = file_get_contents($stratz_request.'?'.$q, false, stream_context_create([
+  $json = file_get_contents($stratz_request, false, stream_context_create([
     'ssl' => [
       'verify_peer' => false,
       'verify_peer_name' => false,
+    ],
+    'http' => [
+      'method' => 'POST',
+      'header'  => "Content-Type: application/json\r\nKey: $stratztoken\r\nUser-Agent: STRATZ_API\r\n",
+      'content' => json_encode($data),
+      'timeout' => 60,
     ]
   ]));
 

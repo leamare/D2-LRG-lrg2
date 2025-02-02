@@ -77,15 +77,24 @@ foreach ($matches as $match) {
       } 
     }",
   ];
-  if (!empty($stratztoken)) $data['key'] = $stratztoken;
   
   $stratz_request = "https://api.stratz.com/graphql";
 
-  $q = http_build_query($data);
   $error = null;
 
   try {
-    $json = file_get_contents($stratz_request.'?'.$q);
+    $json = file_get_contents($stratz_request, false, stream_context_create([
+      'ssl' => [
+        'verify_peer' => false,
+        'verify_peer_name' => false,
+      ],
+      'http' => [
+        'method' => 'POST',
+        'header'  => "Content-Type: application/json\r\nKey: $stratztoken\r\nUser-Agent: STRATZ_API\r\n",
+        'content' => json_encode($data),
+        'timeout' => 60,
+      ]
+    ]));
   } catch (Exception $e) {
     $json = null;
     $error = $e->getMessage();
@@ -118,7 +127,7 @@ foreach ($matches as $match) {
   foreach ($stratz['data']['match']['players'] as $pl) {
     if (empty($pl['steamAccountId'])) continue;
     if (!isset($t_players[$pl['steamAccountId']])) {
-      $name = $pl['steamAccount']['proSteamAccount']['name'] ?? $pl['steamAccount']['name'];
+      $name = $pl['steamAccount']['proSteamAccount']['name'] ?? $pl['steamAccount']['name'] ?? "Player ".$pl['steamAccountId'];
       $update_events[] = "INSERT INTO players (playerID, nickname) VALUES (".$pl['steamAccountId'].",\"".addslashes($name)."\");";
       $t_players[$pl['steamAccountId']] = $name;
     }

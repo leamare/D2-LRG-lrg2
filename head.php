@@ -31,7 +31,7 @@ if(isset($argv)) {
 
 # global settings
 
-  $lrg_version = [2, 25, 1, 0, 0];
+  $lrg_version = [2, 26, 1, 0, 0];
 
   $settings = json_decode(file_get_contents("rg_settings.json"), true);
 
@@ -43,6 +43,10 @@ if(isset($argv)) {
   $stratztoken   = $settings['stratztoken'] ?? '';
   $odapikey      = $settings['odapikey'] ?? '';
   $mysql_median  = (bool)($settings['mysql_stats_func'] ?? false);
+  $fallback_valveapi = $settings['steampi_fallback'] ?? false;
+
+  $sti_blocks_query = $settings['sti_blocks_query'] ?? false;
+  $sti_blocks_size  = $settings['sti_blocks_size'] ?? null;
 
   unset($settings);
 

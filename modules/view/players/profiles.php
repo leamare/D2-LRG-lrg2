@@ -18,7 +18,8 @@ function rg_view_generate_players_profiles() {
 
   uasort($pnames, function($a, $b) {
     if($a == $b) return 0;
-    else return ($a > $b) ? 1 : -1;
+    
+    return strcasecmp($a, $b);
   });
 
   foreach($pnames as $pid => $name) {
@@ -164,6 +165,7 @@ function rg_view_generate_players_profiles() {
         }
         if (!empty($context_records_ext)) {
           foreach ($context_records_ext[$rectag] ?? [] as $i => $rec) {
+            if (empty($rec)) continue;
             if ($rec['playerid'] == $player) {
               $rec['tag'] = $rectag;
               $rec['placement'] = $i+2;

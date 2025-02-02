@@ -1,4 +1,4 @@
-<?php  $__postfix = "?v=22601"; ?>
+<?php  $__postfix = "?v=227006"; ?>
 <!DOCTYPE html>
 <html lang="<?php echo $locale; ?>">
   <head>
@@ -145,7 +145,12 @@
     </header>
     <?php 
       if (!empty($previewcode) && $_earlypreview) echo "<div class=\"support-me-block early-access\">".locale_string("earlypreview")."</div>";
-      else if (!empty($support_me_block)) echo "<div class=\"support-me-block\">$support_me_block</div>";
+      else if (!empty($support_me_block)) {
+        if (isset($support_me_block_link))
+          echo "<a href=\"$support_me_block_link\" target=\"_blank\" class=\"support-me-block support-me-block-link\">$support_me_block</a>";
+        else
+          echo "<div class=\"support-me-block\">$support_me_block</div>";
+      }
     ?>
     <?php 
       if (!empty($support_me_block_second)) echo "<div class=\"support-me-block-secondary\">$support_me_block_second</div>";
@@ -153,7 +158,7 @@
     <?php 
       if (!empty($ads_block) && !empty($leaguetag)) echo "<div class=\"ads-block-report\">$ads_block</div>";
     ?>
-    <div id="content-wrapper">
+    <div id="content-wrapper" <?php echo $__tmpl_trust ? "" : "class=\"shady\""; ?>>
       <div id="header-image" class="section-header">
     <?php if (!empty($leaguetag)) { ?>
       <?php if(!isset($custom_logo)) {?>
@@ -177,20 +182,27 @@
         <?php } ?>
     <?php } ?>
     <?php 
-      if (!empty($global_partners) || (!empty($leaguetag) && !empty($report['sponsors']))) {
-        echo "<div class=\"partners-list ".(isset($custom_logo) ? "special-logo" : "")."\">";
-        
-        $partners_raw = (!empty($leaguetag) && !empty($report['sponsors'])) ? $report['sponsors'] : ($global_partners ?? []);
-        $partners = [];
-        foreach ($partners_raw as $type => $link) {
-          $partners[] = "<a target=\"_blank\" href=\"".$link."\" class=\"shoutout-link\">".
-          // FIXME:
-            (stripos($type, "stratz") !== false ? "<img src=\"https://spectral.gg/res/social/stratz_white.png\" class=\"sponsor-icon\"> " : "").
-          $type."</a>";
-        }
-        echo implode(", ", $partners);
+      if ($__tmpl_trust) {
+        if (!empty($global_partners) || (!empty($leaguetag) && !empty($report['sponsors']))) {
+          $stratz_partner = false;
+          $partners_raw = (!empty($leaguetag) && !empty($report['sponsors'])) ? $report['sponsors'] : ($global_partners ?? []);
+          $partners = [];
+          foreach ($partners_raw as $type => $link) {
+            if (stripos($type, "stratz") !== false) $stratz_partner = true;
+            $partners[] = "<a target=\"_blank\" href=\"".$link."\" class=\"shoutout-link\">".
+            // FIXME:
+              (stripos($type, "stratz") !== false ? "<img src=\"https://spectral.gg/res/social/stratz_white.png\" class=\"sponsor-icon\"> " : "").
+            $type."</a>";
+          }
 
-        echo "</div>";
+          echo "<div class=\"partners-list".(isset($custom_logo) ? " special-logo" : "").($stratz_partner ? " stratz-partner" : "")."\">";
+          
+          echo implode(", ", $partners);
+
+          echo "</div>";
+        }
+      } else {
+        echo "<div class=\"partners-list special-logo\"><img src=\"res/warning.png\" class=\"sponsor-icon\" /> ".locale_string('shady_alert')."</div>";
       }
     ?>
     </div>
@@ -213,13 +225,13 @@
           echo "LRG web version: <a>".parse_ver($lg_version)."</a>. ";
         ?>
       </footer>
-      <div class="modal" id="modal-box">
-        <div class="modal-content">
+      <dialog class="modal-content" id="modal-box">
+        <div class="modal-dialog-container">
           <div class="modal-header"></div>
           <div id="modal-text" class="modal-text"></div>
           <div id="modal-sublevel" class="modal-sublevel"></div>
         </div>
-      </div>
+      </dialog>
       <script type="text/javascript" src="res/dependencies/jquery.min.js<?php echo $__postfix; ?>"></script>
       <script type="text/javascript" src="res/dependencies/jquery.tablesorter.min.js<?php echo $__postfix; ?>"></script>
       <!-- <script type="text/javascript" src="res/dependencies/jquery.tablesorter-mod.js<?php echo $__postfix; ?>"></script> -->

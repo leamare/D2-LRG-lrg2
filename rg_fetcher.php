@@ -62,9 +62,12 @@ if (!empty($options['N'])) {
   $rank_limit = (int)$options['N'];
 }
 
+$min_duration_seconds = $lg_settings['min_duration'] ?? 600;
+$min_score_side = $lg_settings['min_score_side'] ?? 5;
+
 if (!empty($options['d'])) {
-  $api_cooldown = ((int)$options['d'])*1000;
-  $api_cooldown_seconds = ((int)$options['d']);
+  $api_cooldown = ((float)$options['d'])*1000;
+  $api_cooldown_seconds = ((float)$options['d']);
 } else {
   $api_cooldown_seconds = 2;
 }
@@ -279,7 +282,7 @@ while(sizeof($matches) || $listen) {
 
   if ($stratz_graphql_group) {
     if (!$stratz_graphql_group_counter) {
-      $stratz_graphql_group_counter = $stratz_graphql_group-1;
+      $stratz_graphql_group_counter = $stratz_graphql_group;
 
       $stratz_cache = [];
 
@@ -314,7 +317,11 @@ while(sizeof($matches) || $listen) {
       
       echo "[Z] Requesting group of $stratz_graphql_group matches\n";
 
-      get_stratz_multiquery($group);
+      try {
+        get_stratz_multiquery($group);
+      } catch (\Throwable $e) {
+        echo "[E] Error requesting following group: [".implode(', ', $group)."], skipping\n";
+      }
     }
   }
 
@@ -341,6 +348,7 @@ while(sizeof($matches) || $listen) {
     }
   }
 
+
   $r = fetch($match);
   if ($r === FALSE) { //|| ($force_await && $request_unparsed && $r !== TRUE)) {
     array_push($matches, $match);
@@ -355,7 +363,7 @@ if (sizeof($failed_matches)) {
   echo "[_] Recording failed matches to file...\n";
 
   $output = implode("\n", $failed_matches);
-  $filename = "tmp/failed".time();
+  $filename = "tmp/failed_$lrg_league_tag".'_'.time();
   $f = fopen($filename, "w");
   fwrite($f, $output);
   fclose($f);

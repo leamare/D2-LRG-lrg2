@@ -2,11 +2,15 @@
 
 $repeatVars['hvh'] = ['heroid'];
 
-$endpoints['hvh'] = function($mods, $vars, &$report) {
+$endpoints['hvh'] = function($mods, $vars, &$report) use (&$endpoints) {
   if (isset($vars['team'])) {
     throw new \Exception("No team allowed");
   } else if (isset($vars['region'])) {
     throw new \Exception("No region allowed");
+  }
+
+  if (isset($vars['variant']) || in_array("variants", $mods)) {
+    return $endpoints['variants-hvh']($mods, $vars, $report);
   }
 
   $hvh = rg_generator_pvp_unwrap_data($report['hvh'], $report['pickban']);
@@ -18,47 +22,40 @@ $endpoints['hvh'] = function($mods, $vars, &$report) {
       'ms' => $report['pickban'][ $srcid ]['matches_picked']
     ];
 
-    $compound_ranking_sort = function($a, $b) use ($dt) {
-      return positions_ranking_sort($a, $b, $dt['ms']);
-    };
-    uasort($pvp_context, $compound_ranking_sort);
     $pvp_context_cpy = $pvp_context;
+
+    positions_ranking($pvp_context, $dt['ms']);
+
+    uasort($pvp_context, function($a, $b) {
+      return $b['wrank'] <=> $a['wrank'];
+    });
   
-    $increment = 100 / sizeof($pvp_context); $i = 0;
+    $min = end($pvp_context)['wrank'];
+    $max = reset($pvp_context)['wrank'] + 0.01;
   
     foreach ($pvp_context as $elid => $el) {
-      if(isset($last) && $el == $last) {
-        $i++;
-        $pvp_context[$elid]['rank'] = $last_rank ?? 0;
-      } else
-        $pvp_context[$elid]['rank'] = round(100 - $increment*$i++, 2);
-      $last = $el;
-      $last_rank = $pvp_context[$elid]['rank'];
-      
+      $pvp_context[$elid]['rank'] = 100 * ($el['wrank']-$min) / ($max-$min);
       $pvp_context_cpy[$elid]['winrate'] = 1-$pvp_context_cpy[$elid]['winrate'];
     }
 
-    unset($last);
+    positions_ranking($pvp_context_cpy, $dt['ms']);
 
-    uasort($pvp_context_cpy, $compound_ranking_sort);
-    $i = 0;
+    uasort($pvp_context_cpy, function($a, $b) {
+      return $b['wrank'] <=> $a['wrank'];
+    });
+  
+    $min = end($pvp_context_cpy)['wrank'];
+    $max = reset($pvp_context_cpy)['wrank'] + 0.01;
   
     foreach ($pvp_context_cpy as $elid => $el) {
-      if(isset($last) && $el == $last) {
-        $i++;
-        $pvp_context[$elid]['arank'] = $last_rank;
-      } else
-        $pvp_context[$elid]['arank'] = round(100 - $increment*$i++, 2);
-      $last = $el;
-      $last_rank = $pvp_context[$elid]['arank'];
+      $pvp_context[$elid]['arank'] = 100 * ($el['wrank']-$min) / ($max-$min);
+      unset($pvp_context[$elid]['wrank']);
 
-      if (isset($el['expectation'])) {
+      if (isset($el['expectation']) && !isset($el['deviation'])) {
         $pvp_context[$elid]['deviation'] = $el['matches']-$el['expectation'];
         $pvp_context[$elid]['deviation_pct'] = round(($el['matches']-$el['expectation'])*100/$el['matches'], 2);
       }
     }
-  
-    unset($last);
   }
 
   if (isset($vars['heroid'])) {
@@ -85,4 +82,126 @@ $endpoints['hvh'] = function($mods, $vars, &$report) {
     ];
   }
   return $hvh;
+};
+
+$endpoints['variants-hvh'] = function($mods, $vars, &$report) use (&$endpoints) {
+  if (isset($vars['team'])) {
+    throw new \Exception("No team allowed");
+  } else if (isset($vars['region'])) {
+    throw new \Exception("No region allowed");
+  }
+
+  if (!isset($vars['heroid'])) {
+    throw new \Exception("Can't get variants HvH data without a hero");
+  }
+
+  $hvh = rg_generator_pvp_unwrap_data($report['hvh_v'], $report['hero_variants'], true, true);
+
+  if (!isset($vars['variant'])) {
+    $hid = $vars['heroid'];
+    
+    $variants = get_hero_variants_list($vars['heroid']);
+    if (isset($hvh[$hid.'-0'])) {
+      array_unshift($variants, "_no_variant_");
+    }
+
+    $hid = $vars['heroid'];
+    
+    $report['hero_variants'][$hid."-x"] = [
+      'm' => 0,
+      'w' => 0,
+      'f' => 1,
+    ];
+    $hvh[$hid."-x"] = [];
+    foreach ($variants as $i => $tag) {
+      $i++;
+      if (empty($report['hero_variants'][$hid."-".$i])) continue;
+      $report['hero_variants'][$hid."-x"]['m'] += $report['hero_variants'][$hid."-".$i]['m'];
+      $report['hero_variants'][$hid."-x"]['w'] += $report['hero_variants'][$hid."-".$i]['w'];
+
+      foreach ($hvh[$hid."-".$i] as $opid => $data) {
+        if (!isset($hvh[$hid."-x"][$opid])) {
+          $hvh[$hid."-x"][$opid] = [
+            "matches" => 0,
+            "expectation" => 0,
+            "won" => 0,
+            "lost" => 0,
+            "winrate" => null,
+            "diff" => null,
+            "lane_rate" => 0,
+            "lane_wr" => 0,
+          ];
+        }
+
+        $hvh[$hid."-x"][$opid]['matches'] += $data['matches'];
+        $hvh[$hid."-x"][$opid]['expectation'] += $data['expectation'];
+        $hvh[$hid."-x"][$opid]['won'] += $data['won'];
+        $hvh[$hid."-x"][$opid]['lost'] += $data['lost'];
+        $hvh[$hid."-x"][$opid]['lane_rate'] += round($data['lane_rate'] * $data['matches']);
+        $hvh[$hid."-x"][$opid]['lane_wr'] += $data['lane_rate'] * $data['matches'] * $data['lane_wr'];
+      }
+    }
+    $wr = $report['hero_variants'][$hid."-x"]['w']/$report['hero_variants'][$hid."-x"]['m'];
+    foreach ($hvh[$hid."-x"] as $opid => $data) {
+      $hvh[$hid."-x"][$opid]['winrate'] = $data['won']/$data['matches'];
+      $hvh[$hid."-x"][$opid]['diff'] = $hvh[$hid."-x"][$opid]['winrate'] - $wr;
+      $hvh[$hid."-x"][$opid]['lane_wr'] = $data['lane_wr']/($data['lane_rate'] ?: 1);
+      $hvh[$hid."-x"][$opid]['lane_rate'] = $data['lane_rate']/$data['matches'];
+    }
+  }
+
+  $srcid = $vars['heroid'].'-'.($vars['variant'] ?? 'x');
+
+  foreach ($hvh as $srcid => &$pvp_context) {
+    if (isset($vars['heroid']) && $vars['heroid'].'.'.$vars['variant'] != $srcid) continue;
+
+    $dt = [
+      'ms' => $report['hero_variants'][ $srcid ]['m']
+    ];
+
+    $pvp_context_cpy = $pvp_context;
+
+    positions_ranking($pvp_context, $dt['ms']);
+
+    uasort($pvp_context, function($a, $b) {
+      return $b['wrank'] <=> $a['wrank'];
+    });
+  
+    $min = end($pvp_context)['wrank'];
+    $max = reset($pvp_context)['wrank'] + 0.01;
+  
+    foreach ($pvp_context as $elid => $el) {
+      $pvp_context[$elid]['rank'] = 100 * ($el['wrank']-$min) / ($max-$min);
+      $pvp_context_cpy[$elid]['winrate'] = 1-$pvp_context_cpy[$elid]['winrate'];
+    }
+
+    positions_ranking($pvp_context_cpy, $dt['ms']);
+
+    uasort($pvp_context_cpy, function($a, $b) {
+      return $b['wrank'] <=> $a['wrank'];
+    });
+  
+    $min = end($pvp_context_cpy)['wrank'];
+    $max = reset($pvp_context_cpy)['wrank'] + 0.01;
+  
+    foreach ($pvp_context_cpy as $elid => $el) {
+      $pvp_context[$elid]['arank'] = 100 * ($el['wrank']-$min) / ($max-$min);
+      unset($pvp_context[$elid]['wrank']);
+
+      if (isset($el['expectation']) && !isset($el['deviation'])) {
+        $pvp_context[$elid]['deviation'] = $el['matches']-$el['expectation'];
+        $pvp_context[$elid]['deviation_pct'] = round(($el['matches']-$el['expectation'])*100/$el['matches'], 2);
+      }
+    }
+  }
+
+  return [
+    'reference' => [
+      'id' => $srcid,
+      'matches' => $report['hero_variants'][ $srcid ]['m'],
+      'wins' => $report['hero_variants'][ $srcid ]['w']/$report['hero_variants'][ $srcid ]['m'],
+      'winrate' => $report['hero_variants'][ $srcid ]['w'],
+    ],
+    'opponents' => $hvh[ $srcid ]
+  ];
 };

@@ -1,5 +1,7 @@
 <?php
 
+$_locales_imported = [];
+
 function locale_string($string_id, $vars = [], $loc = null) {
   global $strings, $locale, $localesMap, $fallback_locale;
 
@@ -24,8 +26,8 @@ function locale_string($string_id, $vars = [], $loc = null) {
   return $string;
 }
 
-function include_locale($locale) {
-  global $strings, $localesMap, $isBetaLocale;
+function include_locale($locale, $component = null) {
+  global $strings, $localesMap, $isBetaLocale, $root, $fallback_locale, $rootLocale, $_locales_imported;
 
   if (isset($localesMap[ $locale ]) && ($localesMap[ $locale ]['alias'] ?? false)) {
     $locale = $localesMap[ $locale ]['alias'];
@@ -37,20 +39,48 @@ function include_locale($locale) {
     return false;
   }
 
-  $file = $localesMap[$locale]['file'] ?? 'locales/'.$locale.'.json';
+  $file = [];
+
+  if (isset($component)) {
+    $fpath = $root."/locales_additional/$component";
+
+    if ($rootLocale != $locale && file_exists($fpath."_".$rootLocale.".json")) {
+      $file[] = [ $fpath."_".$rootLocale.".json", $rootLocale ];
+    }
+    if ($fallback_locale && file_exists($fpath."_".$fallback_locale.".json")) {
+      $file[] = [ $fpath."_".$fallback_locale.".json", $fallback_locale ];
+    }
+    if (file_exists($fpath."_".$locale.".json")) {
+      $file[] = [ $fpath."_".$locale.".json", $locale ];
+    }
+    if (file_exists($fpath.".json")) {
+      $file[] = [ $fpath.".json", $rootLocale ];
+    } 
+    
+    if (empty($file)) {
+      return false;
+    }
+
+    $_locales_imported[$component.'.'.$locale] = true;
+  } else {
+    $file[] = [ $localesMap[$locale]['file'] ?? $root.'/locales/'.$locale.'.json', $locale ];
+  }
+  
 
   if (!isset($strings[$locale])) $strings[$locale] = [];
 
   // if (file_exists('locales/'.$locale.'.php')) {
   //   require_once('locales/'.$locale.'.php');
   // } else
-  if (file_exists($file)) {
-    $strings[$locale] = array_merge(
-      $strings[$locale],
-      json_decode(file_get_contents('locales/'.$locale.'.json'), true)
-    );
-    
-  } else return false;
+  foreach ($file as [ $f, $l ]) {
+    if (file_exists($f) && !isset($_locales_imported[$f])) {
+      $strings[$l] = array_merge(
+        $strings[$l],
+        json_decode(file_get_contents($f), true)
+      );
+      $_locales_imported[$f] = true;
+    }
+  }
 
   return true;
 }

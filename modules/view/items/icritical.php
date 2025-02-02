@@ -198,10 +198,10 @@ function rg_view_generate_items_critical() {
     "<th class=\"separator\" data-sorter=\"digit\">".locale_string("winrate")."</th>".
     "<th data-sorter=\"digit\">".locale_string("items_early_wr_shift")."</th>".
     "<th data-sorter=\"digit\">".locale_string("items_wr_gradient")."</th>".
-    "<th class=\"separator\" data-sorter=\"time\">".locale_string("item_time_q1")."</th>".
-    "<th data-sorter=\"time\">".locale_string("item_time_median")."</th>".
-    "<th data-sorter=\"time\">".locale_string("item_time_critical")."</th>".
-    "<th data-sorter=\"time\">".locale_string("item_time_window")."</th>".
+    "<th class=\"separator\" data-sorter=\"valuesort\">".locale_string("item_time_q1")."</th>".
+    "<th data-sorter=\"valuesort\">".locale_string("item_time_median")."</th>".
+    "<th data-sorter=\"valuesort\">".locale_string("item_time_critical")."</th>".
+    "<th data-sorter=\"valuesort\">".locale_string("item_time_window")."</th>".
   "</tr></thead><tbody>";
 
   foreach ($items_rc as $iid => $line) {
@@ -217,10 +217,10 @@ function rg_view_generate_items_critical() {
       "<td class=\"separator\">".number_format($line['winrate']*100, 2)."%</td>".
       "<td>".($line['early_wr'] > $line['winrate'] ? '+' : '').number_format(($line['early_wr']-$line['winrate'])*100, 2)."%</td>".
       "<td>".number_format($line['grad']*100, 2)."%</td>".
-      "<td class=\"separator\">".convert_time_seconds($line['q1'])."</td>".
-      "<td>".convert_time_seconds($line['median'])."</td>".
-      "<td>".convert_time_seconds($line['critical_time'])."</td>".
-      "<td>".convert_time_seconds($line['critical_time']-$line['q1'])."</td>".
+      "<td class=\"separator\" value=\"{$line['q1']}\">".convert_time_seconds($line['q1'])."</td>".
+      "<td value=\"{$line['median']}\">".convert_time_seconds($line['median'])."</td>".
+      "<td value=\"{$line['critical_time']}\">".convert_time_seconds($line['critical_time'])."</td>".
+      "<td value=\"".($line['critical_time']-$line['q1'])."\">".convert_time_seconds($line['critical_time']-$line['q1'])."</td>".
     "</tr>";
   }
 

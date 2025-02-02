@@ -9,10 +9,13 @@ reports/
 libs/
 metadata/
 tmp/
+locales_additional/
 .vscode/
 
 # Settings container
 rg_settings.json
+res/meowslist.json
+res/_meowslist.json
 
 # Temporary files
 tmp*

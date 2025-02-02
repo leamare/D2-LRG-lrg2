@@ -51,26 +51,19 @@ function rg_generator_draft($table_id, &$context_pickban, &$context_draft, $cont
   }
 
   $ranks = [];
-  $compound_ranking_sort = function($a, $b) use ($context_total_matches) {
-    return compound_ranking_sort($a, $b, $context_total_matches);
-  };
+  
+  compound_ranking($context_pickban, $context_total_matches);
 
-  uasort($context_pickban, $compound_ranking_sort);
+  uasort($context_pickban, function($a, $b) {
+    return $b['wrank'] <=> $a['wrank'];
+  });
 
-  $increment = 100 / sizeof($context_pickban); $i = 0;
-  $last_rank = 0;
+  $min = end($context_pickban)['wrank'];
+  $max = reset($context_pickban)['wrank'];
 
   foreach ($context_pickban as $id => $el) {
-    $oi = ($el['matches_picked']*$el['winrate_picked'] + $el['matches_banned']*$el['winrate_banned'])
-      / $context_total_matches * 100;
-    if(isset($last) && $oi == $last) {
-      $i++;
-      $ranks[$id] = $last_rank;
-    } else
-      $ranks[$id] = 100 - $increment*$i++;
-    $last = $oi; $last_rank = $ranks[$id];
+    $ranks[$id] = round(100 * ($el['wrank']-$min) / ($max-$min), 2);
   }
-  unset($last);
 
   $ranks_stages = [];
   for ($i = 1; $i <= $max_stage; $i++) {
@@ -84,25 +77,21 @@ function rg_generator_draft($table_id, &$context_pickban, &$context_draft, $cont
           "matches_banned" => $stages[$i]['ban'] ?? 0,
           "winrate_banned" => $stages[$i]['ban_wr'] ?? 0,
         ];
-
     }
-    uasort($scores, $compound_ranking_sort);
+    compound_ranking($scores, $context_total_matches);
 
-    if (!empty($scores))
-      $increment = 100 / sizeof($scores); $j = 0;
-
+    uasort($scores, function($a, $b) {
+      return $b['wrank'] <=> $a['wrank'];
+    });
+  
+    $min = end($scores)['wrank'];
+    $max = reset($scores)['wrank'];
+  
     foreach ($scores as $id => $el) {
-      if(isset($last) && $el == $last) {
-        $j++;
-        $ranks_stages[$i][$id] = $last_rank;
-      } else
-        $ranks_stages[$i][$id] = 100 - $increment*$j++;
-      $last = $el;
-      $last_rank = $ranks_stages[$i][$id];
+      $draft[$id][$i]['rank'] = 100 * ($el['wrank']-$min) / ($max-$min);
+      $ranks_stages[$i][$id] = $draft[$id][$i]['rank'];
     }
-    unset($last);
   }
-  unset($last_rank);
 
   foreach ($draft as $id => $stages) {
     $draftline = "";

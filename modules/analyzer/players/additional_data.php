@@ -1,10 +1,11 @@
 <?php
 
 $result["players"] = [];
-$sql = "SELECT playerid, nickname FROM players ".
-  (!empty($players_interest) ? " WHERE playerid in (".implode(',', $players_interest).")" : "");
+$sql = "SELECT p.playerid, min(nickname) FROM matchlines ml JOIN players p ON ml.playerid = p.playerid ".
+  (!empty($players_interest) ? " WHERE ml.playerid in (".implode(',', $players_interest).")" : "").
+  " GROUP BY 1;";
 
-if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for PLAYERS.\n";
+ if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for PLAYERS.\n";
 else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
 
 $query_res = $conn->store_result();
@@ -81,24 +82,29 @@ foreach ($result['players'] as $pid => &$name) {
   $query_res->free_result();
 
   # heroes
-  $sql = "SELECT ml.heroid, COUNT(ml.matchid) matches, SUM(NOT m.radiantWin XOR ml.isRadiant) wins FROM matchlines ml JOIN matches m
-          ON m.matchid = ml.matchid WHERE ml.playerid = $pid GROUP BY ml.heroid ORDER BY wins DESC, matches DESC ;";
 
-  if ($conn->multi_query($sql) === TRUE);
-  else die("[F] Unexpected problems when requesting database1.\n".$conn->error."\n");
+  if ($lg_settings['ana']['player_cards_heroes'] ?? true) {
+    $sql = "SELECT ml.heroid, COUNT(ml.matchid) matches, SUM(NOT m.radiantWin XOR ml.isRadiant) wins FROM matchlines ml JOIN matches m
+            ON m.matchid = ml.matchid WHERE ml.playerid = $pid GROUP BY ml.heroid ORDER BY wins DESC, matches DESC LIMIT 5;";
 
-  $query_res = $conn->store_result();
-  $result["players_additional"][$pid]['heroes'] = array();
+    if ($conn->multi_query($sql) === TRUE);
+    else die("[F] Unexpected problems when requesting database1.\n".$conn->error."\n");
 
-  for ($i=0, $row = $query_res->fetch_row(); $i<4 && $row != null; $i++, $row = $query_res->fetch_row()) {
-    $result["players_additional"][$pid]['heroes'][] = array(
-      "heroid" => $row[0],
-      "matches" => $row[1],
-      "wins" => $row[2]
-    );
+    $query_res = $conn->store_result();
+    $result["players_additional"][$pid]['heroes'] = array();
+
+    for ($i=0, $row = $query_res->fetch_row(); $i<4 && $row != null; $i++, $row = $query_res->fetch_row()) {
+      $result["players_additional"][$pid]['heroes'][] = array(
+        "heroid" => $row[0],
+        "matches" => $row[1],
+        "wins" => $row[2]
+      );
+    }
+
+    $query_res->free_result();
+  } else {
+    $result["players_additional"][$pid]['heroes'] = [];
   }
-
-  $query_res->free_result();
 
   # positions
   $sql = "SELECT aml.lane, COUNT(distinct aml.matchid) matches, SUM(NOT m.radiantWin XOR ml.isRadiant) wins FROM adv_matchlines aml

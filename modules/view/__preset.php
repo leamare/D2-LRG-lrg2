@@ -142,7 +142,32 @@ const SUMMARY_KEYS_REPLACEMENTS = [
   "follower_pick_radiant_winrate" => "follower_pick_radiant_winrate_s",
   "follower_pick_dire_winrate" => "follower_pick_dire_winrate_s",
   "follower_pick_radiant_ratio" => "follower_pick_radiant_ratio_s",
-  "opener_pick_radiant_ratio" => "follower_pick_radiant_ratio_s",
+  "opener_pick_radiant_ratio" => "opener_pick_radiant_ratio_s",
+];
+
+const VALUESORT_COLS_KEYS = [
+  'duration',
+  'avg_match_len',
+  'matches_median_duration',
+  'avg_win_len',
+];
+
+const ROLES_IDS = [
+  'total',
+  'position_1.1',
+  'position_1.2',
+  'position_1.3',
+  'position_0.3',
+  'position_0.1',
+];
+
+const ROLES_IDS_SIMPLE = [
+  '',
+  '1.1',
+  '1.2',
+  '1.3',
+  '0.3',
+  '0.1',
 ];
 
 if (isset($__lrg_onerror) && !$isApi) {

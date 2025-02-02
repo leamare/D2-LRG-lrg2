@@ -9,8 +9,10 @@ $imports_ignore = [
   "check_directory.php",
 ];
 
-$lg_version = [ 2, 26, 0, 0, 0 ];
+$lg_version = [ 2, 27, 0, 0, 0 ];
 $isApi = false;
+
+$root = dirname(__FILE__);
 
 $imports = scandir("modules/commons/");
 foreach ($imports as $f) {
@@ -51,6 +53,8 @@ if(isset($_REQUEST['loc']) && !empty($_REQUEST['loc'])) {
 }
 
 // require_once('locales/en.php');
+$rootLocale = $localesMap['def']['alias'];
+
 include_locale('en');
 if(strtolower($locale) != "en") {
   include_locale($locale) or $locale = "en";
@@ -89,8 +93,6 @@ include_once("modules/view/__preset.php");
 
 // INITIALISATION
 
-$root = dirname(__FILE__);
-
 $linkvars = [];
 $carryon = [];
 
@@ -118,9 +120,16 @@ if ($lrg_use_get) {
     $override_style = $_GET['stow'];
     $linkvars[] = array("stow", $_GET['stow']);
   }
+  if(isset($_GET['oldschool']) && !empty($_GET['oldschool'])) {
+    $_oldschool_mode = true;
+    $linkvars[] = ['oldschool', 1];
+  } else {
+    $_oldschool_mode = false;
+  }
   if(!empty($previewcode) && isset($_GET['earlypreview']) && ($_GET['earlypreview'] == $previewcode)) {
     $linkvars[] = [ "earlypreview", $previewcode ];
     $_earlypreview = true;
+    $hide_sti_block = false;
   }
   if(isset($_GET['cat']) && !empty($_GET['cat'])) {
     $cat = $_GET['cat'];
@@ -164,6 +173,11 @@ if (!empty($leaguetag)) {
   }
 }
 
+if (file_exists($cats_file)) {
+  $cats = file_get_contents($cats_file);
+  $cats = json_decode($cats, true);
+}
+
 $meta = new lrg_metadata;
 
 if (isset($report)) {
@@ -191,8 +205,9 @@ if (isset($report)) {
         isset($report['hero_sides']) || isset($report['hero_pairs']) || isset($report['hero_triplets']))
           include_once("modules/view/heroes.php");
 
-    if (!empty($report['items']) && !empty($report['items']['pi']))
+    if ((!empty($report['items']) && !empty($report['items']['pi'])) || !empty($report['starting_items'])) {
       include_once("modules/view/items.php");
+    }
 
     if (isset($report['players']) || isset($report['players_summary']))
       include_once("modules/view/players.php");
@@ -237,7 +252,7 @@ if (isset($report)) {
   }
 
   # items
-  if (isset($modules['items']) && check_module("items") && !empty($report['items'])) {
+  if (isset($modules['items']) && check_module("items") && (!empty($report['items']) || !empty($report['starting_items']))) {
     merge_mods($modules['items'], rg_view_generate_items());
   }
 
@@ -270,6 +285,17 @@ if (isset($report)) {
 
 if (file_exists("rg_report_out_prerender.php"))
   include_once("rg_report_out_prerender.php");
+
+$__tmpl_trust = true;
+if (isset($shady_cat) && isset($cats[$shady_cat])) {
+  if (!empty($leaguetag)) {
+    $__tmpl_trust = !check_filters($cache['reps'][$leaguetag], $cats[$shady_cat]['filters']);
+  } else if (isset($cat)) {
+    $__tmpl_trust = $cat != $shady_cat;
+  } else {
+    $__tmpl_trust = true;
+  }
+}
 
 include_once("modules/view/__template.php");
 require_once("modules/view/__post_render.php");

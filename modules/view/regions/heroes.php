@@ -8,8 +8,51 @@ $parent_mod = $modstr."-heroes-";
 $res["region".$region]['heroes']["pickban"] = "";
 include_once("heroes/pickban.php");
 
-if(check_module($parent_mod."pickban")) {
-  $res["region".$region]['heroes']['pickban'] = rg_view_generate_regions_heroes_pickban($region, $reg_report);
+if(check_module($parent_mod."pickban") || check_module($parent_mod."variantspb") || check_module($parent_mod."rolepickban")) {
+  $variants = [];
+  global $leaguetag;
+
+  $cursection = "pickban";
+
+  if (isset($reg_report['hvariants']) && check_module($parent_mod."variantspb")) {
+    include_once("heroes/variants_pickban.php");
+    $res["region".$region]['heroes']['pickban'] = rg_view_generate_regions_heroes_variantspb($region, $reg_report);
+    $cursection = "variantspb";
+  } else if (isset($reg_report['hero_positions']) && check_module($parent_mod."rolepickban")) {
+    include_once("heroes/rolepickban.php");
+    $res["region".$region]['heroes']['pickban'] = rg_view_generate_regions_heroes_rolepickban($region, $reg_report);
+    $cursection = "rolepickban";
+  } else {
+    $res["region".$region]['heroes']['pickban'] = rg_view_generate_regions_heroes_pickban($region, $reg_report);
+  }
+
+  $variants[] = "<span class=\"selector".($cursection == "pickban" ? " active" : "")."\">".
+    "<a href=\"?league=".$leaguetag."&mod=regions-region$region-heroes-pickban".(empty($linkvars) ? "" : "&".$linkvars)."\">".
+      locale_string("overview").
+    "</a>".
+  "</span>";
+
+  if (!empty($reg_report['hvariants'])) {
+    $variants[] = "<span class=\"selector".($cursection == "variantspb" ? " active" : "")."\">".
+      "<a href=\"?league=".$leaguetag."&mod=regions-region$region-heroes-variantspb".(empty($linkvars) ? "" : "&".$linkvars)."\">".
+        locale_string("variantspb").
+      "</a>".
+    "</span>";
+  }
+
+  if (!empty($report['hero_positions'])) {
+    $variants[] = "<span class=\"selector".($cursection == "rolepickban" ? " active" : "")."\">".
+      "<a href=\"?league=".$leaguetag."&mod=regions-region$region-heroes-rolepickban".(empty($linkvars) ? "" : "&".$linkvars)."\">".
+        locale_string("rolepickban").
+      "</a>".
+    "</span>";
+  }
+
+  if (count($variants) > 1) {
+    $res["region".$region]['heroes']['pickban'] = "<div class=\"selector-modules-level-5\">".
+      implode(" | ", $variants).
+    "</div>".$res["region".$region]['heroes']['pickban'];
+  }
 }
 
 if(isset($reg_report['haverages_heroes'])) {
@@ -65,12 +108,6 @@ if(isset($reg_report['hero_positions'])) {
 
   if(check_module($parent_mod."positions")) {
     $res["region".$region]['heroes']['positions'] = rg_view_generate_regions_heroes_positions($region, $reg_report, $parent_mod);
-  }
-
-  include_once("heroes/rolepickban.php");
-  // $res["region".$region]['heroes']["rolepickban"] = "";
-  if(check_module($parent_mod."rolepickban")) {
-    $res["region".$region]['heroes']['rolepickban'] = rg_view_generate_regions_heroes_rolepickban($region, $reg_report);
   }
 }
 

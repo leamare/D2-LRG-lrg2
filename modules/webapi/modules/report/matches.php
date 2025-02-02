@@ -85,6 +85,9 @@ $endpoints['matches'] = function($mods, $vars, &$report) use (&$meta) {
       $found = false;
       foreach ($report['matches'][$id] as $pl) {
         if ($pl['hero'] == $vars['heroid']) {
+          if (isset($vars['variant']) && $pl['var'] != $vars['variant']) {
+            continue;
+          }
           if (isset($vars['team']) && isset($report['match_participants_teams']) && ( $report['match_participants_teams'][$id][ $pl['radiant'] ? 'radiant' : 'dire' ] ?? null ) != $vars['team']) {
             continue;
           }

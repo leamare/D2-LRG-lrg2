@@ -15,7 +15,12 @@ $endpoints['pickban'] = function($mods, $vars, &$report) use (&$meta, &$endpoint
     $context_total_matches = $report['teams'][ $vars['team'] ]['matches_total'];
     $context_main =& $report['teams'][ $vars['team'] ];
 
-    $pb = rg_create_team_pickban_data($context_main['pickban'], $context_main['pickban_vs'] ?? [], $context_main['matches_total']);
+    $pb = rg_create_team_pickban_data(
+      $context_main['pickban'], 
+      $context_main['pickban_vs'] ?? [], 
+      $context_main['matches_total'],
+      $context_main['wins']
+    );
 
     foreach($pb as $hid => &$line) {
       $line['rank'] = round($line['rank'], 2);
@@ -79,47 +84,41 @@ $endpoints['pickban'] = function($mods, $vars, &$report) use (&$meta, &$endpoint
 
   $ranks = [];
 
-  $compound_ranking_sort = function($a, $b) use ($context_total_matches) {
-    return compound_ranking_sort($a, $b, $context_total_matches);
-  };
+  compound_ranking($context, $context_total_matches);
 
-  uasort($context, $compound_ranking_sort);
+  $context_copy = $context;
 
-  $increment = 100 / sizeof($context); $i = 0;
+  uasort($context, function($a, $b) {
+    return $b['wrank'] <=> $a['wrank'];
+  });
+
+  $min = end($context)['wrank'];
+  $max = reset($context)['wrank'];
 
   foreach ($context as $id => $el) {
-    if(isset($last) && $el == $last) {
-      $i++;
-      $ranks[$id] = $last_rank;
-    } else
-      $ranks[$id] = 100 - $increment*$i++;
-    $last = $el;
-    $last_rank = $ranks[$id];
-  }
-  $last = null;
+    $ranks[$id] = 100 * ($el['wrank']-$min) / ($max-$min);
+    unset($context[$id]['wrank']);
 
-  $context_cpy = [];
-  foreach($context as $hid => $data) {
-    $context_cpy[$hid] = $data;
-    $context_cpy[$hid]['winrate_picked'] = 1-$context_cpy[$hid]['winrate_picked'];
-    $context_cpy[$hid]['winrate_banned'] = 1-$context_cpy[$hid]['winrate_banned'];
+    $context_copy[$id]['winrate_picked'] = 1-$el['winrate_picked'];
+    $context_copy[$id]['winrate_banned'] = 1-$el['winrate_banned'];
   }
 
   $aranks = [];
 
-  uasort($context_cpy, $compound_ranking_sort);
+  compound_ranking($context_copy, $context_total_matches);
 
-  $increment = 100 / sizeof($context); $i = 0;
+  uasort($context_copy, function($a, $b) {
+    return $b['wrank'] <=> $a['wrank'];
+  });
 
-  foreach ($context_cpy as $id => $el) {
-    if(isset($last) && $el == $last) {
-      $i++;
-      $aranks[$id] = $last_rank;
-    } else
-      $aranks[$id] = 100 - $increment*$i++;
-    $last = $el;
-    $last_rank = $aranks[$id];
+  $min = end($context_copy)['wrank'];
+  $max = reset($context_copy)['wrank'];
+
+  foreach ($context_copy as $id => $el) {
+    $aranks[$id] = 100 * ($el['wrank']-$min) / ($max-$min);
   }
+
+  unset($context_copy);
   
   foreach($context as $id => &$el) {
     $el['rank'] = round($ranks[$id], 2);

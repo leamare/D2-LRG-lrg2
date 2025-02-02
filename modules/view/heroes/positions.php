@@ -41,13 +41,18 @@ function rg_view_generate_heroes_positions() {
         if(isset($report['hero_positions_matches'])) {
           foreach($report['hero_positions_matches'][$i][$j] as $hid => $matches) {
             $report['hero_positions'][$i][$j][$hid]['matchlinks'] = "<a onclick=\"showModal('".
-                htmlspecialchars(join_matches($matches)).
+                htmlspecialchars(join_matches_add($matches, true, $hid, true)).
                 "', '".locale_string("matches")." - ".addcslashes(hero_name($hid)." - ".locale_string("position_$i.$j"), "'")."');\">".
                 locale_string("matches")."</a>";
           }
         }
 
-        $res["position_$i.$j"] = rg_generator_summary("heroes-positions-$i-$j", $report['hero_positions'][$i][$j], true, true);
+        $res["position_$i.$j"] = rg_generator_summary(
+          "heroes-positions-$i-$j", 
+          $report['hero_positions'][$i][$j], 
+          true, 
+          true,
+        );
 
         $res["position_$i.$j"] .= "<div class=\"content-text\">".locale_string("desc_heroes_positions")."</div>";
         //if (!$i) { break; }
@@ -58,4 +63,3 @@ function rg_view_generate_heroes_positions() {
   return $res;
 }
 
-?>

@@ -184,6 +184,8 @@ function add_networths(&$matchdata) {
   //       2. give it to the killer in their purchase log
 
   foreach ($death_times as $hid => $times) {
+    if (empty($hid)) continue;
+    
     $side = $sides[$hid];
     foreach ($times as $t) {
       $i = ceil($t/60);

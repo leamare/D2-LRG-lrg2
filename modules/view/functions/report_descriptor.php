@@ -142,6 +142,24 @@ function get_report_descriptor(&$report, $generate_endpoints = false) {
     }
   }
 
+  if (isset($report['starting_items'])) {
+    if (isset($report['starting_items']['items'])) $desc['endpoints'][] = "sti-items";
+    if (isset($report['starting_items']['builds'])) $desc['endpoints'][] = "sti-builds";
+    if (isset($report['starting_items']['consumables'])) $desc['endpoints'][] = "sti-consumables";
+  }
+  if (isset($report['starting_items_players'])) {
+    if (isset($report['starting_items_players']['items'])) $desc['endpoints'][] = "stip-items";
+    if (isset($report['starting_items_players']['builds'])) $desc['endpoints'][] = "stip-builds";
+    if (isset($report['starting_items_players']['consumables'])) $desc['endpoints'][] = "stip-consumables";
+  }
+
+  if (isset($report['hero_variants'])) {
+    $desc['endpoints'][] = "heroes-variants";
+    if (isset($report['hvh_v'])) $desc['endpoints'][] = "heroes-hvh-variants";
+    if (isset($report['hpv_v'])) $desc['endpoints'][] = "heroes-hph-variants";
+    if (isset($report['hero_summary_variants'])) $desc['endpoints'][] = "heroes-variants-summary";
+  }
+
   if ($desc['matches_details']) $desc['endpoints'][] = "matches";
   if (!$desc['anonymous_players']) $desc['endpoints'][] = "participants";
 

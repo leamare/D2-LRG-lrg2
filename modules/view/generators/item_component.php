@@ -81,3 +81,39 @@ function itembuild_item_component(&$build, $item, $flags = []) {
     "</div>".
   "</div>";
 }
+
+function itembuild_item_component_simple($item, $params = []) {
+  $big = $params['big'] ?? false;
+
+  $tags = [ "build-item-component" ];
+  $stats = [];
+
+  if (isset($params['wr_incr'])) {
+    if ($params['wr_incr'] > 0.125) $tags[] = "winrate-strong";
+    if ($params['wr_incr'] < -0.1) $tags[] = "winrate-weak";
+    $stats[] = locale_string('items_winrate_increase').": ".number_format($params['wr_incr'] * 100, 2)."%";
+  }
+
+  if (isset($params['prate'])) {
+    $stats[] = locale_string('purchase_rate').": ".number_format($params['prate'] * 100, 2)."%";
+  }
+  if (isset($params['winrate'])) {
+    $stats[] = locale_string('winrate').": ".number_format($params['winrate'] * 100, 2)."%";
+  }
+  if (isset($params['lane_wr'])) {
+    $stats[] = locale_string('lane_wr').": ".number_format($params['lane_wr'] * 100, 2)."%";
+  }
+
+  return "<div class=\"".implode(" ", $tags)."\">".
+    "<a class=\"item-image\" title=\"".
+      addcslashes(
+        item_name($item).
+        (($params['pcnt'] ?? 1) > 1 ? " #".$params['pcnt'] : "").
+        (empty($stats) ? "" : " - ".implode(", ", $stats))
+      , '"').
+      "\">".
+      ($big ? item_big_icon($item) : item_icon($item)).
+      (isset($params['prate']) ? "<span class=\"item-prate\">".number_format($params['prate'] * 100, 2)."%</span>" : "").
+    "</a>".
+  "</div>";
+}

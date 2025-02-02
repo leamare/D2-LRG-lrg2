@@ -8,7 +8,7 @@ function rg_query_hero_laning(&$conn, $cluster = null, $team = null, $players = 
 
   $tie_factor = 0.075;
 
-  $result = [];
+  $result = [ [[]] ];
   //echo "[S] Requested data for HERO DRAFT\n";
 
   $sql = "SELECT
@@ -62,8 +62,6 @@ function rg_query_hero_laning(&$conn, $cluster = null, $team = null, $players = 
 
   if ($conn->multi_query($sql) !== TRUE) throw new \Exception($conn->error);
 
-  $result['0'] = [];
-
   $query_res = $conn->store_result();
   for ($row = $query_res->fetch_assoc(); $row != null; $row = $query_res->fetch_assoc()) {
     $row['avg_advantage'] = round($row['avg_advantage'], 4);
@@ -76,6 +74,9 @@ function rg_query_hero_laning(&$conn, $cluster = null, $team = null, $players = 
   }
 
   $query_res->free_result();
+
+  $keys = array_keys(reset($result[0]));
+  $result[0][0] = array_flip($keys);
 
   // foreach ($result['0'] as $hid => $d) {
   //   echo $hid;
@@ -151,7 +152,7 @@ function rg_query_hero_laning(&$conn, $cluster = null, $team = null, $players = 
     $query_res = $conn->store_result();
     for ($row = $query_res->fetch_assoc(); $row != null; $row = $query_res->fetch_assoc()) {
       if (!isset($result[ $row['ams_heroid'] ]))
-        $result[ $row['ams_heroid'] ] = [];
+        $result[ $row['ams_heroid'] ] = [ 0 => array_flip($keys) ];
 
       $ams = $row['ams_heroid'];
       unset($row['ams_heroid']);

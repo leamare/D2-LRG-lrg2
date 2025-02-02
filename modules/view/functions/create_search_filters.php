@@ -21,8 +21,6 @@ function create_fuzzy_regex(string $string) {
     $res[] = addcslashes($left, REGEX_MASK)."(.){1,2}".addcslashes($right, REGEX_MASK).$ending;
   }
 
-  error_log('(('.implode(')|(', $res).'))');
-
   return '(('.implode(')|(', $res).'))';
 }
 

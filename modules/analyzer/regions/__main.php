@@ -58,6 +58,10 @@ foreach ($regions as $region => $clusters) {
 
     # pickbans
     include("heroes/pickban.php");
+    
+    if ($schema['variant']) {
+      include("heroes/variants.php");
+    }
 
     $picks = [];
     foreach($result["regions_data"][$region]["pickban"] as $hero)

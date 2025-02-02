@@ -6,6 +6,16 @@ $percentages = [
   "radiant_wr",
   "dire_wr",
   "diversity",
+
+  "opener_ratio",
+  "opener_pick_winrate",
+
+  "opener_pick_radiant_winrate",
+  "opener_pick_dire_winrate",
+  "follower_pick_radiant_winrate",
+  "follower_pick_dire_winrate",
+  "follower_pick_radiant_ratio",
+  "opener_pick_radiant_ratio",
 ];
 
 $context[$tid]['averages']['diversity'] = teams_diversity_recalc($context[$tid]);
@@ -41,7 +51,7 @@ if (!empty($report['match_participants_teams'])) {
       if (!isset($matches[ $l['player'] ][ $l['hero'] ])) $matches[ $l['player'] ][ $l['hero'] ] = [ 'ms' => [], 'c' => 0, 'w' => 0 ];
       $matches[ $l['player'] ][ $l['hero'] ]['ms'][] = $match;
       $matches[ $l['player'] ][ $l['hero'] ]['c']++;
-      $matches[ $l['player'] ][ $l['hero'] ]['w'] += ! ($report['matches_additional'][$match]['radiant_win'] XOR $radiant);
+      $matches[ $l['player'] ][ $l['hero'] ]['w'] += ($report['matches_additional'][$match]['radiant_win'] == $radiant);
     }
   }
 
@@ -189,7 +199,7 @@ if (!empty($report['match_participants_teams'])) {
       foreach ($first_matches_heroes as $hid => $mid) {
         $title = addcslashes(hero_name($hid), "'");
         $res["team".$tid]['overview'] .= "<a title=\"".$title."\" ".
-        "onclick=\"showModal('".htmlspecialchars(join_matches([$mid]))."', '".$title."')\"".
+        "onclick=\"showModal('".htmlspecialchars(join_matches_add([$mid], true, $hid, true))."', '".$title."')\"".
         ">".hero_icon($hid)."</a>";
       }
     }
@@ -216,7 +226,7 @@ if (!empty($report['match_participants_teams'])) {
         foreach ($rolems as $hid => $mid) {
           $title = addcslashes(hero_name($hid)." - ".locale_string("position_$role"), "'");
           $line .= "<a title=\"".$title."\" ".
-          "onclick=\"showModal('".htmlspecialchars(join_matches([$mid]))."', '".$title."')\"".
+          "onclick=\"showModal('".htmlspecialchars(join_matches_add([$mid], true, $hid, true))."', '".$title."')\"".
           ">".hero_icon($hid)."</a>";
         }
         $line .= " ]</span> ";
@@ -234,7 +244,7 @@ if (!empty($report['match_participants_teams'])) {
         foreach ($rolems as $hid => $mid) {
           $title = addcslashes(hero_name($hid)." - ".locale_string("region$region"), "'");
           $line .= "<a title=\"".$title."\" ".
-          "onclick=\"showModal('".htmlspecialchars(join_matches([$mid]))."', '".$title."')\"".
+          "onclick=\"showModal('".htmlspecialchars(join_matches_add([$mid], true, $hid, true))."', '".$title."')\"".
           ">".hero_icon($hid)."</a>";
         }
       }
@@ -257,14 +267,14 @@ if (!empty($report['match_participants_teams'])) {
           foreach ($rolems as $hid => $mid) {
             $title = addcslashes(hero_name($hid)." - ".locale_string("position_$role"), "'");
             $line .= "<a title=\"".$title."\" ".
-            "onclick=\"showModal('".htmlspecialchars(join_matches([$mid]))."', '".$title."')\"".
+            "onclick=\"showModal('".htmlspecialchars(join_matches_add([$mid], true, $hid, true))."', '".$title."')\"".
             ">".hero_icon($hid)."</a>";
           }
           $line .= " ]</span> ";
         }
         $line .= " } </span> ";
       }
-      if (empty($line)) $line = locale_string('stats_no_emelents');
+      if (empty($line)) $line = locale_string('stats_no_elements');
       $res["team".$tid]['overview'] .= $line."</div>";
     }
 
@@ -288,7 +298,7 @@ if (!empty($report['match_participants_teams'])) {
         (isset($context[$tid]['pickban'][$hero]) ? $context[$tid]['pickban'][$hero]['matches_picked'] : $num).") - ".
         locale_string('winrate_s')." ".round($wr*100, 2)."%";
       $res["team".$tid]['overview'] .= "<a title=\"".$title."\" ".
-        "onclick=\"showModal('".htmlspecialchars(join_matches($ms))."', '".addcslashes(player_name($player), "'")." - $title')\"".
+        "onclick=\"showModal('".htmlspecialchars(join_matches_add($ms, true, $hero, true))."', '".addcslashes(player_name($player), "'")." - $title')\"".
         ">".hero_icon($hero)."</a>";
     }
     $res["team".$tid]['overview'] .= "</div>";

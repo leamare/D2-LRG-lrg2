@@ -60,7 +60,7 @@ $endpoints['positions'] = function($mods, $vars, &$report) {
         $position[1] = array_keys($context[ (int)$position[0] ])[0];
       $res = $context[ (int)$position[0] ][ (int)$position[1] ];
     }
-    positions_ranking($res, $context_total_matches);
+    positions_ranking_helper($res, $context_total_matches);
     
     $keys = array_keys( array_values($res)[0] );
     $is_dmg_per_min = in_array("hero_damage_per_min_s", $keys) && in_array("gpm", $keys) && !in_array("damage_to_gold_per_min_s", $keys);
@@ -94,7 +94,7 @@ $endpoints['positions'] = function($mods, $vars, &$report) {
   for ($i=1; $i>=0; $i--) {
     foreach ($context[$i] as $j => &$pos_summary) {
       if (empty($pos_summary)) continue;
-      positions_ranking($pos_summary, $context_total_matches);
+      positions_ranking_helper($pos_summary, $context_total_matches);
       foreach ($pos_summary as $id => $data) {
         if (isset($res['total'][$id])) $res['total'][$id] += $data['matches_s'];
         else $res['total'][$id] = $data['matches_s'];
@@ -106,55 +106,38 @@ $endpoints['positions'] = function($mods, $vars, &$report) {
   return $res;
 };
 
-function positions_ranking(&$context, $total_matches) {
-  $ranks = [];
+function positions_ranking_helper(&$context, $total_matches) {
   $context_copy = $context;
   $total_matches = 0;
   foreach ($context as $c) {
     if ($total_matches < $c['matches_s']) $total_matches = $c['matches_s'];
   }
 
-  uasort($context_copy, function($a, $b) use ($total_matches) {
-    return positions_ranking_sort($a, $b, $total_matches);
+  positions_ranking($context, $total_matches);
+
+  uasort($context, function($a, $b) {
+    return $b['wrank'] <=> $a['wrank'];
   });
 
-  if (!empty($context_copy)) {
-    $increment = 100 / sizeof($context_copy); $i = 0;
+  $min = end($context)['wrank'];
+  $max = reset($context)['wrank'];
 
-    foreach ($context_copy as $id => $el) {
-      if(isset($last) && $el['matches_s'] == $last['matches_s'] && $el['winrate_s'] == $last['winrate_s']) {
-        $i++;
-        $context[$id]['rank'] = $last_rank;
-      } else {
-        $context[$id]['rank'] = round(100 - $increment*$i++, 2);
-      }
-      $last = $el;
-      $last_rank = $context[$id]['rank'];
-    }
+  foreach ($context as $elid => $el) {
+    $context[$elid]['rank'] = 100 * ($el['wrank']-$min) / ($max-$min);
+    $context_copy[$elid]['winrate_s'] = 1-($context_copy[$elid]['winrate'] ?? $context_copy[$elid]['winrate_s']);
   }
 
-  $last = null;
+  positions_ranking($context_copy, $total_matches);
 
-  foreach($context_copy as &$data) {
-    $data['winrate_s'] = 1-$data['winrate_s'];
-  }
-
-  uasort($context_copy, function($a, $b) use ($total_matches) {
-    return positions_ranking_sort($a, $b, $total_matches);
+  uasort($context_copy, function($a, $b) {
+    return $b['wrank'] <=> $a['wrank'];
   });
 
-  if (!empty($context_copy)) {
-    $i = 0;
+  $min = end($context_copy)['wrank'];
+  $max = reset($context_copy)['wrank'];
 
-    foreach ($context_copy as $id => $el) {
-      if(isset($last) && $el['matches_s'] == $last['matches_s'] && $el['winrate_s'] == $last['winrate_s']) {
-        $i++;
-        $context[$id]['arank'] = $last_rank;
-      } else {
-        $context[$id]['arank'] = round(100 - $increment*$i++, 2);
-      }
-      $last = $el;
-      $last_rank = $context[$id]['arank'];
-    }
+  foreach ($context_copy as $elid => $el) {
+    $context_copy[$elid]['arank'] = 100 * ($el['wrank']-$min) / ($max-$min);
+    unset($context[$elid]['wrank']);
   }
 }

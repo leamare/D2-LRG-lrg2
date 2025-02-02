@@ -38,9 +38,29 @@ function teams_diversity_recalc(&$team) {
 }
 
 function balance_rank($pickban) {
-  global $meta;
+  global $meta, $report;
 
+  $key = array_keys($pickban)[0];
+  $facets = false;
   $hlist = $meta['heroes'];
+
+  if (!is_numeric($key) && strpos($key, '-')) {
+    $facets = true;
+    $hlist_var = [];
+    if (isset($report['meta']['variants'])) {
+      foreach ($report['meta']['variants'] as $hid => $facets) {
+        foreach ($facets as $i => $f) {
+          $hlist[$hid.'-'.$i] = true;
+        }
+      }
+    } else {
+      foreach ($meta['facets']['heroes'] as $hid => $facets) {
+        foreach ($facets as $i => $f) {
+          $hlist[$hid.'-'.$i] = true;
+        }
+      }
+    }
+  }
 
   uasort($pickban, function($a, $b) {
     return $b['matches_total'] <=> $a['matches_total'];
@@ -57,7 +77,18 @@ function balance_rank($pickban) {
   $wr = [];
 
   foreach($pickban as $hid => $vals) {
-    unset($hlist[$hid]);
+    if (is_numeric($hid)) {
+      unset($hlist[$hid]);
+    } else {
+      if (strpos($hid, '-')) {
+        [$hero, $var] = explode('-', $hid);
+        unset($hlist[$hero]);
+        unset($hlist_var[$hid]);
+      } else {
+        [$hero, $var] = explode('|', $hid);
+        unset($hlist[$hero]);
+      }
+    }
 
     $_cr = round($vals['matches_total']/($mc ? $mc : 1));
     $_pr = round($vals['matches_picked']/($mp ? $mp : 1));
@@ -67,6 +98,16 @@ function balance_rank($pickban) {
     
     if ($vals['matches_picked'] && $_pr >= 1)
       $wr[] = $vals['winrate_picked'];
+  }
+
+  if ($facets) {
+    $cr_f = $cr;
+    $pr_f = $pr;
+
+    foreach($hlist_var as $hid) {
+      $cr_f[] = 0;
+      $pr_f[] = 0;
+    }
   }
 
   if (!empty($hlist)) {
@@ -84,6 +125,11 @@ function balance_rank($pickban) {
   $skew_wr = core_picked_percentage($wr, $medwr-0.5*$maxwr, $medwr+0.5*$maxwr);
   $skew_pr = core_picked_percentage($pr, 1);
   $skew_cr = core_picked_percentage($cr, 1);
+
+  if ($facets) {
+    $skew_pr = core_picked_percentage($pr_f, 1);
+    $skew_cr = core_picked_percentage($cr_f, 1);
+  }
 
   return [
     (3 * $skew_wr + 2 * $skew_pr + $skew_cr ) / 6,

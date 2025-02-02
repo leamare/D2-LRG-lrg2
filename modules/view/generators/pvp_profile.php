@@ -3,7 +3,7 @@
 include_once($root."/modules/view/functions/hero_name.php");
 include_once($root."/modules/view/functions/player_name.php");
 
-function rg_generator_pvp_profile($table_id, &$pvp_context, &$context_wrs, $srcid, $heroes_flag = true) {
+function rg_generator_pvp_profile($table_id, &$pvp_context, &$context_wrs, $srcid, $heroes_flag = true, $facets = false) {
   $res = "";
   $i = 0;
   $isrank = false;
@@ -29,63 +29,72 @@ function rg_generator_pvp_profile($table_id, &$pvp_context, &$context_wrs, $srci
 
   if(!empty($context_wrs)) {
     $wr_id = $heroes_flag ? "winrate_picked" : "winrate";
+    if ($facets) {
+      $context_wrs[$srcid]['winrate_picked'] = $context_wrs[$srcid]['w']/$context_wrs[$srcid]['m'];
+      $context_wrs[$srcid]['matches_picked'] = $context_wrs[$srcid]['m'];
+    }
     $dt = [
       'wr' => $heroes_flag ? $context_wrs[$srcid]['winrate_picked'] : $context_wrs[$srcid]['winrate'],
       'ms' => $heroes_flag ? $context_wrs[$srcid]['matches_picked'] : $context_wrs[$srcid]['matches'],
+      'f'  => $context_wrs[$srcid]['f'] ?? null,
     ];
+
+    if ($facets) {
+      [ $srcid, $variant ] = explode('-', $srcid);
+    }
 
     $res .= "<table id=\"$table_id-reference\" class=\"list sortable\">".
         "<thead><tr>".
-        ($heroes_flag ? "<th width=\"1%\"></th>" : "").
+        ($heroes_flag ? "<th width=\"1%\" ".($facets && $variant ? 'colspan="2"' : '')."></th>" : "").
         "<th data-sortInitialOrder=\"asc\">".locale_string($heroes_flag ? 'hero' : 'player')."</th>".
         "<th>".locale_string("matches")."</th>".
-        "<th>".locale_string("winrate")."</th></tr></thead>".
+        "<th>".locale_string("winrate")."</th>".
+        ($facets && $variant ? "<th>".locale_string("ratio")."</th>" : '').
+        "</tr></thead>".
         "<tbody><tr>".
         ($heroes_flag ? "<td>".hero_portrait($srcid)."</td>" : "").
-        "<td>".($heroes_flag ? hero_link($srcid) : player_link($srcid))."</td>".
+        ($heroes_flag && $facets && $variant ? "<td>".facet_micro_element($srcid, $variant)."</td>" : "").
+        "<td>".($heroes_flag ? hero_link($srcid) : player_link($srcid)).($facets && $variant != 'x' && $variant ? ' '.locale_string("facet_short").$variant : '')."</td>".
         "<td>".$dt['ms']."</td>".
         "<td>".number_format($dt['wr']*100,2)."%</td>".
+        ($facets && $variant ? "<td>".number_format($dt['f']*100,2)."%</td>" : '').
         "</tr></tbody></table>";
 
 
-    $compound_ranking_sort = function($a, $b) use ($dt) {
-      return positions_ranking_sort($a, $b, $dt['ms']);
-    };
-    uasort($pvp_context, $compound_ranking_sort);
-    $pvp_context_cpy = $pvp_context;
+      $pvp_context_cpy = $pvp_context;
+
+    positions_ranking($pvp_context, $dt['ms']);
+
+    uasort($pvp_context, function($a, $b) {
+      return $b['wrank'] <=> $a['wrank'];
+    });
   
-    $increment = 100 / sizeof($pvp_context); $i = 0; $last_rank = 0;
+    $min = end($pvp_context)['wrank'];
+    $max = reset($pvp_context)['wrank'];
   
     foreach ($pvp_context as $elid => $el) {
-      $matches_med[] = $el['matches'];
-
-      if(isset($last) && $el == $last) {
-        $i++;
-        $pvp_context[$elid]['rank'] = $last_rank;
-      } else
-        $pvp_context[$elid]['rank'] = round(100 - $increment*$i++, 2);
-      $last = $el;
-      $last_rank = $pvp_context[$elid]['rank'];
-
+      $pvp_context[$elid]['rank'] = 100 * ($el['wrank']-$min) / ($max-$min);
       $pvp_context_cpy[$elid]['winrate'] = 1-$pvp_context_cpy[$elid]['winrate'];
     }
-  
-    unset($last);
 
-    uasort($pvp_context_cpy, $compound_ranking_sort);
-    $i = 0;
+    positions_ranking($pvp_context_cpy, $dt['ms']);
+
+    uasort($pvp_context_cpy, function($a, $b) {
+      return $b['wrank'] <=> $a['wrank'];
+    });
+  
+    $min = end($pvp_context_cpy)['wrank'];
+    $max = reset($pvp_context_cpy)['wrank'];
   
     foreach ($pvp_context_cpy as $elid => $el) {
-      if(isset($last) && $el == $last) {
-        $i++;
-        $pvp_context[$elid]['arank'] = $last_rank;
-      } else
-        $pvp_context[$elid]['arank'] = round(100 - $increment*$i++, 2);
-      $last = $el;
-      $last_rank = $pvp_context[$elid]['arank'];
+      $pvp_context[$elid]['arank'] = 100 * ($el['wrank']-$min) / ($max-$min);
+      unset($pvp_context[$elid]['wrank']);
+
+      if (isset($el['expectation']) && !isset($el['deviation'])) {
+        $pvp_context[$elid]['deviation'] = $el['matches']-$el['expectation'];
+        $pvp_context[$elid]['deviation_pct'] = round(($el['matches']-$el['expectation'])*100/$el['matches'], 2);
+      }
     }
-  
-    unset($last);
 
     $isrank = true; $i = 0;
   } else {
@@ -118,7 +127,7 @@ function rg_generator_pvp_profile($table_id, &$pvp_context, &$context_wrs, $srci
   $res .= search_filter_component($table_id);
   $res .= "<table id=\"$table_id\" class=\"list sortable\">";
   $res .= "<thead><tr>".
-          ($heroes_flag && !$i++ ? "<th width=\"1%\"></th>" : "").
+          ($heroes_flag && !$i++ ? "<th width=\"1%\" ".($facets ? 'colspan="2"' : '')."></th>" : "").
           "<th data-sortInitialOrder=\"asc\">".locale_string("opponent")."</th>".
           ($isrank ? "<th>".locale_string("rank")."</th><th>".locale_string("antirank")."</th>" : "").
           "<th class=\"separator\">".locale_string("winrate")."</th>".
@@ -149,6 +158,9 @@ function rg_generator_pvp_profile($table_id, &$pvp_context, &$context_wrs, $srci
   }
 
   foreach($pvp_context as $elid_op => $data) {
+    if ($facets) {
+      [ $elid_op, $variant ] = explode('-', $elid_op);
+    }
     $res .= "<tr ".
       "data-value-match=\"".$data['matches']."\" ".
       ($exp ? "data-value-dev=\"".number_format($data['matches']-$data['expectation'], 0)."\" " : "").
@@ -158,7 +170,8 @@ function rg_generator_pvp_profile($table_id, &$pvp_context, &$context_wrs, $srci
                 "onclick=\"showModal('".implode(", ", $data['matchids'])."','".locale_string("matches")."')\"" :
                 "").">".
       ($heroes_flag ? "<td>".hero_portrait($elid_op)."</td>" : "").
-      "<td>".($heroes_flag ? hero_link($elid_op) : player_link($elid_op))."</td>".
+      ($heroes_flag && $facets ? "<td>".facet_micro_element($elid_op, $variant)."</td>" : "").
+      "<td>".($heroes_flag ? hero_link($elid_op) : player_link($elid_op)).($facets ? ' '.locale_string("facet_short").$variant : '')."</td>".
       ($isrank ? "<td>".number_format($data['rank'], 2)."</td><td>".number_format($data['arank'], 2)."</td>" : "").
       "<td class=\"separator\">".number_format($data['winrate']*100,2)."%</td>".
       (!$nodiff ? "<td>".number_format($data['diff']*100,2)."%</td>" : "").

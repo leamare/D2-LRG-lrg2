@@ -5,7 +5,7 @@ include_once($root."/modules/view/functions/player_name.php");
 
 function rg_generator_meta_graph($div_id, &$context, &$context_pickban, $heroes_flag = true) {
   //if(!sizeof($context)) return "";
-  global $visjs_settings, $use_visjs, $meta;
+  global $visjs_settings, $use_visjs, $meta, $player_photo_provider;
 
   $use_visjs = true;
   $id = $heroes_flag ? "heroid" : "playerid";
@@ -82,7 +82,9 @@ function rg_generator_meta_graph($div_id, &$context, &$context_pickban, $heroes_
         ", label: '".addslashes(player_name($elid))."'".
         ", title: '".addslashes(player_name($elid)).", ".
         $el['matches']." ".locale_string("total").", ".
-        number_format($wr_raw*100, 1)." ".locale_string("winrate")."', ".
+        number_format($wr_raw*100, 1)."% ".locale_string("winrate")."', ".
+        "shape:'circularImage', ".
+        "image: '".str_replace("%HERO%", $elid, $player_photo_provider ?? "")."', ".
         "color:{ background:'rgba(".number_format(126-255*$wr, 0).",124,".
           number_format(126+255*$wr, 0).", 0.7)', ".
         "border:'rgba(".number_format(126-255*$wr, 0).",124,".

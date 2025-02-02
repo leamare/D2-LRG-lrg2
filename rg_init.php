@@ -188,7 +188,7 @@ if (!$isVirtual) {
     `radiantWin` tinyint(1) NOT NULL,
     `duration` int(11) NOT NULL,
     `modeID` tinyint(11) UNSIGNED NOT NULL,
-    `leagueID` int(11) NOT NULL,
+    `leagueID` int(11),
     `start_date` int(11) NOT NULL,
     `analysis_status` tinyint(1) NOT NULL,
     `radiant_opener` tinyint(1),
@@ -209,14 +209,15 @@ if (!$isVirtual) {
     `matchid` bigint(20) UNSIGNED NOT NULL,
     `playerid` bigint(20) NOT NULL,
     `heroid` smallint(6) NOT NULL,
+    `variant` SMALLINT(6) UNSIGNED DEFAULT null NULL,
     `level` tinyint(3) UNSIGNED NOT NULL,
     `isRadiant` tinyint(1) NOT NULL,
     `kills` smallint(6) NOT NULL,
     `deaths` smallint(6) NOT NULL,
     `assists` smallint(6) NOT NULL,
     `networth` mediumint(9) NOT NULL,
-    `gpm` smallint(6) NOT NULL,
-    `xpm` smallint(6) NOT NULL,
+    `gpm` mediumint(9) NOT NULL,
+    `xpm` mediumint(9) NOT NULL,
     `heal` mediumint(9) NOT NULL,
     `heroDamage` mediumint(9) NOT NULL,
     `towerDamage` mediumint(9) NOT NULL,
@@ -235,7 +236,7 @@ if (!$isVirtual) {
     `matchid` bigint(20) UNSIGNED NOT NULL,
     `playerid` bigint(20) NOT NULL,
     `heroid` smallint(5) UNSIGNED NOT NULL,
-    `lh_at10` smallint(3) UNSIGNED NOT NULL,
+    `lh_at10` mediumint(9) UNSIGNED NOT NULL,
     `isCore` tinyint(1) NOT NULL,
     `lane` tinyint(3) UNSIGNED NOT NULL,
     `role` tinyint(3) UNSIGNED NOT NULL,
@@ -249,9 +250,9 @@ if (!$isVirtual) {
     `streak` tinyint(3) UNSIGNED NOT NULL DEFAULT '0',
     `stacks` tinyint(4) NOT NULL DEFAULT '0',
     `time_dead` int(10) UNSIGNED NOT NULL,
-    `buybacks` tinyint(3) UNSIGNED NOT NULL DEFAULT '0',
-    `wards_destroyed` tinyint(3) UNSIGNED NOT NULL DEFAULT '0',
-    `pings` smallint(5) UNSIGNED NOT NULL DEFAULT '0',
+    `buybacks` smallint(5) NOT NULL DEFAULT '0',
+    `wards_destroyed` smallint(5) UNSIGNED NOT NULL DEFAULT '0',
+    `pings` int(10) NOT NULL DEFAULT '0',
     `stuns` float NOT NULL,
     `teamfight_part` float NOT NULL,
     `damage_taken` int(10) UNSIGNED NOT NULL,
@@ -288,6 +289,11 @@ if (!$isVirtual) {
     echo "OK\n[ ] Creating table `items`...";
     // `items` json NOT NULL,
 
+  // KEY `items_matchid_heroid_IDX` (`matchid`,`hero_id`) USING BTREE,
+  // KEY `items_matchid_player_IDX` (`matchid`,`playerid`) USING BTREE,
+  // KEY `items_matchid_item_IDX` (`matchid`,`item_id`) USING BTREE,
+  // KEY `items_matchid_category_IDX` (`matchid`,`category_id`) USING BTREE,
+  // KEY `items_matchid_time_IDX` (`matchid`,`item_id`,`time`) USING BTREE
   $conn->query("CREATE TABLE `items` (
     `matchid` bigint(20) UNSIGNED NOT NULL,
     `hero_id` smallint(5) UNSIGNED NOT NULL,
@@ -295,11 +301,10 @@ if (!$isVirtual) {
     `item_id` smallint(5) UNSIGNED NOT NULL,
     `category_id` smallint(5) UNSIGNED NOT NULL,
     `time` int(11) NOT NULL,
-    KEY `items_matchid_heroid_IDX` (`matchid`,`hero_id`) USING BTREE,
-    KEY `items_matchid_player_IDX` (`matchid`,`playerid`) USING BTREE,
-    KEY `items_matchid_item_IDX` (`matchid`,`item_id`) USING BTREE,
-    KEY `items_matchid_category_IDX` (`matchid`,`category_id`) USING BTREE,
-    KEY `items_matchid_time_IDX` (`matchid`,`item_id`,`time`) USING BTREE
+    KEY `items_heroid_IDX` (`hero_id`) USING BTREE,
+    KEY `items_matchid_IDX` (`matchid`) USING BTREE,
+    KEY `items_item_IDX` (`item_id`) USING BTREE,
+    KEY `items_playerid_IDX` (`playerid`) USING BTREE
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
     if ($conn->connect_error) die("[F] Can't create table `items`: ".$conn->connect_error."\n");
 
@@ -352,7 +357,7 @@ if (!$isVirtual) {
 
   $conn->query("CREATE TABLE `players` (
     `playerID` bigint(20) NOT NULL,
-    `nickname` varchar(128) NOT NULL,
+    `nickname` varchar(128),
     `name_fixed` tinyint(1) NOT NULL DEFAULT 0
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
   if ($conn->connect_error) die("[F] Can't create table `players`: ".$conn->connect_error."\n");

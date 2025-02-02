@@ -1,15 +1,15 @@
 <?php
 include_once("head.php");
-ini_set('memory_limit', '4096M');
+ini_set('memory_limit', '8192M');
 
 ini_set('mysqli.allow_persistent', '1');
 ini_set('mysql.allow_persistent', '1');
 
-ini_set('mysql.connect_timeout', '7200');
-ini_set('default_socket_timeout', '7200');
+ini_set('mysql.connect_timeout', '72000');
+ini_set('default_socket_timeout', '72000');
 
 ini_set('mysqli.reconnect', '1');
-ini_set('mysqlnd.net_read_timeout', '7200');
+ini_set('mysqlnd.net_read_timeout', '72000');
 
 const FP_ABLE = [ 23, 18, 21, 17, 16, 8, 2 ];
 
@@ -20,11 +20,16 @@ include_once("modules/commons/metadata.php");
 include_once("modules/commons/wrap_data.php");
 include_once("modules/commons/array_pslice.php");
 include_once("modules/commons/instaquery.php");
+include_once("modules/commons/echobltime.php");
 include_once("modules/view/functions/ranking.php");
 
 echo("\nConnecting to database...\n");
 
-$conn = new mysqli($lrg_sql_host, $lrg_sql_user, $lrg_sql_pass, $lrg_sql_db);
+try {
+  $conn = new mysqli($lrg_sql_host, $lrg_sql_user, $lrg_sql_pass, $lrg_sql_db);
+} catch (Exception $e) {
+  die("[F] Error: ".$e->getMessage()."\n");
+}
 $conn->set_charset('utf8mb4');
 
 if ($conn->connect_error) die("[F] Connection to SQL server failed: ".$conn->connect_error."\n");
@@ -37,13 +42,17 @@ if ($conn->connect_error) die("[F] Connection to SQL server failed: ".$conn->con
 // e.g. formulas or structure
 include_once("modules/analyzer/__queries/hero_pairs.php");
 include_once("modules/analyzer/__queries/hero_pickban.php");
+include_once("modules/analyzer/__queries/hero_variants.php");
 include_once("modules/analyzer/__queries/hero_draft.php");
 include_once("modules/analyzer/__queries/hero_draft_tree.php");
 include_once("modules/analyzer/__queries/hero_trios.php");
 include_once("modules/analyzer/__queries/lane_combos.php");
+include_once("modules/analyzer/__queries/lane_combos_variants.php");
 include_once("modules/analyzer/__queries/hero_positions.php");
 include_once("modules/analyzer/__queries/hero_summary.php");
+include_once("modules/analyzer/__queries/hero_summary_variants.php");
 include_once("modules/analyzer/__queries/hero_laning.php");
+include_once("modules/analyzer/__queries/hero_laning_variants.php");
 
 include_once("modules/analyzer/__queries/player_summary.php");
 include_once("modules/analyzer/__queries/player_draft.php");
@@ -51,6 +60,7 @@ include_once("modules/analyzer/__queries/player_positions.php");
 include_once("modules/analyzer/__queries/player_pairs.php");
 include_once("modules/analyzer/__queries/player_trios.php");
 include_once("modules/analyzer/__queries/player_graph.php");
+include_once("modules/analyzer/__queries/player_laning.php");
 
 include_once("modules/commons/schema.php");
 
@@ -185,6 +195,10 @@ require_once("modules/analyzer/main/overview.php");
 # pick/ban heroes stats
 require_once("modules/analyzer/heroes/pickban.php");
 
+if ($schema['variant']) {
+  require_once("modules/analyzer/heroes/variants.php");
+}
+
 # limiters
 require_once("modules/analyzer/main/limiters.php");
 
@@ -224,6 +238,11 @@ if ($lg_settings['ana']['players'] && $lg_settings['ana']['player_positions']) {
 if($lg_settings['ana']['players'] && $lg_settings['ana']['players_draft']) {
   # player draft
   require_once("modules/analyzer/players/draft.php");
+}
+
+if($lg_settings['ana']['players'] && $lg_settings['ana']['player_laning']) {
+  # player laning
+  require_once("modules/analyzer/players/laning.php");
 }
 
 if ($lg_settings['main']['teams']) {
@@ -279,21 +298,29 @@ if ($lg_settings['ana']['players']) {
 
 // ITEMS
 
-if ($lg_settings['ana']['items'])  {
-  $sql = "SELECT COUNT(*) z
-  FROM information_schema.tables WHERE table_schema = '$lrg_sql_db' 
-  AND table_name = 'itemslines' HAVING z > 0;";
-
-  $query = $conn->query($sql);
-  if (!isset($query->num_rows) || !$query->num_rows) {
-    $lg_settings['main']['itemslines'] = false;
-    echo "[N] Set &settings.items to false.\n";
+if ($lg_settings['ana']['items'] && $schema['items'])  {
+  if ($schema['itemslines']) {
+    $lg_settings['main']['itemslines'] = true;
+    echo "[N] Set &settings.itemslines to false.\n";
   } else {
     $lg_settings['main']['itemslines'] = true;
     echo "[N] Set &settings.itemslines to true.\n";
   }
 
   require_once("modules/analyzer/items/__main.php");
+}
+
+// STARTING ITEMS
+
+if ($schema['starting_items']) {
+  if ($lg_settings['ana']['starting_items'] || $lg_settings['ana']['starting_builds'] 
+    || $lg_settings['ana']['starting_items_players'] || $lg_settings['ana']['starting_builds_players']
+  ) {
+    require_once("modules/analyzer/items/starting_items.php");
+  }
+  if ($lg_settings['ana']['consumables'] || $lg_settings['ana']['consumables_players']) {
+    require_once("modules/analyzer/items/consumables.php");
+  }
 }
 
 // SKILL BUILDS
@@ -357,6 +384,24 @@ if (isset($lg_settings['heroes_snapshot'])) {
 }
 $result['settings']['heroes_exclude'] = $lg_settings['heroes_exclude'] ?? null;
 
+if ($schema['starting_items']) {
+  $result['settings']['sti_builds_players_limit'] = $lg_settings['ana']['starting_builds_players_limit'];
+  $result['settings']['sti_builds_roles_players_limit'] = $lg_settings['ana']['starting_builds_roles_players_limit'];
+  $result['settings']['sti_builds_limit'] = $lg_settings['ana']['starting_builds_limit'];
+  $result['settings']['sti_builds_roles_limit'] = $lg_settings['ana']['starting_builds_roles_limit'];
+}
+
+$result['meta'] = [];
+if ($schema['variant']) {
+  $result['meta']['variants'] = [];
+  foreach ($meta['facets']['heroes'] as $hid => $data) {
+    $result['meta']['variants'][$hid] = [];
+    foreach ($data as $el) {
+      $result['meta']['variants'][$hid][ $el['name'] ] = [ $el['icon'], array_search($el['color'], $meta['facets']['colors']) ];
+    }
+  }
+  $result['meta']['variants_colors'] = $meta['facets']['colors'];
+}
 
 $result['settings']['limiter'] = $limiter;
 $result['settings']['limiter_middle'] = $limiter_middle;
@@ -366,7 +411,7 @@ $result['settings']['limiter_players'] = $pl_limiter;
 $result['settings']['limiter_players_median'] = $pl_limiter_median;
 $result['ana_version'] = $lrg_version;
 
-echo("[ ] Encoding results to JSON\n");
+echo("[~] Encoding results to JSON\n");
 $output = json_encode(utf8ize($result));
 
 $filename = $options['o'] ?? "reports/report_".$lg_settings['league_tag'].".json";

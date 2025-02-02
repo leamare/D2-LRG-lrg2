@@ -9,8 +9,12 @@ function rg_generator_balance($table_id, $context) {
   $vals = balance_rank($context);
 
   return "<table id=\"$table_id\" class=\"list\">".
-    "<thead><tr><th>".locale_string("balance_total")."</th><th>".locale_string("winrate")."</th><th>".
-    locale_string("pickrate")."</th><th>".locale_string("contest_rate")."</th></tr></thead>".
+    "<thead><tr>".
+      "<th>".locale_string("balance_total")."</th>".
+      "<th>".locale_string("winrate")."</th>".
+      "<th>".locale_string("pickrate")."</th>".
+      "<th>".locale_string("contest_rate")."</th>".
+    "</tr></thead>".
     "<tbody><tr>".
       "<td>".number_format($vals[0]*100,1)."</td>".
       "<td>".number_format($vals[1]*100,1)."</td>".
@@ -19,12 +23,13 @@ function rg_generator_balance($table_id, $context) {
     "</tr></tbody></table>";
 }
 
-function rg_generator_pickban($table_id, &$context, &$context_main, $heroes_flag = true, $roles = false) {
+function rg_generator_pickban($table_id, &$context, &$context_main, $heroes_flag = true, $roles = false, $facets = false) {
   if(!sizeof($context)) return "";
 
-  $context_total_matches = $context_main['matches'] ?? $context_main["matches_total"] ?? 0;
+  $context_total_matches = $context_main['matches'] ?? $context_main["matches_total"] ?? 1;
   $mp = $context_main['heroes_median_picks'] ?? null;
   $mb = $context_main['heroes_median_bans'] ?? null;
+  if (is_array($mb)) $mb = null;
 
   if (!$mp) {
     uasort($context, function($a, $b) {
@@ -51,6 +56,9 @@ function rg_generator_pickban($table_id, &$context, &$context_main, $heroes_flag
     else return ($a['matches_total'] < $b['matches_total']) ? 1 : -1;
   });
 
+  $keys = array_keys(reset($context));
+  $is_ratio = in_array('ratio', $keys);
+
   $res = "<div class=\"content-text\">".locale_string("heroes_median_picks").
     " (mp): $mp - ".locale_string("heroes_median_bans").
     " (mb): $mb - ".locale_string("matches_total").": $context_total_matches</div>";
@@ -73,67 +81,60 @@ function rg_generator_pickban($table_id, &$context, &$context_main, $heroes_flag
   $res .= search_filter_component($table_id);
 
   $res .=  "<table id=\"$table_id\" class=\"list sortable\"><thead><tr>".
-            ($heroes_flag ? "<th class=\"sorter-no-parser\" width=\"1%\"></th>" : "").
-            "<th data-sortInitialOrder=\"asc\">".locale_string($heroes_flag ? "hero" : "player")."</th>".
-            ($roles ? "<th>".locale_string("position")."</th>" : "").
-            "<th>".locale_string("matches_total")."</th>".
-            "<th class=\"separator\">".locale_string("contest_rate")."</th>".
-            "<th>".locale_string("rank")."</th>".
-            "<th>".locale_string("antirank")."</th>".
-            "<th class=\"separator\">".locale_string("matches_picked")."</th>".
-            // "<th>".locale_string("pickrate")."</th>".
-            "<th>".locale_string("winrate")."</th>".
-            "<th>".locale_string("mp")."</th>".
-            "<th class=\"separator\">".locale_string("matches_banned")."</th>".
-            // "<th>".locale_string("banrate")."</th>".
-            "<th>".locale_string("winrate")."</th>".
-            "<th>".locale_string("mb")."</th>".
-            "</tr></thead>";
+    ($heroes_flag ? "<th class=\"sorter-no-parser\" width=\"1%\"></th>" : "").
+    ($facets ? "<th></th>" : ""). // ".locale_string("facet")."
+    "<th data-sortInitialOrder=\"asc\">".locale_string($heroes_flag ? "hero" : "player")."</th>".
+    ($roles ? "<th>".locale_string("position")."</th>" : "").
+    "<th>".locale_string("matches_total")."</th>".
+    "<th class=\"separator\">".locale_string("contest_rate")."</th>".
+    "<th>".locale_string("rank")."</th>".
+    "<th>".locale_string("antirank")."</th>".
+    "<th class=\"separator\">".locale_string("matches_picked")."</th>".
+    // "<th>".locale_string("pickrate")."</th>".
+    ($is_ratio ? "<th>".locale_string("ratio")."</th>" : "").
+    "<th>".locale_string("winrate")."</th>".
+    "<th>".locale_string("mp")."</th>".
+    "<th class=\"separator\">".locale_string("matches_banned")."</th>".
+    // "<th>".locale_string("banrate")."</th>".
+    "<th>".locale_string("winrate")."</th>".
+    "<th>".locale_string("mb")."</th>".
+  "</tr></thead>";
 
   $ranks = [];
   $antiranks = [];
   $context_copy = $context;
 
-  $compound_ranking_sort = function($a, $b) use ($context_total_matches) {
-    return compound_ranking_sort($a, $b, $context_total_matches);
-  };
-
-  uasort($context, $compound_ranking_sort);
-
-  $increment = 100 / sizeof($context); $i = 0; $last_rank = 0;
-
-  foreach ($context as $id => $el) {
-    if(isset($last) && $el == $last) {
-      $i++;
-      $ranks[$id] = $last_rank;
-    } else
-      $ranks[$id] = 100 - $increment*$i++;
-    $last = $el;
-    $last_rank = $ranks[$id];
-  }
-  unset($last);
-  unset($context_copy);
+  compound_ranking($context, $context_total_matches);
 
   $context_copy = $context;
-  foreach($context_copy as &$el)  {
-    $el['winrate_picked'] = 1-$el['winrate_picked'];
-    $el['winrate_banned'] = 1-$el['winrate_banned'];
+
+  uasort($context, function($a, $b) {
+    return $b['wrank'] <=> $a['wrank'];
+  });
+
+  $min = end($context)['wrank'];
+  $max = reset($context)['wrank'];
+
+  foreach ($context as $id => $el) {
+    $ranks[$id] = 100 * ($el['wrank']-$min) / ($max-$min);
+
+    $context_copy[$id]['winrate_picked'] = 1-$el['winrate_picked'];
+    $context_copy[$id]['winrate_banned'] = 1-$el['winrate_banned'];
   }
 
-  uasort($context_copy, $compound_ranking_sort);
+  compound_ranking($context_copy, $context_total_matches);
 
-  $increment = 100 / sizeof($context_copy); $i = 0;
+  uasort($context_copy, function($a, $b) {
+    return $b['wrank'] <=> $a['wrank'];
+  });
+
+  $min = end($context_copy)['wrank'];
+  $max = reset($context_copy)['wrank'];
 
   foreach ($context_copy as $id => $el) {
-    if(isset($last) && $el == $last) {
-      $i++;
-      $antiranks[$id] = $last_rank;
-    } else
-      $antiranks[$id] = 100 - $increment*$i++;
-    $last = $el;
-    $last_rank = $antiranks[$id];
+    $antiranks[$id] = 100 * ($el['wrank']-$min) / ($max-$min);
   }
-  unset($last);
+
   unset($context_copy);
 
   foreach($context as $id => $el) {
@@ -141,10 +142,18 @@ function rg_generator_pickban($table_id, &$context, &$context_main, $heroes_flag
     if ($roles) {
       [ $id, $role ] = explode('|', $id);
     }
+    if ($facets) {
+      [ $id, $v ] = explode('-', $id);
+    }
     $el_mp = number_format($el['matches_picked']/$mp, 1);
     $el_mb = number_format((int)$el['matches_banned']/(int)$mb, 1);
     $res .=  "<tr data-value-mp=\"$el_mp\" data-value-mb=\"$el_mb\">".
-            ($heroes_flag ? "<td>".hero_portrait($id)."</td><td>".hero_link($id)."</td>" : "<td>".player_link($id)."</td>").
+            ($heroes_flag ? 
+              "<td>".hero_portrait($id)."</td>".
+                ($facets ? "<td>".facet_micro_element($id, $v)."</td>" : "").
+                "<td>".hero_link($id).($facets && $v ? " ".locale_string('facet_short').$v : "")."</td>" : 
+              "<td>".player_link($id)."</td>"
+            ).
             ($roles ? "<td>".locale_string("position_$role")."</td>" : "").
             "<td>".$el['matches_total']."</td>".
             "<td class=\"separator\">".number_format($el['matches_total']/$context_total_matches*100,2)."%</td>".
@@ -152,6 +161,7 @@ function rg_generator_pickban($table_id, &$context, &$context_main, $heroes_flag
             "<td>".number_format($antiranks[$_id],2)."</td>".
             "<td class=\"separator\">".$el['matches_picked']."</td>".
             // "<td>".number_format($el['matches_picked']/$context_total_matches*100,2)."%</td>".
+            ($is_ratio ? "<td>".number_format($el['ratio']*100, 2)."%</td>" : "").
             "<td>".number_format($el['winrate_picked']*100,2)."%</td>".
             "<td>".$el_mp."</td>".
             "<td class=\"separator\">".$el['matches_banned']."</td>".
@@ -160,7 +170,7 @@ function rg_generator_pickban($table_id, &$context, &$context_main, $heroes_flag
             "<td>".$el_mb."</td>".
             "</tr>";
   }
-  unset($oi);
+  
   $res .= "</table>";
 
   return $res;
@@ -168,6 +178,7 @@ function rg_generator_pickban($table_id, &$context, &$context_main, $heroes_flag
 
 function rg_generator_uncontested($context, $contested, $small = false, $heroes_flag = true) {
   global $portraits_provider;
+
   if ($heroes_flag) {
     // uncontested
     // unpicked : matches_picked 0
@@ -188,7 +199,7 @@ function rg_generator_uncontested($context, $contested, $small = false, $heroes_
         });
         $i = 0;
         foreach ($contested as $tid => $v) {
-          $context_tmp[$tid] = $context[$tid];
+          $context_tmp[$tid] = $context[$tid] ?? [];
           $i++;
           if ($i == $sz) break;
         }

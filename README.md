@@ -193,6 +193,10 @@ Additional parameters to inject in league json descriptor:
 * `force_cluster`
 * `cluster_allowlist`
 * `cluster_denylist`
+* `min_score_side` (default 5)
+* `min_duration` (default 600)
+* `version_allowlist`
+* `version_denylist`
 
 And some things about the listen mode:
 

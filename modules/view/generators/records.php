@@ -21,9 +21,14 @@ function rg_generator_records(&$context) {
                "")."</td>
           <td>".(
             strpos($key, "duration") !== FALSE || strpos($key, "_len") !== FALSE ||
+            strpos($key, "time_dead") !== FALSE || strpos($key, "_time_") !== FALSE ||
             strpos($key, "shortest") !== FALSE || strpos($key, "longest") !== FALSE ?
               convert_time($record['value']) :
-              ( $record['value'] - floor($record['value']) != 0 ? number_format($record['value'], 2) : number_format($record['value'], 0) )
+              (
+                strpos($key, "time_dead") !== FALSE || strpos($key, "_time_") !== FALSE ?
+                convert_time_seconds($record['value']) :
+                ( $record['value'] - floor($record['value']) != 0 ? number_format($record['value'], 2) : number_format($record['value'], 0) )
+              )
             ).
           "</td><td>". ($record['playerid'] ?
                     (strstr($key, "_team") != FALSE ?
@@ -76,7 +81,11 @@ function rg_generator_records_ext(&$context, &$context_ext) {
           strpos($k, "duration") !== FALSE || strpos($k, "_len") !== FALSE ||
           strpos($k, "shortest") !== FALSE || strpos($k, "longest") !== FALSE ?
           convert_time($rec['value']) :
-          ( $rec['value'] - floor($rec['value']) != 0 ? number_format($rec['value'], 2) : number_format($rec['value'], 0) )
+          (
+            strpos($k, "time_dead") !== FALSE || strpos($k, "_time_") !== FALSE ?
+            convert_time_seconds($rec['value']) :
+            ( $rec['value'] - floor($rec['value']) != 0 ? number_format($rec['value'], 2) : number_format($rec['value'], 0) )
+          )
         )."</td>".
         "<td>". ($rec['playerid'] ?
           (strpos($k, "_team") != FALSE ?
@@ -103,7 +112,11 @@ function rg_generator_records_ext(&$context, &$context_ext) {
           strpos($k, "duration") !== FALSE || strpos($k, "_len") !== FALSE ||
           strpos($k, "shortest") !== FALSE || strpos($k, "longest") !== FALSE ?
           convert_time($record['value']) :
-          ( $record['value'] - floor($record['value']) != 0 ? number_format($record['value'], 2) : number_format($record['value'], 0) )
+            (
+              strpos($k, "time_dead") !== FALSE || strpos($k, "_time_") !== FALSE ?
+              convert_time_seconds($record['value']) :
+              ( $record['value'] - floor($record['value']) != 0 ? number_format($record['value'], 2) : number_format($record['value'], 0) )
+            )
         )."</td>".
         "<td>". ($record['playerid'] ?
           (strpos($k, "_team") != FALSE ?

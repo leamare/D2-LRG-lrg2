@@ -119,18 +119,49 @@ function inverse_ncdf($p) {
   //END inverse ncdf implementation.
 }
 
-function compound_ranking_sort($a, $b, $total_matches) {
+function compound_ranking_sort(&$a, &$b, $total_matches) {
   $a_contest = ($a['matches_picked'] + $a['matches_banned'])/$total_matches;
-  $b_contest = ($b['matches_picked'] + $b['matches_banned'])/$total_matches;
-
   $a_oi_rank = ($a['matches_picked']*$a['winrate_picked'] + $a['matches_banned']*$a['winrate_banned']) / $total_matches;
-  $b_oi_rank = ($b['matches_picked']*$b['winrate_picked'] + $b['matches_banned']*$b['winrate_banned']) / $total_matches;
-
   $a_rank = wilson_rating( ($a['matches_picked']*$a['winrate_picked'] + $a['matches_banned']*$a['winrate_banned']/2), ($a['matches_picked'] + $a['matches_banned']/2), 1-$a_contest ) * ($a_oi_rank/4+0.75);
+
+  $b_contest = ($b['matches_picked'] + $b['matches_banned'])/$total_matches;
+  $b_oi_rank = ($b['matches_picked']*$b['winrate_picked'] + $b['matches_banned']*$b['winrate_banned']) / $total_matches;
   $b_rank = wilson_rating( ($b['matches_picked']*$b['winrate_picked'] + $b['matches_banned']*$b['winrate_banned']/2), ($b['matches_picked'] + $b['matches_banned']/2), 1-$b_contest ) * ($b_oi_rank/4+0.75);
 
   if($a_rank == $b_rank) return 0;
   else return ($a_rank < $b_rank) ? 1 : -1;
+}
+
+function compound_ranking(&$arr, $total_matches) {
+  foreach ($arr as $k => $v) {
+    $v_contest = ($v['matches_picked'] + $v['matches_banned'])/$total_matches;
+    $v_oi_rank = ($v['matches_picked']*$v['winrate_picked'] + $v['matches_banned']*$v['winrate_banned']) / $total_matches;
+    $arr[$k]['wrank'] = wilson_rating(
+      ($v['matches_picked']*$v['winrate_picked'] + $v['matches_banned']*$v['winrate_banned']/2),
+      ($v['matches_picked'] + $v['matches_banned']/2), 1-$v_contest
+    ) * ($v_oi_rank/4+0.75);
+  }
+}
+
+function compound_ranking_laning(&$arr, $total_matches, $median_adv, $median_disadv) {
+  foreach ($arr as $k => $v) {
+    $v_popularity = $v['matches']/$total_matches;
+    $v_adv_factor = ($v['avg_advantage'] > 0 && $median_adv > 0 ? $v['avg_advantage']/$median_adv : 0) + 
+      ($v['avg_disadvantage'] > 1 ? $median_disadv/$v['avg_disadvantage'] : 0);
+    $v_matches = $v['matches'] ? $total_matches*(0.7+$v_popularity*0.3) : 0;
+
+    if ($v['matches']) {
+      $v_m = $v_matches * $v['lane_wr'] * (
+        (($v['won_from_won']+$v['won_from_tie']+$v['won_from_behind'])/$v['matches'])/4
+      ) * $v_adv_factor;
+    } else $v_m = 0;
+
+    if ($v_matches < $v_m) {
+      $v_m = $v_matches;
+    }
+
+    $arr[$k]['wrank'] = wilson_rating( $v_m, $v_matches, 1-$v_popularity );
+  }
 }
 
 function compound_ranking_laning_sort($a, $b, $total_matches, $median_adv, $median_disadv) {
@@ -179,10 +210,28 @@ function positions_ranking_sort($a, $b, $total_matches) {
   else return ($a_rank < $b_rank) ? 1 : -1;
 }
 
+function positions_ranking(&$arr, $total_matches) {
+  foreach ($arr as $k => $v) {
+    $v_matches = $v['matches_s'] ?? $v['matches'];
+    $v_winrate = $v['winrate_s'] ?? $v['winrate'];
+    $v_popularity = $v_matches/$total_matches;
+    $arr[$k]['wrank'] = wilson_rating( $v_matches*$v_winrate, $v_matches, 1-$v_popularity );
+  }
+}
+
 function items_ranking_sort($a, $b) {
   $a_rank = wilson_rating( $a['wins'], $a['purchases'], 1-$a['prate'] );
   $b_rank = wilson_rating( $b['wins'], $b['purchases'], 1-$b['prate'] );
 
   if($a_rank == $b_rank) return 0;
   else return ($a_rank < $b_rank) ? 1 : -1;
+}
+
+function items_ranking(&$arr) {
+  foreach ($arr as $k => $v) {
+    if (!$v['purchases'] || !$v['prate']) {
+      $arr[$k]['wrank'] = 0; continue;
+    }
+    $arr[$k]['wrank'] = wilson_rating( $v['wins'], $v['purchases'], 1-$v['prate'] );
+  }
 }
