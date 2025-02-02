@@ -244,6 +244,8 @@ function rg_view_generate_items_profiles() {
     $cons_role_uses = [];
   
     foreach ($cons_data as $blk => $d) {
+      $cons_hero_uses[$blk] = [];
+      $cons_role_uses[$blk] = [];
       if (empty($report['starting_items']['consumables'][$blk][$rid_ref][$hid_ref])) {
         $cons_data[$blk] = array_combine($report['starting_items']['cons_head'], array_fill(0, count($report['starting_items']['cons_head']), 0));
         continue;
@@ -255,35 +257,37 @@ function rg_view_generate_items_profiles() {
         $index = array_search($item, $line['keys']);
         if ($index === false) continue;
 
-        $cons_hero_uses[$hid] = array_combine($report['starting_items']['cons_head'], $line['data'][$index]);
-        $cons_hero_uses[$hid]['mean'] = $cons_hero_uses[$hid]['total'] / $cons_hero_uses[$hid]['matches'];
+        $cons_hero_uses[$blk][$hid] = array_combine($report['starting_items']['cons_head'], $line['data'][$index]);
+        $cons_hero_uses[$blk][$hid]['mean'] = $cons_hero_uses[$blk][$hid]['total'] / $cons_hero_uses[$blk][$hid]['matches'];
       }
 
       foreach ($report['starting_items']['consumables'][$blk] as $rid => &$heroes) {
         $index = array_search($item, $heroes[0]['keys']);
         if ($index === false) continue;
 
-        $cons_role_uses[$rid] = array_combine($report['starting_items']['cons_head'], $heroes[0]['data'][$index]);
-        $cons_role_uses[$rid]['mean'] = $cons_role_uses[$rid]['total'] / $cons_role_uses[$rid]['matches'];
+        $cons_role_uses[$blk][$rid] = array_combine($report['starting_items']['cons_head'], $heroes[0]['data'][$index]);
+        $cons_role_uses[$blk][$rid]['mean'] = $cons_role_uses[$blk][$rid]['total'] / $cons_role_uses[$blk][$rid]['matches'];
       }
     }
 
-    uasort($cons_hero_uses, function($a, $b) {
+    $blk = '10m';
+
+    uasort($cons_hero_uses[$blk], function($a, $b) {
       return $b['mean'] <=> $a['mean'];
     });
 
-    uasort($cons_role_uses, function($a, $b) {
+    uasort($cons_role_uses[$blk], function($a, $b) {
       return $b['mean'] <=> $a['mean'];
     });
 
-    $cons_hero_uses_highest_mean = array_slice(array_keys($cons_hero_uses), 0, 8);
-    $cons_role_most_uses = array_keys($cons_role_uses)[0];
+    $cons_hero_uses_highest_mean = array_slice(array_keys($cons_hero_uses[$blk]), 0, 8);
+    $cons_role_most_uses = array_keys($cons_role_uses[$blk])[0];
 
-    uasort($cons_hero_uses, function($a, $b) {
+    uasort($cons_hero_uses[$blk], function($a, $b) {
       return $a['mean'] <=> $b['mean'];
     });
 
-    $cons_hero_uses_lowest_mean = array_slice(array_keys($cons_hero_uses), 0, 8);
+    $cons_hero_uses_lowest_mean = array_slice(array_keys($cons_hero_uses[$blk]), 0, 8);
   }
 
   $res['itemid'.$item] .= "<div class=\"profile-header\">".
@@ -581,7 +585,7 @@ function rg_view_generate_items_profiles() {
   }
 
   if ($is_consumable) {
-    $res['itemid'.$item] .= "<div class=\"content-text\"><h1>".locale_string("items_overview_consumables_blocks_header")."</h1></div>";
+    $res['itemid'.$item] .= "<div class=\"content-text\"><h1>".locale_string("items_overview_consumables_blocks_all_header")."</h1></div>";
 
     $res['itemid'.$item] .= "<table id=\"items-consumables-itemid$item\" class=\"list sortable\">
       <thead>
@@ -630,7 +634,7 @@ function rg_view_generate_items_profiles() {
     if (count($cons_role_uses) > 1) {
       generate_positions_strings();
 
-      $res['itemid'.$item] .= "<div class=\"content-text\"><h1>".locale_string("items_overview_consumables_blocks_header")."</h1></div>";
+      $res['itemid'.$item] .= "<div class=\"content-text\"><h1>".locale_string("items_overview_consumables_blocks_roles_header")."</h1></div>";
 
       $res['itemid'.$item] .= "<table id=\"items-consumables-roles-itemid$item\" class=\"list sortable\">
       <thead>
@@ -647,7 +651,7 @@ function rg_view_generate_items_profiles() {
       </thead>
       <tbody>";
 
-      foreach ($cons_role_uses as $role => $d) {
+      foreach ($cons_role_uses['10m'] as $role => $d) {
         if (!$role) continue;
         $res['itemid'.$item] .= "<tr><td>".locale_string(ROLES_IDS[$role])."</td>".
           "<td>".$d['matches']."</td>".
