@@ -38,11 +38,11 @@ function rg_generator_stibuilds($table_id, $ishero, $selected_id, $selected_rid,
       <tbody>
   TABLE;
   foreach ($data as $stats) {
-    if (empty($stats)) continue;
+    if (empty($stats) || !$stats['matches']) continue;
     
     $build = implode(" ", array_map(function($a) {
       return "<a title=\"".item_name($a)."\">".item_icon($a, "bigger")."</a>";
-    }, array_filter($stats['build'], function($el) {
+    }, array_filter($stats['build'] ?? [], function($el) {
       return +$el;
     })));
 

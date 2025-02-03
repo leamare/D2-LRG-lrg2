@@ -83,8 +83,76 @@ function rg_view_generate_items_sti_builds() {
   $data = $report['starting_items']['builds'][$selected_rid][$selected_hid] ?? null;
   $report['starting_items']['matches'][$selected_rid] = unwrap_data($report['starting_items']['matches'][$selected_rid]);
 
+  $context = null;
+  if ($selected_hid != 0) {
+    $pbdata = $report['pickban'][$selected_hid] ?? [];
+
+    if (is_wrapped($report['hero_laning'])) {
+      $report['hero_laning'] = unwrap_data($report['hero_laning']);
+    }
+    $lanedata = $report['hero_laning'][0][$selected_hid] ?? [];
+
+    $maindata = $report['random'] ?? $report['main'];
+
+    $context = [
+      'matches' => $pbdata['matches_picked'] ?? 0,
+      'winrate' => $pbdata['winrate_picked'] ?? 0,
+      'pickrate' => ($pbdata['matches_picked'] ?? 0)/$maindata['matches_total'],
+      'lane_wr' => $lanedata['lane_wr'] ?? null,
+      'role_matches' => null,
+      'role_winrate' => null,
+      'role_ratio' => null,
+    ];
+
+    if ($selected_rid != 0 && isset($report['hero_positions'])) {
+      if (is_wrapped($report['hero_positions'])) {
+        $report['hero_positions'] = unwrap_data($report['hero_positions']);
+      }
+
+      [$core, $lane] = explode('.', ROLES_IDS_SIMPLE[$selected_rid]);
+      $posdata = $report['hero_positions'][$core][$lane][$selected_hid] ?? [];
+
+      $context['role_matches'] = $posdata['matches_s'];
+      $context['role_winrate'] = $posdata['winrate_s'];
+      $context['role_ratio'] = $posdata['matches_s']/$context['matches'];
+    }
+  }
+
+  $res[$selected_tag][ROLES_IDS[$selected_rid]] = "";
+
+  if (!empty($context)) {
+    $res[$selected_tag][ROLES_IDS[$selected_rid]] .= "<div class=\"content-text\">".
+      "<table id=\"stibuilds-$selected_hid-$selected_rid-context\" class=\"list\">".
+      "<thead><tr>".
+        "<th></th>".
+        "<th>".locale_string("hero")."</th>".
+        "<th class=\"separator\">".locale_string("matches")."</th>".
+        "<th>".locale_string("pickrate")."</th>".
+        "<th>".locale_string("winrate")."</th>".
+        "<th>".locale_string("lane_wr")."</th>".
+        "<th class=\"separator\">".locale_string("position")."</th>".
+        "<th>".locale_string("ratio")."</th>".
+        "<th>".locale_string("winrate")."</th>".
+      "</tr></thead>".
+      "<tbody>".
+        "<tr>".
+          "<td>".hero_portrait($selected_hid)."</td>".
+          "<td>".hero_link($selected_hid)."</td>".
+          "<td class=\"separator\">".($context['matches'] ?? 0)."</td>".
+          "<td>".number_format(($context['pickrate'] ?? 0)*100, 2)."%</td>".
+          "<td>".number_format(($context['winrate'] ?? 0)*100, 2)."%</td>".
+          "<td>".(isset($context['lane_wr']) ? number_format(($context['lane_wr'] ?? 0)*100, 2)."%" : '-')."</td>".
+          "<td class=\"separator\">".($context['role_matches'] ?? '-')."</td>".
+          "<td>".($context['role_matches'] ? number_format(($context['role_ratio'] ?? 0)*100, 2)."%" : '-')."</td>".
+          "<td>".($context['role_matches'] ? number_format(($context['role_winrate'] ?? 0)*100, 2)."%" : '-')."</td>".
+        "</tr>".
+      "</tbody>".
+    "</table></div>";
+  }
+
+
   if (!empty($data)) {
-    $res[$selected_tag][ROLES_IDS[$selected_rid]] = rg_generator_stibuilds(
+    $res[$selected_tag][ROLES_IDS[$selected_rid]] .= rg_generator_stibuilds(
       "items-stibuilds-$selected_tag",
       true,
       $selected_hid,

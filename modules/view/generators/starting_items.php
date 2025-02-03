@@ -35,6 +35,7 @@ function rg_generator_stitems($table_id, $ishero, $selected_id, $selected_rid, $
       <tbody>
   TABLE;
   foreach ($data as $ciid => $stats) {
+    $ciid = (int)$ciid;
     $cnt = $ciid % 100;
     $item = floor($ciid / 100);
     if (!(+$item)) continue;
