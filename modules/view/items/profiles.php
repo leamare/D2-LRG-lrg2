@@ -512,9 +512,14 @@ function rg_view_generate_items_profiles() {
   if ($is_starting) {
     $variants = [];
 
+    $matches_i = array_search('matches', $report['starting_items']['items_head']);
+
     foreach ($report['starting_items']['items'][0][0]['keys'] as $i => $item_sti) {
       if (floor($item_sti / 100) != $item) continue;
-      $variants[$item_sti] = array_combine($report['starting_items']['items_head'], $report['starting_items']['items'][0][0]['data'][$i]);
+      if ($report['starting_items']['items'][0][0]['data'][$i][$matches_i] < 2) continue;
+      $v = array_combine($report['starting_items']['items_head'], $report['starting_items']['items'][0][0]['data'][$i]);
+      if ($v['freq'] < 0.0001) continue;
+      $variants[$item_sti] = $v;
     }
 
     $res['itemid'.$item] .= "<div class=\"content-text\"><h1>".locale_string("items_overview_sti_variants_header")."</h1></div>";
@@ -534,7 +539,12 @@ function rg_view_generate_items_profiles() {
     foreach ($variants as $i => $line) {
       $res['itemid'.$item] .= "<tr><td>".($i % 100)."</td>".implode('', array_map(function($el) {
         return "<td>".$el."</td>";
-      }, $line))."</tr>";
+      }, [
+        $line['matches'],
+        number_format($line['freq'] * 100, 2)."%",
+        number_format($line['wins'] * 100 / $line['matches'], 2)."%",
+        number_format($line['lane_wins'] * 100 / $line['matches'], 2)."%",
+      ]))."</tr>";
     }
 
     $res['itemid'.$item] .= "</tbody></table>";
