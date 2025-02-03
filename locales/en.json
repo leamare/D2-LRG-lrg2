@@ -621,6 +621,7 @@
     "sti_consumables_all": "Full match",
     "min": "Min",
     "max": "Max",
+    "build": "Build",
     "builds_starting": "Starting builds",
     "items_sti_full": "Full starting items stats",
     "sti_factor": "Factor",
