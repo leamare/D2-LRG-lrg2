@@ -204,8 +204,12 @@ $endpoints['items-builds'] = function($mods, $vars, &$report) use (&$endpoints, 
         $sti_stats = unwrap_data($sti_context);
       }
 
-      $report['starting_items']['matches'][$srid] = unwrap_data($report['starting_items']['matches'][$srid]);
-      $report['starting_items']['matches'][0] = unwrap_data($report['starting_items']['matches'][0]);
+      if (isset($report['starting_items']['matches'][$srid]['data'])) {
+        $report['starting_items']['matches'][$srid] = unwrap_data($report['starting_items']['matches'][$srid]);
+      }
+      if (isset($report['starting_items']['matches'][0]['data'])) {
+        $report['starting_items']['matches'][0] = unwrap_data($report['starting_items']['matches'][0]);
+      }
 
       if (isset($report['starting_items']['matches'][$srid][$hero])) {
         $sti_matches_context =& $report['starting_items']['matches'][$srid][$hero];
@@ -220,8 +224,12 @@ $endpoints['items-builds'] = function($mods, $vars, &$report) use (&$endpoints, 
       $builds_fallback = false;
 
       if (isset($report['starting_items']['builds'])) {
-        $report['starting_items']['builds'][$srid] = unwrap_data($report['starting_items']['builds'][$srid]);
-        $report['starting_items']['builds'][0] = unwrap_data($report['starting_items']['builds'][0]);
+        if (isset($report['starting_items']['builds'][$srid]['data'])) {
+          $report['starting_items']['builds'][$srid] = unwrap_data($report['starting_items']['builds'][$srid]);
+        }
+        if (isset($report['starting_items']['builds'][0]['data'])) {
+          $report['starting_items']['builds'][0] = unwrap_data($report['starting_items']['builds'][0]);
+        }
 
         if (isset($report['starting_items']['builds'][$srid][$hero])) {
           $stib_context =& $report['starting_items']['builds'][$srid][$hero];
