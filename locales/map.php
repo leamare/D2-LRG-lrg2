@@ -15,7 +15,6 @@ return [
         'vpk'  => "russian",
     ],
     "uk" => [
-        "beta" => true,
         "fallback" => "ru",
         "file" => __DIR__ . "/uk.json",
         "name" => "Українська",
