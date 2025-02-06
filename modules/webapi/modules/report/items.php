@@ -59,13 +59,15 @@ $endpoints['items'] = function($mods, $vars, &$report) use (&$endpoints) {
   } else if (in_array('stitems', $mods)) {
     $res = $endpoints['items-stitems']($mods, $vars, $report);
     $res['__endp'] = "items-stitems";
-    $res['__stopRepeater'] = true;
+    $res['__stopRepeater'] = "itemid";
   } else if (in_array('sticonsumables', $mods)) {
     $res = $endpoints['items-sticonsumables']($mods, $vars, $report);
     $res['__endp'] = "items-sticonsumables";
+    $res['__stopRepeater'] = "itemid";
   } else if (in_array('stibuilds', $mods)) {
     $res = $endpoints['items-stibuilds']($mods, $vars, $report);
     $res['__endp'] = "items-stibuilds";
+    $res['__stopRepeater'] = "itemid";
   } else {
     $res = $endpoints['items-overview']($mods, $vars, $report);
     $res['__endp'] = "items-overview";
