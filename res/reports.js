@@ -2,7 +2,7 @@ function parseHashParams() {
   let params = {};
   window.location.hash.substring(1).split('&').forEach(v => {
     v = v.split('=');
-    params[v[0]] = v[1] ? decodeURI(v[1]) : null;
+    params[v[0]] = v[1] ? decodeURI(v[1].replace('%26', '&')) : null;
   });
 
   return params;
@@ -13,7 +13,7 @@ function setHashParam(key, value = null) {
 
   if (!value) delete params[key];
   else {
-    params[key] = value;
+    params[key] = value.replace('&', '%26');
   }
 
   let link = [];
@@ -107,10 +107,15 @@ $(document).ready(function() {
   });
   
   $(".search-filter").on("input", function() {
-    const value = new RegExp( $(this).val().toLowerCase() );
     const table = $(this).attr('data-table-filter-id');
+    let filter = $(this).val().toLowerCase();
 
-    setHashParam('sf-'+table, $(this).val().toLowerCase());
+    setHashParam('sf-'+table, filter);
+
+    filter = filter.split('&');
+    filter = filter.map(f => f.replace(/(\s|^)\-(.*?)(\s|$)/g, '$1(^(?!.*($2)).*)$3'));
+    
+    const value = filter.map(f => new RegExp(f.replace(/^\s+|\s+$/g, '')));
 
     let rowGroups = {};
     
@@ -142,7 +147,11 @@ $(document).ready(function() {
         line +=  $(el).text().toLowerCase() + (aliases ? ' ' + aliases.toLowerCase() : '') + ' ';
       }
       
-      const visible = line.match(value) !== null;
+      let visible = true;
+      for (const i in value) {
+        visible = visible && line.match(value[i]) !== null;
+        if (!visible) break;
+      }
 
       for (const i in rowGroups[group]) {
         $(rowGroups[group][i]).toggle( visible );
