@@ -19,6 +19,47 @@ $previewcode = 123;
 $_earlypreview_banlist = [
   // 'recordext'
 ];
+$_earlypreview_teaser = [
+  // 'items-sticonsumables',
+];
+
+$_earlypreview_wa_ban = [
+  // 'sticonsumables',
+];
+
+$hide_sti_block = true;
+
+$vw_section_markers = [
+  'new' => [
+    'items-stitems',
+    'items-stibuilds',
+  ],
+  'alpha' => [
+    'items-buildspowerspikes'
+  ],
+  'beta' => [
+    'items-irecords',
+  ],
+  'upcoming' => $_earlypreview_teaser,
+];
+
+$reports_earlypreview_ban = [
+  'imm_ranked_737b',
+];
+$reports_earlypreview_ban_time = time() - 280*24*60*60;
+$reports_earlypreview_ban_sections = [
+  'wv' => [
+    'hidden' => [
+      'items-stibuilds',
+    ],
+    'teaser' => [
+      'items-sticonsumables',
+    ],
+  ],
+  'wa' => [
+    'sticonsumables',
+  ],
+];
 
 // custom content
 $custom_head = "";

@@ -11,7 +11,7 @@ function join_selectors($modules, $level, $parent="") {
   global $leaguetag;
   global $max_tabs;
   global $linkvars;
-  global $_earlypreview_banlist, $_earlypreview;
+  global $_earlypreview_banlist, $_earlypreview, $vw_section_markers, $_earlypreview_teaser;
   global $carryon;
 
   $out = "";
@@ -20,6 +20,7 @@ function join_selectors($modules, $level, $parent="") {
   $iconalias = true;
   
   if (empty($_earlypreview_banlist)) $_earlypreview_banlist = [];
+  if (empty($vw_section_markers)) $vw_section_markers = [];
 
   if(empty($parent)) {
     $selectors = explode("-", $mod);
@@ -39,6 +40,8 @@ function join_selectors($modules, $level, $parent="") {
   foreach($modules as $modtag => $module) {
     $mod_type = 0;
     $mod_islink = false;
+    $section_marker = '';
+    $disabled = false;
 
     if ($modtag[0] == "&") {
       $mod_islink = true;
@@ -57,6 +60,21 @@ function join_selectors($modules, $level, $parent="") {
     
     if (!$_earlypreview && in_array($mn, $_earlypreview_banlist)) {
       continue;
+    }
+
+    foreach ($vw_section_markers as $marker => $sections) {
+      foreach ($sections as $section) {
+        if ($section == $mn) {
+          $section_marker = "<span class=\"section-marker section-marker-".$marker."\">".locale_string("section_marker_".$marker)."</span>";
+        } else if (strpos($section, $mn.'-') === 0) {
+          $section_marker = "<span class=\"section-marker section-marker-updated\">".locale_string("section_marker_updated")."</span>";
+        }
+        if (!empty($section_marker)) break;
+      }
+    }
+
+    if (!$_earlypreview && in_array($mn, $_earlypreview_teaser)) {
+      $disabled = true;
     }
 
     $carryon_change = "";
@@ -150,18 +168,19 @@ function join_selectors($modules, $level, $parent="") {
 
       if($lrg_use_get && $lrg_get_depth > $level) {
         if ( $startline_check_res )
-          $selectors[] = "<span class=\"selector active".($child_indicator ? " has-children" : "")."\">".$icon.$modname."</span>";
+          $selectors[] = "<span class=\"selector active".($child_indicator ? " has-children" : "")."\">".$icon.$modname.$section_marker."</span>";
         else
           $selectors[] = "<span class=\"selector".
             ($unset_selector ? " active" : "").
             ($child_indicator ? " has-children" : "").
-            "\"><a href=\"?league=".$leaguetag."&mod=".$mn.$carryon_change.
-            (empty($linkvars) ? "" : "&".$linkvars).
-          "\">".$icon.$modname."</a></span>";
+            "\"><a href=\"".($disabled ? "#" : "?league=".$leaguetag."&mod=".$mn.$carryon_change.
+            (empty($linkvars) ? "" : "&".$linkvars)).
+          "\">".$icon.$modname.$section_marker."</a></span>";
       } else {
         $selectors[] = "<span class=\"mod-".$level_codes[$level][1]."-selector selector".
-                            ($first ? " active" : "")."\" onclick=\"switchTab(event, 'module-".$mn.$carryon_change."', 'mod-".$level_codes[$level][1]."');\">".
-                            $icon.locale_string($modname)."</span>";
+                            ($first ? " active" : "")."\" ".
+                            ($disabled ? "#" : "onclick=\"switchTab(event, 'module-".$mn.$carryon_change."', 'mod-".$level_codes[$level][1]."');\">").
+                            $icon.locale_string($modname).$section_marker."</span>";
       }
     } else {
       if($lrg_use_get && $lrg_get_depth > $level) {
@@ -170,28 +189,35 @@ function join_selectors($modules, $level, $parent="") {
               (strlen($mod) == strlen($mn)) ||
               (strlen($mod) > strlen($mn) && $mod[strlen($mn)] == '-')
             ) )
-          $selectors[] = "<option selected=\"selected\" value=\"?league=".$leaguetag."&mod=".$mn.$carryon_change."&".
-          (empty($linkvars) ? "" : "&".$linkvars)
-          ."\" ".
+          $selectors[] = "<option selected=\"selected\" value=\"".($disabled ? "#" : "?league=".$leaguetag."&mod=".$mn.$carryon_change."&".
+          (empty($linkvars) ? "" : "&".$linkvars)).
+          "\" ".
           (isset($data_aliases) ? 'data-aliases="'.$data_aliases.'" ' : '').
           (isset($data_icon) ? 'data-icon="'.$data_icon.'" ' : '').
-          ">".$modname."</option>";
+          ">".$modname.$section_marker."</option>";
         else
-          $selectors[] = "<option".($unset_selector ? "selected=\"selected\"" : "")." value=\"?league=".$leaguetag."&mod=".$mn.$carryon_change.(empty($linkvars) ? "" : "&".$linkvars)
-            ."\" ".
+          $selectors[] = "<option".($unset_selector ? "selected=\"selected\"" : "")." value=\"".($disabled ? "#" : "?league=".$leaguetag."&mod=".$mn.$carryon_change.(empty($linkvars) ? "" : "&".$linkvars)).
+            "\" ".
             (isset($data_aliases) ? 'data-aliases="'.$data_aliases.'" ' : '').
             (isset($data_icon) ? 'data-icon="'.$data_icon.'" ' : '').
-          ">".$modname."</option>";
+          ">".$modname.$section_marker."</option>";
       } else {
-        $selectors[] = "<option value=\"module-".$mn.$carryon_change."\" ".
+        $selectors[] = "<option value=\"".($disabled ? "#" : "module-".$mn.$carryon_change).
+          "\" ".
           (isset($data_aliases) ? 'data-aliases="'.$data_aliases.'" ' : '').
           (isset($data_icon) ? 'data-icon="'.$data_icon.'" ' : '').
-        ">".$modname."</option>";
+        ">".$modname.$section_marker."</option>";
       }
     }
     if(!$mod_islink && ($startline_check_res || !$lrg_use_get || $lrg_get_depth < $level+1 || $unset_selector)) {
-      if(is_array($module)) {
-        $module = join_selectors($module, $level+1, $mn);
+      if (!$disabled) {
+        if(is_array($module)) {
+          $module = join_selectors($module, $level+1, $mn);
+        }
+      } else {
+        $module = "<div class=\"content-header\">".locale_string("no_access_error_title")."</div>".
+          "<div class=\"content-text\">".locale_string("no_access_error_desc").".</div>".
+        "</div>";
       }
       $out .= "<div id=\"module-".$mn.$carryon_change."\" class=\"selector-module mod-".$level_codes[$level][1].($first ? " active" : "")."\">".$module."</div>";
       $first = false;

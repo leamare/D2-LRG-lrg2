@@ -48,6 +48,12 @@ html {
   --facet-blue: #445477;
   --facet-gray: #4e4c4c;
   --facet-black: #111;
+
+  --section-marker-new: #2169c9;
+  --section-marker-alpha: #96397a;
+  --section-marker-beta: #6f31d3;
+  --section-marker-upcoming: #505050;
+  --section-marker-updated: #b66e0f;
 }
 
 @keyframes collapseAnimationCell {
@@ -2383,4 +2389,29 @@ tr.shady td.banner-row .shady-notice {
 .match-link-modal .hero-facet-element {
   vertical-align: middle;
   font-size: .7em;
+}
+
+.section-marker {
+  color: var(--selector-link);
+  padding: .1em .2em;
+  vertical-align: super;
+  font-size: .5em;
+  border-radius: .25em;
+  letter-spacing: initial;
+}
+
+.section-marker-new {
+  background-color: var(--section-marker-new);
+}
+.section-marker-alpha {
+  background-color: var(--section-marker-alpha);
+}
+.section-marker-beta {
+  background-color: var(--section-marker-beta);
+}
+.section-marker-upcoming {
+  background-color: var(--section-marker-upcoming);
+}
+.section-marker-updated {
+  background-color: var(--section-marker-updated);
 }
