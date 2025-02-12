@@ -128,7 +128,7 @@ $endpoints['items-sticonsumables'] = function($mods, $vars, &$report) use (&$end
         $data[$blk][$iid]['med'] = array_sum($data[$blk][$iid]['med']);
         $data[$blk][$iid]['q1'] = array_sum($data[$blk][$iid]['q1']);
         $data[$blk][$iid]['min'] = min($data[$blk][$iid]['min']);
-        $data[$blk][$iid]['mean'] = round($data[$blk][$iid]['total'] / $data[$blk][$iid]['matches'], 2);
+        $data[$blk][$iid]['mean'] = round($data[$blk][$iid]['total'] / $matches_total, 2);
       }
     }
 
@@ -140,6 +140,14 @@ $endpoints['items-sticonsumables'] = function($mods, $vars, &$report) use (&$end
     if (!isset($report['starting_items']) || empty($report['starting_items']['consumables']))
       throw new \Exception("No consumables data");
 
+    if (is_wrapped($report['starting_items']['matches'][$selected_rid])) {
+      $report['starting_items']['matches'][$selected_rid] = unwrap_data($report['starting_items']['matches'][$selected_rid]);
+    }
+
+    $matches = $report['starting_items']['matches'][$selected_rid][$selected_hid];
+
+    $matches_total = $matches['m'];
+
     foreach ($data as $blk => $d) {
       if (empty($report['starting_items']['consumables'][$blk][$selected_rid][$selected_hid])) {
         $data[$blk] = [];
@@ -149,13 +157,9 @@ $endpoints['items-sticonsumables'] = function($mods, $vars, &$report) use (&$end
       $data[$blk] = unwrap_data($report['starting_items']['consumables'][$blk][$selected_rid][$selected_hid]);
   
       foreach ($data[$blk] as $iid => $d) {
-        $data[$blk][$iid]['mean'] = round($d['total'] / $d['matches'], 2);
+        $data[$blk][$iid]['mean'] = round($d['total'] / $matches_total, 2);
       }
     }
-  
-    $report['starting_items']['matches'][$selected_rid] = unwrap_data($report['starting_items']['matches'][$selected_rid]);
-
-    $matches = $report['starting_items']['matches'][$selected_rid][$selected_hid];
     
     $pbdata = $report['pickban'][$selected_hid] ?? [];
 
