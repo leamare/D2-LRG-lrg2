@@ -75,6 +75,7 @@ function rg_view_generate_items_heroes() {
     "<th data-col-group=\"_index\"></th>".
     "<th data-col-group=\"_index\">".locale_string("item")."</th>".
     "<th class=\"separator\" data-sorter=\"digit\" data-col-group=\"total\">".locale_string("purchases")."</th>".
+    "<th data-sorter=\"digit\" data-col-group=\"total\">".locale_string("avg_purchases")."</th>".
     "<th data-sorter=\"digit\" data-col-group=\"total\">".locale_string("purchase_rate")."</th>".
     "<th data-sorter=\"digit\" data-col-group=\"total\">".locale_string("rank")."</th>".
     "<th class=\"separator\" data-sorter=\"digit\" data-col-group=\"items_winrate_shifts\">".locale_string("winrate")."</th>".
@@ -95,6 +96,7 @@ function rg_view_generate_items_heroes() {
     "<td data-col-group=\"_index\">".item_icon($item)."</td>".
     "<td data-col-group=\"_index\">".item_link($item)."</td>".
     "<td class=\"separator\" data-col-group=\"total\">".$data['purchases']."</td>".
+    // "<td data-col-group=\"total\">".number_format($data['purchases']/$data['matchcount'], 1)."</td>".
     "<td data-col-group=\"total\">".number_format($data['prate']*100, 2)."%</td>".
     "<td data-col-group=\"total\">".number_format($data['rank'], 1)."</td>".
     "<td class=\"separator\" data-col-group=\"items_winrate_shifts\">".number_format($data['winrate']*100, 2)."%</td>".
@@ -180,6 +182,7 @@ function rg_view_generate_items_heroes() {
     "<th data-col-group=\"_index\"></th>".
     "<th data-col-group=\"_index\">".locale_string("hero")."</th>".
     "<th class=\"separator\" data-sorter=\"digit\"  data-col-group=\"total\">".locale_string("purchases")."</th>".
+    // "<th data-sorter=\"digit\" data-col-group=\"total\">".locale_string("avg_purchases")."</th>".
     "<th data-sorter=\"digit\" data-col-group=\"total\">".locale_string("purchase_rate")."</th>".
     "<th data-sorter=\"digit\" data-col-group=\"total\">".locale_string("rank")."</th>".
     "<th class=\"separator\" data-sorter=\"digit\" data-col-group=\"items_winrate_shifts\">".locale_string("winrate")."</th>".
@@ -213,6 +216,7 @@ function rg_view_generate_items_heroes() {
       "<td data-col-group=\"_index\">".hero_portrait($hero)."</td>".
       "<td data-col-group=\"_index\">".hero_link($hero)."</td>".
       "<td class=\"separator\" data-col-group=\"total\">".$line['purchases']."</td>".
+      // "<td data-col-group=\"total\">".number_format($line['purchases']/$line['matchcount'], 5)."</td>".
       "<td data-col-group=\"total\">".number_format($line['prate']*100, 2)."%</td>".
       "<td data-col-group=\"total\">".number_format($line['rank'], 1)."</td>".
       "<td class=\"separator\" data-col-group=\"items_winrate_shifts\">".number_format($line['winrate']*100, 2)."%</td>".

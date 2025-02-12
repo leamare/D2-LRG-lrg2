@@ -171,6 +171,7 @@ function rg_view_generate_items_stats() {
       "<td data-col-group=\"_index\">".item_icon($iid)."</td>".
       "<td data-col-group=\"_index\">".item_link($iid)."</td>".
       "<td class=\"separator\" data-col-group=\"total\">".$line['purchases']."</td>".
+      // "<td data-col-group=\"total\">".number_format($line['purchases']/$line['matchcount'], 1)."</td>".
       "<td data-col-group=\"total\">".number_format($line['prate']*100, 2)."%</td>".
       "<td data-col-group=\"total\">".number_format($line['rank'], 1)."</td>".
       "<td class=\"separator\" data-col-group=\"items_winrate_shifts\">".number_format($line['winrate']*100, 2)."%</td>".
@@ -232,6 +233,7 @@ function rg_view_generate_items_stats() {
     "<th data-col-group=\"_index\"></th>".
     "<th data-col-group=\"_index\">".locale_string("item")."</th>".
     "<th class=\"separator\" data-sorter=\"digit\" data-col-group=\"total\">".locale_string("purchases")."</th>".
+    // "<th data-sorter=\"digit\" data-col-group=\"total\">".locale_string("avg_purchases")."</th>".
     "<th data-sorter=\"digit\" data-col-group=\"total\">".locale_string("purchase_rate")."</th>".
     "<th data-sorter=\"digit\" data-col-group=\"total\">".locale_string("rank")."</th>".
     "<th class=\"separator\" data-sorter=\"digit\" data-col-group=\"items_winrate_shifts\">".locale_string("winrate")."</th>".

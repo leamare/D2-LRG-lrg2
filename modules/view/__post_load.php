@@ -180,3 +180,33 @@ if (isset($report["first_match"]) && isset($report["last_match"]) && compare_ver
     }
   }
 }
+
+if (!empty($reports_earlypreview_ban)) {
+  $match = true;
+
+  if ($match && !in_array($leaguetag, $reports_earlypreview_ban)) {
+    $match = false;
+  }
+  if ($match && isset($reports_earlypreview_ban_time) && (intval($report['last_match']['date'] ?? 0) - $reports_earlypreview_ban_time < 0)) {
+    $match = false;
+  }
+
+  if ($match) {
+    if (empty($vw_section_markers)) {
+      $vw_section_markers = [
+        'upcoming' => [],
+      ];
+    }
+
+    foreach (($reports_earlypreview_ban_sections['wv']['hidden'] ?? []) as $_bmod) {
+      $_earlypreview_banlist[] = $_bmod;
+    }
+    foreach (($reports_earlypreview_ban_sections['wv']['teaser'] ?? []) as $_bmod) {
+      $_earlypreview_teaser[] = $_bmod;
+      $vw_section_markers['upcoming'][] = $_bmod;
+    }
+    foreach (($reports_earlypreview_ban_sections['wa'] ?? []) as $_bmod) {
+      $_earlypreview_wa_ban[] = $_bmod;
+    }
+  }
+}

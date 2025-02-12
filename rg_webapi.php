@@ -108,6 +108,13 @@ if (file_exists("modules/__imports/api") && is_dir("modules/__imports/api")) {
 
 include_once("rg_report_out_settings.php");
 
+$_earlypreview = empty($previewcode) ? true : false;
+if(!$_earlypreview && isset($_GET['earlypreview']) && ($_GET['earlypreview'] == $previewcode)) {
+  $linkvars[] = [ "earlypreview", $previewcode ];
+  $_earlypreview = true;
+  $hide_sti_block = false;
+}
+
 set_error_handler(
   function ($severity, $message, $file, $line) {
     if (strpos($message, 'file_get_contents')) {
@@ -192,20 +199,19 @@ if (!empty($leaguetag)) {
   $report = [];
 }
 
-include_once(__DIR__ . "/modules/webapi/modules.php");
+set_error_handler(
+  function ($severity, $message, $file, $line) {
+    throw new \Exception($severity.' - '.$message.'('.$file.':'.$line.')', $severity);
+  }
+);
 
+include_once(__DIR__ . "/modules/webapi/modules.php");
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST');
 //header("Access-Control-Allow-Headers: X-Requested-With");
 header('Access-Control-Allow-Headers: token, Content-Type');
-
-set_error_handler(
-  function ($severity, $message, $file, $line) {
-    throw new \Exception($severity.' - '.$message.'('.$file.':'.$line.')', $severity);
-  }
-);
 
 $resp['modline'] = $mod;
 $resp['vars'] = $vars;

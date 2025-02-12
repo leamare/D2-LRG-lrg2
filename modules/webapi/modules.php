@@ -49,10 +49,32 @@ if (empty($endp_name)) {
 
 $repeaters = $repeatVars[ $endp_name ] ?? [];
 
-if (!empty($repeaters)) {
-  $result = repeater($repeaters, $modline, $endp, $vars, $report);
+$disabled = false;
+if (!$_earlypreview) {
+  if (in_array($mod, $_earlypreview_wa_ban) || in_array($endp_name, $_earlypreview_wa_ban)) {
+    $disabled = true;
+  } else {
+    foreach ($_earlypreview_wa_ban as $ban) {
+      if (strpos($mod, $ban) !== false) {
+        $disabled = true;
+        break;
+      }
+    }
+  }
+}
+
+if (!$disabled) {
+  if (!empty($repeaters)) {
+    $result = repeater($repeaters, $modline, $endp, $vars, $report);
+  } else {
+    $result = execute($modline, $endp, $vars, $report);
+  }
 } else {
-  $result = execute($modline, $endp, $vars, $report);
+  $result = [
+    'errors' => [
+      'Not allowed (403)',
+    ],
+  ];
 }
 
 if (isset($result['__endp'])) {
