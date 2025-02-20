@@ -9,7 +9,7 @@ $imports_ignore = [
   "check_directory.php",
 ];
 
-$lg_version = [ 2, 27, 0, 0, 0 ];
+$lg_version = [ 2, 28, 0, 0, 0 ];
 $isApi = false;
 
 $root = dirname(__FILE__);
