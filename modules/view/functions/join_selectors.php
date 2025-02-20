@@ -42,6 +42,7 @@ function join_selectors($modules, $level, $parent="") {
     $mod_islink = false;
     $section_marker = '';
     $disabled = false;
+    $might_be_updated = false;
 
     if ($modtag[0] == "&") {
       $mod_islink = true;
@@ -57,24 +58,51 @@ function join_selectors($modules, $level, $parent="") {
         );
       if (is_array($module)) $mod_type = 1;
     }
-    
-    if (!$_earlypreview && in_array($mn, $_earlypreview_banlist)) {
-      continue;
+
+    if (!$_earlypreview) {
+      foreach ($_earlypreview_banlist as $section) {
+        if ((is_string($section) && $section[0] == '/' && preg_match($section, $mn)) || ($section == $mn)) {
+          continue 2;
+        }
+      }
     }
 
     foreach ($vw_section_markers as $marker => $sections) {
       foreach ($sections as $section) {
-        if ($section == $mn) {
-          $section_marker = "<span class=\"section-marker section-marker-".$marker."\">".locale_string("section_marker_".$marker)."</span>";
-        } else if (strpos($section, $mn.'-') === 0) {
-          $section_marker = "<span class=\"section-marker section-marker-updated\">".locale_string("section_marker_updated")."</span>";
+        if (is_string($section) && $section[0] == '/') {
+          if (preg_match($section, $mn)) {
+            $section_marker = "<span class=\"section-marker section-marker-".$marker."\">".locale_string("section_marker_".$marker)."</span>";
+          } else if (is_array($module)) {
+            foreach ($module as $child => $child_module) {
+              if (preg_match($section, $mn.'-'.$child)) {
+                $section_marker = "<span class=\"section-marker section-marker-updated\">".locale_string("section_marker_updated")."</span>";
+                break;
+              }
+            }
+          }
+        } else {
+          if ($section == $mn) {
+            $section_marker = "<span class=\"section-marker section-marker-".$marker."\">".locale_string("section_marker_".$marker)."</span>";
+          } else if (strpos($section, $mn.'-') === 0 && is_array($module) && !(in_array($section, $_earlypreview_teaser) && !$_earlypreview)) {
+            $child = substr($section, strlen($mn)+1);
+            if (isset($module[$child])) {
+              $section_marker = "<span class=\"section-marker section-marker-updated\">".locale_string("section_marker_updated")."</span>";
+              break;
+            }
+          }
         }
         if (!empty($section_marker)) break;
       }
     }
 
-    if (!$_earlypreview && in_array($mn, $_earlypreview_teaser)) {
-      $disabled = true;
+    if (!$_earlypreview) {
+      foreach ($_earlypreview_teaser as $section) {
+        if ((is_string($section) && $section[0] == '/' && preg_match($section, $mn)) || ($section == $mn)) {
+          $disabled = true;
+          $section_marker = "<span class=\"section-marker section-marker-upcoming\">".locale_string("section_marker_upcoming")."</span>";
+          break;
+        }
+      }
     }
 
     $carryon_change = "";
