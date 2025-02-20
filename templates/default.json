@@ -137,7 +137,7 @@
       }
     },
 
-    "items": false,
+    "items": true,
     "skill_builds": false,
     "starting_items": true,
     "starting_builds": true,
