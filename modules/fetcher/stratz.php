@@ -97,7 +97,7 @@ const STRATZ_LEAVER_STATUS = [
 //   }
 // }
 
-const STRATZ_GRAPHQL_QUERY = "{
+const STRATZ_GRAPHQL_QUERY = "fragment MatchInfo on MatchType {
   clusterId
   gameMode
   gameVersionId
@@ -214,6 +214,10 @@ const STRATZ_GRAPHQL_QUERY = "{
         type
       }
       level
+      wardDestruction {
+        time
+        isWard
+      }
     }
     assists
     deaths
@@ -262,7 +266,7 @@ function get_stratz_response($match) {
     ];
   } else {
     $data = [
-      'query' => "{ match(id: $match) ".STRATZ_GRAPHQL_QUERY."}"
+      'query' => "{ match(id: $match) { ...MatchInfo } }\n\n".STRATZ_GRAPHQL_QUERY
     ];
   
     /* 
@@ -301,6 +305,8 @@ function get_stratz_response($match) {
         'timeout' => 60,
       ]
     ]));
+
+    var_dump("STRATZ");
 
     if (empty($json)) return null;
     
@@ -1048,7 +1054,13 @@ function get_stratz_multiquery($group) {
   if (empty($gr)) return null;
 
   $data = [
-    'query' => "{ matches(ids: [".implode(',', $gr)."]) ".STRATZ_GRAPHQL_QUERY."}"
+    'query' => "{
+      ".implode(',', array_map(function($m, $i) {
+        return "BASE_MATCH_INFO_$i: match(id: $m) {
+          ...MatchInfo
+        }\n";
+      }, $gr, array_keys($gr)))."
+    }\n\n".STRATZ_GRAPHQL_QUERY
   ];
 
   $data['query'] = str_replace("  ", "", $data['query']);
@@ -1071,6 +1083,8 @@ function get_stratz_multiquery($group) {
     ]
   ]));
 
+  var_dump("STRATZ MASS");
+
   // $json = @file_get_contents($stratz_request.'?'.$q);
   
   if (empty($json)) {
@@ -1085,7 +1099,7 @@ function get_stratz_multiquery($group) {
 
   if (empty($stratz) || empty($stratz['data'])) return null;
 
-  foreach ($stratz['data']['matches'] as $match) {
+  foreach ($stratz['data'] as $match) {
     if (empty($match)) continue;
     $stratz_cache[ $match['id'] ] = $match;
   }
