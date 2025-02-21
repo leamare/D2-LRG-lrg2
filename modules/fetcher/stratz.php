@@ -306,8 +306,6 @@ function get_stratz_response($match) {
       ]
     ]));
 
-    var_dump("STRATZ");
-
     if (empty($json)) return null;
     
     $stratz = json_decode($json, true);
@@ -1082,8 +1080,6 @@ function get_stratz_multiquery($group) {
       'timeout' => 60,
     ]
   ]));
-
-  var_dump("STRATZ MASS");
 
   // $json = @file_get_contents($stratz_request.'?'.$q);
   
