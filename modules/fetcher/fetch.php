@@ -1421,6 +1421,51 @@ function fetch($match) {
           $t_items[] = $r;
         }
 
+        $last_neutral_item = null;
+        $last_neutral_enchantment = null;
+        foreach ($matchdata['players'][$j]['neutral_item_history'] as $e) {
+          $new_items = [];
+
+          if ($e['item_neutral'] != $last_neutral_item) {
+            $last_neutral_item = $e['item_neutral'];
+
+            $new_items[] = $e['item_neutral'];
+          }
+
+          if ($e['item_neutral_enhancement'] != $last_neutral_enchantment) {
+            $last_neutral_enchantment = $e['item_neutral_enhancement'];
+
+            $new_items[] = $e['item_neutral_enhancement'];
+          }
+
+          foreach($new_items as $item) {
+            $item_id = 0;
+            foreach ($meta['items'] as $id => $item_tag) {
+              if ($item_tag == $item) {
+                $item_id = $id;
+                break;
+              }
+            }
+            if (!$item_id) continue;
+            
+            foreach($meta['item_categories'] as $category_name => $items) {
+              if (in_array($item_id, $items)) {
+                $category = $category_name;
+                break;
+              }
+            }
+
+            $t_items[] = [
+              'matchid' => $match,
+              'playerid' => $matchdata['players'][$j]['account_id'] ?? $t_matchlines[$i]['playerid'],
+              'hero_id' => $matchdata['players'][$j]['hero_id'] ?? $t_matchlines[$i]['heroid'],
+              'item_id' => $item_id,
+              'time' => $e['time'],
+              'category_id' => array_search($category, array_keys($meta['item_categories'])),
+            ];
+          }
+        }
+
         // missing items workaround
         for ($k=0; $k<6; $k++) {
           if (!empty($matchdata['players'][$j]['item_'.$k]) && !isset($plog[ $matchdata['players'][$j]['item_'.$k] ])) {
