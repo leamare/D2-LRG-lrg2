@@ -290,7 +290,7 @@ function rg_view_generate_players_profiles() {
       }
       $res['playerid'.$player] .= "</tbody></table>";
     } else {
-      $res['heroid'.$hero] .= "<div class=\"content-text\"><h1>".locale_string("haverages")."</h1>".locale_string("stats_no_elements")."</a></div>";
+      $res['playerid'.$player] .= "<div class=\"content-text\"><h1>".locale_string("haverages")."</h1>".locale_string("stats_no_elements")."</a></div>";
     }
   }
 
