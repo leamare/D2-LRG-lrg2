@@ -848,6 +848,10 @@ function rg_view_generate_heroes_profiles() {
       foreach ($report['hero_summary_variants'] as $j => $data) {
         $hero_stats = $data[$hvid] ?? [];
 
+        if (($meta['facets']['heroes'][$hero][$i-1]['deprecated'] ?? false) && !($hero_stats['matches_s'] ?? 0)) {
+          continue;
+        }
+
         $stats[] = [
           'variant' => $i,
           'position' => ROLES_IDS[$j],
@@ -1002,6 +1006,10 @@ function rg_view_generate_heroes_profiles() {
       
       foreach ($report['regions_data'] as $regid => $data) {
         $hero_stats = $data['hvariants'][$hvid] ?? [];
+
+        if (($meta['facets']['heroes'][$hero][$i-1]['deprecated'] ?? false) && !($hero_stats['m'] ?? 0)) {
+          continue;
+        }
 
         $stats[] = [
           'variant' => $i,
