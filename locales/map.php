@@ -39,5 +39,10 @@ return [
         "file" => __DIR__ . "/zh.json",
         "name" => "普通话",
         'vpk'  => "schinese",
-    ]
+    ],
+    "emoji" => [
+        "file" => __DIR__ . "/emoji.json",
+        "name" => "Emoji 😀",
+        'vpk'  => "emoji",
+    ],
 ];

@@ -9,7 +9,7 @@ reports/
 libs/
 metadata/
 tmp/
-locales_additional/
+locales_additional/*
 .vscode/
 
 # Settings container
@@ -50,3 +50,6 @@ cachelist.json
 # symlinks workaround
 metadata
 res/custom_styles
+
+# special locales
+!locales_additional/heroes_emoji.json
