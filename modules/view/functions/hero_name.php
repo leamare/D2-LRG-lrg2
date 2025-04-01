@@ -31,7 +31,14 @@ function hero_full_icon($hid) {
 }
 
 function hero_name($hid) {
-  global $meta;
+  global $meta, $locale;
+
+  if (is_special_locale($locale)) {
+    include_locale($locale, "heroes");
+    $hname = locale_string("heroid$hid", [], $locale);
+    return ($hname == "heroid$hid") ? $meta->heroes[ $hid ]['name'] : $hname;
+  }
+
   if (isset($meta->heroes[ $hid ]['name'])) return $meta->heroes[ $hid ]['name'];
   return "undefined";
 }
@@ -49,9 +56,15 @@ function hero_link($hid) {
 }
 
 function hero_aliases($hid) {
-  global $meta;
+  global $meta, $locale;
 
-  return (
+  $aliases = "";
+
+  if (is_special_locale($locale)) {
+    $aliases = $meta->heroes[ $hid ]['name'] ?? "";
+  }
+
+  return $aliases." ".(
     ($meta['heroes'][ $hid ]['alt'] ?? "") . " " .
     ($meta['heroes'][ $hid ]['aliases'] ?? "")
   );

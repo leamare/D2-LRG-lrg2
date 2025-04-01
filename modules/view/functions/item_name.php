@@ -1,7 +1,7 @@
 <?php
 
 function item_icon($iid, $classes = '') {
-  return "<img class=\"hero_portrait $classes\" src=\"".item_icon_link($iid)."\" alt=\"".item_tag($iid)."\" data-aliases=\"".item_name($iid)."\" />";
+  return "<img class=\"hero_portrait $classes\" src=\"".item_icon_link($iid)."\" alt=\"".item_tag($iid)."\" data-aliases=\"".item_name($iid, true)."\" />";
 }
 
 function item_big_icon($iid) {
@@ -25,9 +25,16 @@ function item_tag($iid) {
   return "unknown";
 }
 
-function item_name($iid) {
-  global $meta;
+function item_name($iid, $force_real_name = false) {
+  global $meta, $locale;
   $meta['items_full'];
+
+  if (is_special_locale($locale) && !$force_real_name) {
+    include_locale($locale, "heroes");
+    $iname = locale_string("itemid$iid", [], $locale);
+    return ($iname == "itemid$iid") ? $meta['items_full'][$iid]['name'] : $iname;
+  }
+
   if (isset($meta['items_full'][$iid]))
     return $meta['items_full'][$iid]['localized_name'] ?? $meta['items_full'][$iid]['name'];
   return "Unknown";
