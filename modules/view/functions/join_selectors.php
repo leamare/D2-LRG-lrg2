@@ -13,6 +13,7 @@ function join_selectors($modules, $level, $parent="") {
   global $linkvars;
   global $_earlypreview_banlist, $_earlypreview, $vw_section_markers, $_earlypreview_teaser;
   global $carryon;
+  global $locale;
 
   $out = "";
   $first = true;
@@ -148,7 +149,7 @@ function join_selectors($modules, $level, $parent="") {
           }
         }
         if (isset($hid)) {
-          $data_aliases = ($meta['heroes'][ $hid ]['alt'] ?? "") . " " . ($meta['heroes'][ $hid ]['aliases'] ?? "");
+          $data_aliases = hero_aliases($hid);
           $data_icon = hero_icon_link($hid);
         }
       }
@@ -184,6 +185,9 @@ function join_selectors($modules, $level, $parent="") {
         }
         if (isset($iid)) {
           $data_aliases = item_tag($iid)." $m";
+          if (is_special_locale($locale)) {
+            $data_aliases = item_name($iid, true)." ".$data_aliases;
+          }
           $data_icon = item_icon_link($iid);
         }
       }
