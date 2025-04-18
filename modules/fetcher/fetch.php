@@ -877,6 +877,9 @@ function fetch($match) {
         if (!$player['hero_id']) continue;
         if (!isset($player['lane_role']) || !$player['lane_role'] || $player['lane_role'] > 4) $player['lane_role'] = 4;
         $team = $player['isRadiant'] ? 1 : 0;
+        if (empty($player['lane_efficiency'])) {
+          $player['lane_efficiency'] = $player['lh_at10']/($matchdata['game_mode'] == 23 ? 21 : 42);
+        }
         $p = [
           'hid' => $player['hero_id'],
           'gpm' => $player['gold_per_min'],
@@ -1423,7 +1426,7 @@ function fetch($match) {
 
         $last_neutral_item = null;
         $last_neutral_enchantment = null;
-        foreach ($matchdata['players'][$j]['neutral_item_history'] as $e) {
+        foreach (($matchdata['players'][$j]['neutral_item_history'] ?? []) as $e) {
           $new_items = [];
 
           if ($e['item_neutral'] != $last_neutral_item) {
