@@ -11,6 +11,7 @@ include_once("modules/fetcher/fetch.php");
 include_once("modules/fetcher/stratz.php");
 include_once("modules/commons/generate_tag.php");
 include_once("modules/commons/metadata.php");
+include_once("modules/commons/array_pslice.php");
 
 include_once("libs/simple-opendota-php/simple_opendota.php");
 
@@ -39,6 +40,8 @@ if (!function_exists("array_key_last")) {
 $conn = new mysqli($lrg_sql_host, $lrg_sql_user, $lrg_sql_pass, $lrg_sql_db);
 $conn->set_charset('utf8mb4');
 $meta = new lrg_metadata;
+
+$meta_spells_tags_flip = array_flip_flat($meta['spells_tags']);
 
 $listen = isset($options['L']);
 

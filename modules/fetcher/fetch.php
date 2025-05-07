@@ -21,7 +21,7 @@ function fetch($match) {
   $request_unparsed, $meta, $stratz_timeout_retries, $force_adding, $cache_dir, $lg_settings, $lrg_use_cache, $first_scheduled,
   $use_full_stratz, $scheduled_wait_period, $steamapikey, $force_await, $players_list, $rank_limit, $stratztoken, $ignore_stratz,
   $update_unparsed, $request_unparsed_players, $stratz_graphql, $api_cooldown_seconds, $update_names, $updated_names, $rewrite_existing,
-  $ignore_abandons, $lastversion, $schema, $min_duration_seconds, $min_score_side, $fallback_valveapi;
+  $ignore_abandons, $lastversion, $schema, $min_duration_seconds, $min_score_side, $fallback_valveapi, $meta_spells_tags_flip;
 
   $t_match = [];
   $t_matchlines = [];
@@ -1628,7 +1628,12 @@ function fetch($match) {
               }
             }
           }
-          $ability = array_flip($meta['spells_tags'])[$ability_tag];
+          $ability = $meta_spells_tags_flip[$ability_tag] ?? null;
+          if ($ability) {
+            $ability = max(array_keys($meta['spells_tags'])) + 100;
+            $meta['spells_tags'][$ability] = $ability_tag;
+            $meta_spells_tags_flip[$ability_tag] = $ability;
+          }
           $player['ability_upgrades_arr'][] = $ability;
         }
       }

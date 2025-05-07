@@ -16,13 +16,13 @@ function levelToIndex($level) {
 }
 
 function skillPriority($skillbuild, $hid, $noattr = false) {
-  global $meta;
+  global $meta, $meta_spells_tags_flip;
   $meta['heroes_spells'];
   $meta['spells_linked'];
 
   $ultLevel = (in_array(5375, $skillbuild) || in_array(5433, $skillbuild)) ? 3 : 6;
 
-  $spell_ids = array_flip($meta['spells_tags']);
+  $spell_ids = $meta_spells_tags_flip;
 
   $talents = [];
   $skillNumbers = [];
@@ -38,9 +38,11 @@ function skillPriority($skillbuild, $hid, $noattr = false) {
   ) : 0;
 
   foreach ($skillbuild as $i => $sid) {
-    $tag = $meta['spells_tags'][$sid] ?? "_unknown";
-    if (isset($meta['spells_linked'][$tag])) {
-      $skillbuild[$i] = $spell_ids[ $meta['spells_linked'][$tag] ];
+    $tag = (array)($meta['spells_tags'][$sid] ?? "_unknown");
+    foreach ($tag as $t) {
+      if (isset($meta['spells_linked'][$t])) {
+        $skillbuild[$i] = $spell_ids[ $meta['spells_linked'][$t] ];
+      }
     }
   }
 
@@ -62,7 +64,7 @@ function skillPriority($skillbuild, $hid, $noattr = false) {
     foreach ($skills as $sid) {
       if ($sid == 730 || $sid == 5002) continue;
 
-      if (strpos($meta['spells_tags'][$sid] ?? $sid, "special_bonus") !== false) {
+      if (strpos(implode(",", $meta['spells_tags'][$sid] ?? $sid), "special_bonus") !== false) {
         $i = array_search($sid, $skillbuild);
         $talents[ (LEVELS_IDS[$i] ?? $i+1) ] = $sid;
       }
@@ -76,7 +78,7 @@ function skillPriority($skillbuild, $hid, $noattr = false) {
 
     if ((count($skillNumbers) == 4 && !isset($skillNumbers[$sid])) || 
       (!in_array($sid, $sb_copy) && $i >= 9 && !isset($skillNumbers[$sid]) && ($maxtalents > count($talents))) || 
-      strpos($meta['spells_tags'][$sid] ?? $sid, "special_bonus") !== false
+      strpos(implode(",", $meta['spells_tags'][$sid] ?? $sid), "special_bonus") !== false
     ) {
       $talents[(LEVELS_IDS[$i] ?? $i+1)] = $sid;
       continue;
