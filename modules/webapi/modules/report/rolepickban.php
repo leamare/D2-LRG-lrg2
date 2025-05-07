@@ -1,5 +1,9 @@
 <?php 
 
+include_once(__DIR__ . "/../../functions/pickban_overview.php");
+include_once(__DIR__ . "/../../functions/overview_uncontested.php");
+include_once(__DIR__ . "/../../../view/functions/teams_diversity_recalc.php");
+
 $repeatVars['rolepickban'] = ['team', 'region'];
 
 $endpoints['rolepickban'] = function($mods, $vars, &$report) {
@@ -59,6 +63,8 @@ $endpoints['rolepickban'] = function($mods, $vars, &$report) {
     }
   }
 
+  [ $balance, $b_wr, $b_pr, $b_cr ] = balance_rank($pb);
+
   if (!$mp) {
     uasort($pb, function($a, $b) {
       return $a['matches_picked'] <=> $b['matches_picked'];
@@ -114,8 +120,6 @@ $endpoints['rolepickban'] = function($mods, $vars, &$report) {
   foreach ($context_copy as $id => $el) {
     $aranks[$id] = 100 * ($el['wrank']-$min) / ($max-$min);
   }
-
-  unset($context_copy);
   
   foreach($pb as $id => &$el) {
     unset($el['wrank']);
@@ -128,7 +132,15 @@ $endpoints['rolepickban'] = function($mods, $vars, &$report) {
     $el['bans_to_median'] = isset($mb) ? round($el['matches_banned']/$mb, 1) : null;
   }
 
+  unset($context_copy);
+
   return [
-    'pickban' => array_values($pb)
+    'pickban' => array_values($pb),
+    'balance' => [
+      'total' => round($balance, 3),
+      'winrate' => round($b_wr, 3),
+      'pickrate' => round($b_pr, 3),
+      'contest' => round($b_cr, 3),
+    ]
   ];
 };
