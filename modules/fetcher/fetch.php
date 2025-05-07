@@ -753,14 +753,14 @@ function fetch($match) {
     
       if(empty($teamid)) continue;
 
-      $json = file_get_contents('https://api.steampowered.com/IDOTA2Match_570/GetTeamInfoByTeamID/v001/?key='.$steamapikey.'&teams_requested=1&start_at_team_id='.$teamid);
+      $json = @file_get_contents('https://api.steampowered.com/IDOTA2Match_570/GetTeamInfoByTeamID/v001/?key='.$steamapikey.'&teams_requested=1&start_at_team_id='.$teamid);
       $team = json_decode($json, true);
 
       $matchdata[$tag.'_id'] = $teamid;
       $matchdata[$tag] = [
         'team_id' => $teamid,
-        'name' => $team['result']['teams'][0]['name'],
-        'tag' => $team['result']['teams'][0]['tag'] ?? generate_tag($team['result']['teams'][0]['name']),
+        'name' => $team['result']['teams'][0]['name'] ?? "Team $teamid",
+        'tag' => $team['result']['teams'][0]['tag'] ?? generate_tag($team['result']['teams'][0]['name'] ?? "Team $teamid"),
       ];
     }
   } else {
@@ -776,12 +776,12 @@ function fetch($match) {
           $t_team_matches[$i]['teamid'] = (int) ($match_rules['side'][ $tag ] ?? $match_rules['side'][ $tm['is_radiant'] ? 'radiant' : 'dire' ] ?? $match_rules['side'][ $tm['is_radiant'] ] ?? $tm['teamid']);
 
         if (!isset($t_teams[ $tm['teamid'] ])) {
-          $json = file_get_contents('https://api.steampowered.com/IDOTA2Match_570/GetTeamInfoByTeamID/v001/?key='.$steamapikey.'&teams_requested=1&start_at_team_id='.$tm['teamid']);
+          $json = @file_get_contents('https://api.steampowered.com/IDOTA2Match_570/GetTeamInfoByTeamID/v001/?key='.$steamapikey.'&teams_requested=1&start_at_team_id='.$tm['teamid']);
           $team = json_decode($json, true);
 
           $t_teams[ $tm['teamid'] ] = [
-            'name' => $team['result']['teams'][0]['name'],
-            'tag' => $team['result']['teams'][0]['tag'] ?? generate_tag($team['result']['teams'][0]['name']),
+            'name' => $team['result']['teams'][0]['name'] ?? "Team {$tm['teamid']}",
+            'tag' => $team['result']['teams'][0]['tag'] ?? generate_tag($team['result']['teams'][0]['name'] ?? "Team {$tm['teamid']}"),
             'added' => false
           ];
         }
@@ -1629,7 +1629,7 @@ function fetch($match) {
             }
           }
           $ability = $meta_spells_tags_flip[$ability_tag] ?? null;
-          if ($ability) {
+          if (!$ability) {
             $ability = max(array_keys($meta['spells_tags'])) + 100;
             $meta['spells_tags'][$ability] = $ability_tag;
             $meta_spells_tags_flip[$ability_tag] = $ability;

@@ -64,7 +64,7 @@ function skillPriority($skillbuild, $hid, $noattr = false) {
     foreach ($skills as $sid) {
       if ($sid == 730 || $sid == 5002) continue;
 
-      if (strpos(implode(",", $meta['spells_tags'][$sid] ?? $sid), "special_bonus") !== false) {
+      if (strpos(implode(",", (array)($meta['spells_tags'][$sid] ?? $sid)), "special_bonus") !== false) {
         $i = array_search($sid, $skillbuild);
         $talents[ (LEVELS_IDS[$i] ?? $i+1) ] = $sid;
       }
@@ -78,7 +78,7 @@ function skillPriority($skillbuild, $hid, $noattr = false) {
 
     if ((count($skillNumbers) == 4 && !isset($skillNumbers[$sid])) || 
       (!in_array($sid, $sb_copy) && $i >= 9 && !isset($skillNumbers[$sid]) && ($maxtalents > count($talents))) || 
-      strpos(implode(",", $meta['spells_tags'][$sid] ?? $sid), "special_bonus") !== false
+      strpos(implode(",", (array)($meta['spells_tags'][$sid] ?? $sid)), "special_bonus") !== false
     ) {
       $talents[(LEVELS_IDS[$i] ?? $i+1)] = $sid;
       continue;
