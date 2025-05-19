@@ -954,7 +954,7 @@ function get_stratz_response($match) {
       $d['hero_id'] = $dr['isPick'] || !isset($dr['heroId']) ? $dr['heroId'] : $dr['bannedHeroId'];
       if (empty($d['hero_id'])) continue;
 
-      if ($r['matches']['modeID'] == 2 || $r['matches']['modeID'] == 9) {
+      if ($r['matches']['modeID'] == 2 || $r['matches']['modeID'] == 8) {
         $last_stage_pick = null;
         if ($last_stage_pick != $d['is_pick'] && !$d['is_pick']) {
           $stage++;
