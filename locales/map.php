@@ -43,6 +43,5 @@ return [
     "emoji" => [
         "file" => __DIR__ . "/emoji.json",
         "name" => "Emoji 😀",
-        'vpk'  => "emoji",
     ],
 ];

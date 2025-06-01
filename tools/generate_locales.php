@@ -373,6 +373,9 @@ foreach ($addlocales as $ftag => $data) {
   }
   $gtag = substr($ftag, 0, strrpos($ftag, '_'));
   foreach ($data as $tag => $string) {
+    if (!isset($addlocales[$gtag.'_'.$localesMap['def']['alias']])) {
+      continue;
+    }
     if ($string == $addlocales[$gtag.'_'.$localesMap['def']['alias']][$tag]) {
       unset($addlocales[$ftag][$tag]);
     }

@@ -11,6 +11,9 @@ function rg_generator_overview_chart($name, $labels, $context) {
   global $charts_colors;
 
   $colors = array_slice($charts_colors, 0, sizeof($labels));
+  $labels = array_map(function($label) {
+    return str_replace("'", "\'", $label);
+  }, $labels);
   $res = "<div class=\"chart-pie\"><canvas id=\"$name\" width=\"undefined\" height=\"undefined\"></canvas><script>".
                         "var modes_chart_el = document.getElementById('$name'); ".
                         "var modes_chart = new Chart(modes_chart_el, {
