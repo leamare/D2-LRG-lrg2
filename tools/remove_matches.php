@@ -59,6 +59,7 @@ foreach ($mids as $mid) {
       ( $schema['skill_builds'] ? "delete from skill_builds where matchid = $mid;" : "").
       ( $schema['starting_items'] ? "delete from starting_items where matchid = $mid;" : "").
       ( $schema['wards'] ? "delete from wards where matchid = $mid;" : "").
+      ( $schema['fantasy_mvp'] ? "delete from fantasy_mvp_points where matchid = $mid; delete from fantasy_mvp_awards where matchid = $mid;" : "").
       "delete from matches where matchid = $mid;";
 
   if ($conn->multi_query($sql) === TRUE) echo "$mid\n";

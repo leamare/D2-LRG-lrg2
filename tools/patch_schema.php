@@ -7,6 +7,7 @@ $conn = new mysqli($lrg_sql_host, $lrg_sql_user, $lrg_sql_pass, $lrg_sql_db);
 if ($conn->connect_error) die("[F] Connection to SQL server failed: ".$conn->connect_error."\n");
 
 include_once("modules/commons/schema.php");
+include_once("modules/commons/fantasy_mvp.php");
 
 function runquery($conn, $q) {
   $conn->query($q);
@@ -115,4 +116,8 @@ if (!$schema['variant_supported']) {
   $sql = "ALTER TABLE matchlines ADD `variant` SMALLINT UNSIGNED DEFAULT null NULL;";
 
   runquery($conn, $sql);
+}
+
+if (!$schema['fantasy_mvp']) {
+  create_fantasy_mvp_tables($conn);
 }
