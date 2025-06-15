@@ -19,6 +19,7 @@ $schema = [
   'percentile_available' => false,
   'variant_supported' => false,
   'variant' => false,
+  'fantasy_mvp' => false,
 ];
 
 echo "[ ] Getting tables\n";
@@ -50,6 +51,10 @@ for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row(
     case "starting_items":
     case "skill_builds":
       $schema[$row[0]] = true;
+      break;
+    case "fantasy_mvp_points":
+    case "fantasy_mvp_awards":
+      $schema['fantasy_mvp'] = true;
       break;
   }
 }
