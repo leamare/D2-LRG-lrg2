@@ -8,6 +8,7 @@
 include_once __DIR__.'/comebacks.php';
 include_once __DIR__.'/skillPriority.php';
 include_once __DIR__.'/fetch_valve_api.php';
+include_once __DIR__.'/../../modules/commons/fantasy_mvp.php';
 
 function conn_restart() {
   global $conn, $lrg_sql_host, $lrg_sql_user, $lrg_sql_pass, $lrg_sql_db;
@@ -679,51 +680,52 @@ function fetch($match) {
       }
     }
 
-    if($lg_settings['main']['teams'] && (!isset($matchdata['radiant_team']['team_id']) || !isset($matchdata['dire_team']['team_id'])) ) {
-        $json = @file_get_contents("https://api.steampowered.com/IDOTA2Match_570/GetMatchDetails/V001/?match_id=$match&key=$steamapikey");
-        $tmp = json_decode($json, true);
-        unset($json);
-        if(!isset($matchdata['radiant_team']['team_id'])) {
-          if(isset($tmp['result']['radiant_team_id'])) {
-            if(isset($t_teams[$tmp['result']['radiant_team_id']]) ) {
-              $matchdata['radiant_team']['team_id'] = $tmp['result']['radiant_team_id'];
-              $matchdata['radiant_team']['name'] = $t_teams[$tmp['result']['radiant_team_id']]['name'];
-              $matchdata['radiant_team']['tag'] = $t_teams[$tmp['result']['radiant_team_id']]['tag'];
-            } else {
-              $matchdata['radiant_team']['team_id'] = $tmp['result']['radiant_team_id'];
-              $matchdata['radiant_team']['name'] = $tmp['result']['radiant_name'];
+    // FIXME: GetMatchDetails doesn't work anymore
+    // if($lg_settings['main']['teams'] && (!isset($matchdata['radiant_team']['team_id']) || !isset($matchdata['dire_team']['team_id'])) ) {
+    //     $json = @file_get_contents("https://api.steampowered.com/IDOTA2Match_570/GetMatchDetails/V001/?match_id=$match&key=$steamapikey");
+    //     $tmp = json_decode($json, true);
+    //     unset($json);
+    //     if(!isset($matchdata['radiant_team']['team_id'])) {
+    //       if(isset($tmp['result']['radiant_team_id'])) {
+    //         if(isset($t_teams[$tmp['result']['radiant_team_id']]) ) {
+    //           $matchdata['radiant_team']['team_id'] = $tmp['result']['radiant_team_id'];
+    //           $matchdata['radiant_team']['name'] = $t_teams[$tmp['result']['radiant_team_id']]['name'];
+    //           $matchdata['radiant_team']['tag'] = $t_teams[$tmp['result']['radiant_team_id']]['tag'];
+    //         } else {
+    //           $matchdata['radiant_team']['team_id'] = $tmp['result']['radiant_team_id'];
+    //           $matchdata['radiant_team']['name'] = $tmp['result']['radiant_name'];
 
-              $json = @file_get_contents('https://api.steampowered.com/IDOTA2Match_570/GetTeamInfoByTeamID/v001/?key='.$steamapikey.'&teams_requested=1&start_at_team_id='.$matchdata['radiant_team']['team_id']);
-              $team = json_decode($json, true);
+    //           $json = @file_get_contents('https://api.steampowered.com/IDOTA2Match_570/GetTeamInfoByTeamID/v001/?key='.$steamapikey.'&teams_requested=1&start_at_team_id='.$matchdata['radiant_team']['team_id']);
+    //           $team = json_decode($json, true);
 
-              if( !isset($team['result']['teams'][0]['tag']) || $team['result']['teams'][0]['tag'] == null )
-                  $matchdata['radiant_team']['tag'] = generate_tag($tmp['result']['radiant_name']);
-              else
-                  $matchdata['radiant_team']['tag'] = $team['result']['teams'][0]['tag'];
-            }
-          }
-        }
-        if(!isset($matchdata['dire_team']['team_id'])) {
-          if(isset($tmp['result']['dire_team_id'])) {
-            if(isset($t_teams[$tmp['result']['dire_team_id']]) ) {
-              $matchdata['dire_team']['team_id'] = $tmp['result']['dire_team_id'];
-              $matchdata['dire_team']['name'] = $t_teams[$tmp['result']['dire_team_id']]['name'];
-              $matchdata['dire_team']['tag'] = $t_teams[$tmp['result']['dire_team_id']]['tag'];
-            } else {
-              $matchdata['dire_team']['team_id'] = $tmp['result']['dire_team_id'];
-              $matchdata['dire_team']['name'] = $tmp['result']['dire_name'];
+    //           if( !isset($team['result']['teams'][0]['tag']) || $team['result']['teams'][0]['tag'] == null )
+    //               $matchdata['radiant_team']['tag'] = generate_tag($tmp['result']['radiant_name']);
+    //           else
+    //               $matchdata['radiant_team']['tag'] = $team['result']['teams'][0]['tag'];
+    //         }
+    //       }
+    //     }
+    //     if(!isset($matchdata['dire_team']['team_id'])) {
+    //       if(isset($tmp['result']['dire_team_id'])) {
+    //         if(isset($t_teams[$tmp['result']['dire_team_id']]) ) {
+    //           $matchdata['dire_team']['team_id'] = $tmp['result']['dire_team_id'];
+    //           $matchdata['dire_team']['name'] = $t_teams[$tmp['result']['dire_team_id']]['name'];
+    //           $matchdata['dire_team']['tag'] = $t_teams[$tmp['result']['dire_team_id']]['tag'];
+    //         } else {
+    //           $matchdata['dire_team']['team_id'] = $tmp['result']['dire_team_id'];
+    //           $matchdata['dire_team']['name'] = $tmp['result']['dire_name'];
 
-              $json = @file_get_contents('https://api.steampowered.com/IDOTA2Match_570/GetTeamInfoByTeamID/v001/?key='.$steamapikey.'&teams_requested=1&start_at_team_id='.$matchdata['dire_team']['team_id']);
-              $team = json_decode($json, true);
+    //           $json = @file_get_contents('https://api.steampowered.com/IDOTA2Match_570/GetTeamInfoByTeamID/v001/?key='.$steamapikey.'&teams_requested=1&start_at_team_id='.$matchdata['dire_team']['team_id']);
+    //           $team = json_decode($json, true);
 
-              if( !isset($team['result']['teams'][0]['tag']) || $team['result']['teams'][0]['tag'] == null )
-                  $matchdata['dire_team']['tag'] = generate_tag($tmp['result']['dire_name']);
-              else
-                  $matchdata['dire_team']['tag'] = $team['result']['teams'][0]['tag'];
-            }
-          }
-        }
-    }
+    //           if( !isset($team['result']['teams'][0]['tag']) || $team['result']['teams'][0]['tag'] == null )
+    //               $matchdata['dire_team']['tag'] = generate_tag($tmp['result']['dire_name']);
+    //           else
+    //               $matchdata['dire_team']['tag'] = $team['result']['teams'][0]['tag'];
+    //         }
+    //       }
+    //     }
+    // }
 
     unset($matchdata['chat']);
     unset($matchdata['cosmetics']);
@@ -1742,6 +1744,8 @@ function fetch($match) {
     } while($conn->next_result());
   }
 
+  [ $t_fantasy_points, $t_fantasy_awards ] = generate_fantasy_mvp($t_match, $t_matchlines, $t_adv_matchlines);
+
   // TODO:
   if(!empty($cache_dir) && !empty($matchdata) && $lrg_use_cache && !$bad_replay && !file_exists("$cache_dir/".$match.".lrgcache.json")) {
     //$f = fopen("$cache_dir/".($bad_replay ? "unparsed_" : "").$match.".json", "w");
@@ -1757,6 +1761,8 @@ function fetch($match) {
       'skill_builds' => $t_skill_builds,
       'starting_items' => $t_starting_items,
       'wards' => $t_wards,
+      'fantasy_mvp_points' => $t_fantasy_points,
+      'fantasy_mvp_awards' => $t_fantasy_awards,
     ];
 
     $matchdata['players'] = [];
@@ -1860,6 +1866,8 @@ function fetch($match) {
       }
     }
   }
+
+  
 
   $sql = "INSERT INTO matches (
     matchid, radiantWin, duration, modeID, leagueID, start_date, ".
@@ -2221,6 +2229,61 @@ function fetch($match) {
         $conn->store_result();
       } while($conn->next_result());
       return null;
+    }
+  }
+
+  if(!empty($t_fantasy_points) && $lg_settings['main']['fantasy'] && $schema['fantasy_mvp']) {
+    $sql = "INSERT INTO fantasy_mvp_points (
+      matchid, playerid, heroid,
+      total_points, kills, deaths,
+      assists, creeps, gpm, xpm, obs_placed,
+      stacks, stuns, teamfight_part, damage,
+      healing, damage_taken, hero_damage_taken_bonus,
+      hero_damage_taken_penalty, tower_damage,
+      obs_kills, cour_kills, buybacks
+    ) VALUES ";
+    foreach ($t_fantasy_points as $t) {
+      $sql .= "\n\t({$t['matchid']}, {$t['playerid']}, {$t['heroid']}, {$t['total_points']},
+        {$t['kills']}, {$t['deaths']}, {$t['assists']}, {$t['creeps']}, {$t['gpm']}, {$t['xpm']},
+        {$t['obs_placed']}, {$t['stacks']}, {$t['stuns']}, {$t['teamfight_part']}, {$t['damage']},
+        {$t['healing']}, {$t['damage_taken']}, {$t['hero_damage_taken_bonus']}, {$t['hero_damage_taken_penalty']},
+        {$t['tower_damage']}, {$t['obs_kills']}, {$t['cour_kills']}, {$t['buybacks']}),";
+    }
+    $sql[strlen($sql)-1] = ";";
+
+    $err_query = "DELETE from fantasy_mvp_points where matchid = ".$t_match['matchid'].";".$err_query;
+
+    if ($conn->multi_query($sql) === TRUE);
+    else {
+      echo "ERROR fantasy_mvp_points (".$conn->error."), reverting match.\n";
+      if ($conn->error === "MySQL server has gone away") {
+        sleep(30);
+        conn_restart();
+        $matches[] = $match;
+      }
+      $conn->multi_query($err_query);
+      do {
+        $conn->store_result();
+      } while($conn->next_result());
+      return null;
+    }
+
+    $sql = "INSERT INTO fantasy_mvp_awards (matchid, playerid, heroid, total_points, mvp, mvp_losing, core, support, lvp) VALUES ";
+    foreach ($t_fantasy_awards as $t) {
+      $sql .= "\n\t({$t['matchid']}, {$t['playerid']}, {$t['heroid']}, {$t['total_points']}, {$t['mvp']}, {$t['mvp_losing']}, {$t['core']}, {$t['support']}, {$t['lvp']}),";
+    }
+    $sql[strlen($sql)-1] = ";";
+
+    $err_query = "DELETE from fantasy_mvp_awards where matchid = ".$t_match['matchid'].";".$err_query;
+
+    if ($conn->multi_query($sql) === TRUE);
+    else {
+      echo "ERROR fantasy_mvp_awards (".$conn->error."), reverting match.\n";
+      if ($conn->error === "MySQL server has gone away") {
+        sleep(30);
+        conn_restart();
+        $matches[] = $match;
+      }
     }
   }
 
