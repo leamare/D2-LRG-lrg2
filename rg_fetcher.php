@@ -228,6 +228,10 @@ if (!isset($query->num_rows) || !$query->num_rows) {
   echo "[N] Set &settings.items to true.\n";
 }
 
+if ($lg_settings['main']['fantasy'] && !$schema['fantasy_mvp']) {
+  create_fantasy_mvp_tables($conn);
+}
+
 $json = "";
 if ($lg_settings['main']['teams']) {
     $t_teams = [];

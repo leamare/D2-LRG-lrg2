@@ -3,6 +3,8 @@ $init = true;
 include_once("head.php");
 
 include_once("modules/commons/metadata.php");
+include_once("modules/commons/fantasy_mvp.php");
+
 $meta = new lrg_metadata;
 
 if (!file_exists("templates/default.json")) die("[F] No default league template found, exitting.");
@@ -387,6 +389,10 @@ if (!$isVirtual) {
   $conn->query("ALTER TABLE `matchlines` ADD CONSTRAINT `matchlines_pl` FOREIGN KEY (`playerID`) REFERENCES `players` (`playerID`);");
     if ($conn->connect_error) die("[F] Can't link `matchlines` to `players`: ".$conn->connect_error."\n");
   echo "OK\n";
+
+  if ($lg_settings['main']['fantasy']) {
+    create_fantasy_mvp_tables($conn);
+  }
 
   if($lg_settings['main']['teams']) {
     echo "[ ] Creating table `teams`...";
