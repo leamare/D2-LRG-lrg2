@@ -1,6 +1,8 @@
 <?php 
 
 include_once("head.php");
+include_once("modules/commons/streaming_archive.php");
+
 ini_set('memory_limit', '16192M');
 const DISK_CACHE_COUNTER = 25000;
 const QUERY_COUNTER = 10000;
@@ -17,7 +19,7 @@ $input = $options['f'] ?? '';
 
 $skipTables = explode(",", $options['S'] ?? '');
 
-$output_path = $options['o'] ?? 'backups/'.$lrg_league_tag.'_'.time().'.tar';
+$output_path = $options['o'] ?? 'backups/'.$lrg_league_tag.'_'.time().'.tar.gz';
 if (!is_dir('backups')) mkdir('backups');
 
 // 1. get through all the tables in the database
@@ -66,6 +68,8 @@ if ($restore) {
     'teams',
     'teams_matches',
     'teams_rosters',
+    'fantasy_mvp_points',
+    'fantasy_mvp_awards',
   ];
 
   foreach ($tables as $t) {
@@ -329,19 +333,19 @@ if ($restore) {
   $files['descriptor.json'] = "leagues/$lrg_league_tag.json";
 
   echo "[ ] Packing files...";
-  $a = new PharData($output_path);
+  require_once("modules/commons/streaming_archive.php");
+  $archive = new StreamingArchive($output_path);
 
   foreach ($files as $n => $l) {
     try {
-      $a->addFile($l, $n);
+      $archive->addFile($n, $l);
     } catch (\Throwable $e) {
       echo "\n[E] Couldn't pack file `$n`: ".$e->getMessage()."\n";
       echo "\t...";
     }
   }
   
-  $a->compress(Phar::GZ);
-  unlink($output_path);
+  $archive->close();
   echo "OK\n";
 
   echo "[ ] Cleaning up...";

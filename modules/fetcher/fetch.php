@@ -1867,7 +1867,7 @@ function fetch($match) {
     }
   }
 
-  
+  // DATABASE QUERIES
 
   $sql = "INSERT INTO matches (
     matchid, radiantWin, duration, modeID, leagueID, start_date, ".
