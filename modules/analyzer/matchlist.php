@@ -1,5 +1,14 @@
 <?php
-$result["matches"] = array();
+
+function _map_row_to_award($row) {
+  return ( (int)$row[2] & 0b00001 ) // mvp
+    | ( ((int)$row[3] << 1) & 0b00010 ) // mvp_losing
+    | ( ((int)$row[4] << 2) & 0b00100 ) // core
+    | ( ((int)$row[5] << 3) & 0b01000 ) // support
+    | ( ((int)$row[6] << 4) & 0b10000 ); // lvp
+}
+
+$result["matches"] = [];
 
 $sql = "SELECT matchid, heroid, playerid, isRadiant".($schema['variant'] ? ", variant" : "")." FROM matchlines;";
 
@@ -28,7 +37,7 @@ for ($row = $query_res->fetch_row();
 }
 
 
-$result["matches_additional"] = array();
+$result["matches_additional"] = [];
 foreach ($result["matches"] as $matchid => $matchinfo) {
   $sql = "SELECT duration, cluster, modeID, radiantWin, start_date FROM matches WHERE matchid = $matchid;";
 
@@ -100,8 +109,26 @@ if ($schema['draft_order'] ?? false) {
   $query_res->free_result();
 }
 
-if($lg_settings['main']['teams']) {
-  $result["match_participants_teams"] = array();
+if ($lg_settings['main']['fantasy'] && $schema['fantasy_mvp']) {
+  $sql = "SELECT matchid, playerid, mvp, mvp_losing, core, support, lvp FROM fantasy_mvp_awards;";
+
+  if ($conn->multi_query($sql) === TRUE);
+  else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+
+  $query_res = $conn->store_result();
+
+  for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+    if (!isset($result["matches_additional"][$row[0]]['mvp'])) {
+      $result["matches_additional"][$row[0]]['mvp'] = [];
+    }
+    $result["matches_additional"][$row[0]]['mvp'][$row[1]] = _map_row_to_award($row);
+  }
+
+  $query_res->free_result();
+}
+
+if ($lg_settings['main']['teams']) {
+  $result["match_participants_teams"] = [];
   $sql = "SELECT matchid, teamid, is_radiant FROM teams_matches;";
 
   if ($conn->multi_query($sql) === TRUE) echo "[S] PARTICIPANTS LIST.\n";
@@ -120,4 +147,3 @@ if($lg_settings['main']['teams']) {
 
   $query_res->free_result();
 }
-?>

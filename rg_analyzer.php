@@ -329,6 +329,13 @@ if ($lg_settings['ana']['skill_builds'] && $schema['skill_builds']) {
   require_once("modules/analyzer/skill_builds.php");
 }
 
+// FANTASY MVP
+
+if ($lg_settings['main']['fantasy'] && $schema['fantasy_mvp']) {
+  require_once("modules/analyzer/fantasy/heroes_mvp.php");
+  require_once("modules/analyzer/fantasy/players_mvp.php");
+}
+
 // ...
 
 $result['settings'] = $lg_settings['web'];
