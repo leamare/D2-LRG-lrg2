@@ -498,15 +498,43 @@ table .hero_portrait.bigger, .flextable .hero_portrait.bigger {
 }
 .match-team .match-players {
   position: relative;
-  line-height: 1.5;
+  line-height: 1.25;
 }
 .match-team .match-players .match-player {
+  padding-top: 1.75em;
   font-size: 14px;
   color: #fff;
   width: 20%;
   display: inline-block;
   overflow: hidden;
   white-space: nowrap;
+  position: relative;
+  text-overflow: ellipsis;
+}
+
+.match-player:before {
+  display: block;
+  font-size: 1.25em;
+  position: absolute;
+  top: -0em;
+  left: 0;
+  width: 100%;
+  text-align: center;
+}
+.match-player.fm-mvp:before {
+  content: "👑";
+}
+.match-player.fm-lvp:before {
+  content: "💀";
+}
+.match-player.fm-core:before {
+  content: "🪓";
+}
+.match-player.fm-support:before {
+  content: "👁️";
+}
+.match-player.fm-mvp-losing:before {
+  content: "🥈";
 }
 
 .match-team .match-heroes .match-hero {
@@ -514,10 +542,44 @@ table .hero_portrait.bigger, .flextable .hero_portrait.bigger {
   display: inline-flex;
   position: relative;
 }
-.match-team .match-heroes .match-hero img {
+.match-team .match-heroes .match-hero > img {
   width: 90%;
   margin: 5% .9ch;
+  border-radius: 5% / 10%;
+  transition: all 100ms ease;
 }
+.match-team .match-heroes .match-hero.fm-mvp > img {
+  box-shadow: 0 0 .5em 0 rgba(255, 215, 0, 0.5);
+}
+.match-team .match-heroes .match-hero.fm-lvp > img {
+  box-shadow: 0 0 .5em 0 rgba(96, 96, 96, 0.5);
+}
+.match-team .match-heroes .match-hero.fm-core > img {
+  box-shadow: 0 0 .5em 0 rgba(255, 76, 32, 0.5);
+}
+.match-team .match-heroes .match-hero.fm-support > img {
+  box-shadow: 0 0 .5em 0 rgba(32, 76, 255, 0.5);
+}
+.match-team .match-heroes .match-hero.fm-mvp-losing > img {
+  box-shadow: 0 0 .5em 0 rgba(255, 255, 255, 0.5);
+}
+
+.match-team .match-heroes .match-hero.fm-mvp:hover > img {
+  box-shadow: 0 0 1em 0 rgba(255, 215, 0, 1);
+}
+.match-team .match-heroes .match-hero.fm-lvp:hover > img {
+  box-shadow: 0 0 1em 0 rgba(32, 32, 32, 1);
+}
+.match-team .match-heroes .match-hero.fm-core:hover > img {
+  box-shadow: 0 0 1em 0 rgba(255, 76, 32, 1);
+}
+.match-team .match-heroes .match-hero.fm-support:hover > img {
+  box-shadow: 0 0 1em 0 rgba(32, 76, 255, 1);
+}
+.match-team .match-heroes .match-hero.fm-mvp-losing:hover > img {
+  box-shadow: 0 0 1em 0 rgba(176, 176, 176, 1);
+}
+
 
 .match-team .match-heroes-bans {
   filter: grayscale(100%);
@@ -538,6 +600,7 @@ table .hero_portrait.bigger, .flextable .hero_portrait.bigger {
 .match-team .match-heroes-bans .match-hero img {
   width: 86%;
   margin: 7% 0;
+  border-radius: 5% / 10%;
 }
 
 .match-hero[data-order]:after {
@@ -583,22 +646,26 @@ table .hero_portrait.bigger, .flextable .hero_portrait.bigger {
   border-color: transparent black transparent transparent;
   right: 4.9%;
   top: 7%;
+  border-top-right-radius: 15%;
 }
 .match-team.radiant .match-hero[data-order]:before {
   border-width: 0 0 3.4em 3.4em;
   border-color: transparent transparent transparent black;
   left: 4.9%;
   top: 7%;
+  border-top-left-radius: 15%;
 }
 .match-team.dire .match-heroes-bans .match-hero[data-order]:before {
   border-width: 0 2.25em 2.25em 0;
   right: 0;
   top: 7%;
+  border-top-right-radius: 15%;
 }
 .match-team.radiant .match-heroes-bans .match-hero[data-order]:before {
   border-width: 0 0 2.25em 2.25em;
   left: 0;
   top: 7%;
+  border-top-left-radius: 15%;
 }
 
 .match-team-name {
@@ -621,8 +688,8 @@ table .hero_portrait.bigger, .flextable .hero_portrait.bigger {
 .match-add-info {
   float: right;
   width: 20%;
-  padding-top: 10px;
-  margin-top: 36px;
+  padding-top: .65em;
+  margin-top: 5em;
 }
 .match-info-line {
   font-size: 16px;

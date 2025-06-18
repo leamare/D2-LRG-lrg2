@@ -1,5 +1,15 @@
 <?php
 
+function _map_award_to_string($award) {
+  if ($award == 0b00001) return "fm-mvp";
+  if ($award == 0b00010) return "fm-mvp-losing";
+  if ($award == 0b00100) return "fm-core";
+  if ($award == 0b01000) return "fm-support";
+  if ($award == 0b10000) return "fm-lvp";
+
+  return "";
+}
+
 function match_card($mid) {
   global $report, $meta, $match_card_records_cnt;
   if (empty($mid)) return "";
@@ -13,6 +23,8 @@ function match_card($mid) {
 
   $clusters = $meta['clusters'];
   $regions = $meta['regions'];
+
+  $is_awards = isset($report['matches_additional'][$mid]['mvp']);
 
   $m = $report['matches'][$mid];
 
@@ -28,15 +40,16 @@ function match_card($mid) {
 
   foreach ($m as $pl) {
     $order = empty($orders) ? 0 : $orders[ $pl['hero'] ]+1;
+    $award = $is_awards ? _map_award_to_string($report['matches_additional'][$mid]['mvp'][$pl['player']] ?? 0) : "";
     if($pl['radiant'] == 1) {
-      $players_radi .= "<div class=\"match-player\">".player_name($pl['player'], false)."</div>";
-      $heroes_radi .= "<div class=\"match-hero\" ".($order ? "data-order=\"$order\"" : "").">".
+      $players_radi .= "<div class=\"match-player $award\">".player_name($pl['player'], false)."</div>";
+      $heroes_radi .= "<div class=\"match-hero $award\" ".($order ? "data-order=\"$order\"" : "").">".
         hero_portrait($pl['hero']).
         (!empty($pl['var']) ? facet_micro_element($pl['hero'], $pl['var']) : "").
       "</div>";
     } else {
-      $players_dire .= "<div class=\"match-player\">".player_name($pl['player'], false)."</div>";
-      $heroes_dire .= "<div class=\"match-hero\" ".($order ? "data-order=\"$order\"" : "").">".
+      $players_dire .= "<div class=\"match-player $award\">".player_name($pl['player'], false)."</div>";
+      $heroes_dire .= "<div class=\"match-hero $award\" ".($order ? "data-order=\"$order\"" : "").">".
         hero_portrait($pl['hero']).
         (!empty($pl['var']) ? facet_micro_element($pl['hero'], $pl['var']) : "").
       "</div>";
