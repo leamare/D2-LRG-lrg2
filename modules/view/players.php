@@ -37,6 +37,10 @@ if (isset($report['starting_items_players']) ) {
   }
 }
 
+if (isset($report['fantasy']['players_mvp'])) {
+  include("players/fantasy.php");
+}
+
 if (isset($report['players_summary']) ) {
   include("players/summary.php");
   include("players/profiles.php");
@@ -111,6 +115,11 @@ function rg_view_generate_players() {
     }
     if(check_module($parent."profiles")) {
       $res['profiles'] = rg_view_generate_players_profiles();
+    }
+  }
+  if (isset($report['fantasy']['players_mvp'])) {
+    if(check_module($parent."fantasy")) {
+      $res['fantasy'] = rg_view_generate_players_fantasy();
     }
   }
 

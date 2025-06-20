@@ -37,7 +37,7 @@ function rg_view_generator_teams_summary($context = null, $short_flag = false) {
     break;
   }
   if ($short_flag) {
-    $keys = array_intersect($keys, TEAM_SUMMARY_SHORT_LIST);
+    $keys = array_intersect($keys ?? [], TEAM_SUMMARY_SHORT_LIST);
   }
 
   array_unshift($keys, 'matches');

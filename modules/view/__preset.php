@@ -103,6 +103,19 @@ const SUMMARY_GROUPS = [
 
   'matchlinks' => 'permagroup',
   'common_position' => 'permagroup',
+
+  'total_points_fantasy' => 'fantasy_points',
+  'kda_fantasy' => 'fantasy_points',
+  'farm_fantasy' => 'fantasy_points',
+  'combat_fantasy' => 'fantasy_points',
+  'objectives_fantasy' => 'fantasy_points',
+
+  'total_awards' => 'fantasy_awards',
+  'mvp_awards' => 'fantasy_awards',
+  'mvp_losing_awards' => 'fantasy_awards',
+  'core_awards' => 'fantasy_awards',
+  'support_awards' => 'fantasy_awards',
+  'lvp_awards' => 'fantasy_awards',
 ];
 
 const SUMMARY_GROUPS_PRIORITIES = [
@@ -116,6 +129,8 @@ const SUMMARY_GROUPS_PRIORITIES = [
   'duration' => 7,
   'vision' => 6,
   'permagroup' => 0,
+  'fantasy_awards' => 8,
+  'fantasy_points' => 9,
 ];
 
 const SUMMARY_KEYS_REPLACEMENTS = [
@@ -174,7 +189,7 @@ if (isset($__lrg_onerror) && !$isApi) {
   $projectName = $projectName ?? "LRG2";
 
   set_error_handler(
-    function(int $errno, string $errmsg, string $errfile = null, int $errline = null, array $errcontext = []) use ($__lrg_onerror, &$projectName) {
+    function(int $errno, string $errmsg, ?string $errfile = null, ?int $errline = null, array $errcontext = []) use ($__lrg_onerror, &$projectName) {
       $__lrg_onerror([
         'type' => 'error',
         'project' => $projectName ?? "LRG2",

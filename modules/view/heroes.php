@@ -67,6 +67,10 @@ if (isset($report['hero_summary_variants'])) {
   include("heroes/variants_summary.php");
 }
 
+if (isset($report['fantasy']['heroes_mvp'])) {
+  include("heroes/fantasy.php");
+}
+
 include("heroes/profiles.php");
 
 function rg_view_generate_heroes() {
@@ -168,6 +172,11 @@ function rg_view_generate_heroes() {
   if (isset($report['hero_summary_variants'])) {
     if(check_module($parent."vsummary")) {
       $res['vsummary'] = rg_view_generate_heroes_variants_summary();
+    }
+  }
+  if (isset($report['fantasy']['heroes_mvp'])) {
+    if(check_module($parent."fantasy")) {
+      $res['fantasy'] = rg_view_generate_heroes_fantasy();
     }
   }
 
