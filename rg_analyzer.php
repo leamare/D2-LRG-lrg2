@@ -62,6 +62,9 @@ include_once("modules/analyzer/__queries/player_trios.php");
 include_once("modules/analyzer/__queries/player_graph.php");
 include_once("modules/analyzer/__queries/player_laning.php");
 
+include_once("modules/analyzer/__queries/heroes_mvp.php");
+include_once("modules/analyzer/__queries/players_mvp.php");
+
 include_once("modules/commons/schema.php");
 
 $meta = new lrg_metadata;
@@ -332,8 +335,12 @@ if ($lg_settings['ana']['skill_builds'] && $schema['skill_builds']) {
 // FANTASY MVP
 
 if ($lg_settings['main']['fantasy'] && $schema['fantasy_mvp']) {
+  $result['fantasy'] = [];
+
   require_once("modules/analyzer/fantasy/heroes_mvp.php");
-  require_once("modules/analyzer/fantasy/players_mvp.php");
+  if ($lg_settings['ana']['players']) {
+    require_once("modules/analyzer/fantasy/players_mvp.php");
+  }
 }
 
 // ...
