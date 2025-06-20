@@ -51,10 +51,10 @@ $repeaters = $repeatVars[ $endp_name ] ?? [];
 
 $disabled = false;
 if (!$_earlypreview) {
-  if (in_array($mod, $_earlypreview_wa_ban) || in_array($endp_name, $_earlypreview_wa_ban)) {
+  if (in_array($mod, ($_earlypreview_wa_ban ?? [])) || in_array($endp_name, ($_earlypreview_wa_ban ?? []))) {
     $disabled = true;
   } else {
-    foreach ($_earlypreview_wa_ban as $ban) {
+    foreach ($_earlypreview_wa_ban ?? [] as $ban) {
       if (strpos($mod, $ban) !== false) {
         $disabled = true;
         break;
