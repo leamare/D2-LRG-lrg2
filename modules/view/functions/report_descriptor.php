@@ -87,6 +87,8 @@ function get_report_descriptor(&$report, $generate_endpoints = false) {
   if (isset($report['hero_winrate_timings'])) $desc['endpoints'][] = "heroes-wrtimings";
   if (isset($report['hero_winrate_spammers'])) $desc['endpoints'][] = "heroes-wrplayers";
 
+  if (isset($report['fantasy']['heroes_mvp'])) $desc['endpoints'][] = "heroes-fantasy";
+
   if (isset($report['players_draft'])) $desc['endpoints'][] = "players-draft";
   if (isset($report['averages_players']) || isset($report['haverages_players'])) $desc['endpoints'][] = "players-haverages";
   if (isset($report['player_sides'])) $desc['endpoints'][] = "players-sides";
@@ -100,6 +102,12 @@ function get_report_descriptor(&$report, $generate_endpoints = false) {
   if (isset($report['player_positions_matches'])) $desc['endpoints'][] = "players-positions_matches";
   if (isset($report['pvp'])) $desc['endpoints'][] = "players-pvp";
   if (isset($report['players_summary'])) $desc['endpoints'][] = "players-summary";
+
+  if (isset($report['fantasy']['players_mvp'])) $desc['endpoints'][] = "players-fantasy";
+
+  if (isset(reset($report['matches_additional'])['mvp'])) {
+    $desc['endpoints'][] = "matches-mvp";
+  }
 
   if (isset($report['items']) && !empty($report['items']['pi'])) {
     $desc['endpoints'][] = "items";

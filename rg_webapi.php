@@ -17,7 +17,7 @@ $imports_ignore = [
   "check_directory.php",
 ];
 
-$lg_version = [ 2, 28, 0, 0, 0 ];
+$lg_version = [ 2, 28, 1, 0, 0 ];
 
 $root = dirname(__FILE__);
 
