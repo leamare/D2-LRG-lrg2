@@ -38,6 +38,12 @@ function match_card($mid) {
     if (!empty($pl['var'])) {
       $player['variant'] = $pl['var'];
     }
+    
+    // Add fantasy MVP data if available
+    if (isset($report['matches_additional'][$mid]['mvp'][$pl['player']])) {
+      $player['fantasy_mvp'] = $report['matches_additional'][$mid]['mvp'][$pl['player']];
+    }
+    
     $match['players'][$pl['radiant'] == 1 ? 'radiant' : 'dire'][] = $player;
   }
 
