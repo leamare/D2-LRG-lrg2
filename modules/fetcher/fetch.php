@@ -1734,6 +1734,8 @@ function fetch($match) {
       "DELETE from draft where matchid = $match; ".
       ( $lg_settings['main']['items'] ? "delete from items where matchid = $match;" : "").
       ( $lg_settings['main']['teams'] ? "delete from teams_matches where matchid = $match;" : "").
+      ( $lg_settings['main']['fantasy'] ? "delete from fantasy_mvp_points where matchid = $match;" : "").
+      ( $lg_settings['main']['fantasy'] ? "delete from fantasy_mvp_awards where matchid = $match;" : "").
       "delete from matches where matchid = $match;";
 
     if ($conn->multi_query($sql) === TRUE);
@@ -1744,7 +1746,12 @@ function fetch($match) {
     } while($conn->next_result());
   }
 
-  [ $t_fantasy_points, $t_fantasy_awards ] = generate_fantasy_mvp($t_match, $t_matchlines, $t_adv_matchlines);
+  if (!$bad_replay && !empty($t_adv_matchlines)) {
+    [ $t_fantasy_points, $t_fantasy_awards ] = generate_fantasy_mvp($t_match, $t_matchlines, $t_adv_matchlines);
+  } else {
+    $t_fantasy_points = [];
+    $t_fantasy_awards = [];
+  }
 
   // TODO:
   if(!empty($cache_dir) && !empty($matchdata) && $lrg_use_cache && !$bad_replay && !file_exists("$cache_dir/".$match.".lrgcache.json")) {

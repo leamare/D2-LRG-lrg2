@@ -2,7 +2,7 @@
 
 function generate_fantasy_mvp($match, $matchlines, $adv_matchlines) {
   if (empty($adv_matchlines)) {
-    return [];
+    return [ [], [] ];
   }
   
   $fantasy = [];
