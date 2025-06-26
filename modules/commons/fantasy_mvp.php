@@ -62,12 +62,12 @@ function generate_fantasy_mvp($match, $matchlines, $adv_matchlines) {
     $pts['damage_taken'] = $apl['damage_taken'] * 0.00075;
 
     if ($pl['heroDamage'] - $apl['damage_taken'] > 0.2*$pl['heroDamage']) {
-      $pts['hero_damage_taken_bonus'] = $pl['heroDamage'] * (($pl['heroDamage'] - $apl['damage_taken'])/$pl['heroDamage']) * 0.00075;
+      $pts['hero_damage_taken_bonus'] = $pl['heroDamage'] * (($pl['heroDamage'] - $apl['damage_taken'])/($pl['heroDamage']+1)) * 0.00075;
       $pts['hero_damage_taken_bonus'] *= 1 + (3-abs($apl['role'] - 3)) * 0.1;
     } else if ($pl['heroDamage'] - $apl['damage_taken'] < -0.2*($pl['heroDamage']+$apl['damage_taken'])) {
       $pts['hero_damage_taken_penalty'] = -($apl['damage_taken']-$pl['heroDamage']) * 0.00045 * (1-0.2*$apl['role']);
     } else {
-      $pts['damage_taken'] *= 1.25 * max($apl['damage_taken'], $pl['heroDamage'])/min($apl['damage_taken'], $pl['heroDamage']);
+      $pts['damage_taken'] *= 1.25 * max($apl['damage_taken'], $pl['heroDamage'])/(min($apl['damage_taken'], $pl['heroDamage'])+1);
     }
     $pts['damage_taken'] *= 1 + (3-abs($apl['role'] - 3))*0.125;
 

@@ -152,8 +152,8 @@ foreach ($spellsources as $src) {
       }
 
       $spells = \array_merge(
-        $spell['AbilityValues'] ?? [],
-        $spell['AbilitySpecial'] ?? [],
+        (array)($spell['AbilityValues'] ?? []),
+        (array)($spell['AbilitySpecial'] ?? []),
       );
 
       foreach($spells as $k => $v) {
