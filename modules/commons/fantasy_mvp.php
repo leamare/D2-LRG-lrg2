@@ -118,9 +118,23 @@ function generate_fantasy_mvp($match, $matchlines, $adv_matchlines) {
   if (isset($cores[ $mvp['mvp_losing'] ])) unset($cores[ $mvp['mvp_losing'] ]);
   if (isset($supports[ $mvp['mvp_losing'] ])) unset($supports[ $mvp['mvp_losing'] ]);
 
-  $mvp['core'] = array_search(max($cores), $cores);
-  $mvp['support'] = array_search(max($supports), $supports);
-  $mvp['lvp'] = array_search(min($fantasy), $fantasy);
+  if (empty($cores)) {
+    $mvp['core'] = 0;
+  } else {
+    $mvp['core'] = array_search(max($cores), $cores);
+  }
+
+  if (empty($supports)) {
+    $mvp['support'] = 0;
+  } else {
+    $mvp['support'] = array_search(max($supports), $supports);
+  }
+
+  if (empty($fantasy)) {
+    $mvp['lvp'] = 0;
+  } else {
+    $mvp['lvp'] = array_search(min($fantasy), $fantasy);
+  }
 
   asort($fantasy);
   asort($winning);
