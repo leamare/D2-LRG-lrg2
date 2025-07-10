@@ -198,6 +198,18 @@ $sql .= "SELECT \"highest_rampage\" cap, m.matchid, (CASE WHEN ABS(comeback) > A
           WHERE m.cluster IN (".implode(",", $clusters).") AND am.multi_kill > 4 
           GROUP BY m.matchid ORDER BY val DESC, m.matchid DESC LIMIT $limit;";
 
+# fantasy MVP records
+if ($lg_settings['main']['fantasy'] ?? false) {
+        $sql .= "SELECT \"most_mvp_points_in_match\" cap, fmp.matchid, fmp.total_points, fmp.playerid, fmp.heroid FROM fantasy_mvp_points fmp
+                JOIN matches on fmp.matchid = matches.matchid
+                WHERE matches.cluster IN (".implode(",", $clusters).")
+                ORDER BY fmp.total_points DESC LIMIT $limit;";
+        $sql .= "SELECT \"least_mvp_points_in_match\" cap, fmp.matchid, fmp.total_points, fmp.playerid, fmp.heroid FROM fantasy_mvp_points fmp
+                JOIN matches on fmp.matchid = matches.matchid
+                WHERE matches.cluster IN (".implode(",", $clusters).")
+                ORDER BY fmp.total_points ASC LIMIT $limit;";
+}
+
 # most_matches_player
 $sql .= "SELECT \"most_matches_player\" cap, 0 matchid, COUNT(distinct ml.matchid) val, ml.playerid, 0 heroid FROM matchlines ml
         JOIN matches on ml.matchid = matches.matchid
@@ -238,6 +250,17 @@ if ($lg_settings['main']['teams']) {
             GROUP BY teams_matches.teamid ORDER BY val ASC LIMIT $limit;";
 }
 
+# fantasy MVP records
+if ($lg_settings['main']['fantasy'] ?? false) {
+  $sql .= "SELECT \"most_mvp_awards\" cap, 0 matchid, SUM(fma.mvp + fma.mvp_losing + fma.core*0.6 + fma.support*0.4) val, fma.playerid, 0 heroid FROM fantasy_mvp_awards fma
+          JOIN matches on fma.matchid = matches.matchid
+          WHERE matches.cluster IN (".implode(",", $clusters).")
+          GROUP BY fma.playerid ORDER BY val DESC LIMIT $limit;";
+  $sql .= "SELECT \"most_lvp_awards\" cap, 0 matchid, SUM(fma.lvp) val, fma.playerid, 0 heroid FROM fantasy_mvp_awards fma
+          JOIN matches on fma.matchid = matches.matchid
+          WHERE matches.cluster IN (".implode(",", $clusters).")
+          GROUP BY fma.playerid ORDER BY val DESC LIMIT $limit;";
+}
 
 #   playerid and heroid = 0 for matchrecords
 

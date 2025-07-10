@@ -122,6 +122,16 @@ $sql .= "SELECT \"diversity\", playerid, (COUNT(DISTINCT heroid)/mhpt.mhp) * (CO
             ) mhpt $wheres
           GROUP BY playerid HAVING $pl_limiter < mtch ORDER BY value DESC LIMIT $avg_limit;";
 
+# fantasy MVP points
+if ($lg_settings['main']['fantasy'] ?? false) {
+  $sql .= "SELECT \"most_mvp_points\", playerid, SUM(total_points)/SUM(1) value, SUM(1) mtch FROM fantasy_mvp_points $wheres
+    GROUP BY playerid HAVING $pl_limiter < mtch ORDER BY value DESC LIMIT $avg_limit;";
+  $sql .= "SELECT \"least_mvp_points\", playerid, SUM(total_points)/SUM(1) value, SUM(1) mtch FROM fantasy_mvp_points $wheres
+    GROUP BY playerid HAVING $pl_limiter < mtch ORDER BY value ASC LIMIT $avg_limit;";
+  $sql .= "SELECT \"most_mvp_awards\", playerid, SUM(mvp + mvp_losing + core*0.6 + support*0.4)/SUM(1) value, SUM(1) mtch FROM fantasy_mvp_awards $wheres
+    GROUP BY playerid HAVING $pl_limiter < mtch ORDER BY value DESC LIMIT $avg_limit;";
+}
+
 $result["averages_players"] = array();
 
 if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for AVERAGES PLAYERS.\n";

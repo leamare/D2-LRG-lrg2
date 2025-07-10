@@ -138,6 +138,22 @@ $sql .= "SELECT \"diversity\", playerid, (COUNT(DISTINCT heroid)/mhpt.mhp) * (CO
           JOIN matches ON matchlines.matchid = matches.matchid
           GROUP BY playerid HAVING $limiter_lower < mtch ORDER BY value DESC LIMIT $avg_limit;";
 
+# fantasy MVP points
+if ($lg_settings['main']['fantasy'] ?? false) {
+  $sql .= "SELECT \"most_mvp_points\", playerid, SUM(total_points)/SUM(1) value, SUM(1) mtch FROM fantasy_mvp_points
+            JOIN matches ON fantasy_mvp_points.matchid = matches.matchid
+            WHERE matches.cluster IN (".implode(",", $clusters).")
+            GROUP BY playerid HAVING $limiter_lower < mtch ORDER BY value DESC LIMIT $avg_limit;";
+  $sql .= "SELECT \"least_mvp_points\", playerid, SUM(total_points)/SUM(1) value, SUM(1) mtch FROM fantasy_mvp_points
+            JOIN matches ON fantasy_mvp_points.matchid = matches.matchid
+            WHERE matches.cluster IN (".implode(",", $clusters).")
+            GROUP BY playerid HAVING $limiter_lower < mtch ORDER BY value ASC LIMIT $avg_limit;";
+  $sql .= "SELECT \"most_mvp_awards\", playerid, SUM(mvp + mvp_losing + core*0.6 + support*0.4)/SUM(1) value, SUM(1) mtch FROM fantasy_mvp_awards
+            JOIN matches ON fantasy_mvp_awards.matchid = matches.matchid
+            WHERE matches.cluster IN (".implode(",", $clusters).")
+            GROUP BY playerid HAVING $limiter_lower < mtch ORDER BY value DESC LIMIT $avg_limit;";
+}
+
 $result["regions_data"][$region]["haverages_players"] = [];
 
 if ($conn->multi_query($sql) === TRUE);# echo "[S] Requested data for AVERAGES PLAYERS.\n";

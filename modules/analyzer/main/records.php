@@ -140,6 +140,12 @@ $sql .= "SELECT \"highest_rampage_lost\" cap, m.matchid, (CASE WHEN ABS(comeback
           FROM matches m JOIN adv_matchlines am ON m.matchid = am.matchid JOIN matchlines ml ON am.matchid = ml.matchid AND am.playerid = ml.playerid
           WHERE am.multi_kill > 4 AND m.radiantWin <> ml.isRadiant GROUP BY m.matchid ORDER BY val DESC, m.matchid DESC LIMIT $limit;";
 
+# fantasy MVP records
+if ($lg_settings['main']['fantasy'] ?? false) {
+  $sql .= "SELECT \"most_mvp_points_in_match\" cap, matchid, total_points, playerid, heroid FROM fantasy_mvp_points ORDER BY total_points DESC LIMIT $limit;";
+  $sql .= "SELECT \"least_mvp_points_in_match\" cap, matchid, total_points, playerid, heroid FROM fantasy_mvp_points ORDER BY total_points ASC LIMIT $limit;";
+}
+
 # most_matches_player
 $sql .= "SELECT \"most_matches_player\" cap, 0 matchid, COUNT(distinct matchlines.matchid) val, playerid, 0 heroid FROM matchlines WHERE playerid > 0 GROUP BY playerid ORDER BY val DESC LIMIT $limit;";
 # widest hero pool
@@ -162,6 +168,11 @@ if ($lg_settings['main']['teams']) {
             GROUP BY teams_matches.teamid ORDER BY val ASC LIMIT $limit;";
 }
 
+# fantasy MVP records
+if ($lg_settings['main']['fantasy'] ?? false) {
+  $sql .= "SELECT \"most_mvp_awards\" cap, 0 matchid, SUM(mvp + mvp_losing + core*0.6 + support*0.4) val, playerid, 0 heroid FROM fantasy_mvp_awards GROUP BY playerid ORDER BY val DESC LIMIT $limit;";
+  $sql .= "SELECT \"most_lvp_awards\" cap, 0 matchid, SUM(lvp) val, playerid, 0 heroid FROM fantasy_mvp_awards GROUP BY playerid ORDER BY val DESC LIMIT $limit;";
+}
 
 #   playerid and heroid = 0 for matchrecords
 

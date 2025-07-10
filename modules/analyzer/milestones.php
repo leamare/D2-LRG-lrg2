@@ -194,6 +194,38 @@ if ($lg_settings['main']['teams']) {
     GROUP BY teamid ORDER BY value DESC LIMIT $avg_limit;";
 }
 
+// === fantasy MVP milestones
+
+if ($lg_settings['main']['fantasy'] ?? false) {
+  $sql .= "SELECT \"heroes:mvp_awards_total\", heroid, SUM(fma.mvp + fma.mvp_losing + fma.core*0.6 + fma.support*0.4) value FROM fantasy_mvp_awards fma $wheres GROUP BY heroid ORDER BY value DESC LIMIT $avg_limit;";
+  $sql .= "SELECT \"heroes:mvp_points_total\", heroid, SUM(fmp.total_points) value FROM fantasy_mvp_points fmp $wheres GROUP BY heroid ORDER BY value DESC LIMIT $avg_limit;";
+  $sql .= "SELECT \"heroes:lvp_awards_total\", heroid, SUM(fma.lvp) value FROM fantasy_mvp_awards fma $wheres GROUP BY heroid ORDER BY value DESC LIMIT $avg_limit;";
+
+  if (!$lg_settings['ana']['anon_records']) {
+    $sql .= "SELECT \"players:mvp_awards_total\", playerid, SUM(fma.mvp + fma.mvp_losing + fma.core*0.6 + fma.support*0.4) value FROM fantasy_mvp_awards fma $wheres GROUP BY playerid ORDER BY value DESC LIMIT $avg_limit;";
+    $sql .= "SELECT \"players:mvp_points_total\", playerid, SUM(fmp.total_points) value FROM fantasy_mvp_points fmp $wheres GROUP BY playerid ORDER BY value DESC LIMIT $avg_limit;";
+    $sql .= "SELECT \"players:lvp_awards_total\", playerid, SUM(fma.lvp) value FROM fantasy_mvp_awards fma $wheres GROUP BY playerid ORDER BY value DESC LIMIT $avg_limit;";
+  }
+
+  if ($lg_settings['main']['teams']) {
+    $sql .= "SELECT \"teams:mvp_awards_total\", teamid, SUM(fma.mvp + fma.mvp_losing + fma.core*0.6 + fma.support*0.4) value 
+      FROM fantasy_mvp_awards fma JOIN teams_matches tm ON fma.matchid = tm.matchid 
+      JOIN matchlines ml ON fma.matchid = ml.matchid AND fma.playerid = ml.playerid 
+      WHERE ml.isRadiant = tm.is_radiant $wheres_tm
+      GROUP BY teamid ORDER BY value DESC LIMIT $avg_limit;";
+    $sql .= "SELECT \"teams:mvp_points_total\", teamid, SUM(fmp.total_points) value 
+      FROM fantasy_mvp_points fmp JOIN teams_matches tm ON fmp.matchid = tm.matchid 
+      JOIN matchlines ml ON fmp.matchid = ml.matchid AND fmp.playerid = ml.playerid 
+      WHERE ml.isRadiant = tm.is_radiant $wheres_tm
+      GROUP BY teamid ORDER BY value DESC LIMIT $avg_limit;";
+    $sql .= "SELECT \"teams:lvp_awards_total\", teamid, SUM(fma.lvp) value 
+      FROM fantasy_mvp_awards fma JOIN teams_matches tm ON fma.matchid = tm.matchid 
+      JOIN matchlines ml ON fma.matchid = ml.matchid AND fma.playerid = ml.playerid 
+      WHERE ml.isRadiant = tm.is_radiant $wheres_tm
+      GROUP BY teamid ORDER BY value DESC LIMIT $avg_limit;";
+  }
+}
+
 if ($conn->multi_query($sql) === TRUE) echo "[S] Requested MILESTONES\n";
 else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
 
@@ -210,9 +242,9 @@ do {
 
     for ($i=0; $i<$avg_limit && $row != null; $i++, $row = $query_res->fetch_row()) {
       if (+$row[1]) {
-        $result['milestones'][$type][$value][$row[1]] = (int)$row[2];
+        $result['milestones'][$type][$value][$row[1]] = round(+$row[2], 1);
       } else {
-        $result['milestones'][$type][$value][] = (int)$row[2];
+        $result['milestones'][$type][$value][] = round(+$row[2], 1);
       }
     }
   }
