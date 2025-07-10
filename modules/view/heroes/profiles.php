@@ -558,6 +558,48 @@ function rg_view_generate_heroes_profiles() {
     $res['heroid'.$hero] .= "</tbody></table>";
   }
 
+  // fantasy_mvp stats
+  if (isset($report['fantasy']) && isset($report['fantasy']['heroes_mvp'])) {
+    if (is_wrapped($report['fantasy']['heroes_mvp'])) {
+      $report['fantasy']['heroes_mvp'] = unwrap_data($report['fantasy']['heroes_mvp']);
+    }
+    if (isset($report['fantasy']['heroes_mvp'][$hero])) {
+      $mvp_data = $report['fantasy']['heroes_mvp'][$hero];
+      
+      // MVP Awards table
+      $res['heroid'.$hero] .= "<table class=\"list\"><caption>".locale_string("fantasy")."</caption><thead><tr>".
+        "<th>".locale_string("total_awards")."</th>".
+        "<th>".locale_string("mvp_awards")."</th>".
+        "<th>".locale_string("mvp_losing_awards")."</th>".
+        "<th>".locale_string("core_awards")."</th>".
+        "<th>".locale_string("support_awards")."</th>".
+        "<th>".locale_string("lvp_awards")."</th>".
+      "</tr></thead><tbody><tr>".
+        "<td>".number_format($mvp_data['total_awards'], 1)."</td>".
+        "<td>".number_format($mvp_data['mvp'], 1)."</td>".
+        "<td>".number_format($mvp_data['mvp_losing'], 1)."</td>".
+        "<td>".number_format($mvp_data['core'], 1)."</td>".
+        "<td>".number_format($mvp_data['support'], 1)."</td>".
+        "<td>".number_format($mvp_data['lvp'], 1)."</td>".
+      "</tr></tbody></table>";
+      
+      // MVP Points table
+      $res['heroid'.$hero] .= "<table class=\"list\"><thead><tr>".
+        "<th>".locale_string("total_points_fantasy")."</th>".
+        "<th>".locale_string("kda_fantasy")."</th>".
+        "<th>".locale_string("farm_fantasy")."</th>".
+        "<th>".locale_string("combat_fantasy")."</th>".
+        "<th>".locale_string("objectives_fantasy")."</th>".
+      "</tr></thead><tbody><tr>".
+        "<td>".number_format($mvp_data['total_points'], 2)."</td>".
+        "<td>".number_format($mvp_data['kda'], 2)."</td>".
+        "<td>".number_format($mvp_data['farm'], 2)."</td>".
+        "<td>".number_format($mvp_data['combat'], 2)."</td>".
+        "<td>".number_format($mvp_data['objectives'], 2)."</td>".
+      "</tr></tbody></table>";
+    }
+  }
+
   // records
   if (isset($report['records'])) {
     $player_records = [];

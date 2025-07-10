@@ -25,7 +25,9 @@ function rg_view_generate_milestones() {
             "<th>".locale_string("value")."</th></tr></thead>";
       foreach($list as $pl => $val) {
         $res .= "<td>".player_link($pl)."</td><td>".
-        (strpos($type, "time") !== FALSE || strpos($type, "stuns") !== FALSE ? convert_time_seconds($val) : number_format($val)).
+        (strpos($type, "time") !== FALSE || strpos($type, "stuns") !== FALSE
+          ? convert_time_seconds($val)
+          : (strpos($type, "awards") !== FALSE ? number_format($val, 1) : number_format($val))).
         "</td></tr>";
       }
       $res .= "</table>";
@@ -43,7 +45,9 @@ function rg_view_generate_milestones() {
             "<th>".locale_string("value")."</th></tr></thead>";
       foreach($list as $pl => $val) {
         $res .= "<td>".team_logo($pl)."</td><td>".team_link($pl)."</td><td>".
-        (strpos($type, "time") !== FALSE || strpos($type, "stuns") !== FALSE ? convert_time_seconds($val) : number_format($val)).
+        (strpos($type, "time") !== FALSE || strpos($type, "stuns") !== FALSE
+          ? convert_time_seconds($val)
+          : (strpos($type, "awards") !== FALSE ? number_format($val, 1) : number_format($val))).
         "</td></tr>";
       }
       $res .= "</table>";
@@ -61,7 +65,9 @@ function rg_view_generate_milestones() {
             "<th>".locale_string("value")."</th></tr></thead>";
       foreach($list as $pl => $val) {
         $res .= "<td>".hero_portrait($pl)."</td><td>".hero_link($pl)."</td><td>".
-        (strpos($type, "time") !== FALSE || strpos($type, "stuns") !== FALSE ? convert_time_seconds($val) : number_format($val)).
+        (strpos($type, "time") !== FALSE || strpos($type, "stuns") !== FALSE
+          ? convert_time_seconds($val)
+          : (strpos($type, "awards") !== FALSE ? number_format($val, 1) : number_format($val))).
         "</td></tr>";
       }
       $res .= "</table>";

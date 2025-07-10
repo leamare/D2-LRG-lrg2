@@ -661,7 +661,7 @@
     "desc_heroes_sides": "This section contains stats for heroes' performance for different factions.",
     "desc_heroes_combo_graph": "This graph represents how often heroes were picked together. Bolder line means more matches in pair, bigger node means hero was picked more often. Minimum match count for a pair is set to %lim%. Heroes without pairs aren't displayed.",
     "desc_heroes_summary": "This table contains heroes' average stats.",
-    "fantasy_summary_desc": "This section reflects performance based on different factors and metrics. MVP awards are given based on earned points: 1st place gives MVP award, then best core and support, then MVP of the losing team. LVP is only reflected in cases of significant underperformance. Total points treat MVP awards as 1 point, Best Core award as 0.6 points and Best Support as 0.4 points. THe more in-depth formula for the points can be found in the documentation.",
+    "fantasy_summary_desc": "This section reflects performance based on different factors and metrics. MVP awards are given based on earned points: 1st place gives MVP award, then best core and support, then MVP of the losing team. LVP is only reflected in cases of significant underperformance. Total points treat MVP awards as 1 point, Best Core award as 0.6 points and Best Support as 0.4 points. The more in-depth formula for the points can be found in the documentation.",
     "total_awards": "Total awards",
     "mvp_awards": "👑 MVP",
     "mvp_losing_awards": "🥈 MVP of losing team",
