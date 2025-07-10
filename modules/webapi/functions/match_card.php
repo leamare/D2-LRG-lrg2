@@ -42,6 +42,23 @@ function match_card($mid) {
     // Add fantasy MVP data if available
     if (isset($report['matches_additional'][$mid]['mvp'][$pl['player']])) {
       $player['fantasy_mvp'] = $report['matches_additional'][$mid]['mvp'][$pl['player']];
+      switch ($report['matches_additional'][$mid]['mvp'][$pl['player']]) {
+        case 0b00001:
+          $player['fantasy_award'] = 'mvp';
+          break;
+        case 0b00010:
+          $player['fantasy_award'] = 'mvp_losing';
+          break;
+        case 0b00100:
+          $player['fantasy_award'] = 'core';
+          break;
+        case 0b01000:
+          $player['fantasy_award'] = 'support';
+          break;
+        case 0b10000:
+          $player['fantasy_award'] = 'lvp';
+          break;
+      }
     }
     
     $match['players'][$pl['radiant'] == 1 ? 'radiant' : 'dire'][] = $player;

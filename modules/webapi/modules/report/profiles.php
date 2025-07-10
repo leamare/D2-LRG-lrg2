@@ -220,6 +220,14 @@ $endpoints['profiles'] = function($mods, $vars, &$report) use (&$endpoints, &$me
       }
     }
 
+    // fantasy_mvp
+    if (isset($report['fantasy']) && isset($report['fantasy']['heroes_mvp'])) {
+      if (is_wrapped($report['fantasy']['heroes_mvp'])) {
+        $report['fantasy']['heroes_mvp'] = unwrap_data($report['fantasy']['heroes_mvp']);
+      }
+      $res['fantasy_mvp'] = $report['fantasy']['heroes_mvp'][ $vars['heroid'] ] ?? null;
+    }
+
     // players
     if (isset($report['matches']) && isset($report['players'])) {
       $res['players'] = [];
@@ -477,6 +485,14 @@ $endpoints['profiles'] = function($mods, $vars, &$report) use (&$endpoints, &$me
           }
         }
       }
+    }
+
+    // fantasy_mvp
+    if (isset($report['fantasy']) && isset($report['fantasy']['players_mvp'])) {
+      if (is_wrapped($report['fantasy']['players_mvp'])) {
+        $report['fantasy']['players_mvp'] = unwrap_data($report['fantasy']['players_mvp']);
+      }
+      $res['fantasy_mvp'] = $report['fantasy']['players_mvp'][ $vars['playerid'] ] ?? null;
     }
 
     return $res;
