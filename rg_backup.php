@@ -194,6 +194,10 @@ if ($restore) {
 
   echo "[ ] Getting tables\n";
 
+  if (!empty($skipTables)) {
+    echo "[ ] Skip tables: ".implode(', ', $skipTables)."\n";
+  }
+
   $sql = "SHOW TABLES;";
   if ($conn->multi_query($sql) === FALSE)
     die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
