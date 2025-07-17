@@ -256,7 +256,7 @@ const STRATZ_GRAPHQL_QUERY = "fragment MatchInfo on MatchType {
 }";
 
 function get_stratz_response($match) {
-  global $stratztoken, $meta, $stratz_cache, $api_cooldown_seconds;
+  global $stratztoken, $meta, $stratz_cache, $api_cooldown_seconds, $stratz_user_agent;
 
   if (isset($stratz_cache[ $match ])) {
     $stratz = [
@@ -300,7 +300,7 @@ function get_stratz_response($match) {
       ],
       'http' => [
         'method' => 'POST',
-        'header'  => "Content-Type: application/json\r\nKey: $stratztoken\r\nUser-Agent: STRATZ_API\r\n",
+        'header'  => "Content-Type: application/json\r\nKey: $stratztoken\r\nUser-Agent: $stratz_user_agent\r\n",
         'content' => json_encode($data),
         'timeout' => 60,
       ]

@@ -47,6 +47,7 @@ if(isset($argv)) {
 
   $sti_blocks_query = $settings['sti_blocks_query'] ?? false;
   $sti_blocks_size  = $settings['sti_blocks_size'] ?? null;
+  $stratz_user_agent = $settings['stratz_user_agent'] ?? "STRATZ_API";
 
   unset($settings);
 
