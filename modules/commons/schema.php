@@ -20,6 +20,7 @@ $schema = [
   'variant_supported' => false,
   'variant' => false,
   'fantasy_mvp' => false,
+  'series' => false,
 ];
 
 echo "[ ] Getting tables\n";
@@ -56,6 +57,9 @@ for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row(
     case "fantasy_mvp_awards":
       $schema['fantasy_mvp'] = true;
       break;
+    case "series":
+      $schema['series'] = false;
+      break;
   }
 }
 $query_res->free_result();
@@ -67,7 +71,9 @@ $query_res = $conn->store_result();
 for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
   if ($row[0] == "radiant_opener") {
     $schema['matches_opener'] = true;
-    break;
+  }
+  if ($row[0] == "seriesid") {
+    $schema['series'] = true;
   }
 }
 $query_res->free_result();
