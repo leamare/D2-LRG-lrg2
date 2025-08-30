@@ -11,7 +11,8 @@
     "wards": true,
     "skill_builds": true,
     "starting": true,
-    "normalize_turbo": true
+    "normalize_turbo": true,
+    "series_id_priority": false
   },
   "ana": {
     "records": true,

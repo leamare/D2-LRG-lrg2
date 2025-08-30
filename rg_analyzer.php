@@ -423,6 +423,7 @@ $result['settings']['limiter_triplets'] = $limiter_lower;
 $result['settings']['limiter_combograph'] = $limiter_graph;
 $result['settings']['limiter_players'] = $pl_limiter;
 $result['settings']['limiter_players_median'] = $pl_limiter_median;
+$result['settings']['series_id_priority'] = $lg_settings['main']['series_id_priority'] ?? false;
 $result['ana_version'] = $lrg_version;
 
 echo("[~] Encoding results to JSON\n");
