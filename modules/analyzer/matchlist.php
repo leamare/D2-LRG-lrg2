@@ -39,7 +39,7 @@ for ($row = $query_res->fetch_row();
 
 $result["matches_additional"] = [];
 foreach ($result["matches"] as $matchid => $matchinfo) {
-  $sql = "SELECT duration, cluster, modeID, radiantWin, start_date FROM matches WHERE matchid = $matchid;";
+  $sql = "SELECT duration, cluster, modeID, radiantWin, start_date".($schema['series'] ? ", seriesid" : "")." FROM matches WHERE matchid = $matchid;";
 
   if ($conn->multi_query($sql) === TRUE);
   else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
@@ -48,11 +48,12 @@ foreach ($result["matches"] as $matchid => $matchinfo) {
   $row = $query_res->fetch_row();
 
   $result["matches_additional"][$matchid] = array (
-    "duration" => $row[0],
-    "cluster" => $row[1],
-    "game_mode" => $row[2],
-    "radiant_win" => $row[3],
-    "date" => $row[4]
+    "duration" => (int)$row[0],
+    "cluster" => (int)$row[1],
+    "game_mode" => (int)$row[2],
+    "radiant_win" => (int)$row[3],
+    "date" => (int)$row[4],
+    "seriesid" => $schema['series'] ? (int)$row[5] : null
   );
   $query_res->free_result();
 
