@@ -749,6 +749,8 @@
     "desc_laning_5": "Since it's based on NETWORTH, it's naturally affected by hero and tower kills, as well as deaths. It also means that if a hero switched to jungle and got more from there, then the hero practically won the lane (if the hero didn't leave the lane completely).",
     "desc_laning_6": "Hero laning matchups are not limited to 1 vs 1 lane matchups. Supports and even multiple cores on lane may affect the picture.",
     "desc_laning_7": "There's no such thing as \"lost lane 1 vs 3, but it's actually a won lane\". If a hero lost lane, then the lane is lost, no matter how you call it. However, there are winrates from lost\/tie\/won lanes, that can show you, how effective the hero may be if the lane was lost, completing the picture. Same goes the other way around.",
+    "desc_draft_explainer": "This section represents statistics for different draft stages. Each stage ends once a full bans-picks cycle is completed (new bans stage starts).",
+    "desc_draft_targeted_bans_estimate_explainer": "Players Draft section represents how often heroes for this specific player are picked at a certain draft stage. It also includes estimated bans numbers, which represent how often a banned hero was likely a targeted ban aimed at this player. The estimation is based on the drafts against the team, who played each hero and role. If the hero was not picked prior at the event, the draft stage is used to estimate the possible target of the ban. If multiple eligible players are found, the bans are assigned based on their hero/role/stage picks distribution.",
     "limiter_h": "Higher limiter",
     "limiter_l": "Lower limiter",
     "limiter_gr": "Graph limiter",
