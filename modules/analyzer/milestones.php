@@ -208,20 +208,21 @@ if ($lg_settings['main']['fantasy'] ?? false) {
   }
 
   if ($lg_settings['main']['teams']) {
+    $wheres_tm = (empty($wheres_tm) ? "WHERE " : $wheres_tm." AND ") . "ml.isRadiant = tm.is_radiant";
     $sql .= "SELECT \"teams:mvp_awards_total\", teamid, SUM(fma.mvp + fma.mvp_losing + fma.core*0.6 + fma.support*0.4) value 
       FROM fantasy_mvp_awards fma JOIN teams_matches tm ON fma.matchid = tm.matchid 
       JOIN matchlines ml ON fma.matchid = ml.matchid AND fma.playerid = ml.playerid 
-      WHERE ml.isRadiant = tm.is_radiant $wheres_tm
+      $wheres_tm
       GROUP BY teamid ORDER BY value DESC LIMIT $avg_limit;";
     $sql .= "SELECT \"teams:mvp_points_total\", teamid, SUM(fmp.total_points) value 
       FROM fantasy_mvp_points fmp JOIN teams_matches tm ON fmp.matchid = tm.matchid 
       JOIN matchlines ml ON fmp.matchid = ml.matchid AND fmp.playerid = ml.playerid 
-      WHERE ml.isRadiant = tm.is_radiant $wheres_tm
+      $wheres_tm
       GROUP BY teamid ORDER BY value DESC LIMIT $avg_limit;";
     $sql .= "SELECT \"teams:lvp_awards_total\", teamid, SUM(fma.lvp) value 
       FROM fantasy_mvp_awards fma JOIN teams_matches tm ON fma.matchid = tm.matchid 
       JOIN matchlines ml ON fma.matchid = ml.matchid AND fma.playerid = ml.playerid 
-      WHERE ml.isRadiant = tm.is_radiant $wheres_tm
+      $wheres_tm
       GROUP BY teamid ORDER BY value DESC LIMIT $avg_limit;";
   }
 }
