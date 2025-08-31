@@ -31,7 +31,7 @@ function rg_generator_records(&$context) {
               )
             ).
           "</td><td>". ($record['playerid'] ?
-                    (strstr($key, "_team") != FALSE ?
+                    ((strstr($key, "_team") !== FALSE || strstr($key, "team_") !== FALSE) ?
                       team_link($record['playerid']) :
                       player_link($record['playerid'])
                     ) :
@@ -88,7 +88,7 @@ function rg_generator_records_ext(&$context, &$context_ext) {
           )
         )."</td>".
         "<td>". ($rec['playerid'] ?
-          (strpos($k, "_team") != FALSE ?
+          ((strpos($k, "_team") !== FALSE || strpos($k, "team_") !== FALSE) ?
             team_link($rec['playerid']) :
             player_link($rec['playerid'])
           ) :
@@ -119,7 +119,7 @@ function rg_generator_records_ext(&$context, &$context_ext) {
             )
         )."</td>".
         "<td>". ($record['playerid'] ?
-          (strpos($k, "_team") != FALSE ?
+          ((strpos($k, "_team") !== FALSE || strpos($k, "team_") !== FALSE) ?
             team_link($record['playerid']) :
             player_link($record['playerid'])
           ) :

@@ -88,7 +88,7 @@ function rg_generator_draft($table_id, &$context_pickban, &$context_draft, $cont
     $max = reset($scores)['wrank'];
   
     foreach ($scores as $id => $el) {
-      $draft[$id][$i]['rank'] = 100 * ($el['wrank']-$min) / ($max-$min);
+      $draft[$id][$i]['rank'] = 100 * ($el['wrank']-$min) / ($max-$min+0.01);
       $ranks_stages[$i][$id] = $draft[$id][$i]['rank'];
     }
   }
