@@ -232,7 +232,16 @@
     "neutral_camps_stacked": "Campos neutrais stackados",
     "stomp": "Stomp por ouro de equipe",
     "comeback": "Comeback de ouro pela equipe",
+    "longest_series_duration": "Série mais longa por tempo total de jogo",
+    "team_series_win_streak": "Equipe com sequência mais longa de séries sem derrotas",
+    "team_series_loss_streak": "Equipe com sequência mais longa de séries perdidas",
+    "team_win_streak": "Equipe com sequência mais longa de partidas vencidas",
+    "team_loss_streak": "Equipe com sequência mais longa de partidas perdidas",
+    "player_win_streak": "Jogador com sequência mais longa de partidas vencidas",
+    "player_loss_streak": "Jogador com sequência mais longa de partidas perdidas",
     "duration": "Duração",
+    "time": "Tempo",
+    "score": "Pontuação",
     "region": "Região",
     "game_mode": "Modo de Jogo",
     "game_modes": "Modos de Jogo",
@@ -567,5 +576,10 @@
     "avg_win_len_s": "Tempo médio de vitória",
     "wards_lost": "Wards Observadoras perdidas para o inimigo",
     "wards_lost_s": "Wards perdidas",
-    "duration_s": "Tempo"
+    "duration_s": "Tempo",
+    "series_heroes": "Heróis presentes em todas as partidas",
+    "series_duration": "Duração",
+    "series_heroes_other": "Mistos",
+    "series_duration_delta": "Delta",
+    "series_duration_playtime": "Tempo de jogo bruto"
 }

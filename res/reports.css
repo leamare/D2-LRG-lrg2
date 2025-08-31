@@ -2482,3 +2482,9 @@ tr.shady td.banner-row .shady-notice {
 .section-marker-updated {
   background-color: var(--section-marker-updated);
 }
+
+.placeholder {
+  font-size: inherit;
+  opacity: 0.5;
+  font-style: italic;
+}
