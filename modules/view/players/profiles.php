@@ -339,35 +339,92 @@ function rg_view_generate_players_profiles() {
   // drafts data
   if (isset($report['players_draft'])) {
     $draft = [];
+    $players_bans_disable = true;
+
+    if (!empty($report['draft']) && !empty($report['matches_additional'])) {
+      include_once __DIR__."/../functions/players_bans_estimate.php";
+
+      $player_pb = [];
+      $player_pb[ $player ] = [
+        'matches_picked' => $report['players_summary'][$player]['matches_s'],
+        'winrate_picked' => $report['players_summary'][$player]['winrate_s'],
+        'matches_banned' => 0,
+        'winrate_banned' => 0,
+        'matches_total' => $report['players_summary'][$player]['matches_s'],
+      ];
+      
+      if (!empty($report['teams']) && !empty($report['match_participants_teams'])) {
+        $players_bans_disable = false;
+  
+        estimate_players_draft_processor_tvt_report($player_pb);
+      } else {
+        $players_bans_disable = false;
+  
+        estimate_players_draft_processor_pvp_report($player_pb);
+      }
+    }
+
+    $draft_bans = [];
+
     foreach ($report['players_draft'][1] as $stage => $players) {
       $draft[$stage] = null;
       foreach ($players as $pl) {
         if ($pl['playerid'] == $player) $draft[$stage] = $pl;
       }
     }
+    foreach ($report['players_draft'][0] as $stage => $players) {
+      $draft_bans[$stage] = null;
+      foreach ($players as $pl) {
+        if ($pl['playerid'] == $player) $draft_bans[$stage] = $pl;
+      }
+    }
+
+    $cs = $players_bans_disable ? 2 : 4;
 
     $res['playerid'.$player] .= "<table id=\"player-profile-pid$player-draft\" class=\"list\"><caption>".locale_string("stage")."</caption><thead>";
     $res['playerid'.$player] .= "<tr class=\"overhead\">";
     foreach (array_keys($draft) as $stg) {
-      $res['playerid'.$player] .= "<th".($stg > 1 ? " class=\"separator\"" : "")." colspan=\"2\">".locale_string("stage")." $stg</th>";
+      $res['playerid'.$player] .= "<th".($stg > 1 ? " class=\"separator\"" : "")." colspan=\"$cs\">".locale_string("stage")." $stg</th>";
     }
     $res['playerid'.$player] .= "</tr>";
     $res['playerid'.$player] .= "<tr>";
     foreach (array_keys($draft) as $stg) {
       $res['playerid'.$player] .= "<th".($stg > 1 ? " class=\"separator\"" : "").">".locale_string("matches")."</th><th>".locale_string("winrate")."</th>";
+      if (!$players_bans_disable) {
+        $res['playerid'.$player] .= "<th>".locale_string("bans")."</th><th>".locale_string("winrate")."</th>";
+      }
     }
     $res['playerid'.$player] .= "</tr></thead>";
 
     $res['playerid'.$player] .= "<tbody><tr>";
     foreach ($draft as $stg => $data) {
       if (!$data) $data = ['matches' => 0, 'winrate' => 0];
+      if ($draft_bans[$stg]) {
+        $data_bans = $draft_bans[$stg];
+      } else {
+        $data_bans = ['matches' => 0, 'winrate' => 0];
+      }
       if ($data['matches']) {
         $res['playerid'.$player] .= "<td".($stg > 1 ? " class=\"separator\"" : "").">".$data['matches']."</td><td>".number_format($data['winrate']*100, 2)."%</td>";
       } else {
         $res['playerid'.$player] .= "<td".($stg > 1 ? " class=\"separator\"" : "").">-</td><td>-</td>";
       }
+      if (!$players_bans_disable) {
+        if ($data_bans['matches']) {
+          $res['playerid'.$player] .= "<td>".$data_bans['matches']."</td><td>".number_format($data_bans['winrate']*100, 2)."%</td>";
+        } else {
+          $res['playerid'.$player] .= "<td>-</td><td>-</td>";
+        }
+      }
     }
     $res['playerid'.$player] .= "</tr></tbody></table>";
+    if (!$players_bans_disable) {
+      $res['playerid'.$player] .= "<details class=\"content-text explainer\"><summary>".locale_string("explain_summary")."</summary>".
+        "<div class=\"explain-content\">".
+          "<div class=\"line\">".locale_string("desc_draft_targeted_bans_estimate_explainer")."</div>".
+        "</div>".
+      "</details>";
+    }
   }
 
   // positions
