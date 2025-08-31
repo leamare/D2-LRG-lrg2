@@ -1,5 +1,7 @@
 <?php
 
+include_once($root."/modules/view/functions/series_link.php");
+
 function _map_award_to_string($award) {
   if ($award == 0b00001) return "fm-mvp";
   if ($award == 0b00010) return "fm-mvp-losing";
@@ -121,20 +123,24 @@ function match_card($mid) {
     (int)($report['matches_additional'][$mid]['duration']%60)
   );
 
-  $output .= "<div class=\"match-add-info\">
-                <div class=\"match-info-line\"><span class=\"caption\">".locale_string("duration").":</span> ".
-                  $duration."</div>
-                <div class=\"match-info-line\"><span class=\"caption\">".locale_string("region").":</span> ".
-                  ($meta['regions'][
-                    $meta['clusters'][ $report['matches_additional'][$mid]['cluster'] ] ?? 0
-                  ] ?? "unknown")."</div>
-                <div class=\"match-info-line\"><span class=\"caption\">".locale_string("game_mode").":</span> ".
-                  $meta['modes'][$report['matches_additional'][$mid]['game_mode']]."</div>
-                  <div class=\"match-info-line\"><span class=\"caption\">".locale_string("winner").":</span> ".
-                    ($report['matches_additional'][$mid]['radiant_win'] ? $team_radiant : $team_dire)."</div>
-                  <div class=\"match-info-line\"><span class=\"caption\">".locale_string("date").":</span> ".
-                    date(locale_string("time_format")." ".locale_string("date_format"), $report['matches_additional'][$mid]['date'] + $report['matches_additional'][$mid]['duration'])."</div>
-              </div>";
+  $series_tag = isset($report['match_parts_series_tag'][$mid]) ? $report['match_parts_series_tag'][$mid] : null;
+  $series_id = isset($report['series'][$series_tag]['seriesid']) ? $report['series'][$series_tag]['seriesid'] : null;
+
+  $output .= "<div class=\"match-add-info\">".
+    ($series_tag ? "<div class=\"match-info-line\">".series_matches_link($series_id ? $series_id : $series_tag, "cards")."</div>" : "").
+    "<div class=\"match-info-line\"><span class=\"caption\">".locale_string("duration").":</span> ".
+      $duration."</div>
+    <div class=\"match-info-line\"><span class=\"caption\">".locale_string("region").":</span> ".
+      ($meta['regions'][
+        $meta['clusters'][ $report['matches_additional'][$mid]['cluster'] ] ?? 0
+      ] ?? "unknown")."</div>
+    <div class=\"match-info-line\"><span class=\"caption\">".locale_string("game_mode").":</span> ".
+      $meta['modes'][$report['matches_additional'][$mid]['game_mode']]."</div>
+      <div class=\"match-info-line\"><span class=\"caption\">".locale_string("winner").":</span> ".
+        ($report['matches_additional'][$mid]['radiant_win'] ? $team_radiant : $team_dire)."</div>
+      <div class=\"match-info-line\"><span class=\"caption\">".locale_string("date").":</span> ".
+        date(locale_string("time_format")." ".locale_string("date_format"), $report['matches_additional'][$mid]['date'] + $report['matches_additional'][$mid]['duration'])."</div>
+  </div>";
 
   if (isset($report['records'])) {
     $match_records = [];
