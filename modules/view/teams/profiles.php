@@ -184,6 +184,29 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
             $reslocal['list'] = rg_generator_matches_list("matches-list-team$tid", $context[$tid]['matches']);
           }
 
+          if (!empty($report['series'])) {
+            $reslocal['series'] = "";
+
+            if (check_module($parent."series")) {
+              $team_series = [];
+              foreach ($report['series'] as $st => $s) {
+                foreach ($s['matches'] as $mid) {
+                  if (!isset($report['match_participants_teams'][$mid]['radiant'])) continue;
+                  if (($report['match_participants_teams'][$mid]['radiant'] ?? 0) == $tid) {
+                    $team_series[$st] = $s;
+                    break;
+                  }
+                  if (($report['match_participants_teams'][$mid]['dire'] ?? 0) == $tid) {
+                    $team_series[$st] = $s;
+                    break;
+                  }
+                }
+              }
+              
+              $reslocal['series'] = rg_generator_series_list("matches-series-team$tid", $team_series);
+            }
+          }
+
           $reslocal['cards'] = "";
           if (check_module($parent."cards")) {
             krsort($context[$tid]['matches']);
