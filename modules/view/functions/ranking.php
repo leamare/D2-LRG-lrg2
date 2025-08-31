@@ -135,6 +135,9 @@ function compound_ranking_sort(&$a, &$b, $total_matches) {
 function compound_ranking(&$arr, $total_matches) {
   foreach ($arr as $k => $v) {
     $v_contest = ($v['matches_picked'] + $v['matches_banned'])/$total_matches;
+    if ($v_contest > 1) {
+      $v_contest = 1;
+    }
     $v_oi_rank = ($v['matches_picked']*$v['winrate_picked'] + $v['matches_banned']*$v['winrate_banned']) / $total_matches;
     $arr[$k]['wrank'] = wilson_rating(
       ($v['matches_picked']*$v['winrate_picked'] + $v['matches_banned']*$v['winrate_banned']/2),

@@ -64,7 +64,11 @@ $(document).ready(function() {
     const greedy = $(this).hasClass('greedy');
     const tableContainerWidth = $('#'+table).parent().width() * (isWide ? .98 : .82) * (greedy ? 1.05 : .875);
 
-    if (tableContainerWidth < tableWidth) {
+    const greedyWidth = greedy ? 2200 : 1800;
+
+    console.log(tableContainerWidth, tableWidth, greedyWidth);
+
+    if (tableContainerWidth < tableWidth || tableWidth < greedyWidth) {
       let overhead = [];
       $('#'+table+' tr.overhead th').each(function() {
         const group = $(this).attr('data-col-group');

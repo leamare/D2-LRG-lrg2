@@ -1,7 +1,9 @@
 <?php 
 
-function table_columns_toggle($table_id, $groups, $wide = false, $priorities = []) {
-  return "<div class=\"table-column-toggles ".($wide ? "wide" : "")." ".(empty($priorities) ? 'greedy' : '')."\" data-table=\"$table_id\">".
+function table_columns_toggle($table_id, $groups, $wide = false, $priorities = [], $greedy = false) {
+  if (empty($priorities)) $greedy = true;
+  
+  return "<div class=\"table-column-toggles ".($wide ? "wide" : "")." ".(($greedy) ? 'greedy' : '')."\" data-table=\"$table_id\">".
     "<span class=\"table-column-toggles-name\">".locale_string('columns_toggle')."</span>".
     implode('', array_map(function($a, $p) use ($table_id) {
       $colgr = str_replace('.', '-', $a);
