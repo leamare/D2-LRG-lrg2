@@ -10,17 +10,40 @@ function rg_view_generate_matches() {
   $res = [];
   $parent = "matches-";
 
+  $series_filter = null;
+  if (!empty($_GET['gets'])) {
+    $series_filter = $_GET['gets'];
+  }
+
   $res['list'] = "";
   if (check_module($parent."list")) {
-    $res['list'] = rg_generator_matches_list("matches-list", $report['matches']);
+    $res['list'] = rg_generator_matches_list("matches-list", $report['matches'], $series_filter);
+  }
+
+  if (!empty($report['series'])) {
+    $res['series'] = "";
+    if (check_module($parent."series")) {
+      $res['series'] = rg_generator_series_list("matches-series", $report['series']);
+    }
   }
 
   $res['cards'] = "";
   if (check_module($parent."cards")) {
     krsort($report['matches']);
     $res['cards'] = "<div class=\"content-text\">".locale_string("desc_matches")."</div>";
+    if ($series_filter !== null) {
+      $res['cards'] .= "<div class=\"content-text\"><h1>".locale_string("meet_num")." $series_filter</h1></div>";
+    }
     $res['cards'] .= "<div class=\"content-cards\">";
     foreach($report['matches'] as $matchid => $match) {
+      if ($series_filter !== null && isset($report['match_parts_series_tag'])) {
+        $series_tag = $report['match_parts_series_tag'][$matchid] ?? null;
+        $sid = ($report['series'][$series_tag]['seriesid'] ?? 0) ? $report['series'][$series_tag]['seriesid'] : $series_tag;
+        if ($sid != $series_filter) {
+          continue;
+        }
+      }
+  
       $res['cards'] .= match_card($matchid);
     }
     $res['cards'] .= "</div>";
