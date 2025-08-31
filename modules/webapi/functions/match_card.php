@@ -18,6 +18,10 @@ function match_card($mid) {
   $match['string'] = isset($report['match_parts_strings']) ? $report['match_parts_strings'][$mid] ?? null : null;
   $match['series_num'] = isset($report['match_parts_series_num']) ? $report['match_parts_series_num'][$mid] ?? null : null;
   $match['game_num'] = isset($report['match_parts_game_num']) ? $report['match_parts_game_num'][$mid] ?? null : null;
+  $match['series_tag'] = isset($report['match_parts_series_tag']) ? $report['match_parts_series_tag'][$mid] ?? null : null;
+  if (isset($report['series'])) {
+    $match['series_id'] = $report['series'][$match['series_tag']]['seriesid'] ?? null;
+  }
 
   $clusters = $meta['clusters'];
   $regions = $meta['regions'];
