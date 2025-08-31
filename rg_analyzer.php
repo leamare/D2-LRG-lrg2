@@ -426,6 +426,8 @@ $result['settings']['limiter_players_median'] = $pl_limiter_median;
 $result['settings']['series_id_priority'] = $lg_settings['main']['series_id_priority'] ?? false;
 $result['ana_version'] = $lrg_version;
 
+require_once("modules/analyzer/series.php");
+
 echo("[~] Encoding results to JSON\n");
 $output = json_encode(utf8ize($result));
 

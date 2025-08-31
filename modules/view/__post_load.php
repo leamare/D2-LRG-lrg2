@@ -68,57 +68,14 @@ if (isset($report['localized']) && isset($report['localized'][$locale])) {
   $report['league_desc'] = $report['localized'][$locale]['desc'] ?? $report['league_desc'];
 }
 
-if (!empty($report['teams']) && !empty($report['matches']) && !empty($report['match_participants_teams'])) {
-  $partCnts = [];
-  $meetCnts = [];
-  $totalCnt = [];
-  $report['match_parts_strings'] = [];
-  $mids = array_keys($report['matches']);
-  sort($mids);
+if ((!empty($report['teams']) || ($report['settings']['series_id_priority'] ?? false)) && !empty($report['matches']) && !empty($report['match_participants_teams'])) {
+  include_once("$root/modules/commons/series.php");
 
-  foreach ($mids as $mid) {
-    $teams = [ $report['match_participants_teams'][$mid]['radiant'] ?? 0, $report['match_participants_teams'][$mid]['dire'] ?? 0 ];
-    $time = $report['matches_additional'][$mid]['date'];
-    $duration = $report['matches_additional'][$mid]['duration'];
-    if ($teams[0] && $teams[1])
-      $teamsStr = team_tag( min($teams) ).' '.locale_string('versus').' '.team_tag( max($teams) );
-    else {
-      $teamsStr = ( $teams[0] ? team_tag($teams[0]) : locale_string('radiant') ).' '.locale_string('versus').' '.( $teams[1] ? team_tag($teams[1]) : locale_string('dire') );
-    }
+  [ $series, $_report_add ] = generate_series_data($report);
 
-    if (!isset($meetCnts[$teamsStr])) {
-      $meetCnts[$teamsStr] = [
-        0,
-        null,
-        0
-      ];
-    }
-    // 3600 * 4 = 10800
-    $timeDiff = $meetCnts[$teamsStr][1] ? $time - $meetCnts[$teamsStr][1] - $duration : 0;
-    if (!$meetCnts[$teamsStr][1] || ($partCnts[$teamsStr] < 2 && $timeDiff > 14400) || ($partCnts[$teamsStr] >= 2 && $timeDiff > $meetCnts[$teamsStr][2] * 3)) {
-      $meetCnts[$teamsStr][0]++;
-      $partCnts[$teamsStr] = 0;
-    }
-    $meetCnts[$teamsStr][1] = $time;
-    $meetCnts[$teamsStr][2] = max($timeDiff, 1700);
-
-    if (!isset($partCnts[$teamsStr])) {
-      $partCnts[$teamsStr] = 0;
-      $totalCnt[$teamsStr] = 0;
-    }
-    if (!isset($totalCnt[$teamsStr])) {
-      $totalCnt[$teamsStr] = 0;
-    }
-    $partCnts[$teamsStr]++;
-    $totalCnt[$teamsStr]++;
-    $cnt = $partCnts[$teamsStr];
-    
-    $report['match_parts_strings'][$mid] = $teamsStr
-      .' - '.locale_string('meet_num').' '.$meetCnts[$teamsStr][0]
-      .' - '.locale_string('game_num').' '.$cnt;
-    $report['match_parts_series_num'][$mid] = $meetCnts[$teamsStr][0];
-    $report['match_parts_game_num'][$mid] = $cnt;
-    $report['match_parts_total_game_num'][$mid] = $totalCnt[$teamsStr];
+  $report['series'] = $series;
+  foreach ($_report_add as $k => $v) {
+    $report[$k] = $v;
   }
 }
 
