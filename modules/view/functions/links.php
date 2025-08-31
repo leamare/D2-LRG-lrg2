@@ -45,11 +45,11 @@ function link_provider($lpn) {
   return "<img class=\"rf_icon\" src=\"".str_replace("%LPN%", strtolower($lpn), $link_provider_icon)."\" />";
 }
 
-function team_link($tid) {
+function team_link($tid, $with_tag = true) {
   global $leaguetag, $linkvars;
 
   return "<a href=\"?league=".$leaguetag."&mod=teams-profiles-team".$tid.(empty($linkvars) ? "" : "&$linkvars")
-    ."\" title=\"".team_name($tid)."\">".team_name($tid)." (".team_tag($tid).")</a>";
+    ."\" title=\"".team_name($tid)."\">".team_name($tid).($with_tag ? " (".team_tag($tid).")" : "")."</a>";
 }
 
 function region_link($rid) {
