@@ -200,7 +200,9 @@ function join_selectors($modules, $level, $parent="") {
 
       if($lrg_use_get && $lrg_get_depth > $level) {
         if ( $startline_check_res )
-          $selectors[] = "<span class=\"selector active".($child_indicator ? " has-children" : "")."\">".$icon.$modname.$section_marker."</span>";
+          $selectors[] = "<span class=\"selector active".($child_indicator ? " has-children" : "")."\">".
+            "<a href=\"?league=$leaguetag&mod=$mn".$carryon_change.(empty($linkvars) ? "" : "&".$linkvars)."\">".$icon.$modname.$section_marker."</a>".
+          "</span>";
         else
           $selectors[] = "<span class=\"selector".
             ($unset_selector ? " active" : "").
