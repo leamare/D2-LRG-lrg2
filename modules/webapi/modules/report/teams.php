@@ -88,21 +88,51 @@ $endpoints['teams'] = function($mods, $vars, &$report) use (&$endpoints, &$repea
       if (isset($vars['team']) && $tid != $vars['team']) continue;
       if (!empty($report['teams_interest']) && !in_array($tid, $report['teams_interest'])) continue;
       $res[$tid] = [];
-      for($i=0, $end = sizeof($team_ids); $i<$end; $i++) {
+      for($i=0, $end=count($team_ids); $i<$end; $i++) {
         if (!empty($report['teams_interest']) && !in_array($tid, $report['teams_interest'])) continue;
         if (!$tvt[$tid][$team_ids[$i]]['matches']) continue;
-        if($tid != $team_ids[$i]) {
+        if ($tid != $team_ids[$i]) {
           $res[$tid][ $team_ids[$i] ] = [
-            "matches" => $tvt[$tid][$team_ids[$i]]['matches'],
+            "matches" => +$tvt[$tid][$team_ids[$i]]['matches'],
             "winrate" => $teamline[$team_ids[$i]]['winrate'] ?? $teamline[$team_ids[$i]]['wins']/$teamline[$team_ids[$i]]['matches'],
             "won" => $tvt[$tid][$team_ids[$i]]['won'] ?? $tvt[$tid][$team_ids[$i]]['wins'],
-            "lost" => $tvt[$tid][$team_ids[$i]]['lost'] ?? $tvt[$tid][$team_ids[$i]]['matches']-$tvt[$tid][$team_ids[$i]]['wins'],
+            "lost" => +($tvt[$tid][$team_ids[$i]]['lost'] ?? $tvt[$tid][$team_ids[$i]]['matches']-$tvt[$tid][$team_ids[$i]]['wins']),
           ];
           if (isset($context[$tid][$team_ids[$i]]['matchids'])) {
             $res[$tid][ $team_ids[$i] ]['matches'] = [];
             foreach ($context[$tid][$team_ids[$i]]['matchids'] as $mid) {
               $res[$tid][ $team_ids[$i] ]['matches'][] = match_card_min($mid);
             }
+          }
+        }
+      }
+
+      if (!empty($report['series'])) {
+        $series_team = $endpoints['series']($mods, $vars, $report);
+  
+        foreach ($series_team['series'] as $series_data) {
+          $opponent = null;
+          foreach ($series_data['teams'] as $team) {
+            if ($team['team_id'] == $tid) continue;
+
+            $opponent = $team['team_id'];
+            break;
+          }
+
+          if (!isset($res[$tid][$opponent]['series'])) {
+            $res[$tid][$opponent]['series'] = 0;
+            $res[$tid][$opponent]['series_tags'] = [];
+            $res[$tid][$opponent]['series_scores'] = [0,0,0];
+          }
+
+          $res[$tid][$opponent]['series']++;
+          $res[$tid][$opponent]['series_tags'][] = $series_data['series_tag'];
+          if ($series_data['winner'] == $tid) {
+            $res[$tid][$opponent]['series_scores'][0]++;
+          } else if ($series_data['winner'] == $opponent) {
+            $res[$tid][$opponent]['series_scores'][2]++;
+          } else {
+            $res[$tid][$opponent]['series_scores'][1]++;
           }
         }
       }

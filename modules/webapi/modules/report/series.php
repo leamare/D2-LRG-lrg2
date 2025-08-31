@@ -1,8 +1,8 @@
 <?php 
 
-$repeatVars['matches'] = ['team', 'optid'];
+$repeatVars['series'] = ['team', 'optid'];
 
-$endpoints['matches'] = function($mods, $vars, &$report) use (&$meta) {
+$endpoints['series'] = function($mods, $vars, &$report) use (&$meta) {
   if (empty($report['matches'])) 
     throw new Exception("No matches available for this report");
 
