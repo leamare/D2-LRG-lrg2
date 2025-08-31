@@ -320,7 +320,7 @@ function rg_generator_series_list($table_id, $series) {
     "<th data-col-group=\"teams\"></th>".
     "<th class=\"separator\" colspan=\"3\" data-col-group=\"heroes\">".locale_string("series_heroes")."</th>".
     "<th class=\"separator\" colspan=\"2\" data-col-group=\"time\">".locale_string("series_duration")."</th>".
-    "<th class=\"separator\" data-col-group=\"time\" class=\"sorter-valuesort\" ></th>".
+    "<th class=\"separator\" data-col-group=\"time\" class=\"sorter-valuesort\"></th>".
   "</tr><tr>".
     "<th data-col-group=\"_index\">".locale_string("meet_num")."</th>".
     "<th data-col-group=\"_index\">".locale_string("matches")."</th>".

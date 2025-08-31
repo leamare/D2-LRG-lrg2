@@ -58,7 +58,7 @@ $endpoints['matches'] = function($mods, $vars, &$report) use (&$meta) {
 
   foreach ($context as $id => $data) {
     if (isset($report['matches_additional']) && isset($vars['team']) && isset($vars['region'])) {
-      $region = $meta['clusters'][ $report['matches_additional'][$mid]['cluster'] ];
+      $region = $meta['clusters'][ $report['matches_additional'][$id]['cluster'] ];
       if ($region != $vars['region']) continue;
     }
 
