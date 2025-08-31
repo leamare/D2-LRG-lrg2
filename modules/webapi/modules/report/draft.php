@@ -52,14 +52,30 @@ $endpoints['draft'] = function($mods, $vars, &$report) {
       $context[ $id ] = [
         "matches_banned" => 0,
         "winrate_banned" => 0,
-        "matches_picked" => $el['matches_s'],
-        "matches_total" => $el['matches_s'],
-        "winrate_picked" => $el['winrate_s']
+        "matches_picked" => +$el['matches_s'],
+        "matches_total" => +$el['matches_s'],
+        "winrate_picked" => +$el['winrate_s']
       ];
     }
   }
 
-  if(!sizeof($context)) return [];
+  if(!count($context)) return [];
+
+  if ($type == "player") {
+    if (!empty($report['draft']) && !empty($report['matches_additional'])) {
+      include_once __DIR__."/../../../view/functions/players_bans_estimate.php";
+      
+      if (!empty($report['teams']) && !empty($report['match_participants_teams'])) {
+        if (isset($vars['team'])) {
+          estimate_players_draft_processor_tvt_single_team($report['teams'], $vars['team']);
+        } else {
+          estimate_players_draft_processor_tvt_report($context);
+        }
+      } else {
+        estimate_players_draft_processor_pvp_report($context);
+      }
+    }
+  }
 
   foreach($context as $k => $v) {
     if(isset($v['winrate_picked'])) break;
@@ -85,7 +101,7 @@ $endpoints['draft'] = function($mods, $vars, &$report) {
   $max = reset($context)['wrank'];
 
   foreach ($context as $id => $el) {
-    $context[$id]['rank'] = round(100 * ($el['wrank']-$min) / ($max-$min), 2);
+    $context[$id]['rank'] = round(100 * ($el['wrank']-$min) / ($max-$min+0.01), 2);
     $context[$id]['contest_rate'] = round($el['matches_total']/$context_total_matches, 4);
     unset($context[$id]['wrank']);
   }
@@ -117,9 +133,9 @@ $endpoints['draft'] = function($mods, $vars, &$report) {
 
         if(!isset($draft[ $el[$id_name] ][$stage_num]))
           $draft[ $el[$id_name] ][$stage_num] = $draft_template;
-        $draft[ $el[$id_name] ][$stage_num]["matches_total"] += $el['matches'];
-        $draft[ $el[$id_name] ][$stage_num]["matches_".$stage_type] = $el['matches'];
-        $draft[ $el[$id_name] ][$stage_num]["winrate_".$stage_type] = $el['winrate'];
+        $draft[ $el[$id_name] ][$stage_num]["matches_total"] += +$el['matches'];
+        $draft[ $el[$id_name] ][$stage_num]["matches_".$stage_type] = +$el['matches'];
+        $draft[ $el[$id_name] ][$stage_num]["winrate_".$stage_type] = +$el['winrate'];
 
         if ($i) {
           $draft[ $el[$id_name] ][$stage_num]["ratio"] = round($context[ $el[$id_name] ]['matches_picked'] ? $el['matches']/$context[ $el[$id_name] ]['matches_picked'] : 0, 4);
