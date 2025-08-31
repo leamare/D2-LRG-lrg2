@@ -146,23 +146,7 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
         if ($mod == $context_mod."team".$tid."-players") $unset_module = true;
 
         if (isset($context[$tid]['players_draft'])) {
-            $res["team".$tid]['players']['draft'] = "";
-
-            if (compare_release_ver($report['ana_version'], [ 2, 18, 0, 0, 0 ]) < 0) {
-              foreach ($context[$tid]['players_draft_pb'] as $id => $el) {
-                if (!in_array($id, $context[$tid]['active_roster'])) {
-                  unset($context[$tid]['players_draft_pb'][$id]);
-                }
-              }
-            }
-
-            if(check_module($context_mod."team".$tid."-players-draft")) {
-              $res["team".$tid]['players']['draft'] = rg_generator_draft("team$tid-players-draft",
-                                                                          $context[$tid]['players_draft_pb'],
-                                                                          $context[$tid]['players_draft'],
-                                                                          $context[$tid]['matches_total'],
-                                                                        false, true, true);
-            }
+          include_once __DIR__ . "/profile_snippets/players_draft.php";
         }
       }
 
