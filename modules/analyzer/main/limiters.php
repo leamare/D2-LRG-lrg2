@@ -9,6 +9,11 @@ if ($lg_settings['ana']['players']) {
     function($a) { return reset($a); }, 
     instaquery($conn, "SELECT COUNT(matchid) FROM matchlines GROUP BY playerid;")
   );
+} else if ($lg_settings['ana']['teams']) {
+  $teams_matches = array_map(
+    function($a) { return reset($a); }, 
+    instaquery($conn, "SELECT COUNT(matchid) FROM teams_matches GROUP BY teamid;")
+  );
 }
 
 function calculate_limiters(array $dataset, $teams = null, $total = null): array {
@@ -68,6 +73,8 @@ $limiters = calculate_limiters($picks, $result['random']['teams_on_event'] ?? nu
 
 if ($lg_settings['ana']['players']) {
   $limiters_players = calculate_limiters($players, $result['random']['teams_on_event'] ?? null, $result['random']["matches_total"]);
+} else if ($lg_settings['ana']['teams']) {
+  $limiters_teams = calculate_limiters($teams_matches, $result['random']['teams_on_event'] ?? null, $result['random']["matches_total"]);
 }
   
 //compatibility
@@ -81,6 +88,9 @@ $limiter_quantile = $limiters['limiter_quantile'];
 if ($lg_settings['ana']['players']) {
   $pl_limiter = round($limiters_players['limiter_higher'] * 0.75);
   $pl_limiter_median = $limiters_players['median'];
+} else if ($lg_settings['ana']['teams']) {
+  $pl_limiter = round($limiters_teams['limiter_higher'] * 0.75);
+  $pl_limiter_median = $limiters_teams['median'];
 } else {
   $pl_limiter = $limiter_graph;
   $pl_limiter_median = $limiter_median;
