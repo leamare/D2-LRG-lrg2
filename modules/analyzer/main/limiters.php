@@ -66,9 +66,10 @@ function calculate_limiters(array $dataset, $teams = null, $total = null): array
 
 $limiters = calculate_limiters($picks, $result['random']['teams_on_event'] ?? null, $result['random']["matches_total"]);
 
-if ($lg_settings['ana']['players'])
+if ($lg_settings['ana']['players']) {
   $limiters_players = calculate_limiters($players, $result['random']['teams_on_event'] ?? null, $result['random']["matches_total"]);
-
+}
+  
 //compatibility
 $limiter = $limiters['limiter_higher'];
 $limiter_graph = $limiters['limiter_graph'];
@@ -78,7 +79,7 @@ $limiter_median = $limiters['median'];
 $limiter_quantile = $limiters['limiter_quantile'];
 
 if ($lg_settings['ana']['players']) {
-  $pl_limiter = $limiters_players['limiter_higher'];
+  $pl_limiter = round($limiters_players['limiter_higher'] * 0.75);
   $pl_limiter_median = $limiters_players['median'];
 } else {
   $pl_limiter = $limiter_graph;
