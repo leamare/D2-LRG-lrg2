@@ -179,9 +179,9 @@ $endpoints['series'] = function($mods, $vars, &$report) use (&$meta) {
       'winner' => $winner,
       'scores' => $scores,
       'shared_heroes' => [
-        'picks' => $heroes_picks,
-        'bans' => $heroes_bans,
-        'both' => $heroes_both,
+        'picks' => array_keys($heroes_picks),
+        'bans' => array_keys($heroes_bans),
+        'both' => array_keys($heroes_both),
       ],
       'start_date' => $start_date_unix,
       'end_date' => $end_date_unix,

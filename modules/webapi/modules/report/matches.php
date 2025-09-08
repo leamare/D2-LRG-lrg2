@@ -12,6 +12,17 @@ $endpoints['matches'] = function($mods, $vars, &$report) use (&$meta) {
     $context =& $report['teams'][ $vars['team'] ]['matches'];
   } else if (isset($vars['region'])) {
     $context =& $report['regions_data'][ $vars['region'] ]['matches'];
+  } else if (isset($vars['gets']) && !empty($report['series']) && isset($report['match_parts_series_tag'])) {
+    $context = [];
+
+    foreach($report['matches'] as $matchid => $match) {
+      $series_tag = $report['match_parts_series_tag'][$matchid] ?? null;
+      $sid = ($report['series'][$series_tag]['seriesid'] ?? 0) ? $report['series'][$series_tag]['seriesid'] : $series_tag;
+      if (!in_array($sid, $vars['gets'])) {
+        continue;
+      }
+      $context[$matchid] = true;
+    }
   } else {
     $context =& $report['matches'];
   }
