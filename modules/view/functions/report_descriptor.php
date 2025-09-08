@@ -89,7 +89,12 @@ function get_report_descriptor(&$report, $generate_endpoints = false) {
 
   if (isset($report['fantasy']['heroes_mvp'])) $desc['endpoints'][] = "heroes-fantasy";
 
-  if (isset($report['players_draft'])) $desc['endpoints'][] = "players-draft";
+  if (isset($report['players_draft'])) {
+    $desc['endpoints'][] = "players-draft";
+    if (isset($report['matches']) && isset($report['players_summary'])) {
+      $desc['endpoints'][] = "players-draft-est-bans";
+    }
+  }
   if (isset($report['averages_players']) || isset($report['haverages_players'])) $desc['endpoints'][] = "players-haverages";
   if (isset($report['player_sides'])) $desc['endpoints'][] = "players-sides";
   if (isset($report['player_pairs'])) $desc['endpoints'][] = "players-combos-pairs";
@@ -166,6 +171,10 @@ function get_report_descriptor(&$report, $generate_endpoints = false) {
     if (isset($report['hvh_v'])) $desc['endpoints'][] = "heroes-hvh-variants";
     if (isset($report['hpv_v'])) $desc['endpoints'][] = "heroes-hph-variants";
     if (isset($report['hero_summary_variants'])) $desc['endpoints'][] = "heroes-variants-summary";
+  }
+
+  if (isset($report['matches'])) {
+    $desc['endpoints'][] = "series";
   }
 
   if ($desc['matches_details']) $desc['endpoints'][] = "matches";
