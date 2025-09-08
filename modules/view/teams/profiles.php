@@ -189,21 +189,35 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
 
             if (check_module($parent."series")) {
               $team_series = [];
+              if (!empty($_GET['opponent'])) {
+                $opponent = +$_GET['opponent'];
+              } else {
+                $opponent = null;
+              }
+
               foreach ($report['series'] as $st => $s) {
                 foreach ($s['matches'] as $mid) {
                   if (!isset($report['match_participants_teams'][$mid]['radiant'])) continue;
-                  if (($report['match_participants_teams'][$mid]['radiant'] ?? 0) == $tid) {
-                    $team_series[$st] = $s;
-                    break;
+                  $radiant = $report['match_participants_teams'][$mid]['radiant'] ?? 0;
+                  $dire = $report['match_participants_teams'][$mid]['dire'] ?? 0;
+                  if ($opponent) {
+                    if ($radiant != $opponent && $dire != $opponent) {
+                      break;
+                    }
                   }
-                  if (($report['match_participants_teams'][$mid]['dire'] ?? 0) == $tid) {
+                  if ($radiant == $tid || $dire == $tid) {
                     $team_series[$st] = $s;
                     break;
                   }
                 }
               }
               
-              $reslocal['series'] = rg_generator_series_list("matches-series-team$tid", $team_series);
+              if ($opponent) {
+                $reslocal['series'] .= "<div class=\"table-column-toggles wide\">".
+                  "<span class=\"table-column-toggles-name\">".locale_string("opponent").": ".team_link($opponent)."</span>".
+                "</div>";
+              }
+              $reslocal['series'] .= rg_generator_series_list("matches-series-team$tid", $team_series);
             }
           }
 
