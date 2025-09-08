@@ -1039,7 +1039,7 @@ function get_stratz_response($match) {
 }
 
 function get_stratz_multiquery($group) {
-  global $stratztoken, $meta, $stratz_cache, $api_cooldown_seconds;
+  global $stratztoken, $meta, $stratz_cache, $api_cooldown_seconds, $stratz_user_agent;
 
   $gr = [];
   foreach ($group as $match) {
@@ -1075,7 +1075,7 @@ function get_stratz_multiquery($group) {
     ],
     'http' => [
       'method' => 'POST',
-      'header'  => "Content-Type: application/json\r\nKey: $stratztoken\r\nUser-Agent: STRATZ_API\r\n",
+      'header'  => "Content-Type: application/json\r\nKey: $stratztoken\r\nUser-Agent: $stratz_user_agent\r\n",
       'content' => json_encode($data),
       'timeout' => 60,
     ]
