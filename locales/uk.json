@@ -786,6 +786,7 @@
   "data_filter_items_early_time": "Час Q1 до 20 хв",
   "data_filter_item_combo_time_diff_pos": "Тільки позитивна різниця часу",
   "data_filter_item_combo_time_diff_neg": "Тільки негативна різниця часу",
+  "series": "Серії",
   "series_heroes": "Герої у всіх матчах",
   "series_duration": "Тривалість",
   "series_heroes_other": "Змішані",
