@@ -159,7 +159,12 @@ foreach ($tvt[$tid] as $opid => $data) {
     // ).
     (isset($data['matchids']) 
       ? "<td><a href=\"?league=$leaguetag&mod=teams-profiles-team$tid-matches-opponents-$optag".(empty($linkvars) ? "" : "&".$linkvars)."\">".
-      locale_string("matches")."</a></td>" : ""
+        locale_string("matches")."</a>".
+        (!empty($team_series) ? " / ".
+          "<a href=\"?league=$leaguetag&mod=teams-profiles-team$tid-matches-series&opponent=$opid".(empty($linkvars) ? "" : "&".$linkvars)."\">".
+          locale_string("series")."</a>" : 
+        "").
+      "</td>" : ""
     ).
   "</tr>";
 }
