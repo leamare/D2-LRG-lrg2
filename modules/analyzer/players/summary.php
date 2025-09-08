@@ -3,7 +3,8 @@ $result["players_summary"] = rg_query_player_summary($conn, null);
 
 $pl_numbers = [];
 foreach ($result['players_summary'] as $line) {
-  $num = ceil(($line['matches_s'] * $line['matches_s']) / (2 * ($result['random']["matches_total"])));
+  $mt = (int)$result['random']["matches_total"];
+  $num = ceil(($line['matches_s'] * $line['matches_s']) / (2 * $mt));
   if ($num > 1) $pl_numbers[] = $num;
 }
 
