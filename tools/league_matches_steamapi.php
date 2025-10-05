@@ -3,16 +3,16 @@ require_once('head.php');
 
 $_file = !empty($options['o']) ? $options['o'] : "matchlists/$lrg_league_tag.list";
 
-$_ticket = !empty($options['T']) ? $options['T'] : die("# Specify ticket ID\n");
+$_ticket = !empty($options['T']) ? $options['T'] : $lg_settings['league_id'];
 
 $_force_all = isset($options['f']) ? true : false;
 
 $matches = [];
 $i = 0;
 
-if($lg_settings['league_id'] == null) $out = "";
+if(empty($_ticket)) $out = "";
 else {
-  $request = "https://api.steampowered.com/IDOTA2Match_570/GetMatchHistory/v0001/?key=".$steamapikey."&league_id=".$lg_settings['league_id'];
+  $request = "https://api.steampowered.com/IDOTA2Match_570/GetMatchHistory/v0001/?key=".$steamapikey."&league_id=".$_ticket;
   echo "[ ] Requested...";
 
   $matches = array();
