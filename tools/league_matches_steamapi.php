@@ -26,7 +26,7 @@ else {
     foreach($response['result']['matches'] as $r_match) {
       $last_matchid = $r_match['match_id'];
 
-      if (!$force_all) {
+      if (!$_force_all) {
         if($lg_settings['time_limit_after'] != null && $lg_settings['time_limit_after'] > $r_match['start_time'])
           continue;
         if($lg_settings['time_limit_after'] != null && $lg_settings['time_limit_before'] < $r_match['start_time'])
