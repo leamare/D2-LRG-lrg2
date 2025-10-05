@@ -138,13 +138,16 @@ if (isset($report["first_match"]) && isset($report["last_match"]) && compare_ver
   }
 }
 
-if (!empty($reports_earlypreview_ban)) {
-  $match = true;
+if (isset($leaguetag) && !empty($reports_earlypreview_ban)) {
+  $match = false;
 
-  if ($match && !in_array($leaguetag, $reports_earlypreview_ban)) {
-    $match = false;
+  if (in_array(strtolower($leaguetag), $reports_earlypreview_ban)) {
+    $match = true;
   }
   if ($match && isset($reports_earlypreview_ban_time) && (intval($report['last_match']['date'] ?? 0) - $reports_earlypreview_ban_time < 0)) {
+    $match = false;
+  }
+  if ($match && !empty($reports_earlypreview_ban_exclude) && in_array($leaguetag, $reports_earlypreview_ban_exclude)) {
     $match = false;
   }
 
