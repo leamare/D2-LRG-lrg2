@@ -1,6 +1,12 @@
 <?php 
 
-$endpoints['summary'] = function($mods, $vars, &$report) {
+#[Endpoint(name: 'summary')]
+#[Description('Summary of teams, players, or heroes for report/region')]
+#[ModlineVar(name: 'region', schema: ['type' => 'integer'], description: 'Region id')]
+#[ReturnSchema(schema: 'SummaryResult')]
+class Summary extends EndpointTemplate {
+public function process() {
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report;
   $res = [];
 
   if (isset($vars['region'])) {
@@ -62,4 +68,20 @@ $endpoints['summary'] = function($mods, $vars, &$report) {
   }
 
   return $res;
-};
+}
+}
+
+if (is_docs_mode()) {
+  SchemaRegistry::register('TeamSummary', TypeDefs::obj([
+    'team_id' => TypeDefs::int(),
+    'team_name' => TypeDefs::str(),
+    'team_tag' => TypeDefs::str(),
+    'matches_total' => TypeDefs::int(),
+    'winrate' => TypeDefs::num(),
+  ]));
+
+  SchemaRegistry::register('SummaryResult', TypeDefs::oneOf([
+    TypeDefs::arrayOf('TeamSummary'),
+    TypeDefs::mapOfIdKeys(TypeDefs::obj([]))
+  ]));
+}

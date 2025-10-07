@@ -2,7 +2,14 @@
 
 $repeatVars['meta_graph'] = ['region'];
 
-$endpoints['meta_graph'] = function($mods, $vars, &$report) {
+#[Endpoint(name: 'meta_graph')]
+#[Description('Hero synergy graph nodes and pairs (derived from pairs), team/region/global')]
+#[ModlineVar(name: 'team', schema: ['type' => 'integer'], description: 'Team id')]
+#[ModlineVar(name: 'region', schema: ['type' => 'integer'], description: 'Region id')]
+#[ReturnSchema(schema: 'MetaGraphResult')]
+class MetaGraph extends EndpointTemplate {
+public function process() {
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report;
   if (isset($vars['team'])) {
     $context =& $report['teams'][ $vars['team'] ];
   } else if (isset($vars['region'])) {
@@ -106,4 +113,15 @@ $endpoints['meta_graph'] = function($mods, $vars, &$report) {
   ];
 
   return $res;
-};
+}
+}
+
+if (is_docs_mode()) {
+  SchemaRegistry::register('MetaGraphResult', TypeDefs::obj([
+    'limiter' => TypeDefs::int(),
+    'max_wr' => TypeDefs::num(),
+    'max_games' => TypeDefs::int(),
+    'nodes' => TypeDefs::arrayOf(TypeDefs::obj([])),
+    'pairs' => TypeDefs::arrayOf(TypeDefs::obj([])),
+  ]));
+}

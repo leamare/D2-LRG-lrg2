@@ -1,6 +1,15 @@
 <?php 
 
-$endpoints['draft_tree'] = function($mods, $vars, &$report) {
+#[Endpoint(name: 'draft_tree')]
+#[Description('Draft edges and draft context for heroes')]
+#[GetParam(name: 'league', required: true, schema: ['type' => 'string'], description: 'Report tag')]
+#[GetParam(name: 'cat', required: false, schema: ['type' => 'number'], description: 'Quantile cutoff 0..1 to filter edges by count')]
+#[ModlineVar(name: 'team', schema: ['type' => 'integer'], description: 'Team id')]
+#[ModlineVar(name: 'region', schema: ['type' => 'integer'], description: 'Region id')]
+#[ReturnSchema(schema: 'DraftTreeResult')]
+class DraftTree extends EndpointTemplate {
+public function process() {
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report;
   if (!isset($report['draft_tree']))
     throw new \Exception("This module doesn't exist");
   if (!in_array("heroes", $mods))
@@ -48,4 +57,20 @@ $endpoints['draft_tree'] = function($mods, $vars, &$report) {
     'edges' => $context,
     'draft' => $draft_context
   ];
-};
+}
+}
+
+if (is_docs_mode()) {
+  SchemaRegistry::register('DraftEdge', TypeDefs::obj([
+    'pick' => TypeDefs::int(),
+    'ban' => TypeDefs::int(),
+    'count' => TypeDefs::int(),
+    'from' => TypeDefs::int(),
+    'to' => TypeDefs::int(),
+  ]));
+
+  SchemaRegistry::register('DraftTreeResult', TypeDefs::obj([
+    'edges' => TypeDefs::arrayOf('DraftEdge'),
+    'draft' => TypeDefs::arrayOf(TypeDefs::arrayOf(TypeDefs::arrayOf(TypeDefs::int())))
+  ]));
+}

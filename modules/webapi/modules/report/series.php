@@ -2,7 +2,18 @@
 
 $repeatVars['series'] = ['team', 'optid'];
 
-$endpoints['series'] = function($mods, $vars, &$report) use (&$meta) {
+#[Endpoint(name: 'series')]
+#[Description('Filter and list series derived from matches')]
+#[ModlineVar(name: 'team', schema: ['type' => 'integer'], description: 'Team id')]
+#[ModlineVar(name: 'region', schema: ['type' => 'integer'], description: 'Region id')]
+#[ModlineVar(name: 'optid', schema: ['type' => 'integer'], description: 'Opponent team id')]
+#[ModlineVar(name: 'playerid', schema: ['type' => 'integer'], description: 'Player id')]
+#[ModlineVar(name: 'heroid', schema: ['type' => 'integer'], description: 'Hero id')]
+#[ModlineVar(name: 'variant', schema: ['type' => 'integer'], description: 'Hero variant id')]
+#[ReturnSchema(schema: 'SeriesResult')]
+class Series extends EndpointTemplate {
+public function process() {
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report; global $meta;
   if (empty($report['matches'])) 
     throw new Exception("No matches available for this report");
 
@@ -191,6 +202,31 @@ $endpoints['series'] = function($mods, $vars, &$report) use (&$meta) {
   }
 
   return $res;
-};
+}
+}
+
+if (is_docs_mode()) {
+  SchemaRegistry::register('SeriesEntry', TypeDefs::obj([
+    'series_tag' => TypeDefs::str(),
+    'seriesid' => TypeDefs::int(),
+    'matches' => TypeDefs::arrayOf(TypeDefs::int()),
+    'teams' => TypeDefs::arrayOf(TypeDefs::obj([])),
+    'winner' => TypeDefs::int(),
+    'scores' => TypeDefs::mapOf(TypeDefs::int()),
+    'shared_heroes' => TypeDefs::obj([
+      'picks' => TypeDefs::arrayOf(TypeDefs::int()),
+      'bans' => TypeDefs::arrayOf(TypeDefs::int()),
+      'both' => TypeDefs::arrayOf(TypeDefs::int()),
+    ]),
+    'start_date' => TypeDefs::int(),
+    'end_date' => TypeDefs::int(),
+    'total_duration' => TypeDefs::int(),
+    'playtime' => TypeDefs::int(),
+  ]));
+
+  SchemaRegistry::register('SeriesResult', TypeDefs::obj([
+    'series' => TypeDefs::arrayOf('SeriesEntry')
+  ]));
+}
 
 // func check_positions_matches defined in matches.php

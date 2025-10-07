@@ -1,6 +1,12 @@
 <?php 
 
-$endpoints['party_graph'] = function($mods, $vars, &$report) {
+#[Endpoint(name: 'party_graph')]
+#[Description('Players party/combo graph nodes and pairs, optionally per region')]
+#[ModlineVar(name: 'region', schema: ['type' => 'integer'], description: 'Region id')]
+#[ReturnSchema(schema: 'PartyGraphResult')]
+class PartyGraph extends EndpointTemplate {
+public function process() {
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report;
   if (isset($vars['region'])) {
     $context =& $report['regions_data'][ $vars['region'] ];
   } else {
@@ -24,6 +30,7 @@ $endpoints['party_graph'] = function($mods, $vars, &$report) {
   $max_wr *= 2;
 
   $nodes = [];
+  $counter = 0; $endp = sizeof($context_pickban)*0.35;
   foreach($context_pickban as $elid => $el) {
     if($counter++ >= $endp && !has_pair($elid, $pairs)) {
         continue;
@@ -44,4 +51,15 @@ $endpoints['party_graph'] = function($mods, $vars, &$report) {
   ];
 
   return $res;
-};
+}
+}
+
+if (is_docs_mode()) {
+  SchemaRegistry::register('PartyGraphResult', TypeDefs::obj([
+    'limiter' => TypeDefs::int(),
+    'max_wr' => TypeDefs::num(),
+    'max_games' => TypeDefs::int(),
+    'nodes' => TypeDefs::arrayOf(TypeDefs::obj([])),
+    'pairs' => TypeDefs::arrayOf(TypeDefs::obj([])),
+  ]));
+}

@@ -1,6 +1,13 @@
 <?php 
 
-$endpoints['items-critical'] = function($mods, $vars, &$report) use (&$endpoints, &$meta) {
+#[Endpoint(name: 'items-critical')]
+#[Description('Critical item timings per hero or total')]
+#[ModlineVar(name: 'heroid', schema: ['type' => 'integer'], description: 'Hero id or total')]
+#[GetParam(name: 'item_cat', required: false, schema: ['type' => 'array','items' => ['type' => 'string']], description: 'Item category filters')]
+#[ReturnSchema(schema: 'ItemsCriticalResult')]
+class ItemsCritical extends EndpointTemplate {
+public function process() {
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report; global $endpoints, $meta;
   if (!isset($report['items']) || empty($report['items']['pi']) || !isset($report['items']['stats']))
     throw new \Exception("No items stats data");
 
@@ -92,4 +99,26 @@ $endpoints['items-critical'] = function($mods, $vars, &$report) use (&$endpoints
   $res['items'] = $items_rc;
 
   return $res;
-};
+}
+}
+
+if (is_docs_mode()) {
+  SchemaRegistry::register('CriticalLine', TypeDefs::obj([
+    'purchases' => TypeDefs::int(),
+    'prate' => TypeDefs::num(),
+    'grad' => TypeDefs::num(),
+    'q1' => TypeDefs::num(),
+    'median' => TypeDefs::num(),
+    'winrate' => TypeDefs::num(),
+    'early_wr' => TypeDefs::num(),
+    'critical_time' => TypeDefs::num(),
+  ]));
+
+  SchemaRegistry::register('ItemsCriticalResult', TypeDefs::obj([
+    'categories' => TypeDefs::arrayOf(TypeDefs::str()),
+    'allowed_items' => TypeDefs::arrayOf(TypeDefs::int()),
+    'hero' => TypeDefs::int(),
+    'hero_pickban' => TypeDefs::obj([]),
+    'items' => TypeDefs::mapOf('CriticalLine'),
+  ]));
+}

@@ -2,7 +2,13 @@
 
 $repeatVars['records_single'] = ['region'];
 
-$endpoints['records_single'] = function($mods, $vars, &$report) use (&$endpoints) {
+#[Endpoint(name: 'records_single')]
+#[Description('Top single entries per record key, optionally per region; routes to items-records for items')]
+#[ModlineVar(name: 'region', schema: ['type' => 'integer'], description: 'Region id')]
+#[ReturnSchema(schema: 'RecordsSingleResult')]
+class RecordsSingle extends EndpointTemplate {
+public function process() {
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report; global $endpoints;
   if (in_array('items', $mods)) {
     $res = $endpoints['items-records']($mods, $vars, $report);
     $res['__endp'] = "items-records";
@@ -48,4 +54,18 @@ $endpoints['records_single'] = function($mods, $vars, &$report) use (&$endpoints
   }
 
   return $res;
-};
+}
+}
+
+if (is_docs_mode()) {
+  SchemaRegistry::register('RecordSingleEntry', TypeDefs::obj([
+    'name' => TypeDefs::str(),
+    'playerid' => TypeDefs::int(),
+    'teamid' => TypeDefs::int(),
+    'heroid' => TypeDefs::int(),
+    'value' => TypeDefs::num(),
+    'matchid' => TypeDefs::int(),
+    'match_card_min' => TypeDefs::obj([]),
+  ]));
+  SchemaRegistry::register('RecordsSingleResult', TypeDefs::mapOf('RecordSingleEntry'));
+}

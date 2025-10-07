@@ -1,6 +1,12 @@
 <?php 
 
-$endpoints['items-progression'] = function($mods, $vars, &$report) use (&$endpoints) {
+#[Endpoint(name: 'items-progression')]
+#[Description('Item progression pairs and edges for hero or total')]
+#[ModlineVar(name: 'heroid', schema: ['type' => 'integer'], description: 'Hero id or total')]
+#[ReturnSchema(schema: 'ItemsProgressionResult')]
+class ItemsProgression extends EndpointTemplate {
+public function process() {
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report; global $endpoints;
   if (!isset($report['items']) || empty($report['items']['pi']) || !isset($report['items']['progr']))
     throw new \Exception("No items data");
 
@@ -51,7 +57,8 @@ $endpoints['items-progression'] = function($mods, $vars, &$report) use (&$endpoi
     if (!in_array($v['item2'], $items)) $items[] = $v['item2'];
 
     if ($v['total'] > $max_games) $max_games = $v['total'];
-    $diff = abs($v['winrate']-($data ? $data['winrate_picked'] : 0.5));
+    $base_wr = isset($report['pickban'][$hero]['winrate_picked']) ? $report['pickban'][$hero]['winrate_picked'] : 0.5;
+    $diff = abs($v['winrate'] - $base_wr);
     if ($diff > $max_wr) {
       $max_wr = $diff;
     }
@@ -72,4 +79,24 @@ $endpoints['items-progression'] = function($mods, $vars, &$report) use (&$endpoi
   $res['edges'] = $pairs;
 
   return $res;
-};
+}
+}
+
+if (is_docs_mode()) {
+  SchemaRegistry::register('ItemsProgressionEdge', TypeDefs::obj([
+    'item1' => TypeDefs::int(),
+    'item2' => TypeDefs::int(),
+    'total' => TypeDefs::int(),
+    'winrate' => TypeDefs::num(),
+  ]));
+
+  SchemaRegistry::register('ItemsProgressionResult', TypeDefs::obj([
+    'hero' => TypeDefs::int(),
+    'wr_amplitude' => TypeDefs::num(),
+    'matches_amplitude' => TypeDefs::num(),
+    'items' => TypeDefs::mapOf(TypeDefs::obj([
+      'purchases' => TypeDefs::int(), 'median_time' => TypeDefs::num(), 'winrate' => TypeDefs::num()
+    ])),
+    'edges' => TypeDefs::arrayOf('ItemsProgressionEdge'),
+  ]));
+}

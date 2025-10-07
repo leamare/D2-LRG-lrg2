@@ -1,6 +1,13 @@
 <?php 
 
-$endpoints['items-records'] = function($mods, $vars, &$report) use (&$endpoints, &$meta) {
+#[Endpoint(name: 'items-records')]
+#[Description('Items records overview or per-item details')]
+#[ModlineVar(name: 'item', schema: ['type' => 'integer'], description: 'Optional item id to focus')]
+#[GetParam(name: 'item_cat', required: false, schema: ['type' => 'array','items' => ['type' => 'string']], description: 'Item category filters (overview)')]
+#[ReturnSchema(schema: 'ItemsRecordsResult')]
+class ItemsRecords extends EndpointTemplate {
+public function process() {
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report; global $endpoints, $meta;
   if (!isset($report['items']) || empty($report['items']['pi']) || !isset($report['items']['records']))
     throw new \Exception("No items records data");
 
@@ -71,4 +78,22 @@ $endpoints['items-records'] = function($mods, $vars, &$report) use (&$endpoints,
   }
 
   return $res;
-};
+}
+}
+
+if (is_docs_mode()) {
+  SchemaRegistry::register('ItemRecord', TypeDefs::obj([
+    'hero' => TypeDefs::int(),
+    'item' => TypeDefs::int(),
+    'match' => TypeDefs::int(),
+    'match_card_min' => TypeDefs::obj([]),
+    'diff' => TypeDefs::num(),
+  ]));
+
+  SchemaRegistry::register('ItemsRecordsResult', TypeDefs::obj([
+    'item' => TypeDefs::int(),
+    'categories' => TypeDefs::arrayOf(TypeDefs::str()),
+    'allowed_items' => TypeDefs::arrayOf(TypeDefs::int()),
+    'records' => TypeDefs::arrayOf('ItemRecord'),
+  ]));
+}

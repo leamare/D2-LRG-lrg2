@@ -2,7 +2,14 @@
 
 $repeatVars['draft'] = ['team', 'region'];
 
-$endpoints['draft'] = function($mods, $vars, &$report) {
+#[Endpoint(name: 'draft')]
+#[Description('Draft totals and stages for heroes or players')]
+#[ModlineVar(name: 'team', schema: ['type' => 'integer'], description: 'Team id')]
+#[ModlineVar(name: 'region', schema: ['type' => 'integer'], description: 'Region id')]
+#[ReturnSchema(schema: 'DraftResult')]
+class Draft extends EndpointTemplate {
+public function process() {
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report;
   if (in_array("players", $mods))
     $type = "player";
   else 
@@ -172,4 +179,22 @@ $endpoints['draft'] = function($mods, $vars, &$report) {
     'total' => $context,
     'stages' => $draft
   ];
-};
+}
+}
+
+if (is_docs_mode()) {
+  SchemaRegistry::register('DraftStage', TypeDefs::obj([
+    'matches_total' => TypeDefs::int(),
+    'matches_picked' => TypeDefs::int(),
+    'winrate_picked' => TypeDefs::num(),
+    'matches_banned' => TypeDefs::int(),
+    'winrate_banned' => TypeDefs::num(),
+    'rank' => TypeDefs::num(),
+    'ratio' => TypeDefs::num(),
+  ]));
+  SchemaRegistry::register('DraftResult', TypeDefs::obj([
+    'type' => TypeDefs::str(),
+    'total' => TypeDefs::mapOf(TypeDefs::obj([])),
+    'stages' => TypeDefs::mapOf(TypeDefs::mapOf('DraftStage'))
+  ]));
+}

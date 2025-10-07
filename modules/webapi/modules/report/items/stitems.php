@@ -1,6 +1,15 @@
 <?php 
 
-$endpoints['items-stitems'] = function($mods, $vars, &$report) use (&$endpoints) {
+#[Endpoint(name: 'items-stitems')]
+#[Description('Starting items aggregated stats for hero/team/player')]
+#[ModlineVar(name: 'position', schema: ['type' => 'string'], description: 'Role code (core.lane)')]
+#[ModlineVar(name: 'heroid', schema: ['type' => 'integer'], description: 'Hero id')]
+#[ModlineVar(name: 'team', schema: ['type' => 'integer'], description: 'Team id')]
+#[ModlineVar(name: 'playerid', schema: ['type' => 'integer'], description: 'Player id')]
+#[ReturnSchema(schema: 'StItemsResult')]
+class StItems extends EndpointTemplate {
+public function process() {
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report; global $endpoints;
   if (!isset($report['starting_items']) || empty($report['starting_items']['items']) &&
     (empty($report['starting_items_players']) || empty($report['starting_items_players']['items']))
   )
@@ -161,4 +170,13 @@ $endpoints['items-stitems'] = function($mods, $vars, &$report) use (&$endpoints)
     'matches' => $matches,
     'context' => $context_info,
   ];
-};
+}
+}
+
+if (is_docs_mode()) {
+  SchemaRegistry::register('StItemsResult', TypeDefs::obj([
+    'data' => TypeDefs::mapOf(TypeDefs::obj(['item_id' => TypeDefs::int(), 'count' => TypeDefs::int()])),
+    'matches' => TypeDefs::obj([]),
+    'context' => TypeDefs::obj([]),
+  ]));
+}

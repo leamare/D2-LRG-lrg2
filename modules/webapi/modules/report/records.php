@@ -2,7 +2,13 @@
 
 $repeatVars['records'] = ['region'];
 
-$endpoints['records'] = function($mods, $vars, &$report) use (&$endpoints) {
+#[Endpoint(name: 'records')]
+#[Description('Records list with optional region context')]
+#[ModlineVar(name: 'region', schema: ['type' => 'integer'], description: 'Region id')]
+#[ReturnSchema(schema: 'RecordsResult')]
+class Records extends EndpointTemplate {
+public function process() {
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report;
   if (isset($vars['region']) && isset($report['regions_data'][ $vars['region'] ])) {
     $context =& $report['regions_data'][ $vars['region'] ];
   } else $context =& $report;
@@ -55,4 +61,32 @@ $endpoints['records'] = function($mods, $vars, &$report) use (&$endpoints) {
   }
 
   return $res;
-};
+}
+}
+
+if (is_docs_mode()) {
+  SchemaRegistry::register('RecordItem', TypeDefs::obj([
+    'name' => TypeDefs::str(),
+    'playerid' => TypeDefs::int(),
+    'teamid' => TypeDefs::int(),
+    'heroid' => TypeDefs::int(),
+    'value' => TypeDefs::num(),
+    'matchid' => TypeDefs::int(),
+    'match_card_min' => TypeDefs::obj([]),
+  ]));
+
+  // SchemaRegistry::register('RecordsResult', TypeDefs::mapWithPattern('RecordItem', '^[a-zA-Z_][a-zA-Z0-9_]*$'));
+  SchemaRegistry::register('RecordsResult', TypeDefs::mapWithKeys('RecordItem', [
+    'kills',
+    'deaths',
+    'assists',
+    'wards',
+    'last_hits',
+    'denies',
+    'gold',
+    'gold_spent',
+    'gold_per_min',
+    'xp_per_min',
+    'gold_spent_per_min',
+  ]));
+}

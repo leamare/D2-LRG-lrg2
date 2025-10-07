@@ -6,7 +6,14 @@ include_once(__DIR__ . "/../../../view/functions/teams_diversity_recalc.php");
 
 $repeatVars['rolepickban'] = ['team', 'region'];
 
-$endpoints['rolepickban'] = function($mods, $vars, &$report) {
+#[Endpoint(name: 'rolepickban')]
+#[Description('Pick/Ban stats by hero role (position), team/region/global')]
+#[ModlineVar(name: 'team', schema: ['type' => 'integer'], description: 'Team id')]
+#[ModlineVar(name: 'region', schema: ['type' => 'integer'], description: 'Region id')]
+#[ReturnSchema(schema: 'RolePickbanResult')]
+class RolePickban extends EndpointTemplate {
+public function process() {
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report;
   if (!in_array("heroes", $mods)) throw new \Exception("This module is only available for heroes");
 
   if (isset($vars['team']) && isset($report['teams'])) {
@@ -143,4 +150,19 @@ $endpoints['rolepickban'] = function($mods, $vars, &$report) {
       'contest' => round($b_cr, 3),
     ]
   ];
-};
+}
+}
+
+if (is_docs_mode()) {
+  SchemaRegistry::register('RolePickbanBalance', TypeDefs::obj([
+    'total' => TypeDefs::num(),
+    'winrate' => TypeDefs::num(),
+    'pickrate' => TypeDefs::num(),
+    'contest' => TypeDefs::num(),
+  ]));
+
+  SchemaRegistry::register('RolePickbanResult', TypeDefs::obj([
+    'pickban' => TypeDefs::arrayOf(TypeDefs::obj([])),
+    'balance' => 'RolePickbanBalance',
+  ]));
+}

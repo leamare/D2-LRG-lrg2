@@ -1,6 +1,11 @@
 <?php 
 
-$endpoints['items-overview'] = function($mods, $vars, &$report) use (&$endpoints, &$meta) {
+#[Endpoint(name: 'items-overview')]
+#[Description('Overview of best/worst items and gradients')]
+#[ReturnSchema(schema: 'ItemsOverviewResult')]
+class ItemsOverview extends EndpointTemplate {
+public function process() {
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report; global $endpoints, $meta;
   if (!isset($report['items']) || empty($report['items']['pi']))
     throw new \Exception("No items data");
 
@@ -115,4 +120,26 @@ $endpoints['items-overview'] = function($mods, $vars, &$report) use (&$endpoints
   $res['gradients'] = $gradients;
 
   return $res;
-};
+}
+}
+
+if (is_docs_mode()) {
+  SchemaRegistry::register('ItemImpact', TypeDefs::obj([
+    'early_wr' => TypeDefs::num(),
+    'late_wr' => TypeDefs::num(),
+    'wo_wr' => TypeDefs::num(),
+    'purchases' => TypeDefs::int(),
+    'hero' => TypeDefs::int(),
+    'item' => TypeDefs::int(),
+    'grad' => TypeDefs::num(),
+    'record' => TypeDefs::obj([]),
+  ]));
+
+  SchemaRegistry::register('ItemsOverviewResult', TypeDefs::obj([
+    'total_best' => TypeDefs::mapOf('ItemImpact'),
+    'total_worst' => TypeDefs::mapOf('ItemImpact'),
+    'heroes_best' => TypeDefs::arrayOf('ItemImpact'),
+    'heroes_worst' => TypeDefs::arrayOf('ItemImpact'),
+    'gradients' => TypeDefs::arrayOf('ItemImpact'),
+  ]));
+}

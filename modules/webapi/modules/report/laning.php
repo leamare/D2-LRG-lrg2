@@ -4,7 +4,14 @@ const MIN10_GOLD = 4973;
 
 $repeatVars['laning'] = ['heroid'];
 
-$endpoints['laning'] = function($mods, $vars, &$report) {
+#[Endpoint(name: 'laning')]
+#[Description('Laning advantages/disadvantages for heroes or players')]
+#[ModlineVar(name: 'heroid', schema: ['type' => 'integer'], description: 'Hero id')]
+#[ModlineVar(name: 'playerid', schema: ['type' => 'integer'], description: 'Player id')]
+#[ReturnSchema(schema: 'LaningResult')]
+class Laning extends EndpointTemplate {
+public function process() {
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report;
   if (isset($vars['team'])) {
     throw new \Exception("No team allowed");
   } else if (isset($vars['region'])) {
@@ -119,4 +126,16 @@ $endpoints['laning'] = function($mods, $vars, &$report) {
   return [
     'total' => $context[0]
   ];
-};
+}
+}
+
+if (is_docs_mode()) {
+  SchemaRegistry::register('LaningLine', TypeDefs::obj([
+    'avg_advantage' => TypeDefs::num(), 'avg_disadvantage' => TypeDefs::num(), 'matches' => TypeDefs::int(), 'rank' => TypeDefs::num(), 'avg_gold_diff' => TypeDefs::num(),
+    'avg_advantage_gold' => TypeDefs::num(), 'avg_disadvantage_gold' => TypeDefs::num(), 'avg_gold_diff_gold' => TypeDefs::num()
+  ]));
+  SchemaRegistry::register('LaningResult', TypeDefs::oneOf([
+    TypeDefs::obj(['total' => 'LaningLine', 'opponents' => TypeDefs::mapOf('LaningLine')]),
+    TypeDefs::obj(['total' => TypeDefs::mapOf('LaningLine')])
+  ]));
+}

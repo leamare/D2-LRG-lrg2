@@ -1,6 +1,13 @@
 <?php 
 
-$endpoints['search'] = function($mods, $vars, &$report) use (&$endpoints, $cat, $cats_file, $hidden_cat) {
+#[Endpoint(name: 'search')]
+#[Description('Search reports by query across cache')]
+#[GetParam(name: 'search', required: true, schema: ['type' => 'string'], description: 'Query string')]
+#[ReturnSchema(schema: 'SearchResult')]
+class SearchEndpoint extends EndpointTemplate {
+public function process() {
+  global $endpoints, $cat, $cats_file, $hidden_cat;
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report;
   $cache = $endpoints['getcache']($mods, $vars, $report);
   $reps = [];
 
@@ -23,4 +30,12 @@ $endpoints['search'] = function($mods, $vars, &$report) use (&$endpoints, $cat, 
     "query" => $vars['search'],
     "reports" => $reps
   ];
-};
+}
+}
+
+if (is_docs_mode()) {
+  SchemaRegistry::register('SearchResult', TypeDefs::obj([
+    'query' => TypeDefs::str(),
+    'reports' => TypeDefs::mapOfIdKeys(TypeDefs::obj([])),
+  ]));
+}

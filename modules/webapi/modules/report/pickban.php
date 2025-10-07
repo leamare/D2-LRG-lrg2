@@ -6,7 +6,14 @@ include_once(__DIR__ . "/../../../view/functions/teams_diversity_recalc.php");
 
 $repeatVars['pickban'] = ['team', 'region'];
 
-$endpoints['pickban'] = function($mods, $vars, &$report) use (&$meta, &$endpoints) {
+#[Endpoint(name: 'pickban')]
+#[Description('Pick/Ban overview and ranks for heroes, global/region or per team')]
+#[ModlineVar(name: 'team', schema: ['type' => 'integer'], description: 'Team id')]
+#[ModlineVar(name: 'region', schema: ['type' => 'integer'], description: 'Region id')]
+#[ReturnSchema(schema: 'PickbanResult')]
+class Pickban extends EndpointTemplate {
+public function process() {
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report; global $meta, $endpoints;
   if (!in_array("heroes", $mods)) throw new \Exception("This module is only available for heroes");
 
   if (isset($vars['team']) && isset($report['teams'])) {
@@ -155,4 +162,23 @@ $endpoints['pickban'] = function($mods, $vars, &$report) use (&$meta, &$endpoint
       'contest' => round($b_cr, 3),
     ]
   ];
-};
+}
+}
+
+if (is_docs_mode()) {
+  SchemaRegistry::register('PickbanBalance', TypeDefs::obj([
+    'total' => TypeDefs::num(),
+    'winrate' => TypeDefs::num(),
+    'pickrate' => TypeDefs::num(),
+    'contest' => TypeDefs::num(),
+  ]));
+
+  SchemaRegistry::register('PickbanResult', TypeDefs::obj([
+    'median_picks' => TypeDefs::num(),
+    'median_bans' => TypeDefs::num(),
+    'total' => TypeDefs::int(),
+    'pickban' => TypeDefs::mapOfIdKeys(TypeDefs::obj([])),
+    'heroes_uncontested' => TypeDefs::arrayOf(TypeDefs::int()),
+    'balance' => 'PickbanBalance',
+  ]));
+}

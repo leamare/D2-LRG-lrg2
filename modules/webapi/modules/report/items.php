@@ -16,7 +16,14 @@ include_once(__DIR__ . "/items/profile.php");
 
 $repeatVars['items'] = ['heroid', 'itemid', 'position'];
 
-$endpoints['items'] = function($mods, $vars, &$report) use (&$endpoints) {
+#[Endpoint(name: 'items', isRouter: true)]
+#[Description('Items router: forwards to specific items endpoints')]
+#[ModlineVar(name: 'heroid', schema: ['type' => 'integer'], description: 'Hero id')]
+#[ModlineVar(name: 'itemid', schema: ['type' => 'integer'], description: 'Item id')]
+#[ModlineVar(name: 'position', schema: ['type' => 'string'], description: 'Position code')]
+class ItemsRouter extends EndpointTemplate {
+public function process() {
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report; global $endpoints;
   if ((!isset($report['items']) || empty($report['items']['pi'])) &&
     empty($report['starting_items']) &&
     empty($report['starting_items_players'])
@@ -24,56 +31,45 @@ $endpoints['items'] = function($mods, $vars, &$report) use (&$endpoints) {
     throw new \Exception("No items data");
   }
 
-  if (in_array('heroes', $mods) || in_array('heroboxplots', $mods) || in_array('hboxplots', $mods)) {
-    $res = $endpoints['items-heroes']($mods, $vars, $report);
-    $res['__endp'] = "items-heroes";
-    $res['__stopRepeater'] = "heroid";
-  } else if (in_array('combos', $mods) || in_array('icombos', $mods)) {
-    $res = $endpoints['items-combos']($mods, $vars, $report);
-    $res['__endp'] = "items-combos";
-    $res['__stopRepeater'] = "itemid";
-  } else if (in_array('stats', $mods) || in_array('boxplots', $mods)) {
-    $res = $endpoints['items-stats']($mods, $vars, $report);
-    $res['__endp'] = "items-stats";
-    $res['__stopRepeater'] = "itemid";
-  } else if (in_array('records', $mods) || in_array('irecords', $mods)) {
-    $res = $endpoints['items-records']($mods, $vars, $report);
-    $res['__endp'] = "items-records";
-    $res['__stopRepeater'] = "itemid";
-  } else if (in_array('progression', $mods) || in_array('proglist', $mods)) {
-    $res = $endpoints['items-progression']($mods, $vars, $report);
-    $res['__endp'] = "items-progression";
-    $res['__stopRepeater'] = "itemid";
-  } else if (in_array('progrole', $mods)) {
-    $res = $endpoints['items-progrole']($mods, $vars, $report);
-    $res['__endp'] = "items-progrole";
-    $res['__stopRepeater'] = "itemid";
-  } else if (in_array('builds', $mods)) {
-    $res = $endpoints['items-builds']($mods, $vars, $report);
-    $res['__endp'] = "items-builds";
-    $res['__stopRepeater'] = "itemid";
-  } else if (in_array('icritical', $mods)) {
-    $res = $endpoints['items-critical']($mods, $vars, $report);
-    $res['__endp'] = "items-critical";
-    $res['__stopRepeater'] = "itemid";
-  } else if (in_array('stitems', $mods)) {
-    $res = $endpoints['items-stitems']($mods, $vars, $report);
-    $res['__endp'] = "items-stitems";
-    $res['__stopRepeater'] = "itemid";
-  } else if (in_array('sticonsumables', $mods)) {
-    $res = $endpoints['items-sticonsumables']($mods, $vars, $report);
-    $res['__endp'] = "items-sticonsumables";
-    $res['__stopRepeater'] = "itemid";
-  } else if (in_array('stibuilds', $mods)) {
-    $res = $endpoints['items-stibuilds']($mods, $vars, $report);
-    $res['__endp'] = "items-stibuilds";
-    $res['__stopRepeater'] = "itemid";
-  } else {
-    $res = $endpoints['items-overview']($mods, $vars, $report);
-    $res['__endp'] = "items-overview";
-    $res['__stopRepeater'] = true;
-  }
-  
+  // Forward to best matching endpoint class via existing map
+  $mapping = [
+    'heroes' => 'items-heroes', 'heroboxplots' => 'items-heroes', 'hboxplots' => 'items-heroes',
+    'combos' => 'items-combos', 'icombos' => 'items-combos',
+    'stats' => 'items-stats', 'boxplots' => 'items-stats',
+    'records' => 'items-records', 'irecords' => 'items-records',
+    'progression' => 'items-progression', 'proglist' => 'items-progression',
+    'progrole' => 'items-progrole',
+    'builds' => 'items-builds',
+    'icritical' => 'items-critical',
+    'stitems' => 'items-stitems',
+    'sticonsumables' => 'items-sticonsumables',
+    'stibuilds' => 'items-stibuilds',
+  ];
 
+  foreach ($mapping as $key => $endp) {
+    if (in_array($key, $mods)) {
+      $fn = $endpoints[$endp];
+      $res = $fn($mods, $vars, $report);
+      $res['__endp'] = $endp;
+      if (isset($vars['heroid'])) $res['__stopRepeater'] = 'heroid';
+      if (isset($vars['itemid'])) $res['__stopRepeater'] = 'itemid';
+      return $res;
+    }
+  }
+
+  $res = $endpoints['items-overview']($mods, $vars, $report);
+  $res['__endp'] = 'items-overview';
+  $res['__stopRepeater'] = true;
   return $res;
+}
+}
+
+// Back-compat adapter for runtime execution
+$endpoints['items'] = function($mods, $vars, &$report) {
+  $inst = new ItemsRouter($mods, $vars, $report);
+  return $inst->process();
 };
+
+if (is_docs_mode()) {
+  SchemaRegistry::register('ItemsRouterResult', TypeDefs::obj([]));
+}

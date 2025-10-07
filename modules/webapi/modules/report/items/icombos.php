@@ -1,6 +1,12 @@
 <?php 
 
-$endpoints['items-combos'] = function($mods, $vars, &$report) use (&$endpoints, &$meta) {
+#[Endpoint(name: 'items-combos')]
+#[Description('Item pair synergies and timings')]
+#[ModlineVar(name: 'item', schema: ['type' => 'integer'], description: 'Optional item id to focus')]
+#[ReturnSchema(schema: 'ItemsCombosResult')]
+class ItemsCombos extends EndpointTemplate {
+public function process() {
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report; global $endpoints, $meta;
   if (!isset($report['items']) || empty($report['items']['pi']) || !isset($report['items']['records']))
     throw new \Exception("No items combos data");
   
@@ -67,4 +73,20 @@ $endpoints['items-combos'] = function($mods, $vars, &$report) use (&$endpoints, 
       'pairs' => $pairs
     ];
   }
-};
+}
+}
+
+if (is_docs_mode()) {
+  SchemaRegistry::register('ItemsPair', TypeDefs::obj([
+    'itemid1' => TypeDefs::int(),
+    'itemid2' => TypeDefs::int(),
+    'matches' => TypeDefs::int(),
+    'time_diff' => TypeDefs::num(),
+  ]));
+
+  SchemaRegistry::register('ItemsCombosResult', TypeDefs::obj([
+    'item' => TypeDefs::int(),
+    'total' => TypeDefs::obj([]),
+    'pairs' => TypeDefs::arrayOf('ItemsPair'),
+  ]));
+}

@@ -2,7 +2,13 @@
 
 $repeatVars['roster'] = ['team'];
 
-$endpoints['roster'] = function($mods, $vars, &$report) {
+#[Endpoint(name: 'roster')]
+#[Description('Active roster for a specific team')]
+#[ModlineVar(name: 'team', schema: ['type' => 'integer'], description: 'Team id')]
+#[ReturnSchema(schema: 'RosterResult')]
+class Roster extends EndpointTemplate {
+public function process() {
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report;
   if (isset($vars['team']) && isset($report['teams'][ $vars['team'] ])) {
     $res = [];
     foreach($report['teams'][ $vars['team'] ]['active_roster'] as $player) {
@@ -10,6 +16,10 @@ $endpoints['roster'] = function($mods, $vars, &$report) {
     }
     return $res;
   }
-    //return $report['teams'][ $vars['teamid'] ];
   throw new \Exception("You need teamid for roster");
-};
+}
+}
+
+if (is_docs_mode()) {
+  SchemaRegistry::register('RosterResult', TypeDefs::arrayOf(TypeDefs::obj([])));
+}

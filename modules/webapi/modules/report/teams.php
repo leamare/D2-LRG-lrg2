@@ -5,7 +5,13 @@ include_once(__DIR__ . "/../../../view/functions/teams_diversity_recalc.php");
 
 $repeatVars['teams'] = ['team'];
 
-$endpoints['teams'] = function($mods, $vars, &$report) use (&$endpoints, &$repeatVars) {
+#[Endpoint(name: 'teams')]
+#[Description('Teams endpoints: grid/opponents, cards, profiles, summary routing')]
+#[ModlineVar(name: 'team', schema: ['type' => 'integer'], description: 'Team id')]
+#[ReturnSchema(schema: 'TeamsResult')]
+class Teams extends EndpointTemplate {
+public function process() {
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report; global $endpoints, $repeatVars;
   if (!isset($report['teams']))
     throw new \Exception("No teams in the report ");
 
@@ -475,4 +481,21 @@ $endpoints['teams'] = function($mods, $vars, &$report) use (&$endpoints, &$repea
     return $endpoints['participants']($mods, $vars, $report);
   
   return $endpoints['summary']($mods, $vars, $report);
-};
+}
+}
+
+if (is_docs_mode()) {
+  SchemaRegistry::register('TeamsGridEntry', TypeDefs::obj([
+    'matches' => TypeDefs::int(),
+    'winrate' => TypeDefs::num(),
+    'won' => TypeDefs::int(),
+    'lost' => TypeDefs::int(),
+    'matches_list' => TypeDefs::arrayOf(TypeDefs::obj([]))
+  ]));
+
+  SchemaRegistry::register('TeamsResult', TypeDefs::oneOf([
+    TypeDefs::arrayOf(TypeDefs::obj([])), // cards
+    TypeDefs::mapOf(TypeDefs::mapOf('TeamsGridEntry')), // grid
+    TypeDefs::obj([]) // profiles/summary passthroughs
+  ]));
+}

@@ -2,7 +2,13 @@
 
 $repeatVars['vsummary'] = ['position'];
 
-$endpoints['vsummary'] = function($mods, $vars, &$report) {
+#[Endpoint(name: 'vsummary')]
+#[Description('Hero variants summary by selected position')]
+#[ModlineVar(name: 'position', schema: ['type' => 'string'], description: 'Position code like 1.2 or label')]
+#[ReturnSchema(schema: 'VSummaryResult')]
+class VSummary extends EndpointTemplate {
+public function process() {
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report;
   if (!in_array("heroes", $mods)) throw new \Exception("This module is only available for heroes");
 
   if (is_wrapped($report['hero_summary_variants'])) $report['hero_summary_variants'] = unwrap_data($report['hero_summary_variants']);
@@ -59,4 +65,9 @@ $endpoints['vsummary'] = function($mods, $vars, &$report) {
   unset($context_copy);
 
   return $context;
-};
+}
+}
+
+if (is_docs_mode()) {
+  SchemaRegistry::register('VSummaryResult', TypeDefs::mapOfIdKeys(TypeDefs::obj([])));
+}

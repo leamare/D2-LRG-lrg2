@@ -1,6 +1,11 @@
 <?php 
 
-$endpoints['milestones'] = function($mods, $vars, &$report) use (&$endpoints) {
+#[Endpoint(name: 'milestones')]
+#[Description('Milestones totals and per-entity top lists')]
+#[ReturnSchema(schema: 'MilestonesResult')]
+class Milestones extends EndpointTemplate {
+public function process() {
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report; global $endpoints;
   $data = $report['milestones'] ?? null;
 
   if (empty($data))
@@ -47,4 +52,22 @@ $endpoints['milestones'] = function($mods, $vars, &$report) use (&$endpoints) {
   }
 
   return $res;
-};
+}
+}
+
+if (is_docs_mode()) {
+  SchemaRegistry::register('MilestoneEntry', TypeDefs::obj([
+    'playerid' => TypeDefs::int(),
+    'teamid' => TypeDefs::int(),
+    'name' => TypeDefs::str(),
+    'tag' => TypeDefs::str(),
+    'value' => TypeDefs::num(),
+  ]));
+
+  SchemaRegistry::register('MilestonesResult', TypeDefs::obj([
+    'total' => TypeDefs::mapOf(TypeDefs::num()),
+    'players' => TypeDefs::mapOf(TypeDefs::arrayOf('MilestoneEntry')),
+    'teams' => TypeDefs::mapOf(TypeDefs::arrayOf('MilestoneEntry')),
+    'heroes' => TypeDefs::mapOf(TypeDefs::num()),
+  ]));
+}

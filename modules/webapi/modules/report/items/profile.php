@@ -1,6 +1,12 @@
 <?php 
 
-$endpoints['items-profile'] = function($mods, $vars, &$report) use (&$endpoints, &$meta) {
+#[Endpoint(name: 'items-profile')]
+#[Description('Detailed profile for a single item: ranks, heroes, records, starting stats')]
+#[ModlineVar(name: 'item', schema: ['type' => 'integer'], description: 'Item id')]
+#[ReturnSchema(schema: 'ItemsProfileResult')]
+class ItemsProfile extends EndpointTemplate {
+public function process() {
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report; global $endpoints, $meta;
   if (!isset($report['items']) || empty($report['items']['pi']) || !isset($report['items']['stats']))
       throw new \Exception("No items stats data");
 
@@ -392,4 +398,35 @@ $endpoints['items-profile'] = function($mods, $vars, &$report) use (&$endpoints,
     $res['stats']['overview'] = $stats;
     
     return $res;
-};
+}
+}
+
+if (is_docs_mode()) {
+  SchemaRegistry::register('ItemsProfileResult', TypeDefs::obj([
+    'info' => TypeDefs::obj([
+      'is_regular' => TypeDefs::bool(),
+      'is_starting' => TypeDefs::bool(),
+      'is_consumable' => TypeDefs::bool(),
+    ]),
+    'meta' => TypeDefs::obj([
+      'name' => TypeDefs::str(), 'tag' => TypeDefs::str(), 'category' => TypeDefs::str()
+    ]),
+    'stats' => TypeDefs::obj([
+      'overview' => TypeDefs::obj([]),
+      'heroes_top_purchases' => TypeDefs::arrayOf(TypeDefs::obj([])),
+      'heroes_ranks' => TypeDefs::obj([
+        'best' => TypeDefs::arrayOf(TypeDefs::obj([])),
+        'worst' => TypeDefs::arrayOf(TypeDefs::obj([])),
+      ]),
+      'records' => TypeDefs::arrayOf(TypeDefs::obj([])),
+      'heroes_starting_most_matches' => TypeDefs::arrayOf(TypeDefs::int()),
+      'heroes_starting_best_winrate' => TypeDefs::int(),
+      'heroes_consumable_most_uses' => TypeDefs::arrayOf(TypeDefs::int()),
+      'heroes_consumable_best_winrate' => TypeDefs::int(),
+      'heroes_consumable_worst_winrate' => TypeDefs::arrayOf(TypeDefs::int()),
+      'consumable_role_uses' => TypeDefs::mapOf(TypeDefs::obj([])),
+      'variants' => TypeDefs::mapOf(TypeDefs::obj([])),
+      'starting_builds_featured_total' => TypeDefs::arrayOf(TypeDefs::obj([]))
+    ])
+  ]));
+}

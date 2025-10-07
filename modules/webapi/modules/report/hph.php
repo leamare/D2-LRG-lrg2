@@ -2,7 +2,14 @@
 
 $repeatVars['hph'] = ['heroid'];
 
-$endpoints['hph'] = function($mods, $vars, &$report) use (&$endpoints) {
+#[Endpoint(name: 'hph')]
+#[Description('Hero vs Player (H vs P) pairs for a given hero')]
+#[ModlineVar(name: 'heroid', schema: ['type' => 'integer'], description: 'Hero id')]
+#[ModlineVar(name: 'variant', schema: ['type' => 'integer'], description: 'Hero variant id')]
+#[ReturnSchema(schema: 'HphResult')]
+class Hph extends EndpointTemplate {
+public function process() {
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report; global $endpoints;
   if (isset($vars['team'])) {
     throw new \Exception("No team allowed");
   } else if (isset($vars['region'])) {
@@ -116,9 +123,15 @@ $endpoints['hph'] = function($mods, $vars, &$report) use (&$endpoints) {
     ];
   }
   return $report['hph'];
-};
+}
+}
 
-$endpoints['variants-hph'] = function($mods, $vars, &$report) use (&$endpoints) {
+#[Endpoint(name: 'variants-hph')]
+#[Description('Hero vs Player for hero variants')]
+#[ReturnSchema(schema: 'HphResult')]
+class HphVariants extends EndpointTemplate {
+public function process() {
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report; global $endpoints;
   if (isset($vars['team'])) {
     throw new \Exception("No team allowed");
   } else if (isset($vars['region'])) {
@@ -262,4 +275,17 @@ $endpoints['variants-hph'] = function($mods, $vars, &$report) use (&$endpoints) 
     'reference' => $hero_reference ?? null,
     'pairs' => $context ?? null
   ];
-};
+}
+}
+
+if (is_docs_mode()) {
+  SchemaRegistry::register('HphPair', TypeDefs::obj([
+    'matches' => TypeDefs::int(), 'winrate' => TypeDefs::num(), 'wr_diff' => TypeDefs::num(),
+    'rank' => TypeDefs::num(), 'arank' => TypeDefs::num(),
+    'deviation' => TypeDefs::num(), 'deviation_pct' => TypeDefs::num()
+  ]));
+  SchemaRegistry::register('HphResult', TypeDefs::oneOf([
+    TypeDefs::mapOf('HphPair'),
+    TypeDefs::obj(['reference' => TypeDefs::obj([]), 'pairs' => TypeDefs::mapOf('HphPair')])
+  ]));
+}
