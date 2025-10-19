@@ -110,7 +110,7 @@ function get_report_descriptor(&$report, $generate_endpoints = false) {
 
   if (isset($report['fantasy']['players_mvp'])) $desc['endpoints'][] = "players-fantasy";
 
-  if (isset(reset($report['matches_additional'])['mvp'])) {
+  if (!empty($report['matches_additional']) && isset(reset($report['matches_additional'])['mvp'])) {
     $desc['endpoints'][] = "matches-mvp";
   }
 
