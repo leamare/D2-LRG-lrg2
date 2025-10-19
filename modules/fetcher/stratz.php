@@ -1089,8 +1089,19 @@ function get_stratz_multiquery($group) {
 
   $stratz = json_decode($json, true);
 
+  $empty_data = 0;
+  foreach ($stratz['data'] as $d) {
+    if (empty($d)) {
+      $empty_data++;
+    }
+  }
+
+
   if (!empty($stratz['errors'])) {
-    throw new \Exception(json_encode($stratz['errors'], JSON_PRETTY_PRINT));
+    echo "ERROR: ".json_encode($stratz['errors']);
+    if ($empty_data <= 1) return null;
+
+    // throw new \Exception(json_encode($stratz['errors'], JSON_PRETTY_PRINT));
   }
 
   if (empty($stratz) || empty($stratz['data'])) return null;
