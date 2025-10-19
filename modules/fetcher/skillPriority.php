@@ -168,6 +168,29 @@ function skillPriority($skillbuild, $hid, $noattr = false) {
     }
   }
 
+  foreach ($skills as $sid) {
+    if (!isset($firstPointAt[$sid])) {
+      for ($i = $totalLevels; ; $i++) {
+        if (array_search(LEVELS_IDS[$i-1], $skilledAt[$sid]) !== false) {
+          continue;
+        }
+        $firstPointAt[$sid] = LEVELS_IDS[$i-1] ?? $i;
+        break;
+      }
+    }
+    if (!isset($maxlevel[$sid])) {
+      $maxlevel[$sid] = 0;
+    }
+    if (!isset($maxedAt[$sid])) {
+      $lvl = $firstPointAt[$sid];
+      if ($sid == $ultimate) {
+        $maxedAt[$sid] = (LEVELS_IDS[ $level-1 ] ?? $level) < 19 ? 18 : $level + (3-$lvl) - 1;
+      } else {
+        $maxedAt[$sid] = $level + ($maxlevel[$sid]-$lvl) - 1;
+      }
+    }
+  }
+
   usort($skills, function($a, $b) use ($firstPointAt, $maxedAt, $maxlevel, $ultimate, $avgLvls) {
     if ($maxlevel[$a] != $maxlevel[$b]) {
       if ($maxlevel[$a] < $maxlevel[$b]) {
