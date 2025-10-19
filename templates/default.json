@@ -6,7 +6,7 @@
   "match_limit_before": null,
   "main": {
     "teams": true,
-    "fantasy": false,
+    "fantasy": true,
     "items": true,
     "wards": true,
     "skill_builds": true,
