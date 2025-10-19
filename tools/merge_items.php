@@ -2,6 +2,8 @@
 
 require("modules/commons/wrap_data.php");
 
+ini_set('memory_limit', '16192M');
+
 $input = $argv[1];
 $sources = [];
 
