@@ -67,6 +67,8 @@ function rg_view_generate_heroes_hph() {
       if (isset($report['hph_v'])) {
         $res["heroid".$hid]['variants'] = "";
 
+        $_meta_facets = $meta['facets']['heroes'][$hid];
+
         if(check_module($parent_module."variants")) {
           $res["heroid".$hid]['variants'] = [];
 
@@ -138,6 +140,11 @@ function rg_view_generate_heroes_hph() {
 
           foreach ($variants as $i => $tag) {
             $i++;
+
+            $is_deprecated = $_meta_facets[$i-1]['deprecated'] ?? false;
+            
+            if ($is_deprecated && empty($report['hero_variants'][$hid."-".$i])) continue;
+
             register_locale_string(locale_string("#facet::".$tag), "variant$i");
 
             $res["heroid".$hid]["variants"]["variant$i"] = "";
