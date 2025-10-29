@@ -36,7 +36,7 @@ function rg_view_generate_items_sti_builds() {
   foreach ($hnames as $hid => $name) {
     register_locale_string(hero_name($hid), "heroid".$hid);
 
-    $res["heroid".$hid] = in_array($hid, $report['starting_items']['builds'][0]['keys']) ? [] : "";
+    $res["heroid".$hid] = in_array($hid, $report['starting_items']['builds'][0]['keys'] ?? []) ? [] : "";
 
     if(check_module($parent_module."heroid".$hid)) {
       $selected_tag = "heroid".$hid;
@@ -51,7 +51,7 @@ function rg_view_generate_items_sti_builds() {
     $parent_module = $parent_module.$selected_tag."-";
 
     foreach ($roles as $rid) {
-      if (in_array($selected_hid, $report['starting_items']['builds'][$rid]['keys'])) {
+      if (in_array($selected_hid, $report['starting_items']['builds'][$rid]['keys'] ?? [])) {
         $res[$selected_tag][ROLES_IDS[$rid]] = "";
         $bcnt++;
 

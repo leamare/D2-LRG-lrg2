@@ -33,7 +33,7 @@ function rg_view_generate_items_profiles() {
   $item_ids = array_unique(array_merge(
     array_keys($report['items']['stats']['total']), 
     $starting_iids,
-    $consumable_iids
+    $consumable_iids ?? [],
   ));
 
   $item_names = [];
@@ -76,7 +76,7 @@ function rg_view_generate_items_profiles() {
   $is_regular = in_array($item, array_keys($report['items']['stats']['total']));
   $is_starting = in_array($item, $starting_iids);
   $is_consumable = isset($report['starting_items']['consumables'])
-    && in_array($item, $report['starting_items']['consumables']['all'][0][0]['keys']);
+    && in_array($item, $report['starting_items']['consumables']['all'][0][0]['keys'] ?? []);
 
   if ($is_regular) {
     $ranks = [];
