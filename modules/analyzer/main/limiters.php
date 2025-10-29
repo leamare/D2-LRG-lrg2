@@ -9,7 +9,7 @@ if ($lg_settings['ana']['players']) {
     function($a) { return reset($a); }, 
     instaquery($conn, "SELECT COUNT(matchid) FROM matchlines GROUP BY playerid;")
   );
-} else if ($lg_settings['ana']['teams']) {
+} else if ($lg_settings['main']['teams'] && $lg_settings['ana']['teams']) {
   $teams_matches = array_map(
     function($a) { return reset($a); }, 
     instaquery($conn, "SELECT COUNT(matchid) FROM teams_matches GROUP BY teamid;")
