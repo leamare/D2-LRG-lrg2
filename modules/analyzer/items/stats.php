@@ -8,6 +8,24 @@ include __DIR__ . "/stats/pi_ph.php";
 
 // Medians and timings
 
+// these items will be skipped for additional processing later
+$items_skip = [];
+$item_cats_skip = [];
+
+foreach (array_keys($meta['item_categories']) as $i => $category_name) {
+  if (strpos($category_name, 'enhancement_tier_') !== false) $item_cats_skip[] = $i;
+}
+
+$q = "SELECT item_id FROM items WHERE category_id IN (".implode(',', $item_cats_skip).") GROUP BY item_id;";
+
+$query_res = $conn->query($q);
+if ($query_res === FALSE) die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+
+for ($row = $query_res->fetch_assoc(); $row != null; $row = $query_res->fetch_assoc()) {
+  $items_skip[] = (int)$row['item_id'];
+}
+
+$query_res->free_result();
 $dataset = [];
 
 if ($schema['percentile_available']) {
@@ -21,6 +39,11 @@ if ($schema['medians_available']) {
 
 foreach ($r as $hid => $items) {
   foreach ($items as $iid => $data) {
+    if (in_array($iid, $items_skip)) {
+      unset($r[$hid][$iid]);
+      continue;
+    }
+
     $sz = $dataset[$iid][$hid]['sz'];
 
     if ($sz < 2) {

@@ -35,6 +35,7 @@ require_once("modules/analyzer/items/combos.php"); //+ limiters
 //require_once("modules/analyzer/items/counters.php"); //+ limiters
 require_once("modules/analyzer/items/progression.php"); //+ limiters
 require_once("modules/analyzer/items/records.php");
+require_once("modules/analyzer/items/enchantments.php");
 
 if (isset($result["hero_positions"])) require_once("modules/analyzer/items/progression_roles.php");
 
