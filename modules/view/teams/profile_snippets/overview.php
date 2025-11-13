@@ -415,5 +415,13 @@ foreach ($context[$tid]['averages'] as $key => $value) {
       (in_array($key, $percentages) ? "%" : "").
       "</td></tr>";
 }
+if (!empty($context[$tid]['add_info'])) {
+  foreach ($context[$tid]['add_info'] ?? [] as $key => $value) {
+    $res["team".$tid]['overview'] .= "<tr><td>".locale_string( $key )."</td><td>".
+      (strpos($key, "_match") !== FALSE ? match_link($value) : $value).
+    "</td></tr>";
+  }
+}
 $res["team".$tid]['overview'] .= "</table>";
+
 $res["team".$tid]['overview'] .= "<div class=\"content-text\">".locale_string("desc_teams")."</div>";

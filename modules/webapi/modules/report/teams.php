@@ -160,6 +160,7 @@ $endpoints['teams'] = function($mods, $vars, &$report) use (&$endpoints, &$repea
       $report['teams'][ $vars['team'] ]['averages']['diversity'] = teams_diversity_recalc($report['teams'][ $vars['team'] ]);
 
     $res['averages'] = $report['teams'][ $vars['team'] ]['averages'];
+    $res['add_info'] = $report['teams'][ $vars['team'] ]['add_info'] ?? [];
 
     if(isset($report['teams'][ $vars['team'] ]['regions'])) {
       asort($report['teams'][ $vars['team'] ]['regions']);

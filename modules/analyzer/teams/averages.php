@@ -231,7 +231,7 @@ $sql .= "SELECT \"avg_win_len\", (SUM(matches.duration)/60)/COUNT(DISTINCT match
 if ($conn->multi_query($sql) === TRUE) echo "[S] Requested data for TEAM $id AVERAGES.\n";
 else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
 
-$result['teams'][$id]['averages'] = array();
+$result['teams'][$id]['averages'] = [];
 
 do {
   $query_res = $conn->store_result();
@@ -245,4 +245,33 @@ do {
     $query_res->free_result();
   }
 } while($conn->next_result());
-?>
+
+// Additional stuff 
+
+# rampages
+$sql = "SELECT \"rampages_total\", SUM(adv_matchlines.multi_kill > 4) FROM adv_matchlines JOIN matchlines
+      ON adv_matchlines.matchid = matchlines.matchid AND adv_matchlines.playerid = matchlines.playerid JOIN teams_matches
+      ON matchlines.matchid = teams_matches.matchid AND teams_matches.is_radiant = matchlines.isradiant WHERE teams_matches.teamid = ".$id.";";
+
+# rampages last match
+$sql .= "SELECT \"rampages_last_match\", MAX(adv_matchlines.matchid) FROM adv_matchlines JOIN matchlines
+      ON adv_matchlines.matchid = matchlines.matchid AND adv_matchlines.playerid = matchlines.playerid JOIN teams_matches
+      ON matchlines.matchid = teams_matches.matchid AND teams_matches.is_radiant = matchlines.isradiant WHERE teams_matches.teamid = ".$id." AND adv_matchlines.multi_kill > 4;";
+
+$result['teams'][$id]['add_info'] = [];
+
+if ($conn->multi_query($sql) === TRUE);
+else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+
+do {
+  $query_res = $conn->store_result();
+
+  if (!is_bool($query_res)) {
+    $row = $query_res->fetch_row();
+    if (empty($row)) continue;
+
+    $result['teams'][$id]['add_info'][$row[0]] = $row[1];
+
+    $query_res->free_result();
+  }
+} while($conn->next_result());
