@@ -1473,11 +1473,20 @@ function fetch($match) {
             ];
           }
 
+          $item_id = 0;
+          foreach ($meta['items'] as $id => $item_tag) {
+            if ($item_tag == $e['item_neutral_enhancement']) {
+              $item_id = $id;
+              break;
+            }
+          }
+          if (!$item_id) continue;
+
           $t_items[] = [
             'matchid' => $match,
             'playerid' => $matchdata['players'][$j]['account_id'] ?? $t_matchlines[$i]['playerid'],
             'hero_id' => $matchdata['players'][$j]['hero_id'] ?? $t_matchlines[$i]['heroid'],
-            'item_id' => $e['item_neutral_enhancement'],
+            'item_id' => $item_id,
             'time' => $e['time'],
             'category_id' => array_search('enhancement_tier_'.($i+1), array_keys($meta['item_categories'])),
           ];
