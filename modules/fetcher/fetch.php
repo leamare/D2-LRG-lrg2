@@ -1428,8 +1428,9 @@ function fetch($match) {
 
         $last_neutral_item = null;
         $last_neutral_enchantment = null;
-        foreach (($matchdata['players'][$j]['neutral_item_history'] ?? []) as $e) {
+        foreach (($matchdata['players'][$j]['neutral_item_history'] ?? []) as $i => $e) {
           $new_items = [];
+          $enchantments = [];
 
           if ($e['item_neutral'] != $last_neutral_item) {
             $last_neutral_item = $e['item_neutral'];
@@ -1437,11 +1438,13 @@ function fetch($match) {
             $new_items[] = $e['item_neutral'];
           }
 
-          if ($e['item_neutral_enhancement'] != $last_neutral_enchantment) {
-            $last_neutral_enchantment = $e['item_neutral_enhancement'];
+          // if ($e['item_neutral_enhancement'] != $last_neutral_enchantment) {
+          //   $last_neutral_enchantment = $e['item_neutral_enhancement'];
 
-            $new_items[] = $e['item_neutral_enhancement'];
-          }
+          //   $new_items[] = $e['item_neutral_enhancement'];
+          // }
+
+
 
           foreach($new_items as $item) {
             $item_id = 0;
@@ -1469,6 +1472,15 @@ function fetch($match) {
               'category_id' => array_search($category, array_keys($meta['item_categories'])),
             ];
           }
+
+          $t_items[] = [
+            'matchid' => $match,
+            'playerid' => $matchdata['players'][$j]['account_id'] ?? $t_matchlines[$i]['playerid'],
+            'hero_id' => $matchdata['players'][$j]['hero_id'] ?? $t_matchlines[$i]['heroid'],
+            'item_id' => $e['item_neutral_enhancement'],
+            'time' => $e['time'],
+            'category_id' => array_search('enhancement_tier_'.($i+1), array_keys($meta['item_categories'])),
+          ];
         }
 
         // missing items workaround
