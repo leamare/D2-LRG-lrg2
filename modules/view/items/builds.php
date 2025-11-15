@@ -798,6 +798,49 @@ function rg_view_generate_items_builds() {
     $reslocal .= "</div>";
     $reslocal .= "</div>";
   }
+  
+  // enchantments
+
+  if (isset($report['items']['enchantments'])) {
+    if (is_wrapped($report['items']['enchantments'])) {
+      $report['items']['enchantments'] = unwrap_data($report['items']['enchantments']);
+    }
+
+    if (!empty($report['items']['enchantments'][$hero])) {
+      $reslocal .= "<div class=\"content-header\">".locale_string("builds_enchantments")."</div>";
+      $reslocal .= "<div class=\"hero-build-overview-container hero-build\">";
+      $reslocal .= "<div class=\"build-blocks-container\">";
+      $tier = 1;
+      foreach ($report['items']['enchantments'][$hero] as $i => $items) {
+        if ($i == 0) continue;
+
+        $items = array_filter($items, function($a) {
+          return !empty($a) && $a['matches'] > 0;
+        });
+
+        uasort($items, function($a, $b) {
+          return $b['matches'] <=> $a['matches'];
+        });
+
+        $reslocal .= "<div class=\"items-list\">".
+          "<div class=\"build-item-component text common\"><a class=\"item-text\">T$tier</a></div>".
+          "<div class=\"build-item-arrow build-item-arrow-right\"></div><div class=\"items-list items-list-inner\">";
+        foreach ($items as $j => $item) {
+          if (empty($item) || !$item['matches']) continue;
+          // $reslocal .= itembuild_item_component($build, $item);
+          $reslocal .= itembuild_item_component_simple($j, [
+            'prate' => $item['matches'] / ($item['matches'] + $item['matches_wo']),
+            'winrate' => $item['wr'],
+            'wr_incr' => $item['wr'] - $item['wr_wo'],
+          ]);
+        } 
+        $reslocal .= "</div></div>";
+        $tier++;
+      }
+      $reslocal .= "</div>";
+      $reslocal .= "</div>";
+    }
+  }
 
   // other value items
 
