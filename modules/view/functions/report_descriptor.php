@@ -126,6 +126,9 @@ function get_report_descriptor(&$report, $generate_endpoints = false) {
     if (isset($report['items']['combos'])) {
       $desc['endpoints'][] = "items-icombos";
     }
+    if (isset($report['items']['enchantments'])) {
+      $desc['endpoints'][] = "items-enchantments";
+    }
     if (isset($report['items']['records'])) {
       $desc['endpoints'][] = "items-irecords";
     }
