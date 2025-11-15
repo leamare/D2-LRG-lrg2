@@ -138,6 +138,8 @@ if (isset($report["first_match"]) && isset($report["last_match"]) && compare_ver
   }
 }
 
+include_once("$root/modules/view/__enchantments_softgen.php");
+
 if (isset($leaguetag) && !empty($reports_earlypreview_ban)) {
   $match = false;
 

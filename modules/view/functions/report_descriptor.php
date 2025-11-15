@@ -55,6 +55,9 @@ function get_report_descriptor(&$report, $generate_endpoints = false) {
   if (isset($report['localized']))
     $desc["localized"] = $report['localized'];
   
+  if (!empty($report['settings']['enchantments_recalc']))
+    $desc["enchantments_recalc"] = true;
+  
   if (!$generate_endpoints)
     return $desc;
 
