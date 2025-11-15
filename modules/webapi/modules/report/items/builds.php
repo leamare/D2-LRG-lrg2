@@ -315,6 +315,40 @@ $endpoints['items-builds'] = function($mods, $vars, &$report) use (&$endpoints, 
       ];
     }
 
+    if (isset($report['items']['enchantments'])) {
+      if (is_wrapped($report['items']['enchantments'])) {
+        $report['items']['enchantments'] = unwrap_data($report['items']['enchantments']);
+      }
+      $res['enchantments'] = [];
+      if (!empty($report['items']['enchantments'][$hero])) {
+        $tier = 1;
+        foreach ($report['items']['enchantments'][$hero] as $i => $items) {
+          if ($i == 0) continue;
+          $items = array_filter($items, function($a) {
+            return !empty($a) && $a['matches'] > 0;
+          });
+          uasort($items, function($a, $b) {
+            return $b['matches'] <=> $a['matches'];
+          });
+          $items = array_map(function($a) {
+            return [
+              'matches' => $a['matches'],
+              'prate' => round($a['matches'] / ($a['matches'] + $a['matches_wo']), 4),
+              'winrate' => round($a['wr'], 4),
+              'wr_incr' => round($a['wr'] - $a['wr_wo'], 4),
+              'wr_wo' => round($a['wr_wo'], 4),
+            ];
+          }, $items);
+          $res['enchantments'][] = [
+            'tier' => $tier,
+            'category' => array_keys($meta['item_categories'])[$i] ?? $i,
+            'items' => $items,
+          ];
+          $tier++;
+        }
+      }
+    }
+
     return $res;
   }
 
