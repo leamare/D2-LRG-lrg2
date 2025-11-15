@@ -16,6 +16,9 @@ if (isset($report['items'])) {
   if (isset($report['items']['combos'])) {
     include($root."/modules/view/items/icombos.php");
   }
+  if (isset($report['items']['enchantments'])) {
+    include($root."/modules/view/items/enchantments.php");
+  }
   if (isset($report['items']['progr']) || isset($report['items']['progrole'])) {
     if (isset($report['items']['progrole'])) {
       // if (!function_exists('itembuild_item_component')) {
@@ -95,6 +98,11 @@ function rg_view_generate_items() {
     if (isset($report['items']['combos'])) {
       if (check_module($parent."icombos")) {
         $res['icombos'] = rg_view_generate_items_icombos();
+      }
+    }
+    if (isset($report['items']['enchantments'])) {
+      if (check_module($parent."enchantments")) {
+        $res['enchantments'] = rg_view_generate_items_enchantments();
       }
     }
     if (isset($report['items']['progr']) || isset($report['items']['progrole'])) {

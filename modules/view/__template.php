@@ -214,9 +214,8 @@
 
           $output = join_selectors($modules, 0);
 
-          echo $output;
+          echo $output.sources_notice();
 
-          echo sources_notice();
         ?>
       </div>
     </div>
