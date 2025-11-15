@@ -14,7 +14,10 @@ foreach (array_keys($meta['item_categories']) as $i => $category_name) {
   }
 }
 
-if (empty($enchantments_iids)) return;
+if (empty($enchantments_iids)) {
+  echo "[S] No enchantment items found\n";
+  return;
+}
 
 $min_enchantment_tier = min($enchantments_cats);
 
@@ -191,7 +194,10 @@ foreach ($total_data as $hero_id => $items) {
 
 echo "\n";
 
-$result['items']['enchantments'] = $r;
+if (empty($r) || empty($r['total']) || empty($r['total'][0])) {
+  echo "[S] No enchantment data found\n";
+  return;
+}
 
 $result['items']['enchantments'] = wrap_data(
   $r,
