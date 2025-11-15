@@ -199,9 +199,11 @@ if (empty($r) || empty($r['total']) || empty($r['total'][0])) {
   return;
 }
 
-$result['items']['enchantments'] = wrap_data(
-  $r,
-  true,
-  true,
-  true
-);
+// $result['items']['enchantments'] = wrap_data(
+//   $r,
+//   true,
+//   true,
+//   true
+// );
+
+$result['items']['enchantments'] = $r;
