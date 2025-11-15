@@ -300,7 +300,7 @@ if ($lg_settings['ana']['matchlist']) {
   require_once("modules/analyzer/matchlist.php");
 }
 
-if ($lg_settings['ana']['tickets']) {
+if (($lg_settings['ana']['tickets'] ?? false)) {
   require_once("modules/analyzer/tickets.php");
 }
 
