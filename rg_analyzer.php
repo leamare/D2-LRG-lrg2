@@ -300,6 +300,10 @@ if ($lg_settings['ana']['matchlist']) {
   require_once("modules/analyzer/matchlist.php");
 }
 
+if ($lg_settings['ana']['tickets']) {
+  require_once("modules/analyzer/tickets.php");
+}
+
 # players metadata
 if ($lg_settings['ana']['players']) {
   require_once("modules/analyzer/players/additional_data.php");

@@ -117,6 +117,8 @@ function match_card($mid) {
 
   $match['date'] = $report['matches_additional'][$mid]['date'];
 
+  $match['lid'] = $report['matches_additional'][$mid]['lid'] ?? null;
+
   if (isset($report['records'])) {
     $match_records = [];
 
@@ -185,6 +187,7 @@ function match_card_min($match) {
     'match_id' => $match,
     'string' => isset($report['match_parts_strings']) ? $report['match_parts_strings'][$match] ?? null : null,
     'series_num' => isset($report['match_parts_series_num']) ? $report['match_parts_series_num'][$match] ?? null : null,
+    'lid' => isset($report['matches_additional'][$match]['lid']) ? $report['matches_additional'][$match]['lid'] ?? null : null,
     'game_num' => isset($report['match_parts_game_num']) ? $report['match_parts_game_num'][$match] ?? null : null,
     'total_game_num' => isset($report['match_parts_total_game_num']) ? $report['match_parts_total_game_num'][$match] ?? null : null,
     'teams' => $teams ?? []

@@ -3,6 +3,7 @@
 $modules['matches'] = [];
 
 include_once($root."/modules/view/generators/matches_list.php");
+include_once($root."/modules/view/generators/tickets_list.php");
 
 function rg_view_generate_matches() {
   global $report, $unset_module, $mod;
@@ -100,6 +101,13 @@ function rg_view_generate_matches() {
       if(check_module($parent."heroid".$hid)) {
         $res['hbanned']["heroid".$hid] = rg_generator_hero_matches_banned_list("matches-hbanned-$hid", $hid, null, true);
       }
+    }
+  }
+
+  if (!empty($report['tickets'])) {
+    $res['tickets'] = "";
+    if (check_module($parent."tickets")) {
+      $res['tickets'] = rg_generator_tickets_list("matches-tickets", $report['tickets']);
     }
   }
 

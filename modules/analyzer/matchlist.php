@@ -39,22 +39,34 @@ for ($row = $query_res->fetch_row();
 
 $result["matches_additional"] = [];
 foreach ($result["matches"] as $matchid => $matchinfo) {
-  $sql = "SELECT duration, cluster, modeID, radiantWin, start_date".($schema['series'] ? ", seriesid" : "")." FROM matches WHERE matchid = $matchid;";
+  $sql = "SELECT
+    duration,
+    cluster,
+    modeID,
+    radiantWin,
+    start_date,
+    version".
+    ($schema['series'] ? ", seriesid" : "").
+    (($lg_settings['ana']['tickets'] ?? false) ? ", leagueID" : "").
+  " FROM matches WHERE matchid = $matchid;";
 
   if ($conn->multi_query($sql) === TRUE);
   else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
 
   $query_res = $conn->store_result();
-  $row = $query_res->fetch_row();
+  $row = $query_res->fetch_assoc();
 
-  $result["matches_additional"][$matchid] = array (
-    "duration" => (int)$row[0],
-    "cluster" => (int)$row[1],
-    "game_mode" => (int)$row[2],
-    "radiant_win" => (int)$row[3],
-    "date" => (int)$row[4],
-    "seriesid" => $schema['series'] ? (int)$row[5] : null
-  );
+  $result["matches_additional"][$matchid] = [
+    "duration" => (int)$row['duration'],
+    "cluster" => (int)$row['cluster'],
+    "game_mode" => (int)$row['modeID'],
+    "radiant_win" => (int)$row['radiantWin'],
+    "date" => (int)$row['start_date'],
+    "seriesid" => $schema['series'] ? (int)$row['seriesid'] : null,
+  ];
+  if (($lg_settings['ana']['tickets'] ?? false) && isset($row['leagueID'])) {
+    $result["matches_additional"][$matchid]["lid"] = (int)$row['leagueID'];
+  }
   $query_res->free_result();
 
   $sql = "SELECT SUM(kills), SUM(networth) FROM matchlines WHERE matchid = $matchid GROUP BY isRadiant ORDER BY isRadiant ASC;";

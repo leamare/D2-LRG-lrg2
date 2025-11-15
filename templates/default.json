@@ -161,7 +161,9 @@
     "starting_builds_players_limit": true,
     "starting_builds_roles_players_limit": true,
     
-    "consumables_players_roles": false
+    "consumables_players_roles": false,
+
+    "tickets": false
   },
   "web": {
     "custom_style" : "",
