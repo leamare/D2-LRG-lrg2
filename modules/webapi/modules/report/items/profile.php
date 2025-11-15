@@ -45,17 +45,35 @@ $endpoints['items-profile'] = function($mods, $vars, &$report) use (&$endpoints,
       $consumable_iids = $report['starting_items']['consumables']['all'][0][0]['keys'];
     }
   
+    // Get enchantments IDs
+    $enchantment_iids = [];
+    if (isset($report['items']['enchantments'])) {
+      if (is_wrapped($report['items']['enchantments'])) {
+        $report['items']['enchantments'] = unwrap_data($report['items']['enchantments']);
+      }
+      foreach ($report['items']['enchantments']['total'] as $category_id => $enchantment_items) {
+        if (!empty($enchantment_items)) {
+          foreach (array_keys($enchantment_items) as $_item_id) {
+            $enchantment_iids[] = $_item_id;
+          }
+        }
+      }
+      $enchantment_iids = array_unique($enchantment_iids);
+    }
+  
     // Combine all item IDs
     $item_ids = array_unique(array_merge(
       array_keys($report['items']['stats']['total']), 
       $starting_iids,
-      $consumable_iids
+      $consumable_iids,
+      $enchantment_iids ?? []
     ));
 
     $is_regular = in_array($item, array_keys($report['items']['stats']['total']));
     $is_starting = in_array($item, $starting_iids);
     $is_consumable = isset($report['starting_items']['consumables'])
       && in_array($item, $report['starting_items']['consumables']['all'][0][0]['keys']);
+    $is_enchantment = isset($report['items']['enchantments']) && in_array($item, $enchantment_iids);
 
     foreach ($item_ids as $iid) {
       $item_names[$iid] = [
@@ -78,6 +96,7 @@ $endpoints['items-profile'] = function($mods, $vars, &$report) use (&$endpoints,
         'is_regular' => $is_regular,
         'is_starting' => $is_starting,
         'is_consumable' => $is_consumable,
+        'is_enchantment' => $is_enchantment,
       ],
       'meta' => $item_names[$item],
       'stats' => [
@@ -387,6 +406,103 @@ $endpoints['items-profile'] = function($mods, $vars, &$report) use (&$endpoints,
         if (!$role) continue;
         $res['stats']['consumable_role_uses'][$role] = $d;
       }
+    }
+
+    if ($is_enchantment) {
+      $ench_hero_tier_data = [];
+      
+      foreach ($report['items']['enchantments'] as $hero_id => $categories) {
+        foreach ($categories as $category_id => $items) {
+          if (!isset($items[$item])) continue;
+          
+          $item_data = $items[$item];
+          
+          if (!isset($ench_hero_tier_data[$hero_id])) {
+            $ench_hero_tier_data[$hero_id] = [];
+          }
+          $ench_hero_tier_data[$hero_id][$category_id] = $item_data;
+        }
+      }
+      
+      $category_id_to_tier = [];
+      $tier_number = 1;
+      foreach (array_keys($meta['item_categories']) as $i => $category_name) {
+        if (strpos($category_name, 'enhancement_tier_') === 0) {
+          $category_id_to_tier[$i] = $tier_number++;
+        }
+      }
+      
+      $tier_category_ids = [];
+      if (isset($ench_hero_tier_data['total'])) {
+        foreach (array_keys($ench_hero_tier_data['total']) as $cat_id) {
+          if ($cat_id != 0 && isset($category_id_to_tier[$cat_id])) {
+            $tier_category_ids[] = $cat_id;
+          }
+        }
+      }
+      usort($tier_category_ids, function($a, $b) use ($category_id_to_tier) {
+        return $category_id_to_tier[$a] <=> $category_id_to_tier[$b];
+      });
+      
+      if (isset($ench_hero_tier_data['total'][0])) {
+        $total_data = $ench_hero_tier_data['total'][0];
+        $ench_total_matches = $total_data['matches'];
+        $ench_total_wins = $total_data['wins'];
+        $ench_total_matches_wo = $total_data['matches_wo'];
+        $ench_total_wr = $total_data['wr'];
+        $ench_total_wr_wo = $total_data['wr_wo'];
+        $ench_prate = $ench_total_matches / ($ench_total_matches + $ench_total_matches_wo);
+        $ench_wr_incr = $ench_total_wr - $ench_total_wr_wo;
+        
+        $stats['matches'] = $ench_total_matches;
+        $stats['purchase_rate'] = $ench_prate;
+        $stats['winrate'] = $ench_total_wr;
+        $stats['winrate_diff'] = $ench_wr_incr;
+      }
+      
+      $hero_names = [];
+      foreach ($ench_hero_tier_data as $hero_id => $categories) {
+        if ($hero_id !== 'total') {
+          $hero_names[$hero_id] = $hero_id;
+        }
+      }
+      sort($hero_names);
+      
+      $enchantments_per_tier = [];
+      foreach ($tier_category_ids as $category_id) {
+        $tier_number = $category_id_to_tier[$category_id];
+        $tier_data = [];
+        
+        foreach ($hero_names as $hero_id) {
+          if (!isset($ench_hero_tier_data[$hero_id][$category_id])) continue;
+          
+          $item_data = $ench_hero_tier_data[$hero_id][$category_id];
+          $prate = $item_data['matches'] / ($item_data['matches'] + $item_data['matches_wo']);
+          $wr_diff = $item_data['wr'] - $item_data['wr_wo'];
+          
+          $tier_data[] = [
+            'hero_id' => $hero_id,
+            'matches' => $item_data['matches'],
+            'prate' => round($prate, 4),
+            'wr' => round($item_data['wr'], 4),
+            'wr_diff' => round($wr_diff, 4),
+          ];
+        }
+        
+        if (!empty($tier_data)) {
+          $enchantments_per_tier["tier_$tier_number"] = $tier_data;
+        }
+      }
+      
+      $res['stats']['enchantments'] = [
+        'total' => isset($ench_hero_tier_data['total'][0]) ? [
+          'matches' => $ench_hero_tier_data['total'][0]['matches'],
+          'prate' => round($ench_hero_tier_data['total'][0]['matches'] / ($ench_hero_tier_data['total'][0]['matches'] + $ench_hero_tier_data['total'][0]['matches_wo']), 4),
+          'wr' => round($ench_hero_tier_data['total'][0]['wr'], 4),
+          'wr_diff' => round($ench_hero_tier_data['total'][0]['wr'] - $ench_hero_tier_data['total'][0]['wr_wo'], 4),
+        ] : null,
+        'per_tier' => $enchantments_per_tier,
+      ];
     }
 
     $res['stats']['overview'] = $stats;

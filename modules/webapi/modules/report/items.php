@@ -12,6 +12,7 @@ include_once(__DIR__ . "/items/builds.php");
 include_once(__DIR__ . "/items/stitems.php");
 include_once(__DIR__ . "/items/sticonsumables.php");
 include_once(__DIR__ . "/items/stibuilds.php");
+include_once(__DIR__ . "/items/enchantments.php");
 include_once(__DIR__ . "/items/profile.php");
 
 $repeatVars['items'] = ['heroid', 'itemid', 'position'];
@@ -68,6 +69,10 @@ $endpoints['items'] = function($mods, $vars, &$report) use (&$endpoints) {
     $res = $endpoints['items-stibuilds']($mods, $vars, $report);
     $res['__endp'] = "items-stibuilds";
     $res['__stopRepeater'] = "itemid";
+  } else if (in_array('enchantments', $mods)) {
+    $res = $endpoints['items-enchantments']($mods, $vars, $report);
+    $res['__endp'] = "items-enchantments";
+    $res['__stopRepeater'] = "heroid";
   } else {
     $res = $endpoints['items-overview']($mods, $vars, $report);
     $res['__endp'] = "items-overview";
