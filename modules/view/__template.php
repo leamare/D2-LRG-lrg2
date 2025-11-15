@@ -1,4 +1,4 @@
-<?php  $__postfix = "?v=227013"; ?>
+<?php  $__postfix = "?v=227014"; ?>
 <!DOCTYPE html>
 <html lang="<?php echo $locale; ?>">
   <head>
@@ -210,9 +210,13 @@
         <?php
           if (!empty($custom_content)) echo "<br />".$custom_content;
 
+          echo calculate_notice();
+
           $output = join_selectors($modules, 0);
 
           echo $output;
+
+          echo sources_notice();
         ?>
       </div>
     </div>

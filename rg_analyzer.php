@@ -84,6 +84,14 @@ $result["links"] = $lg_settings['links'] ?? null;
 
 $result["localized"] = $lg_settings['localized'] ?? null;
 
+if (isset($lg_settings['incomplete_source']) && $lg_settings['incomplete_source']) {
+  $result['settings']['incomplete_source'] = true;
+}
+
+if (isset($lg_settings['sources']) && is_array($lg_settings['sources'])) {
+  $result['settings']['sources'] = $lg_settings['sources'];
+}
+
 $avg_limit = $lg_settings['ana']['avg_limit'];
 
 if (isset($lg_settings['teams']) && !isset($lg_settings['players'])) {
