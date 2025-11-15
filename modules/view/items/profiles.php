@@ -29,11 +29,28 @@ function rg_view_generate_items_profiles() {
     $consumable_iids = $report['starting_items']['consumables']['all'][0][0]['keys'];
   }
 
+  // Get enchantments IDs
+  $enchantment_iids = [];
+  if (isset($report['items']['enchantments'])) {
+    if (is_wrapped($report['items']['enchantments'])) {
+      $report['items']['enchantments'] = unwrap_data($report['items']['enchantments']);
+    }
+    foreach ($report['items']['enchantments']['total'] as $category_id => $enchantment_items) {
+      if (!empty($enchantment_items)) {
+        foreach (array_keys($enchantment_items) as $_item_id) {
+          $enchantment_iids[] = $_item_id;
+        }
+      }
+    }
+    $enchantment_iids = array_unique($enchantment_iids);
+  }
+
   // Combine all item IDs
   $item_ids = array_unique(array_merge(
     array_keys($report['items']['stats']['total']), 
     $starting_iids,
     $consumable_iids ?? [],
+    $enchantment_iids ?? [],
   ));
 
   $item_names = [];
@@ -77,6 +94,7 @@ function rg_view_generate_items_profiles() {
   $is_starting = in_array($item, $starting_iids);
   $is_consumable = isset($report['starting_items']['consumables'])
     && in_array($item, $report['starting_items']['consumables']['all'][0][0]['keys'] ?? []);
+  $is_enchantment = isset($report['items']['enchantments']) && in_array($item, $enchantment_iids);
 
   if ($is_regular) {
     $ranks = [];
@@ -344,6 +362,59 @@ function rg_view_generate_items_profiles() {
     $content_lines[] = [ 'q3_cons_all', $cons_data['5m'][$item]['q3'] ];
   }
 
+  if ($is_enchantment) {
+    $ench_hero_tier_data = [];
+    
+    foreach ($report['items']['enchantments'] as $hero_id => $categories) {
+      foreach ($categories as $category_id => $items) {
+        if (!isset($items[$item])) continue;
+        
+        $item_data = $items[$item];
+        
+        if (!isset($ench_hero_tier_data[$hero_id])) {
+          $ench_hero_tier_data[$hero_id] = [];
+        }
+        $ench_hero_tier_data[$hero_id][$category_id] = $item_data;
+      }
+    }
+    
+    $category_id_to_tier = [];
+    $tier_number = 1;
+    foreach (array_keys($meta['item_categories']) as $i => $category_name) {
+      if (strpos($category_name, 'enhancement_tier_') === 0) {
+        $category_id_to_tier[$i] = $tier_number++;
+      }
+    }
+    
+    $tier_category_ids = [];
+    if (isset($ench_hero_tier_data['total'])) {
+      foreach (array_keys($ench_hero_tier_data['total']) as $cat_id) {
+        if ($cat_id != 0 && isset($category_id_to_tier[$cat_id])) {
+          $tier_category_ids[] = $cat_id;
+        }
+      }
+    }
+    usort($tier_category_ids, function($a, $b) use ($category_id_to_tier) {
+      return $category_id_to_tier[$a] <=> $category_id_to_tier[$b];
+    });
+    
+    if (isset($ench_hero_tier_data['total'][0])) {
+      $total_data = $ench_hero_tier_data['total'][0];
+      $ench_total_matches = $total_data['matches'];
+      $ench_total_wins = $total_data['wins'];
+      $ench_total_matches_wo = $total_data['matches_wo'];
+      $ench_total_wr = $total_data['wr'];
+      $ench_total_wr_wo = $total_data['wr_wo'];
+      $ench_prate = $ench_total_matches / ($ench_total_matches + $ench_total_matches_wo);
+      $ench_wr_incr = $ench_total_wr - $ench_total_wr_wo;
+      
+      $content_lines[] = [ 'matches', $ench_total_matches ];
+      $content_lines[] = [ 'purchase_rate', number_format($ench_prate*100, 2)."%" ];
+      $content_lines[] = [ 'winrate', number_format($ench_total_wr*100, 2)."%" ];
+      $content_lines[] = [ 'items_winrate_increase', ($ench_wr_incr >= 0 ? '+' : '').number_format($ench_wr_incr*100, 2)."%" ];
+    }
+  }
+
   $res['itemid'.$item] .= "<div class=\"profile-content\">";
 
   $group_size = ceil(count($content_lines)/3);
@@ -477,6 +548,189 @@ function rg_view_generate_items_profiles() {
     $res['itemid'.$item] .= "<div class=\"content-text\">".
       "<a href=\"?league=$leaguetag&mod=items-sticonsumables".(empty($linkvars) ? "" : "&".$linkvars)."\">".
       locale_string("items_consumables_full")."</a>".
+    "</div>";
+  }
+
+  if ($is_enchantment) {
+    // closing profile header
+    $res['itemid'.$item] .= "</div>";
+    
+    if (!empty($report['settings']['enchantments_recalc'])) {
+      $res['itemid'.$item] .= "<div class=\"content-text alert\">".
+        locale_string("enchantments_recalc_notice").
+      "</div>";
+    }
+
+    $category_id_to_tier = [];
+    $tier_number = 1;
+    foreach (array_keys($meta['item_categories']) as $i => $category_name) {
+      if (strpos($category_name, 'enhancement_tier_') === 0) {
+        $category_id_to_tier[$i] = $tier_number++;
+      }
+    }
+    
+    $tier_category_ids = [];
+    if (isset($ench_hero_tier_data['total'])) {
+      foreach (array_keys($ench_hero_tier_data['total']) as $cat_id) {
+        if ($cat_id != 0 && isset($category_id_to_tier[$cat_id])) {
+          $tier_category_ids[] = $cat_id;
+        }
+      }
+    }
+    usort($tier_category_ids, function($a, $b) use ($category_id_to_tier) {
+      return $category_id_to_tier[$a] <=> $category_id_to_tier[$b];
+    });
+    
+    $hero_names = [];
+    foreach ($ench_hero_tier_data as $hero_id => $categories) {
+      if ($hero_id !== 'total') {
+        $hero_names[$hero_id] = hero_name($hero_id);
+      }
+    }
+    uasort($hero_names, function($a, $b) {
+      return strcmp($a, $b);
+    });
+
+    if (isset($ench_hero_tier_data['total']) && !empty($tier_category_ids)) {
+      $res['itemid'.$item] .= "<div class=\"content-text\"></div>";
+
+      $total_header_rows = "<tr class=\"overhead\">".
+        "<th width=\"10%\" colspan=\"2\" data-col-group=\"_index\"></th>";
+      foreach ($tier_category_ids as $category_id) {
+        $tier_number = $category_id_to_tier[$category_id];
+        $tier_group = "tier_$tier_number";
+        $total_header_rows .= "<th class=\"separator\" width=\"".(90/count($tier_category_ids))."%\" colspan=\"4\" data-col-group=\"$tier_group\">".
+          locale_string("tier")." ".$tier_number.
+        "</th>";
+      }
+      $total_header_rows .= "</tr><tr>".
+        "<th data-col-group=\"_index\"></th>".
+        "<th data-col-group=\"_index\">".locale_string("hero")."</th>";
+      
+      foreach ($tier_category_ids as $category_id) {
+        $tier_number = $category_id_to_tier[$category_id];
+        $tier_group = "tier_$tier_number";
+        $total_header_rows .= "<th class=\"separator\" data-sorter=\"digit\" data-col-group=\"$tier_group\">".locale_string("matches")."</th>".
+          "<th data-sorter=\"digit\" data-col-group=\"$tier_group\">".locale_string("purchases_s")."</th>".
+          "<th data-sorter=\"digit\" data-col-group=\"$tier_group\">".locale_string("winrate")."</th>".
+          "<th data-sorter=\"digit\" data-col-group=\"$tier_group\">".locale_string("items_wo_wr_shift")."</th>";
+      }
+      $total_header_rows .= "</tr>";
+      
+      $total_row_data_attrs = "data-value-hero=\"".locale_string("total")."\"";
+      $total_row_cells = "<td data-col-group=\"_index\"></td>".
+        "<td data-col-group=\"_index\">".locale_string("total")."</td>";
+      
+      foreach ($tier_category_ids as $category_id) {
+        $tier_number = $category_id_to_tier[$category_id];
+        $tier_group = "tier_$tier_number";
+        
+        if (isset($ench_hero_tier_data['total'][$category_id])) {
+          $item_data = $ench_hero_tier_data['total'][$category_id];
+          $prate = $item_data['matches'] / ($item_data['matches'] + $item_data['matches_wo']);
+          $wr_diff = $item_data['wr'] - $item_data['wr_wo'];
+          
+          $total_row_data_attrs .= " data-value-matches-$tier_number=\"{$item_data['matches']}\"";
+          $total_row_data_attrs .= " data-value-prate-$tier_number=\"".number_format($prate*100, 2)."\"";
+          $total_row_data_attrs .= " data-value-wr-$tier_number=\"".number_format($item_data['wr']*100, 2)."\"";
+          $total_row_data_attrs .= " data-value-wr_diff-$tier_number=\"".number_format($wr_diff*100, 2)."\"";
+          
+          $total_row_cells .= "<td class=\"separator\" data-sorter=\"digit\" data-col-group=\"$tier_group\">".$item_data['matches']."</td>".
+            "<td data-sorter=\"digit\" data-col-group=\"$tier_group\">".number_format($prate*100, 2)."%</td>".
+            "<td data-sorter=\"digit\" data-col-group=\"$tier_group\">".number_format($item_data['wr']*100, 2)."%</td>".
+            "<td data-sorter=\"digit\" data-col-group=\"$tier_group\">".($wr_diff >= 0 ? '+' : '').number_format($wr_diff*100, 2)."%</td>";
+        } else {
+          $total_row_cells .= "<td class=\"separator\" data-col-group=\"$tier_group\">-</td>".
+            "<td data-col-group=\"$tier_group\">-</td>".
+            "<td data-col-group=\"$tier_group\">-</td>".
+            "<td data-col-group=\"$tier_group\">-</td>";
+        }
+      }
+      
+      $res['itemid'.$item] .= "<table id=\"items-enchantments-profile-itemid$item-total\" class=\"list wide sortable\">";
+      $res['itemid'.$item] .= "<caption>".locale_string("total")."</caption>";
+      $res['itemid'.$item] .= "<thead>$total_header_rows</thead><tbody>";
+      $res['itemid'.$item] .= "<tr $total_row_data_attrs>$total_row_cells</tr>";
+      $res['itemid'.$item] .= "</tbody></table><br />";
+    }
+
+    $rows = "";
+    foreach ($hero_names as $hero_id => $hero_name) {
+      if (!isset($ench_hero_tier_data[$hero_id])) continue;
+      
+      $row_data_attrs = "data-value-hero=\"".htmlspecialchars($hero_name)."\"";
+      $row_cells = "<td data-col-group=\"_index\">".hero_portrait($hero_id)."</td>".
+        "<td data-col-group=\"_index\">".hero_link($hero_id)."</td>";
+      
+      foreach ($tier_category_ids as $category_id) {
+        $tier_number = $category_id_to_tier[$category_id];
+        $tier_group = "tier_$tier_number";
+        
+        if (isset($ench_hero_tier_data[$hero_id][$category_id])) {
+          $item_data = $ench_hero_tier_data[$hero_id][$category_id];
+          $prate = $item_data['matches'] / ($item_data['matches'] + $item_data['matches_wo']);
+          $wr_diff = $item_data['wr'] - $item_data['wr_wo'];
+          
+          $row_data_attrs .= " data-value-matches-$tier_number=\"{$item_data['matches']}\"";
+          $row_data_attrs .= " data-value-prate-$tier_number=\"".number_format($prate*100, 2)."\"";
+          $row_data_attrs .= " data-value-wr-$tier_number=\"".number_format($item_data['wr']*100, 2)."\"";
+          $row_data_attrs .= " data-value-wr_diff-$tier_number=\"".number_format($wr_diff*100, 2)."\"";
+          
+          $row_cells .= "<td class=\"separator\" data-sorter=\"digit\" data-col-group=\"$tier_group\">".$item_data['matches']."</td>".
+            "<td data-sorter=\"digit\" data-col-group=\"$tier_group\">".number_format($prate*100, 2)."%</td>".
+            "<td data-sorter=\"digit\" data-col-group=\"$tier_group\">".number_format($item_data['wr']*100, 2)."%</td>".
+            "<td data-sorter=\"digit\" data-col-group=\"$tier_group\">".($wr_diff >= 0 ? '+' : '').number_format($wr_diff*100, 2)."%</td>";
+        } else {
+          $row_cells .= "<td class=\"separator\" data-col-group=\"$tier_group\">-</td>".
+            "<td data-col-group=\"$tier_group\">-</td>".
+            "<td data-col-group=\"$tier_group\">-</td>".
+            "<td data-col-group=\"$tier_group\">-</td>";
+        }
+      }
+      
+      $rows .= "<tr $row_data_attrs>$row_cells</tr>";
+    }
+
+    if (!empty($rows)) {
+      $table_id = "items-enchantments-profile-itemid$item";
+      $tier_groups = [];
+      foreach ($tier_category_ids as $category_id) {
+        $tier_number = $category_id_to_tier[$category_id];
+        $tier_groups[] = locale_string("tier")." ".$tier_number;
+      }
+      
+      $res['itemid'.$item] .= search_filter_component($table_id, true);
+      $res['itemid'.$item] .= table_columns_toggle($table_id, $tier_groups, true);
+      
+      $header_rows = "<tr class=\"overhead\">".
+        "<th width=\"10%\" colspan=\"2\" data-col-group=\"_index\"></th>";
+      foreach ($tier_category_ids as $category_id) {
+        $tier_number = $category_id_to_tier[$category_id];
+        $tier_group = "tier_$tier_number";
+        $header_rows .= "<th class=\"separator\" width=\"".(90/count($tier_category_ids))."%\" colspan=\"4\" data-col-group=\"$tier_group\">".
+          locale_string("tier")." ".$tier_number.
+        "</th>";
+      }
+      $header_rows .= "</tr><tr>".
+        "<th data-col-group=\"_index\"></th>".
+        "<th data-col-group=\"_index\">".locale_string("hero")."</th>";
+      
+      foreach ($tier_category_ids as $category_id) {
+        $tier_number = $category_id_to_tier[$category_id];
+        $tier_group = "tier_$tier_number";
+        $header_rows .= "<th class=\"separator\" data-sorter=\"digit\" data-col-group=\"$tier_group\">".locale_string("matches")."</th>".
+          "<th data-sorter=\"digit\" data-col-group=\"$tier_group\">".locale_string("purchases_s")."</th>".
+          "<th data-sorter=\"digit\" data-col-group=\"$tier_group\">".locale_string("winrate")."</th>".
+          "<th data-sorter=\"digit\" data-col-group=\"$tier_group\">".locale_string("items_wo_wr_shift")."</th>";
+      }
+      $header_rows .= "</tr>";
+      
+      $res['itemid'.$item] .= "<table id=\"$table_id\" class=\"list wide sortable\">";
+      $res['itemid'.$item] .= "<thead>$header_rows</thead><tbody>$rows</tbody></table>";
+    }
+
+    $res['itemid'.$item] .= "<div class=\"content-text\">".
+      "<a href=\"?league=$leaguetag&mod=items-enchantments".(empty($linkvars) ? "" : "&".$linkvars)."\">".locale_string("items_enchantments_full")."</a>".
     "</div>";
   }
 
