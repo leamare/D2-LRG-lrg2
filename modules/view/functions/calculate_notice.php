@@ -48,7 +48,7 @@ function calculate_notice() {
 function sources_notice() {
   global $report;
 
-  if (empty($report) || empty($report['settings'])) return "";
+  if (empty($report) || empty($report['settings']) || empty($report['settings']['sources'])) return "";
 
   $sources = array_map(function($link, $title) {
     return "<a href=\"$link\" target=\"_blank\" rel=\"noopener\">$title</a>";
