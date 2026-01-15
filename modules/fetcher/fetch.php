@@ -44,6 +44,9 @@ function fetch($match) {
   }
 
   $conn->ping();
+  // if (!$conn->query('SELECT 1')) {
+  //   conn_restart();
+  // }
 
   if (empty($match) || $match[0] == "#" || $match[0] == "[" || strlen($match) < 2) return true;
 
@@ -1432,7 +1435,7 @@ function fetch($match) {
           $new_items = [];
           $enchantments = [];
 
-          if ($e['item_neutral'] != $last_neutral_item) {
+          if (!empty($e['item_neutral']) && $e['item_neutral'] != $last_neutral_item) {
             $last_neutral_item = $e['item_neutral'];
 
             $new_items[] = $e['item_neutral'];
@@ -1474,10 +1477,12 @@ function fetch($match) {
           }
 
           $item_id = 0;
-          foreach ($meta['items'] as $id => $item_tag) {
-            if ($item_tag == $e['item_neutral_enhancement']) {
-              $item_id = $id;
-              break;
+          if (!empty($e['item_neutral_enhancement'])) {
+            foreach ($meta['items'] as $id => $item_tag) {
+              if ($item_tag == $e['item_neutral_enhancement']) {
+                $item_id = $id;
+                break;
+              }
             }
           }
           if (!$item_id) continue;
@@ -1688,14 +1693,15 @@ function fetch($match) {
         $wards_log[$pl['account_id']][ $ward['ehandle'] ] = [
           'x_c' => $ward['x'] ?? $ward['key'][0],
           'y_c' => $ward['y'] ?? $ward['key'][1],
-          'time' => $ward['time'],
+          'time' => +$ward['time'],
           'alive' => 360,
           'destroyed_at' => null,
           'destroyed_by' => null,
         ];
       }
       foreach($pl['obs_left_log'] ?? [] as $ward) {
-        $wards_log[$pl['account_id']][ $ward['ehandle'] ]['alive'] = $ward['time'] - ($wards_log[ $ward['ehandle'] ] ?? ($ward['time']-360));
+        $start_time = $wards_log[$pl['account_id']][ $ward['ehandle'] ]['time'] ?? ($ward['time'] - 360);
+        $wards_log[$pl['account_id']][ $ward['ehandle'] ]['alive'] = $ward['time'] - $start_time;
         $wards_log[$pl['account_id']][ $ward['ehandle'] ]['destroyed_at'] = $ward['time'];
         $wards_log[$pl['account_id']][ $ward['ehandle'] ]['destroyed_by'] = $player_tags[ $ward['attackername'] ?? "null" ] ?? null;
 
