@@ -19,6 +19,7 @@ function estimate_players_bans($matches, $r_player_pos, &$players_pb, &$draft_co
   $wins_unc = [];
 
   // 1. I go through all heroes banned vs the team and compare them to total stats. (ban's draft stage affects the result)
+  if (!isset($draft_context[0])) return $pdb;
   foreach ($draft_context[0] as $stage => $heroes) {
     foreach ($heroes as $hero => $el) {
       $hid = $el['heroid'];
@@ -47,7 +48,7 @@ function estimate_players_bans($matches, $r_player_pos, &$players_pb, &$draft_co
         }
       } else if (!empty($pickban_context[$hid]) && $pickban_context[$hid]['matches_picked']) {
         // 1.2. if the hero was not picked by the team, but was generally picked -> see what roles this hero appeared in.
-        if (isset($report['hero_positions'])) {
+        if (isset($report['hero_positions']) && isset($report['pickban'][$hid]['matches_picked'])) {
           $roles = [];
           for ($isCore = 0; $isCore <= 1; $isCore++) {
             for ($lane = 1; $lane <= 3; $lane++) {
@@ -75,7 +76,8 @@ function estimate_players_bans($matches, $r_player_pos, &$players_pb, &$draft_co
         // 1.3. if the hero was not picked at all -> compare bans against this team to total bans.
         //      If the result is above the threshold -> uncertain bucket, else => meta ban
         
-        $ratio = $report['pickban'][$hid]['matches_banned'] ? $pickban_ctx_alt[$hid]['matches_banned'] / $report['pickban'][$hid]['matches_banned'] : 0;
+        $ratio = (isset($report['pickban'][$hid]['matches_banned']) && $report['pickban'][$hid]['matches_banned']) ? 
+          (isset($pickban_ctx_alt[$hid]['matches_banned']) ? $pickban_ctx_alt[$hid]['matches_banned'] / $report['pickban'][$hid]['matches_banned'] : 0) : 0;
 
         if ($ratio > 0.2) {
           $uncertain[$hid."|".$stage] = [];
@@ -94,6 +96,7 @@ function estimate_players_bans($matches, $r_player_pos, &$players_pb, &$draft_co
     [ $hid, $stage ] = explode('|', $code);
 
     for ($i = +$stage; $i <= 3; $i++) {
+      if (!isset($pd_context[1][$i])) continue;
       foreach ($pd_context[1][$i] as $el) {
         if (isset($el[$hid])) {
           if (!isset($candidates[$el['playerid']])) {
@@ -103,7 +106,8 @@ function estimate_players_bans($matches, $r_player_pos, &$players_pb, &$draft_co
         }
       }
     }
-    foreach ($candidates as $player => $matches) {  
+    foreach ($candidates as $player => $matches) {
+      if (!isset($players_pb[$player]['matches_picked']) || !$players_pb[$player]['matches_picked']) continue;
       $candidates[$player] = $matches / $players_pb[$player]['matches_picked'];
 
       $pdb[$stage][$candidates[$i]]['matches'] += round($match_unc[$code] * $candidates[$player]);
@@ -112,7 +116,8 @@ function estimate_players_bans($matches, $r_player_pos, &$players_pb, &$draft_co
   }
 
   foreach ($matches as $player => $phs) {
-    $wins_old = $players_pb[$player]['matches_banned'] ? round($players_pb[$player]['matches_banned']*$players_pb[$player]['winrate_banned']) : 0;
+    $wins_old = (isset($players_pb[$player]['matches_banned']) && $players_pb[$player]['matches_banned']) ? 
+      round($players_pb[$player]['matches_banned']*($players_pb[$player]['winrate_banned'] ?? 0)) : 0;
     $players_pb[$player]['matches_banned'] = ($players_pb[$player]['matches_banned'] ?? 0) 
       + ($pdb[1][$player]['matches'] ?? 0)
       + ($pdb[2][$player]['matches'] ?? 0)
@@ -151,6 +156,7 @@ function estimate_players_draft_processor_tvt_report(&$context_pickban, $tid = n
   $teams_pids = [];
 
   foreach ($report['teams'] as $tid => $el) {
+    if (!isset($el['players_draft_pb'])) continue;
     $pids = array_keys($el['players_draft_pb']);
     $teams_pids[$tid] = $pids;
     $matches_teams[$tid] = [];
@@ -158,7 +164,7 @@ function estimate_players_draft_processor_tvt_report(&$context_pickban, $tid = n
 
     foreach($el['players_draft_pb'] as $player => $ppb) {
       if (!isset($report['players'][$player])) continue;
-      if (!empty($report['players_additional'])) {
+      if (!empty($report['players_additional']) && isset($report['players_additional'][$player]['positions'])) {
         $player_pos[$player] = reset($report['players_additional'][$player]['positions']);
 
         foreach ($report['players_additional'][$player]['positions'] as $pos) {
@@ -166,7 +172,9 @@ function estimate_players_draft_processor_tvt_report(&$context_pickban, $tid = n
           if (empty($r_player_pos_teams[$tid][$roletag])) {
             $r_player_pos_teams[$tid][$roletag] = [];
           }
-          $r_player_pos_teams[$tid][$roletag][$player] = $pos['matches'] / $report['players_additional'][$player]['matches'];
+          if (isset($report['players_additional'][$player]['matches']) && $report['players_additional'][$player]['matches']) {
+            $r_player_pos_teams[$tid][$roletag][$player] = $pos['matches'] / $report['players_additional'][$player]['matches'];
+          }
         }
       }
       $matches_teams[$tid][ $player ] = [];
@@ -188,39 +196,51 @@ function estimate_players_draft_processor_tvt_report(&$context_pickban, $tid = n
       if (!isset($matches_teams[$t][ $l['player'] ][ $l['hero'] ])) $matches_teams[$t][ $l['player'] ][ $l['hero'] ] = [ 'ms' => [], 'c' => 0, 'w' => 0 ];
       $matches_teams[$t][ $l['player'] ][ $l['hero'] ]['ms'][] = $match;
       $matches_teams[$t][ $l['player'] ][ $l['hero'] ]['c']++;
-      $matches_teams[$t][ $l['player'] ][ $l['hero'] ]['w'] += ($report['matches_additional'][$match]['radiant_win'] == $l['radiant']);
+      if (isset($report['matches_additional'][$match]['radiant_win'])) {
+        $matches_teams[$t][ $l['player'] ][ $l['hero'] ]['w'] += ($report['matches_additional'][$match]['radiant_win'] == $l['radiant']);
+      }
     }
   }
 
   if (!empty($matches_teams[0])) {
-    $team_0_draft = $report['draft'];
-    $team_0_pickban = $report['pickban'];
-    $team_0_pd = $report['players_draft'];
-    $team_0_pd_pb = $report['players_draft_pb'];
+    $team_0_draft = $report['draft'] ?? [];
+    $team_0_pickban = $report['pickban'] ?? [];
+    $team_0_pd = $report['players_draft'] ?? [];
+    $team_0_pd_pb = $report['players_draft_pb'] ?? [];
 
     foreach ($report['teams'] as $tid => $el) {
+      if (!isset($el['draft'])) continue;
       foreach ($el['draft'] as $stage => $heroes) {
         foreach ($heroes as $hero => $el) {
+          if (!isset($team_0_draft[$stage][$hero]['winrate_banned']) || !isset($team_0_draft[$stage][$hero]['matches_banned'])) continue;
           $wins = $team_0_draft[$stage][$hero]['winrate_banned']*$team_0_draft[$stage][$hero]['matches_banned'];
           $team_0_draft[$stage][$hero]['winrate_banned'] = ($wins - $el['winrate_banned']*$el['matches_banned'])
             / ($team_0_draft[$stage][$hero]['matches_banned'] - $el['matches_banned']);
           $team_0_draft[$stage][$hero]['matches_banned'] -= $el['matches_banned'];
         }
       }
+      if (!isset($el['pickban'])) continue;
       foreach ($el['pickban'] as $hero => $el) {
-        $team_0_pickban[$hero]['winrate_banned'] = ($team_0_pickban[$hero]['winrate_banned']*$team_0_pickban[$hero]['matches_banned']
-           - $el['winrate_banned']*$el['matches_banned'])
-          / ($team_0_pickban[$hero]['matches_banned'] - $el['matches_banned']);
+        if (!isset($team_0_pickban[$hero])) continue;
+        if (isset($team_0_pickban[$hero]['winrate_banned']) && isset($team_0_pickban[$hero]['matches_banned'])) {
+          $team_0_pickban[$hero]['winrate_banned'] = ($team_0_pickban[$hero]['winrate_banned']*$team_0_pickban[$hero]['matches_banned']
+             - $el['winrate_banned']*$el['matches_banned'])
+            / ($team_0_pickban[$hero]['matches_banned'] - $el['matches_banned']);
           $team_0_pickban[$hero]['matches_banned'] -= $el['matches_banned'];
+        }
 
-        $team_0_pickban[$hero]['winrate_picked'] = ($team_0_pickban[$hero]['winrate_picked']*$team_0_pickban[$hero]['matches_picked']
-           - $el['winrate_picked']*$el['matches_picked'])
-          / ($team_0_pickban[$hero]['matches_picked'] - $el['matches_picked']);
-        $team_0_pickban[$hero]['matches_picked'] -= $el['matches_picked'];
+        if (isset($team_0_pickban[$hero]['winrate_picked']) && isset($team_0_pickban[$hero]['matches_picked'])) {
+          $team_0_pickban[$hero]['winrate_picked'] = ($team_0_pickban[$hero]['winrate_picked']*$team_0_pickban[$hero]['matches_picked']
+             - $el['winrate_picked']*$el['matches_picked'])
+            / ($team_0_pickban[$hero]['matches_picked'] - $el['matches_picked']);
+          $team_0_pickban[$hero]['matches_picked'] -= $el['matches_picked'];
+        }
       }
 
+      if (!isset($el['players_draft_pb'])) continue;
       foreach ($el['players_draft_pb'] as $stage => $heroes) {
         foreach ($heroes as $hero => $el) {
+          if (!isset($team_0_pd_pb[$hero]) || !isset($team_0_pd_pb[$hero]['winrate_picked']) || !isset($team_0_pd_pb[$hero]['matches_picked'])) continue;
           $team_0_pd_pb[$hero]['matches_picked'] -= $el['matches_picked'];
           $team_0_pd_pb[$hero]['winrate_picked'] = ($team_0_pd_pb[$hero]['winrate_picked']*$team_0_pd_pb[$hero]['matches_picked']
             - $el['winrate_picked']*$el['matches_picked'])
@@ -229,8 +249,10 @@ function estimate_players_draft_processor_tvt_report(&$context_pickban, $tid = n
         }
       }
 
+      if (!isset($el['players_draft'])) continue;
       foreach ($el['players_draft'] as $stage => $pls) {
         foreach ($pls as $pid => $el) {
+          if (!isset($team_0_pd[$stage][$pid]['winrate_picked']) || !isset($team_0_pd[$stage][$pid]['matches_picked'])) continue;
           $team_0_pd[$stage][$pid]['winrate_picked'] = ($team_0_pd[$stage][$pid]['winrate_picked']*$team_0_pd[$stage][$pid]['matches_picked']
             - $el['winrate_picked']*$el['matches_picked'])
             / ($team_0_pd[$stage][$pid]['matches_picked'] - $el['matches_picked']);
@@ -249,14 +271,21 @@ function estimate_players_draft_processor_tvt_report(&$context_pickban, $tid = n
 
   $pds = [];
   foreach ($matches_teams as $tid => $el) {
+    if (!isset($report['teams'][$tid])) continue;
+    $r_player_pos_ref = $r_player_pos_teams[$tid] ?? [];
+    $players_draft_pb_ref = $report['teams'][$tid]['players_draft_pb'] ?? [];
+    $draft_vs_ref = $report['teams'][$tid]['draft_vs'] ?? [];
+    $pickban_ref = $report['teams'][$tid]['pickban'] ?? [];
+    $pickban_vs_ref = $report['teams'][$tid]['pickban_vs'] ?? [];
+    $players_draft_ref = $report['teams'][$tid]['players_draft'] ?? [];
     $pds[$tid] = estimate_players_bans(
       $el,
-      $r_player_pos_teams[$tid],
-      $report['teams'][$tid]['players_draft_pb'],
-      $report['teams'][$tid]['draft_vs'],
-      $report['teams'][$tid]['pickban'],
-      $report['teams'][$tid]['pickban_vs'],
-      $report['teams'][$tid]['players_draft'],
+      $r_player_pos_ref,
+      $players_draft_pb_ref,
+      $draft_vs_ref,
+      $pickban_ref,
+      $pickban_vs_ref,
+      $players_draft_ref,
     );
 
     foreach ($pds[$tid] as $stage => $pls) {
@@ -273,27 +302,31 @@ function estimate_players_draft_processor_tvt_report(&$context_pickban, $tid = n
       }
     }
 
-    foreach ($report['teams'][$tid]['players_draft_pb'] as $pid => $el) {
-      if (!isset($context_pickban[$pid])) continue;
+    if (isset($report['teams'][$tid]['players_draft_pb'])) {
+      foreach ($report['teams'][$tid]['players_draft_pb'] as $pid => $el) {
+        if (!isset($context_pickban[$pid])) continue;
 
-      $ms = ($context_pickban[$pid]['matches_banned'] + $el['matches_banned']);
-      $context_pickban[$pid]['winrate_banned'] = $ms ? (
-        ($context_pickban[$pid]['winrate_banned']*$context_pickban[$pid]['matches_banned']
-        + $el['winrate_banned']*$el['matches_banned'])
-        / $ms) : 0;
-      $context_pickban[$pid]['matches_banned'] = $ms;
+        $ms = (($context_pickban[$pid]['matches_banned'] ?? 0) + ($el['matches_banned'] ?? 0));
+        $context_pickban[$pid]['winrate_banned'] = $ms ? (
+          (($context_pickban[$pid]['winrate_banned'] ?? 0)*($context_pickban[$pid]['matches_banned'] ?? 0)
+          + ($el['winrate_banned'] ?? 0)*($el['matches_banned'] ?? 0))
+          / $ms) : 0;
+        $context_pickban[$pid]['matches_banned'] = $ms;
+      }
     }
   }
 
   unset($report['teams'][0]);
 
-  foreach ($report['players_draft'][0] as $stage => $pls) {
-    foreach ($pls as $pid => $el) {
-      $report['players_draft'][0][$stage][$pid]['winrate'] = $report['players_draft'][0][$stage][$pid]['matches'] ? 
-        $report['players_draft'][0][$stage][$pid]['wins'] / $report['players_draft'][0][$stage][$pid]['matches'] : 0;
-      unset($report['players_draft'][0][$stage][$pid]['wins']);
+  if (isset($report['players_draft'][0])) {
+    foreach ($report['players_draft'][0] as $stage => $pls) {
+      foreach ($pls as $pid => $el) {
+        $report['players_draft'][0][$stage][$pid]['winrate'] = $report['players_draft'][0][$stage][$pid]['matches'] ? 
+          $report['players_draft'][0][$stage][$pid]['wins'] / $report['players_draft'][0][$stage][$pid]['matches'] : 0;
+        unset($report['players_draft'][0][$stage][$pid]['wins']);
+      }
+      $report['players_draft'][0][$stage] = array_values($report['players_draft'][0][$stage]);
     }
-    $report['players_draft'][0][$stage] = array_values($report['players_draft'][0][$stage]);
   }
 }
 
@@ -307,7 +340,7 @@ function estimate_players_draft_processor_pvp_report(&$context_pickban) {
 
   foreach($context_pickban as $player => $ppb) {
     if (!isset($report['players'][$player])) continue;
-    if (!empty($report['players_additional'])) {
+    if (!empty($report['players_additional']) && isset($report['players_additional'][$player]['positions'])) {
       $player_pos[$player] = reset($report['players_additional'][$player]['positions']);
 
       foreach ($report['players_additional'][$player]['positions'] as $pos) {
@@ -315,7 +348,9 @@ function estimate_players_draft_processor_pvp_report(&$context_pickban) {
         if (empty($r_player_pos[$roletag])) {
           $r_player_pos[$roletag] = [];
         }
-        $r_player_pos[$roletag][$player] = $pos['matches'] / $report['players_additional'][$player]['matches'];
+        if (isset($report['players_additional'][$player]['matches']) && $report['players_additional'][$player]['matches']) {
+          $r_player_pos[$roletag][$player] = $pos['matches'] / $report['players_additional'][$player]['matches'];
+        }
       }
     }
     $matches[ $player ] = [];
@@ -329,30 +364,39 @@ function estimate_players_draft_processor_pvp_report(&$context_pickban) {
       if (!isset($matches[ $l['player'] ][ $l['hero'] ])) $matches[ $l['player'] ][ $l['hero'] ] = [ 'ms' => [], 'c' => 0, 'w' => 0 ];
       $matches[ $l['player'] ][ $l['hero'] ]['ms'][] = $match;
       $matches[ $l['player'] ][ $l['hero'] ]['c']++;
-      $matches[ $l['player'] ][ $l['hero'] ]['w'] += ($report['matches_additional'][$match]['radiant_win'] == $l['radiant']);
+      if (isset($report['matches_additional'][$match]['radiant_win'])) {
+        $matches[ $l['player'] ][ $l['hero'] ]['w'] += ($report['matches_additional'][$match]['radiant_win'] == $l['radiant']);
+      }
     }
   }
 
+  $draft_ref = $report['draft'] ?? [];
+  $pickban_ref1 = $report['pickban'] ?? [];
+  $pickban_ref2 = $report['pickban'] ?? [];
   $pds = estimate_players_bans(
     $matches,
     $r_player_pos,
     $context_pickban,
-    $report['draft'],
-    $report['pickban'],
-    $report['pickban'],
-    $report['players_draft'],
+    $draft_ref,
+    $pickban_ref1,
+    $pickban_ref2,
+    $report['players_draft'] ?? [],
   );
 
   $report['players_draft'][0] = $pds;
 
-  foreach ($report['players_draft'][0] as $stage => $pls) {
+  if (isset($report['players_draft'][0])) {
+    foreach ($report['players_draft'][0] as $stage => $pls) {
     foreach ($pls as $i => $el) {
       $report['players_draft'][0][$stage][$i]['matches'] = round($report['players_draft'][0][$stage][$i]['matches'] / 2);
     }
   }
+  }
 
   foreach ($context_pickban as $pid => $el) {
-    $context_pickban[$pid]['matches_banned'] = round($context_pickban[$pid]['matches_banned'] / 2);
+    if (isset($context_pickban[$pid]['matches_banned'])) {
+      $context_pickban[$pid]['matches_banned'] = round($context_pickban[$pid]['matches_banned'] / 2);
+    }
   }
 }
 
@@ -363,10 +407,11 @@ function estimate_players_draft_processor_tvt_single_team(&$context, $tid) {
   $matches = [];
   $player_pos = [];
   $r_player_pos = [];
+  if (!isset($context[$tid]['players_draft_pb'])) return;
   $pids = array_keys($context[$tid]['players_draft_pb']);
   foreach($context[$tid]['players_draft_pb'] as $player => $ppb) {
     if (!isset($report['players'][$player])) continue;
-    if (!empty($report['players_additional'])) {
+    if (!empty($report['players_additional']) && isset($report['players_additional'][$player]['positions'])) {
       $player_pos[$player] = reset($report['players_additional'][$player]['positions']);
 
       foreach ($report['players_additional'][$player]['positions'] as $pos) {
@@ -374,7 +419,9 @@ function estimate_players_draft_processor_tvt_single_team(&$context, $tid) {
         if (empty($r_player_pos[$roletag])) {
           $r_player_pos[$roletag] = [];
         }
-        $r_player_pos[$roletag][$player] = $pos['matches'] / $report['players_additional'][$player]['matches'];
+        if (isset($report['players_additional'][$player]['matches']) && $report['players_additional'][$player]['matches']) {
+          $r_player_pos[$roletag][$player] = $pos['matches'] / $report['players_additional'][$player]['matches'];
+        }
       }
     }
     $matches[ $player ] = [];
@@ -395,7 +442,9 @@ function estimate_players_draft_processor_tvt_single_team(&$context, $tid) {
       if (!isset($matches[ $l['player'] ][ $l['hero'] ])) $matches[ $l['player'] ][ $l['hero'] ] = [ 'ms' => [], 'c' => 0, 'w' => 0 ];
       $matches[ $l['player'] ][ $l['hero'] ]['ms'][] = $match;
       $matches[ $l['player'] ][ $l['hero'] ]['c']++;
-      $matches[ $l['player'] ][ $l['hero'] ]['w'] += ($report['matches_additional'][$match]['radiant_win'] == $radiant);
+      if (isset($report['matches_additional'][$match]['radiant_win'])) {
+        $matches[ $l['player'] ][ $l['hero'] ]['w'] += ($report['matches_additional'][$match]['radiant_win'] == $radiant);
+      }
     }
   }
 
@@ -408,14 +457,18 @@ function estimate_players_draft_processor_tvt_single_team(&$context, $tid) {
     ];
   }
 
+  $players_draft_pb_ref = $context[$tid]['players_draft_pb'] ?? [];
+  $draft_vs_ref = $context[$tid]['draft_vs'] ?? [];
+  $pickban_ref = $context[$tid]['pickban'] ?? [];
+  $pickban_vs_ref = $context[$tid]['pickban_vs'] ?? [];
   $pdb = estimate_players_bans(
     $matches,
     $r_player_pos,
-    $context[$tid]['players_draft_pb'],
-    $context[$tid]['draft_vs'],
-    $context[$tid]['pickban'],
-    $context[$tid]['pickban_vs'],
-    $context[$tid]['players_draft'],
+    $players_draft_pb_ref,
+    $draft_vs_ref,
+    $pickban_ref,
+    $pickban_vs_ref,
+    $context[$tid]['players_draft'] ?? [],
   );
 
   $context[$tid]['players_draft'][0] = $pdb;
