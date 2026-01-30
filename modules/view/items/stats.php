@@ -132,7 +132,7 @@ function rg_view_generate_items_stats() {
     // "<option ".($cat === null ? "selected=\"selected\"" : "").
     //   " value=\"?league=".$leaguetag."&mod=".$mod.(empty($linkvars) ? "" : "&".$linkvars)."\">".locale_string("items_category_all")."</option>";
   foreach ($item_cats as $ic) {
-    $res[$tag] .= "<option ".(in_array($ic, $cat) ? "selected=\"selected\"" : "").
+    $res[$tag] .= "<option ".(in_array($ic, $cat ?? []) ? "selected=\"selected\"" : "").
       " value=\"$ic\">".locale_string("items_category_$ic")."</option>";
   }
   $res[$tag] .= "</select></div>";
@@ -160,6 +160,11 @@ function rg_view_generate_items_stats() {
 
   foreach ($items as $iid => $line) {
     $matches_med[] = $line['purchases'];
+    if ($meta['items_full'][$iid]['cost'] > 0) {
+      $gradgold = number_format($line['grad']*100000/$meta['items_full'][$iid]['cost'], 2);
+    } else {
+      $gradgold = '0.00';
+    }
     
     $rows .= "<tr ".
       "data-value-prate=\"{$line['purchases']}\" ".
@@ -181,6 +186,7 @@ function rg_view_generate_items_stats() {
       "<td data-col-group=\"items_winrate_shifts\">".($line['early_wr'] > $line['winrate'] ? '+' : '').number_format(($line['early_wr']-$line['winrate'])*100, 2)."%</td>".
       "<td data-col-group=\"items_winrate_shifts\">".($line['late_wr'] > $line['winrate'] ? '+' : '').number_format(($line['late_wr']-$line['winrate'])*100, 2)."%</td>".
       "<td data-col-group=\"items_winrate_shifts\">".number_format($line['grad']*100, 2)."%</td>".
+      "<td data-col-group=\"items_winrate_shifts\">".$gradgold."</td>".
       "<td class=\"separator\" data-col-group=\"items_timings\" value=\"{$line['avg_time']}\">".convert_time_seconds($line['avg_time'])."</td>".
       "<td data-col-group=\"items_timings\" value=\"{$line['min_time']}\">".convert_time_seconds($line['min_time'])."</td>".
       "<td data-col-group=\"items_timings\" value=\"{$line['q1']}\">".convert_time_seconds($line['q1'])."</td>".
@@ -227,7 +233,7 @@ function rg_view_generate_items_stats() {
   $res[$tag] .= "<thead><tr class=\"overhead\">".
       "<th width=\"15%\" colspan=\"2\" data-col-group=\"_index\"></th>".
       "<th class=\"separator\" width=\"18%\" colspan=\"3\" data-col-group=\"total\">".locale_string("total")."</th>".
-      "<th class=\"separator\" width=\"30%\" colspan=\"5\" data-col-group=\"items_winrate_shifts\">".locale_string("items_winrate_shifts")."</th>".
+      "<th class=\"separator\" width=\"30%\" colspan=\"6\" data-col-group=\"items_winrate_shifts\">".locale_string("items_winrate_shifts")."</th>".
       "<th class=\"separator\" colspan=\"8\" data-col-group=\"items_timings\">".locale_string("items_timings")."</th>".
     "</tr><tr>".
     "<th data-col-group=\"_index\"></th>".
@@ -241,6 +247,7 @@ function rg_view_generate_items_stats() {
     "<th data-sorter=\"digit\" data-col-group=\"items_winrate_shifts\">".locale_string("items_early_wr_shift")."</th>".
     "<th data-sorter=\"digit\" data-col-group=\"items_winrate_shifts\">".locale_string("items_late_wr_shift")."</th>".
     "<th data-sorter=\"digit\" data-col-group=\"items_winrate_shifts\">".locale_string("items_wr_gradient")."</th>".
+    "<th data-sorter=\"digit\" data-col-group=\"items_winrate_shifts\">".locale_string("items_wr_gradient_per_gold")."</th>".
     "<th class=\"separator\" data-sorter=\"valuesort\" data-col-group=\"items_timings\">".locale_string("item_time_mean")."</th>".
     "<th data-sorter=\"valuesort\" data-col-group=\"items_timings\">".locale_string("item_time_min")."</th>".
     "<th data-sorter=\"valuesort\" data-col-group=\"items_timings\">".locale_string("item_time_q1")."</th>".

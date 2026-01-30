@@ -67,5 +67,14 @@ $endpoints['items-stats'] = function($mods, $vars, &$report) use (&$endpoints, &
     }
   }
 
+  foreach ($res['items'] as $iid => &$item) {
+    if ($meta['items_full'][$iid]['cost'] > 0) {
+      $item['grad_per_gold'] = $item['grad'] * 100000 / $meta['items_full'][$iid]['cost'];
+    } else {
+      $item['grad_per_gold'] = 0;
+    }
+  }
+  unset($item);
+
   return $res;
 };

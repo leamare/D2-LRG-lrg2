@@ -1,6 +1,6 @@
 <?php 
 
-$endpoints['items-heroes'] = function($mods, $vars, &$report) use (&$endpoints) {
+$endpoints['items-heroes'] = function($mods, $vars, &$report) use (&$endpoints, &$meta) {
   if (!isset($report['items']) || empty($report['items']['pi']) || !isset($report['items']['stats']))
     throw new \Exception("No items stats data");
 
@@ -37,6 +37,13 @@ $endpoints['items-heroes'] = function($mods, $vars, &$report) use (&$endpoints) 
   }
 
   $total = $report['items']['stats']['total'][$item];
+  
+  if ($meta['items_full'][$item]['cost'] > 0) {
+    $total['grad_per_gold'] = $total['grad'] * 100000 / $meta['items_full'][$item]['cost'];
+  } else {
+    $total['grad_per_gold'] = 0;
+  }
+  
   unset($report['items']['stats']['total']);
 
   $heroes = [];
@@ -59,6 +66,12 @@ $endpoints['items-heroes'] = function($mods, $vars, &$report) use (&$endpoints) 
     $heroes[$id]['rank'] = 100 * ($el['wrank']-$min) / ($max-$min);
     unset($heroes[$id]['wrank']);
     unset($heroes[$id]['category']);
+    
+    if ($meta['items_full'][$item]['cost'] > 0) {
+      $heroes[$id]['grad_per_gold'] = $heroes[$id]['grad'] * 100000 / $meta['items_full'][$item]['cost'];
+    } else {
+      $heroes[$id]['grad_per_gold'] = 0;
+    }
   }
 
   // $increment = 100 / sizeof($heroes); $i = 0;

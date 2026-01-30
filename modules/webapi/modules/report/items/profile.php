@@ -246,6 +246,11 @@ $endpoints['items-profile'] = function($mods, $vars, &$report) use (&$endpoints,
       $stats['purchase_rate'] = $data['prate'];
       $stats['item_time_median_long'] = $data['median'];
       $stats['items_wr_gradient'] = $data['grad'];
+      if ($meta['items_full'][$item]['cost'] > 0) {
+        $stats['items_wr_gradient_per_gold'] = $data['grad'] * 100000 / $meta['items_full'][$item]['cost'];
+      } else {
+        $stats['items_wr_gradient_per_gold'] = 0;
+      }
       if ($data['grad'] < -0.01) {
         $stats['item_time_window_q1'] = $data['q1'];
         $stats['item_time_window_critical'] = $data['critical'];

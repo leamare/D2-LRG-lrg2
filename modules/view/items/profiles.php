@@ -321,6 +321,11 @@ function rg_view_generate_items_profiles() {
     $content_lines[] = [ 'purchases', $data['purchases'] ];
     $content_lines[] = [ 'purchase_rate', number_format($data['prate']*100, 2)."%" ];
     $content_lines[] = [ 'item_time_median_long', convert_time_seconds($data['median']) ];
+    if ($meta['items_full'][$item]['cost'] > 0) {
+      $content_lines[] = [ 'item_cost', number_format($meta['items_full'][$item]['cost']) ];
+      $gradgold = number_format($data['grad']*100000/$meta['items_full'][$item]['cost'], 2);
+      $content_lines[] = [ 'items_wr_gradient_per_gold', $gradgold ];
+    }
     $content_lines[] = [ 'items_wr_gradient', number_format($data['grad']*100, 2)."%" ];
     if ($data['grad'] < -0.01) {
       $content_lines[] = [ 'item_time_window', convert_time_seconds($data['q1']).
