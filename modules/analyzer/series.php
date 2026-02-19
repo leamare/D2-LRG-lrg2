@@ -230,6 +230,7 @@ if (!empty($result['matches'])) {
     $last_outcome = [];
     
     foreach ($result['matches'] as $mid => $data) {
+      if (empty($result['match_participants_teams'][$mid]['radiant']) || empty($result['match_participants_teams'][$mid]['dire'])) continue;
       $radiant_win = $result['matches_additional'][$mid]['radiant_win'];
       $radiant = $result['match_participants_teams'][$mid]['radiant'];
       $dire = $result['match_participants_teams'][$mid]['dire'];
