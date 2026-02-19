@@ -915,8 +915,10 @@ function fetch($match) {
         if (!$player['hero_id']) continue;
         if (!isset($player['lane_role']) || !$player['lane_role'] || $player['lane_role'] > 4) $player['lane_role'] = 4;
         $team = $player['isRadiant'] ? 1 : 0;
+        $lm = $matchdata['game_mode'] == 23 ? 5 : 10;
+        $player['lh_at10'] = count($player['lh_t']) > $lm ? $player['lh_t'][$lm] : $player['lh_t'][count($player['lh_t'])-1];
         if (empty($player['lane_efficiency'])) {
-          $player['lane_efficiency'] = $player['lh_at10']/($matchdata['game_mode'] == 23 ? 21 : 42);
+          $player['lane_efficiency'] = $player['lh_at10']/$lm;
         }
         $p = [
           'hid' => $player['hero_id'],
@@ -925,6 +927,7 @@ function fetch($match) {
           'roaming' => $player['is_roaming'],
           'lane' => $player['lane_role'],
           'eff' => $player['lane_efficiency'],
+          'lh_at10' => $player['lh_at10'],
         ];
         if (!isset($laning_raw[$p['hid']])) $laning_raw[$p['hid']] = [];
         $laning_raw[$p['hid']][$p['lane']] = $p;
@@ -932,8 +935,7 @@ function fetch($match) {
       }
       
       foreach($teams_players as $i => $tm) {
-        $roles = [];
-        $supports = [];
+        // Roles processing by lane buckets
         $lanes = [];
         foreach ($tm as $p) {
           if (!isset($lanes[$p['lane']])) $lanes[$p['lane']] = [];
@@ -941,33 +943,116 @@ function fetch($match) {
         }
         ksort($lanes);
         $laning_raw[$i] = $lanes;
-        foreach($lanes as $lane => $players) {
-          if ($lane > 3) {
-            if (count($roles) == 3) {
-              $supports = array_merge($supports, $players);
-              continue;
+
+        $assigned_roles = [];
+        $unassigned = [];
+        
+        // cores are processed directly
+        foreach ([1, 2, 3] as $lane) {
+          if (isset($lanes[$lane]) && !empty($lanes[$lane])) {
+            // Multiple players in same lane - sort by farm (higher farm = core)
+            usort($lanes[$lane], function($a, $b) {
+              // if ($b['gpm'] != $a['gpm']) return $b['gpm'] <=> $a['gpm'];
+              if (abs($b['eff']-$a['eff']) > 0.05) return $b['eff'] <=> $a['eff'];
+              return $b['lh_at10'] <=> $a['lh_at10'];
+            });
+            
+            $core_player = array_shift($lanes[$lane]);
+            $assigned_roles[$lane] = $core_player;
+
+            $unassigned = array_merge($unassigned, $lanes[$lane]);
+          }
+        }
+        
+        if (isset($lanes[4])) {
+          $unassigned = array_merge($unassigned, $lanes[4]);
+        }
+        
+        // Sort unassigned by farm - lower farm => more likely support
+        usort($unassigned, function($a, $b) {
+          if ($a['gpm'] != $b['gpm']) return $a['gpm'] <=> $b['gpm'];
+          return $a['eff'] <=> $b['eff'];
+        });
+        
+        $supports = [];
+        $roaming_supports = [];
+        
+        foreach ($unassigned as $p) {
+          if ($p['roaming']) {
+            $roaming_supports[] = $p;
+          } else {
+            $supports[] = $p;
+          }
+        }
+        
+        if (count($unassigned) == 2) {
+          if (count($roaming_supports) == 2) {
+            usort($roaming_supports, function($a, $b) {
+              if ($a['lane'] == 1 && $b['lane'] != 1) return 1;
+              if ($b['lane'] == 1 && $a['lane'] != 1) return -1;
+              return $a['gpm'] <=> $b['gpm'];
+            });
+            $assigned_roles[5] = array_shift($roaming_supports);
+            $assigned_roles[4] = array_shift($roaming_supports);
+          } else if (count($roaming_supports) == 1 && count($supports) == 1) {
+            $roamer = $roaming_supports[0];
+            $laner = $supports[0];
+            
+            if ($laner['lane'] == 1) {
+              $assigned_roles[5] = $laner;
+              $assigned_roles[4] = $roamer;
+            } else {
+              $assigned_roles[4] = $laner;
+              $assigned_roles[5] = $roamer;
             }
-            $lane = 1;
-            foreach ($roles as $rid => $data) {
-              if ($rid == $lane) $lane++;
+          } else {
+            usort($unassigned, function($a, $b) {
+              $a_safe = ($a['lane'] == 1) ? 0 : 1;
+              $b_safe = ($b['lane'] == 1) ? 0 : 1;
+              if ($a_safe != $b_safe) return $a_safe <=> $b_safe;
+              return $a['gpm'] <=> $b['gpm'];
+            });
+            $assigned_roles[5] = array_shift($unassigned);
+            $assigned_roles[4] = array_shift($unassigned);
+          }
+        } else {
+          // Fill missing core roles first (if any)
+          for ($role = 0; $role < 3; $role++) {
+            if (!isset($assigned_roles[$role]) && !empty($unassigned)) {
+              $highest_farm = array_pop($unassigned);
+              array_unshift($unassigned, $highest_farm);
+
+              usort($unassigned, function($a, $b) {
+                return $b['gpm'] <=> $a['gpm'];
+              });
+              $assigned_roles[$role] = array_shift($unassigned);
+              
+              usort($unassigned, function($a, $b) {
+                return $a['gpm'] <=> $b['gpm'];
+              });
             }
           }
-          usort($players, function($a, $b) {
-            return $b['gpm'] <=> $a['gpm'];
-          });
-          $roles[$lane] = array_shift($players);
-          $supports = array_merge($supports, $players);
-        }
-        usort($supports, function($a, $b) {
-          return $b['gpm'] <=> $a['gpm'];
-        });
-
-        foreach ($supports as $p) {
-          $roles[] = $p;
+          
+          if (!empty($unassigned)) {
+            $assigned_roles[5] = array_shift($unassigned);
+          }
+          if (!empty($unassigned)) {
+            $assigned_roles[4] = array_shift($unassigned);
+          }
+          
+          $role_slot = 0;
+          while (!empty($unassigned)) {
+            if (!isset($assigned_roles[$role_slot])) {
+              $assigned_roles[$role_slot] = array_shift($unassigned);
+            }
+            $role_slot++;
+          }
         }
 
         $team_roles[$i] = [];
-        foreach ($roles as $rid => $p) $team_roles[$i][ $p['hid'] ] = $rid;
+        foreach ($assigned_roles as $role => $p) {
+          $team_roles[$i][$p['hid']] = $role;
+        }
       }
 
       $tie_factor = 0.075;
@@ -1091,8 +1176,6 @@ function fetch($match) {
           $t_new_players[ $t_matchlines[$i]['playerid'] ] = $player_info['profile']['name'] ?? $player_info['profile']['personaname'] ?? "Player ".$t_matchlines[$i]['playerid'];
         }
 
-
-
         $t_matchlines[$i]['heroid'] = $matchdata['players'][$j]['hero_id'];
         $t_matchlines[$i]['variant'] = $matchdata['players'][$j]['hero_variant'] ?? $matchdata['players'][$j]['variant'] ?? null;
         $t_matchlines[$i]['isRadiant'] = $matchdata['players'][$j]['isRadiant'];
@@ -1146,7 +1229,15 @@ function fetch($match) {
           if ($matchdata['players'][$j]['lane_efficiency'] < 0.55 && $matchdata['players'][$j]['win']) $support_indicators++;
           if ($matchdata['players'][$j]['lane_efficiency'] < 0.50) $support_indicators++;
           if ($matchdata['players'][$j]['lane_efficiency'] < 0.35) $support_indicators++;
-          if ($matchdata['players'][$j]['is_roaming'] || $matchdata['players'][$j]['lane_role'] == 4) $support_indicators+=5;
+          
+          if ($matchdata['players'][$j]['lane_role'] == 4) $support_indicators+=2;
+          if ($matchdata['players'][$j]['is_roaming']) {
+            if ($matchdata['players'][$j]['lane_efficiency'] < 0.40) {
+              $support_indicators+=4;
+            } else {
+              $support_indicators+=2;
+            }
+          }
         }
 
         if ($matchdata['players'][$j]['gold_per_min'] < 420 && $matchdata['players'][$j]['win']) $support_indicators++;
@@ -1159,17 +1250,25 @@ function fetch($match) {
         if ($matchdata['players'][$j]['last_hits']*60/$matchdata['duration'] < 2.5) $support_indicators++;
 
         # TODO compare to teammates on the same lane/role
+        // if (!$bad_replay && $support_indicators > 4) $t_adv_matchlines[$i]['isCore'] = 0;
+        // else if ($bad_replay && $support_indicators > 2) $t_adv_matchlines[$i]['isCore'] = 0;
+        // else $t_adv_matchlines[$i]['isCore'] = 1;
 
-        if (!$bad_replay && $support_indicators > 4) $t_adv_matchlines[$i]['isCore'] = 0;
+        if (!$bad_replay) {
+          $t_adv_matchlines[$i]['role'] = $team_roles[ $matchdata['players'][$j]['isRadiant'] ? 1 : 0 ][ $matchdata['players'][$j]['hero_id'] ];
+        }
+
+        if (!$bad_replay && $t_adv_matchlines[$i]['role'] > 3) $t_adv_matchlines[$i]['isCore'] = 0;
         else if ($bad_replay && $support_indicators > 2) $t_adv_matchlines[$i]['isCore'] = 0;
         else $t_adv_matchlines[$i]['isCore'] = 1;
 
         if (!$bad_replay) {
-          if ($t_adv_matchlines[$i]['isCore'] && $matchdata['players'][$j]['is_roaming'])
-            $t_adv_matchlines[$i]['lane'] = $matchdata['players'][$j]['lane_role'];
-          else if (!$t_adv_matchlines[$i]['isCore'] && $matchdata['players'][$j]['is_roaming'])
-            $t_adv_matchlines[$i]['lane'] = 5;
-          # Gonna put roaming cores into junglers for now
+          if ($t_adv_matchlines[$i]['isCore'] && $matchdata['players'][$j]['is_roaming']) {
+          } else if (!$t_adv_matchlines[$i]['isCore'] && $matchdata['players'][$j]['is_roaming']) {
+            if ($matchdata['players'][$j]['lane_role'] == 4 || $matchdata['players'][$j]['lane_role'] > 3) {
+              $t_adv_matchlines[$i]['lane'] = 4;
+            }
+          }
         } else {
           # We can't determine hero's lane, so we're going to set it as the most popular value for that hero
           # if it's core. Supports are going to be roaming.
@@ -1198,12 +1297,10 @@ function fetch($match) {
           } else {
             $t_adv_matchlines[$i]['lane'] = 4;
           }
-
         }
 
-
         if (!$bad_replay) {
-          $t_adv_matchlines[$i]['role'] = $team_roles[ $matchdata['players'][$j]['isRadiant'] ? 1 : 0 ][ $matchdata['players'][$j]['hero_id'] ];
+          // $t_adv_matchlines[$i]['role'] = $team_roles[ $matchdata['players'][$j]['isRadiant'] ? 1 : 0 ][ $matchdata['players'][$j]['hero_id'] ];
           $t_adv_matchlines[$i]['lane_won'] = $laning[ $matchdata['players'][$j]['hero_id'] ];
           $t_adv_matchlines[$i]['efficiency_at10'] = $matchdata['players'][$j]['lane_efficiency'];
           $t_adv_matchlines[$i]['wards'] = $matchdata['players'][$j]['obs_placed'];
@@ -2016,8 +2113,23 @@ function fetch($match) {
 
     foreach($t_adv_matchlines as &$aml) {
       if (!isset($aml['role'])) {
-        if ($aml['isCore']) $aml['role'] = $aml['lane'];
-        else $aml['role'] = $aml['lane'] == 1 ? 5 : 4;
+        # Fallback: use lane if role wasn't set
+        # But be smarter about it - don't just use lane directly for supports
+        if ($aml['isCore']) {
+          # Core: role = lane (1, 2, or 3)
+          $aml['role'] = $aml['lane'];
+        } else {
+          # Support: need to distinguish between pos 4 and pos 5
+          # Lane 1 (safe lane) -> pos 5 (role 4)
+          # Lane 4 (roaming/jungle) -> pos 4 (role 3)
+          # Lane 3 (offlane) -> pos 4 (role 3)
+          # Lane 5 was removed from new logic
+          if ($aml['lane'] == 1) {
+            $aml['role'] = 4;  # Position 5 - Hard Support
+          } else {
+            $aml['role'] = 3;  # Position 4 - Support Offlane/Roaming
+          }
+        }
       }
     }
     foreach($t_adv_matchlines as &$aml) {
