@@ -370,6 +370,8 @@
   "items_early_wr_shift": "早",
   "items_late_wr_shift": "晚",
   "items_wr_gradient": "斜率（%/分）",
+  "items_wr_gradient_per_gold": "每千金币斜率",
+  "item_cost": "成本",
   "items_winrate_increase": "胜率增加",
   "items_early_wr_long": "早时间点胜率",
   "items_late_wr_long": "晚时间点胜率",

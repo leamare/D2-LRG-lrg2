@@ -422,6 +422,8 @@
     "items_early_wr_shift": "Early",
     "items_late_wr_shift": "Late",
     "items_wr_gradient": "Gradient (%\/min)",
+    "items_wr_gradient_per_gold": "Gold Gradient (per 1k)",
+    "item_cost": "Cost",
     "items_winrate_increase": "Winrate increase",
     "items_early_wr_long": "Winrate with early timing",
     "items_late_wr_long": "Winrate with late timing",

@@ -421,6 +421,8 @@
   "items_early_wr_shift": "Ранний",
   "items_late_wr_shift": "Поздний",
   "items_wr_gradient": "Градиент (%/мин)",
+  "items_wr_gradient_per_gold": "Градиент на золото (на 1к)",
+  "item_cost": "Стоимость",
   "items_winrate_increase": "Прирост побед",
   "items_early_wr_long": "Побед при ранней покупке",
   "items_late_wr_long": "Побед при поздней покупке",

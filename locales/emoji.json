@@ -421,6 +421,8 @@
   "items_early_wr_shift": "🌅",
   "items_late_wr_shift": "🌙",
   "items_wr_gradient": "📉➗💱⏲",
+  "items_wr_gradient_per_gold": "📉➗💰💱",
+  "item_cost": "💰",
   "items_winrate_increase": "📈➗🏆",
   "items_early_wr_long": "➗🏆➕🌅⏰",
   "items_late_wr_long": "➗🏆➕🌙⏰",

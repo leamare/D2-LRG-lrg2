@@ -308,6 +308,8 @@
     "items_early_wr_shift": "Cedo",
     "items_late_wr_shift": "Tarde",
     "items_wr_gradient": "Gradiente (%\/minuto)",
+    "items_wr_gradient_per_gold": "Gradiente por Ouro (por 1k)",
+    "item_cost": "Custo",
     "item_time_mean": "Média",
     "item_time_min": "Minuto",
     "item_time_q1": "Q1",

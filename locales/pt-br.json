@@ -370,6 +370,8 @@
   "items_early_wr_shift": "Fase Inicial",
   "items_late_wr_shift": "Fase Final",
   "items_wr_gradient": "Gradiente (%/min)",
+  "items_wr_gradient_per_gold": "Gradiente por Ouro (por 1k)",
+  "item_cost": "Custo",
   "items_winrate_increase": "Aumento da taxa de vitórias",
   "items_early_wr_long": "Taxa de vitórias durante a fase inicial",
   "items_late_wr_long": "Taxa de vitórias durante a fase final",
