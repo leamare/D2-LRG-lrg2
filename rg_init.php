@@ -323,6 +323,18 @@ if (!$isVirtual) {
   if ($conn->connect_error) die("[F] Can't create table `players`: ".$conn->connect_error."\n");
   echo "OK\n";
 
+  echo "[ ] Creating table `leagues`...";
+  $conn->query("CREATE TABLE `leagues` (
+    `ticket_id` bigint(20) NOT NULL,
+    `name` varchar(512) NOT NULL,
+    `url` varchar(512),
+    `description` text,
+    PRIMARY KEY (`ticket_id`),
+    UNIQUE KEY `leagues_ticket_id_IDX` (`ticket_id`) USING BTREE
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+  if ($conn->connect_error) die("[F] Can't create table `leagues`: ".$conn->connect_error."\n");
+  echo "OK\n";
+
   echo "[ ] Adding keys to main tables...";
   $conn->query("ALTER TABLE `matches` ADD PRIMARY KEY (`matchid`), ADD UNIQUE KEY `matchid` (`matchid`);");
     if ($conn->connect_error) die("[F] Can't add key to `matches`: ".$conn->connect_error."\n");

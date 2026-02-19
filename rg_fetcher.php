@@ -262,6 +262,24 @@ if ($conn->multi_query($sql) === TRUE) {
   $res->free_result();
 } else die("Something went wrong: ".$conn->error."\n");
 
+$t_leagues = [];
+if ($schema['leagues'] ?? false) {
+  $sql = "SELECT ticket_id, name, url, description FROM leagues;";
+  if ($conn->multi_query($sql) === TRUE) {
+    $res = $conn->store_result();
+
+    for ($row = $res->fetch_row(); $row != null; $row = $res->fetch_row()) {
+      $t_leagues[(int)$row[0]] = [
+        "name" => $row[1],
+        "url" => $row[2],
+        "description" => $row[3],
+        "added" => true
+      ];
+    }
+    $res->free_result();
+  } else die("Something went wrong when loading leagues: ".$conn->error."\n");
+}
+
 $stdin_flag = false;
 
 if ($listen)

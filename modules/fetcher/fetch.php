@@ -8,6 +8,7 @@
 include_once __DIR__.'/comebacks.php';
 include_once __DIR__.'/skillPriority.php';
 include_once __DIR__.'/fetch_valve_api.php';
+include_once __DIR__.'/fetch_league_info.php';
 include_once __DIR__.'/../../modules/commons/fantasy_mvp.php';
 
 function conn_restart() {
@@ -18,7 +19,7 @@ function conn_restart() {
 }
 
 function fetch($match) {
-  global $opendota, $conn, $rnum, $matches, $failed_matches, $scheduled, $scheduled_stratz, $t_teams, $t_players, $use_stratz, $require_stratz,
+  global $opendota, $conn, $rnum, $matches, $failed_matches, $scheduled, $scheduled_stratz, $t_teams, $t_players, $t_leagues, $use_stratz, $require_stratz,
   $request_unparsed, $meta, $stratz_timeout_retries, $force_adding, $cache_dir, $lg_settings, $lrg_use_cache, $first_scheduled,
   $use_full_stratz, $scheduled_wait_period, $steamapikey, $force_await, $players_list, $rank_limit, $stratztoken, $ignore_stratz,
   $update_unparsed, $request_unparsed_players, $stratz_graphql, $api_cooldown_seconds, $update_names, $updated_names, $rewrite_existing,
@@ -161,6 +162,19 @@ function fetch($match) {
           $t_teams[ $t['teamid'] ] = array(
             "name" => $t['name'],
             "tag" => $t['tag'],
+            "added" => false
+          );
+        }
+      }
+    }
+
+    if (isset($matchdata['leagues']) && !empty($matchdata['leagues'])) {
+      foreach($matchdata['leagues'] as $l) {
+        if (!isset($t_leagues[$l['ticket_id']])) {
+          $t_leagues[ $l['ticket_id'] ] = array(
+            "name" => $l['name'],
+            "url" => $l['url'],
+            "description" => $l['description'],
             "added" => false
           );
         }
@@ -821,6 +835,25 @@ function fetch($match) {
     } else {
       $t_match['stomp'] = 0;
       $t_match['comeback'] = 0;
+    }
+
+    if (($schema['leagues'] ?? false) && !empty($t_match['leagueID']) && $t_match['leagueID'] > 0) {
+      if (!isset($t_leagues[$t_match['leagueID']])) {
+        echo "..Fetching league info for {$t_match['leagueID']}..";
+        $league_info = fetch_league_info($t_match['leagueID']);
+        
+        if ($league_info) {
+          $t_leagues[$t_match['leagueID']] = [
+            "name" => $league_info['name'],
+            "url" => $league_info['url'],
+            "description" => $league_info['description'],
+            "added" => false
+          ];
+          echo "OK..";
+        } else {
+          echo "League info not available..";
+        }
+      }
     }
 
     if ($lg_settings['main']['teams'] && (isset($matchdata['radiant_team']) || isset($matchdata['dire_team']))) {
@@ -1820,6 +1853,17 @@ function fetch($match) {
       }
     }
 
+    if (!empty($t_match['leagueID']) && isset($t_leagues[$t_match['leagueID']])) {
+      $matchdata['leagues'] = [
+        [
+          'ticket_id' => $t_match['leagueID'],
+          'name' => $t_leagues[$t_match['leagueID']]['name'],
+          'url' => $t_leagues[$t_match['leagueID']]['url'],
+          'description' => $t_leagues[$t_match['leagueID']]['description'],
+        ]
+      ];
+    }
+
     $json = json_encode($matchdata);
     if (!empty($json)) {
       file_put_contents("$cache_dir/".$match.".lrgcache.json", $json);
@@ -2322,6 +2366,33 @@ function fetch($match) {
   }
 
   echo "..OK.\n";
+
+  if ($schema['leagues'] ?? false) {
+    $newleagues = [];
+    foreach ($t_leagues as $id => $league) {
+      if ($league['added']) continue;
+      $newleagues[$id] = $league;
+    }
+    if (sizeof($newleagues)) {
+      $sql = "INSERT INTO leagues (ticket_id, name, url, description) VALUES ";
+      foreach ($newleagues as $id => $league) {
+        $sql .= "\n\t(" . $id . ", "
+          . "'" . $conn->real_escape_string($league['name']) . "', "
+          . ($league['url'] ? "'" . $conn->real_escape_string($league['url']) . "'" : "NULL") . ", "
+          . ($league['description'] ? "'" . $conn->real_escape_string($league['description']) . "'" : "NULL")
+          . "),";
+      }
+      $sql[strlen($sql)-1] = " ";
+      $sql .= "ON DUPLICATE KEY UPDATE name = VALUES(name), url = VALUES(url), description = VALUES(description);";
+
+      if ($conn->multi_query($sql) === TRUE);
+      else echo "ERROR leagues (" . $conn->error . ").\n";
+
+      foreach ($newleagues as $id => $league) {
+        $t_leagues[$id]['added'] = true;
+      }
+    }
+  }
 
   if ($lg_settings['main']['teams']) {
     $newteams = array();

@@ -21,6 +21,7 @@ $schema = [
   'variant' => false,
   'fantasy_mvp' => false,
   'series' => false,
+  'leagues' => false,
 ];
 
 echo "[ ] Getting tables\n";
@@ -59,6 +60,9 @@ for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row(
       break;
     case "series":
       $schema['series'] = false;
+      break;
+    case "leagues":
+      $schema['leagues'] = true;
       break;
   }
 }

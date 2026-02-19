@@ -30,11 +30,20 @@ function rg_generator_tickets_list($mod_id, $tickets_data) {
     global $linkvars;
     $linkvars_str = is_array($linkvars) ? http_build_query($linkvars) : $linkvars;
 
+    $league_name = "none";
+    if ($lid && $lid > 0) {
+      if (!empty($data['name'])) {
+        $league_name = htmlspecialchars($data['name']);
+      } else {
+        $league_name = "League #$lid";
+      }
+    }
+
     $res .= "<tr>";
     $res .= "<td class=\"lid-logo banner-row\">".
       "<img class=\"event-logo-list\" src=\"".str_replace('%LID%', $lid, $league_logo_banner_provider)."\" alt=\"$lid\" />".
     "</td>";
-    $res .= "<td>League #$lid</td>";
+    $res .= "<td>$league_name</td>";
     $res .= "<td><a href=\"?lid=$lid".(empty($linkvars_str) ? "" : "&".$linkvars_str)."\">$lid</a></td>";
     $res .= "<td>".$data['matches']."</td>";
     $res .= "</tr>";
