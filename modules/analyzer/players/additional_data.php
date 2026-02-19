@@ -107,10 +107,38 @@ foreach ($result['players'] as $pid => &$name) {
   }
 
   # positions
-  $sql = "SELECT aml.lane, COUNT(distinct aml.matchid) matches, SUM(NOT m.radiantWin XOR ml.isRadiant) wins FROM adv_matchlines aml
-          JOIN matches m ON m.matchid = aml.matchid
-          JOIN matchlines ml ON aml.matchid = ml.matchid  AND aml.playerid = ml.playerid
-          WHERE ml.playerid = $pid AND aml.isCore = 1 GROUP BY aml.lane ORDER BY wins DESC, matches DESC;";
+  $use_roles = $schema['adv_matchlines_roles'] ?? false;
+  
+  if ($use_roles) {
+    # Use role-based query
+    $sql = "SELECT 
+              CASE 
+                WHEN aml.role <= 2 THEN 1
+                ELSE 0
+              END as core,
+              CASE
+                WHEN aml.role = 0 THEN 1
+                WHEN aml.role = 1 THEN 2
+                WHEN aml.role = 2 THEN 3
+                WHEN aml.role = 3 THEN 3
+                WHEN aml.role = 4 THEN 1
+                ELSE aml.lane
+              END as lane,
+              COUNT(distinct aml.matchid) matches,
+              SUM(NOT m.radiantWin XOR ml.isRadiant) wins
+            FROM adv_matchlines aml
+            JOIN matches m ON m.matchid = aml.matchid
+            JOIN matchlines ml ON aml.matchid = ml.matchid AND aml.playerid = ml.playerid
+            WHERE ml.playerid = $pid
+            GROUP BY core, lane
+            ORDER BY wins DESC, matches DESC;";
+  } else {
+    // separate queries for cores and supports for old reports
+    $sql = "SELECT aml.lane, COUNT(distinct aml.matchid) matches, SUM(NOT m.radiantWin XOR ml.isRadiant) wins FROM adv_matchlines aml
+            JOIN matches m ON m.matchid = aml.matchid
+            JOIN matchlines ml ON aml.matchid = ml.matchid  AND aml.playerid = ml.playerid
+            WHERE ml.playerid = $pid AND aml.isCore = 1 GROUP BY aml.lane ORDER BY wins DESC, matches DESC;";
+  }
 
   if ($conn->multi_query($sql) === TRUE);
   else die("[F] Unexpected problems when requesting database1.\n".$conn->error."\n");
@@ -120,44 +148,45 @@ foreach ($result['players'] as $pid => &$name) {
 
   for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
     $result["players_additional"][$pid]['positions'][] = array(
-      "core" => 1,
-      "lane" => $row[0],
-      "matches" => $row[1],
-      "wins" => $row[2]
+      "core" => $use_roles ? $row[0] : 1,
+      "lane" => $use_roles ? $row[1] : $row[0],
+      "matches" => $use_roles ? $row[2] : $row[1],
+      "wins" => $use_roles ? $row[3] : $row[2]
     );
   }
 
   $query_res->free_result();
 
-  $sql = "SELECT CASE WHEN aml.lane = 1 THEN 1 ELSE 3 END as lane, COUNT(distinct aml.matchid) matches, SUM(NOT m.radiantWin XOR ml.isRadiant) wins
-    FROM adv_matchlines aml
-    JOIN matches m ON m.matchid = aml.matchid
-    JOIN matchlines ml ON aml.matchid = ml.matchid AND aml.playerid = ml.playerid
-    WHERE aml.playerid = $pid AND aml.isCore = 0 GROUP BY 1 ORDER BY wins DESC, matches DESC;";
+  if (!$use_roles) {
+    $sql = "SELECT CASE WHEN aml.lane = 1 THEN 1 ELSE 3 END as lane, COUNT(distinct aml.matchid) matches, SUM(NOT m.radiantWin XOR ml.isRadiant) wins
+      FROM adv_matchlines aml
+      JOIN matches m ON m.matchid = aml.matchid
+      JOIN matchlines ml ON aml.matchid = ml.matchid AND aml.playerid = ml.playerid
+      WHERE aml.playerid = $pid AND aml.isCore = 0 GROUP BY 1 ORDER BY wins DESC, matches DESC;";
 
-  if ($conn->multi_query($sql) === TRUE);
-  else die("[F] Unexpected problems when requesting database1.\n".$conn->error."\n");
+    if ($conn->multi_query($sql) === TRUE);
+    else die("[F] Unexpected problems when requesting database1.\n".$conn->error."\n");
 
-  $query_res = $conn->store_result();
+    $query_res = $conn->store_result();
 
-  for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
-    $result["players_additional"][$pid]['positions'][] = array(
-      "core" => 0,
-      "lane" => $row[0],
-      "matches" => $row[1],
-      "wins" => $row[2]
-    );
+    for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+      $result["players_additional"][$pid]['positions'][] = array(
+        "core" => 0,
+        "lane" => $row[0],
+        "matches" => $row[1],
+        "wins" => $row[2]
+      );
+    }
+
+    $query_res->free_result();
   }
 
   uasort($result["players_additional"][$pid]['positions'], function($a, $b) {
     if($a['matches'] == $b['matches']) return 0;
     else return ($a['matches'] < $b['matches']) ? 1 : -1;
   });
-
-  $query_res->free_result();
 }
 
-if (!($lg_settings['ana']['players_names'] ?? true))
+if (!($lg_settings['ana']['players_names'] ?? true)) {
   unset($result['players']);
-
-?>
+}

@@ -1,7 +1,7 @@
 <?php 
 
 function rg_query_hero_positions(&$conn, $team = null, $cluster = null, $players = null) {
-  global $players_interest;
+  global $players_interest, $schema;
   if (empty($players) && !empty($team) && !empty($players_interest)) {
     $players = $players_interest;
   }
@@ -13,11 +13,23 @@ function rg_query_hero_positions(&$conn, $team = null, $cluster = null, $players
   if (!empty($team)) $wheres[] = "teams_matches.teamid = $team";
   if (!empty($players)) $wheres[] = "ml.playerid IN (".implode(",", $players).")";
 
+  $use_roles = $schema['adv_matchlines_roles'] ?? false;
+
   for ($core = 0; $core < 2; $core++) {
     if (!isset($res[$core])) $res[$core] = [];
     for ($lane = 1; $lane > 0 && $lane < 6; $lane++) {
       if (!$core) { $lane = $lane == 1 ? 1 : 3; }
       $res[$core][$lane] = [];
+      
+      if ($use_roles) {
+        $role = POSITION_TO_ROLE_MAP[$core][$lane] ?? null;
+        if ($role === null) continue;
+        $where_position = "am.role = $role";
+      } else {
+        $where_position = $core == 0
+          ? "am.isCore = 0 AND am.lane ".($lane == 1 ? '= 1' : '<> 1')
+          : "am.isCore = 1 AND am.lane = $lane";
+      }
   
       $sql = "SELECT
                 am.heroid heroid,
@@ -42,9 +54,7 @@ function rg_query_hero_positions(&$conn, $team = null, $cluster = null, $players
                   JOIN matches m
                     ON m.matchid = am.matchid ". 
               ($team === null ? "" : "JOIN teams_matches ON ml.matchid = teams_matches.matchid AND ml.isRadiant = teams_matches.is_radiant ").
-            " WHERE ".
-             //($core == 0 ? "am.isCore = 0" : "am.isCore = 1 AND am.lane = $lane").
-             ($core == 0 ? "am.isCore = 0 AND am.lane ".($lane == 1 ? '= 1' : '<> 1') : "am.isCore = 1 AND am.lane = $lane").
+            " WHERE $where_position".
              (!empty($wheres) ? " AND ".implode(" AND ", $wheres) : "").
              " GROUP BY am.heroid
               ORDER BY matches DESC, winrate DESC;";
@@ -90,7 +100,10 @@ function rg_query_hero_positions(&$conn, $team = null, $cluster = null, $players
 }
 
 function rg_query_hero_positions_matches(&$conn, &$context) {
+  global $schema;
   $res = [];
+
+  $use_roles = $schema['adv_matchlines_roles'] ?? false;
 
   for ($core = 0; $core < 2; $core++) {
     if (!isset($res[$core])) $res[$core] = [];
@@ -98,12 +111,29 @@ function rg_query_hero_positions_matches(&$conn, &$context) {
       if (!$core) { $lane = $lane == 1 ? 1 : 3; }
       $res[$core][$lane] = [];
 
+      if (empty($context[$core][$lane])) {
+        if (!$core && $lane == 3) break;
+        continue;
+      }
+
+      # Map core/lane to role ID or build legacy WHERE clause
+      if ($use_roles) {
+        $role = POSITION_TO_ROLE_MAP[$core][$lane] ?? null;
+        if ($role === null) {
+          if (!$core && $lane == 3) break;
+          continue;
+        }
+        $where_position = "role = $role";
+      } else {
+        $where_position = $core == 0
+          ? "isCore = 0 AND lane ".($lane == 1 ? '= 1' : '<> 1')
+          : "isCore = 1 AND lane = $lane";
+      }
+
       foreach ($context[$core][$lane] as $id => $hero) {
         $res[$core][$lane][$id] = [];
 
-        $sql = "SELECT matchid FROM adv_matchlines WHERE heroid = ".$id." AND ".
-            //($core == 0 ? "isCore = 0" :"isCore = 1 AND lane = $lane").";";
-            ($core == 0 ? "isCore = 0 AND lane ".($lane == 1 ? '= 1' : '<> 1') :"isCore = 1 AND lane = $lane").";";
+        $sql = "SELECT matchid FROM adv_matchlines WHERE heroid = ".$id." AND $where_position;";
 
         if ($conn->multi_query($sql) === TRUE);
         else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
