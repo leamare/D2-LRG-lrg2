@@ -94,7 +94,8 @@
       "triplets": true,
       "matches": true,
       "team_vs_team" : true,
-      "limiter": false
+      "limiter": false,
+      "players_mvp_full_gen": false
     },
     "regions": {
       "group_regions": true,

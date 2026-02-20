@@ -1,6 +1,6 @@
 <?php 
 
-function rg_query_players_mvp(&$conn, $cluster = null, $players = null) {
+function rg_query_players_mvp(&$conn, $cluster = null, $players = null, $teamid = null) {
   global $players_interest;
   if (empty($players) && !empty($players_interest)) {
     $players = $players_interest;
@@ -8,8 +8,16 @@ function rg_query_players_mvp(&$conn, $cluster = null, $players = null) {
 
   $res = [];
 
+  $joins = [];
   $wheres = [];
-  if (!empty($cluster)) $wheres[] = "m.cluster IN (".implode(",", $cluster).")";
+  if (!empty($teamid)) {
+    $joins[]  = "JOIN teams_matches tm ON fmp.matchid = tm.matchid AND tm.teamid = ".intval($teamid);
+    $joins[]  = "JOIN matchlines ml ON ml.matchid = fmp.matchid AND ml.playerid = fmp.playerid AND ml.isRadiant = tm.is_radiant";
+  }
+  if (!empty($cluster)) {
+    $joins[]  = "JOIN matches m ON fmp.matchid = m.matchid";
+    $wheres[] = "m.cluster IN (".implode(",", $cluster).")";
+  }
   if (!empty($players)) $wheres[] = "fmp.playerid IN (".implode(",", $players).")";
 
   $sql = "SELECT
@@ -41,7 +49,7 @@ function rg_query_players_mvp(&$conn, $cluster = null, $players = null) {
           FROM fantasy_mvp_points fmp LEFT JOIN
             fantasy_mvp_awards fma
                 ON fma.matchid = fmp.matchid AND fmp.heroid = fma.heroid ".
-          (!empty($cluster) ? "JOIN matches m ON fmp.matchid = m.matchid " : "").
+          (!empty($joins)  ? implode(" ", $joins)." " : "").
           (!empty($wheres) ? "WHERE ".implode(" AND ", $wheres) : "").
         " GROUP BY pid
           ORDER BY total_awards DESC;";

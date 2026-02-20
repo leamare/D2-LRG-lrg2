@@ -16,14 +16,20 @@ class Fantasy extends EndpointTemplate {
       if (!isset($report['teams'][$tid]))
         throw new \Exception("Unknown team $tid");
 
-      if (in_array("players", $mods)) {
+    if (in_array("players", $mods)) {
+      if (isset($report['teams'][$tid]['players_mvp'])) {
+        $res = $report['teams'][$tid]['players_mvp'];
+        if (is_wrapped($res)) $res = unwrap_data($res);
+      } else {
         $players_all = $report['fantasy']['players_mvp'] ?? null;
         if (empty($players_all))
           throw new \Exception("No players MVP data in this report");
         if (is_wrapped($players_all)) $players_all = unwrap_data($players_all);
         $roster = $report['teams'][$tid]['active_roster'] ?? $report['teams'][$tid]['roster'] ?? [];
         $res = array_intersect_key($players_all, array_flip($roster));
-        $res['__endp'] = "teams-players-fantasy";
+      }
+      
+      $res['__endp'] = "teams-players-fantasy";
       } else if (in_array("heroes", $mods)) {
         if (!isset($report['teams'][$tid]['heroes_mvp']))
           throw new \Exception("No heroes MVP data for team $tid");

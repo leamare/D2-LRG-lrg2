@@ -178,10 +178,13 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
         }
       }
 
-      // players / fantasy MVP (filtered from report-wide data to this team's roster)
-      if (!empty($report['fantasy']['players_mvp'])) {
+      // players / fantasy MVP
+      // Use full per-team generated data if present, otherwise filter report-wide data by roster
+      $has_players_mvp_generated = isset($context[$tid]['players_mvp']);
+      $has_players_mvp_filtered  = !$has_players_mvp_generated && !empty($report['fantasy']['players_mvp']);
+      if ($has_players_mvp_generated || $has_players_mvp_filtered) {
         $roster = $context[$tid]['active_roster'] ?? $context[$tid]['roster'] ?? [];
-        if (!empty($roster)) {
+        if ($has_players_mvp_generated || !empty($roster)) {
           if (!isset($res["team".$tid]['players'])) {
             $res["team".$tid]['players'] = [];
             if ($mod == $context_mod."team".$tid."-players") $unset_module = true;
@@ -192,9 +195,14 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
             include_once($root."/modules/view/generators/summary.php");
             include_once($root."/modules/view/functions/explainer.php");
 
-            $players_all = $report['fantasy']['players_mvp'];
-            if (is_wrapped($players_all)) $players_all = unwrap_data($players_all);
-            $mvp_data = array_intersect_key($players_all, array_flip($roster));
+            if ($has_players_mvp_generated) {
+              $mvp_data = $context[$tid]['players_mvp'];
+              if (is_wrapped($mvp_data)) $mvp_data = unwrap_data($mvp_data);
+            } else {
+              $players_all = $report['fantasy']['players_mvp'];
+              if (is_wrapped($players_all)) $players_all = unwrap_data($players_all);
+              $mvp_data = array_intersect_key($players_all, array_flip($roster));
+            }
 
             $postfixes = [
               'awards'  => [ 'mvp', 'mvp_losing', 'core', 'support', 'lvp' ],
