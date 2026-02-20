@@ -23,6 +23,8 @@ include_once("modules/commons/instaquery.php");
 include_once("modules/commons/echobltime.php");
 include_once("modules/view/functions/ranking.php");
 
+include_once("modules/analyzer/__constants/positions.php");
+
 echo("\nConnecting to database...\n");
 
 try {

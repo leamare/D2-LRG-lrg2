@@ -20,15 +20,56 @@ There’s also a note about versions format. It’s basically a number based on 
 
 One major GET parameter is `report`. It specifies a tag of a report to load. If such report exists then GET `mod` is parsed. This is case one – Report is loaded. The second case is opposite and it has some unique endpoints.
 
-There's also a thing called "repeater". Basically (if the method supports it) you can pass a comma delimited input (e.g. `1,2,3,5`) or an asterisk (`*`) instead of value. The resulting set will have responses for all selected values (asterisk selects all possible values) for this method.
+### OpenAPI / Swagger spec
+
+Add `?openapi` (or `?swagger`) to any request to get a machine-readable OpenAPI 3.0 spec instead of a normal response. All class-based endpoints are described there. Example:
+
+```
+GET /rg_webapi.php?openapi
+```
+
+### Repeaters
+
+When an endpoint supports repeating (most report endpoints do), you can pass a comma-delimited list **or** `*` as the value of any modline variable or its GET parameter equivalent. The response then wraps individual results in a repeater envelope:
+
+```json
+{
+  "repeater": "heroid",
+  "values": [1, 2, 8],
+  "results": {
+    "1": { /* normal result for heroid=1 */ },
+    "2": { /* normal result for heroid=2 */ },
+    "8": { /* normal result for heroid=8 */ }
+  }
+}
+```
+
+`*` expands to all known values for that variable in the loaded report (all heroes, all teams, all players, etc.). Repeaters can be nested — if two variables both receive arrays the outer one iterates first, then the inner one for each outer value.
+
+Some endpoints stop the repeater early and return a single merged result even when an array is supplied (e.g. `items/profiles` always returns a single item profile regardless). Those endpoints declare a `__stopRepeater` key internally.
 
 ### Variables
 
+Modline variables can be supplied in **two ways** — embedded in the `mod` path (MODL) or as plain GET parameters. GET parameters are only applied when the modline did not already set that variable. The syntax for both is identical for lists and wildcards.
+
+| Variable | Modline prefix | GET param | Wildcard `*` expands to |
+|---|---|---|---|
+| `region` | `region#` | `region` | all regions in the report |
+| `position` | `position_C.L` | `position` | all five positions |
+| `heroid` | `heroid#` | `heroid` | all heroes with pick/ban data |
+| `variant` | `variant#` | `variant` | — |
+| `playerid` | `playerid#` | `playerid` | all players in the report |
+| `team` | `team#` / `teamid#` | `team` / `teamid` | all teams of interest |
+| `optid` | `optid#` | `optid` | all teams of interest |
+| `itemid` | `itemid#` | `itemid` / `item` | all items with stats |
+
+All integer variables also accept comma-delimited lists (`1,2,3`) in both forms, which activates the repeater for that variable.
+
 * (GET) `league` – report tag for report endpoints
 * (GET) `gets` – a comma-delimited list of parameters (for non-report endpoints)
-* (GET) `mod` – Modpath to execute. It’s readed from last to read to find the next specified method. Think of modline as of a path to a file with directory names. You can use `/` or `-` as separators.
+* (GET) `mod` – Modpath to execute. It's read from right to left to find the active endpoint. Use `/` or `-` as separators.
   * Modline examples: `heroes-positions-position_1.1`, `regions/region2/heroes/meta_graph`
-  * The modline if being read right to left so you can specify a very long modline, but as soon as it finds a correct endpoint, it gets executed regardless of everything else.
+  * The modline is read right to left so you can specify a very long modline, but as soon as it finds a correct endpoint, it gets executed regardless of everything else.
   * Modline can contain some parameters (described below as MODL). Modline parameters can be placed anywhere in modline.
 * (MODL) `region#` – sets `region` variable to `#` value (expected region codes listed in metadata)
 * (MODL) `position_C.L` – sets position to `C.L` code, where `C` is Core flag (0/1) and `L` is lane flag
@@ -37,7 +78,7 @@ There's also a thing called "repeater". Basically (if the method supports it) yo
 * (MODL) `team#` – sets `team` to `#` value (expected dota team ID), alias `teamid#`
 * (MODL) `itemid#` – sets `item` to `#` value (expected dota item ID)
 * (GET) `rep` – report tag (for non-report endpoints)
-* (GET) `pretty` – flag, if it’s used response will be nicely formatted
+* (GET) `pretty` – flag, if it's used response will be nicely formatted
 * (GET) `desc` - flag, adds report descriptor to the response if set
 * (GET) `teamcard` - flag, adds team card to the response if set
 * (GET) `search` - search query used for search
