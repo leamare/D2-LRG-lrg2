@@ -113,15 +113,15 @@ foreach ($result['players'] as $pid => &$name) {
     # Use role-based query
     $sql = "SELECT 
               CASE 
-                WHEN aml.role <= 2 THEN 1
+                WHEN aml.role <= 3 THEN 1
                 ELSE 0
               END as core,
               CASE
-                WHEN aml.role = 0 THEN 1
-                WHEN aml.role = 1 THEN 2
-                WHEN aml.role = 2 THEN 3
+                WHEN aml.role = 1 THEN 1
+                WHEN aml.role = 2 THEN 2
                 WHEN aml.role = 3 THEN 3
-                WHEN aml.role = 4 THEN 1
+                WHEN aml.role = 4 THEN 3
+                WHEN aml.role = 5 THEN 1
                 ELSE aml.lane
               END as lane,
               COUNT(distinct aml.matchid) matches,
