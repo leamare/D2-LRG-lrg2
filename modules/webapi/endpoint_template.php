@@ -1,7 +1,7 @@
 <?php
 
-include_once(__DIR__ . "/Attributes.php");
-include_once(__DIR__ . "/Schema.php");
+include_once(__DIR__ . "/attributes.php");
+include_once(__DIR__ . "/schema.php");
 
 abstract class EndpointTemplate {
 

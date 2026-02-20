@@ -5,7 +5,7 @@ $endpoints = [];
 $endpointObjects = [];
 $repeatVars = [];
 
-include_once(__DIR__ . "/EndpointTemplate.php");
+include_once(__DIR__ . "/endpoint_template.php");
 
 // Specify endpoints folders for specific conditions
 
@@ -48,8 +48,8 @@ $mod = str_replace("/", "-", $mod);
 $modline = array_reverse(explode("-", $mod));
 
 // Load framework pieces and register endpoint classes BEFORE parsing variables
-include_once(__DIR__ . "/Attributes.php");
-include_once(__DIR__ . "/Schema.php");
+include_once(__DIR__ . "/attributes.php");
+include_once(__DIR__ . "/schema.php");
 
 // Discover endpoint classes in loaded files
 $declared = get_declared_classes();
