@@ -101,6 +101,11 @@ if ($lg_settings['ana']['teams'])
         require("players/draft.php");
       }
 
+      if (($lg_settings['ana']['teams']['mvp'] ?? false) || $lg_settings['main']['fantasy']) {
+        # heroes MVP summary stats for this team
+        require("heroes/mvp.php");
+      }
+
       if ($lg_settings['ana']['matchlist'] && $lg_settings['ana']['teams']['matches']) {
         # matches
         require("matches.php");

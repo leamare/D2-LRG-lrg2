@@ -141,12 +141,76 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
         }
       }
 
+      // heroes / fantasy MVP
+      if (isset($context[$tid]['heroes_mvp'])) {
+        $res["team".$tid]['heroes']['fantasy'] = "";
+
+        if (check_module($context_mod."team".$tid."-heroes-fantasy")) {
+          include_once($root."/modules/view/generators/summary.php");
+          include_once($root."/modules/view/functions/explainer.php");
+
+          $mvp_data = $context[$tid]['heroes_mvp'];
+          if (is_wrapped($mvp_data)) $mvp_data = unwrap_data($mvp_data);
+
+          $postfixes = [
+            'awards'  => [ 'mvp', 'mvp_losing', 'core', 'support', 'lvp' ],
+            'fantasy' => [ 'total_points', 'kda', 'farm', 'combat', 'objectives' ],
+          ];
+          $fantasy_data = [];
+          foreach ($mvp_data as $hero_id => $data) {
+            $fantasy_data[$hero_id] = [ 'matches' => $data['matches_s'], 'total_awards' => $data['total_awards'] ];
+            foreach ($postfixes as $type => $keys)
+              foreach ($keys as $key)
+                $fantasy_data[$hero_id][$key.'_'.$type] = $data[$key];
+          }
+
+          $res["team".$tid]['heroes']['fantasy'] = explainer_block(locale_string("fantasy_summary_desc"))
+            . rg_generator_summary("team$tid-heroes-fantasy", $fantasy_data);
+        }
+      }
+
       if (isset($context[$tid]['players_draft'])) {
         $res["team".$tid]['players'] = [];
         if ($mod == $context_mod."team".$tid."-players") $unset_module = true;
 
         if (isset($context[$tid]['players_draft'])) {
           include_once __DIR__ . "/profile_snippets/players_draft.php";
+        }
+      }
+
+      // players / fantasy MVP (filtered from report-wide data to this team's roster)
+      if (!empty($report['fantasy']['players_mvp'])) {
+        $roster = $context[$tid]['active_roster'] ?? $context[$tid]['roster'] ?? [];
+        if (!empty($roster)) {
+          if (!isset($res["team".$tid]['players'])) {
+            $res["team".$tid]['players'] = [];
+            if ($mod == $context_mod."team".$tid."-players") $unset_module = true;
+          }
+          $res["team".$tid]['players']['fantasy'] = "";
+
+          if (check_module($context_mod."team".$tid."-players-fantasy")) {
+            include_once($root."/modules/view/generators/summary.php");
+            include_once($root."/modules/view/functions/explainer.php");
+
+            $players_all = $report['fantasy']['players_mvp'];
+            if (is_wrapped($players_all)) $players_all = unwrap_data($players_all);
+            $mvp_data = array_intersect_key($players_all, array_flip($roster));
+
+            $postfixes = [
+              'awards'  => [ 'mvp', 'mvp_losing', 'core', 'support', 'lvp' ],
+              'fantasy' => [ 'total_points', 'kda', 'farm', 'combat', 'objectives' ],
+            ];
+            $fantasy_data = [];
+            foreach ($mvp_data as $player_id => $data) {
+              $fantasy_data[$player_id] = [ 'matches' => $data['matches_s'], 'total_awards' => $data['total_awards'] ];
+              foreach ($postfixes as $type => $keys)
+                foreach ($keys as $key)
+                  $fantasy_data[$player_id][$key.'_'.$type] = $data[$key];
+            }
+
+            $res["team".$tid]['players']['fantasy'] = explainer_block(locale_string("fantasy_summary_desc"))
+              . rg_generator_summary("team$tid-players-fantasy", $fantasy_data, false);
+          }
         }
       }
 

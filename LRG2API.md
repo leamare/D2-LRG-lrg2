@@ -356,6 +356,29 @@ It’s fairly simple to explain. It doesn’t have a structure and is used in `s
 * `heroes/rolepickban` - also works for regions and teams, requires heroes-positions to be enabled
 * `milestones`
 * `tickets` - returns list of league tickets that matches in this report belong to, sorted by number of matches descending. Returns an empty array if the report has no ticket data.
+* `fantasy/heroes` - hero-level Fantasy MVP summary. Add `team` variable to scope to a specific team (heroes played by that team only; requires fantasy+teams data). Returns a map of hero ID → entry.
+* `fantasy/players` - player-level Fantasy MVP summary. Add `team` variable to return only players from that team's active roster. Returns a map of player ID → entry.
+
+#### fantasy response entry shape
+
+```json
+{
+  "86": {                      // hero ID or player ID
+    "matches_s":    12,        // matches with fantasy data
+    "total_awards": 8.4,       // weighted score: mvp + mvp_losing + 0.6*core + 0.4*support
+    "mvp":          3,
+    "mvp_losing":   1,
+    "core":         5,
+    "support":      2,
+    "lvp":          0,
+    "total_points": 42.5,      // avg total fantasy points
+    "kda":          11.2,      // avg kills+deaths+assists points
+    "farm":         14.8,      // avg farm points (creeps+gpm+xpm+stacks)
+    "combat":       9.3,
+    "objectives":   4.1
+  }
+}
+```
 
 #### Tickets response
 
