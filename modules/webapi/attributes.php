@@ -2,44 +2,56 @@
 
 #[\Attribute(\Attribute::TARGET_CLASS)]
 class Endpoint {
-	public function __construct(
-		public string $name,
-		public ?string $path = null,
-		public bool $isRouter = false
-	) {}
+	public $name;
+	public $path;
+	public $isRouter;
+	public function __construct($name, $path = null, $isRouter = false) {
+		$this->name = $name;
+		$this->path = $path;
+		$this->isRouter = $isRouter;
+	}
 }
 
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::IS_REPEATABLE)]
 class GetParam {
-	public function __construct(
-		public string $name,
-		public bool $required = false,
-		public array $schema = [ 'type' => 'string' ],
-		public string $description = ''
-	) {}
+	public $name;
+	public $required;
+	public $schema;
+	public $description;
+	public function __construct($name, $required = false, $schema = [ 'type' => 'string' ], $description = '') {
+		$this->name = $name;
+		$this->required = $required;
+		$this->schema = $schema;
+		$this->description = $description;
+	}
 }
 
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::IS_REPEATABLE)]
 class ModlineVar {
-	public function __construct(
-		public string $name,
-		public array $schema = [ 'type' => 'string' ],
-		public string $description = ''
-	) {}
+	public $name;
+	public $schema;
+	public $description;
+	public function __construct($name, $schema = [ 'type' => 'string' ], $description = '') {
+		$this->name = $name;
+		$this->schema = $schema;
+		$this->description = $description;
+	}
 }
 
 #[\Attribute(\Attribute::TARGET_CLASS)]
 class ReturnSchema {
-	public function __construct(
-		public array|string $schema = [ 'type' => 'object' ]
-	) {}
+	public $schema;
+	public function __construct($schema = [ 'type' => 'object' ]) {
+		$this->schema = $schema;
+	}
 }
 
 #[\Attribute(\Attribute::TARGET_CLASS)]
 class Description {
-	public function __construct(
-		public string $text
-	) {}
+	public $text;
+	public function __construct($text) {
+		$this->text = $text;
+	}
 }
 
 

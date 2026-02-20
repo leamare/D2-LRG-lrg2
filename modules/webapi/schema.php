@@ -133,10 +133,10 @@ function normalize_data_by_schema($data, $schema) {
 			return is_numeric($data) ? (float)$data : $data;
 			
 		case 'boolean':
-			return (bool)$data;
+			return is_scalar($data) ? (bool)$data : $data;
 			
 		case 'string':
-			return (string)$data;
+			return is_scalar($data) ? (string)$data : $data;
 			
 		default:
 			return $data;

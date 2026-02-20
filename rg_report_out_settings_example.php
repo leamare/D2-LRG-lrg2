@@ -27,6 +27,10 @@ $_earlypreview_wa_ban = [
   // 'sticonsumables',
 ];
 
+// Override the base URL used in the generated OpenAPI spec and Swagger UI.
+// Leave null to auto-detect from the request path (query string stripped).
+$_webapi_root = null;
+
 $hide_sti_block = true;
 
 $vw_section_markers = [

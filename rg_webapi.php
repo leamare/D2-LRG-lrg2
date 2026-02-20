@@ -222,7 +222,14 @@ if (!empty($leaguetag)) {
 // Serve Swagger UI if requested
 if (isset($_GET['swagger'])) {
   header('Content-Type: text/html; charset=utf-8');
-  $openapiUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http')."://".$_SERVER['HTTP_HOST'].dirname($_SERVER['REQUEST_URI'])."/rg_webapi.php?openapi=1".(empty($leaguetag)?'':"&league=".urlencode($leaguetag));
+  $scheme = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
+  $host   = $_SERVER['HTTP_HOST'] ?? 'localhost';
+  if (!empty($_webapi_root)) {
+    $apiBase = rtrim($_webapi_root);
+  } else {
+    $apiBase = $scheme.'://'.$host.(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?: '/');
+  }
+  $openapiUrl = $apiBase.'?openapi=1'.(empty($leaguetag) ? '' : '&league='.urlencode($leaguetag));
   echo "<!DOCTYPE html><html><head><meta charset=\"utf-8\" /><title>LRG2 API Docs</title><link rel=\"stylesheet\" href=\"https://unpkg.com/swagger-ui-dist@5/swagger-ui.css\"></head><body><div id=\"swagger-ui\"></div><script src=\"https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js\"></script><script>window.ui = SwaggerUIBundle({ url: '".$openapiUrl."', dom_id: '#swagger-ui' });</script></body></html>";
   exit;
 }

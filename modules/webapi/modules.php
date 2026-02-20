@@ -139,8 +139,13 @@ $__openapi = isset($_GET['openapi']);
 if ($__openapi) {
   $scheme = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
   $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-  $scriptPath = $_SERVER['SCRIPT_NAME'] ?? '/rg_webapi.php';
-  $baseUrl = $scheme."://".$host.$scriptPath;
+
+  if (!empty($GLOBALS['_webapi_root'])) {
+    $baseUrl = rtrim($GLOBALS['_webapi_root']);
+  } else {
+    $requestPath = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?: ($_SERVER['SCRIPT_NAME'] ?? '/rg_webapi.php');
+    $baseUrl = $scheme."://".$host.$requestPath;
+  }
 
   $paths = [];
   foreach ($endpointObjects as $name => $factory) {
