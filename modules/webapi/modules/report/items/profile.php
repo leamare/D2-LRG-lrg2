@@ -523,17 +523,39 @@ public function process() {
 }
 
 if (is_docs_mode()) {
+  SchemaRegistry::register('EnchantmentHeroTierEntry', TypeDefs::obj([
+    'hero_id' => TypeDefs::int(),
+    'matches' => TypeDefs::int(),
+    'prate' => TypeDefs::num(),
+    'wr' => TypeDefs::num(),
+    'wr_diff' => TypeDefs::num(),
+  ]));
+
+  SchemaRegistry::register('EnchantmentProfileStats', TypeDefs::obj([
+    'total' => TypeDefs::obj([
+      'matches' => TypeDefs::int(),
+      'prate' => TypeDefs::num(),
+      'wr' => TypeDefs::num(),
+      'wr_diff' => TypeDefs::num(),
+    ]),
+    'per_tier' => TypeDefs::mapOf(TypeDefs::arrayOf('EnchantmentHeroTierEntry')),
+  ]));
+
   SchemaRegistry::register('ItemsProfileResult', TypeDefs::obj([
     'info' => TypeDefs::obj([
       'is_regular' => TypeDefs::bool(),
       'is_starting' => TypeDefs::bool(),
       'is_consumable' => TypeDefs::bool(),
+      'is_enchantment' => TypeDefs::bool(),
     ]),
     'meta' => TypeDefs::obj([
       'name' => TypeDefs::str(), 'tag' => TypeDefs::str(), 'category' => TypeDefs::str()
     ]),
     'stats' => TypeDefs::obj([
-      'overview' => TypeDefs::obj([]),
+      'overview' => TypeDefs::obj([
+        'items_wr_gradient_per_gold' => TypeDefs::num(),
+      ]),
+      'enchantments' => TypeDefs::ref('EnchantmentProfileStats'), // only present for enchantment items
       'heroes_top_purchases' => TypeDefs::arrayOf(TypeDefs::obj([])),
       'heroes_ranks' => TypeDefs::obj([
         'best' => TypeDefs::arrayOf(TypeDefs::obj([])),

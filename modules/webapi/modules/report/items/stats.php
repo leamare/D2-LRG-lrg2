@@ -94,6 +94,7 @@ if (is_docs_mode()) {
     'early_wr' => TypeDefs::num(),
     'late_wr' => TypeDefs::num(),
     'rank' => TypeDefs::num(),
+    'grad_per_gold' => TypeDefs::num(),
   ]));
 
   SchemaRegistry::register('ItemsStatsResult', TypeDefs::obj([

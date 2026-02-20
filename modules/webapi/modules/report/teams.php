@@ -494,9 +494,18 @@ if (is_docs_mode()) {
     'matches_list' => TypeDefs::arrayOf(TypeDefs::obj([]))
   ]));
 
+  SchemaRegistry::register('TeamsSummaryResult', TypeDefs::obj([
+    'teams_list' => TypeDefs::arrayOf(TypeDefs::int()),
+    'card' => TypeDefs::obj([]),
+    'averages' => TypeDefs::mapOf(TypeDefs::any()),
+    'add_info' => TypeDefs::mapOf(TypeDefs::any()), // extra computed stats e.g. rampages_total, rampages_last_match
+    'regions' => TypeDefs::mapOf(TypeDefs::int()),
+  ]));
+
   SchemaRegistry::register('TeamsResult', TypeDefs::oneOf([
     TypeDefs::arrayOf(TypeDefs::obj([])), // cards
     TypeDefs::mapOf(TypeDefs::mapOf('TeamsGridEntry')), // grid
-    TypeDefs::obj([]) // profiles/summary passthroughs
+    TypeDefs::ref('TeamsSummaryResult'), // summary/profile with team var set
+    TypeDefs::obj([]) // other passthroughs
   ]));
 }

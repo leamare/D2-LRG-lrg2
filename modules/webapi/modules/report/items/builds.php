@@ -6,7 +6,7 @@ include_once($root."/modules/view/functions/itembuilds.php");
 #[Description('Starting from role progression, generate item builds/tree for a hero role')]
 #[ModlineVar(name: 'heroid', schema: ['type' => 'integer'], description: 'Hero id')]
 #[ModlineVar(name: 'position', schema: ['type' => 'string'], description: 'Role code (core.lane)')]
-#[ReturnSchema(schema: 'ItemsProgRoleResult')]
+#[ReturnSchema(schema: 'ItemsBuildsResult')]
 class ItemsBuilds extends EndpointTemplate {
 public function process() {
   $mods = $this->mods; $vars = $this->vars; $report = $this->report; global $endpoints, $meta, $root;
@@ -361,4 +361,35 @@ public function process() {
 
   return [];
 }
+}
+
+if (is_docs_mode()) {
+  SchemaRegistry::register('ItemsBuildsEnchantmentTier', TypeDefs::obj([
+    'tier' => TypeDefs::int(),
+    'category' => TypeDefs::str(),
+    'items' => TypeDefs::arrayOf(TypeDefs::obj([
+      'matches' => TypeDefs::int(),
+      'prate' => TypeDefs::num(),
+      'winrate' => TypeDefs::num(),
+      'wr_incr' => TypeDefs::num(),
+      'wr_wo' => TypeDefs::num(),
+    ])),
+  ]));
+
+  SchemaRegistry::register('ItemsBuildsResult', TypeDefs::oneOf([
+    TypeDefs::arrayOf(TypeDefs::obj(['hero' => TypeDefs::int(), 'positions' => TypeDefs::arrayOf(TypeDefs::str())])),
+    TypeDefs::obj([
+      'hero' => TypeDefs::int(),
+      'role' => TypeDefs::str(),
+      'stats' => TypeDefs::obj([]),
+      'build' => TypeDefs::arrayOf('ItemsProgRoleBuild'),
+      'facets' => TypeDefs::arrayOf(TypeDefs::obj([])),
+      'tree' => TypeDefs::obj([]),
+      'starting_items' => TypeDefs::obj([
+        'stats' => TypeDefs::mapOf(TypeDefs::obj(['wins' => TypeDefs::num(), 'matches' => TypeDefs::num(), 'lane_wins' => TypeDefs::num()])),
+        'builds' => TypeDefs::arrayOf(TypeDefs::obj([]))
+      ]),
+      'enchantments' => TypeDefs::arrayOf('ItemsBuildsEnchantmentTier'), // only when enchantments data present
+    ])
+  ]));
 }

@@ -1,6 +1,12 @@
 <?php 
 
-$endpoints['items-enchantments'] = function($mods, $vars, &$report) use (&$endpoints) {
+#[Endpoint(name: 'items-enchantments')]
+#[Description('Enchantment item stats per hero and tier category; heroid=total returns aggregate')]
+#[ModlineVar(name: 'heroid', schema: ['type' => 'integer'], description: 'Hero id (defaults to total)')]
+#[ReturnSchema(schema: 'ItemsEnchantmentsResult')]
+class ItemsEnchantments extends EndpointTemplate {
+public function process() {
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report; global $endpoints, $meta;
   if (!isset($report['items']['enchantments']))
     throw new \Exception("No enchantments data");
   
@@ -28,8 +34,6 @@ $endpoints['items-enchantments'] = function($mods, $vars, &$report) use (&$endpo
   $res = [];
   $res['hero'] = $selected_hid;
   $res['categories'] = [];
-
-  global $meta;
   
   $category_names = [];
   foreach (array_keys($meta['item_categories']) as $i => $category_name) {
@@ -75,5 +79,26 @@ $endpoints['items-enchantments'] = function($mods, $vars, &$report) use (&$endpo
   }
 
   return $res;
-};
+}
+}
 
+if (is_docs_mode()) {
+  SchemaRegistry::register('EnchantmentItem', TypeDefs::obj([
+    'item_id' => TypeDefs::int(),
+    'matches' => TypeDefs::int(),
+    'prate' => TypeDefs::num(),
+    'wr' => TypeDefs::num(),
+    'wr_diff' => TypeDefs::num(),
+  ]));
+
+  SchemaRegistry::register('EnchantmentCategory', TypeDefs::obj([
+    'id' => TypeDefs::int(),
+    'name' => TypeDefs::str(),
+    'items' => TypeDefs::arrayOf('EnchantmentItem'),
+  ]));
+
+  SchemaRegistry::register('ItemsEnchantmentsResult', TypeDefs::obj([
+    'hero' => TypeDefs::any(), // integer hero id or "total"
+    'categories' => TypeDefs::arrayOf('EnchantmentCategory'),
+  ]));
+}

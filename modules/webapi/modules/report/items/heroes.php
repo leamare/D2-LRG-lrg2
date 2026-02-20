@@ -106,7 +106,7 @@ public function process() {
 if (is_docs_mode()) {
   SchemaRegistry::register('ItemsHeroesResult', TypeDefs::obj([
     'item' => TypeDefs::int(),
-    'total' => TypeDefs::obj([]),
+    'total' => TypeDefs::ref('ItemStatsLine'),
     'heroes' => TypeDefs::mapOf('ItemStatsLine'),
   ]));
 }

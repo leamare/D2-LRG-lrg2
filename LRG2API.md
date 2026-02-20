@@ -114,7 +114,8 @@ There's also a thing called "repeater". Basically (if the method supports it) yo
     "duration": "2000", // seconds
     "cluster": "200",
     "region": "1",
-    "date": "12345678901" // unix timestamp
+    "date": "12345678901", // unix timestamp
+    "lid": 12345 // league/ticket ID of the match, null if not assigned
 }
 ```
 
@@ -142,6 +143,11 @@ There's also a thing called "repeater". Basically (if the method supports it) yo
             "position": "0.0"
         }...
     ],
+    "add_info": {
+        // key-value map of additional computed stats for this team, e.g.:
+        "rampages_total": "3",     // total rampages scored by the team
+        "rampages_last_match": "7944065089" // match ID of the last match where team scored a rampage
+    },
     "top_heroes": [ // up to 4
         {
             "hero_id": 79,
@@ -230,7 +236,7 @@ It’s fairly simple to explain. It doesn’t have a structure and is used in `s
 * `players/summary` (may use `region`)
 * `heroes/sides` (may use `region`)
 * `players/sides` (usually doesn't exist in a report, may use `region`)
-* `teams/summary`
+* `teams/summary` - when `team` variable is set, the response additionally includes `add_info` (see Team Card above for structure)
 * [EXCL] `matchcards` (requires `gets`, returns match cards for matches listed in `gets`)
 * [EXCL] `teams_raw` (requires `team`, returns raw team object from report)
 * `teams/cards`
@@ -239,22 +245,92 @@ It’s fairly simple to explain. It doesn’t have a structure and is used in `s
 * [EXCL] `teams/grid/raw` (same as regular grid, but returns raw TVT data object)
 * [EXCL] `teams/grid/source` (same as regular grid, but returns unpacked TVT data)
 * `items/overview`
-* `items/stats` and `items/boxplots` (identical) - may use `item` variable, returns `total` if not set
-* `items/heroes` and `items/heroboxplots` (identical) - may use `hero` variable
+* `items/stats` and `items/boxplots` (identical) - may use `item` variable, returns `total` if not set. Each item now includes `grad_per_gold` (winrate gradient per 100k gold spent, 0 for free items).
+* `items/heroes` and `items/heroboxplots` (identical) - may use `hero` variable. Each hero row and the `total` object now include `grad_per_gold`.
 * `items/icombos` - may use `item` variable, returns `total` if not set
 * `items/irecords` - may use `item` variable, returns `overview` if not set
 * `items/icritical` - may use `hero` variable
 * `items/progression` and `items/proglist` (identical) - may use `hero` variable, returns `overview` if not set
 * `items/progrole` - may use `hero` and `position`, supports repeaters for both, if hero is not set returns the list of all possible role progressions for every hero
-* `items/builds` - may use `hero` and `position`, pretty much same rules as progrole
+* `items/builds` - may use `hero` and `position`, pretty much same rules as progrole. When enchantments data is present in the report, each hero build profile includes an `enchantments` array (per tier, items sorted by matches) containing `tier`, `category`, and `items` fields.
+* `items/enchantments` - may use `heroid` variable, returns data for `total` if not set. Returns `[]` if the report has no enchantments data or if the specified hero has no enchantment stats.
+
+#### items/enchantments response
+
+```json
+{
+  "hero": 65,            // heroid requested, or "total"
+  "categories": [
+    {
+      "id": 0,           // internal category index (0 = overall total)
+      "name": "enhancement_tier_total",  // category name from item_categories metadata
+      "items": [
+        {
+          "item_id": 123,
+          "matches": 10,
+          "prate": 0.45,    // pick rate (matches / (matches + matches_without))
+          "wr": 0.6,        // winrate when picking this enchantment
+          "wr_diff": 0.05   // winrate delta vs not picking it
+        }
+      ]
+    },
+    // per-tier categories follow (enhancement_tier_1, enhancement_tier_2, ...)
+  ]
+}
+```
+
+* `items/profiles` - requires `itemid`. Profiles for enchantment items additionally include:
+  - `type.is_enchantment: true` in the item type flags
+  - `stats.overview.items_wr_gradient_per_gold` - gradient per 100k gold (same as `grad_per_gold` in stats/heroes)
+  - `stats.enchantments` - enchantment-specific breakdown:
+
+```json
+{
+  "total": {
+    "matches": 10,
+    "prate": 0.45,
+    "wr": 0.6,
+    "wr_diff": 0.05
+  },
+  "per_tier": {
+    "tier_1": [
+      {
+        "hero_id": 65,
+        "matches": 4,
+        "prate": 0.5,
+        "wr": 0.75,
+        "wr_diff": 0.1
+      }
+    ]
+    // tier_2, tier_3, ...
+  }
+}
+```
+
 * `heroes/daily_wr`
 * `heroes/wrtimings`
 * `heroes/wrplayers`
 * `heroes/profiles` - requires `heroid`
 * `players/profiles` - requires `playerid`
-* `items/profiles` - requires `itemid`
 * `heroes/rolepickban` - also works for regions and teams, requires heroes-positions to be enabled
 * `milestones`
+* `tickets` - returns list of league tickets that matches in this report belong to, sorted by number of matches descending. Returns an empty array if the report has no ticket data.
+
+#### Tickets response
+
+Array of ticket objects:
+
+```json
+[
+  {
+    "lid": 12345,               // Dota league/ticket ID (0 for matches with no ticket)
+    "matches": 10,              // number of matches played under this ticket in the report
+    "league_name": "ESL One",   // league name from DB, "League #<id>" if name unknown, "none" for lid 0
+    "url": "https://...",       // optional: league URL (omitted if not set)
+    "description": "..."        // optional: league description (omitted if not set)
+  }
+]
+```
 
 ### Non-report endpoints
 
