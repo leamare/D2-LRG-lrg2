@@ -3,7 +3,14 @@
 $repeatVars['variantspb'] = ['team', 'region'];
 $repeatVars['hvariants'] = ['team', 'region'];
 
-$endpoints['variantspb'] = function($mods, $vars, &$report) {
+#[Endpoint(name: 'variantspb')]
+#[Description('Pick/Ban style stats for hero variants, global/region or per team')]
+#[ModlineVar(name: 'team', schema: ['type' => 'integer'], description: 'Team id')]
+#[ModlineVar(name: 'region', schema: ['type' => 'integer'], description: 'Region id')]
+#[ReturnSchema(schema: 'VariantsPbResult')]
+class VariantsPb extends EndpointTemplate {
+public function process() {
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report;
   if (!in_array("heroes", $mods)) throw new \Exception("This module is only available for heroes");
 
   if (isset($vars['team']) && isset($report['teams'])) {
@@ -135,6 +142,13 @@ $endpoints['variantspb'] = function($mods, $vars, &$report) {
   return [
     'pickban' => array_values($pb)
   ];
-};
+}
+}
 
-$endpoints['hvariants'] = $endpoints['variantspb'];
+if (is_docs_mode()) {
+  SchemaRegistry::register('VariantsPbResult', TypeDefs::obj([
+    'pickban' => TypeDefs::arrayOf(TypeDefs::obj([]))
+  ]));
+}
+
+// keep alias at runtime via router or class registration; closure alias removed in class-based design

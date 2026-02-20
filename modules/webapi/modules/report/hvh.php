@@ -2,7 +2,14 @@
 
 $repeatVars['hvh'] = ['heroid'];
 
-$endpoints['hvh'] = function($mods, $vars, &$report) use (&$endpoints) {
+#[Endpoint(name: 'hvh')]
+#[Description('Hero vs Hero (HvH) pairs, with lane rates if available')]
+#[ModlineVar(name: 'heroid', schema: ['type' => 'integer'], description: 'Hero id')]
+#[ModlineVar(name: 'variant', schema: ['type' => 'integer'], description: 'Hero variant id')]
+#[ReturnSchema(schema: 'HvhResult')]
+class Hvh extends EndpointTemplate {
+public function process() {
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report; global $endpoints;
   if (isset($vars['team'])) {
     throw new \Exception("No team allowed");
   } else if (isset($vars['region'])) {
@@ -82,9 +89,15 @@ $endpoints['hvh'] = function($mods, $vars, &$report) use (&$endpoints) {
     ];
   }
   return $hvh;
-};
+}
+}
 
-$endpoints['variants-hvh'] = function($mods, $vars, &$report) use (&$endpoints) {
+#[Endpoint(name: 'variants-hvh')]
+#[Description('HvH for hero variants')]
+#[ReturnSchema(schema: 'HvhResult')]
+class HvhVariants extends EndpointTemplate {
+public function process() {
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report; global $endpoints;
   if (isset($vars['team'])) {
     throw new \Exception("No team allowed");
   } else if (isset($vars['region'])) {
@@ -204,4 +217,16 @@ $endpoints['variants-hvh'] = function($mods, $vars, &$report) use (&$endpoints) 
     ],
     'opponents' => $hvh[ $srcid ]
   ];
-};
+}
+}
+
+if (is_docs_mode()) {
+  SchemaRegistry::register('HvhPair', TypeDefs::obj([
+    'matches' => TypeDefs::int(), 'winrate' => TypeDefs::num(), 'rank' => TypeDefs::num(), 'arank' => TypeDefs::num(),
+    'deviation' => TypeDefs::num(), 'deviation_pct' => TypeDefs::num(), 'lane_rate' => TypeDefs::num(), 'lane_wr' => TypeDefs::num()
+  ]));
+  SchemaRegistry::register('HvhResult', TypeDefs::oneOf([
+    TypeDefs::mapOf('HvhPair'),
+    TypeDefs::obj(['reference' => TypeDefs::obj([]), 'opponents' => TypeDefs::mapOf('HvhPair')])
+  ]));
+}

@@ -2,7 +2,14 @@
 
 include_once($root."/modules/view/functions/itembuilds.php");
 
-$endpoints['items-builds'] = function($mods, $vars, &$report) use (&$endpoints, &$meta) {
+#[Endpoint(name: 'items-builds')]
+#[Description('Starting from role progression, generate item builds/tree for a hero role')]
+#[ModlineVar(name: 'heroid', schema: ['type' => 'integer'], description: 'Hero id')]
+#[ModlineVar(name: 'position', schema: ['type' => 'string'], description: 'Role code (core.lane)')]
+#[ReturnSchema(schema: 'ItemsProgRoleResult')]
+class ItemsBuilds extends EndpointTemplate {
+public function process() {
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report; global $endpoints, $meta, $root;
   if (!isset($report['items']) || empty($report['items']['pi']) || !isset($report['items']['progr']))
     throw new \Exception("No items data");
 
@@ -353,4 +360,5 @@ $endpoints['items-builds'] = function($mods, $vars, &$report) use (&$endpoints, 
   }
 
   return [];
-};
+}
+}

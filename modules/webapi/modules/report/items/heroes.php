@@ -1,6 +1,12 @@
 <?php 
-
-$endpoints['items-heroes'] = function($mods, $vars, &$report) use (&$endpoints, &$meta) {
+#[Endpoint(name: 'items-heroes')]
+#[Description('For a selected item, show total and per-hero rankings')]
+#[ModlineVar(name: 'item', schema: ['type' => 'integer'], description: 'Item id')]
+#[ReturnSchema(schema: 'ItemsHeroesResult')]
+class ItemsHeroes extends EndpointTemplate {
+public function process() {
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report;
+  global $endpoints, $meta;
   if (!isset($report['items']) || empty($report['items']['pi']) || !isset($report['items']['stats']))
     throw new \Exception("No items stats data");
 
@@ -94,4 +100,13 @@ $endpoints['items-heroes'] = function($mods, $vars, &$report) use (&$endpoints, 
   $res['heroes'] = $heroes;
 
   return $res;
-};
+}
+}
+
+if (is_docs_mode()) {
+  SchemaRegistry::register('ItemsHeroesResult', TypeDefs::obj([
+    'item' => TypeDefs::int(),
+    'total' => TypeDefs::obj([]),
+    'heroes' => TypeDefs::mapOf('ItemStatsLine'),
+  ]));
+}

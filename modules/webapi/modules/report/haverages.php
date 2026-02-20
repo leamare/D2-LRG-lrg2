@@ -1,6 +1,12 @@
 <?php 
 
-$endpoints['haverages'] = function($mods, $vars, &$report) {
+#[Endpoint(name: 'haverages')]
+#[Description('Hero or player averages (haverages) for report/region')]
+#[ModlineVar(name: 'region', schema: ['type' => 'integer'], description: 'Region id')]
+#[ReturnSchema(schema: 'HaveragesResult')]
+class HAverages extends EndpointTemplate {
+public function process() {
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report;
   $res = [];
 
   if (isset($vars['region'])) {
@@ -20,4 +26,9 @@ $endpoints['haverages'] = function($mods, $vars, &$report) {
   $res = $context['averages_'.$type] ?? $context['haverages_'.$type];
 
   return $res;
-};
+}
+}
+
+if (is_docs_mode()) {
+  SchemaRegistry::register('HaveragesResult', TypeDefs::mapOf(TypeDefs::obj([])));
+}

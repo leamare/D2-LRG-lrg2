@@ -2,7 +2,16 @@
 
 $repeatVars['profiles'] = ['team', 'heroid', 'playerid', 'itemid'];
 
-$endpoints['profiles'] = function($mods, $vars, &$report) use (&$endpoints, &$meta) {
+#[Endpoint(name: 'profiles')]
+#[Description('Profiles aggregator for heroes/players/teams/items')]
+#[ModlineVar(name: 'heroid', schema: ['type' => 'integer'], description: 'Hero id')]
+#[ModlineVar(name: 'playerid', schema: ['type' => 'integer'], description: 'Player id')]
+#[ModlineVar(name: 'team', schema: ['type' => 'integer'], description: 'Team id')]
+#[ModlineVar(name: 'itemid', schema: ['type' => 'integer'], description: 'Item id')]
+#[ReturnSchema(schema: 'ProfilesResult')]
+class Profiles extends EndpointTemplate {
+public function process() {
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report; global $endpoints, $meta;
   // hero
   if (in_array("heroes", $mods)) {
     if (!isset($vars['heroid'])) {
@@ -507,4 +516,9 @@ $endpoints['profiles'] = function($mods, $vars, &$report) use (&$endpoints, &$me
   if (in_array("items", $mods)) {
     return $endpoints['items-profile']($mods, $vars, $report);
   }
-};
+}
+}
+
+if (is_docs_mode()) {
+  SchemaRegistry::register('ProfilesResult', TypeDefs::obj([]));
+}

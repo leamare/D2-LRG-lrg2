@@ -1,6 +1,12 @@
 <?php 
 
-$endpoints['sides'] = function($mods, $vars, &$report) {
+#[Endpoint(name: 'sides')]
+#[Description('Performance by faction (Radiant/Dire) for heroes or players, optionally per region')]
+#[ModlineVar(name: 'region', schema: ['type' => 'integer'], description: 'Region id')]
+#[ReturnSchema(schema: 'SidesResult')]
+class Sides extends EndpointTemplate {
+public function process() {
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report;
   $res = [];
 
   if (isset($vars['region'])) {
@@ -27,4 +33,9 @@ $endpoints['sides'] = function($mods, $vars, &$report) {
   }
 
   return $res;
-};
+}
+}
+
+if (is_docs_mode()) {
+  SchemaRegistry::register('SidesResult', TypeDefs::mapOf(TypeDefs::mapOfIdKeys(TypeDefs::obj([]))));
+}

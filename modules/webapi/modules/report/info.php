@@ -1,6 +1,14 @@
 <?php 
 
-$endpoints['info'] = function($mods, $vars, &$report) {
-  //return get_report_descriptor($report, true);
+#[Endpoint(name: 'info')]
+#[Description('Report info/descriptor (reserved)')]
+#[ReturnSchema(schema: 'InfoResult')]
+class Info extends EndpointTemplate {
+public function process() {
   return null;
-};
+}
+}
+
+if (is_docs_mode()) {
+  SchemaRegistry::register('InfoResult', TypeDefs::obj([]));
+}

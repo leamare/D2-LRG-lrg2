@@ -1,6 +1,16 @@
 <?php 
 
-$endpoints['positions_matches'] = function($mods, $vars, &$report) {
+#[Endpoint(name: 'positions_matches')]
+#[Description('Match list for a given hero/player at a specific position, optionally per team/region')]
+#[ModlineVar(name: 'position', schema: ['type' => 'string'], description: 'Core.lane dotted pair like 1.2')]
+#[ModlineVar(name: 'team', schema: ['type' => 'integer'], description: 'Team id')]
+#[ModlineVar(name: 'region', schema: ['type' => 'integer'], description: 'Region id')]
+#[ModlineVar(name: 'playerid', schema: ['type' => 'integer'], description: 'Player id')]
+#[ModlineVar(name: 'heroid', schema: ['type' => 'integer'], description: 'Hero id')]
+#[ReturnSchema(schema: 'PositionsMatchesResult')]
+class PositionsMatches extends EndpointTemplate {
+public function process() {
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report;
   if (in_array("players", $mods))
     $type = "player";
   else 
@@ -55,4 +65,9 @@ $endpoints['positions_matches'] = function($mods, $vars, &$report) {
   return $r;
 
   throw new \Exception("Positions matches requires a position specified.");
-};
+}
+}
+
+if (is_docs_mode()) {
+  SchemaRegistry::register('PositionsMatchesResult', TypeDefs::arrayOf(TypeDefs::obj([])));
+}

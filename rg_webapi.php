@@ -131,7 +131,27 @@ include_once("modules/view/__preset.php");
 /* INITIALISATION */
 
 if(isset($_GET['mod'])) $mod = strtolower($_GET['mod']);
-else $mod = "";
+else {
+  $mod = "";
+  // Derive modline from request path if present (supports /rg_webapi.php/<modline> or /api/<modline>)
+  $pathInfo = $_SERVER['PATH_INFO'] ?? '';
+  if (!empty($pathInfo)) {
+    $mod = strtolower(ltrim($pathInfo, '/'));
+  } else {
+    $script = $_SERVER['SCRIPT_NAME'] ?? '';
+    $path = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?? '';
+    if (!empty($script) && strpos($path, $script) === 0) {
+      $extra = substr($path, strlen($script));
+      $mod = strtolower(ltrim($extra, '/'));
+    } else {
+      $dir = rtrim(dirname($script), '/');
+      if (!empty($dir) && strpos($path, $dir) === 0) {
+        $extra = substr($path, strlen($dir));
+        $mod = strtolower(ltrim($extra, '/'));
+      }
+    }
+  }
+}
 
 if(isset($_GET['cat']) && !empty($_GET['cat'])) {
   $cat = $_GET['cat'];
@@ -199,6 +219,14 @@ if (!empty($leaguetag)) {
   $report = [];
 }
 
+// Serve Swagger UI if requested
+if (isset($_GET['swagger'])) {
+  header('Content-Type: text/html; charset=utf-8');
+  $openapiUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http')."://".$_SERVER['HTTP_HOST'].dirname($_SERVER['REQUEST_URI'])."/rg_webapi.php?openapi=1".(empty($leaguetag)?'':"&league=".urlencode($leaguetag));
+  echo "<!DOCTYPE html><html><head><meta charset=\"utf-8\" /><title>LRG2 API Docs</title><link rel=\"stylesheet\" href=\"https://unpkg.com/swagger-ui-dist@5/swagger-ui.css\"></head><body><div id=\"swagger-ui\"></div><script src=\"https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js\"></script><script>window.ui = SwaggerUIBundle({ url: '".$openapiUrl."', dom_id: '#swagger-ui' });</script></body></html>";
+  exit;
+}
+
 set_error_handler(
   function ($severity, $message, $file, $line) {
     throw new \Exception($severity.' - '.$message.'('.$file.':'.$line.')', $severity);
@@ -213,12 +241,37 @@ header('Access-Control-Allow-Methods: GET, POST');
 //header("Access-Control-Allow-Headers: X-Requested-With");
 header('Access-Control-Allow-Headers: token, Content-Type');
 
-$resp['modline'] = $mod;
+// Reconstruct modline if not provided via GET
+$reconstructed_modline = $mod;
+if (!isset($_GET['mod']) && !empty($endp_name)) {
+  $reconstructed_modline = $endp_name;
+  
+  // Add modline variables in order
+  $modline_order = ['region', 'team', 'playerid', 'heroid', 'variant', 'position', 'optid', 'itemid'];
+  foreach ($modline_order as $var) {
+    if (isset($vars[$var]) && !empty($vars[$var])) {
+      if (is_array($vars[$var])) {
+        $reconstructed_modline .= '-' . $var . implode(',', $vars[$var]);
+      } else {
+        $reconstructed_modline .= '-' . $var . $vars[$var];
+      }
+    }
+  }
+}
+
+$resp['modline'] = $reconstructed_modline;
 $resp['vars'] = $vars;
 $resp['endpoint'] = $endp_name;
 $resp['report'] = !empty($leaguetag) ? $leaguetag : null;
 $resp['version'] = parse_ver($lg_version);
-$resp['result'] = $result ?? [];
+
+// Normalize response based on endpoint schema
+$normalized_result = $result ?? [];
+if (!empty($endp_name) && isset($endpointObjects[$endp_name])) {
+  $normalized_result = normalize_response_by_schema($normalized_result, $endp_name);
+}
+
+$resp['result'] = $normalized_result;
 
 if (!empty($report) && $include_descriptor) {
   $resp['report_desc'] = get_report_descriptor($report, true);

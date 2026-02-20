@@ -8,22 +8,31 @@ include_once(__DIR__ . "/../../functions/overview_sides.php");
 include_once(__DIR__ . "/../../functions/overview_combos.php");
 include_once(__DIR__ . "/../../../view/functions/teams_diversity_recalc.php");
 
-$endpoints['overview'] = function($mods, $vars, &$report) use (&$meta, &$endpoints) {
+// Local reusable schema registrations are lazily loaded in docs mode after the class.
 
-  if (in_array('items', $mods)) {
-    $res = $endpoints['items-overview']($mods, $vars, $report);
+#[Endpoint(name: 'overview')]
+#[Description('General overview of a report or region')]
+#[GetParam(name: 'league', required: true, schema: ['type' => 'string'], description: 'Report tag')]
+#[ModlineVar(name: 'region', schema: ['type' => 'integer'], description: 'Region id (optional)')]
+#[ReturnSchema(schema: 'OverviewResult')]
+class Overview extends EndpointTemplate {
+public function process() {
+  global $meta, $endpoints;
+
+  if (in_array('items', $this->mods)) {
+    $res = $endpoints['items-overview']($this->mods, $this->vars, $this->report);
     $res['__endp'] = "items-overview";
     return $res;
   }
 
   $res = [];
 
-  $descriptor = get_report_descriptor($report);
+  $descriptor = get_report_descriptor($this->report);
 
-  if (isset($vars['region'])) {
-    $context =& $report['regions_data'][ $vars['region'] ];
+  if (isset($this->vars['region'])) {
+    $context =& $this->report['regions_data'][ $this->vars['region'] ];
   } else {
-    $context =& $report;
+    $context =& $this->report;
   }
 
   if (!isset($context['main'])) $context['main'] = $context['random'];
@@ -33,7 +42,7 @@ $endpoints['overview'] = function($mods, $vars, &$report) use (&$meta, &$endpoin
   if (!isset($context['settings']['limiter_graph'])) $context['settings']['limiter_graph'] = $context['settings']['limiter_combograph'];
 
   if (!isset($context['settings']['overview_last_match_winners']))
-    $context['settings']['overview_last_match_winners'] = $report['settings']['overview_last_match_winners'];
+    $context['settings']['overview_last_match_winners'] = $this->report['settings']['overview_last_match_winners'];
   
   $context_total_matches = isset($context['main']['matches_total']) ? $context['main']['matches_total'] : $context['main']['matches'];
 
@@ -47,7 +56,7 @@ $endpoints['overview'] = function($mods, $vars, &$report) use (&$meta, &$endpoin
 
   $res['matches_total'] = $context_total_matches;
 
-  if(isset($report['teams']))
+  if(isset($this->report['teams']))
     $res['teams_on_event'] = $context['main']['teams_on_event'];
   else
     $res['players_on_event'] = $context['main']['players_on_event'];
@@ -85,7 +94,7 @@ $endpoints['overview'] = function($mods, $vars, &$report) use (&$meta, &$endpoin
     $res['clusters'] = $context['regions'];
   }
 
-  if($report['settings']['overview_time_limits']) {
+  if($this->report['settings']['overview_time_limits']) {
     if(isset($context['first_match'])) {
       $res['first_match'] = match_card($context['first_match']['mid']);
       $res['first_match_date'] = $context['first_match']['date'];
@@ -96,8 +105,8 @@ $endpoints['overview'] = function($mods, $vars, &$report) use (&$meta, &$endpoin
     }
   }
 
-  if(($context['settings']['overview_last_match_winners'] || !isset($context['settings'])) && !empty($report['matches_additional'])) {
-    $res['last_match_radiant_win'] = $report['matches_additional'][ $context['last_match']['mid'] ]['radiant_win'];
+  if(($context['settings']['overview_last_match_winners'] || !isset($context['settings'])) && !empty($this->report['matches_additional'])) {
+    $res['last_match_radiant_win'] = $this->report['matches_additional'][ $context['last_match']['mid'] ]['radiant_win'];
   }
 
   $res['heroes_contested'] = [
@@ -133,15 +142,15 @@ $endpoints['overview'] = function($mods, $vars, &$report) use (&$meta, &$endpoin
 
   $res['participants'] = [];
 
-  if(isset($report['players_additional']) || isset($report["teams"])) {
-    if (isset($report['teams']) && $context['settings']['overview_last_match_winners'] && !empty($report['matches_additional'])) {
-      if($report['matches_additional'][ $context['last_match']['mid'] ]['radiant_win']) {
-          if (isset( $report['match_participants_teams'][ $context['last_match']['mid'] ]['radiant'] ))
-              $tid = $report['match_participants_teams'][ $context['last_match']['mid'] ]['radiant'];
+  if(isset($this->report['players_additional']) || isset($this->report["teams"])) {
+    if (isset($this->report['teams']) && $context['settings']['overview_last_match_winners'] && !empty($this->report['matches_additional'])) {
+      if($this->report['matches_additional'][ $context['last_match']['mid'] ]['radiant_win']) {
+          if (isset( $this->report['match_participants_teams'][ $context['last_match']['mid'] ]['radiant'] ))
+              $tid = $this->report['match_participants_teams'][ $context['last_match']['mid'] ]['radiant'];
           else $tid = 0;
       } else {
-          if (isset($report['match_participants_teams'][ $context['last_match']['mid'] ]['dire']) )
-              $tid = $report['match_participants_teams'][ $context['last_match']['mid'] ]['dire'];
+          if (isset($this->report['match_participants_teams'][ $context['last_match']['mid'] ]['dire']) )
+              $tid = $this->report['match_participants_teams'][ $context['last_match']['mid'] ]['dire'];
           else $tid = 0;
       }
       if ($tid) {
@@ -153,19 +162,19 @@ $endpoints['overview'] = function($mods, $vars, &$report) use (&$meta, &$endpoin
       }
     }
 
-    if (isset($report['teams'])) {
+    if (isset($this->report['teams'])) {
       $max_wr = 0;
       $max_matches = 0;
       foreach ($context['teams'] as $team_id => $team) {
-        if(!isset($report['teams'][$team_id]['matches_total'])) continue; //FIXME
-        if(!$max_matches || $report['teams'][$max_matches]['matches_total'] < $report['teams'][$team_id]['matches_total'] )
+        if(!isset($this->report['teams'][$team_id]['matches_total'])) continue; //FIXME
+        if(!$max_matches || $this->report['teams'][$max_matches]['matches_total'] < $this->report['teams'][$team_id]['matches_total'] )
           $max_matches = $team_id;
-        if($report['teams'][$team_id]['matches_total'] <= $context['settings']['limiter_higher']) continue;
+        if($this->report['teams'][$team_id]['matches_total'] <= $context['settings']['limiter_higher']) continue;
 
         if($max_wr == 0) $max_wr = $team_id;
         else if(!$max_wr ||
-                $report['teams'][$max_wr]['wins']/$report['teams'][$max_wr]['matches_total'] <
-                  $report['teams'][$team_id]['wins']/$report['teams'][$team_id]['matches_total'] )
+                $this->report['teams'][$max_wr]['wins']/$this->report['teams'][$max_wr]['matches_total'] <
+                  $this->report['teams'][$team_id]['wins']/$this->report['teams'][$team_id]['matches_total'] )
           $max_wr = $team_id;
       }
 
@@ -173,7 +182,7 @@ $endpoints['overview'] = function($mods, $vars, &$report) use (&$meta, &$endpoin
         "team_id" => $max_matches,
         "team_name" => team_name($max_matches),
         "team_tag" => team_tag($max_matches),
-        "value" => $report['teams'][$max_matches]['matches_total']
+        "value" => $this->report['teams'][$max_matches]['matches_total']
       ];
 
       if($max_wr) {
@@ -181,48 +190,48 @@ $endpoints['overview'] = function($mods, $vars, &$report) use (&$meta, &$endpoin
           "team_id" => $max_wr,
           "team_name" => team_name($max_wr),
           "team_tag" => team_tag($max_wr),
-          "value" => round($report['teams'][$max_wr]['wins']*100/$report['teams'][$max_wr]['matches_total'],2)
+          "value" => round($this->report['teams'][$max_wr]['wins']*100/$this->report['teams'][$max_wr]['matches_total'],2)
         ];
       }
 
       if (isset($context['records'])) {
         $res['participants']['widest_hero_pool_team'] = [
-          "team_id" => $report['records']['widest_hero_pool_team']['playerid'],
-          "team_name" => team_name($report['records']['widest_hero_pool_team']['playerid']),
-          "team_tag" => team_tag($report['records']['widest_hero_pool_team']['playerid']),
-          "value" => $report['records']['widest_hero_pool_team']['value']
+          "team_id" => $this->report['records']['widest_hero_pool_team']['playerid'],
+          "team_name" => team_name($this->report['records']['widest_hero_pool_team']['playerid']),
+          "team_tag" => team_tag($this->report['records']['widest_hero_pool_team']['playerid']),
+          "value" => $this->report['records']['widest_hero_pool_team']['value']
         ];
         $res['participants']['smallest_hero_pool_team'] = [
-          "team_id" => $report['records']['smallest_hero_pool_team']['playerid'],
-          "team_name" => team_name($report['records']['smallest_hero_pool_team']['playerid']),
-          "team_tag" => team_tag($report['records']['smallest_hero_pool_team']['playerid']),
-          "value" => $report['records']['smallest_hero_pool_team']['value']
+          "team_id" => $this->report['records']['smallest_hero_pool_team']['playerid'],
+          "team_name" => team_name($this->report['records']['smallest_hero_pool_team']['playerid']),
+          "team_tag" => team_tag($this->report['records']['smallest_hero_pool_team']['playerid']),
+          "value" => $this->report['records']['smallest_hero_pool_team']['value']
         ];
       }
-    } else if (isset($report['players_additional']) && isset($context['players_summary'])) {
+    } else if (isset($this->report['players_additional']) && isset($context['players_summary'])) {
       $max_wr = 0;
       $max_matches = 0;
       foreach ($context['players_summary'] as $pid => $player) {
-          if(!$max_matches || $report['players_additional'][$max_matches]['matches'] < $report['players_additional'][$pid]['matches'] )
+          if(!$max_matches || $this->report['players_additional'][$max_matches]['matches'] < $this->report['players_additional'][$pid]['matches'] )
             $max_matches = $pid;
-          if($report['players_additional'][$pid]['matches'] <= $context['settings']['limiter_higher']) continue;
+          if($this->report['players_additional'][$pid]['matches'] <= $context['settings']['limiter_higher']) continue;
           if(!$max_wr || (
-              $report['players_additional'][$max_wr]['won']/$report['players_additional'][$max_wr]['matches'] <
-                $report['players_additional'][$pid]['won']/$report['players_additional'][$pid]['matches']) )
+              $this->report['players_additional'][$max_wr]['won']/$this->report['players_additional'][$max_wr]['matches'] <
+                $this->report['players_additional'][$pid]['won']/$this->report['players_additional'][$pid]['matches']) )
             $max_wr = $pid;
       }
 
       $res['participants']['most_matches_player_id'] = [
         "player_id" => $max_matches,
         "player_name" => player_name($max_matches),
-        "value" => $report['players_additional'][$max_matches]['matches']
+        "value" => $this->report['players_additional'][$max_matches]['matches']
       ];
 
       if($max_wr)
         $res['participants']['most_matches_player_id'] = [
           "player_id" => $max_wr,
           "player_name" => player_name($max_wr),
-          "value" => round($report['players_additional'][$max_wr]['won']*100/$report['players_additional'][$max_wr]['matches'],2)
+          "value" => round($this->report['players_additional'][$max_wr]['won']*100/$this->report['players_additional'][$max_wr]['matches'],2)
         ];
     }
 
@@ -263,24 +272,24 @@ $endpoints['overview'] = function($mods, $vars, &$report) use (&$meta, &$endpoin
   }
 
   if (isset($context['records'])) { //&& isset($report['settings']['overview_include_records']) && $report['settings']['overview_include_records']) {
-    $res['records'] = $endpoints['records']($mods, $vars, $report);
+    $res['records'] = $endpoints['records']($this->mods, $this->vars, $this->report);
   }
 
-  if(isset($context['teams']) && $report['settings']['overview_teams_summary_short']) {
-    $mods_cpy = $mods;
+  if(isset($context['teams']) && $this->report['settings']['overview_teams_summary_short']) {
+    $mods_cpy = $this->mods;
     $mods_cpy[] = "teams";
-    $res['teams_summary'] = $endpoints['summary']($mods_cpy, $vars, $report);
+    $res['teams_summary'] = $endpoints['summary']($mods_cpy, $this->vars, $this->report);
   }
 
   // heroes stats
 
   $res['draft_is_accurate'] = rgapi_draft_accuracy_test($context['pickban'], $context['draft']);
 
-  if($report['settings']['overview_top_contested']) {
+  if($this->report['settings']['overview_top_contested']) {
     $res['pickban_overview'] = rgapi_generator_pickban_overview(
       $context['pickban'],
       $context_total_matches, 
-      $report['settings']['overview_top_contested_count'],
+      $this->report['settings']['overview_top_contested_count'],
       [
         'median_picks' => $context['random']['heroes_median_picks'] ?? $context['main']['heroes_median_picks'] ?? null,
         'median_bans' => $context['random']['heroes_median_bans'] ?? $context['main']['heroes_median_bans'] ?? null,
@@ -288,7 +297,7 @@ $endpoints['overview'] = function($mods, $vars, &$report) use (&$meta, &$endpoin
     );
   }
 
-  if($report['settings']['overview_top_picked']) {
+  if($this->report['settings']['overview_top_picked']) {
     $res['draft_top_picked'] = [];
 
     $workspace = $context['pickban'];
@@ -299,7 +308,7 @@ $endpoints['overview'] = function($mods, $vars, &$report) use (&$meta, &$endpoin
       } else return ($a['matches_picked'] < $b['matches_picked']) ? 1 : -1;
     });
 
-    $counter = $report['settings']['overview_top_picked_count'];
+    $counter = $this->report['settings']['overview_top_picked_count'];
     foreach($workspace as $hid => $hero) {
       if($counter == 0) break;
       $res['draft_top_picked'][] = [
@@ -313,7 +322,7 @@ $endpoints['overview'] = function($mods, $vars, &$report) use (&$meta, &$endpoin
     unset($workspace);
   }
 
-  if($report['settings']['overview_top_bans']) {
+  if($this->report['settings']['overview_top_bans']) {
     $res['draft_top_banned'] = [];
 
     $workspace = $context['pickban'];
@@ -324,7 +333,7 @@ $endpoints['overview'] = function($mods, $vars, &$report) use (&$meta, &$endpoin
       } else return ($a['matches_banned'] < $b['matches_banned']) ? 1 : -1;
     });
 
-    $counter = $report['settings']['overview_top_bans_count'];
+    $counter = $this->report['settings']['overview_top_bans_count'];
     foreach($workspace as $hid => $hero) {
       if($counter == 0) break;
       $res['draft_top_banned'][] = [
@@ -340,16 +349,16 @@ $endpoints['overview'] = function($mods, $vars, &$report) use (&$meta, &$endpoin
   $uncontested = rgapi_generator_uncontested($meta['heroes'], $context['pickban'], true);
   $res[ $uncontested['type'] ] = $uncontested['data'];
 
-  if($report['settings']['overview_top_draft']) {
+  if($this->report['settings']['overview_top_draft']) {
     $res['draft_overview'] = [];
 
     for ($i=1; $i>=0; $i--) {
       for ($j=1; $j<4; $j++) {
-        if($report['settings']["overview_draft_".$i."_".$j] && isset($context['draft']) && !empty($context['draft'][$i][$j])) {
+        if($this->report['settings']["overview_draft_".$i."_".$j] && isset($context['draft']) && !empty($context['draft'][$i][$j])) {
           if (!isset($res['draft_overview'][$i])) $res['draft_overview'][$i] = [];
           $res['draft_overview'][$i][$j] = [];
           
-          $counter = $report['settings']["overview_draft_".$i."_".$j."_count"];
+          $counter = $this->report['settings']["overview_draft_".$i."_".$j."_count"];
 
           uasort($context['draft'][$i][$j], function($a, $b) {
             if($a['matches'] == $b['matches']) return 0;
@@ -365,41 +374,41 @@ $endpoints['overview'] = function($mods, $vars, &$report) use (&$meta, &$endpoin
     }
   }
 
-  if(isset($context['hero_sides']) && ($report['settings']['overview_factions'] ?? true)) {
+  if(isset($context['hero_sides']) && ($this->report['settings']['overview_factions'] ?? true)) {
     $res['sides'] = rgapi_generator_overview_sides_section(
       $context['hero_sides'], 
       $context['pickban'],
-      $report['settings']['overview_factions_count'] ?? $report['settings']['overview_top_picked_count'] ?? 5
+      $this->report['settings']['overview_factions_count'] ?? $this->report['settings']['overview_top_picked_count'] ?? 5
     );
   }
 
-  if(($report['settings']['overview_positions'] ?? false) && isset($context['hero_positions'])) {
+  if(($this->report['settings']['overview_positions'] ?? false) && isset($context['hero_positions'])) {
     $res['positions_overview'] = rgapi_generator_overview_positions_section(
       $context['hero_positions'], 
       $context['pickban'],
-      $report['settings']['overview_positions_count'] ?? $report['settings']['overview_top_picked_count'] ?? 5,
-      $report['settings']['overview_positions_sort'] ?? "matches"
+      $this->report['settings']['overview_positions_count'] ?? $this->report['settings']['overview_top_picked_count'] ?? 5,
+      $this->report['settings']['overview_positions_sort'] ?? "matches"
     );
   }
 
-  if($report['settings']['overview_top_hero_pairs'] && isset($context['hero_pairs']) && !empty($context['hero_pairs'])) {
+  if($this->report['settings']['overview_top_hero_pairs'] && isset($context['hero_pairs']) && !empty($context['hero_pairs'])) {
     $res['hero_pairs'] = rgapi_generator_overview_combos(
       $context['hero_pairs'],
-      $report['settings']['overview_top_hero_pairs_count']
+      $this->report['settings']['overview_top_hero_pairs_count']
     );
   }
 
-  if(!isset($report['teams']) && $report['settings']['overview_top_player_pairs'] && isset($context['player_pairs']) && !empty($context['player_pairs'])) {
+  if(!isset($this->report['teams']) && $this->report['settings']['overview_top_player_pairs'] && isset($context['player_pairs']) && !empty($context['player_pairs'])) {
     $res['player_pairs'] = rgapi_generator_overview_combos(
       $context['player_pairs'],
-      $report['settings']['overview_top_player_pairs_count'],
+      $this->report['settings']['overview_top_player_pairs_count'],
       false
     );
   }
 
   // notable matches
 
-  if($report['settings']['overview_matches']) {
+  if($this->report['settings']['overview_matches']) {
     $res['notable_matches'] = [];
 
     if(($context['settings']['overview_first_match'] ?? true) && isset($context['first_match']))
@@ -408,11 +417,11 @@ $endpoints['overview'] = function($mods, $vars, &$report) use (&$meta, &$endpoin
       $res['notable_matches']['last_match'] = match_card($context['last_match']['mid']);
 
     if(isset($context['records'])) {
-      if($report['settings']['overview_records_stomp'] && !empty($context['records']['stomp']['matchid']))
+      if($this->report['settings']['overview_records_stomp'] && !empty($context['records']['stomp']['matchid']))
         $res['notable_matches']['match_stomp'] = match_card($context['records']['stomp']['matchid']);
-      if($report['settings']['overview_records_comeback'] && !empty($context['records']['comeback']['matchid']))
+      if($this->report['settings']['overview_records_comeback'] && !empty($context['records']['comeback']['matchid']))
         $res['notable_matches']['match_comeback'] = match_card($context['records']['comeback']['matchid']);
-      if($report['settings']['overview_records_duration']) {
+      if($this->report['settings']['overview_records_duration']) {
         $res['notable_matches']['longest_match'] = match_card($context['records']['longest_match']['matchid']);
         $res['notable_matches']['shortest_match'] = match_card($context['records']['shortest_match']['matchid']);
       }
@@ -426,8 +435,60 @@ $endpoints['overview'] = function($mods, $vars, &$report) use (&$meta, &$endpoin
     'limiter_middle' => $context['settings']['limiter_middle'] ?? $context['settings']['limiter_graph'],
     'limiter_higher' => $context['settings']['limiter_higher'],
     'limiter_graph' => $context['settings']['limiter_graph'],
-    'version' => parse_ver($report['ana_version'])
+    'version' => parse_ver($this->report['ana_version'])
   ];
 
   return $res;
-};
+}
+
+}
+
+// Register schemas after class, only in docs mode
+if (is_docs_mode()) {
+    SchemaRegistry::register('MatchCard', TypeDefs::obj([
+        'mid' => TypeDefs::int(),
+        'date' => TypeDefs::int(),
+        'radiant_win' => TypeDefs::bool(),
+    ]));
+
+    SchemaRegistry::register('OverviewResult', TypeDefs::obj([
+        'matches_total' => TypeDefs::int(),
+        'teams_on_event' => TypeDefs::int(),
+        'players_on_event' => TypeDefs::int(),
+        'versions' => TypeDefs::arrayOf(TypeDefs::int()),
+        'game_modes' => TypeDefs::mapOf(TypeDefs::int()),
+        'heroes_contested' => TypeDefs::obj([
+            'picked_and_banned' => TypeDefs::int(),
+            'picked' => TypeDefs::int(),
+            'banned' => TypeDefs::int(),
+            'uncontested' => TypeDefs::int(),
+        ]),
+        'days' => TypeDefs::arrayOf(TypeDefs::obj([])),
+        'balance' => TypeDefs::obj([
+            'total' => TypeDefs::num(), 'winrate' => TypeDefs::num(), 'pickrate' => TypeDefs::num(), 'contest' => TypeDefs::num()
+        ]),
+        'main' => TypeDefs::obj([]),
+        'participants' => TypeDefs::obj([]),
+        'records' => TypeDefs::obj([]),
+        'teams_summary' => TypeDefs::obj([]),
+        'draft_is_accurate' => TypeDefs::bool(),
+        'pickban_overview' => TypeDefs::arrayOf(TypeDefs::obj([])),
+        'draft_top_picked' => TypeDefs::arrayOf(TypeDefs::obj([])),
+        'draft_top_banned' => TypeDefs::arrayOf(TypeDefs::obj([])),
+        'sides' => TypeDefs::obj([]),
+        'positions_overview' => TypeDefs::arrayOf(TypeDefs::obj([])),
+        'hero_pairs' => TypeDefs::arrayOf(TypeDefs::obj([])),
+        'player_pairs' => TypeDefs::arrayOf(TypeDefs::obj([])),
+        'notable_matches' => TypeDefs::obj([
+            'first_match' => 'MatchCard',
+            'last_match' => 'MatchCard',
+            'match_stomp' => 'MatchCard',
+            'match_comeback' => 'MatchCard',
+            'longest_match' => 'MatchCard',
+            'shortest_match' => 'MatchCard',
+        ]),
+        'technical' => TypeDefs::obj([
+            'limiter_lower' => TypeDefs::int(), 'limiter_middle' => TypeDefs::int(), 'limiter_higher' => TypeDefs::int(), 'limiter_graph' => TypeDefs::int(), 'version' => TypeDefs::str()
+        ]),
+    ]));
+}

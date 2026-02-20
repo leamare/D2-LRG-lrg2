@@ -1,9 +1,12 @@
 <?php 
 
-$endpoints['wrplayers'] = function($mods, $vars, &$report) {
-  if (in_array("heroes", $mods)) {
-    $type = "heroes";
-  } else {
+#[Endpoint(name: 'wrplayers')]
+#[Description('Hero winrate vs player experience (spammers quartiles)')]
+#[ReturnSchema(schema: 'WrPlayersResult')]
+class WrPlayers extends EndpointTemplate {
+public function process() {
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report;
+  if (!in_array("heroes", $mods)) {
     throw new \Exception("Endpoint `wrplayers` only works for heroes");
   }
 
@@ -17,4 +20,9 @@ $endpoints['wrplayers'] = function($mods, $vars, &$report) {
   }
 
   return $report['hero_winrate_spammers'];
-};
+}
+}
+
+if (is_docs_mode()) {
+  SchemaRegistry::register('WrPlayersResult', TypeDefs::mapOfIdKeys(TypeDefs::obj([])));
+}

@@ -2,7 +2,14 @@
 
 // $repeatVars['items-progrole'] = ['heroid', 'position'];
 
-$endpoints['items-progrole'] = function($mods, $vars, &$report) use (&$endpoints) {
+#[Endpoint(name: 'items-progrole')]
+#[Description('Item progression per role for a hero, with builds and tree')]
+#[ModlineVar(name: 'heroid', schema: ['type' => 'integer'], description: 'Hero id or null')]
+#[ModlineVar(name: 'position', schema: ['type' => 'string'], description: 'Role code (core.lane)')]
+#[ReturnSchema(schema: 'ItemsProgRoleResult')]
+class ItemsProgRole extends EndpointTemplate {
+public function process() {
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report; global $endpoints, $meta, $root;
   if (!isset($report['items']) || empty($report['items']['pi']) || !isset($report['items']['progr']))
     throw new \Exception("No items data");
 
@@ -123,4 +130,32 @@ $endpoints['items-progrole'] = function($mods, $vars, &$report) use (&$endpoints
   }
 
   return $res;
-};
+}
+}
+
+if (is_docs_mode()) {
+  SchemaRegistry::register('ItemsProgRoleBuild', TypeDefs::obj([
+    'build' => TypeDefs::arrayOf(TypeDefs::int()),
+    'matches' => TypeDefs::num(),
+    'winrate' => TypeDefs::num(),
+    'lane_wr' => TypeDefs::num(),
+    'ratio' => TypeDefs::num(),
+    'factor' => TypeDefs::str(),
+  ]));
+
+  SchemaRegistry::register('ItemsProgRoleResult', TypeDefs::oneOf([
+    TypeDefs::arrayOf(TypeDefs::obj(['hero' => TypeDefs::int(), 'positions' => TypeDefs::arrayOf(TypeDefs::str())])),
+    TypeDefs::obj([
+      'hero' => TypeDefs::int(),
+      'role' => TypeDefs::str(),
+      'stats' => TypeDefs::obj([]),
+      'build' => TypeDefs::arrayOf('ItemsProgRoleBuild'),
+      'facets' => TypeDefs::arrayOf(TypeDefs::obj([])),
+      'tree' => TypeDefs::obj([]),
+      'starting_items' => TypeDefs::obj([
+        'stats' => TypeDefs::mapOf(TypeDefs::obj(['wins' => TypeDefs::num(), 'matches' => TypeDefs::num(), 'lane_wins' => TypeDefs::num()])),
+        'builds' => TypeDefs::arrayOf(TypeDefs::obj([]))
+      ])
+    ])
+  ]));
+}

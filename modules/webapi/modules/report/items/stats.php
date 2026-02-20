@@ -1,6 +1,13 @@
 <?php 
 
-$endpoints['items-stats'] = function($mods, $vars, &$report) use (&$endpoints, &$meta) {
+#[Endpoint(name: 'items-stats')]
+#[Description('Per-hero or total item stats with ranking and filters')]
+#[ModlineVar(name: 'heroid', schema: ['type' => 'integer'], description: 'Hero id or total')]
+#[GetParam(name: 'item_cat', required: false, schema: ['type' => 'array','items' => ['type' => 'string']], description: 'Item category filters')]
+#[ReturnSchema(schema: 'ItemsStatsResult')]
+class ItemsStats extends EndpointTemplate {
+public function process() {
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report; global $endpoints, $meta;
   if (!isset($report['items']) || empty($report['items']['pi']) || !isset($report['items']['stats']))
     throw new \Exception("No items stats data");
 
@@ -77,4 +84,23 @@ $endpoints['items-stats'] = function($mods, $vars, &$report) use (&$endpoints, &
   unset($item);
 
   return $res;
-};
+}
+}
+
+if (is_docs_mode()) {
+  SchemaRegistry::register('ItemStatsLine', TypeDefs::obj([
+    'purchases' => TypeDefs::int(),
+    'wo_wr' => TypeDefs::num(),
+    'early_wr' => TypeDefs::num(),
+    'late_wr' => TypeDefs::num(),
+    'rank' => TypeDefs::num(),
+  ]));
+
+  SchemaRegistry::register('ItemsStatsResult', TypeDefs::obj([
+    'categories' => TypeDefs::arrayOf(TypeDefs::str()),
+    'allowed_items' => TypeDefs::arrayOf(TypeDefs::int()),
+    'hero' => TypeDefs::int(),
+    'hero_pickban' => TypeDefs::obj([]),
+    'items' => TypeDefs::mapOf('ItemStatsLine'),
+  ]));
+}

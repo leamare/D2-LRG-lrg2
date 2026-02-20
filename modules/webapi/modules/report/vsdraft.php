@@ -2,7 +2,13 @@
 
 $repeatVars['vsdraft'] = ['team'];
 
-$endpoints['vsdraft'] = function($mods, $vars, &$report) {
+#[Endpoint(name: 'vsdraft')]
+#[Description('Opponent draft stages statistics for a team')]
+#[ModlineVar(name: 'team', schema: ['type' => 'integer'], description: 'Team id')]
+#[ReturnSchema(schema: 'VsDraftResult')]
+class VsDraft extends EndpointTemplate {
+public function process() {
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report;
   $type = "hero";
   $fallback_type = "heroes";
 
@@ -109,4 +115,12 @@ $endpoints['vsdraft'] = function($mods, $vars, &$report) {
     'total' => $context,
     'stages' => $draft
   ];
-};
+}
+}
+
+if (is_docs_mode()) {
+  SchemaRegistry::register('VsDraftResult', TypeDefs::obj([
+    'total' => TypeDefs::mapOfIdKeys(TypeDefs::obj([])),
+    'stages' => TypeDefs::mapOf(TypeDefs::mapOfIdKeys(TypeDefs::obj([])))
+  ]));
+}

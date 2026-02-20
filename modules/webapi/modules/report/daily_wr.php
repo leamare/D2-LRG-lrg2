@@ -1,6 +1,11 @@
 <?php 
 
-$endpoints['daily_wr'] = function($mods, $vars, &$report) {
+#[Endpoint(name: 'daily_wr')]
+#[Description('Daily pick/ban/win rates for heroes')] 
+#[ReturnSchema(schema: 'DailyWrResult')]
+class DailyWr extends EndpointTemplate {
+public function process() {
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report;
   if (in_array("heroes", $mods)) {
     $type = "heroes";
   } else {
@@ -104,4 +109,24 @@ $endpoints['daily_wr'] = function($mods, $vars, &$report) {
   }
 
   return $res;
-};
+}
+}
+
+if (is_docs_mode()) {
+  SchemaRegistry::register('DailyWrEntry', TypeDefs::obj([
+    'pickrate_first' => TypeDefs::num(),
+    'pickrate_days' => TypeDefs::arrayOf(TypeDefs::num()),
+    'pickrate_last' => TypeDefs::num(),
+    'pickrate_diff' => TypeDefs::num(),
+    'banrate_first' => TypeDefs::num(),
+    'banrate_days' => TypeDefs::arrayOf(TypeDefs::num()),
+    'banrate_last' => TypeDefs::num(),
+    'banrate_diff' => TypeDefs::num(),
+    'winrate_first' => TypeDefs::num(),
+    'winrate_days' => TypeDefs::arrayOf(TypeDefs::num()),
+    'winrate_last' => TypeDefs::num(),
+    'winrate_diff' => TypeDefs::num(),
+  ]));
+
+  SchemaRegistry::register('DailyWrResult', TypeDefs::mapOf('DailyWrEntry'));
+}

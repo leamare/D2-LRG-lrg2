@@ -2,7 +2,15 @@
 
 $repeatVars['positions'] = ['position'];
 
-$endpoints['positions'] = function($mods, $vars, &$report) {
+#[Endpoint(name: 'positions')]
+#[Description('Positions overview or specific position stats for heroes/players')]
+#[ModlineVar(name: 'position', schema: ['type' => 'string'], description: 'Core.lane dotted pair like 1.2')]
+#[ModlineVar(name: 'team', schema: ['type' => 'integer'], description: 'Team id')]
+#[ModlineVar(name: 'region', schema: ['type' => 'integer'], description: 'Region id')]
+#[ReturnSchema(schema: 'PositionsResult')]
+class Positions extends EndpointTemplate {
+public function process() {
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report;
   if (in_array("players", $mods))
     $type = "player";
   else 
@@ -104,7 +112,14 @@ $endpoints['positions'] = function($mods, $vars, &$report) {
     }
   }
   return $res;
-};
+}
+}
+
+if (is_docs_mode()) {
+  SchemaRegistry::register('PositionsResult', TypeDefs::obj([
+    'total' => TypeDefs::mapOfIdKeys(TypeDefs::int()),
+  ]));
+}
 
 function positions_ranking_helper(&$context, $total_matches) {
   $context_copy = $context;

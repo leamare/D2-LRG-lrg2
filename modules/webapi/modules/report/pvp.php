@@ -1,6 +1,13 @@
 <?php 
 
-$endpoints['pvp'] = function($mods, $vars, &$report) {
+#[Endpoint(name: 'pvp')]
+#[Description('Player vs player matchup ranks and deviations')]
+#[GetParam(name: 'league', required: true, schema: ['type' => 'string'], description: 'Report tag')]
+#[ModlineVar(name: 'playerid', schema: ['type' => 'integer'], description: 'Filter by player id')]
+#[ReturnSchema(schema: 'PvpResult')]
+class Pvp extends EndpointTemplate {
+public function process() {
+  $mods = $this->mods; $vars = $this->vars; $report = $this->report;
   if (isset($vars['team'])) {
     throw new \Exception("No team allowed");
   } else if (isset($vars['region'])) {
@@ -72,4 +79,31 @@ $endpoints['pvp'] = function($mods, $vars, &$report) {
     ];
   }
   return $pvp;
-};
+}
+}
+
+if (is_docs_mode()) {
+  SchemaRegistry::register('PvpOpponent', TypeDefs::obj([
+    'matches' => TypeDefs::int(),
+    'winrate' => TypeDefs::num(),
+    'rank' => TypeDefs::num(),
+    'arank' => TypeDefs::num(),
+    'deviation' => TypeDefs::num(),
+    'deviation_pct' => TypeDefs::num(),
+  ]));
+
+  SchemaRegistry::register('PvpReference', TypeDefs::obj([
+    'id' => TypeDefs::int(),
+    'matches' => TypeDefs::int(),
+    'wins' => TypeDefs::int(),
+    'winrate' => TypeDefs::num(),
+  ]));
+
+  SchemaRegistry::register('PvpResult', TypeDefs::oneOf([
+    TypeDefs::mapOfIdKeys('PvpOpponent'),
+    TypeDefs::obj([
+      'reference' => 'PvpReference',
+      'opponents' => TypeDefs::mapOfIdKeys('PvpOpponent')
+    ])
+  ]));
+}
