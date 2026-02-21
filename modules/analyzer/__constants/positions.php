@@ -13,9 +13,9 @@ const POSITION_TO_ROLE_MAP = [
 ];
 
 const ROLE_TO_POSITION_MAP = [
-  0 => ['core' => 1, 'lane' => 1],
-  1 => ['core' => 1, 'lane' => 2],
-  2 => ['core' => 1, 'lane' => 3],
-  3 => ['core' => 0, 'lane' => 3],
-  4 => ['core' => 0, 'lane' => 1],
+  1 => ['core' => 1, 'lane' => 1],
+  2 => ['core' => 1, 'lane' => 2],
+  3 => ['core' => 1, 'lane' => 3],
+  4 => ['core' => 0, 'lane' => 3],
+  5 => ['core' => 0, 'lane' => 1],
 ];
