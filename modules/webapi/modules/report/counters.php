@@ -10,15 +10,15 @@
 class Counters extends EndpointTemplate {
 public function process() {
   if (isset($vars['team'])) {
-    throw new \Exception("No team allowed");
+    throw new UserInputException("No team allowed");
   } else if (isset($vars['region'])) {
-    throw new \Exception("No region allowed");
+    throw new UserInputException("No region allowed");
   }
 
   $res = [];
 
   if (!in_array("heroes", $this->mods)) {
-    throw new \Exception("Incorrect module specified");
+    throw new UserInputException("Incorrect module specified");
   }
 
   $hvh = []; 

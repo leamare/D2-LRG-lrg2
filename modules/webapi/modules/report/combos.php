@@ -61,7 +61,7 @@ public function process() {
   } else if (in_array("players", $this->mods)) {
     $type = "player";
   } else {
-    throw new \Exception("No module specified");
+    throw new UserInputException("No module specified");
   }
 
   if (in_array("trios", $this->mods)) {

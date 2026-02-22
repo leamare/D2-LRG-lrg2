@@ -9,7 +9,7 @@ class ItemsRecords extends EndpointTemplate {
 public function process() {
   $mods = $this->mods; $vars = $this->vars; $report = $this->report; global $endpoints, $meta;
   if (!isset($report['items']) || empty($report['items']['pi']) || !isset($report['items']['records']))
-    throw new \Exception("No items records data");
+    throw new UserInputException("No items records data");
 
   if (is_wrapped($report['items']['records'])) {
     $report['items']['records'] = unwrap_data($report['items']['records']);

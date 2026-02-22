@@ -8,10 +8,10 @@ class ItemsProfile extends EndpointTemplate {
 public function process() {
   $mods = $this->mods; $vars = $this->vars; $report = $this->report; global $endpoints, $meta;
   if (!isset($report['items']) || empty($report['items']['pi']) || !isset($report['items']['stats']))
-      throw new \Exception("No items stats data");
+      throw new UserInputException("No items stats data");
 
     if (!isset($vars['item'])) {
-      throw new \Exception("Need to specify item");
+      throw new UserInputException("Need to specify item");
     }
 
     $res['__endp'] = 'items-profiles';

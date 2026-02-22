@@ -20,7 +20,7 @@ public function process() {
   } else if (in_array("players", $mods) && isset($context['player_sides'])) {
     $type = "player";
   } else {
-    throw new \Exception("No module specified");
+    throw new UserInputException("No module specified");
   }
 
   foreach($context[$type.'_sides'] as $i => $side) {

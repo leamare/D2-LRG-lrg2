@@ -1,5 +1,7 @@
 <?php 
 
+class UserInputException extends \Exception {}
+
 function execute(&$modline, &$endp, &$vars, &$report) {
   global $resp, $__lrg_onerror;
 
@@ -7,7 +9,7 @@ function execute(&$modline, &$endp, &$vars, &$report) {
     $result = $endp($modline, $vars, $report);
     return $result;
   } catch (\Throwable $e) {
-    if (!empty($__lrg_onerror)) {
+    if (!empty($__lrg_onerror) && !($e instanceof UserInputException)) {
       $__lrg_onerror([
         'type' => 'error',
         'project' => $projectName ?? "LRG2",
@@ -20,7 +22,7 @@ function execute(&$modline, &$endp, &$vars, &$report) {
     }
 
     if (!isset($resp['errors'])) $resp['errors'] = [];
-      $resp['errors'][] = $e->getMessage().' ('.$e->getFile().':'.$e->getLine().')';
+    $resp['errors'][] = $e->getMessage().' ('.$e->getFile().':'.$e->getLine().')';
   }
 }
 

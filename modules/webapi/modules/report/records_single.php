@@ -22,7 +22,7 @@ public function process() {
   } else $data = $report['records'] ?? null;
 
   if (empty($data))
-    throw new \Exception("Problem occured when fetching records.");
+    throw new UserInputException("Problem occured when fetching records.");
 
   $res = [];
   

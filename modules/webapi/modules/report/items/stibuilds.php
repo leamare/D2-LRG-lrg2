@@ -13,7 +13,7 @@ public function process() {
   if (!isset($report['starting_items']) || empty($report['starting_items']['builds']) &&
     (empty($report['starting_items_players']) || empty($report['starting_items_players']['builds']))
   )
-    throw new \Exception("No starting item builds data");
+    throw new UserInputException("No starting item builds data");
 
   $selected_rid = array_flip(ROLES_IDS_SIMPLE)[$vars['position'] ?? ''];
   $selected_hid = $vars['heroid'] ?? 0;
@@ -23,7 +23,7 @@ public function process() {
 
   if (isset($vars['playerid']) || in_array("players", $mods)) {
     if (!isset($report['starting_items_players']) || empty($report['starting_items_players']['builds']))
-      throw new \Exception("No starting item builds data for players");
+      throw new UserInputException("No starting item builds data for players");
     
     $report['starting_items_players']['builds'][$selected_rid] = unwrap_data($report['starting_items_players']['builds'][$selected_rid]);
     $data = $report['starting_items_players']['builds'][$selected_rid][$selected_pid] ?? null;
@@ -65,7 +65,7 @@ public function process() {
     }
   } else {
     if (!isset($report['starting_items']) || empty($report['starting_items']['builds']))
-      throw new \Exception("No starting item builds data");
+      throw new UserInputException("No starting item builds data");
 
     $report['starting_items']['builds'][$selected_rid] = unwrap_data($report['starting_items']['builds'][$selected_rid]);
     $data = $report['starting_items']['builds'][$selected_rid][$selected_hid] ?? null;

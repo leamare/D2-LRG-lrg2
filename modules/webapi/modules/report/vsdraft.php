@@ -16,7 +16,7 @@ public function process() {
     $context =& $report['teams'][ $vars['team'] ]['pickban_vs'];
     $context_draft =& $report['teams'][ $vars['team'] ]['draft_vs'];
     $context_total_matches = $report['teams'][ $vars['team'] ]['matches_total'];
-  } else throw new \Exception("VSdraft works only for teams");
+  } else throw new UserInputException("VSdraft works only for teams");
 
   if(!sizeof($context)) return [];
 

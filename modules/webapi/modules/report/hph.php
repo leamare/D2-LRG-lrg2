@@ -11,12 +11,12 @@ class Hph extends EndpointTemplate {
 public function process() {
   $mods = $this->mods; $vars = $this->vars; $report = $this->report; global $endpoints;
   if (isset($vars['team'])) {
-    throw new \Exception("No team allowed");
+    throw new UserInputException("No team allowed");
   } else if (isset($vars['region'])) {
-    throw new \Exception("No region allowed");
+    throw new UserInputException("No region allowed");
   }
   if (!isset($vars['heroid'])) {
-    throw new \Exception("Can't give you data without hero ID");
+    throw new UserInputException("Can't give you data without hero ID");
   }
 
   if (isset($vars['variant']) || in_array("variants", $mods)) {
@@ -133,12 +133,12 @@ class HphVariants extends EndpointTemplate {
 public function process() {
   $mods = $this->mods; $vars = $this->vars; $report = $this->report; global $endpoints;
   if (isset($vars['team'])) {
-    throw new \Exception("No team allowed");
+    throw new UserInputException("No team allowed");
   } else if (isset($vars['region'])) {
-    throw new \Exception("No region allowed");
+    throw new UserInputException("No region allowed");
   }
   if (!isset($vars['heroid'])) {
-    throw new \Exception("Can't give you data without hero ID");
+    throw new UserInputException("Can't give you data without hero ID");
   }
 
   if (is_wrapped($report['hph_v'])) {

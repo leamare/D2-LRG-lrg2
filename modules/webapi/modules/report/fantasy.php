@@ -14,7 +14,7 @@ class Fantasy extends EndpointTemplate {
 
     if ($tid) {
       if (!isset($report['teams'][$tid]))
-        throw new \Exception("Unknown team $tid");
+        throw new UserInputException("Unknown team $tid");
 
     if (in_array("players", $mods)) {
       if (isset($report['teams'][$tid]['players_mvp'])) {
@@ -23,7 +23,7 @@ class Fantasy extends EndpointTemplate {
       } else {
         $players_all = $report['fantasy']['players_mvp'] ?? null;
         if (empty($players_all))
-          throw new \Exception("No players MVP data in this report");
+          throw new UserInputException("No players MVP data in this report");
         if (is_wrapped($players_all)) $players_all = unwrap_data($players_all);
         $roster = $report['teams'][$tid]['active_roster'] ?? $report['teams'][$tid]['roster'] ?? [];
         $res = array_intersect_key($players_all, array_flip($roster));
@@ -32,13 +32,13 @@ class Fantasy extends EndpointTemplate {
       $res['__endp'] = "teams-players-fantasy";
       } else if (in_array("heroes", $mods)) {
         if (!isset($report['teams'][$tid]['heroes_mvp']))
-          throw new \Exception("No heroes MVP data for team $tid");
+          throw new UserInputException("No heroes MVP data for team $tid");
         $data = $report['teams'][$tid]['heroes_mvp'];
         if (is_wrapped($data)) $data = unwrap_data($data);
         $res = $data;
         $res['__endp'] = "teams-heroes-fantasy";
       } else {
-        throw new \Exception("What kind of fantasy data do you need?");
+        throw new UserInputException("What kind of fantasy data do you need?");
       }
     } else {
       // ── Report / region context ──────────────────────────────────────────────
@@ -57,7 +57,7 @@ class Fantasy extends EndpointTemplate {
         $res = $context['fantasy']['heroes_mvp'];
         $res['__endp'] = "heroes-fantasy";
       } else {
-        throw new \Exception("What kind of fantasy data do you need?");
+        throw new UserInputException("What kind of fantasy data do you need?");
       }
     }
 

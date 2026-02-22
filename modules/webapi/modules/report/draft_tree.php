@@ -11,9 +11,9 @@ class DraftTree extends EndpointTemplate {
 public function process() {
   $mods = $this->mods; $vars = $this->vars; $report = $this->report;
   if (!isset($report['draft_tree']))
-    throw new \Exception("This module doesn't exist");
+    throw new UserInputException("This module doesn't exist");
   if (!in_array("heroes", $mods))
-    throw new \Exception("This module is only available for heroes");
+    throw new UserInputException("This module is only available for heroes");
 
   // positions context
   if (isset($vars['team'])) {

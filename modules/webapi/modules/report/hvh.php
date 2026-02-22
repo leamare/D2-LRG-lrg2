@@ -11,9 +11,9 @@ class Hvh extends EndpointTemplate {
 public function process() {
   $mods = $this->mods; $vars = $this->vars; $report = $this->report; global $endpoints;
   if (isset($vars['team'])) {
-    throw new \Exception("No team allowed");
+    throw new UserInputException("No team allowed");
   } else if (isset($vars['region'])) {
-    throw new \Exception("No region allowed");
+    throw new UserInputException("No region allowed");
   }
 
   if (isset($vars['variant']) || in_array("variants", $mods)) {
@@ -99,13 +99,13 @@ class HvhVariants extends EndpointTemplate {
 public function process() {
   $mods = $this->mods; $vars = $this->vars; $report = $this->report; global $endpoints;
   if (isset($vars['team'])) {
-    throw new \Exception("No team allowed");
+    throw new UserInputException("No team allowed");
   } else if (isset($vars['region'])) {
-    throw new \Exception("No region allowed");
+    throw new UserInputException("No region allowed");
   }
 
   if (!isset($vars['heroid'])) {
-    throw new \Exception("Can't get variants HvH data without a hero");
+    throw new UserInputException("Can't get variants HvH data without a hero");
   }
 
   $hvh = rg_generator_pvp_unwrap_data($report['hvh_v'], $report['hero_variants'], true, true);

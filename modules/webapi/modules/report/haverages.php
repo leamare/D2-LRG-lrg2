@@ -20,7 +20,7 @@ public function process() {
   } else if (in_array("players", $mods)) {
     $type = "players";
   } else {
-    throw new \Exception("No module specified");
+    throw new UserInputException("No module specified");
   }
 
   $res = $context['averages_'.$type] ?? $context['haverages_'.$type];

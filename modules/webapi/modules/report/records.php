@@ -17,7 +17,7 @@ public function process() {
   $data_ext = $context['records_ext'] ?? [];
 
   if (empty($data))
-    throw new \Exception("Problem occured when fetching records.");
+    throw new UserInputException("Problem occured when fetching records.");
   
   if (!empty($data_ext)) {
     $data_ext = unwrap_data($data_ext);

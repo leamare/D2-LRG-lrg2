@@ -9,7 +9,7 @@ $repeatVars['vsummary'] = ['position'];
 class VSummary extends EndpointTemplate {
 public function process() {
   $mods = $this->mods; $vars = $this->vars; $report = $this->report;
-  if (!in_array("heroes", $mods)) throw new \Exception("This module is only available for heroes");
+  if (!in_array("heroes", $mods)) throw new UserInputException("This module is only available for heroes");
 
   if (is_wrapped($report['hero_summary_variants'])) $report['hero_summary_variants'] = unwrap_data($report['hero_summary_variants']);
 

@@ -17,10 +17,10 @@ public function process() {
     $type = "hero";
 
   if (!isset($report[$type.'_positions_matches']))
-    throw new \Exception("The report does not support $type positions matches.");
+    throw new UserInputException("The report does not support $type positions matches.");
 
   if (isset($vars['team']) && !isset($report['match_participants_teams']))
-    throw new \Exception("The report does not support $type positions matches for teams.");
+    throw new UserInputException("The report does not support $type positions matches for teams.");
 
   // positions context
   if (isset($vars['team'])) {
@@ -32,10 +32,10 @@ public function process() {
   }
 
   if (!isset($vars[$type.'id']))
-    throw new \Exception("No ID specified.");
+    throw new UserInputException("No ID specified.");
 
   if (!isset($vars['position']))
-    throw new \Exception("Position was not specified.");
+    throw new UserInputException("Position was not specified.");
 
   $position = explode('.', $vars['position']);
 
@@ -64,7 +64,7 @@ public function process() {
 
   return $r;
 
-  throw new \Exception("Positions matches requires a position specified.");
+  throw new UserInputException("Positions matches requires a position specified.");
 }
 }
 

@@ -8,7 +8,7 @@ class ItemsEnchantments extends EndpointTemplate {
 public function process() {
   $mods = $this->mods; $vars = $this->vars; $report = $this->report; global $endpoints, $meta;
   if (!isset($report['items']['enchantments']))
-    throw new \Exception("No enchantments data");
+    throw new UserInputException("No enchantments data");
   
   if (is_wrapped($report['items']['enchantments'])) {
     $report['items']['enchantments'] = unwrap_data($report['items']['enchantments']);

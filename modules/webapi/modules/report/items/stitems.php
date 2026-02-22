@@ -13,7 +13,7 @@ public function process() {
   if (!isset($report['starting_items']) || empty($report['starting_items']['items']) &&
     (empty($report['starting_items_players']) || empty($report['starting_items_players']['items']))
   )
-    throw new \Exception("No starting item items data");
+    throw new UserInputException("No starting item items data");
   
   $selected_rid = array_flip(ROLES_IDS_SIMPLE)[$vars['position'] ?? ''];
   $selected_hid = $vars['heroid'] ?? 0;
@@ -23,7 +23,7 @@ public function process() {
 
   if (isset($vars['playerid']) || (in_array("players", $mods) && !isset($vars['team']))) {
     if (empty($report['starting_items_players']) || empty($report['starting_items_players']['items'])) {
-      throw new \Exception("No starting item items data for players");
+      throw new UserInputException("No starting item items data for players");
     }
 
     $data = $report['starting_items_players']['items'][$selected_rid][$selected_pid];
@@ -66,10 +66,10 @@ public function process() {
     }
   } else if (isset($vars['team'])) {
     if (empty($report['starting_items_players']) || empty($report['starting_items_players']['items'])) {
-      throw new \Exception("No starting item items data for players");
+      throw new UserInputException("No starting item items data for players");
     }
     if (empty($report['teams'])) {
-      throw new \Exception("No teams data");
+      throw new UserInputException("No teams data");
     }
 
     $context =& $report['teams'];
@@ -111,7 +111,7 @@ public function process() {
     ];
   } else {
     if (empty($report['starting_items']) || empty($report['starting_items']['items'])) {
-      throw new \Exception("No starting item items data");
+      throw new UserInputException("No starting item items data");
     }
 
     $data = $report['starting_items']['items'][$selected_rid][$selected_hid];

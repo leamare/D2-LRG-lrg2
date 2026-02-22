@@ -8,7 +8,7 @@ class ItemsCombos extends EndpointTemplate {
 public function process() {
   $mods = $this->mods; $vars = $this->vars; $report = $this->report; global $endpoints, $meta;
   if (!isset($report['items']) || empty($report['items']['pi']) || !isset($report['items']['records']))
-    throw new \Exception("No items combos data");
+    throw new UserInputException("No items combos data");
   
   $res = [];
 

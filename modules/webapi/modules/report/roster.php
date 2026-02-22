@@ -16,7 +16,7 @@ public function process() {
     }
     return $res;
   }
-  throw new \Exception("You need teamid for roster");
+  throw new UserInputException("You need teamid for roster");
 }
 }
 

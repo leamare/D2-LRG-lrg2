@@ -9,7 +9,7 @@ class ItemsCritical extends EndpointTemplate {
 public function process() {
   $mods = $this->mods; $vars = $this->vars; $report = $this->report; global $endpoints, $meta;
   if (!isset($report['items']) || empty($report['items']['pi']) || !isset($report['items']['stats']))
-    throw new \Exception("No items stats data");
+    throw new UserInputException("No items stats data");
 
   $res = [];
 

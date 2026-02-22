@@ -7,7 +7,7 @@ class WrPlayers extends EndpointTemplate {
 public function process() {
   $mods = $this->mods; $vars = $this->vars; $report = $this->report;
   if (!in_array("heroes", $mods)) {
-    throw new \Exception("Endpoint `wrplayers` only works for heroes");
+    throw new UserInputException("Endpoint `wrplayers` only works for heroes");
   }
 
   if (is_wrapped($report['hero_winrate_spammers'])) {

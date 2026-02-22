@@ -13,9 +13,9 @@ class Laning extends EndpointTemplate {
 public function process() {
   $mods = $this->mods; $vars = $this->vars; $report = $this->report;
   if (isset($vars['team'])) {
-    throw new \Exception("No team allowed");
+    throw new UserInputException("No team allowed");
   } else if (isset($vars['region'])) {
-    throw new \Exception("No region allowed");
+    throw new UserInputException("No region allowed");
   }
 
   if (in_array("players", $mods))

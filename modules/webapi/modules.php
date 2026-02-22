@@ -92,7 +92,7 @@ if (empty($endp_name)) {
 }
 
 if ($endp === null) {
-  throw new \Exception("Endpoint not found: ".$endp_name);
+  throw new UserInputException("Endpoint not found: ".$endp_name);
 }
 
 $repeaters = $repeatVars[ $endp_name ] ?? [];

@@ -54,7 +54,7 @@ public function process() {
     $res = $context['hero_summary'];
     $res['__endp'] = "heroes-summary";
   } else {
-    throw new \Exception("What kind of summary do you need?");
+    throw new UserInputException("What kind of summary do you need?");
   }
 
   $keys = array_keys( array_values($res)[0] );

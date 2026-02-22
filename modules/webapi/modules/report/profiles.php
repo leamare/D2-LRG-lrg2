@@ -15,7 +15,7 @@ public function process() {
   // hero
   if (in_array("heroes", $mods)) {
     if (!isset($vars['heroid'])) {
-      throw new \Exception("Need to specify hero");
+      throw new UserInputException("Need to specify hero");
     }
     $res = [];
 
@@ -24,7 +24,7 @@ public function process() {
 
     // summary
     if (is_wrapped($report['hero_summary'])) $report['hero_summary'] = unwrap_data($report['hero_summary']);
-    if (!isset($report['hero_summary'][ $vars['heroid'] ])) throw new \Exception("Hero `{$vars['heroid']}` is not in the report");
+    if (!isset($report['hero_summary'][ $vars['heroid'] ])) throw new UserInputException("Hero `{$vars['heroid']}` is not in the report");
     $res['summary'] = $report['hero_summary'][ $vars['heroid'] ];
 
     if (isset($res['summary']['hero_damage_per_min_s']) && $res['summary']['gpm'] && !isset($res['summary']['damage_to_gold_per_min_s'])) {
@@ -286,10 +286,10 @@ public function process() {
   // player
   if (in_array("players", $mods)) {
     if (!isset($vars['playerid'])) {
-      throw new \Exception("Need to specify player");
+      throw new UserInputException("Need to specify player");
     }
     if (!isset($report['players'])) {
-      throw new \Exception("Players data is not available for this report");
+      throw new UserInputException("Players data is not available for this report");
     }
 
     $res = [];
@@ -307,7 +307,7 @@ public function process() {
 
     // summary
     if (is_wrapped($report['players_summary'])) $report['players_summary'] = unwrap_data($report['players_summary']);
-    if (!isset($report['players_summary'][ $vars['playerid'] ])) throw new \Exception("Player `{$vars['playerid']}` is not in the report");
+    if (!isset($report['players_summary'][ $vars['playerid'] ])) throw new UserInputException("Player `{$vars['playerid']}` is not in the report");
     $res['summary'] = $report['players_summary'][ $vars['playerid'] ];
 
     if (isset($res['summary']['hero_damage_per_min_s']) && $res['summary']['gpm'] && !isset($res['summary']['damage_to_gold_per_min_s'])) {

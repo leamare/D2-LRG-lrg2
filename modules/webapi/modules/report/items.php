@@ -29,7 +29,7 @@ public function process() {
     empty($report['starting_items']) &&
     empty($report['starting_items_players'])
   ) {
-    throw new \Exception("No items data");
+    throw new UserInputException("No items data");
   }
 
   // Forward to best matching endpoint; each entry: [endpoint, __stopRepeater]

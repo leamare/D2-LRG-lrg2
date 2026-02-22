@@ -13,7 +13,7 @@ public function process() {
   if (!isset($report['starting_items']) || empty($report['starting_items']['consumables']) &&
     (empty($report['starting_items_players']) || empty($report['starting_items_players']['consumables']))
   )
-    throw new \Exception("No consumables data");
+    throw new UserInputException("No consumables data");
 
   $selected_rid = array_flip(ROLES_IDS_SIMPLE)[$vars['position'] ?? ''];
   $selected_hid = $vars['heroid'] ?? 0;
@@ -31,7 +31,7 @@ public function process() {
 
   if (isset($vars['playerid']) || (in_array("players", $mods) && !isset($vars['team']))) {
     if (!isset($report['starting_items_players']) || empty($report['starting_items_players']['consumables']))
-      throw new \Exception("No consumables data for players");
+      throw new UserInputException("No consumables data for players");
 
     foreach ($data as $blk => $d) {
       if (empty($report['starting_items_players']['consumables'][$blk][$selected_rid][$selected_pid])) {
@@ -80,9 +80,9 @@ public function process() {
     }
   } else if (isset($vars['team'])) {
     if (!isset($report['starting_items_players']) || empty($report['starting_items_players']['consumables']))
-      throw new \Exception("No consumables data for players");
+      throw new UserInputException("No consumables data for players");
     if (!isset($report['teams']))
-      throw new \Exception("No teams data");
+      throw new UserInputException("No teams data");
 
     $context =& $report['teams'];
     $tid = $vars['team'];
@@ -147,7 +147,7 @@ public function process() {
     ];
   } else {
     if (!isset($report['starting_items']) || empty($report['starting_items']['consumables']))
-      throw new \Exception("No consumables data");
+      throw new UserInputException("No consumables data");
 
     if (is_wrapped($report['starting_items']['matches'][$selected_rid])) {
       $report['starting_items']['matches'][$selected_rid] = unwrap_data($report['starting_items']['matches'][$selected_rid]);

@@ -9,7 +9,7 @@ public function process() {
   $data = $report['milestones'] ?? null;
 
   if (empty($data))
-    throw new \Exception("Milestones are not available for this report.");
+    throw new UserInputException("Milestones are not available for this report.");
 
   $res = [
     'total' => [],

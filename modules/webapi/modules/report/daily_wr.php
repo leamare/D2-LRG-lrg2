@@ -9,7 +9,7 @@ public function process() {
   if (in_array("heroes", $mods)) {
     $type = "heroes";
   } else {
-    throw new \Exception("Endpoint `daily_wr` only works for heroes");
+    throw new UserInputException("Endpoint `daily_wr` only works for heroes");
   }
 
   if (is_wrapped($report['hero_daily_wr'])) {

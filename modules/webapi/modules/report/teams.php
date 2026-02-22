@@ -13,7 +13,7 @@ class Teams extends EndpointTemplate {
 public function process() {
   $mods = $this->mods; $vars = $this->vars; $report = $this->report; global $endpoints, $repeatVars;
   if (!isset($report['teams']))
-    throw new \Exception("No teams in the report ");
+    throw new UserInputException("No teams in the report ");
 
   if (in_array("cards", $mods)) {
     $res = [

@@ -11,10 +11,10 @@ class ItemsBuilds extends EndpointTemplate {
 public function process() {
   $mods = $this->mods; $vars = $this->vars; $report = $this->report; global $endpoints, $meta, $root;
   if (!isset($report['items']) || empty($report['items']['pi']) || !isset($report['items']['progr']))
-    throw new \Exception("No items data");
+    throw new UserInputException("No items data");
 
   if (!isset($report['items']['progrole']))
-    throw new \Exception("No items progression for roles");
+    throw new UserInputException("No items progression for roles");
 
   $res = [];
 
@@ -57,6 +57,7 @@ public function process() {
     $data = [];
 
     foreach ($report['items']['progrole']['data'][$hero][$crole] as $elem) {
+      if (!is_array($elem)) continue;
       $data[] = array_combine($report['items']['progrole']['keys'], $elem);
     }
 

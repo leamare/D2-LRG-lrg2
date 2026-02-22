@@ -86,7 +86,7 @@ class ListEndpoint extends EndpointTemplate {
 			} else if ($cat == "all") {
 				$reps = $cache["reps"];
 			} else {
-				throw new \Exception("No such category.");
+				throw new UserInputException("No such category.");
 			}
 		} else {
 			$reps = $cache["reps"];

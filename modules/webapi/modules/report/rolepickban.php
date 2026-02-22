@@ -14,7 +14,7 @@ $repeatVars['rolepickban'] = ['team', 'region'];
 class RolePickban extends EndpointTemplate {
 public function process() {
   $mods = $this->mods; $vars = $this->vars; $report = $this->report;
-  if (!in_array("heroes", $mods)) throw new \Exception("This module is only available for heroes");
+  if (!in_array("heroes", $mods)) throw new UserInputException("This module is only available for heroes");
 
   if (isset($vars['team']) && isset($report['teams'])) {
     $parent =& $report['teams'][ $vars['team'] ]; 

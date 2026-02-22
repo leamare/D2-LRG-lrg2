@@ -11,7 +11,7 @@ class ItemsProgRole extends EndpointTemplate {
 public function process() {
   $mods = $this->mods; $vars = $this->vars; $report = $this->report; global $endpoints, $meta, $root;
   if (!isset($report['items']) || empty($report['items']['pi']) || !isset($report['items']['progr']))
-    throw new \Exception("No items data");
+    throw new UserInputException("No items data");
 
   $res = [];
 

@@ -19,7 +19,7 @@ public function process() {
       }
     }
     $report = file_get_contents($fname);
-    if (!$report) throw new \Exception("Can't open $leaguetag, probably no such report\n");
+    if (!$report) throw new UserInputException("Can't open $leaguetag, probably no such report\n");
     $report = json_decode($report, true);
   }
   return [
