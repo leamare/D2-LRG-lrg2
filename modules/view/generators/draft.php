@@ -84,6 +84,7 @@ function rg_generator_draft($table_id, &$context_pickban, &$context_draft, $cont
       return $b['wrank'] <=> $a['wrank'];
     });
   
+    if (empty($scores)) continue;
     $min = end($scores)['wrank'];
     $max = reset($scores)['wrank'];
   
@@ -104,7 +105,7 @@ function rg_generator_draft($table_id, &$context_pickban, &$context_draft, $cont
           (isset($ranks_stages[$stage_num][$id]) ? number_format($ranks_stages[$stage_num][$id],2) : "-")."</td>";
         
         if ($ratio) {
-          $ratioval = $context_pickban[$id]['matches_picked'] ? $stage['pick']/$context_pickban[$id]['matches_picked'] : 0;
+          $ratioval = ($context_pickban[$id]['matches_picked'] ?? 0) ? $stage['pick']/($context_pickban[$id]['matches_picked']) : 0;
           $draftline .= "<td data-col-group=\"draft-stage-$stage_num\">".($ratioval ? number_format(100*$ratioval, 2).'%' : '-')."</td>";
         }
 

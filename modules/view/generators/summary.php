@@ -16,8 +16,8 @@ function rg_generator_summary($table_id, &$context, $hero_flag = true, $rank = f
   $total_matches = 0;
   foreach ($context as $id => $c) {
     if (empty($c) || !$id) continue;
-    if ($total_matches < $c['matches_s']) $total_matches = $c['matches_s'];
-    $matches[] = $c['matches_s'];
+    if ($total_matches < ($c['matches_s'] ?? 0)) $total_matches = $c['matches_s'] ?? 0;
+    $matches[] = $c['matches_s'] ?? 0;
   } 
 
   if ($rank) {
@@ -34,7 +34,7 @@ function rg_generator_summary($table_id, &$context, $hero_flag = true, $rank = f
     $max = reset($context)['wrank'];
   
     foreach ($context as $id => $el) {
-      $ranks[$id] = 100 * ($el['wrank']-$min) / ($max-$min);
+      $ranks[$id] = ($max != $min) ? 100 * ($el['wrank']-$min) / ($max-$min) : 0;
       $context_copy[$id]['winrate_s'] = 1-($el['winrate'] ?? $el['winrate_s']);
     }
 
@@ -50,7 +50,7 @@ function rg_generator_summary($table_id, &$context, $hero_flag = true, $rank = f
     $max = reset($context_copy)['wrank'];
   
     foreach ($context_copy as $id => $el) {
-      $aranks[$id] = 100 * ($el['wrank']-$min) / ($max-$min);
+      $aranks[$id] = ($max != $min) ? 100 * ($el['wrank']-$min) / ($max-$min) : 0;
     }
 
     unset($context_copy);
@@ -151,7 +151,7 @@ function rg_generator_summary($table_id, &$context, $hero_flag = true, $rank = f
       [$id, $var] = explode('-', $id);
     }
 
-    $res .= "<tr data-value-summary_matches=\"".$el['matches_s']."\"><td data-col-group=\"_index\">".
+    $res .= "<tr data-value-summary_matches=\"".($el['matches_s'] ?? 0)."\"><td data-col-group=\"_index\">".
       ($hero_flag ?
         hero_portrait($id)."</td>".
         ($variants ? "<td>".facet_micro_element($id, $var)."</td>" : "").

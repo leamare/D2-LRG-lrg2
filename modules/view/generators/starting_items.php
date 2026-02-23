@@ -56,7 +56,7 @@ function rg_generator_stitems($table_id, $ishero, $selected_id, $selected_rid, $
 
   $locres .= filter_toggles_component($table_id, [
     'matches' => [
-      'value' => $matches_med[ count($matches_med)/2 ],
+      'value' => !empty($matches_med) ? $matches_med[ (int)(count($matches_med)/2) ] : 0,
       'label' => 'data_filter_matches'
     ],
     'cnt' => [

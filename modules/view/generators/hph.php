@@ -53,6 +53,7 @@ function rg_generator_hph_profile($table_id, &$context, &$context_wrs, $srcid, $
     positions_ranking($context, $dt['ms']);
     $context_cpy = $context;
 
+    if (empty($context)) return $res;
     uasort($context, function($a, $b) {
       return $b['wrank'] <=> $a['wrank'];
     });
@@ -61,7 +62,7 @@ function rg_generator_hph_profile($table_id, &$context, &$context_wrs, $srcid, $
     $max = reset($context)['wrank'];
   
     foreach ($context as $elid => $el) {
-      $context[$elid]['rank'] = 100 * ($el['wrank']-$min) / ($max-$min);
+      $context[$elid]['rank'] = ($max != $min) ? 100 * ($el['wrank']-$min) / ($max-$min) : 0;
       $context_cpy[$elid]['winrate'] = 1-$context_cpy[$elid]['winrate'];
     }
 
@@ -75,7 +76,7 @@ function rg_generator_hph_profile($table_id, &$context, &$context_wrs, $srcid, $
     $max = reset($context_cpy)['wrank'];
   
     foreach ($context_cpy as $elid => $el) {
-      $context[$elid]['arank'] = 100 * ($el['wrank']-$min) / ($max-$min);
+      $context[$elid]['arank'] = ($max != $min) ? 100 * ($el['wrank']-$min) / ($max-$min) : 0;
       unset($context[$elid]['wrank']);
 
       if (isset($el['exp']) && !isset($el['deviation'])) {
@@ -131,7 +132,8 @@ function rg_generator_hph_profile($table_id, &$context, &$context_wrs, $srcid, $
           ($is_lanewr ? "<th>".locale_string("lane_wr")."</th>" : "").
           "</tr></thead>";
 
-  if (!$isrank) {
+  $pvp_context = $pvp_context ?? null;
+  if (!$isrank && is_array($pvp_context)) {
     uasort($pvp_context, function($a, $b) {
       if($a['wr_diff'] == $b['wr_diff']) return 0;
       else return ($a['wr_diff'] < $b['wr_diff']) ? 1 : -1;

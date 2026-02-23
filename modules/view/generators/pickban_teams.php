@@ -122,7 +122,7 @@ function rg_create_team_pickban_data($context_pb, $context_vs_pb, $context_total
   
     foreach ($pb as $id => $el) {
       unset($pb[$id]['wrank']);
-      $r[$id][$key] = 100 * ($el['wrank']-$min) / ($max-$min);
+      $r[$id][$key] = ($max != $min) ? 100 * ($el['wrank']-$min) / ($max-$min) : 0;
     }
   }
 

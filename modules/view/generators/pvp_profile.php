@@ -73,7 +73,7 @@ function rg_generator_pvp_profile($table_id, &$pvp_context, &$context_wrs, $srci
     $max = reset($pvp_context)['wrank'];
   
     foreach ($pvp_context as $elid => $el) {
-      $pvp_context[$elid]['rank'] = 100 * ($el['wrank']-$min) / ($max-$min);
+      $pvp_context[$elid]['rank'] = ($max != $min) ? 100 * ($el['wrank']-$min) / ($max-$min) : 0;
       $pvp_context_cpy[$elid]['winrate'] = 1-$pvp_context_cpy[$elid]['winrate'];
     }
 
@@ -87,7 +87,7 @@ function rg_generator_pvp_profile($table_id, &$pvp_context, &$context_wrs, $srci
     $max = reset($pvp_context_cpy)['wrank'];
   
     foreach ($pvp_context_cpy as $elid => $el) {
-      $pvp_context[$elid]['arank'] = 100 * ($el['wrank']-$min) / ($max-$min);
+      $pvp_context[$elid]['arank'] = ($max != $min) ? 100 * ($el['wrank']-$min) / ($max-$min) : 0;
       unset($pvp_context[$elid]['wrank']);
 
       if (isset($el['expectation']) && !isset($el['deviation'])) {
@@ -165,7 +165,7 @@ function rg_generator_pvp_profile($table_id, &$pvp_context, &$context_wrs, $srci
       "data-value-match=\"".$data['matches']."\" ".
       ($exp ? "data-value-dev=\"".number_format($data['matches']-$data['expectation'], 0)."\" " : "").
       (!$nodiff ? "data-value-diff=\"".number_format($data['diff']*100,2)."\" " : "").
-      ($laning ? "data-value-lane=\"".number_format($data['lane_rate']*100, 2)."\" " : "").
+      ($laning ? "data-value-lane=\"".number_format(($data['lane_rate'] ?? 0)*100, 2)."\" " : "").
       (isset($data['matchids']) ?
                 "onclick=\"showModal('".implode(", ", $data['matchids'])."','".locale_string("matches")."')\"" :
                 "").">".
@@ -181,8 +181,8 @@ function rg_generator_pvp_profile($table_id, &$pvp_context, &$context_wrs, $srci
       ($exp ? "<td class=\"separator\">".number_format($data['expectation'], 0)."</td>".
       "<td>".number_format($data['matches']-$data['expectation'], 0)."</td>".
       "<td>".number_format(($data['matches']-$data['expectation'])*100/$data['matches'], 2)."%</td>" : "").
-      ($laning ? "<td class=\"separator\">".number_format($data['lane_rate']*100, 2)."%</td>".
-      "<td>".number_format($data['lane_wr']*100, 2)."%</td>"
+      ($laning ? "<td class=\"separator\">".number_format(($data['lane_rate'] ?? 0)*100, 2)."%</td>".
+      "<td>".number_format(($data['lane_wr'] ?? 0)*100, 2)."%</td>"
       : "").
     "</tr>";
   }

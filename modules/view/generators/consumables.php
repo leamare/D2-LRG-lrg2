@@ -21,7 +21,7 @@ function rg_generator_sticonsumables($table_id, $ishero, $selected_id, $selected
     $locres .= "<div class=\"content-text alert\">".locale_string("sti_consumables_partial_notice")."</div>";
   }
 
-  $matches_total = $context['m'];
+  $matches_total = $context['m'] ?? 0;
 
   if (!$matches_total) {
     return "<div class=\"content-text\">".

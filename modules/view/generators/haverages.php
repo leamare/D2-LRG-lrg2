@@ -22,7 +22,7 @@ function rg_generator_haverages($table_id, &$context, $hero_flag = true) {
                         player_link($el[$id], true, true)
                       )
                     ).
-              "</td><td>".number_format($el['value'],2)."</td></tr>";
+              "</td><td>".number_format($el['value'] ?? 0,2)."</td></tr>";
     }
     $res .= "</table>";
   }
@@ -30,5 +30,3 @@ function rg_generator_haverages($table_id, &$context, $hero_flag = true) {
 
   return $res;
 }
-
-?>

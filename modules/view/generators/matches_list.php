@@ -212,7 +212,7 @@ function rg_generator_hero_matches_list($table_id, $hero, $limit = null, $wide =
   }
 
   foreach ($matches as $mid => $data) {
-    $posnum = $data['rolenum'];
+    $posnum = $data['rolenum'] ?? null;
 
     $res .= "<tr ".($keys['team'] ? "data-aliases=\"".team_name($data['team_self'])." ".team_name($data['team_enemy'])."\"" : "").">".
       "<td value=\"$mid\">".match_link($mid)."</td>".
@@ -407,15 +407,15 @@ function rg_generator_series_list($table_id, $series) {
       $winner = null;
     }
 
-    $teams = array_filter(array_keys($scores), function($team) use ($winner) {
+    $teams = array_values(array_filter(array_keys($scores), function($team) use ($winner) {
       return $team != 0;
-    });
+    }));
 
     $res .= "<tr>".
       "<td value=\"$series_tag\" data-col-group=\"_index\">".series_matches_link($series_id, "cards")."</td>".
       "<td data-col-group=\"_index\">$matches_count</td>";
     for ($i = 0; $i < 2; $i++) {
-      $res .= "<td ".($i==0 ? "class=\"separator\"" : "")." data-col-group=\"teams\">".($teams[$i] ? team_link($teams[$i]) : locale_string("team")." $i")."</td>";
+      $res .= "<td ".($i==0 ? "class=\"separator\"" : "")." data-col-group=\"teams\">".(($teams[$i] ?? null) ? team_link($teams[$i]) : locale_string("team")." $i")."</td>";
     }
 
     $res .= "<td data-col-group=\"teams\">".($winner ? team_link_short($winner) : "<span class=\"placeholder\">".locale_string("tie")."</span>")."</td>".

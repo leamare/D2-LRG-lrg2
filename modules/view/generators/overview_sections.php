@@ -230,7 +230,7 @@ function rg_generator_overview_sides_section($tables_prefix, $context, $context_
   }
 
   foreach ($heroes as $hid => $data) {
-    if (!isset($data[0]) || !isset($data[1])) {
+    if (!isset($data[0]) || !isset($data[1]) || !isset($context_pb[$hid]['matches_picked'])) {
       continue;
     }
     $diff_rad_wr[$hid] = $data[1]['winrate'] - $data[0]['winrate'];
