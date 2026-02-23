@@ -5,7 +5,7 @@ function check_module($module) {
   global $lrg_use_get;
   global $mod;
 
-  if(unset_module()) {
+  if (unset_module()) {
     $mod = $module;
   }
 
@@ -24,11 +24,10 @@ function check_module($module) {
 function unset_module() {
   global $unset_module;
 
-  if($unset_module) {
+  if ($unset_module) {
     $unset_module = false;
     return true;
   }
   return false;
 }
 
-?>

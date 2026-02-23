@@ -10,7 +10,7 @@ function match_link($mid, $team = null, $winner = null) {
   }
 
   if (!empty($report['match_parts_strings'])) {
-    $midText .= ' - '.$report['match_parts_strings'][$mid];
+    $midText .= ' - '.($report['match_parts_strings'][$mid] ?? '');
 
     if ($team) {
       if ($team > 0) {

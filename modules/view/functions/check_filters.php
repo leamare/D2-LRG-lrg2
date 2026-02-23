@@ -125,9 +125,9 @@ function check_filters($rep, $filters) {
             );
           };
 
-          $desc = $letterize($rep['desc']);
-          $name = $letterize($rep['name']);
-          $tag = $letterize($rep['tag']);
+          $desc = $letterize($rep['desc'] ?? '') ?? '';
+          $name = $letterize($rep['name'] ?? '') ?? '';
+          $tag = $letterize($rep['tag'] ?? '') ?? '';
           $r = preg_match("/$lt/iu", $desc) || preg_match("/$lt/iu", $name) || preg_match("/$lt/iu", $tag);
 
           if (isset($rep['localized'])) {

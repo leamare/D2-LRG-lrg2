@@ -36,12 +36,12 @@ function match_card($mid) {
     )) {
     $orders = array_flip( $report['matches_additional'][$mid]['order'] );
     usort($m, function($a, $b) use (&$orders) {
-      return $orders[ $a['hero'] ] <=> $orders[ $b['hero'] ];
+      return ($orders[ $a['hero'] ] ?? 0) <=> ($orders[ $b['hero'] ] ?? 0);
     });
   }
 
   foreach ($m as $pl) {
-    $order = empty($orders) ? 0 : $orders[ $pl['hero'] ]+1;
+    $order = empty($orders) ? 0 : (($orders[ $pl['hero'] ] ?? -1)+1);
     $award = $is_awards ? _map_award_to_string($report['matches_additional'][$mid]['mvp'][$pl['player']] ?? 0) : "";
     if($pl['radiant'] == 1) {
       $players_radi .= "<div class=\"match-player $award\">".player_name($pl['player'], false)."</div>";
@@ -141,7 +141,8 @@ function match_card($mid) {
       <div class=\"match-info-line\"><span class=\"caption\">".locale_string("date").":</span> ".
         date(locale_string("time_format")." ".locale_string("date_format"), $report['matches_additional'][$mid]['date'] + $report['matches_additional'][$mid]['duration'])."</div>
       <div class=\"match-info-line\"><span class=\"caption\">".locale_string("league_id").":</span> ".
-        "<a href=\"?lid=".$report['matches_additional'][$mid]['lid'].(empty($linkvars) ? "" : "&".$linkvars)."\">".$report['matches_additional'][$mid]['lid']."</a></div>
+        (!isset($report['matches_additional'][$mid]['lid']) ? "-" :
+          "<a href=\"?lid=".$report['matches_additional'][$mid]['lid'].(empty($linkvars) ? "" : "&".$linkvars)."\">".$report['matches_additional'][$mid]['lid']."</a>")."</div>
   </div>";
 
   if (isset($report['records'])) {

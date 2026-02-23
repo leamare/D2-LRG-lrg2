@@ -31,7 +31,7 @@ function player_card($player_id) {
 
   # heroes
   $output .= "<div class=\"player-heroes\"><div class=\"section-caption\">".locale_string("heroes")."</div><div class=\"section-lines\">";
-  foreach($pinfo['heroes'] as $hero) {
+  foreach($pinfo['heroes'] ?? [] as $hero) {
     $output .= "<div class=\"player-info-line\"><span class=\"caption\">".hero_full($hero['heroid']).":</span> ";
     $output .= $hero['matches']." - ".number_format($hero['wins']*100/$hero['matches'], 2)."%</div>";
   }
@@ -39,7 +39,7 @@ function player_card($player_id) {
 
   # positions
   $output .= "<div class=\"player-positions\"><div class=\"section-caption\">".locale_string("positions")."</div><div class=\"section-lines\">";
-  foreach($pinfo['positions'] as $position) {
+  foreach($pinfo['positions'] ?? [] as $position) {
     $output .= "<div class=\"player-info-line\"><span class=\"caption\">".locale_string("position_".$position["core"].".".$position["lane"]).":</span> ";
     $output .= $position['matches']." - ".number_format($position['wins']*100/$position['matches'], 2)."%</div>";
   }

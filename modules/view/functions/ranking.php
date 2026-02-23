@@ -231,6 +231,7 @@ function items_ranking_sort($a, $b) {
 }
 
 function items_ranking(&$arr) {
+  if (!is_array($arr)) return;
   foreach ($arr as $k => $v) {
     if (!$v['purchases'] || !$v['prate']) {
       $arr[$k]['wrank'] = 0; continue;

@@ -45,7 +45,7 @@ function join_selectors($modules, $level, $parent="") {
     $disabled = false;
     $might_be_updated = false;
 
-    if ($modtag[0] == "&") {
+    if (strlen($modtag) > 0 && $modtag[0] == "&") {
       $mod_islink = true;
       $modtag = substr($modtag, 1);
       $mn = $module['link'];

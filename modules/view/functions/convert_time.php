@@ -14,7 +14,7 @@ function convert_time($time_decimal) {
     $str = '';
   }
 
-  $minutes = floor($time_decimal);
+  $minutes = floor($time_decimal ?? 0);
   $seconds = floor(($time_decimal-$minutes)*60);
   if ($minutes > 60) {
     $hours = floor($minutes / 60);
@@ -36,7 +36,7 @@ function convert_time_seconds($time) {
   }
 
   $minutes = floor($time / 60);
-  $seconds = $time % 60;
+  $seconds = (int)$time % 60;
   if ($minutes > 60) {
     $hours = floor($minutes / 60);
     $minutes %= 60;

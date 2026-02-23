@@ -243,7 +243,7 @@ function traverse_build_tree(&$stats, &$tree, $m_lim, $m_role, $root = '0', $bui
 
     foreach ($alts as $alt) {
       // timing for alts shouldn't be too different
-      if (($stats[$item]['median'] - $stats[$alt]['median']) > 240) {
+      if (!isset($stats[$alt]) || ($stats[$item]['median'] - $stats[$alt]['median']) > 240) {
         unset($alts[ array_search($alt, $alts) ]);
         $alts = array_values($alts);
         continue;
@@ -387,7 +387,7 @@ function traverse_build_tree_partial(&$stats, &$tree, $m_lim, $m_role) {
   
   // then sorting by median purchase time
   uasort($stats, function($a, $b) {
-    return $a['median'] <=> $b['median'];
+    return ($a['median'] ?? 0) <=> ($b['median'] ?? 0);
   });
 
   // only "big" items are allowed, everything else is injected with stats later
@@ -582,7 +582,7 @@ function inject_item_stats(&$build, &$stats, $hero) {
   global $meta;
 
   $lategame = $build['lategamePoint'];
-  $lategame_time = round(array_sum(array_slice($build['times'], 0, $lategame)) * 60);
+  $lategame_time = round(array_sum(array_slice($build['times'] ?? [], 0, $lategame)) * 60);
 
   // early game items
 
@@ -592,6 +592,7 @@ function inject_item_stats(&$build, &$stats, $hero) {
     if (!isset($stats[$item])) continue;
     if ($stats[$item]['prate'] < 0.09 || $stats[$item]['median'] > 1200) continue;
     
+    if (empty($build['times'])) continue;
     $order = 0; 
     for ($i = 0, $sum = $build['times'][0], $sz = count($build['times']); $i < $sz; $i++, $sum += $build['times'][$i] ?? 0) {
       if ($stats[$item]['median'] / 60 < $sum) {
@@ -664,7 +665,7 @@ function inject_item_stats(&$build, &$stats, $hero) {
 
   foreach ($stats as $item => $is) {
     // why .6% specifically? Because.
-    if (empty($is) || in_array($item, $items) || $is['prate'] < 0.006) continue;
+    if (empty($is) || in_array($item, $items) || !isset($is['prate']) || $is['prate'] < 0.006) continue;
 
     if ($is['prate'] > 0.035 && $is['median'] > $lategame_time) {
       $build['lategame'][] = $item;
@@ -740,20 +741,20 @@ function generate_item_builds(&$pairs, &$stats, $hero) {
   foreach ($pairs as $pair) {
     if (!isset($tree[ $pair['item1'] ])) {
       $tree[ $pair['item1'] ] = $dummy;
-      $tree[ $pair['item1'] ]['time'] = $stats[ $pair['item1'] ]['median'];
+      $tree[ $pair['item1'] ]['time'] = $stats[ $pair['item1'] ]['median'] ?? null;
     }
     if (!isset($tree[ $pair['item2'] ])) {
       $tree[ $pair['item2'] ] = $dummy;
-      $tree[ $pair['item2'] ]['time'] = $stats[ $pair['item2'] ]['median'];
+      $tree[ $pair['item2'] ]['time'] = $stats[ $pair['item2'] ]['median'] ?? null;
     }
 
     // populating root point
     if (($pair['avgord1'] ?? 0) <= 1) {
       if (!isset($tree[ '0' ]['children'][ $pair['item1'] ])) {
         $tree[ '0' ]['children'][ $pair['item1'] ] = [
-          'diff' => $stats[ $pair['item1'] ]['median'] / 60,
+          'diff' => ($stats[ $pair['item1'] ]['median'] ?? 0) / 60,
           'matches' => 0,
-          'winrate' => $stats[ $pair['item1'] ]['winrate'],
+          'winrate' => $stats[ $pair['item1'] ]['winrate'] ?? 0,
           'min_ord' => 0
         ];
       }
@@ -769,7 +770,9 @@ function generate_item_builds(&$pairs, &$stats, $hero) {
           'min_ord' => 0
         ];
       }
-      $tree[ '0' ]['children'][ $pair['item2'] ]['matches'] += $pair['total'] * (1-($pair['avgord2'] ?? 0));
+      if (isset($tree[ '0' ]['children'][ $pair['item2'] ])) {
+        $tree[ '0' ]['children'][ $pair['item2'] ]['matches'] += $pair['total'] * (1-($pair['avgord2'] ?? 0));
+      }
     }
 
     if ($pair['min_diff'] > 0) {
