@@ -575,12 +575,12 @@ function rg_view_generate_heroes_profiles() {
         "<th>".locale_string("support_awards")."</th>".
         "<th>".locale_string("lvp_awards")."</th>".
       "</tr></thead><tbody><tr>".
-        "<td>".number_format($mvp_data['total_awards'], 1)."</td>".
-        "<td>".number_format($mvp_data['mvp'], 1)."</td>".
-        "<td>".number_format($mvp_data['mvp_losing'], 1)."</td>".
-        "<td>".number_format($mvp_data['core'], 1)."</td>".
-        "<td>".number_format($mvp_data['support'], 1)."</td>".
-        "<td>".number_format($mvp_data['lvp'], 1)."</td>".
+        "<td>".number_format($mvp_data['total_awards'] ?? 0, 1)."</td>".
+        "<td>".number_format($mvp_data['mvp'] ?? 0, 1)."</td>".
+        "<td>".number_format($mvp_data['mvp_losing'] ?? 0, 1)."</td>".
+        "<td>".number_format($mvp_data['core'] ?? 0, 1)."</td>".
+        "<td>".number_format($mvp_data['support'] ?? 0, 1)."</td>".
+        "<td>".number_format($mvp_data['lvp'] ?? 0, 1)."</td>".
       "</tr></tbody></table>";
       
       // MVP Points table
@@ -1112,7 +1112,8 @@ function rg_view_generate_heroes_profiles() {
       "<th>".locale_string("trends_diff")."</th>".
     "</tr></thead><tbody>";
 
-    if ($report['hero_laning'][$hero]) {
+    $context = null;
+    if (!empty($report['hero_laning'][$hero])) {
       unset($report['hero_laning'][$hero][$hero]);
       $context =& $report['hero_laning'];
 
@@ -1153,7 +1154,7 @@ function rg_view_generate_heroes_profiles() {
       }
     }
 
-    $data = $context[0][$hero];
+    $data = $context ? ($context[0][$hero] ?? []) : [];
     $data['matches'] = $data['matches'] ?? 0;
     $wr_diff = $data['matches'] ? (
       ( $data['lanes_won'] ? $data['won_from_won']/$data['lanes_won'] : ( $data['lanes_tied'] ? $data['won_from_tie']/$data['lanes_tied'] : 0 ) ) - 
@@ -1408,10 +1409,10 @@ function rg_view_generate_heroes_profiles() {
         "<td>".$data['matches_total']."</td>".
         "<td class=\"separator\">".$data['matches_picked']."</td>".
         "<td>".number_format(100*$data['winrate_picked'], 2)."%</td>".
-        "<td>".number_format(100*$data['matches_picked']/$el['matches_total'], 2)."%</td>".
+        "<td>".number_format(100*$data['matches_picked']/max(1, $el['matches_total'] ?? 0), 2)."%</td>".
         "<td class=\"separator\">".$data['matches_banned']."</td>".
         "<td>".number_format(100*$data['winrate_banned'], 2)."%</td>".
-        "<td>".number_format(100*$data['matches_banned']/$el['matches_total'], 2)."%</td>".
+        "<td>".number_format(100*$data['matches_banned']/max(1, $el['matches_total'] ?? 0), 2)."%</td>".
       "</tr>";
     }
 
@@ -1452,7 +1453,7 @@ function rg_view_generate_heroes_profiles() {
         "<td>".player_link($pid)."</td>".
         "<td>".$data['matches']."</td>".
         "<td>".number_format(100*$data['wins']/$data['matches'], 2)."%</td>".
-        "<td>".number_format(100*$data['matches']/$el['matches_total'], 2)."%</td>".
+        "<td>".number_format(100*$data['matches']/max(1, $el['matches_total'] ?? 0), 2)."%</td>".
       "</tr>";
     }
 

@@ -18,12 +18,13 @@ function rg_view_generate_heroes_variants_pickban() {
   foreach ($report['hero_variants'] as $hvid => $stats) {
     [ $hid, $v ] = explode('-', $hvid);
 
+    if (!isset($report['pickban'][$hid]) || !$stats['m']) continue;
     $pb[$hvid] = [
       'matches_picked' => $stats['m'],
       'winrate_picked' => $stats['w']/$stats['m'],
-      'matches_banned' => round( $stats['f']*$report['pickban'][$hid]['matches_banned'] ),
-      'winrate_banned' => $report['pickban'][$hid]['winrate_banned'],
-      'ratio' => $stats['m'] ? $stats['m']/$report['pickban'][$hid]['matches_picked'] : 0,
+      'matches_banned' => round( $stats['f']*($report['pickban'][$hid]['matches_banned'] ?? 0) ),
+      'winrate_banned' => $report['pickban'][$hid]['winrate_banned'] ?? 0,
+      'ratio' => $stats['m'] ? $stats['m']/max(1, $report['pickban'][$hid]['matches_picked'] ?? 0) : 0,
     ];
     $pb[$hvid]['matches_total'] = $pb[$hvid]['matches_picked'] + $pb[$hvid]['matches_banned'];
     $pb[$hvid]['variant'] = +$v;

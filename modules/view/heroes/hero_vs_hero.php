@@ -91,6 +91,7 @@ function rg_view_generate_heroes_hvh() {
               $report['hero_variants'][$hid."-x"]['m'] += $report['hero_variants'][$hid."-".$i]['m'];
               $report['hero_variants'][$hid."-x"]['w'] += $report['hero_variants'][$hid."-".$i]['w'];
 
+              if (empty($hvh[$hid."-".$i])) continue;
               foreach ($hvh[$hid."-".$i] as $opid => $data) {
                 if (!isset($hvh[$hid."-x"][$opid])) {
                   $hvh[$hid."-x"][$opid] = [
@@ -108,8 +109,8 @@ function rg_view_generate_heroes_hvh() {
                 $hvh[$hid."-x"][$opid]['matches'] += $data['matches'];
                 $hvh[$hid."-x"][$opid]['expectation'] += $data['expectation'];
                 $hvh[$hid."-x"][$opid]['won'] += $data['won'];
-                $hvh[$hid."-x"][$opid]['lane_rate'] += round($data['lane_rate'] * $data['matches']);
-                $hvh[$hid."-x"][$opid]['lane_wr'] += $data['lane_rate'] * $data['matches'] * $data['lane_wr'];
+                $hvh[$hid."-x"][$opid]['lane_rate'] += round(($data['lane_rate'] ?? 0) * $data['matches']);
+                $hvh[$hid."-x"][$opid]['lane_wr'] += ($data['lane_rate'] ?? 0) * $data['matches'] * ($data['lane_wr'] ?? 0);
               }
             }
             $wr = $report['hero_variants'][$hid."-x"]['w']/$report['hero_variants'][$hid."-x"]['m'];

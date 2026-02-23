@@ -120,6 +120,7 @@ function rg_view_generate_heroes_hph() {
                 $report['hph_v'][$hid."-x"][$opid]['lane_wr'] += $data['lane_rate'] * $data['matches'] * $data['lane_wr'];
               }
             }
+            if (empty($report['hero_variants'][$hid."-x"]['m'])) continue;
             $wr = $report['hero_variants'][$hid."-x"]['w']/$report['hero_variants'][$hid."-x"]['m'];
             foreach ($report['hph_v'][$hid."-x"] as $opid => $data) {
               if (!$data['matches']) continue;
@@ -150,6 +151,7 @@ function rg_view_generate_heroes_hph() {
             $res["heroid".$hid]["variants"]["variant$i"] = "";
             if(check_module($parent_module."variant$i")) {
               $hvid = $hid.'-'.$i;
+              if (!isset($report['hph_v'][$hvid])) continue;
               foreach ($report['hph_v'][$hvid] as $id => $line) {
                 if ($id == '_h') {
                   unset($report['hph_v'][$hvid][$id]);
