@@ -96,7 +96,7 @@ function unwrap_data ($array) {
 
   $head_sz = sizeof($head);
 
-  foreach ($array['data'] as $data) {
+  foreach ($array['data'] ?? [] as $data) {
     if ($data === null) {
       $r[] = null;
       continue;

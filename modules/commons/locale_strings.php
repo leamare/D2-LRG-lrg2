@@ -20,7 +20,7 @@ function locale_string($string_id, $vars = [], $loc = null) {
   else $string = $string_id;
 
   foreach($vars as $k => $v) {
-    $string = str_ireplace("%$k%", $v, $string);
+    $string = str_ireplace("%$k%", (string)($v ?? ''), $string);
   }
 
   return $string;
@@ -74,9 +74,10 @@ function include_locale($locale, $component = null) {
   // } else
   foreach ($file as [ $f, $l ]) {
     if (file_exists($f) && !isset($_locales_imported[$f])) {
+      $decoded = json_decode(file_get_contents($f), true);
       $strings[$l] = array_merge(
-        $strings[$l],
-        json_decode(file_get_contents($f), true)
+        $strings[$l] ?? [],
+        $decoded ?? []
       );
       $_locales_imported[$f] = true;
     }

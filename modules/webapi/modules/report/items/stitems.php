@@ -114,7 +114,7 @@ public function process() {
       throw new UserInputException("No starting item items data");
     }
 
-    $data = $report['starting_items']['items'][$selected_rid][$selected_hid];
+    $data = $report['starting_items']['items'][$selected_rid][$selected_hid] ?? null;
 
     if (empty($data)) {
       return [];

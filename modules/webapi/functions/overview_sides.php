@@ -25,10 +25,17 @@ function rgapi_generator_overview_sides_section($context, $context_pb, $count) {
 
   $subset = array_slice($diff_rad_wr, 0, $count, true);
   $rd = array_map(function($v, $k) use (&$diff_rad_match, $context_pb) {
+    if (!isset($diff_rad_match) || !isset($context_pb[$k])) {
+      return [
+        'hero' => $k,
+        'pickrate_diff' => 0,
+        'winrate_diff' => 0,
+      ];
+    }
     return [
       'hero' => $k,
-      'pickrate_diff' => round($diff_rad_match[$k]/$context_pb[$k]['matches_picked'], 4),
-      'winrate_diff' => round($v, 4)
+      'pickrate_diff' => round(($diff_rad_match[$k])/$context_pb[$k]['matches_picked'], 4),
+      'winrate_diff' => round($v, 4),
     ];
   }, $subset, array_keys($subset));
 
