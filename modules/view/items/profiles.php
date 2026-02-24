@@ -26,7 +26,7 @@ function rg_view_generate_items_profiles() {
   // Get consumables IDs
   $consumable_iids = [];
   if (isset($report['starting_items']['consumables'])) {
-    $consumable_iids = $report['starting_items']['consumables']['all'][0][0]['keys'];
+    $consumable_iids = $report['starting_items']['consumables']['all'][0][0]['keys'] ?? [];
   }
 
   // Get enchantments IDs
@@ -47,7 +47,7 @@ function rg_view_generate_items_profiles() {
 
   // Combine all item IDs
   $item_ids = array_unique(array_merge(
-    array_keys($report['items']['stats']['total']), 
+    isset($report['items']['stats']['total']) ? array_keys($report['items']['stats']['total']) : [],
     $starting_iids,
     $consumable_iids ?? [],
     $enchantment_iids ?? [],
@@ -55,7 +55,10 @@ function rg_view_generate_items_profiles() {
 
   $item_names = [];
 
+  $meta['items_full'];
+
   foreach ($item_ids as $item) {
+    if (!isset($meta['items_full'][$item])) continue;
     $item_names[$item] = [
       'name' => $meta['items_full'][$item]['localized_name'],
       'tag' => $meta['items_full'][$item]['name'],
@@ -85,12 +88,11 @@ function rg_view_generate_items_profiles() {
       $item = $iid;
     }
   }
-  
   // total aka reference table data
 
   // RANKING FOR REFERENCE TABLE
 
-  $is_regular = in_array($item, array_keys($report['items']['stats']['total']));
+  $is_regular = in_array($item, array_keys($report['items']['stats']['total'] ?? []));
   $is_starting = in_array($item, $starting_iids);
   $is_consumable = isset($report['starting_items']['consumables'])
     && in_array($item, $report['starting_items']['consumables']['all'][0][0]['keys'] ?? []);
@@ -299,7 +301,7 @@ function rg_view_generate_items_profiles() {
     });
 
     $cons_hero_uses_highest_mean = array_slice(array_keys($cons_hero_uses[$blk]), 0, 8);
-    $cons_role_most_uses = array_keys($cons_role_uses[$blk])[0];
+    $cons_role_most_uses = !empty($cons_role_uses[$blk]) ? array_keys($cons_role_uses[$blk])[0] : null;
 
     uasort($cons_hero_uses[$blk], function($a, $b) {
       return $a['mean'] <=> $b['mean'];
@@ -361,10 +363,10 @@ function rg_view_generate_items_profiles() {
   }
 
   if ($is_consumable) {
-    $content_lines[] = [ 'matches_cons_all', $cons_data['all'][$item]['matches'] ];
-    $content_lines[] = [ 'median_cons_all', $cons_data['5m'][$item]['med'] ];
-    $content_lines[] = [ 'q1_cons_all', $cons_data['5m'][$item]['q1'] ];
-    $content_lines[] = [ 'q3_cons_all', $cons_data['5m'][$item]['q3'] ];
+    $content_lines[] = [ 'matches_cons_all', $cons_data['all'][$item]['matches'] ?? 0 ];
+    $content_lines[] = [ 'median_cons_all', $cons_data['5m'][$item]['med'] ?? 0 ];
+    $content_lines[] = [ 'q1_cons_all', $cons_data['5m'][$item]['q1'] ?? 0 ];
+    $content_lines[] = [ 'q3_cons_all', $cons_data['5m'][$item]['q3'] ?? 0 ];
   }
 
   if ($is_enchantment) {
@@ -872,7 +874,7 @@ function rg_view_generate_items_profiles() {
       <tbody>";
     
     foreach ($cons_data as $blk => $d) {
-      $d = $d[$item];
+      $d = $d[$item] ?? null;
       if (empty($d)) {
         $d = [
           'matches' => 0,

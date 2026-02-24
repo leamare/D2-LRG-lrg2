@@ -32,6 +32,9 @@ function rg_view_generate_items_progression() {
     else return ($a['name'] > $b['name']) ? 1 : -1;
   });
 
+  $hero = 'total';
+  $tag = "overview";
+
   if(check_module($parent_module."overview")) {
     $hero = 'total';
     $tag = "overview";
@@ -107,6 +110,7 @@ function rg_view_generate_items_progression() {
     if (empty($v)) continue;
 
     if ($crole ?? false) {
+      if (!is_array($v)) continue;
       $v = array_combine($report['items']['progrole']['keys'], $v);
     }
 

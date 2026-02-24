@@ -18,7 +18,10 @@ function rg_view_generate_items_heroes() {
   $item_ids = array_keys($report['items']['stats']['total']);
   $item_names = [];
 
+  $meta['items_full'];
+
   foreach ($item_ids as $item) {
+    if (!isset($meta['items_full'][$item]) || empty($report['items']['stats']['total'][$item])) continue;
     $item_names[ $item ] = [
       'name' => $meta['items_full'][$item]['localized_name'],
       'tag' => $meta['items_full'][$item]['name']
@@ -39,6 +42,15 @@ function rg_view_generate_items_heroes() {
     }
   }
 
+  if ($unset_module) {
+    $unset_module = false;
+    if (!empty($item_names)) {
+      $item = array_key_first($item_names);
+    } else {
+      return $res;
+    }
+  }
+
   // RANKING FOR REFERENCE TABLE
 
   items_ranking($report['items']['stats']['total']);
@@ -56,6 +68,8 @@ function rg_view_generate_items_heroes() {
   }
 
   // REFERENCE TABLE
+
+  if (!isset($item) || !isset($res['itemid'.$item])) return $res;
 
   $data = $report['items']['stats']['total'][$item];
   
@@ -146,7 +160,7 @@ function rg_view_generate_items_heroes() {
   $max = reset($heroes)['wrank'];
 
   foreach ($heroes as $id => $el) {
-    $heroes[$id]['rank'] = 100 * ($el['wrank']-$min) / ($max-$min);
+    $heroes[$id]['rank'] = ($max != $min) ? 100 * ($el['wrank']-$min) / ($max-$min) : 0;
   }
 
   sort($matches_med);

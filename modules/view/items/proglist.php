@@ -81,6 +81,7 @@ function rg_view_generate_items_proglist() {
     if (empty($v)) continue;
 
     if ($crole ?? false) {
+      if (!is_array($v)) continue;
       $v = array_combine($report['items']['progrole']['keys'], $v);
     }
     $pairs[] = $v;

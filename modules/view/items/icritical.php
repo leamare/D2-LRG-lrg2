@@ -28,6 +28,9 @@ function rg_view_generate_items_critical() {
   );
   $enable_neutrals = false;
 
+  $hero = "total";
+  $tag = "total";
+
   if(check_module($parent_module."total")) {
     $hero = "total";
     $tag = "total";
@@ -142,7 +145,7 @@ function rg_view_generate_items_critical() {
     // "<option ".($cat === null ? "selected=\"selected\"" : "").
     //   " value=\"?league=".$leaguetag."&mod=".$mod.(empty($linkvars) ? "" : "&".$linkvars)."\">".locale_string("items_category_all")."</option>";
   foreach ($item_cats as $ic) {
-    $res[$tag] .= "<option ".(in_array($ic, $cat) ? "selected=\"selected\"" : "").
+    $res[$tag] .= "<option ".(in_array($ic, $cat ?? []) ? "selected=\"selected\"" : "").
       " value=\"$ic\">".locale_string("items_category_$ic")."</option>";
   }
   $res[$tag] .= "</select></div>";

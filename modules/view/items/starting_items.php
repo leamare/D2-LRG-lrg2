@@ -21,8 +21,8 @@ function rg_view_generate_items_sti_items() {
   generate_positions_strings();
 
   $selected_rid = null;
-  $selected_hid = null;
-  $selected_tag = null;
+  $selected_hid = 0;
+  $selected_tag = 'total';
 
   $carryon["/^items-stitems-(heroid\d+|total)$/"] = "/^items-stitems-(heroid\d+|total)/";
 
@@ -88,7 +88,7 @@ function rg_view_generate_items_sti_items() {
   if ($selected_hid != 0) {
     $pbdata = $report['pickban'][$selected_hid] ?? [];
 
-    if (is_wrapped($report['hero_laning'])) {
+    if (isset($report['hero_laning']) && is_wrapped($report['hero_laning'])) {
       $report['hero_laning'] = unwrap_data($report['hero_laning']);
     }
     $lanedata = $report['hero_laning'][0][$selected_hid] ?? [];
@@ -113,9 +113,9 @@ function rg_view_generate_items_sti_items() {
       [$core, $lane] = explode('.', ROLES_IDS_SIMPLE[$selected_rid]);
       $posdata = $report['hero_positions'][$core][$lane][$selected_hid] ?? [];
 
-      $context['role_matches'] = $posdata['matches_s'];
-      $context['role_winrate'] = $posdata['winrate_s'];
-      $context['role_ratio'] = $posdata['matches_s']/$context['matches'];
+      $context['role_matches'] = $posdata['matches_s'] ?? null;
+      $context['role_winrate'] = $posdata['winrate_s'] ?? null;
+      $context['role_ratio'] = $context['matches'] ? (($posdata['matches_s'] ?? 0)/$context['matches']) : 0;
     }
   }
 

@@ -137,10 +137,10 @@ function rg_view_generate_items_enchantments() {
   foreach ($category_ids as $tier_number => $category_id) {
     if (!$tier_number || empty($data[$category_id])) continue;
 
-    $items = $data[$category_id];
+    $items = array_filter($data[$category_id], 'is_array');
 
     uasort($items, function($a, $b) {
-      return $b['matches'] <=> $a['matches'];
+      return ($b['matches'] ?? 0) <=> ($a['matches'] ?? 0);
     });
 
     $rows = "";

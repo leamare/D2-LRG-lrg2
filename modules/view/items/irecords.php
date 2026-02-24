@@ -29,6 +29,9 @@ function rg_view_generate_items_irecords() {
     else return ($a['name'] > $b['name']) ? 1 : -1;
   });
 
+  $item = null;
+  $tag = 'overview';
+
   $res['overview'] = '';
   if(check_module($parent_module."overview")) {
     $item = null;

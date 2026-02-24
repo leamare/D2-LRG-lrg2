@@ -33,6 +33,7 @@ function rg_view_generate_items_builds() {
     else return ($a['name'] > $b['name']) ? 1 : -1;
   });
 
+  $hero = null;
   if(check_module($parent_module."overview")) {
     $hero = null;
   }
@@ -144,6 +145,7 @@ function rg_view_generate_items_builds() {
   $data = [];
 
   foreach ($report['items']['progrole']['data'][$hero][$crole] as $elem) {
+    if (!is_array($elem)) continue;
     $data[] = array_combine($report['items']['progrole']['keys'], $elem);
   }
 
@@ -393,9 +395,10 @@ function rg_view_generate_items_builds() {
 
   // BUILD OVERVIEW
 
+  $sti_builds = [];
+  $sti_stats = [];
+
   if (isset($report['starting_items'])) {
-    $sti_builds = [];
-    $sti_stats = [];
     $sti_matches_context = [];
 
     $srid = array_search($crole, ROLES_IDS_SIMPLE);
@@ -429,6 +432,7 @@ function rg_view_generate_items_builds() {
     }
 
     $builds_fallback = false;
+    $sti_builds = [];
 
     if (isset($report['starting_items']['builds'])) {
       $report['starting_items']['builds'][$srid] = unwrap_data($report['starting_items']['builds'][$srid]);
@@ -444,6 +448,7 @@ function rg_view_generate_items_builds() {
         $stib_context =& $report['starting_items']['builds'][0][0];
       }
 
+      if (!is_array($stib_context)) $stib_context = [];
       $stib_context = array_filter($stib_context, function($el) { return !empty($el); });
 
       usort($stib_context, function($a, $b) {
@@ -480,6 +485,7 @@ function rg_view_generate_items_builds() {
           $items[] = $iid;
         }
 
+        if (empty($matches) || array_sum($matches) == 0) continue;
         $sti_builds[] = [
           'build' => $items,
           'matches' => array_sum($matches)/count($matches),
@@ -547,6 +553,7 @@ function rg_view_generate_items_builds() {
         //   $wr_wo = 0;
         // }
 
+        if (!isset($sti_stats[$stiid])) continue;
         $reslocal .= itembuild_item_component_simple($item, [
           'pcnt' => $cnts[$item],
           'winrate' => $sti_stats[$stiid]['wins']/$sti_stats[$stiid]['matches'],
@@ -814,6 +821,7 @@ function rg_view_generate_items_builds() {
       foreach ($report['items']['enchantments'][$hero] as $i => $items) {
         if ($i == 0) continue;
 
+        if (!is_array($items)) continue;
         $items = array_filter($items, function($a) {
           return !empty($a) && $a['matches'] > 0;
         });

@@ -28,6 +28,9 @@ function rg_view_generate_items_stats() {
   );
   $enable_neutrals = false;
 
+  $hero = "total";
+  $tag = "total";
+
   if(check_module($parent_module."total")) {
     $hero = "total";
     $tag = "total";
@@ -72,7 +75,7 @@ function rg_view_generate_items_stats() {
   $max = reset($report['items']['stats'][$hero])['wrank'];
 
   foreach ($report['items']['stats'][$hero] as $id => $el) {
-    $report['items']['stats'][$hero][$id]['rank'] = 100 * ($el['wrank']-$min) / ($max-$min);
+    $report['items']['stats'][$hero][$id]['rank'] = ($max != $min) ? 100 * ($el['wrank']-$min) / ($max-$min) : 0;
     unset($report['items']['stats'][$hero][$id]['wrank']);
 
     if (!$enable_neutrals && in_array($id, $neutral_items)) {
