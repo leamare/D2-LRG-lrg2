@@ -14,7 +14,7 @@ function rg_view_generate_players_combos() {
     if (check_module($parent_module."pairs")) {
       foreach ($report['player_pairs'] as $i => $pair) {
         // workaround for players WR diff being inverted
-        $report['player_pairs'][$i]['wr_diff'] *= -1; 
+        $report['player_pairs'][$i]['wr_diff'] = ($report['player_pairs'][$i]['wr_diff'] ?? 0) * -1; 
       }
 
       $res['pairs'] =  "<div class=\"content-text\">".locale_string("desc_players_pairs", [ "limh"=>$report['settings']['limiter']+1 ] )."</div>";

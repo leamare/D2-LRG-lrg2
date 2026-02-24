@@ -7,7 +7,7 @@ $modules['players']['draft'] = "";
 function rg_view_generate_players_draft() {
   global $report;
 
-  $plyers_bans_disable = true;
+  $players_bans_disable = true;
 
   $context_pickban = [];
   foreach($report['players_summary'] as $id => $el) {

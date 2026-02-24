@@ -34,6 +34,8 @@ function rg_view_generate_players_profiles() {
 
   $data = $report['players_summary'][$player];
 
+  if (!is_array($data)) return "";
+
   if (isset($data['hero_damage_per_min_s']) && $data['gpm'] && !isset($data['damage_to_gold_per_min_s'])) {
     $data = array_insert_before($data, "gpm", [
       "damage_to_gold_per_min_s" => ($data['hero_damage_per_min_s'] ?? 0)/($data['gpm'] ?? 1),
@@ -54,24 +56,24 @@ function rg_view_generate_players_profiles() {
       "<div class=\"profile-stats\">".
         "<div class=\"profile-statline\"><label>".locale_string("kda")."</label>: ".(
           isset($data['kills_s']) ? 
-          number_format($data['kills_s'], 2)."/".
-          number_format($data['deaths_s'], 2)."/".
-          number_format($data['assists_s'], 2)." (".number_format($data['kda'], 2).")"
-           : number_format($data['kda'], 2)
+          number_format($data['kills_s'] ?? 0, 2)."/".
+          number_format($data['deaths_s'] ?? 0, 2)."/".
+          number_format($data['assists_s'] ?? 0, 2)." (".number_format($data['kda'] ?? 0, 2).")"
+           : number_format($data['kda'] ?? 0, 2)
         ).
         "</div>".
         "<div class=\"profile-statline\"><label>".locale_string("gpm")."/".locale_string("xpm")."</label>: ".
           number_format($data['gpm'], 0)."/".number_format($data['xpm'], 0)."</div>".
-        "<div class=\"profile-statline\"><label>".locale_string("lh_at10")."</label>: ".number_format($data['lh_at10'], 1)."</div>".
-        "<div class=\"profile-statline\"><label>".locale_string("lasthits_per_min_s")."</label>: ".number_format($data['lasthits_per_min_s'], 1)."</div>".
-        "<div class=\"profile-statline\"><label>".locale_string("damage_to_gold_per_min")."</label>: ".number_format($data['damage_to_gold_per_min_s'], 3)."</div>".
+        "<div class=\"profile-statline\"><label>".locale_string("lh_at10")."</label>: ".number_format($data['lh_at10'] ?? 0, 1)."</div>".
+        "<div class=\"profile-statline\"><label>".locale_string("lasthits_per_min_s")."</label>: ".number_format($data['lasthits_per_min_s'] ?? 0, 1)."</div>".
+        "<div class=\"profile-statline\"><label>".locale_string("damage_to_gold_per_min")."</label>: ".number_format($data['damage_to_gold_per_min_s'] ?? 0, 3)."</div>".
       "</div>".
       "<div class=\"profile-stats\">".
-        "<div class=\"profile-statline\"><label>".locale_string("heal_per_min")."</label>: ".number_format($data['heal_per_min_s'], 2)."</div>".
-        "<div class=\"profile-statline\"><label>".locale_string("hero_damage_per_min")."</label>: ".number_format($data['hero_damage_per_min_s'], 1)."</div>".
-        "<div class=\"profile-statline\"><label>".locale_string("tower_damage_per_min")."</label>: ".number_format($data['tower_damage_per_min_s'], 1)."</div>".
-        "<div class=\"profile-statline\"><label>".locale_string("taken_damage_per_min")."</label>: ".number_format($data['taken_damage_per_min_s'], 1)."</div>".
-        "<div class=\"profile-statline\"><label>".locale_string("stuns")."</label>: ".round($data['stuns'], 2)."</div>".
+        "<div class=\"profile-statline\"><label>".locale_string("heal_per_min")."</label>: ".number_format($data['heal_per_min_s'] ?? 0, 2)."</div>".
+        "<div class=\"profile-statline\"><label>".locale_string("hero_damage_per_min")."</label>: ".number_format($data['hero_damage_per_min_s'] ?? 0, 1)."</div>".
+        "<div class=\"profile-statline\"><label>".locale_string("tower_damage_per_min")."</label>: ".number_format($data['tower_damage_per_min_s'] ?? 0, 1)."</div>".
+        "<div class=\"profile-statline\"><label>".locale_string("taken_damage_per_min")."</label>: ".number_format($data['taken_damage_per_min_s'] ?? 0, 1)."</div>".
+        "<div class=\"profile-statline\"><label>".locale_string("stuns")."</label>: ".round($data['stuns'] ?? 0, 2)."</div>".
       "</div>".
     "</div>".
     // "<div class=\"profile-content\">";
@@ -151,12 +153,12 @@ function rg_view_generate_players_profiles() {
         "<th>".locale_string("support_awards")."</th>".
         "<th>".locale_string("lvp_awards")."</th>".
       "</tr></thead><tbody><tr>".
-        "<td>".number_format($mvp_data['total_awards'], 1)."</td>".
-        "<td>".number_format($mvp_data['mvp'], 1)."</td>".
-        "<td>".number_format($mvp_data['mvp_losing'], 1)."</td>".
-        "<td>".number_format($mvp_data['core'], 1)."</td>".
-        "<td>".number_format($mvp_data['support'], 1)."</td>".
-        "<td>".number_format($mvp_data['lvp'], 1)."</td>".
+        "<td>".number_format($mvp_data['total_awards'] ?? 0, 1)."</td>".
+        "<td>".number_format($mvp_data['mvp'] ?? 0, 1)."</td>".
+        "<td>".number_format($mvp_data['mvp_losing'] ?? 0, 1)."</td>".
+        "<td>".number_format($mvp_data['core'] ?? 0, 1)."</td>".
+        "<td>".number_format($mvp_data['support'] ?? 0, 1)."</td>".
+        "<td>".number_format($mvp_data['lvp'] ?? 0, 1)."</td>".
       "</tr></tbody></table>";
       
       // MVP Points table
@@ -399,7 +401,7 @@ function rg_view_generate_players_profiles() {
     $res['playerid'.$player] .= "<tbody><tr>";
     foreach ($draft as $stg => $data) {
       if (!$data) $data = ['matches' => 0, 'winrate' => 0];
-      if ($draft_bans[$stg]) {
+      if ($draft_bans[$stg] ?? null) {
         $data_bans = $draft_bans[$stg];
       } else {
         $data_bans = ['matches' => 0, 'winrate' => 0];
@@ -460,7 +462,7 @@ function rg_view_generate_players_profiles() {
         "<td>".number_format($data['matches_s'], 0)."</td>".
         "<td>".number_format($data['winrate_s']*100, 2)."%</td>".
         "<td>".number_format($data['hero_pool'], 0)."</td>".
-        "<td>".number_format($data['kda'], 2)."</td>".
+        "<td>".number_format($data['kda'] ?? 0, 2)."</td>".
         "<td>".number_format($data['gpm'], 0)."</td>".
         "<td>".number_format($data['xpm'], 0)."</td>".
       "</tr>";
