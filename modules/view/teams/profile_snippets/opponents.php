@@ -14,7 +14,7 @@ if (!empty($report['series'])) {
         $team_series[$st] = $s;
         break;
       }
-      if ($report['match_participants_teams'][$mid]['dire'] == $tid) {
+      if (($report['match_participants_teams'][$mid]['dire'] ?? null) == $tid) {
         $s['opponent'] = $report['match_participants_teams'][$mid]['radiant'] ?? 0;
         $team_series[$st] = $s;
         break;
@@ -150,8 +150,8 @@ foreach ($tvt[$tid] as $opid => $data) {
     "<td>".team_link($opid)."</td>".
     "<td>".$data['matches']."</td>".
     "<td>".number_format($data['winrate']*100,2)."%</td>".
-    (!empty($team_series) ? "<td>".$data['series']."</td>".
-      "<td>".$data['series_wins']."-".$data['series_tie']."-".$data['series_loss']."</td>" : "").
+    (!empty($team_series) ? "<td>".($data['series'] ?? 0)."</td>".
+      "<td>".($data['series_wins'] ?? 0)."-".($data['series_tie'] ?? 0)."-".($data['series_loss'] ?? 0)."</td>" : "").
     // (isset($data['matchids']) ? "<td><a onclick=\"showModal('".
     //   htmlspecialchars(join_matches($data['matchids'])).
     //   "', '".locale_string("matches")." - ".addcslashes(team_name($tid)." vs. ".team_name($opid), "'")."');\">".

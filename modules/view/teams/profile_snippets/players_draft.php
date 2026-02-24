@@ -13,7 +13,7 @@ if (compare_release_ver($report['ana_version'], [ 2, 18, 0, 0, 0 ]) < 0) {
 // ??? Skip meta bans?
 
 if(check_module($context_mod."team".$tid."-players-draft")) {
-  $plyers_bans_disable = true;
+  $players_bans_disable = true;
   if (!empty($context[$tid]['draft_vs']) && !empty($report['match_participants_teams']) && !empty($context[$tid]['matches'])) {
     $players_bans_disable = false;
 

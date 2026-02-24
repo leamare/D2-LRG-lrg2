@@ -34,21 +34,22 @@ if (isset($report['starting_items_players']['items'])) {
 
     $sti_matches = unwrap_data($report['starting_items_players']['matches'][0]);
   
-    if ($selected_pid) {
+    if ($selected_pid && isset($report['starting_items_players']['items'][0][$selected_pid])) {
       $data = $report['starting_items_players']['items'][0][$selected_pid];
       $data['head'] = $report['starting_items_players']['items_head'];
       $data = unwrap_data($data);
-      $matches = $sti_matches[$selected_pid];
+      $matches = $sti_matches[$selected_pid] ?? 0;
     } else {
       $data = [];
       $matches_total = 0;
   
       foreach ($context[$tid]['active_roster'] as $pid) {
+        if (!isset($report['starting_items_players']['items'][0][$pid])) continue;
         $pl_data = $report['starting_items_players']['items'][0][$pid];
         $pl_data['head'] = $report['starting_items_players']['items_head'];
         $pl_data = unwrap_data($pl_data);
 
-        $matches_total += $sti_matches[$pid]['m'];
+        $matches_total += $sti_matches[$pid]['m'] ?? 0;
 
         foreach ($pl_data as $iid => $item) {
           if (!isset($data[$iid])) $data[$iid] = [

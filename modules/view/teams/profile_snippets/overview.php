@@ -334,6 +334,7 @@ if (!empty($report['match_participants_teams'])) {
           $_records[] = $record;
         } else if (!empty($context_records_ext)) {
           foreach ($context_records_ext[$rectag] ?? [] as $i => $rec) {
+            if (!is_array($rec)) continue;
             if ($rec['playerid'] == $tid) {
               $rec['tag'] = $rectag;
               $rec['placement'] = $i+2;
@@ -348,7 +349,7 @@ if (!empty($report['match_participants_teams'])) {
     if (empty($_records)) {
       $res["team".$tid]['overview'] .= "<div class=\"content-text\"><h1>".locale_string("records")."</h1>".locale_string("stats_no_elements")."</a></div>";
     } else {
-      $res["team".$tid]['overview'] .= "<table id=\"player-profile-pid$player-records\" class=\"list wide\"><caption>".locale_string("records")."</caption><thead>".
+      $res["team".$tid]['overview'] .= "<table id=\"team-profile-tid$tid-records\" class=\"list wide\"><caption>".locale_string("records")."</caption><thead>".
         "<tr class=\"overhead\">".
           "<th>".locale_string("record")."</th>".
           "<th>".locale_string("match")."</th>".
