@@ -8,7 +8,7 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
 
   $carryon["/^teams-profiles-team(\d+)$/"] = "/^teams-profiles-team(\d+)/";
 
-  if(!is_array(array_values($context)[0])) {
+  if(!empty($context) && !is_array(array_values($context)[0])) {
     foreach($context as $team_id => &$content) {
       $content = $report['teams'][$team_id];
     }
@@ -343,7 +343,7 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
               foreach ($context[$tid]['matches'] as $mid => $data) {
                 if (!isset($report['match_participants_teams'][$mid])) continue;
 
-                $opid = $report['match_participants_teams'][$mid]['radiant'] == $tid ?
+                $opid = ($report['match_participants_teams'][$mid]['radiant'] ?? null) == $tid ?
                    ($report['match_participants_teams'][$mid]['dire'] ?? 0) : 
                    ($report['match_participants_teams'][$mid]['radiant'] ?? 0);
                 

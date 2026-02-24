@@ -158,12 +158,12 @@
     <?php 
       if (!empty($ads_block) && !empty($leaguetag)) echo "<div class=\"ads-block-report\">$ads_block</div>";
     ?>
-    <div id="content-wrapper" <?php echo $__tmpl_trust ? "" : "class=\"shady\""; ?>>
+    <div id="content-wrapper" <?php echo ($__tmpl_trust ?? false) ? "" : "class=\"shady\""; ?>>
       <div id="header-image" class="section-header">
     <?php if (!empty($leaguetag)) { ?>
       <?php if(!isset($custom_logo)) {?>
         <h1><?php echo $report['league_name']; ?></h1>
-        <h2><?php echo $report['league_desc']; ?></h2>
+        <h2><?php echo $report['league_desc'] ?? ''; ?></h2>
         <h3><?php echo locale_string($h3).": ".$report['random'][$h3]; ?></h3>
         <?php if (isset($report['settings']['3rd_party'])) echo "<h3>".implode(', ', (array)$report['settings']['3rd_party'])."</h3>"; ?>
         <?php 
@@ -182,12 +182,13 @@
         <?php } ?>
     <?php } ?>
     <?php 
-      if ($__tmpl_trust) {
+      if ($__tmpl_trust ?? false) {
         if (!empty($global_partners) || (!empty($leaguetag) && !empty($report['sponsors']))) {
           $stratz_partner = false;
           $partners_raw = (!empty($leaguetag) && !empty($report['sponsors'])) ? $report['sponsors'] : ($global_partners ?? []);
           $partners = [];
           foreach ($partners_raw as $type => $link) {
+            if (!is_string($link)) continue;
             if (stripos($type, "stratz") !== false) $stratz_partner = true;
             $partners[] = "<a target=\"_blank\" href=\"".$link."\" class=\"shoutout-link\">".
             // FIXME:
