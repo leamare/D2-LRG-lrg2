@@ -11,7 +11,7 @@ function create_fuzzy_regex(string $string) {
 
   $ending = '';
   if ($len > 8) {
-    $ending = '('.mb_substr($string, $len-2, 1).'|.)?('.mb_substr($string, $len-1, 1).'|.)?';
+    $ending = '('.addcslashes(mb_substr($string, $len-2, 1), REGEX_MASK).'|.)?('.addcslashes(mb_substr($string, $len-1, 1), REGEX_MASK).'|.)?';
     $len -= 2;
   }
 

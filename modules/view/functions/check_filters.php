@@ -88,7 +88,7 @@ function check_filters($rep, $filters) {
           break;
         case LRG_TAG_FILTER_DESC:
           if (isset($rep['localized'])) {
-            $r = preg_match($filter[1], $rep['desc']);
+            $r = preg_match($filter[1], ($rep['desc'] ?? ''));
             foreach ($rep['localized'] as $loc) {
               if ($r) break;
               if (!isset($loc['desc'])) continue;
@@ -97,12 +97,12 @@ function check_filters($rep, $filters) {
 
             $group_result = $group_result && $r;
           } else {
-            $group_result = $group_result && preg_match($filter[1], $rep['desc']);
+            $group_result = $group_result && preg_match($filter[1], ($rep['desc'] ?? ''));
           }
           break;
         case LRG_TAG_FILTER_NAMEDESC:
           if (isset($rep['localized'])) {
-            $r = preg_match($filter[1], $rep['desc']) || preg_match($filter[1], $rep['name']);
+            $r = preg_match($filter[1], ($rep['desc'] ?? '')) || preg_match($filter[1], $rep['name']);
             foreach ($rep['localized'] as $loc) {
               if ($r) break;
               if (isset($loc['desc'])) $r = $r || preg_match($filter[1], $loc['desc']);
@@ -111,11 +111,11 @@ function check_filters($rep, $filters) {
 
             $group_result = $group_result && $r;
           } else {
-            $group_result = $group_result && ( preg_match($filter[1], $rep['desc']) || preg_match($filter[1], $rep['name']) );
+            $group_result = $group_result && ( preg_match($filter[1], ($rep['desc'] ?? '')) || preg_match($filter[1], $rep['name']) );
           }
           break;
         case LRG_TAG_FILTER_NAMEDESC_LETTERS:
-          $lt = addcslashes(strtolower($filter[1]), "\\");
+          $lt = preg_quote(strtolower($filter[1]), '/');
           $letterize = function($str) {
             return array_reduce(
               preg_split("(\s|_|\-)", strtolower(str_replace([',', '.', ':', ';'], '', $str))),
@@ -152,7 +152,7 @@ function check_filters($rep, $filters) {
           break;
         case LRG_TAG_FILTER_NAMEDESC_EXCLUSIVE:
           if (isset($rep['localized'])) {
-            $r = preg_match($filter[1], $rep['desc']) && preg_match($filter[1], $rep['name']);
+            $r = preg_match($filter[1], ($rep['desc'] ?? '')) && preg_match($filter[1], $rep['name']);
             foreach ($rep['localized'] as $loc) {
               if (!$r) break;
               if (isset($loc['desc'])) $r = $r && preg_match($filter[1], $loc['desc']);
@@ -161,7 +161,7 @@ function check_filters($rep, $filters) {
 
             $group_result = $group_result && $r;
           } else {
-            $group_result = $group_result && ( preg_match($filter[1], $rep['desc']) && preg_match($filter[1], $rep['name']) );
+            $group_result = $group_result && ( preg_match($filter[1], ($rep['desc'] ?? '')) && preg_match($filter[1], $rep['name']) );
           }
           break;
         case LRG_TAG_FILTER_ID:
