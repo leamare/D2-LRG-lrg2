@@ -28,10 +28,10 @@ function team_card($tid, $full = false) {
                       number_format($report['teams'][$tid]['wins']*100/$report['teams'][$tid]['matches_total'])."%</div>"
                     : ""
                   ).
-                "<div class=\"team-info-line\"><span class=\"caption\">".locale_string("gpm").":</span> ".number_format($report['teams'][$tid]['averages']['gpm'])."</div>".
-                "<div class=\"team-info-line\"><span class=\"caption\">".locale_string("xpm").":</span> ".number_format($report['teams'][$tid]['averages']['xpm'])."</div>".
-                "<div class=\"team-info-line\"><span class=\"caption\">".locale_string("kda").":</span> ".number_format($report['teams'][$tid]['averages']['kills']).
-                  "/".number_format($report['teams'][$tid]['averages']['deaths'])."/".number_format($report['teams'][$tid]['averages']['assists'])."</div>".
+                "<div class=\"team-info-line\"><span class=\"caption\">".locale_string("gpm").":</span> ".number_format($report['teams'][$tid]['averages']['gpm'] ?? 0)."</div>".
+                "<div class=\"team-info-line\"><span class=\"caption\">".locale_string("xpm").":</span> ".number_format($report['teams'][$tid]['averages']['xpm'] ?? 0)."</div>".
+                "<div class=\"team-info-line\"><span class=\"caption\">".locale_string("kda").":</span> ".number_format($report['teams'][$tid]['averages']['kills'] ?? 0).
+                  "/".number_format($report['teams'][$tid]['averages']['deaths'] ?? 0)."/".number_format($report['teams'][$tid]['averages']['assists'] ?? 0)."</div>".
                 (isset($region_line) ? "<div class=\"team-info-line\"><span class=\"caption\">".locale_string("main_region").":</span> ".$region_line."</div>" : "").
                   "</div>";
 
