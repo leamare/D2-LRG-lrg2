@@ -6,9 +6,9 @@ function core_picked_percentage($array, $q1 = null, $q3 = null) {
   sort($array);
   
   $sz = count($array);
-  if (!isset($q3)) $q3 = $array[round($sz*0.75)];
-  if (!isset($q1)) $q1 = $array[round($sz*0.25)];
-  $q2 = $array[round($sz*0.5)];
+  if (!isset($q3)) $q3 = $array[min((int)round($sz*0.75), $sz-1)];
+  if (!isset($q1)) $q1 = $array[min((int)round($sz*0.25), $sz-1)];
+  $q2 = $array[min((int)round($sz*0.5), $sz-1)];
 
   $arr2 = array_filter($array, function($a) use ($q1, $q3) {
       return $a >= $q1 && $a <= $q3;
