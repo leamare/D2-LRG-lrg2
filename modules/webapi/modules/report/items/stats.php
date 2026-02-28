@@ -52,7 +52,7 @@ public function process() {
     $max = reset($report['items']['stats'][$hero])['wrank'];
 
     foreach ($report['items']['stats'][$hero] as $id => $el) {
-      $report['items']['stats'][$hero][$id]['rank'] = 100 * ($el['wrank']-$min) / ($max-$min);
+      $report['items']['stats'][$hero][$id]['rank'] = ($max != $min) ? 100 * ($el['wrank']-$min) / ($max-$min) : 0;
       unset($report['items']['stats'][$hero][$id]['wrank']);
     }
   }
