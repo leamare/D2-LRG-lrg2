@@ -113,6 +113,7 @@ function rg_view_generate_heroes_hvh() {
                 $hvh[$hid."-x"][$opid]['lane_wr'] += ($data['lane_rate'] ?? 0) * $data['matches'] * ($data['lane_wr'] ?? 0);
               }
             }
+            if (empty($report['hero_variants'][$hid."-x"]['m'])) continue;
             $wr = $report['hero_variants'][$hid."-x"]['w']/$report['hero_variants'][$hid."-x"]['m'];
             foreach ($hvh[$hid."-x"] as $opid => $data) {
               $hvh[$hid."-x"][$opid]['winrate'] = $data['won']/$data['matches'];

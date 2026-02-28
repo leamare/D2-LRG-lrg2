@@ -11,7 +11,7 @@ function summary_prepare_value($key, $value) {
   if (strpos($key, "winrate") !== FALSE || strpos($key, "_wr") !== FALSE || strpos($key, "ratio") !== FALSE || strpos($key, "diversity") !== FALSE)
     return number_format($value*100, 2)."%";
 
-  if (strpos($key, "matches") !== FALSE) return number_format($value, 0);
+  if (strpos($key, "matches") !== FALSE) return number_format((float)($value ?? 0), 0);
   
   if(!is_numeric($value)) return $value;
 

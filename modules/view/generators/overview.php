@@ -380,10 +380,12 @@ function rg_view_generator_overview($modlink, &$context, $foreword = "") {
           $res .= "<tr><td>".locale_string("most_matches_team")."</td><td>".
             team_link($context['records']['most_matches_team']['playerid'])."</td><td>".$context['records']['most_matches_team']['value']."</td></tr>";
 
-        $res .= "<tr><td>".locale_string("widest_hero_pool")."</td><td>".
-          player_link($context['records']['widest_hero_pool']['playerid'])."</td><td>".$context['records']['widest_hero_pool']['value']."</td></tr>";
-        $res .= "<tr><td>".locale_string("smallest_hero_pool")."</td><td>".
-          player_link($context['records']['smallest_hero_pool']['playerid'])."</td><td>".$context['records']['smallest_hero_pool']['value']."</td></tr>";
+        if (isset($context['records']['widest_hero_pool']))
+          $res .= "<tr><td>".locale_string("widest_hero_pool")."</td><td>".
+            player_link($context['records']['widest_hero_pool']['playerid'])."</td><td>".$context['records']['widest_hero_pool']['value']."</td></tr>";
+        if (isset($context['records']['smallest_hero_pool']))
+          $res .= "<tr><td>".locale_string("smallest_hero_pool")."</td><td>".
+            player_link($context['records']['smallest_hero_pool']['playerid'])."</td><td>".$context['records']['smallest_hero_pool']['value']."</td></tr>";
       }
 
       if (isset($context['averages_players']) && isset($context['averages_players']['diversity'])) {

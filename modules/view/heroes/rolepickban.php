@@ -23,8 +23,8 @@ function rg_view_generate_heroes_rolepickban() {
           $pb[$hid.'|'.$role] = [
             'matches_picked' => $data['matches_s'],
             'winrate_picked' => $data['winrate_s'],
-            'matches_banned' => round( ($data['matches_s']/$report['pickban'][$hid]['matches_picked'])*$report['pickban'][$hid]['matches_banned'] ),
-            'winrate_banned' => $report['pickban'][$hid]['winrate_banned'],
+            'matches_banned' => isset($report['pickban'][$hid]) ? round( ($data['matches_s']/($report['pickban'][$hid]['matches_picked'] ?: 1))*$report['pickban'][$hid]['matches_banned'] ) : 0,
+            'winrate_banned' => $report['pickban'][$hid]['winrate_banned'] ?? 0,
           ];
           $pb[$hid.'|'.$role]['matches_total'] = $pb[$hid.'|'.$role]['matches_picked'] + $pb[$hid.'|'.$role]['matches_banned'];
           $pb[$hid.'|'.$role]['role'] = $role;

@@ -41,7 +41,7 @@ function rg_generator_pvp_unwrap_data(&$context, &$context_wrs, $heroes_flag = t
       "lost" => $line[$sid.'1won']
     ];
     if ($facets) {
-      $context_wrs[$line[$id.'2']][$wr_id] = $context_wrs[$line[$id.'2']]['w']/$context_wrs[$line[$id.'2']]['m'];
+      $context_wrs[$line[$id.'2']][$wr_id] = isset($context_wrs[$line[$id.'2']]) ? $context_wrs[$line[$id.'2']]['w']/($context_wrs[$line[$id.'2']]['m'] ?: 1) : 0;
     }
     if(!$nodiff) $pvp[ $line[$id.'2'] ][ $line[$id.'1'] ]['diff'] = round(1-$line[$sid.'1winrate']-$context_wrs[$line[$id.'2']][$wr_id], 5);
 

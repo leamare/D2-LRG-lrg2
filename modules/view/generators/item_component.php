@@ -1,6 +1,7 @@
 <?php 
 
 function itembuild_item_component(&$build, $item, $flags = []) {
+  if (empty($item) || !isset($build['stats'][$item])) return '';
   $big = $flags['big'] ?? false;
   $critical = $flags['critical'] ?? isset($build['critical'][$item]);
   $prate = $flags['prate'] ?? true;

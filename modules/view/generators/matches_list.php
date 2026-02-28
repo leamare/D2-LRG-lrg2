@@ -399,7 +399,7 @@ function rg_generator_series_list($table_id, $series) {
       $heroes_both = [];
     }
 
-    $non_tie_factor = ($matches_count > 1 && ((array_sum($scores)/2) != max($scores))) || $matches_count == 1;
+    $non_tie_factor = ($matches_count > 1 && !empty($scores) && ((array_sum($scores)/2) != max($scores))) || $matches_count == 1;
 
     if (!empty($scores) && $non_tie_factor) {
       $winner = array_search(max($scores), $scores);

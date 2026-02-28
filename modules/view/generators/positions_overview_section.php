@@ -59,7 +59,7 @@ function rg_generator_overview_positions_section($tables_prefix, &$context, &$pi
       $max = reset($context_copy)['wrank'];
     
       foreach ($context_copy as $id => $el) {
-        $ranks[$i][$j][$id] = 100 * ($el['wrank']-$min) / ($max-$min);
+        $ranks[$i][$j][$id] = ($max != $min) ? 100 * ($el['wrank']-$min) / ($max-$min) : 0;
       }
 
       unset($context_copy);

@@ -7,7 +7,7 @@ function rg_generate_hero_pairs() {
 
   $r = [];
 
-  foreach ($report['hph'] as $hid1 => $heroes) {
+  foreach (($report['hph'] ?? []) as $hid1 => $heroes) {
     foreach ($heroes as $hid2 => $line) {
       if (empty($line) || $line === true)
         continue;

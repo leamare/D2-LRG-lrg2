@@ -243,7 +243,7 @@ function traverse_build_tree(&$stats, &$tree, $m_lim, $m_role, $root = '0', $bui
 
     foreach ($alts as $alt) {
       // timing for alts shouldn't be too different
-      if (!isset($stats[$alt]) || ($stats[$item]['median'] - $stats[$alt]['median']) > 240) {
+      if (!isset($stats[$alt]) || (($stats[$item]['median'] ?? 0) - ($stats[$alt]['median'] ?? 0)) > 240) {
         unset($alts[ array_search($alt, $alts) ]);
         $alts = array_values($alts);
         continue;
@@ -694,20 +694,20 @@ function inject_item_stats(&$build, &$stats, $hero) {
     if (empty($stats[$item])) continue;
 
     $build['stats'][$item] = [
-      'prate' => $stats[$item]['prate'],
-      'med_time' => $stats[$item]['median'],
-      'winrate' => $stats[$item]['winrate'],
-      'wo_wr_incr' => $stats[$item]['winrate'] - $stats[$item]['wo_wr'], // would like to show increase there, but we can get it later, I guess
+      'prate' => $stats[$item]['prate'] ?? 0,
+      'med_time' => $stats[$item]['median'] ?? 0,
+      'winrate' => $stats[$item]['winrate'] ?? 0,
+      'wo_wr_incr' => ($stats[$item]['winrate'] ?? 0) - ($stats[$item]['wo_wr'] ?? 0),
       // not going to pass hero stats here as well
       // or am I?
     ];
 
-    if ($stats[$item]['median'] > 60 && ( $stats[$item]['grad'] < -0.01 || $stats[$item]['grad'] > 0.01 ) && !in_array($item, $neutrals_list)) {
+    if (($stats[$item]['median'] ?? 0) > 60 && ( ($stats[$item]['grad'] ?? 0) < -0.01 || ($stats[$item]['grad'] ?? 0) > 0.01 ) && !in_array($item, $neutrals_list)) {
       $build['critical'][$item] = [
-        'q1' => $stats[$item]['q1'],
-        'q3' => $stats[$item]['q3'],
-        'grad' => $stats[$item]['grad'],
-        'critical_time' => $stats[$item]['q1'] - 60*(($stats[$item]['early_wr'] - $hero['winrate_picked'])/$stats[$item]['grad']),
+        'q1' => $stats[$item]['q1'] ?? 0,
+        'q3' => $stats[$item]['q3'] ?? 0,
+        'grad' => $stats[$item]['grad'] ?? 0,
+        'critical_time' => ($stats[$item]['q1'] ?? 0) - 60*((($stats[$item]['early_wr'] ?? 0) - ($hero['winrate_picked'] ?? 0))/(($stats[$item]['grad'] ?? 0) ?: 1)),
         'early_wr' => $stats[$item]['early_wr'],
         'early_wr_incr' => $stats[$item]['early_wr'] - $stats[$item]['wo_wr'],
       ];

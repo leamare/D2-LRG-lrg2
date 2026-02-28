@@ -27,7 +27,7 @@ function rg_generator_records(&$context) {
               (
                 strpos($key, "time_dead") !== FALSE || strpos($key, "_time_") !== FALSE ?
                 convert_time_seconds($record['value']) :
-                ( $record['value'] - floor($record['value']) != 0 ? number_format($record['value'], 2) : number_format($record['value'], 0) )
+                ( ($record['value'] ?? 0) - floor($record['value'] ?? 0) != 0 ? number_format($record['value'], 2) : number_format($record['value'] ?? 0, 0) )
               )
             ).
           "</td><td>". ($record['playerid'] ?
@@ -84,7 +84,7 @@ function rg_generator_records_ext(&$context, &$context_ext) {
           (
             strpos($k, "time_dead") !== FALSE || strpos($k, "_time_") !== FALSE ?
             convert_time_seconds($rec['value']) :
-            ( $rec['value'] - floor($rec['value']) != 0 ? number_format($rec['value'], 2) : number_format($rec['value'], 0) )
+            ( ($rec['value'] ?? 0) - floor($rec['value'] ?? 0) != 0 ? number_format($rec['value'], 2) : number_format($rec['value'] ?? 0, 0) )
           )
         )."</td>".
         "<td>". ($rec['playerid'] ?
@@ -115,7 +115,7 @@ function rg_generator_records_ext(&$context, &$context_ext) {
             (
               strpos($k, "time_dead") !== FALSE || strpos($k, "_time_") !== FALSE ?
               convert_time_seconds($record['value']) :
-              ( $record['value'] - floor($record['value']) != 0 ? number_format($record['value'], 2) : number_format($record['value'], 0) )
+              ( ($record['value'] ?? 0) - floor($record['value'] ?? 0) != 0 ? number_format($record['value'], 2) : number_format($record['value'] ?? 0, 0) )
             )
         )."</td>".
         "<td>". ($record['playerid'] ?

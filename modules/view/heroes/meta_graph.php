@@ -24,7 +24,7 @@ function rg_view_generate_heroes_meta_graph() {
       $dev[] = $pair['dev_pct'];
     }
     sort($dev);
-    $lim = $dev[ round( count($dev)*0.6 ) ];
+    $lim = empty($dev) ? 0 : $dev[ min((int)round(count($dev)*0.6), count($dev)-1) ];
     
     foreach ($report['hero_pairs'] as $pair) {
       if ($pair['dev_pct'] < $lim) continue;

@@ -97,7 +97,7 @@ function rg_view_generate_heroes_hph() {
               $report['hero_variants'][$hid."-x"]['m'] += $report['hero_variants'][$hid."-".$i]['m'];
               $report['hero_variants'][$hid."-x"]['w'] += $report['hero_variants'][$hid."-".$i]['w'];
 
-              foreach ($report['hph_v'][$hid."-".$i] as $opid => $data) {
+              foreach (($report['hph_v'][$hid."-".$i] ?? []) as $opid => $data) {
                 if (empty($data) || $data['matches'] == -1) continue;
                 
                 if (!isset($report['hph_v'][$hid."-x"][$opid])) {
