@@ -272,7 +272,7 @@ function rg_view_generate_players_profiles() {
             strpos($record['tag'], "_time") !== FALSE ||
             strpos($record['tag'], "shortest") !== FALSE || strpos($record['tag'], "longest") !== FALSE ?
             convert_time($record['value']) :
-            ( $record['value'] - floor($record['value']) != 0 ? number_format($record['value'], 2) : number_format($record['value'], 0) )
+            ( ($record['value'] ?? 0) - floor($record['value'] ?? 0) != 0 ? number_format($record['value'], 2) : number_format($record['value'] ?? 0, 0) )
           )."</td>".
           "<td>".($record['heroid'] ? hero_full($record['heroid']) : '-')."</td>".
         "</tr>";
@@ -328,7 +328,7 @@ function rg_view_generate_players_profiles() {
             strpos($record['tag'], "_time") !== FALSE ||
             strpos($record['tag'], "shortest") !== FALSE || strpos($record['tag'], "longest") !== FALSE ?
             convert_time($record['value']) :
-            ( $record['value'] - floor($record['value']) != 0 ? number_format($record['value'], 2) : number_format($record['value'], 0) )
+            ( ($record['value'] ?? 0) - floor($record['value'] ?? 0) != 0 ? number_format($record['value'], 2) : number_format($record['value'] ?? 0, 0) )
           )."</td>".
         "</tr>";
       }

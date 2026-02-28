@@ -28,6 +28,7 @@ function rg_view_generate_overview() {
     $res .= "<div class=\"block-content\">".locale_string("sponsors").": ";
     $links = [];
     foreach($report['sponsors'] as $type => $link) {
+      if (!is_string($link)) continue;
       $links[] = "<a target=\"_blank\" href=\"".$link."\">".$type."</a>";
     }
     $res .= implode(", ", $links);

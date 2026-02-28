@@ -17,10 +17,10 @@ function rg_view_generate_regions_heroes_variantspb($region, &$reg_report) {
 
     $pb[$hvid] = [
       'matches_picked' => $stats['m'],
-      'winrate_picked' => $stats['w']/$stats['m'],
-      'matches_banned' => round( $stats['f']*$reg_report['pickban'][$hid]['matches_banned'] ),
-      'winrate_banned' => $reg_report['pickban'][$hid]['winrate_banned'],
-      'ratio' => $stats['m'] ? $stats['m']/$reg_report['pickban'][$hid]['matches_picked'] : 0,
+      'winrate_picked' => $stats['m'] ? $stats['w']/$stats['m'] : 0,
+      'matches_banned' => isset($reg_report['pickban'][$hid]) ? round( $stats['f']*$reg_report['pickban'][$hid]['matches_banned'] ) : 0,
+      'winrate_banned' => $reg_report['pickban'][$hid]['winrate_banned'] ?? 0,
+      'ratio' => ($stats['m'] && isset($reg_report['pickban'][$hid])) ? $stats['m']/($reg_report['pickban'][$hid]['matches_picked'] ?: 1) : 0,
     ];
     $pb[$hvid]['matches_total'] = $pb[$hvid]['matches_picked'] + $pb[$hvid]['matches_banned'];
     $pb[$hvid]['variant'] = +$v;

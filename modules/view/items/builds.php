@@ -227,7 +227,7 @@ function rg_view_generate_items_builds() {
       "<td>".hero_portrait($hero)."</td>".
       "<td>".hero_link($hero)."</td>".
       "<td>".($pbdata['role_matches'] ?? $pbdata['matches_picked'])."</td>".
-      ($pbdata['role_matches'] && isset($report['hero_positions']) ? "<td>".number_format(100*$pbdata['role_matches']/$pbdata['matches_picked'], 2)."%</td>" : "").
+      ($pbdata['role_matches'] && isset($report['hero_positions']) && ($pbdata['matches_picked'] ?? 0) ? "<td>".number_format(100*$pbdata['role_matches']/$pbdata['matches_picked'], 2)."%</td>" : "").
       "<td>".number_format(($pbdata['role_winrate'] ?? $pbdata['winrate_picked'])*100, 2)."%</td>".
       "<td><a href=\"?league=$leaguetag&mod=items-stats-$tag".(empty($linkvars) ? "" : "&".$linkvars)."\">".locale_string("link")."</a></td>".
       "<td><a href=\"?league=$leaguetag&mod=items-progression-$tag-".(($crole ?? false) ? "position_".$crole : "all").(empty($linkvars) ? "" : "&".$linkvars)."\">".locale_string("link")."</a></td>".
@@ -588,7 +588,7 @@ function rg_view_generate_items_builds() {
       }
     }
   }
-  $overview_categories['early'][] = $build['path'][0];
+  if (!empty($build['path'])) $overview_categories['early'][] = $build['path'][0];
 
   if (isset($build['early'][1])) {
     foreach ($build['early'][1] as $item => $stats) {

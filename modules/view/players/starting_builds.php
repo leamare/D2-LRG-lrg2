@@ -12,7 +12,7 @@ function rg_view_generate_players_sti_builds() {
 
   $res = [];
 
-  $pids = $report['starting_items_players']['builds'][0]['keys'];
+  $pids = $report['starting_items_players']['builds'][0]['keys'] ?? [];
   $pnames = [];
   foreach ($pids as $id) {
     if (!$id) continue;
@@ -54,7 +54,7 @@ function rg_view_generate_players_sti_builds() {
 
   $bcnt = 0;
 
-  if (is_array($res[$selected_tag])) {
+  if (isset($selected_tag) && isset($res[$selected_tag]) && is_array($res[$selected_tag])) {
     if($mod == $parent_module.$selected_tag) $unset_module = true;
     $parent_module = $parent_module.$selected_tag."-";
 

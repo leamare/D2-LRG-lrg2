@@ -132,7 +132,7 @@ if (isset($report['starting_items_players']['consumables'])) {
         $report['starting_items_players']['consumables'][$blk][0][$selected_pid]['head'] = $report['starting_items_players']['cons_head'];
         $data[$blk] = unwrap_data($report['starting_items_players']['consumables'][$blk][0][$selected_pid]);
       }
-      $matches = $sti_matches[$selected_pid];
+      $matches = $sti_matches[$selected_pid] ?? [];
     } else {
       $matches_total = 0;
   
@@ -151,7 +151,7 @@ if (isset($report['starting_items_players']['consumables'])) {
           $pl_data[$blk] = unwrap_data($report['starting_items_players']['consumables'][$blk][0][$pid]);
         }
 
-        $matches_total += $sti_matches[$pid]['m'];
+        $matches_total += $sti_matches[$pid]['m'] ?? 0;
 
         foreach ($pl_data as $blk => $items) {
           foreach ($items as $iid => $item) {

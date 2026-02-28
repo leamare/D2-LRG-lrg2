@@ -81,6 +81,8 @@ function rg_view_generate_items_profiles() {
     else return ($a['name'] > $b['name']) ? 1 : -1;
   });
 
+  $item = null;
+
   foreach($item_names as $iid => $name) {
     $res["itemid".$iid] = "";
 
@@ -88,9 +90,20 @@ function rg_view_generate_items_profiles() {
       $item = $iid;
     }
   }
+
+  if (!isset($item)) {
+    if (!empty($item_names)) {
+      $item = array_key_first($item_names);
+    } else {
+      return $res;
+    }
+  }
+
   // total aka reference table data
 
   // RANKING FOR REFERENCE TABLE
+
+  if (!isset($res['itemid'.$item])) return $res;
 
   $is_regular = in_array($item, array_keys($report['items']['stats']['total'] ?? []));
   $is_starting = in_array($item, $starting_iids);
@@ -766,7 +779,7 @@ function rg_view_generate_items_profiles() {
     $res['itemid'.$item] .= "</tbody></table>";
 
     $res['itemid'.$item] .= "<div class=\"content-text\">".
-      "<a href=\"?league=$leaguetag&mod=items-irecords-itemid$iid".(empty($linkvars) ? "" : "&".$linkvars)."\">".locale_string("items_records_full")."</a>".
+      "<a href=\"?league=$leaguetag&mod=items-irecords-itemid$item".(empty($linkvars) ? "" : "&".$linkvars)."\">".locale_string("items_records_full")."</a>".
     "</div>";
   }
 

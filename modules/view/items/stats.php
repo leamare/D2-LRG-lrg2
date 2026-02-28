@@ -61,6 +61,8 @@ function rg_view_generate_items_stats() {
     $cat = [];
   }
 
+  if (!isset($report['items']['stats'][$hero])) return $res;
+
   foreach ($report['items']['stats'][$hero] as $iid => $v) {
     if (empty($v)) unset($report['items']['stats'][$hero][$iid]);
   }

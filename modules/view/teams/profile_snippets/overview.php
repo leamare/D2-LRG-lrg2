@@ -63,7 +63,8 @@ if (!empty($report['match_participants_teams'])) {
     });
     $mp = array_values($report['pickban'])[ ceil(count($report['pickban']) * 0.5) ]['matches_picked'];
     foreach ($context[$tid]['pickban'] as $hid => $data) {
-      if ($report['pickban'][$hid]['matches_picked'] > $mp || !$data['matches_picked']) continue;
+      if (!isset($report['pickban'][$hid]) || $report['pickban'][$hid]['matches_picked'] > $mp || !$data['matches_picked']) continue;
+      if (!$teams) continue;
       $ref_ratio = $report['pickban'][$hid]['matches_picked']/$teams;
       if ($data['matches_picked'] > $ref_ratio && ($data['matches_picked'] - $ref_ratio)/$ref_ratio > 1.5) {
         // $data['ratio'] = $ref_ratio;

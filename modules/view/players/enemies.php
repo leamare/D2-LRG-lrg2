@@ -68,9 +68,9 @@ function rg_view_generate_players_enemies() {
 
     foreach ($pvp as $l) {
       if (!isset($d[ $l['playerid1'] ]))
-        $d[ $l['playerid1'] ] = $report['pickban'][ $l['playerid1'] ];
+        $d[ $l['playerid1'] ] = $report['pickban'][ $l['playerid1'] ] ?? [];
       if (!isset($d[ $l['playerid2'] ]))
-        $d[ $l['playerid2'] ] = $report['pickban'][ $l['playerid2'] ];
+        $d[ $l['playerid2'] ] = $report['pickban'][ $l['playerid2'] ] ?? [];
     }
 
     $res['graph'] .= rg_generator_meta_graph("players-foe-graph", $pvp, $report['players_additional'], false);
