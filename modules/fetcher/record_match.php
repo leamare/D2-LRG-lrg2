@@ -297,7 +297,7 @@ if (!empty($t_items) && ($lg_settings['main']['items'] ?? false)) {
     $rows = [];
     foreach ($t_items as $item) {
       $rows[] = "(" . $item['matchid'] . ", " . $item['hero_id'] . ", " . $item['playerid'] . ", " .
-        $item['item_id'] . ", " . ($item['category_id'] ?? 0) . ", " . $item['time'] . ")";
+        $item['item_id'] . ", " . (empty($item['category_id']) ? 0 : $item['category_id']) . ", " . $item['time'] . ")";
     }
     $sql = "INSERT INTO items (matchid, hero_id, playerid, item_id, category_id, `time`) VALUES " . implode(",\n\t", $rows) . ";";
   }
