@@ -992,7 +992,8 @@ function rg_view_generate_heroes_profiles() {
               'pickrate' => $data['hero_positions'][$i][$j][$hero]['matches_s']/$context_total_matches,
               'matches' => $data['hero_positions'][$i][$j][$hero]['matches_s'],
               'winrate' => $data['hero_positions'][$i][$j][$hero]['winrate_s'],
-              'ratio' => $data['hero_positions'][$i][$j][$hero]['matches_s']/$data['pickban'][$hero]['matches_picked'],
+              'ratio' => ($data['pickban'][$hero]['matches_picked'] ?? 0) > 0 ?
+                $data['hero_positions'][$i][$j][$hero]['matches_s']/$data['pickban'][$hero]['matches_picked'] : 0,
               'link' => "?league=$leaguetag&mod=regions-region$region-heroes-positions-position_$i.$j".(empty($linkvars) ? "" : "&".$linkvars)
             ];
           }

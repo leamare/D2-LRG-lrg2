@@ -106,10 +106,16 @@ function unwrap_data ($array) {
     }
     
 
-    if (is_array($data) && sizeof($data) < $head_sz) {
-      $data = array_merge( $data, array_fill(0, $head_sz - sizeof($data), null) );
+    if (is_array($data)) {
+      if (sizeof($data) < $head_sz) {
+        $data = array_merge( $data, array_fill(0, $head_sz - sizeof($data), null) );
+      } else if (sizeof($data) > $head_sz) {
+        $data = array_slice($data, 0, $head_sz);
+      }
+      $r[] = (is_array($head) && sizeof($head) === sizeof($data)) ? array_combine($head, $data) : $data;
+    } else {
+      $r[] = $data;
     }
-    $r[] = is_array($data) ? array_combine($head, $data) : $data;
   }
   if(isset($array['keys']))
     $r = array_combine($array['keys'], $r);

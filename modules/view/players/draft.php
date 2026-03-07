@@ -11,12 +11,13 @@ function rg_view_generate_players_draft() {
 
   $context_pickban = [];
   foreach($report['players_summary'] as $id => $el) {
+    if (!is_array($el)) continue;
     $context_pickban[ $id ] = [
       "matches_banned" => 0,
       "winrate_banned" => 0,
-      "matches_picked" => $el['matches_s'],
-      "matches_total" => $el['matches_s'],
-      "winrate_picked" => $el['winrate_s']
+      "matches_picked" => $el['matches_s'] ?? 0,
+      "matches_total" => $el['matches_s'] ?? 0,
+      "winrate_picked" => $el['winrate_s'] ?? 0
     ];
   }
 

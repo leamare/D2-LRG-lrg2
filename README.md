@@ -1,6 +1,6 @@
 # Dota 2 League Report Generator (D2-LRG-lrg2)
 
-## Current version: 2.25.1
+## Current version: 2.30.0
 
 This is the **lrg2** version that won't be updated any further.
 
@@ -32,6 +32,7 @@ So what does it mean in context of this repository:
 3. Simon will be somewhat ready sometime around Feb 2020 (maybe even later) and then I will be working on an interface for all this, so this one will be completely shut down around June 2020.
 
 ### Features
+
 * Fetching data from OpenDota
 * Getting player information and Ranked All Pick from Stratz (for non-tournament matches)
 * Botmatches support
@@ -72,9 +73,9 @@ I also recommend using PHPMyAdmin for manual data change.
 It would be nice to have bash on your system. For Windows it's recommended to have git bash or cygwin with ConEmu.
 
 ## Dependencies:
-* PHP 7+
+* PHP 8+
 * php mbstring
-* MySQL 8+
+* MySQL 5.7+
 * cURL
 
 After getting D2LRG code to your computer, run `php setup.php`. It will install the rest of dependencies:

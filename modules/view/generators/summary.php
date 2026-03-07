@@ -170,9 +170,9 @@ function rg_generator_summary($table_id, &$context, $hero_flag = true, $rank = f
           "", array_map(function($key, $i) use (&$el, &$a) {
             return "<td ".
               (!$i ? " class=\"separator\"" : "").
-              (in_array($key, VALUESORT_COLS_KEYS) ? " value=\"{$el[$key]}\"" : "").
+              (in_array($key, VALUESORT_COLS_KEYS) ? " value=\"" . ($el[$key] ?? '') . "\"" : "").
               " data-col-group=\"$a\">".
-              summary_prepare_value($key, $el[$key]).
+              summary_prepare_value($key, $el[$key] ?? null).
             "</td>";
           }, $groups[$a], array_keys($groups[$a]))
         );

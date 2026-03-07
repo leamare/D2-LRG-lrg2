@@ -333,21 +333,26 @@ function rg_view_generator_overview($modlink, &$context, $foreword = "") {
           $max_wr = $team_id;
       }
 
-      $res .= "<tr><td>".locale_string("most_matches")."</td><td>".
-          team_link($max_matches)."</td><td>".$report['teams'][$max_matches]['matches_total']."</td></tr>";
+      if($max_matches && isset($report['teams'][$max_matches]))
+        $res .= "<tr><td>".locale_string("most_matches")."</td><td>".
+            team_link($max_matches)."</td><td>".$report['teams'][$max_matches]['matches_total']."</td></tr>";
 
-      if($max_wr)
+      if($max_wr && isset($report['teams'][$max_wr]))
         $res .= "<tr><td>".locale_string("highest_winrate")."</td><td>".
           team_link($max_wr)."</td><td>".number_format($report['teams'][$max_wr]['wins']*100/$report['teams'][$max_wr]['matches_total'],2)."%</td></tr>";
 
       if (isset($context['records'])) {
-        $res .= "<tr><td>".locale_string("widest_hero_pool_team")."</td><td>".
-            team_link($report['records']['widest_hero_pool_team']['playerid'])."</td><td>".
-            $context['records']['widest_hero_pool_team']['value']."</td></tr>";
+        if (isset($context['records']['widest_hero_pool_team']) && isset($report['records']['widest_hero_pool_team'])) {
+          $res .= "<tr><td>".locale_string("widest_hero_pool_team")."</td><td>".
+              team_link($report['records']['widest_hero_pool_team']['playerid'])."</td><td>".
+              $context['records']['widest_hero_pool_team']['value']."</td></tr>";
+        }
 
-        $res .= "<tr><td>".locale_string("smallest_hero_pool_team")."</td><td>".
-            team_link($report['records']['smallest_hero_pool_team']['playerid'])."</td><td>".
-            $context['records']['smallest_hero_pool_team']['value']."</td></tr>";
+        if (isset($context['records']['smallest_hero_pool_team']) && isset($report['records']['smallest_hero_pool_team'])) {
+          $res .= "<tr><td>".locale_string("smallest_hero_pool_team")."</td><td>".
+              team_link($report['records']['smallest_hero_pool_team']['playerid'])."</td><td>".
+              $context['records']['smallest_hero_pool_team']['value']."</td></tr>";
+        }
       }
 
     } else if (isset($report['players_additional']) && isset($context['players_summary'])) {

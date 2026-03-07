@@ -94,7 +94,7 @@ function rg_view_generate_heroes_counters() {
         "</details>";
 
     sort($devs);
-    $med_deviation = $devs[ round( count($devs) * 0.75 ) ];
+    $med_deviation = !empty($devs) ? $devs[ round( count($devs) * 0.75 ) ] : 0;
     $hvh = array_filter($hvh, function($a) use ($med_deviation) { return ($a['matches'] - $a['expectation']) > $med_deviation; });
 
     $d = [];

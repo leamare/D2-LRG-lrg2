@@ -75,7 +75,7 @@ public function process() {
   }
 
   foreach ($res['items'] as $iid => &$item) {
-    if ($meta['items_full'][$iid]['cost'] > 0) {
+    if (isset($meta['items_full'][$iid]['cost']) && $meta['items_full'][$iid]['cost'] > 0) {
       $item['grad_per_gold'] = $item['grad'] * 100000 / $meta['items_full'][$iid]['cost'];
     } else {
       $item['grad_per_gold'] = 0;

@@ -149,8 +149,8 @@ function rg_view_generate_heroes_daily_winrates() {
     foreach($days as $dt) {
       $dd = $days_data[$dt] ?? [ 'ms' => 0, 'wr' => 0 ];
 
-      if ($prev_dt == null || $global_days[$dt]/$prev_dt > 0.05) {
-        $prev_dt = $global_days[$dt];
+      if ($prev_dt == null || (isset($global_days[$dt]) && $global_days[$dt]/$prev_dt > 0.05)) {
+        $prev_dt = $global_days[$dt] ?? $prev_dt;
   //       if (isset($prev_b) && $prev_b*0.15 > ($dd['bn'] ?? 0)) {
   //         $dmb[] = $dmb[ count($dmb)-1 ];
   //       } else {

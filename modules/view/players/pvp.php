@@ -21,7 +21,7 @@ function rg_view_generate_players_pvp() {
 
   $pvp = rg_generator_pvp_unwrap_data($report['pvp'], $winrates, false);
 
-  $names = $report['players'];
+  $names = $report['players'] ?? [];
 
   $res = [];
 
@@ -33,11 +33,13 @@ function rg_view_generate_players_pvp() {
     $out['pvpover'] = rg_view_generate_players_enemies();
   }
 
-  uasort($names, function($a, $b) {
-    if($a == $b) return 0;
-    
-    return strcasecmp($a, $b);
-  });
+  if (is_array($names) && !empty($names)) {
+    uasort($names, function($a, $b) {
+      if($a == $b) return 0;
+      
+      return strcasecmp($a, $b);
+    });
+  }
 
   if($report['settings']['pvp_grid']) {
     $res['grid'] = "";
