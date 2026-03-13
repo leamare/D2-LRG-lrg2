@@ -18,8 +18,11 @@ public function process() {
         $fname = $reports_dir."/".$cache['reps'][$leaguetag]['file'];
       }
     }
+    if (!file_exists($fname)) {
+      throw new UserInputException("Can't open $leaguetag, probably no such report");
+    }
     $report = file_get_contents($fname);
-    if (!$report) throw new UserInputException("Can't open $leaguetag, probably no such report\n");
+    if ($report === false) throw new UserInputException("Can't open $leaguetag, probably no such report");
     $report = json_decode($report, true);
   }
   return [

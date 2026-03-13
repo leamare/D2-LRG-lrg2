@@ -34,7 +34,10 @@ function teams_diversity_recalc(&$team) {
 
   $core = core_picked_percentage($pb);
 
-  return sqrt( ( $pool / (min($matches, $mpool) * 5)) * $core );
+  $denom = min($matches, $mpool) * 5;
+  if ($denom <= 0) return 0;
+
+  return sqrt( ( $pool / $denom) * $core );
 }
 
 function balance_rank($pickban) {

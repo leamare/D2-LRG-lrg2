@@ -9,7 +9,9 @@ function rg_generator_summary($table_id, &$context, $hero_flag = true, $rank = f
 
   if (is_wrapped($context)) $context = unwrap_data($context);
 
-  $keys = array_keys( array_values($context)[0] );
+  $first = array_values($context)[0] ?? null;
+  if (!is_array($first)) return "";
+  $keys = array_keys($first);
 
   $matches = [];
 

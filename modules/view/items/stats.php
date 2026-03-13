@@ -164,9 +164,11 @@ function rg_view_generate_items_stats() {
   $matches_med = [];
 
   foreach ($items as $iid => $line) {
+    if (!isset($meta['items_full'][$iid])) continue;
     $matches_med[] = $line['purchases'];
-    if ($meta['items_full'][$iid]['cost'] > 0) {
-      $gradgold = number_format($line['grad']*100000/$meta['items_full'][$iid]['cost'], 2);
+    $cost = (int)($meta['items_full'][$iid]['cost'] ?? 0);
+    if ($cost > 0) {
+      $gradgold = number_format($line['grad']*100000/$cost, 2);
     } else {
       $gradgold = '0.00';
     }
