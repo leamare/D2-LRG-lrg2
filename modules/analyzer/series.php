@@ -54,10 +54,13 @@ if ((!empty($result['teams'])) && !empty($result['matches']) && !empty($result['
       $playtime += $result['matches_additional'][$match]['duration'];
     }
 
-    $non_tie_factor = ($matches_count > 1 && ((array_sum($scores)/2) != max($scores))) || $matches_count == 1;
+    $max_score = empty($scores) ? 0 : max($scores);
+    $non_tie_factor = !empty($scores) && (
+      ($matches_count > 1 && ((array_sum($scores) / 2) != $max_score)) || $matches_count == 1
+    );
 
     if (!empty($scores) && $non_tie_factor) {
-      $winner = array_search(max($scores), $scores);
+      $winner = array_search($max_score, $scores);
     } else {
       $winner = null;
     }
