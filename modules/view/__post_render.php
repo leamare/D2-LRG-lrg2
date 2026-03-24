@@ -1,15 +1,10 @@
-<?php 
+<?php
 
 if (isset($__lrg_onrequest)) {
-  if (function_exists("geoip_country_name_by_name")) {
-    $country = geoip_country_name_by_name(
-      $_SERVER['HTTP_CLIENT_IP'] ?? 
-      $_SERVER['HTTP_X_FORWARDED_FOR'] ?? 
-      $_SERVER['REMOTE_ADDR']
-    );
-  } else {
-    $country = null;
-  }
+  $_ip =
+    $_SERVER['HTTP_CLIENT_IP'] ??
+    $_SERVER['HTTP_X_FORWARDED_FOR'] ??
+    $_SERVER['REMOTE_ADDR'];
 
   if (!empty($leaguetag)) {
     $path = "league=".$leaguetag."::".($mod ?? "");
@@ -30,10 +25,7 @@ if (isset($__lrg_onrequest)) {
     'lang' => $origLocale ?? null,
     'langused' => $locale ?? null,
     'calltype' => $isApi ? 0 : 1,
-    'agent' => $_SERVER['HTTP_USER_AGENT'] ?? "Unknown Agent",
-    'ip' => $_SERVER['HTTP_CLIENT_IP'] ?? 
-      $_SERVER['HTTP_X_FORWARDED_FOR'] ?? 
-      $_SERVER['REMOTE_ADDR'],
-    'country' => $country,  
+    'agent' => isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : "Unknown Agent",
+    'ip' => $_ip,
   ]);
 }

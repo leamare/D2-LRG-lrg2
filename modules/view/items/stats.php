@@ -61,7 +61,10 @@ function rg_view_generate_items_stats() {
     $cat = [];
   }
 
-  if (!isset($report['items']['stats'][$hero])) return $res;
+  if (!isset($report['items']['stats'][$hero])) {
+    $res[$tag] .= "<div class=\"content-text\">".locale_string("items_stats_empty")."</div>";
+    return $res;
+  }
 
   foreach ($report['items']['stats'][$hero] as $iid => $v) {
     if (empty($v)) unset($report['items']['stats'][$hero][$iid]);
@@ -103,6 +106,11 @@ function rg_view_generate_items_stats() {
       "<td>".($data['matches_picked'] ?? 0)."</td>".
       "<td>".number_format(($data['winrate_picked'] ?? 0)*100, 2)."%</td>".
     "</tr></tbody></table><br />";
+  }
+
+  if ($hero !== 'total' && (empty($report['pickban'][$hero]) || $report['pickban'][$hero]['matches_picked'] == 0)) {
+    $res[$tag] .= "<div class=\"content-text\">".locale_string("items_stats_empty")."</div>";
+    return $res;
   }
 
   $item_cats = [
@@ -162,6 +170,8 @@ function rg_view_generate_items_stats() {
 
   $rows = "";
   $matches_med = [];
+
+  $meta['items_full'];
 
   foreach ($items as $iid => $line) {
     if (!isset($meta['items_full'][$iid])) continue;

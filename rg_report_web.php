@@ -219,7 +219,7 @@ if (isset($report)) {
     if (isset($report['regions_data']))
       include_once("modules/view/regions.php");
 
-    if (isset($report['matches']))
+    if (isset($report['matches']) || isset($report['series']) || !empty($report['tickets']))
       include_once("modules/view/matches.php");
 
     if (isset($report['players']))

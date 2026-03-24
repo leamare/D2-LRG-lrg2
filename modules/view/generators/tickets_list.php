@@ -3,12 +3,10 @@
 function rg_generator_tickets_list($mod_id, $tickets_data) {
   global $league_logo_banner_provider;
 
-  $res = "<div class=\"content-section\">";
-  $res .= "<div class=\"content-header\">".locale_string("tickets")."</div>";
+  $res = "";
   
   if (empty($tickets_data)) {
     $res .= "<div class=\"content-text\">".locale_string("no_data")."</div>";
-    $res .= "</div>";
     return $res;
   }
   
@@ -50,7 +48,6 @@ function rg_generator_tickets_list($mod_id, $tickets_data) {
   }
   
   $res .= "</tbody></table>";
-  $res .= "</div>";
   
   return $res;
 }

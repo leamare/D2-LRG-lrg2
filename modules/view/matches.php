@@ -16,9 +16,11 @@ function rg_view_generate_matches() {
     $series_filter = $_GET['gets'];
   }
 
-  $res['list'] = "";
-  if (check_module($parent."list")) {
-    $res['list'] = rg_generator_matches_list("matches-list", $report['matches'], $series_filter);
+  if (!empty($report['matches'])) {
+    $res['list'] = "";
+    if (check_module($parent."list")) {
+      $res['list'] = rg_generator_matches_list("matches-list", $report['matches'], $series_filter);
+    }
   }
 
   if (!empty($report['series'])) {
@@ -28,78 +30,80 @@ function rg_view_generate_matches() {
     }
   }
 
-  $res['cards'] = "";
-  if (check_module($parent."cards")) {
-    krsort($report['matches']);
-    $res['cards'] = "<div class=\"content-text\">".locale_string("desc_matches")."</div>";
-    if ($series_filter !== null) {
-      $res['cards'] .= "<div class=\"content-text\"><h1>".locale_string("meet_num")." $series_filter</h1></div>";
+  if (!empty($report['matches'])) {
+    $res['cards'] = "";
+    if (check_module($parent."cards")) {
+      krsort($report['matches']);
+      $res['cards'] = "<div class=\"content-text\">".locale_string("desc_matches")."</div>";
+      if ($series_filter !== null) {
+        $res['cards'] .= "<div class=\"content-text\"><h1>".locale_string("meet_num")." $series_filter</h1></div>";
+      }
+      $res['cards'] .= "<div class=\"content-cards\">";
+      foreach($report['matches'] as $matchid => $match) {
+        if ($series_filter !== null && isset($report['match_parts_series_tag'])) {
+          $series_tag = $report['match_parts_series_tag'][$matchid] ?? null;
+          $sid = ($report['series'][$series_tag]['seriesid'] ?? 0) ? $report['series'][$series_tag]['seriesid'] : $series_tag;
+          if ($sid != $series_filter) {
+            continue;
+          }
+        }
+    
+        $res['cards'] .= match_card($matchid);
+      }
+      $res['cards'] .= "</div>";
     }
-    $res['cards'] .= "<div class=\"content-cards\">";
-    foreach($report['matches'] as $matchid => $match) {
-      if ($series_filter !== null && isset($report['match_parts_series_tag'])) {
-        $series_tag = $report['match_parts_series_tag'][$matchid] ?? null;
-        $sid = ($report['series'][$series_tag]['seriesid'] ?? 0) ? $report['series'][$series_tag]['seriesid'] : $series_tag;
-        if ($sid != $series_filter) {
-          continue;
+
+    $res['heroes'] = [];
+    if (check_module($parent."heroes")) {
+      if ($mod == $parent."heroes") $unset_module = true;
+      $parent .= "heroes-";
+
+      global $meta, $strings;
+
+      $hnames = [];
+      foreach ($meta['heroes'] as $id => $v) {
+        $hnames[$id] = $v['name'];
+        $strings['en']["heroid".$id] = $v['name'];
+      }
+    
+      uasort($hnames, function($a, $b) {
+        if($a == $b) return 0;
+        else return ($a > $b) ? 1 : -1;
+      });
+    
+      foreach($hnames as $hid => $name) {
+        $res['heroes']["heroid".$hid] = "";
+    
+        if(check_module($parent."heroid".$hid)) {
+          $res['heroes']["heroid".$hid] = rg_generator_hero_matches_list("matches-heroes-$hid", $hid, null, true);
         }
       }
-  
-      $res['cards'] .= match_card($matchid);
     }
-    $res['cards'] .= "</div>";
-  }
 
-  $res['heroes'] = [];
-  if (check_module($parent."heroes")) {
-    if ($mod == $parent."heroes") $unset_module = true;
-    $parent .= "heroes-";
+    $res['hbanned'] = [];
+    if (check_module($parent."hbanned")) {
+      if ($mod == $parent."hbanned") $unset_module = true;
+      $parent .= "hbanned-";
 
-    global $meta, $strings;
+      global $meta, $strings;
 
-    $hnames = [];
-    foreach ($meta['heroes'] as $id => $v) {
-      $hnames[$id] = $v['name'];
-      $strings['en']["heroid".$id] = $v['name'];
-    }
-  
-    uasort($hnames, function($a, $b) {
-      if($a == $b) return 0;
-      else return ($a > $b) ? 1 : -1;
-    });
-  
-    foreach($hnames as $hid => $name) {
-      $res['heroes']["heroid".$hid] = "";
-  
-      if(check_module($parent."heroid".$hid)) {
-        $res['heroes']["heroid".$hid] = rg_generator_hero_matches_list("matches-heroes-$hid", $hid, null, true);
+      $hnames = [];
+      foreach ($meta['heroes'] as $id => $v) {
+        $hnames[$id] = $v['name'];
+        $strings['en']["heroid".$id] = $v['name'];
       }
-    }
-  }
-
-  $res['hbanned'] = [];
-  if (check_module($parent."hbanned")) {
-    if ($mod == $parent."hbanned") $unset_module = true;
-    $parent .= "hbanned-";
-
-    global $meta, $strings;
-
-    $hnames = [];
-    foreach ($meta['heroes'] as $id => $v) {
-      $hnames[$id] = $v['name'];
-      $strings['en']["heroid".$id] = $v['name'];
-    }
-  
-    uasort($hnames, function($a, $b) {
-      if($a == $b) return 0;
-      else return ($a > $b) ? 1 : -1;
-    });
-  
-    foreach($hnames as $hid => $name) {
-      $res['hbanned']["heroid".$hid] = "";
-  
-      if(check_module($parent."heroid".$hid)) {
-        $res['hbanned']["heroid".$hid] = rg_generator_hero_matches_banned_list("matches-hbanned-$hid", $hid, null, true);
+    
+      uasort($hnames, function($a, $b) {
+        if($a == $b) return 0;
+        else return ($a > $b) ? 1 : -1;
+      });
+    
+      foreach($hnames as $hid => $name) {
+        $res['hbanned']["heroid".$hid] = "";
+    
+        if(check_module($parent."heroid".$hid)) {
+          $res['hbanned']["heroid".$hid] = rg_generator_hero_matches_banned_list("matches-hbanned-$hid", $hid, null, true);
+        }
       }
     }
   }

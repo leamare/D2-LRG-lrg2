@@ -66,6 +66,7 @@ function hero_aliases($hid) {
 
   return $aliases." ".(
     ($meta['heroes'][ $hid ]['alt'] ?? "") . " " .
-    ($meta['heroes'][ $hid ]['aliases'] ?? "")
+    ($meta['heroes'][ $hid ]['aliases'] ?? "") . " " .
+    (($meta['heroes'][ $hid ]['aliases_more'] ?? "") ? implode(" ", $meta['heroes'][ $hid ]['aliases_more']) : "")
   );
 }
