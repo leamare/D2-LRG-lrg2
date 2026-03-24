@@ -164,7 +164,7 @@
     
     "consumables_players_roles": false,
 
-    "tickets": false
+    "tickets": true
   },
   "web": {
     "custom_style" : "",

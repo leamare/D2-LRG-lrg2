@@ -168,15 +168,29 @@ function fetch($match) {
       }
     }
 
-    if (isset($matchdata['leagues']) && !empty($matchdata['leagues'])) {
-      foreach($matchdata['leagues'] as $l) {
-        if (!isset($t_leagues[$l['ticket_id']])) {
-          $t_leagues[ $l['ticket_id'] ] = array(
-            "name" => $l['name'],
-            "url" => $l['url'],
-            "description" => $l['description'],
-            "added" => false
-          );
+    if (($schema['leagues'] ?? false) && isset($matchdata['leagues']) && !empty($matchdata['leagues'])) {
+      foreach ($matchdata['leagues'] as $l) {
+        $tid = isset($l['ticket_id']) ? (int)$l['ticket_id'] : 0;
+        if ($tid <= 0) {
+          continue;
+        }
+        if (!isset($t_leagues[$tid])) {
+          $t_leagues[$tid] = [
+            'name' => $l['name'] ?? null,
+            'url' => $l['url'] ?? null,
+            'description' => $l['description'] ?? null,
+            'added' => false,
+          ];
+        } else {
+          if (empty($t_leagues[$tid]['name']) && !empty($l['name'])) {
+            $t_leagues[$tid]['name'] = $l['name'];
+          }
+          if (empty($t_leagues[$tid]['url']) && isset($l['url']) && $l['url'] !== null && $l['url'] !== '') {
+            $t_leagues[$tid]['url'] = $l['url'];
+          }
+          if (empty($t_leagues[$tid]['description']) && isset($l['description']) && $l['description'] !== null && $l['description'] !== '') {
+            $t_leagues[$tid]['description'] = $l['description'];
+          }
         }
       }
     }
@@ -1950,14 +1964,16 @@ function fetch($match) {
       }
     }
 
-    if (!empty($t_match['leagueID']) && isset($t_leagues[$t_match['leagueID']])) {
+    if (($schema['leagues'] ?? false) && !empty($t_match['leagueID']) && $t_match['leagueID'] > 0) {
+      $lid = (int)$t_match['leagueID'];
+      $league = $t_leagues[$lid] ?? null;
       $matchdata['leagues'] = [
         [
-          'ticket_id' => $t_match['leagueID'],
-          'name' => $t_leagues[$t_match['leagueID']]['name'],
-          'url' => $t_leagues[$t_match['leagueID']]['url'],
-          'description' => $t_leagues[$t_match['leagueID']]['description'],
-        ]
+          'ticket_id' => $lid,
+          'name' => $league['name'] ?? null,
+          'url' => $league['url'] ?? null,
+          'description' => $league['description'] ?? null,
+        ],
       ];
     }
 

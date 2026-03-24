@@ -137,6 +137,20 @@ for ($i = 0; $i < $sz; $i++) {
     }
   }
 
+  if (($schema['leagues'] ?? false) && !empty($match['matches']['leagueID']) && (int)$match['matches']['leagueID'] > 0) {
+    $lid = (int)$match['matches']['leagueID'];
+    $q = "SELECT ticket_id, name, url, description FROM leagues WHERE ticket_id = $lid LIMIT 1;";
+    $lr = instaquery($conn, $q);
+    if (!empty($lr)) {
+      $match['leagues'] = [[
+        'ticket_id' => (int)$lr[0]['ticket_id'],
+        'name' => $lr[0]['name'],
+        'url' => $lr[0]['url'],
+        'description' => $lr[0]['description'],
+      ]];
+    }
+  }
+
   if($lg_settings['main']['items']) {
     $q = "select * from items where matchid = $m;";
     $match['items'] = instaquery($conn, $q);
