@@ -1,0 +1,21 @@
+CREATE TABLE `matches` (
+  `matchid` bigint(20) UNSIGNED NOT NULL,
+  `radiantWin` tinyint(1) NOT NULL,
+  `duration` int(11) NOT NULL,
+  `modeID` tinyint(11) UNSIGNED NOT NULL,
+  `leagueID` int(11),
+  `start_date` int(11) NOT NULL,
+  `analysis_status` tinyint(1) NOT NULL,
+  `radiant_opener` tinyint(1),
+  `seriesid` bigint(20) UNSIGNED,
+  `stomp` int(11) NOT NULL,
+  `comeback` int(11) NOT NULL,
+  `cluster` int(10) UNSIGNED NOT NULL,
+  `version` int(10) UNSIGNED NOT NULL,
+  PRIMARY KEY (`matchid`),
+  UNIQUE KEY `matchid` (`matchid`),
+  UNIQUE KEY `matches_matchid_radiantwin_IDX` (`matchid`,`radiantWin`) USING BTREE,
+  UNIQUE KEY `matches_matchid_modeid_IDX` (`matchid`,`modeID`) USING BTREE,
+  UNIQUE KEY `matches_matchid_cluster_IDX` (`matchid`,`cluster`) USING BTREE,
+  UNIQUE KEY `matches_matchid_version_IDX` (`matchid`,`version`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

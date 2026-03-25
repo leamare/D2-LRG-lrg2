@@ -1,0 +1,1 @@
+ALTER TABLE matchlines ADD `variant` SMALLINT UNSIGNED DEFAULT null NULL;
