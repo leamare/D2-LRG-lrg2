@@ -208,66 +208,12 @@ function generate_fantasy_mvp($match, $matchlines, $adv_matchlines) {
 }
 
 function create_fantasy_mvp_tables(&$conn) {
-  echo "[ ] Creating table `fantasy_mvp_points`...";
-  $conn->query("CREATE TABLE `fantasy_mvp_points` (
-    `matchid` bigint(20) UNSIGNED NOT NULL,
-    `playerid` bigint(20) NOT NULL,
-    `heroid` smallint(6) NOT NULL,
-    `total_points` DOUBLE NOT NULL,
-    `kills` FLOAT NOT NULL,
-    `deaths` FLOAT NOT NULL,
-    `assists` FLOAT NOT NULL,
-    `creeps` FLOAT NOT NULL,
-    `gpm` FLOAT NOT NULL,
-    `xpm` FLOAT NOT NULL,
-    `obs_placed` FLOAT NOT NULL,
-    `stacks` FLOAT NOT NULL,
-    `stuns` FLOAT NOT NULL,
-    `teamfight_part` FLOAT NOT NULL,
-    `damage` FLOAT NOT NULL,
-    `healing` FLOAT NOT NULL,
-    `damage_taken` FLOAT NOT NULL,
-    `hero_damage_taken_bonus` FLOAT NOT NULL,
-    `hero_damage_taken_penalty` FLOAT NOT NULL,
-    `tower_damage` FLOAT NOT NULL,
-    `obs_kills` FLOAT NOT NULL,
-    `cour_kills` FLOAT NOT NULL,
-    `buybacks` FLOAT NOT NULL,
-    KEY `fantasy_breakdown_matchid_heroid_IDX` (`matchid`,`heroid`) USING BTREE,
-    UNIQUE KEY `fantasy_breakdown_matchid_playerid_IDX` (`matchid`,`playerid`) USING BTREE
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
-  if ($conn->connect_error) {
-    throw new Exception("[F] Can't create table `fantasy_mvp_points`: ".$conn->connect_error."\n");
-  }
-  echo "OK\n";
-
-  $conn->query("ALTER TABLE `fantasy_mvp_points` ADD PRIMARY KEY (`matchid`,`playerid`);");
-  if ($conn->connect_error) {
-    throw new Exception("[F] Can't add key to `fantasy_mvp_points`: ".$conn->connect_error."\n");
-  }
-
-  echo "[ ] Creating table `fantasy_mvp_awards`...";
-  $conn->query("CREATE TABLE `fantasy_mvp_awards` (
-    `matchid` bigint(20) UNSIGNED NOT NULL,
-    `playerid` bigint(20) NOT NULL,
-    `heroid` smallint(6) NOT NULL,
-    `total_points` FLOAT NOT NULL,
-    `mvp` tinyint(1) NOT NULL,
-    `mvp_losing` tinyint(1) NOT NULL,
-    `core` tinyint(1) NOT NULL,
-    `support` tinyint(1) NOT NULL,
-    `lvp` tinyint(1) NOT NULL,
-    KEY `fantasy_awards_matchid_heroid_IDX` (`matchid`,`heroid`) USING BTREE,
-    UNIQUE KEY `fantasy_awards_matchid_playerid_IDX` (`matchid`,`playerid`) USING BTREE
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
-  if ($conn->connect_error) {
-    throw new Exception("[F] Can't create table `fantasy_mvp_awards`: ".$conn->connect_error."\n");
-  }
-  echo "OK\n";
-
-  $conn->query("ALTER TABLE `fantasy_mvp_awards` ADD PRIMARY KEY (`matchid`,`playerid`);");
-  if ($conn->connect_error) {
-    throw new Exception("[F] Can't add key to `fantasy_mvp_awards`: ".$conn->connect_error."\n");
+  require_once __DIR__.'/schema_sql.php';
+  foreach ([
+    'tables/fantasy_mvp_points.sql',
+    'tables/fantasy_mvp_awards.sql',
+  ] as $script) {
+    lrg_run_init_sql($conn, $script);
   }
 }
 

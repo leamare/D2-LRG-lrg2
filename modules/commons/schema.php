@@ -1,5 +1,9 @@
 <?php 
 
+if (!isset($schema_quiet)) {
+  $schema_quiet = false;
+}
+
 $schema = [
   // 'runes' => false,
   'skill_builds' => false,
@@ -24,7 +28,7 @@ $schema = [
   'leagues' => false,
 ];
 
-echo "[ ] Getting tables\n";
+if (!$schema_quiet) echo "[ ] Getting tables\n";
 
 $sql = "SHOW FULL TABLES;";
 if ($conn->multi_query($sql) === FALSE)
