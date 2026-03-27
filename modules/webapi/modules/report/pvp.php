@@ -1,4 +1,5 @@
 <?php 
+include_once(__DIR__ . '/../../../commons/volatility.php');
 
 #[Endpoint(name: 'pvp')]
 #[Description('Player vs player matchup ranks and deviations')]
@@ -68,12 +69,14 @@ public function process() {
   }
 
   if (isset($vars['playerid'])) {
+    $volatility = rg_volatility_metrics($pvp[ $vars['playerid'] ] ?? []);
     return [
       'reference' => [
         'id' => $vars['playerid'],
         'matches' => $winrates[ $vars['playerid'] ]['matches'],
         'wins' => $report['players_additional'][ $vars['playerid'] ]['won'],
         'winrate' => round($winrates[ $vars['playerid'] ]['winrate'], 4),
+        'volatility' => $volatility,
       ],
       'opponents' => $pvp[ $vars['playerid'] ]
     ];
@@ -83,6 +86,17 @@ public function process() {
 }
 
 if (is_docs_mode()) {
+  SchemaRegistry::register('VolatilityMetrics', TypeDefs::obj([
+    'relative' => TypeDefs::num(),
+    'total' => TypeDefs::num(),
+    'avg_advantage' => TypeDefs::num(),
+    'normalized_relative' => TypeDefs::num(),
+    'normalized_total' => TypeDefs::num(),
+    'normalized_avg_advantage' => TypeDefs::num(),
+    'q1_matches' => TypeDefs::int(),
+    'sample' => TypeDefs::int(),
+  ]));
+
   SchemaRegistry::register('PvpOpponent', TypeDefs::obj([
     'matches' => TypeDefs::int(),
     'winrate' => TypeDefs::num(),
@@ -97,6 +111,7 @@ if (is_docs_mode()) {
     'matches' => TypeDefs::int(),
     'wins' => TypeDefs::int(),
     'winrate' => TypeDefs::num(),
+    'volatility' => 'VolatilityMetrics',
   ]));
 
   SchemaRegistry::register('PvpResult', TypeDefs::oneOf([

@@ -49,10 +49,41 @@ public function process() {
     }
     $res = $context['players_summary'];
     $res['__endp'] = "players-summary";
+    if (isset($report['pvp']) && isset($report['players_additional'])) {
+      include_once(__DIR__ . "/../../../commons/volatility.php");
+      include_once(__DIR__ . "/../../functions/pvp_unwrap_data.php");
+      $winrates = [];
+      foreach ($report['players_additional'] as $id => $pl) {
+        if (!isset($pl['matches']) || $pl['matches'] <= 0) continue;
+        $winrates[$id] = ['matches' => $pl['matches'], 'winrate' => $pl['won'] / max(1, $pl['matches'])];
+      }
+      $pvp = rg_generator_pvp_unwrap_data($report['pvp'], $winrates, false);
+      foreach ($res as $playerid => &$entry) {
+        if (!is_numeric($playerid) || !isset($pvp[$playerid])) continue;
+        $vol = rg_volatility_metrics($pvp[$playerid]);
+        $entry['volatility_normalized_relative']      = $vol['normalized_relative'];
+        $entry['volatility_normalized_total']         = $vol['normalized_total'];
+        $entry['volatility_normalized_avg_advantage'] = $vol['normalized_avg_advantage'];
+      }
+      unset($entry, $pvp, $winrates);
+    }
   } else if (in_array("heroes", $mods)) {
     if (is_wrapped($context['hero_summary'])) $context['hero_summary'] = unwrap_data($context['hero_summary']);
     $res = $context['hero_summary'];
     $res['__endp'] = "heroes-summary";
+    if (isset($report['hvh']) && isset($report['pickban'])) {
+      include_once(__DIR__ . "/../../../commons/volatility.php");
+      include_once(__DIR__ . "/../../functions/pvp_unwrap_data.php");
+      $hvh = rg_generator_pvp_unwrap_data($report['hvh'], $report['pickban']);
+      foreach ($res as $heroid => &$entry) {
+        if (!is_numeric($heroid) || !isset($hvh[$heroid])) continue;
+        $vol = rg_volatility_metrics($hvh[$heroid]);
+        $entry['volatility_normalized_relative']      = $vol['normalized_relative'];
+        $entry['volatility_normalized_total']         = $vol['normalized_total'];
+        $entry['volatility_normalized_avg_advantage'] = $vol['normalized_avg_advantage'];
+      }
+      unset($entry, $hvh);
+    }
   } else {
     throw new UserInputException("What kind of summary do you need?");
   }

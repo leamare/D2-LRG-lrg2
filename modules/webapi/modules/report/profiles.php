@@ -1,4 +1,5 @@
 <?php 
+include_once(__DIR__ . '/../../../commons/volatility.php');
 
 $repeatVars['profiles'] = ['team', 'heroid', 'playerid', 'itemid'];
 
@@ -168,6 +169,8 @@ public function process() {
     if (isset($report['hvh'])) {
       $pairs = $endpoints['hvh']($mods, $vars, $report);
       $res['counters'] = $pairs['opponents'];
+      $ref = $pairs['reference'];
+      $res['volatility'] = $ref['volatility'] ?? rg_volatility_metrics($res['counters'] ?? []);
       unset($pairs);
     }
 
@@ -467,6 +470,8 @@ public function process() {
     if (isset($report['pvp'])) {
       $pairs = $endpoints['pvp']($mods, $vars, $report);
       $res['pvp'] = $pairs['opponents'];
+      $ref = $pairs['reference'];
+      $res['volatility'] = $ref['volatility'] ?? rg_volatility_metrics($res['pvp'] ?? []);
     }
 
     // factions

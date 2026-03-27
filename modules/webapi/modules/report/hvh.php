@@ -1,4 +1,5 @@
 <?php 
+include_once(__DIR__ . '/../../../commons/volatility.php');
 
 $repeatVars['hvh'] = ['heroid'];
 
@@ -78,12 +79,15 @@ public function process() {
       }
     }
 
+    $volatility = rg_volatility_metrics($hvh[ $vars['heroid'] ] ?? []);
+
     return [
       'reference' => [
         'id' => $vars['heroid'],
         'matches' => $report['pickban'][ $vars['heroid'] ]['matches_picked'],
         'wins' => round($report['pickban'][ $vars['heroid'] ]['matches_picked'] * $report['pickban'][ $vars['heroid'] ]['winrate_picked']),
         'winrate' => $report['pickban'][ $vars['heroid'] ]['winrate_picked'],
+        'volatility' => $volatility,
       ],
       'opponents' => $hvh[ $vars['heroid'] ]
     ];
@@ -214,6 +218,7 @@ public function process() {
       'matches' => $report['hero_variants'][ $srcid ]['m'],
       'wins' => $report['hero_variants'][ $srcid ]['w']/$report['hero_variants'][ $srcid ]['m'],
       'winrate' => $report['hero_variants'][ $srcid ]['w'],
+      'volatility' => rg_volatility_metrics($hvh[ $srcid ] ?? []),
     ],
     'opponents' => $hvh[ $srcid ]
   ];
@@ -221,12 +226,32 @@ public function process() {
 }
 
 if (is_docs_mode()) {
+  SchemaRegistry::register('VolatilityMetrics', TypeDefs::obj([
+    'relative' => TypeDefs::num(),
+    'total' => TypeDefs::num(),
+    'avg_advantage' => TypeDefs::num(),
+    'normalized_relative' => TypeDefs::num(),
+    'normalized_total' => TypeDefs::num(),
+    'normalized_avg_advantage' => TypeDefs::num(),
+    'q1_matches' => TypeDefs::int(),
+    'sample' => TypeDefs::int(),
+  ]));
+
   SchemaRegistry::register('HvhPair', TypeDefs::obj([
     'matches' => TypeDefs::int(), 'winrate' => TypeDefs::num(), 'rank' => TypeDefs::num(), 'arank' => TypeDefs::num(),
     'deviation' => TypeDefs::num(), 'deviation_pct' => TypeDefs::num(), 'lane_rate' => TypeDefs::num(), 'lane_wr' => TypeDefs::num()
   ]));
+
+  SchemaRegistry::register('HvhReference', TypeDefs::obj([
+    'id' => TypeDefs::int(),
+    'matches' => TypeDefs::int(),
+    'wins' => TypeDefs::num(),
+    'winrate' => TypeDefs::num(),
+    'volatility' => 'VolatilityMetrics',
+  ]));
+
   SchemaRegistry::register('HvhResult', TypeDefs::oneOf([
     TypeDefs::mapOf('HvhPair'),
-    TypeDefs::obj(['reference' => TypeDefs::obj([]), 'opponents' => TypeDefs::mapOf('HvhPair')])
+    TypeDefs::obj(['reference' => 'HvhReference', 'opponents' => TypeDefs::mapOf('HvhPair')])
   ]));
 }
