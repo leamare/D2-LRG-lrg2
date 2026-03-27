@@ -868,5 +868,16 @@
   "series_heroes_other": "🔄",
   "series_duration_delta": "Δ",
   "series_duration_playtime": "⏳🎮",
+  "volatility": "🌡️",
+  "volatility_relative": "📐🌡️",
+  "volatility_total": "☯️🌡️",
+  "volatility_avg_advantage": "💪📊",
+  "volatility_normalized_relative": "🔢📐🌡️",
+  "volatility_normalized_relative_s": "🔢📐🌡️",
+  "volatility_normalized_total": "🔢☯️🌡️",
+  "volatility_normalized_total_s": "🔢☯️🌡️",
+  "volatility_normalized_avg_advantage": "🔢💪📊",
+  "volatility_normalized_avg_advantage_s": "🔢💪📊",
+  "desc_volatility": "🌡️📊➡️⚖️🆚👊. 📉: %👊 diff<0 (👊💪). 📈: %👊 ≥50%🏆. 💪📊: avg diff. 🔢➡️Σ👊×⚖️🏏; 🚫🔢➡️Q1+👊🏏.",
   "region_unknown": "❓🌍"
 }

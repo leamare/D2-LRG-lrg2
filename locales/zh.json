@@ -725,5 +725,16 @@
   "series_heroes_other": "混合",
   "series_duration_delta": "增量",
   "series_duration_playtime": "原始游戏时间",
-  "lang_name": "英语"
+  "lang_name": "英语",
+  "volatility": "波动性",
+  "volatility_relative": "相对波动率",
+  "volatility_total": "总波动率",
+  "volatility_avg_advantage": "平均优势",
+  "volatility_normalized_relative": "标准化相对波动率",
+  "volatility_normalized_relative_s": "NRV",
+  "volatility_normalized_total": "标准化总波动率",
+  "volatility_normalized_total_s": "NTV",
+  "volatility_normalized_avg_advantage": "标准化平均优势",
+  "volatility_normalized_avg_advantage_s": "NAA",
+  "desc_volatility": "波动性衡量对各对手表现的稳定性。相对波动率：负diff对手（拥有优势）的百分比。总波动率：胜率50%以上对手的百分比。平均优势：diff的平均值。非标准化值仅统计Q1+对手（按对局数超过第一四分位数）。标准化值包含所有对手，各对手按其在总对局中的占比加权。"
 }
