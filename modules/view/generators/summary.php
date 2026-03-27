@@ -4,10 +4,22 @@ include_once($root."/modules/view/functions/player_name.php");
 include_once($root."/modules/view/functions/convert_time.php");
 include_once($root."/modules/view/functions/summary_utils.php");
 
-function rg_generator_summary($table_id, &$context, $hero_flag = true, $rank = false, $variants = false) {
+function rg_generator_summary($table_id, &$context, $hero_flag = true, $rank = false, $variants = false, array $inject = []) {
   if(!sizeof($context)) return "";
 
   if (is_wrapped($context)) $context = unwrap_data($context);
+
+  // Merge extra per-entity data after unwrapping so injected keys appear as columns
+  if (!empty($inject)) {
+    $inject_keys = array_keys(reset($inject));
+    foreach ($context as $id => &$entry) {
+      if (!is_array($entry)) continue;
+      foreach ($inject_keys as $k) {
+        $entry[$k] = $inject[$id][$k] ?? null;
+      }
+    }
+    unset($entry);
+  }
 
   $first = array_values($context)[0] ?? null;
   if (!is_array($first)) return "";

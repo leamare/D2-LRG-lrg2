@@ -2,6 +2,7 @@
 
 include_once($root."/modules/view/functions/hero_name.php");
 include_once($root."/modules/view/functions/player_name.php");
+include_once($root."/modules/commons/volatility.php");
 
 function rg_generator_pvp_profile($table_id, &$pvp_context, &$context_wrs, $srcid, $heroes_flag = true, $facets = false) {
   $res = "";
@@ -25,6 +26,11 @@ function rg_generator_pvp_profile($table_id, &$pvp_context, &$context_wrs, $srci
   else
     $laning = false;
 
+  $vol = [
+    'relative' => 0, 'total' => 0, 'avg_advantage' => 0,
+    'normalized_relative' => 0, 'normalized_total' => 0, 'normalized_avg_advantage' => 0,
+  ];
+
   $matches_med = [];
 
   if(!empty($context_wrs)) {
@@ -38,6 +44,8 @@ function rg_generator_pvp_profile($table_id, &$pvp_context, &$context_wrs, $srci
       'ms' => $heroes_flag ? $context_wrs[$srcid]['matches_picked'] : $context_wrs[$srcid]['matches'],
       'f'  => $context_wrs[$srcid]['f'] ?? null,
     ];
+
+    $vol = rg_volatility_metrics($pvp_context);
 
     if ($facets) {
       [ $srcid, $variant ] = explode('-', $srcid);
@@ -102,6 +110,22 @@ function rg_generator_pvp_profile($table_id, &$pvp_context, &$context_wrs, $srci
       $matches_med[] = $el['matches'];
     }
   }
+
+  $res .= "<table id=\"$table_id-volatility\" class=\"list\"><thead><tr>".
+      "<th>".locale_string("volatility_relative")."</th>".
+      "<th>".locale_string("volatility_total")."</th>".
+      "<th>".locale_string("volatility_avg_advantage")."</th>".
+      "<th class=\"separator\">".locale_string("volatility_normalized_relative")."</th>".
+      "<th>".locale_string("volatility_normalized_total")."</th>".
+      "<th>".locale_string("volatility_normalized_avg_advantage")."</th>".
+    "</tr></thead><tbody><tr>".
+      "<td>".number_format($vol['relative'], 2)."%</td>".
+      "<td>".number_format($vol['total'], 2)."%</td>".
+      "<td>".number_format($vol['avg_advantage'], 2)."%</td>".
+      "<td class=\"separator\">".number_format($vol['normalized_relative'], 2)."%</td>".
+      "<td>".number_format($vol['normalized_total'], 2)."%</td>".
+      "<td>".number_format($vol['normalized_avg_advantage'], 2)."%</td>".
+    "</tr></tbody></table>";
 
   sort($matches_med);
 

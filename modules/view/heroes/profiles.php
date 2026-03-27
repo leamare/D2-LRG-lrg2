@@ -6,6 +6,7 @@ include_once($root."/modules/view/generators/item_component.php");
 include_once($root."/modules/view/generators/laning.php");
 include_once($root."/modules/view/generators/matches_list.php");
 include_once($root."/modules/view/heroes/daily_wr.php");
+include_once($root."/modules/commons/volatility.php");
 
 $modules['heroes']['profiles'] = [];
 
@@ -258,8 +259,29 @@ function rg_view_generate_heroes_profiles() {
     }
   }
 
+  $volatility_html = "";
+
   if (isset($report['hvh'])) {
     $hvh = rg_generator_pvp_unwrap_data($report['hvh'], $report['pickban']);
+
+    if (isset($hvh[$hero])) {
+      $vol = rg_volatility_metrics($hvh[$hero]);
+      $volatility_html = "<table id=\"profile-$hero-volatility\" class=\"list\"><caption>".locale_string("volatility")."</caption><thead><tr>".
+        "<th>".locale_string("volatility_relative")."</th>".
+        "<th>".locale_string("volatility_total")."</th>".
+        "<th>".locale_string("volatility_avg_advantage")."</th>".
+        "<th class=\"separator\">".locale_string("volatility_normalized_relative")."</th>".
+        "<th>".locale_string("volatility_normalized_total")."</th>".
+        "<th>".locale_string("volatility_normalized_avg_advantage")."</th>".
+      "</tr></thead><tbody><tr>".
+        "<td>".number_format($vol['relative'], 2)."%</td>".
+        "<td>".number_format($vol['total'], 2)."%</td>".
+        "<td>".number_format($vol['avg_advantage'], 2)."%</td>".
+        "<td class=\"separator\">".number_format($vol['normalized_relative'], 2)."%</td>".
+        "<td>".number_format($vol['normalized_total'], 2)."%</td>".
+        "<td>".number_format($vol['normalized_avg_advantage'], 2)."%</td>".
+      "</tr></tbody></table>";
+    }
 
     if (isset($hvh[$hero])) {
       foreach ($hvh[$hero] as $h => $data) {
@@ -511,6 +533,10 @@ function rg_view_generate_heroes_profiles() {
     "<td>".number_format($el['mb'], 1)."</td>".
     "</tr>".
   "</tbody></table>";
+
+  if (!empty($volatility_html)) {
+    $res['heroid'.$hero] .= $volatility_html;
+  }
 
   if (isset($report['matches']) && isset($report['matches_additional'])) {
     $res['heroid'.$hero] .= "<div class=\"content-text\"><h1>".locale_string("recent_matches")."</h1></div>";

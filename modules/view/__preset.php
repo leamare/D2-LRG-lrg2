@@ -116,6 +116,10 @@ const SUMMARY_GROUPS = [
   'core_awards' => 'fantasy_awards',
   'support_awards' => 'fantasy_awards',
   'lvp_awards' => 'fantasy_awards',
+
+  'volatility_normalized_relative' => 'hvh',
+  'volatility_normalized_total' => 'hvh',
+  'volatility_normalized_avg_advantage' => 'hvh',
 ];
 
 const SUMMARY_GROUPS_PRIORITIES = [
@@ -131,6 +135,7 @@ const SUMMARY_GROUPS_PRIORITIES = [
   'permagroup' => 0,
   'fantasy_awards' => 8,
   'fantasy_points' => 9,
+  'hvh' => 10,
 ];
 
 const SUMMARY_KEYS_REPLACEMENTS = [
@@ -158,6 +163,10 @@ const SUMMARY_KEYS_REPLACEMENTS = [
   "follower_pick_dire_winrate" => "follower_pick_dire_winrate_s",
   "follower_pick_radiant_ratio" => "follower_pick_radiant_ratio_s",
   "opener_pick_radiant_ratio" => "opener_pick_radiant_ratio_s",
+
+  "volatility_normalized_relative" => "volatility_normalized_relative_s",
+  "volatility_normalized_total" => "volatility_normalized_total_s",
+  "volatility_normalized_avg_advantage" => "volatility_normalized_avg_advantage_s",
 ];
 
 const VALUESORT_COLS_KEYS = [

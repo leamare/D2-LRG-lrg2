@@ -1,6 +1,8 @@
 <?php
 
 $modules['players']['profiles'] = [];
+include_once($root."/modules/commons/volatility.php");
+include_once($root."/modules/view/generators/pvp_unwrap_data.php");
 
 function rg_view_generate_players_profiles() {
   global $report, $parent, $root, $unset_module, $mod, $meta, $strings, $player_photo_provider, $links_providers;
@@ -78,6 +80,37 @@ function rg_view_generate_players_profiles() {
     "</div>".
     // "<div class=\"profile-content\">";
   "</div>";
+
+  if (isset($report['pvp'])) {
+    $winrates = [];
+    if (isset($report['players_additional'])) {
+      foreach($report['players_additional'] as $id => $pl) {
+        $winrates[$id] = [
+          'matches' => $pl['matches'],
+          'winrate' => $pl['won']/max(1, $pl['matches']),
+        ];
+      }
+    }
+    $pvp = rg_generator_pvp_unwrap_data($report['pvp'], $winrates, false);
+    if (isset($pvp[$player])) {
+      $vol = rg_volatility_metrics($pvp[$player]);
+      $res['playerid'.$player] .= "<table id=\"player-profile-pid$player-volatility\" class=\"list\"><caption>".locale_string("volatility")."</caption><thead><tr>".
+        "<th>".locale_string("volatility_relative")."</th>".
+        "<th>".locale_string("volatility_total")."</th>".
+        "<th>".locale_string("volatility_avg_advantage")."</th>".
+        "<th class=\"separator\">".locale_string("volatility_normalized_relative")."</th>".
+        "<th>".locale_string("volatility_normalized_total")."</th>".
+        "<th>".locale_string("volatility_normalized_avg_advantage")."</th>".
+      "</tr></thead><tbody><tr>".
+        "<td>".number_format($vol['relative'], 2)."%</td>".
+        "<td>".number_format($vol['total'], 2)."%</td>".
+        "<td>".number_format($vol['avg_advantage'], 2)."%</td>".
+        "<td class=\"separator\">".number_format($vol['normalized_relative'], 2)."%</td>".
+        "<td>".number_format($vol['normalized_total'], 2)."%</td>".
+        "<td>".number_format($vol['normalized_avg_advantage'], 2)."%</td>".
+      "</tr></tbody></table>";
+    }
+  }
 
   // played heroes
   if (isset($report['matches'])) {

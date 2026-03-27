@@ -52,6 +52,7 @@ function rg_view_generate_heroes_hvh() {
         $res["heroid".$hid]['total'] .= "<details class=\"content-text explainer\"><summary>".locale_string("explain_summary")."</summary>".
             "<div class=\"explain-content\">".
               "<div class=\"line\">".locale_string("desc_heroes_hvh_2")."</div>".
+              "<div class=\"line\">".locale_string("desc_volatility")."</div>".
             "</div>".
           "</details>";
         $res["heroid".$hid]['total'] .= rg_generator_pvp_profile("hero-hvh-$hid-total", $hvh[$hid], $report['pickban'], $hid);
@@ -126,6 +127,7 @@ function rg_view_generate_heroes_hvh() {
             $res["heroid".$hid]["variants"]["total"] .= "<details class=\"content-text explainer\"><summary>".locale_string("explain_summary")."</summary>".
                 "<div class=\"explain-content\">".
                   "<div class=\"line\">".locale_string("desc_heroes_hvh_2")."</div>".
+                  "<div class=\"line\">".locale_string("desc_volatility")."</div>".
                 "</div>".
               "</details>";
             $res["heroid".$hid]["variants"]["total"] .= rg_generator_pvp_profile("hero-hvh-$hid-total", $hvh[$hid."-x"], $report['hero_variants'], $hid."-x", true, true);
@@ -148,6 +150,7 @@ function rg_view_generate_heroes_hvh() {
                 $res["heroid".$hid]["variants"]["variant$i"] .= "<details class=\"content-text explainer\"><summary>".locale_string("explain_summary")."</summary>".
                     "<div class=\"explain-content\">".
                       "<div class=\"line\">".locale_string("desc_heroes_hvh_2")."</div>".
+                      "<div class=\"line\">".locale_string("desc_volatility")."</div>".
                     "</div>".
                   "</details>";
                 $res["heroid".$hid]["variants"]["variant$i"] .= rg_generator_pvp_profile("hero-hvh-$hid-variant$i", $hvh[$hid."-".$i], $report['hero_variants'], $hid."-".$i, true, true);
