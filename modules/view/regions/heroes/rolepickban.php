@@ -13,11 +13,16 @@ function rg_view_generate_regions_heroes_rolepickban($region, $reg_report) {
       if(!empty($reg_report['hero_positions'][$i][$j])) {
         $role = "$i.$j";
         foreach ($reg_report['hero_positions'][$i][$j] as $hid => $data) {
+          $hid_pb = $reg_report['pickban'][$hid] ?? null;
+          $hid_mp = (float)($hid_pb['matches_picked'] ?? 0);
+          if ($hid_mp <= 0 || $hid_pb === null) {
+            continue;
+          }
           $pb[$hid.'|'.$role] = [
             'matches_picked' => $data['matches_s'],
             'winrate_picked' => $data['winrate_s'],
-            'matches_banned' => round( ($data['matches_s']/$reg_report['pickban'][$hid]['matches_picked'])*$reg_report['pickban'][$hid]['matches_banned'] ),
-            'winrate_banned' => $reg_report['pickban'][$hid]['winrate_banned'],
+            'matches_banned' => round( ($data['matches_s']/$hid_mp)*($hid_pb['matches_banned'] ?? 0) ),
+            'winrate_banned' => $hid_pb['winrate_banned'] ?? 0,
           ];
           $pb[$hid.'|'.$role]['matches_total'] = $pb[$hid.'|'.$role]['matches_picked'] + $pb[$hid.'|'.$role]['matches_banned'];
           $pb[$hid.'|'.$role]['role'] = $role;

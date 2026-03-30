@@ -260,6 +260,9 @@ function rg_view_generate_players_profiles() {
       }
 
       foreach ($report['items']['records'] as $item => $records) {
+        if (!isset($meta['items_full'][$item])) {
+          continue;
+        }
         foreach ($heroes as $hero => $data) {
           if (!isset($records[$hero])) continue;
 

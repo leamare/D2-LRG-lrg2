@@ -65,8 +65,12 @@ function report_list_element($report) {
 
   $_lid = $report['id'] ?? null;
   if (empty($_lid) && !empty($__lid_fallbacks)) {
+    $tag_for_lid = $report['tag'] ?? $cat;
+    if (!is_string($tag_for_lid)) {
+      $tag_for_lid = is_scalar($tag_for_lid) ? (string)$tag_for_lid : '';
+    }
     foreach ($__lid_fallbacks as $preg => $lid) {
-      if (preg_match($preg, $report['tag'] ?? $cat)) {
+      if (preg_match($preg, $tag_for_lid)) {
         $_lid = $lid;
         break;
       }
@@ -144,8 +148,12 @@ function report_card_element($report, $smaller = true, $catlabel = false) {
 
   $_lid = $report['id'] ?? null;
   if (empty($_lid) && !empty($__lid_fallbacks)) {
+    $tag_for_lid = $report['tag'] ?? $cat;
+    if (!is_string($tag_for_lid)) {
+      $tag_for_lid = is_scalar($tag_for_lid) ? (string)$tag_for_lid : '';
+    }
     foreach ($__lid_fallbacks as $preg => $lid) {
-      if (preg_match($preg, $report['tag'] ?? $cat)) {
+      if (preg_match($preg, $tag_for_lid)) {
         $_lid = $lid;
         break;
       }

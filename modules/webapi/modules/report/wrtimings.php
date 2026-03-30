@@ -10,6 +10,10 @@ public function process() {
     throw new UserInputException("Endpoint `wrtimings` only works for heroes");
   }
 
+  if (!isset($report['hero_winrate_timings'])) {
+    return [];
+  }
+
   if (is_wrapped($report['hero_winrate_timings'])) {
     $report['hero_winrate_timings'] = unwrap_data($report['hero_winrate_timings']);
   }

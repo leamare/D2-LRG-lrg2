@@ -96,10 +96,10 @@ function rg_view_generate_players_sti_items() {
   if ($selected_pid != 0) {
     $pbdata = $report['players_summary'][$selected_pid] ?? [];
 
-    if (is_wrapped($report['player_laning'])) {
+    if (isset($report['player_laning']) && is_wrapped($report['player_laning'])) {
       $report['player_laning'] = unwrap_data($report['player_laning']);
     }
-    $lanedata = $report['player_laning'][0][$selected_pid] ?? [];
+    $lanedata = (($report['player_laning'] ?? [])[0] ?? [])[$selected_pid] ?? [];
 
     $context_info = [
       'matches' => $pbdata['matches_s'] ?? 0,
