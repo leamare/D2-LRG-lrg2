@@ -604,14 +604,14 @@
     "series_duration_delta": "Delta",
     "series_duration_playtime": "Tempo de jogo bruto",
     "volatility": "Volatilidade",
-    "volatility_relative": "Taxa de volatilidade relativa",
-    "volatility_total": "Taxa de volatilidade total",
+    "volatility_relative": "Volatilidade relativa",
+    "volatility_total": "Volatilidade total",
     "volatility_avg_advantage": "Vantagem média",
-    "volatility_normalized_relative": "Taxa de volatilidade relativa normalizada",
+    "volatility_normalized_relative": "Volatilidade relativa normalizada",
     "volatility_normalized_relative_s": "TRV",
-    "volatility_normalized_total": "Taxa de volatilidade total normalizada",
+    "volatility_normalized_total": "Volatilidade total normalizada",
     "volatility_normalized_total_s": "TVN",
     "volatility_normalized_avg_advantage": "Vantagem média normalizada",
     "volatility_normalized_avg_advantage_s": "VMA",
-    "desc_volatility": "A volatilidade mede a estabilidade do desempenho contra adversários. Taxa relativa: % de adversários com diff negativo (eles têm vantagem). Taxa total: % de adversários com 50%+ de vitórias. Vantagem média: diff médio. Os valores não normalizados consideram apenas adversários Q1+ (acima do primeiro quartil por número de partidas). Os valores normalizados incluem todos os adversários, cada um ponderado pela sua proporção do total de confrontos."
+    "desc_volatility": "A volatilidade mede a estabilidade do desempenho contra adversários. Volatilidade relativa: % de adversários com diff negativo (eles têm vantagem). Volatilidade total: % de adversários com 50%+ de vitórias. Vantagem média: diff médio. Os valores não normalizados consideram apenas adversários Q1+ (acima do primeiro quartil por número de partidas). Os valores normalizados incluem todos os adversários, cada um ponderado pela sua proporção do total de confrontos."
 }
