@@ -64,12 +64,12 @@ function check_filters($rep, $filters) {
 
       switch ($filter[0]) {
         case LRG_TAG_FILTER_TAG:
-          $group_result = $group_result && preg_match($filter[1], $rep['tag']);
+          $group_result = $group_result && preg_match($filter[1], (string)($rep['tag'] ?? ''));
           break;
         case LRG_TAG_FILTER_TAG_ALT:
           $group_result = $group_result && preg_match(
             str_replace('_', '', $filter[1]),
-            str_replace('_', '', $rep['tag'])
+            str_replace('_', '', (string)($rep['tag'] ?? ''))
           );
           break;
         case LRG_TAG_FILTER_NAME:
@@ -83,7 +83,7 @@ function check_filters($rep, $filters) {
 
             $group_result = $group_result && $r;
           } else {
-            $group_result = $group_result && preg_match($filter[1], $rep['name']);
+            $group_result = $group_result && preg_match($filter[1], (string)($rep['name'] ?? ''));
           }
           break;
         case LRG_TAG_FILTER_DESC:

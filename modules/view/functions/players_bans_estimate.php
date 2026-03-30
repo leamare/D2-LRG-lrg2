@@ -231,9 +231,11 @@ function estimate_players_draft_processor_tvt_report(&$context_pickban, $tid = n
         }
 
         if (isset($team_0_pickban[$hero]['winrate_picked']) && isset($team_0_pickban[$hero]['matches_picked'])) {
-          $team_0_pickban[$hero]['winrate_picked'] = ($team_0_pickban[$hero]['winrate_picked']*$team_0_pickban[$hero]['matches_picked']
-             - $el['winrate_picked']*$el['matches_picked'])
-            / ($team_0_pickban[$hero]['matches_picked'] - $el['matches_picked']);
+          $denom_p = $team_0_pickban[$hero]['matches_picked'] - $el['matches_picked'];
+          $team_0_pickban[$hero]['winrate_picked'] = $denom_p
+            ? ($team_0_pickban[$hero]['winrate_picked']*$team_0_pickban[$hero]['matches_picked']
+               - $el['winrate_picked']*$el['matches_picked']) / $denom_p
+            : 0;
           $team_0_pickban[$hero]['matches_picked'] -= $el['matches_picked'];
         }
       }
