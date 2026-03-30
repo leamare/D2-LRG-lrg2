@@ -51,6 +51,9 @@ function rg_view_generate_items_overview() {
   $limit = $report['settings']['overview_items_limit'] ?? 10; 
   $best = [];
   $worst = [];
+  if (!isset($report['items']['stats']['total']) || !is_array($report['items']['stats']['total'])) {
+    return $res;
+  }
   uasort($report['items']['stats']['total'], function($a, $b) {
     return ( max($a['early_wr'], $a['late_wr'])-$a['wo_wr'] ) <=> ( max($b['early_wr'], $b['late_wr'])-$b['wo_wr'] );
   });

@@ -21,6 +21,9 @@ function rg_view_generate_items_icombos() {
   $item_names = [];
 
   foreach ($item_ids as $item) {
+    if (!isset($meta['items_full'][$item])) {
+      continue;
+    }
     $item_names[ $item ] = [
       'name' => $meta['items_full'][$item]['localized_name'],
       'tag' => $meta['items_full'][$item]['name']

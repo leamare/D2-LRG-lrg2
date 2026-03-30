@@ -113,13 +113,22 @@ function rg_create_team_pickban_data($context_pb, $context_vs_pb, $context_total
 
     compound_ranking($pb, $context_total_matches);
 
+    if (empty($pb)) {
+      continue;
+    }
+
     uasort($pb, function($a, $b) {
       return $b['wrank'] <=> $a['wrank'];
     });
-  
-    $min = end($pb)['wrank'];
-    $max = reset($pb)['wrank'];
-  
+
+    $first_ranked = reset($pb);
+    $last_ranked = end($pb);
+    if ($first_ranked === false || $last_ranked === false) {
+      continue;
+    }
+    $max = $first_ranked['wrank'];
+    $min = $last_ranked['wrank'];
+
     foreach ($pb as $id => $el) {
       unset($pb[$id]['wrank']);
       $r[$id][$key] = ($max != $min) ? 100 * ($el['wrank']-$min) / ($max-$min) : 0;

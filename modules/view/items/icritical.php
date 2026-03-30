@@ -69,8 +69,8 @@ function rg_view_generate_items_critical() {
   $res[$tag] .= "<div class=\"selector-modules-level-4\">";
 
   if ($hero !== 'total') {
-    $data = $report['pickban'][$hero];
-    $winrate = $data['winrate_picked'];
+    $data = $report['pickban'][$hero] ?? null;
+    $winrate = $data['winrate_picked'] ?? 0.5;
 
     $res[$tag] .= "<table id=\"items-$tag-reference\" class=\"list\">";
     $res[$tag] .= "<thead><tr>".
@@ -82,8 +82,8 @@ function rg_view_generate_items_critical() {
     $res[$tag] .= "<tr>".
       "<td>".hero_portrait($hero)."</td>".
       "<td>".hero_link($hero)."</td>".
-      "<td>".$data['matches_picked']."</td>".
-      "<td>".number_format($data['winrate_picked']*100, 2)."%</td>".
+      "<td>".($data['matches_picked'] ?? 0)."</td>".
+      "<td>".number_format(($data['winrate_picked'] ?? 0)*100, 2)."%</td>".
     "</tr></tbody></table><br />";
   } else {
     $winrate = 0.5;

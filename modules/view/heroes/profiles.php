@@ -346,10 +346,18 @@ function rg_view_generate_heroes_profiles() {
       $report['hero_daily_wr_days'] = $days;
       $report['hero_daily_wr'] = unwrap_data($report['hero_daily_wr']);
     } else {
-      $days = array_keys($report['hero_daily_wr'][ array_keys($report['hero_daily_wr'])[0] ]);
-      sort($days);
+      $hwr_keys = array_keys($report['hero_daily_wr']);
+      if ($hwr_keys === []) {
+        $days = [];
+      } else {
+        $days = array_keys($report['hero_daily_wr'][ $hwr_keys[0] ]);
+        sort($days);
+      }
     }
-  
+
+    if (empty($days)) {
+      // hero_daily_wr set but no per-day series (avoid bogus indexes)
+    } else {
     $global_days = [];
     if (count($days) == count($report['days'])) {
       foreach($report['days'] as $d) {
@@ -366,7 +374,7 @@ function rg_view_generate_heroes_profiles() {
       }
     }
   
-    $days_data = $report['hero_daily_wr'][$hero];
+    $days_data = $report['hero_daily_wr'][$hero] ?? [];
 
     $dwr = []; $dm = []; $dmb = []; $prev = null; $prev_b = null;
     $prev_dt = null;
@@ -445,6 +453,7 @@ function rg_view_generate_heroes_profiles() {
 
     // pickrate
     $scripts[] = __rg_view_generate_heroes_daily_winrates_generate_scripts("'rgb(128, 224, 96)'", $labels, $dm, "hero-daily-matches-$hid", true);
+    }
   }
 
   // Basic item build + best items + link
@@ -674,7 +683,7 @@ function rg_view_generate_heroes_profiles() {
       }
 
       foreach ($report['items']['records'] as $item => $records) {
-        if (!isset($records[$hero])) continue;
+        if (!isset($records[$hero]) || !isset($meta['items_full'][$item])) continue;
 
         $record_pid = null;
         if (!empty($report['matches']) && isset($report['matches'][ $records[$hero]['match'] ])) {
