@@ -226,17 +226,17 @@ function rg_generator_uncontested($context, $contested, $small = false, $heroes_
       locale_string($loc).
       ": ".sizeof($context)."</h1><div class=\"hero-list\">";
 
-    usort($context, function($a, $b) {
+    uasort($context, function($a, $b) {
       return $a['name'] <=> $b['name'];
     });
     if ($heroes_flag)
-      foreach($context as $el) {
+      foreach($context as $hid =>$el) {
         $res .= "<div class=\"hero\"><img src=\"".str_replace("%HERO%", $el['tag'], $portraits_provider)."\" alt=\"".$el['tag']."\" />".
-                "<span class=\"hero_name\">".$el['name']."</span></div>";
+                "<span class=\"hero_name\">".hero_name($hid)."</span></div>";
       }
     else
-      foreach($context as $el) {
-        $res .= "<div class=\"hero\"><span class=\"hero_name\">".$el['name']."</span></div>";
+      foreach($context as $hid =>$el) {
+        $res .= "<div class=\"hero\"><span class=\"hero_name\">".player_name($hid)."</span></div>";
       }
     $res .= "</div></div>";
   }
