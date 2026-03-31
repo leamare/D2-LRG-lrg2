@@ -3,7 +3,7 @@
 return [
     "en" => [
         "file" => __DIR__ . "/en.json",
-        "name" => "English",
+        "name" => "🇬🇧 English",
         'vpk'  => "english",
     ],
     "def" => [
@@ -11,13 +11,13 @@ return [
     ],
     "ru" => [
         "file" => __DIR__ . "/ru.json",
-        "name" => "Русский",
+        "name" => "🇷🇺 Русский",
         'vpk'  => "russian",
     ],
     "uk" => [
         "fallback" => "ru",
         "file" => __DIR__ . "/uk.json",
-        "name" => "Українська",
+        "name" => "🇺🇦 Українська",
         'vpk'  => "ukrainian",
     ],
     "ua" => [
@@ -27,21 +27,25 @@ return [
         "beta" => true,
         "fallback" => "pt-br",
         "file" => __DIR__ . "/pt.json",
-        "name" => "Português",
+        "name" => "🇵🇹 Português",
         'vpk'  => "portuguese",
     ],
     "pt-br" => [
         "file" => __DIR__ . "/pt-br.json",
-        "name" => "Português Brasileiro",
+        "name" => "🇧🇷 Português Brasileiro",
         'vpk'  => "brazilian",
     ],
     "zh" => [
         "file" => __DIR__ . "/zh.json",
-        "name" => "普通话",
+        "name" => "🇨🇳 普通话",
         'vpk'  => "schinese",
     ],
     "emoji" => [
         "file" => __DIR__ . "/emoji.json",
-        "name" => "Emoji 😀",
+        "name" => "😀 Emoji",
+    ],
+    "ozh" => [
+        "file" => __DIR__ . "/ozh.json",
+        "name" => "😈 Ozkavosh",
     ],
 ];
