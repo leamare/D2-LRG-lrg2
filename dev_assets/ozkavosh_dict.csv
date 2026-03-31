@@ -1,0 +1,439 @@
+english_concept,Ozkavosh,notes
+I / self,ozh,"[CANON] first-person pronoun Self (I, me, my, mine, etc)"
+You / him / her,izh,"[CANON] Other person (you, him, her, etc)"
+"Group, they, others",izhai,"[CANON] Group (not gender specific), they"
+"at (location), you (direct, locative)",tho,"[CANON] At (where you currently are, etc), also can be used as a second-person singular"
+They / those,ish,[INVENTED] Third-person plural / those ones.
+demons,Ozkavosh,[CANON] Demons and spirits as a group/species
+this (near demonstrative),sa,"[CANON] Near object(this, etc)"
+that,vu,"[CANON] Far object (that, etc)"
+on (locative / from / at / above),doq,"[CANON] On (upon, on top of, above, etc)"
+closeness marker,do-,[DERIVED] Attached to object or direction marker
+Below / downward,doz,"[CANON] follows the same scheme as doq, basically “attached to below” or being lower"
+Inside / within / contents,don,"[INVENTED] same as doq/doz, “attached to inside”"
+"off (not near, etc)",roq,"[CANON] Off (not near, etc), opposite of doq"
+Un-closeness marker,ro-,"[DERIVED] Detached from object, opposite direction, reverse of do-"
+Outside,ron,[INVENTED] literally opposite of inside
+Behind,dosh,[INVENTED] behind
+not below,roz,"[INVENTED] not below (but not necessarily above or not attached to the object, moving away)"
+forward / upward / ahead,alatho,"[CANON] Forward (ahead, etc) – first vowel acts as time marker"
+Backward / downward / behind,ulatho,"[CANON] Back (backwards, etc)"
+forward motion,ala-,[DERIVED] general forward direction marker
+backward motion,ula-,[DERIVED] general backward direction marker
+negation prefix,vo'-,"[CANON] Negative (modifier for negatives, i.e. not, etc)"
+intensifier / very / extreme,ahm'-,[CANON] Very (modifier for emphasis or severity)
+comparative / more / bigger,ashm,[CANON] More
+Less / lesser / smaller,vom,[CANON] less (negative marker + general size marker ‘m’)
+Now / is / present / to be,acha,"[CANON] Current state of being (am, be, now, etc)"
+Before / was / past / ancient,ucha,"[CANON] Past state of being (was, had been, etc)"
+Will be / could / future / potential,icha,"[CANON] Future state of being (could, will be, etc)"
+Without / empty / void,hollom,"[CANON] Without (nothing, hollow, etc)"
+take / have / for / toward (purpose),tak,"[CANON] Take (have, own, for a person, etc)"
+renewal / return / cycle,wroth,"[CANON] Again (once more, etc)"
+renewal (ongoing state),wrothai,[DERIVED] wroth (cycle/return) + -ai (ongoing-state suffix). 'The state of returning.' Used in items: Wrothai-Kethul = Refresher Orb.
+Part / segment / share,lash,"[CANON] Part (segment, share, etc)"
+entity-of suffix,-osh,"[DERIVED] Core noun-maker suffix: 'the thing that is X'. arkosh = entity-of-mastery (king). ensh'osh = entity-of-knowledge (mage). -osh implies singular, concrete personhood"
+entity-of plural suffix,-oshai,[DERIVED] Plural of -osh. ensh'oshai = mages. Krethum-Ensh'Oshai = ogre-mages. -ai is the standard Ozhkavosh plural/ongoing marker appended
+entity-of abstract / many / plural,-ai,[DERIVED] Ongoing state / plural marker. Works both as plural (izhai=others-plural) and as ongoing-action suffix (wroth-ai = returning state = renewal)
+flow or active process / ongoing action,-zh-,[DERIVED] The zh- interfix creates flow/continuity in a word. Used in fekuizhai: fek+ui+zh+ai = ban+past+flow+plural. Represents the stream or set of completed-then-flowing things.
+past completed state,-ui,"[DERIVED] Suffix marking a past action that is now a permanent/completed state. fek=stop → fekui=was-stopped/banned (the stopped state). Pair with -ai (current state). Etymology: u=settled/done, -i=minimal suffix. 'ui' closes the action into its result."
+future ongoing state,-ii,"[DERIVED] Same rules as -ai and -ui, but using future marker"
+possession/compound marker,-',[CANON] The apostrophe-separator in Ozhkavosh compounds shows tight semantic bonding: ensh'osh = knowing-entity (inseparable). Separate from hyphen (looser compound). ensh'poz = knowledge-power as unified concept.
+hyphen compound,-,[CANON] Looser compound marker. Joins two concepts that remain distinct: Glath-Zhelv = frost-female (two concepts). Skavrath-Droth = storm-spirit (two identities). Hyphen reads left-right: modifier then head.
+to know / to learn / to read,ensh,[CANON] Core knowledge verb. Given in the table. ensh = the act of knowing/learning/reading. All knowledge-words derive from this root.
+noun marker,-at / -it / -ath / -ith / -ut / -uth / -ot / -oth,"[INVENTED] A counterpart to -osh for abstract nouns, also domain indicator"
+instrument suffix,-ast,"[INVENTED] Tool/instrument marker. Used for things that are instruments of perception or action. eyikast = seeing-instrument (lens/eye-tool). vethkast = vision-instrument (ward). vrethkast = hand-strike-instrument (gauntlet). Note: -ath is domain suffix (glath=cold-domain), -ast is tool suffix — keep distinct."
+knowledge (noun),enshat,[DERIVED] ensh (know) + -at (abstract-noun essence marker). enshat = the essence/substance of knowing. Used in Enshat-Gankesh (knowledge-assassin = Templar Assassin).
+come,sek,"[CANON] Come (to self, etc)"
+Move / proceed,thok,"[CANON] Move (go, etc), continue, proceed"
+stop / prevent / silence / ban,fek,"[CANON] Stop (cease, etc), prevent, act of being stopped (banned on draft  in dota context)"
+Hide / hidden / unseen,ses,"[CANON] Hide (unseen, etc) – also phantom, stealth"
+Feel / touch / experience,hahsh,"[CANON] Feel (touch, etc)"
+look at / witness / behold,eyik,"[CANON] Look at (witness, behold, etc)"
+Happiness / positivity / leisure,zomfa,"[CANON] leisure (happiness, positive emotions)"
+Reign / dominion / domination / kingship,domosh,"[CANON] Reign (domination, dominion, kingship, etc)"
+master,arkosh,"[CANON] Master (king, etc.)"
+mastery / lordship / ownership,ark,"[DERIVED] mastery, kingship, lordship, ownership"
+War / battle,voth,"[CANON] Battle, war, also match or competition"
+ban / banned,fekui,"[DERIVED] past of fek, literally “was prevented”"
+bans,fekuizhai,"[DERIVED] plural of fekui, multiple of bans"
+Desirable / delicious / wanted / ideal,hedoq,"[CANON] Desirable (delicious, wanted, etc.), ideal, most wanted"
+Land / earth / ground / kingdom,nith,"[CANON] Land (earth, ground, kingdom, etc)"
+Eat / devour / consume / gluttony,gluth,"[CANON] Eat (devour, consume, etc), gluttony"
+Darkness / dire / hell,omoz,"[CANON] Darkness (abyss, blackness, Hell, etc), also Dire"
+Hope / light / sun / radiant,sol,"[CANON] Hope (light, brightness, the sun, etc), also Radiant"
+Home / sanctuary / safety,nesh,"[CANON] Home (sanctuary, safety, etc)"
+Pain / suffering / wound,safras,"[CANON] Pain (suffer, wound, etc)"
+Spread / widen / open / welcome,groth,"[CANON] Spread (widen, open, welcome, etc)"
+Debt / lack thereof,greesh,"[CANON] Debt (lack thereof, etc)"
+Payment / bounty / gold,lieyev,"[CANON] Payment (gift, tithe, etc), also bounty, wealth, gold"
+time,chron,"[CANON] [Length of] time, general temporal root"
+timeless,vo’chron,[DERIVED] timeless
+minute (time unit),vom’chron,"[DERIVED] minute, literally “lesser time”"
+hour (greater time unit),ahm'chron,[DERIVED] ahm' (greater/bigger prefix) + chron (time). A larger unit of time = hour.
+minute (abbreviation),V’c,"[ABBREVIATION] Short form of Vom'chron (lesser-time). V' from Vom', c from chron."
+GPM abbreviation,V.Vc,"[ABBREVIATION] Vorsh per Vom'chron. V=vorsh (gold/wealth), Vc=vom'chron (minute)."
+XPM abbreviation,E.Vc,"[ABBREVIATION] Ensh per Vom'chron. E=ensh (knowledge/experience), Vc=vom'chron."
+MP abbreviation (median picks),ZV,"[ABBREVIATION] Zushk Veshai. Z=zushk (median), V=vesh (pick). Replaces English MP."
+MB abbreviation (median bans),ZF,"[ABBREVIATION] Zushk Fekuizhai. Z=zushk (median), F=fekui (ban). Replaces English MB."
+WR abbreviation (winrate),T.L,"[ABBREVIATION] Trukuth-Lash. T=trukuth (win), L=lash (rate)"
+KDA abbreviation,S.G.A,"[ABBREVIATION] Shen/Gang/Akshen. S=shen (kill), G=gang (death), A=akshen (assist)"
+featured/highlighted (above-light),Doq-sol,"[COMPOUND] doq (above/at, canonical) + sol (light/hope, canonical). Light-from-above = something highlighted/featured. Used for pinned/featured builds."
+Toys / puppets / amusements,rast,"[CANON] Toys, puppets, amusements, entertainments, etc., also items in dota, artifacts"
+Failure / incomplete / unfinished,miskath,"[CANON] Failure (uncompleted, unfinished, etc)"
+Weakling / peasant,fol,"[CANON] Weakling (whelp, peasant, etc), can also mean creep"
+Power / skill / ability,poz,"[CANON] Power (ability, skill, action currently occuring, etc)"
+Illness / sickness / plague,irush,"[CANON] Illness (common cold, [with modifier] plague, etc)"
+full / complete / entire,zuz,"[INVENTED] Complete, full. Follows a similar structure to doz/roz, but with a “completeness status” marker"
+death / kill,gang,[INVENTED] Terminal/death root. gang = death-event. Gang-Shazeth = Book of the Dead. vo'gang = undying.
+more / excess / again / surplus,vo'gang,[INVENTED] Strictly: vo' (negation) + gang (death) = undying. But contextually: vo'gang = the thing that keeps coming back. Used for 'Undying' hero.
+sum / total / all together,meshfuz,[CANON] Complete sum. Literally “complete number”
+average / mean,fomog,[INVENTED] The middle value / distributed quantity.
+one / alone,ov,"[CANON] one, alone, once, etc"
+two,duv,"[INVENTED] two, second, etc"
+seven,sav,"[CANON] seven, seventh, etc"
+Opener / first,rugh,"[INVENTED] opener, also first, in front of"
+Follower / second,dift,"[INVENTED] follower, coming second, next in line"
+Excrement / waste,kish,"[CANON] Excrement, waste, etc., general disgrace, corruption"
+curse,sof,[CANON] [curses beyond mortal knowledge]
+### HERE START INVENTED AND SPECULATIVE WORDS,,
+spirit / soul / essence,droth,"[INVENTED] Spiritual substance root. dro- (subtle, unseen) + -oth (substance domain)"
+protection / guard,nereth,[INVENTED] Defensive root. Comes from “nesh” as safe space
+shield / defense surface,skarm,[INVENTED] Physical shield. Distinct from groth (conceptual protection). skarm = the blocking surface.
+enchantment / magic-shaping,-shath,[INVENTED] Enchantment suffix. Shath = the applied magic.
+recipe / blueprint,suzm,"[INVENTED] Component-assembly. su- (from sesh=quick-assembly, contracted to su-) + -zm (snap-together cluster). Zm cluster chosen specifically for its harsh, clicking sound, evokes snapping pieces into place."
+normalized / adjusted,thaskum,[INVENTED] Calibrated/normalized. Used in volatility stats.
+correlation / relationship,kotf,[INVENTED] Relational metric. kotf = the connective measure between two variables.
+lane (battlefield),shith,"[INVENTED] Lane, general route"
+protected realm / safe (lane),neresh,"[INVENTED] protected realm, defended place, in lane context – safe lane"
+middle,meza,[INVENTED] mez (mid/center: m=median + ez=equal-point) + a (state suffix)
+hard realm / pain realm / off (lane),safresh,"[INVENTED] safras (pain) with realm ending and a vowel change for distinction, literally “pain realm”"
+roamer,thokur,[DERIVED] thok (move) + ur (agent/doer suffix). Moving-agent = roamer/soft support.
+Forest / jungle,shassh,"[INVENTED] wild, uncontrolled area, jkungle"
+pick (hero selection),vesh,[INVENTED] Selection action. vesh = choose/pick.
+Team / family,drav,[INVENTED] The close group/team/family. Used in Ashm-Drav-Ark (Legion Commander = big-group-master).
+kill,shen,[INVENTED] Kill
+death,gang,[INVENTED] Death
+assist,akshen,"[INVENTED] Assist, supporting action"
+player,murf,[INVENTED] The person who plays. murf = participant/player/guy. Also used generically for person
+knowledge-entity / mage,ensh'osh,"[DERIVED] ensh (know, canonical) + ' (bond marker) + -osh (entity suffix). 'The knowing-entity.'"
+knowledge-power / magic,ensh'poz,"[DERIVED] ensh (know) + ' + poz (power, canonical). 'Knowledge-force' = magic as concept."
+knowledge (noun),enshat,[DERIVED] ensh (know) + -at (abstract-quality marker). enshat = the substance of knowing. Enshat-Gankesh = Templar Assassin (knowledge-assassin). Enshat-Shazeth = Tome of Knowledge.
+spirit-caller / shaman,drothvesh,"[INVENTED] droth (spirit, invented) + vesh (pick/call, canonical). 'One who calls spirits.' Replaces shamang which was too close to English 'shaman'. Omoz-Drothvesh = Shadow Shaman."
+storm / sky-crash,skavrath,"[INVENTED] skav (above-domain root, from skaveth=head-cover) + -rath (crashing force suffix). 'The force that crashes from above.' Replaces stormq (too English). Skavrath-Droth = Storm Spirit."
+wind / outward-flowing-force,ozvel,"[INVENTED] oz- (based on particles meaning outside action) + vel (flowing force, invented). 'Force flowing outward' = wind"
+fire / burning-domain,sorath,"[INVENTED] sor (burn/heat: s=sibilant-heat, or=hot-core) + -ath (domain suffix). 'The burning domain.' Used: Sorath-Droth (Ember Spirit), Sorath-Velosh (Phoenix)."
+frost / cold,glath,"[INVENTED] gl (cold cluster, icy vibes) + -ath (domain). 'The cold domain.' gl- chosen specifically to evoke hardness + smooth ice surface. Glath-Zhelv = Crystal Maiden (frost-female). Glath-Kethul = Orb of Frost."
+water / flowing-substance,velzath,"[INVENTED] vel (flowing force) + -zath (fluid-substance: z=liquid-sibilant, -ath=substance). 'Flowing substance.' Droth'Velzath = Morphling (essence-of-water). Velzath-Poz = Tidehunter (water-force)."
+lizard / scales-crawler,mezrath,"[INVENTED] Lizard. mez (scales: short harsh sound, m=mass, ez=surface texture) + -rath (crawler suffix). 'The scales-crawler.' ahm'mezrath = great-lizard (dragon). Duv'Korn-Mezrath = Jakiro (two-headed-lizard)."
+scorpion / sting-creature,thrask,"[INVENTED] thr (sharp, projecting: thr-cluster evokes piercing) + -ask (tail-end, curved suffix). 'Sting-tail creature.' Thrask-Arkosh = Sand King (Scorpion King). thr- cluster used because scorpion moves with sharp, darting motion."
+sand / fine-earth,rashn,"[INVENTED] rash (fine particles: r=scatter, ash=fine-dry) + -n (earth-ground closure). 'Fine-earth particles.' Replaces zand (too English). Used in context for scorpion's desert theme."
+bear / heavy-furred-creature,gruv,"[INVENTED] gr (heavy, grinding: grakh uses same cluster) + -uv (dense-warm form: u=full, v=soft). 'Heavy and full-bodied.' Short word — bears are elemental, simple. Tornath-Gruv = Ursa (angry-bear). Ov-Gruv-Murf = Lone Druid (bear-person)."
+angry / fierce,tornath,"[INVENTED] tor (sharp reactive force: t=impact, or=hot-core) + -nath (force-domain suffix). 'The sharp-reactive-force domain' = anger/ferocity. Tornath-Gruv = Ursa."
+wolf / howling-beast,vokrath,"[INVENTED] vok (howl: v=voiced, ok=open sudden sound, evokes howl) + -rath (beast). 'The howling-beast.' Vokrath-Murf = Lycan (wolf-man)."
+bird / winged-entity,velosh,"[INVENTED] vel (wing/swift-movement) + -osh (entity). 'Winged entity.' Sorath-Velosh = Phoenix (fire-bird). vel from ozvel (wind = outward-flowing-force) -- same root, wings and wind share the 'flowing outward' quality."
+insect / small-crawler,krethim,"[INVENTED] kreth (crawl: kr=multi-limbed scrabbling, eth=quick) + -im (small diminutive suffix). 'Small crawler.' Chron-Krethim = Weaver (time-bug). im diminutive used because insects are tiny."
+goblin / small-mischief-being,trikoth,"[INVENTED] trik (small troublemaker: tr=quick-dart, ik=quick small) + -oth (entity). 'Small trouble-entity.' Nushk-Gankesh-Trikoth = Timbersaw (tree-killer-goblin). Safrash-Trikothai = Techies (explosion-goblins, trikothai=goblins-plural)."
+ape / monkey / nimble-climber,shakmath,"[INVENTED] shak (nimble: sh=quick-sound, ak=grip-syllable) + -math (actor/one-who-does). 'The nimble-gripping actor.' Shakmath-Ark = Monkey King (ape-lord)."
+squirrel / nimble-tree-creature,velshak,"[INVENTED] vel (swift, from ozvel-wind family) + shak (nimble-grip). 'Swift-nimble creature.' Shassh-Velshak = Hoodwink (forest-squirrel)."
+armadillo / shell-back-creature,skavreth,"[INVENTED] skav (above/shell-covering, from skaveth=helm) + -reth (back-covered creature). 'Shell-backed creature.' Skavreth-Murf = Pangolier (armadillo-guy). skav root repurposed from 'above' to 'shell/cover'"
+poison / toxic-substance,shekath,"[INVENTED] shek (toxic: sh=sibilant-harm, ek=piercing) + -ath (substance domain). 'Toxic substance domain.' Shekath-Ensh'Osh = Venomancer (poison-mage). shek- cluster used because poison is a quiet, sibilant threat."
+vengeance / returning-harm-force,vozmath,"[INVENTED] voz (returning: voz=the motion-back, v=movement, oz=outward-then-back reference) + -math (force). 'The returning force of harm.' Initially derived from wroth, but was deliberately changed"
+fly / sky-bound-state,veldath,"[INVENTED] vel (wing/flight, from vel in velosh/ozvel family) + -dath (bound-state: d=settled, -ath=domain). 'State of being wing-bound to sky.' Veldath-Uchakrav = Gyrocopter (flying-old-man)."
+eat / consume / take-inside,zomvak,"[INVENTED] zom (consume-inward: zo=taking-in, m=mass-absorption) + -vak (action marker). 'Inward-mass-action' = eating. Kish-Zomvak = Pudge (corruption-eater)."
+death-striker / assassin,gankesh,"[INVENTED] gang (death) compressed to gan- + -kesh (striker-actor: k=impact, esh=person-suffix variant). 'Death-striker person.' Ses-Gankesh = Phantom Assassin (hidden death-striker). Enshat-Gankesh = Templar Assassin (knowledge-striker)"
+axe (weapon),gorakh,"[INVENTED] gor (chopping/heavy-strike: g=weight, or=rotational impact) + -akh (metal/mineral guttural ending, cf. grakh). 'Chopping-iron.' Hero Axe = Gorakh, his nickname from the weapon he was named after."
+mechanism / gear-system,gomrath,"[INVENTED] gom (gear/cog: g=grinding, om=rotating mass) + -rath (mechanism/system). 'The gear-mechanism.' Gomrath-Murf = Tinker (mechanism-guy). Gomrathosh = Clockwerk (mechanism-entity, the robot itself)."
+alchemy / element-transformation,alkum,"[INVENTED] al (element: al=base material, elemental root) + -kum (processing/work: k=action, um=transforming). 'Element-processing.' Alkum-Murf = Alchemist. alkum used as proper-noun-adjacent, not too far from 'alchemy' but with Ozkavosh phonology."
+brew / fermented-substance,vuzl,"[INVENTED] vuz (ferment: v=liquid, uz=bubbling) + -l (substance ending). 'Fermented-liquid.' Zomfa-Vuzl-Ark = Brewmaster (delight-brew-master)."
+friend / companion-entity,neshoth,"[DERIVED] nesh (belonging, from nesh'izhai=teammates/belonging-ones) + -oth (entity variant). 'The belonging-entity' = a companion. Neshoth-Droth = Io (friend-spirit)."
+drow-race / underground-folk,drimath,"[INVENTED] dri (underground, dim: dr=down-dark cluster) + -math (actor/person-type). 'Underground-type person.' Used for the Drow race in Drow Ranger: Drimath-Sathosh."
+warrior / combat-entity / knight,sathosh,"[DERIVED] sath (combat: sa=engage, th=force) + -osh (entity). 'Combat-entity.' Used in many hero names: Maskq-Sathosh (Juggernaut), Ozvel-Sathosh (Windranger), Kentar-Sathosh (Centaur Warrunner), Ashm'Mezrath-Sathosh (Dragon Knight)."
+marauder / raid-striker,sathrak,"[DERIVED] sath (combat) + -rak (raid/wreck: r=force, ak=impact-suffix). 'Combat-raider.' Drath-Sathrak = Terrorblade (demon-marauder). Distinct from sathosh (warrior, honorable combat) -- sathrak implies destruction/raiding."
+female,zhelv,"[INVENTED] zh (soft/curved phoneme: zh=voiced palatal, curved like the form) + -elv (graceful form). 'The curved-graceful form.' zhelv sounds soft and distinct from kravesh. Glath-Zhelv = Crystal Maiden. Hollom-Zhelv = Spectre. Vo'Zatar-Zhelv = Death Prophet."
+male,kravesh,"[INVENTED] kr (hard/direct: kr=sharp consonant cluster) + -avesh (standing/upright form: a=open, vesh=standing). 'The hard-upright form.' Counterpart to zhelv. kravesh = male. uchakrav = old-male (krav is short form used in Veldath-Uchakrav = Gyrocopter)."
+maiden / young female,vom'zhelv,[COMPOUND] vom' (lesser/younger prefix) + zhelv (female). 'Lesser female' = young woman. Ahm'Mesht-Vom'Zhelv was considered for Marci but simplified to Ahm'Mesht-Zhelv.
+lady / senior female,ashm'zhelv,[COMPOUND] ashm (comparative-greater) + zhelv (female). 'Greater female' = lady/senior woman.
+tree / wooden-entity root,nushk,"[INVENTED] nu (growing: n=nurture, u=upward) + -shk (hard bark: sh=surface, k=hard closure). 'Growing-bark-thing.' Nushk'Osh = Treant (tree-entity). Nushk-Gankesh-Trikoth = Timbersaw (tree-killer-goblin)."
+orb / power-sphere,kethul,"[INVENTED] keth (power-charge: k=gathered energy, eth=contained) + -ul (round-vessel suffix: u=full, l=smooth). 'Round power-vessel.' Replaces orzh. Ahm'Kethul = Ultimate Orb. Wrothai-Kethul = Refresher Orb. Lotus-Kethul = Lotus Orb."
+tome / mark-vessel (book),shazeth,"[INVENTED] sha (mark-root: sha=written mark, from shask=record) + -zeth (container: z=bound, eth=vessel). 'Vessel of marks.' Replaces tomq. Enshat-Shazeth = Tome of Knowledge. Gang-Shazeth = Book of the Dead."
+relic / time-kept-thing,chronrast,"[COMPOUND] chron (time, persisting through time) + rast (toy, trinket). 'The thing that persisted through time.'"
+scepter / mastery-channel,arkveth,"[COMPOUND] ark (mastery/lordship) + veth (channel: v=directional, eth=conduit). 'Channel of mastery/authority.' Replaces skeptr. Aghanim-Arkveth = Aghanim's Scepter. Droth-Arkveth = Ghost Scepter."
+staff / focus-rod,thurmak,"[INVENTED] thurm (focus-thin: thur=narrow concentration, m=mass-gathered) + -ak (rod suffix: a=open, k=hardclosure = solid rod). 'Focused narrow rod.' Replaces stav. Thurmak-Varlok = Staff of Wizardry. Hollom-Thurmak = Oblivion Staff."
+ring / binding-circle,zheln,"[INVENTED] zh (circle/enclosure phoneme: zh=soft encircling sound) + -eln (binding-form: el=linking, n=closure). 'The encircling bind.' Replaces rinkq. Droth-Zheln = Soul Ring. Arkan-Zheln = Arcane Ring. Tarask-Zheln = Tarrasque Ring."
+wand / focus-channel,thurmath,"[DERIVED] thurm (focus, from thurmak) + -ath (domain/channel). 'Focus-channel.' Shorter/lighter than thurmak (staff) -- a wand is more delicate than a staff. "
+elixir / transform-liquid,molkath,"[INVENTED] mol (liquid-transform: mo=flowing, l=liquid-quality) + -kath (processed-form suffix). 'Transformation-liquid.' "
+ward (observer) / vision-instrument,vethkast,"[COMPOUND] veth (vision-directed: from zetf=vision family, v=visual, eth=out-directed) + -kast (instrument, canonical -ast variant). 'Vision-directing instrument.'"
+scroll / folded-travel-marks,ruvpath,"[INVENTED] ruv (fold/compress: r=rolled, uv=compact) + -path (marked-way: path=route-marks + instrument marker). 'Folded route-marks.'"
+crown / mastery-peak,arkgorn,"[COMPOUND] ark (mastery/lordship) + gorn (peak/top: go=above, rn=peak-closure). G is silent.  'Mastery's peak/top.' Replaces krown. Only one item: Arkgorn = Crown."
+cloak / hide-wear,sesavr,"[DERIVED] ses (stealth/hide, canonical root) + -avr (wearing-form: a=applied, vr=covering motion). 'The worn-concealment.'"
+boots / earth-contact-wear,nithvath,"[COMPOUND] nith (earth/ground, from Earth Spirit hero root) + -vath (contact-wear: v=touching, ath=wear-domain). 'Earth-touching wear.'"
+greaves / inner-leg-wear,donvath,"[COMPOUND] don (inside/within, new spatial word) + -vath (wear-form). 'Inner-leg-wear.' Replaces griavsk. Greaves encase the leg from inside (the inner surface). Groth-Donvath = Guardian Greaves."
+glaive / spinning-blade,sprevlath,"[COMPOUND] spre (spin: spr=spinning motion cluster) + vlath (blade: vl=edge-motion, -ath=domain). 'Spinning-edge.'"
+gauntlet / hand-strike-instrument,vrethkast,"[INVENTED] vreth (hand/grip: vr=grip, eth=extension) + -kast (instrument suffix, -ast variant). 'Hand-strike instrument.'"
+iron / hard-metal,grakh,"[INVENTED] gr (grinding/hard: gr-cluster is established as heavy/hard in Ozhkavosh, cf. gruv=bear/heavy) + -akh (mineral/guttural ending). 'Hard-metal.'"
+helm / head-armor,skaveth,"[DERIVED] skav (above-covering: skav=the root of above-domain, from the concept of covering from above) + -eth (vessel/wear form). 'The thing that covers from above.'"
+armor / body-protection,skorm,"[DERIVED] sk (protective cluster, from skarm=shield, skaveth=helm) + -orm (body-wrap suffix: or=around, m=mass). 'The protective body-wrap.'"
+lens / seeing-instrument,eyikast,"[COMPOUND] eyik (eye/vision, canonical) + -ast (instrument suffix). 'Eye-instrument/seeing-tool.' Initially was eyikath, but it’s more fluent with -ast"
+ogre / brute,krethum,"[INVENTED] kreth (heavy-body: kr=mass-force, eth=thick) + -um (creature-body suffix). 'Heavy-body creature.' Ogre."
+dragon (general word),ashm'mezrath,[COMPOUND] ahm' (intensifier: great/truly) used as ashm' (comparative-great) + mezrath (lizard). 'The great lizard.' Dragon
+demon / dread-being,drath,[INVENTED] Distinct demon root
+undead (state),vo'gang,[CANONICAL-COMPOUND] vo' (negation) + gang (death). 'Not-dead' = undying. Used for Undying hero. For more nuanced undead: Vo'Zatar = not-dead-state (Death Prophet).
+dead-state / death-condition,zatar,"[DERIVED] za (settling-down: z=terminal, a=settling) + -tar (state-marker). 'Settled/terminal state.' Zatar = the state of having died. Zatar-Glath-Murf = Lich (dead-frost-guy). Vo'Zatar = not-dead-state."
+head / core / center,korn,"[INVENTED] kor (core: k=center, or=round-central) + -n (closure). 'The core-center' = head. Duv'Korn-Mezrath = Jakiro (two-headed-lizard). Metaphor: head is the core of the body."
+delight / pleasure / relaxation,zomfa,[CANONICAL] Leisure/happiness root. Zomfa-Nithvath = Tranquil Boots. Zomfa-Vuzl-Ark = Brewmaster (delight-brew-master).
+destroyer / wrecker,vlath,[CANONICAL] Destructive blade root. vlath = blade/destroying edge. sprevlath = spinning-blade (glaive). Droth-Vathesh uses vath variant.
+artist / mark-maker,vathesh,[DERIVED] vath (mark/visual-impression: from vathq=color/mark) + -esh (actor suffix). 'Mark-making actor.' Droth-Vathesh = Grimstroke (spirit-artist).
+volatility / sway,drevath,"[INVENTED] drev (volatile motion: dr=unstable, ev=shifting) + -ath (domain). 'The volatile-motion domain.' Introduced for the volatility metrics system. drevath-kotf = relative volatility."
+advantage,tel,[INVENTED] Edge/advantage metric.
+normalized,thaskum,[INVENTED] Calibrated/adjusted value.
+team composition,kavlesh,[INVENTED] The lineup. kav (lineup/arrangement) + -lesh (form).
+win,trukuth,[INVENTED] Victory.
+lose,vrask,[INVENTED] Loss/defeat-state.
+creep,nuth,"[INVENTED] Non-hero unit, more specific term for a creep"
+courier,sofom,[INVENTED] Transport unit. sofom = the carrying-one.
+tower,tharesh,"[INVENTED] Structure/tower, building"
+fountain,vekask,"[INVENTED] Fountain, restoration point, respawn point"
+roshan,Rozhan,[ADAPTED] Phonological adaptation of the boss monster name.
+experience,mord,"[INVENTED] Accumulated data/experience. While enshat=abstract-knowledge (from ensh), mord=recorded-experience/data. Used in Nith-Enshat (Nature's Prophet) but mord retained for data/metadata contexts."
+hero level,gik,[INVENTED] Level/rank. Gik-N = level-N (tier token). Elevation level.
+mana,ensh,[CANONICAL] The in-game mana resource also referenced as ensh (the knowing-force). Context distinguishes game-mana from the knowledge concept.
+movement speed,Thok-ranzh,[INVENTED] Speed of movement.
+strength,mesht,[INVENTED] Physical strength stat. Ahm'Mesht-Zhelv = Marci (very-strong-female).
+agility,ranzh,[INVENTED] Swiftness stat (same as speed root).
+intelligence,ensh,[INVENTED] Knowledge/intelligence stat.
+magic resistance,Poz-Groth,[COMPOUND] poz (power/magic) + groth (protection). Magic protection.
+milestones / collected time-counts,chron-meshf,"[COMPOUND] chron (time, canonical) + meshf (number/count, from 'meshf doq' = number of). 'Time-numbers' = counted records over time."
+per / each (game),dregros,[INVENTED] dregros = distributive per-unit marker. 'dregros voth' = per game. dreg (distributed) + -ros (unit-pass). Used in stat descriptions: 'kills per minute per game'.
+purchase / buy (item action),thars,[INVENTED] thars = the act of purchasing/acquiring. 'thars chron' = purchase time. 'tharsh' = purchased (past form). Central to all item-timing stats.
+purchased (past),tharush,[DERIVED from thars] thars + -u-h (past-completion). 'Was purchased.' Appears constantly in item build descriptions.
+higher / deeper (comparative),dither,[DERIVED] dither = 'more depth/more' — comparative intensifier. 'dither sesl' = higher rank. 'dither meshf' = higher number. From dith (deep) + -er comparative marker.
+least / lower / fewer,narf,[INVENTED] narf = minimal/least amount. 'narf efkth' = least effective. 'narf mifim' = low bans. Harsh short sound appropriate for 'minimum'.
+available / present,lemz,[INVENTED] lemz = present-and-accessible. 'lemz gok' = available stats. 'iv lemz' = if available. Short final-z closure = definite availability.
+categories (plural),catqai,"[LOANWORD adapted] catqai: 'categories' + Ozhkavosh -ai plural. 'catq' = category, 'catqai' = categories."
+picks (plural),veshai,"[DERIVED] vesh (pick/choose, canonical) + -ai (plural). 'veshai' = picks. 'vrazhai' veshai = heroes' picks."
+pair (of heroes/players),rez,"[INVENTED] rez = a linked-pair/connection. Short, harsh. Used in combo/pair stats: 'vrazh rezs' = hero pairs. 'vosh rezs' = without pairs."
+pair / connection (graph edge),shug,[INVENTED] shug = a graph-edge/connection-point. Distinct from rez (a matched pair). Used in graph descriptions.
+set to / configured at,torthiz,[INVENTED] torthiz = fixed-at/configured. 'torthiz tak %val%' = set to %val%. torth (fix/set) + -iz (at-value marker).
+block / section (major),nezuth,[INVENTED] Structured block/section unit for major UI divisions; aligned with established -th closure morphology.
+rate / frequency of,kuqun,[INVENTED] kuqun = the rate/frequency-of. 'vesh kuqun' = pick rate. 'tharsg kuqun' = purchase rate. ku (measure) + -qun (frequency-form).
+without / absent,vosh,[INVENTED] vosh = lacking/without (distinct from vo'=negation prefix). 'vosh rezs' = without pairs. 'vosh lem' = without detail.
+page / view,mert,"[INVENTED] mert = a display-page/view. 'za mert nethg' = the page shows. Short, functional."
+shows / indicates (implies),lisker,[INVENTED] lisker = implies/indicates a meaning. Softer than nethg. 'lisker vak skugu' = means and shows. lis (signal) + -ker (meaning-carrier).
+include / contains,lishsh,"[INVENTED] lishsh = the act of including/holding. 'lishsh datom' = includes data. The doubled-sh gives a containing, enveloping sound."
+early (timing),ker,[INVENTED] ker = the early/initial period. 'ker morkovai' = early items. 'ker alfq datom' = early alpha data. Q1 timing context.
+amount / small number,amth,[INVENTED] amth = amount/count-of. 'migru amth' = small amount. 'amth doq lemz gok' = amount of available stats.
+deviation (statistical),muvz,[INVENTED] Statistical deviation between expected and actual values; paired with thozich and thov in pair/trio analysis.
+order (sequence),thum,[INVENTED] thum = sequence/order. 'thum doq vrazh' = order of heroes. 'thum thaf' = order swaps. thum = the arranged sequence.
+swap / exchange,thash,"[INVENTED] Swap/exchange action in ordered sequences (e.g., build order swaps)."
+without / if not purchased,thin,[INVENTED] thin = the absent/not-present state. 'morkov thin tharsh' = item not purchased. thi (missing) + -n (state-closure).
+gradient (rate of change),zin,[INVENTED] zin = the rate-of-change/slope. 'neqrk-kotf zin' = winrate gradient. 'zin dregros gask' = per-minute gradient. zi (slope) + -n (continuous marker).
+window (timing range),kuz,[INVENTED] kuz = a window/range. 'chron-kez kuz' = timing window. ku (contained range) + -z (boundary).
+minute (time unit),gask,[INVENTED] gask = one minute of game time. 'dregros gask' = per minute. 'gaskai' = minutes (plural). gas (time-tick) + -k (unit-closure).
+roles / role types,gekeshai,[DERIVED] gekesh (role/position assignment) + -ai (plural). 'fur gekeshai' = for roles. 'desm tak gekeshai' = progression for roles. 'gekesh' = singular role.
+role (singular),gekesh,[INVENTED] gekesh = a role/position-assignment. 'evr gekesh' = every role. ge (assigned) + -kesh (position-actor).
+build (item lineup),larth,[INVENTED] larth = the constructed item-lineup. 'morkov larth' = item build. 'narsq larth' = starting build. larth = the purposeful arrangement.
+timeline / chronological view,chron-voth,[COMPOUND] chron (time) + voth (match/game). 'chron-voth' = the timeline within a match. Used for the build timeline block.
+progression / advancement,desm,[INVENTED] desm = the forward-progression/advancement. 'desm nushk' = progression tree. 'desm fur gekeshai' = progression for roles. des (advance) + -m (motion-mass).
+draft (hero selection process),kith,[INVENTED] Draft process root for pick/ban sequencing; compact form aligned with established consonant closures.
+most / highest,foshk,[INVENTED] foshk = the superlative most/highest. 'foshk shen' = most kills. 'foshk sessh' = most common. fosh (peak) + -k (hard closure).
+minimum / threshold,minth,[INVENTED] minth = minimum threshold. 'minth voth shavz' = minimum match count. min (lower bound) + -th (set-point).
+percentage / share,mors,[INVENTED] mors = the proportional percentage. 'mors doq aktq vothai' = percentage of actual matches. mor (portion) + -s (ratio).
+median / middle value,zushk,[INVENTED] zushk = the median/middle-value. 'zushk vrazh fekuizhai' = median hero bans. 'zushk chron-kez' = median purchase time. zu (middle) + -shk (statistical marker).
+travel/blink (instant move),velthok,"[INVENTED] vel (swift, from established vel- prefix for speed) + thok (move, from canonical thok-ranzh). Compound velthok = swift-move = the act of teleporting/blinking."
+javelin (thrown spear),relvlath,"[COMPOUND] rel (reach/extend-far, new root: r=ranging motion + el=extend) + vlath (blade). A blade that extends far = thrown lance/javelin."
+lance (piercing pole-blade),thruvlath,"[COMPOUND] thru (through, established particle for piercing) + vlath (blade). A blade that goes through = lance/piercing weapon. Used in Dragon Lance, Lance of Pursuit."
+fury/raging force,safrath,"[COMPOUND] safras (pain, canonical) + -th (force suffix). Pain-force = the furious energy of battle-rage. Used in Battle Fury."
+mask (face-cover),zeskav,"[INVENTED] zes (face-surface: z=sharp + es=outer layer) + kav (shade/cover, from kav- shadow roots). Face-shade = a mask. Distinct from maskq (category). Used in Mask of Madness, Juggernaut."
+thorn / spike (sharp protrusion),thilsh,[INVENTED] thilsh = a spike or thorn. thil (sharp-point) + -sh (state-suffix). 'Vloth-Thilsh' = bloodthorn (blood-spike).
+soul vessel / spirit container,droth-keth,[COMPOUND] droth (spirit/soul) + keth (stone/vessel). Soul-container. 'Omoz-Droth-Keth' = Urn of Shadows.
+dissolve/diffuse (cut-transform),molkash,"[COMPOUND] mol (transform/dissolve, from molkath = transform-liquid/elixir) + kash (cut, aggressive action). Dissolving cut = diffusal action. Used in Diffusal Blade."
+many-blade (manta-type),trem-vlath,[COMPOUND] trem (many/multiple) + vlath (blade). Many-blade construct. Used in Manta Style = Trem-Vlath.
+assists (plural),akshenai,[DERIVED] akshen (assist) + -ai (ongoing/plural suffix). Multiple assist actions.
+record/battle-glory (singular),sol-voth,"[COMPOUND] sol (light/glory/sacred, canonical) + voth (battle/war, canonical). Battle-glory = a record/peak achievement. The light shining from battle = what is remembered as best."
+records/battle-glories (plural),sol-vothai,[DERIVED] sol-voth (record) + -ai (plural suffix). Multiple peak records/achievements.
+overview (over-look),doq-eyik,"[COMPOUND] doq (above/over, canonical) + eyik (look/see, canonical). Looking-from-above = overview."
+summary/card (one-look),ov-eyik,"[COMPOUND] ov (one, established) + eyik (look/see, canonical). A single glance = summary/card view. Distinct from doq-eyik (overview) but same metaphorical family."
+other-kinds/mixed,vokai,[INVENTED] vok (different/other: v=variation + ok=type-marker) + -ai (plural). Other-kinds = mixed/miscellaneous category.
+raw playtime (played-time),kruva-chron,"[COMPOUND] kruva (played, established past participle of play) + chron (time, canonical). Played-time = raw/actual duration of play."
+card view (lesser-look),vom'eyik,"[COMPOUND] vom' (lesser, established prefix) + eyik (look/view, canonical). Lesser-look = a compact card view. Distinct from doq-eyik (overview) and ov-eyik (summary)."
+rank (power-grade),pozgorv,"[COMPOUND] poz (power, canonical) + gorv (grade, from gorvq=value/grade). Power-grade = a measured rank of strength/capability."
+stuns (plural),fek-pozai,"[DERIVED] fek-poz (stun: fek=stop + poz=power, established) + -ai (plural). Multiple stop-power effects."
+worst (not-best),vo'hedoq,"[DERIVED] vo' (negation prefix, canonical) + hedoq (best/desired, canonical). Not-desired/not-best = worst."
+singer (song-entity),rashosh,[INVENTED] rash (voice/song: r=resonance + ash=breath/sound) + -osh (entity-of suffix). Entity-of-song = singer. Used in Naga Siren = Naga-Rashosh.
+sacred stone / phylactery,sol-keth,"[COMPOUND] sol (sacred/light, canonical) + keth (stone/crystal: keth=mineral vessel from poz-keth=power mineral/rune). Sacred-stone = a phylactery/magical receptacle."
+objectives/targets (plural),zikrai,"[DERIVED] zikr (target, established from counter-pick target context: zikre=target) + -ai (plural). Multiple targets/objectives to claim in-game."
+tie/draw (equal result),kel,[SIMPLIFIED] Simplified from kelq (kel + q-suffix). User noted trailing q after consonants breaks Ozhkavosh flow. kel = balance/level standing alone.
+performance (achieved-result),driv,[SIMPLIFIED] Simplified from drivq. driv = achieve/accomplish as standalone root. No awkward consonant+q cluster.
+common/frequent (item type),tharsh,[SIMPLIFIED] From tharsq → tharsh. thars (purchased/common) + sh (state/nature suffix). The -sh ending is natural in Ozhkavosh. Common item type = often-purchased items with high pick rate.
+regular/plain/standard (item type),verna,[INVENTED] ver (plain/base: v=basic + er=neutral-ground) + na (state suffix). Plain-state = regular/standard. Used for uncolored/default item category.
+FAQ / frequently asked questions,ofn-zeshqai,"[COMPOUND] ofn (often/frequently, established) + zeshqai (questions: zesh=ask/query + -qai=plural form). Often-questions = FAQ. Literal translation of Frequently Asked Questions."
+the / that (definite article),za,"[INVENTED] Core definite article/demonstrative. 'za voth' = the match. Short, heavy, ubiquitous."
+and (conjunction),vak,[INVENTED] Conjunction linking nouns and clauses. 'veshai vak fekuizhai' = picks and bans.
+with / having (attribute preposition),weth,[INVENTED] Preposition of attribution. 'murf weth 10 trukuth' = player with 10 wins. w=accompaniment + eth=state.
+as well as / also-including,meze,[INVENTED] Additive conjunction including both sides. 'meze X meze Y' = both X and Y. mez=middle + e=connector.
+or (disjunction),ur,[INVENTED] Simple disjunction. 'murf ur drav' = player or team.
+which / that (relative pronoun),thot,[INVENTED] Relative pronoun. 'rastai thot ucha tharsh' = items that were common. th=pointing + ot=referent.
+only / filter (restrictive),ves,"[INVENTED] Restrictive particle limiting scope. 'ves foth shith' = only winning lane. Short, sharp."
+not (standalone negation),vo,[CANONICAL] Standalone negation. Also prefix vo'- (see vo'). 'vo nars rastai' = no starting items.
+shows / represents (display verb),shorg,[INVENTED] Display/representation verb. 'shorg trukuth-lash' = shows winrate. shor=reveal + g=active suffix.
+contains / holds (container verb),mavsh,[INVENTED] Container verb: section/page holds or includes data. Used in explanatory section headers.
+together / jointly (union adverb),ovtho,[INVENTED] Together/combined. 'veshui ovtho' = picked together. ov=one-point + tho=location-merge.
+how / in what way,thav,[INVENTED] Manner interrogative. 'thav ofn' = how often. th=manner + av=query-direction.
+from / based on (source marker),morz,[INVENTED] Source marker: from/based on. Used in descriptive formulas and derivation phrasing.
+this (near demonstrative),zoth,[INVENTED] Near demonstrative. 'zoth fen' = this section. zo=near + th=pointer.
+when / at time of (temporal conditional),wen,[INVENTED] Temporal conditional. 'wen lemz' = when available. w=temporal + en=condition.
+after (temporal sequence),aft,"[INVENTED] After/following. 'aft skasu' = after core items. Short, clean."
+highest / maximum,dith,[INVENTED] Highest/maximum. dith=peak-value. 'dith fomog gorvai' = highest average values.
+hero (game unit),vrazh,[INVENTED] A hero. vrazhai = heroes. vr=force + azh=agent.
+heroes (plural),vrazhai,[DERIVED] vrazh + -ai (plural). Multiple heroes.
+players (plural),murfai,[DERIVED] murf + -ai. Multiple players.
+items (plural),rastai,[DERIVED] rast + -ai (plural). Multiple items.
+stat / data point,gok,[INVENTED] Statistics/data. g=measure + ok=value-point.
+data / information set,datom,[INVENTED] A body of data. dat=data + om=body-of.
+difference / delta measurement,vunz,[INVENTED] Measured difference. Simplified from vunzq. vun=apart + z=end-measurement.
+section / page area,fen,[INVENTED] A content section or page area. fen=enclosed-area.
+route / item path,rer,[INVENTED] An item build path/route. Simplified from rerq. r=route + er=path.
+starting / initial,nars,[INVENTED] Start/beginning state. Simplified from narsq. nar=origin + s=point.
+type / category,mask,[INVENTED] Category/type. Simplified from maskq. Note: distinct from zeskav (face-mask). mask=kind-of.
+all / totality,sam,[INVENTED] All/every/total. Simplified from samq. sam=total-together.
+opponent / adversary,tez,"[INVENTED/DERIVED] tez = opponent/foe/against. Root of tezai (opponents, plural). Used as both noun (enemy) and preposition (against/versus)."
+opponents (plural),tezai,[DERIVED] tez + -ai. Multiple opponents.
+detail / deep analysis,shil,[INVENTED] Detailed analysis. Simplified from shilq. shil=depth-view.
+detailed (adjective form),shilg,[DERIVED] shil + -g (adjective suffix). 'ashm shilg' = more detailed.
+calculated / determined result,thoz,[INVENTED] Result of calculation. Simplified from thozq. th=thought-process + oz=output.
+negative / below-baseline,thun,[INVENTED] Negative/below-expected. Simplified from thunq. th=opposite + un=under.
+actual / real (measured),akth,[INVENTED] The actual measured value. Simplified from aktq. ak=real + th=state.
+value / grade (measurement),gorv,[INVENTED] A measured value or grade. Simplified from gorvq. gor=grade + v=value-marker.
+values (plural),gorvai,[DERIVED] gorv + -ai. Multiple values. 'fomog gorvai' = average values.
+change / shift (action),sifva,[INVENTED] A change/shift. Simplified from sifvq: sif=shift + va=state-change. 'trukuth-lash sifva' = winrate change.
+configured / set state,zetsh,[INVENTED] State of being configured to something. Simplified from zetshq. zetsh=established-state.
+situational (context-dependent),shesh,[INVENTED] Context-dependent/situational. Simplified from shesq. shesh=condition-state.
+specific / particular (trait),ruvash,[INVENTED] Specific/distinctive. ruv=distinct-case + ash=state.
+color / visual mark,vath,[INVENTED] Color/visual distinguisher. From vathq. vath=visual-mark used in graphs.
+logo / symbol,gil,[INVENTED] A visual symbol or logo. From logq. g=graphic + il=image-mark.
+official / sanctioned,ofizh,[ADAPTED] Official/sanctioned. More Ozhkavosh-sounding than ofishq. ofizh=validated.
+ongoing / current state,ach,[INVENTED] Ongoing/current. From achq. ach=continuing. 'ach-voth' = ongoing match.
+upcoming / future,kur,[INVENTED] Future/upcoming. From kurq. kur=forward-time.
+alpha (version label),alfz,[ADAPTED] Alpha version. From alfq. alfz=first-version technical marker.
+beta (version label),beth,[ADAPTED] Beta version. From betq. beth=second-version technical marker.
+date / timestamp,det,[INVENTED] A calendar date. From detq. det=fixed-time-point.
+finished / ended (date),votz,[INVENTED] End date or finished state. From votq. votz=sealed-time-point.
+deny / denied (last hit),des,[INVENTED] A deny in Dota. From desq. des=destruction-denied.
+earned / accumulated (adj),ern,[INVENTED] Earned/accumulated. From ernq. ern=gathered. 'lieyev ern' = gold earned.
+buyback (death-cancel purchase),zams,[INVENTED] A buyback. From zamsq. zams=reverse-death-buy. z=cancel + ams=death-purchase.
+diversity / variety metric,dars,[INVENTED] Hero diversity. From darsq. dars=spread-variety.
+some / certain (indefinite qty),gazl,[INVENTED] Indefinite quantity. From gazlq. gazl=partial-set.
+position / role (game),bov,[INVENTED] Player position. bovai = positions. From bovq. bov=assigned-place.
+positions (plural),bovai,[DERIVED] bov + -ai. Multiple positions.
+threshold / cutoff,shoz,[INVENTED] Threshold/cutoff marker for minimum required values in filtered stats.
+threshold level / percentage cut,shel,[INVENTED] A percentage threshold. From shelq. shel=level-cut.
+things / stuff (general),shoth,[INVENTED] Things/general stuff. sh=thing + oth=body-of.
+table / display layout,fath,[INVENTED] A table or structured display. From fathlarth. fath=structured-display.
+random / varied outcome,glidra,[INVENTED] Random/varied. glidra=varied-distribution.
+title / identifier label,tor,[INVENTED] Title or identifying label. From torq. tor=mark-of-identity.
+error / critical failure state,zokh,[INVENTED] Critical error/failure state marker for fatal-error UI contexts.
+valuable (adjective),zov,[INVENTED] Worth-having. From zovq. zov=worth-having.
+branches / covers (verb),vogs,[INVENTED] Branching/covering. From vogsq. vogs=spread-over.
+talent / skill build path,nuzh,[INVENTED] Talent tree or skill build. From nuzq. nuzh=ability-path.
+explore / view deeply,resh,[INVENTED] Explore or view in detail. From reshq. resh=look-deep.
+map ping / map mark,lavask,[COMPOUND] lavas (map) + k (mark suffix). Map-mark = a click-ping on the map.
+undefined / not-labeled,vo'tor,[COMPOUND] vo' (negation) + tor (label). Not-titled = undefined. Technical UI term.
+winrate,trukuth-lash,[COMPOUND] trukuth (win) + lash (rate/proportion). Proportion of wins.
+winrate abbreviation (TR),TR,[ABBREVIATION] TRukuth-lash. First two letters of win-rate word.
+rune (power mineral),poz-keth,"[COMPOUND] poz (power, canonical) + keth (stone/mineral). Power-mineral = rune."
+healing (restore HP),desh,[INVENTED] Heal/healing. desh=restore.
+tower (structure),lozth,[INVENTED] A tower/building. lozth=fixed-structure.
+item timing (when bought),chron-kez,[COMPOUND] chron (time) + kez (point/mark). Time-point = the minute an item was bought.
+stage / phase of game,thoklash,[COMPOUND] thok (move) + lash (part/rate). Moving-portion = a game phase.
+series (chain of matches),zhai'voth,[COMPOUND] zhai (chain/sequence: zh=linked + ai=flow) + voth (match). Chain-of-battles = series.
+neutral / no-lane,hollom-shith,[COMPOUND] hollom (without) + shith (lane). No-lane position = neutral/jungle.
+enchantment (neutral item),poz-rast,[COMPOUND] poz (power/magic) + rast (item). Magic-item = enchantment.
+stun (stop-power effect),fek-poz,[COMPOUND] fek (stop) + poz (power). Stop-power = a stun.
+server ping / latency,sek-chron,[COMPOUND] sek (signal arrival) + chron (time). Signal-time = server latency ping.
+facet / choice node,muz,[INVENTED] A hero facet/choice point. muz=choice-point.
+consumable (temp item),tiv,[INVENTED] Consumable-item root. Used for temporary single-use items and consumable item blocks.
+core / essential items,sirirth,[INVENTED] Core/essential. sir=essential + irth=foundation.
+map (game map),lavas,[INVENTED] The game map. lavas=terrain-overview.
+safe lane (pos 1),sesk-shith,[COMPOUND] sesk (safe/sheltered) + shith (lane). Safe-lane = carry position.
+mid lane (pos 2),meza-shith,[COMPOUND] meza (middle) + shith (lane). Middle-lane.
+hard/off lane (pos 3),drukh-shith,[COMPOUND] drukh (hard/harsh: dr-force + ukh-rough) + shith (lane).
+roaming lane (pos 4),thokur-shith,[COMPOUND] thokur (mover/roamer: thok=move + ur=agent) + shith (lane).
+forest/jungle lane (pos 5),grumash-shith,[COMPOUND] grumash (forest: grum=vegetation + ash=expanse) + shith.
+radiant faction,sol-nith,[COMPOUND] sol (light/radiant) + nith (force/side). Light-force = Radiant.
+dire faction,omoz-nith,[COMPOUND] omoz (darkness) + nith (force/side). Dark-force = Dire.
+FAQ abbreviation,O.Zh,"[ABBREVIATION] Ofn Zeshqai = Frequently Asked Questions. O=Ofn (often), Zh=Zeshqai (questions)."
+bread / baked-grain,vrumkast,[INVENTED] Bread. vrum=grain-dense + kast=formed-object. A dense grain-formed thing.
+meat bun / kill-bread,shen-vrumkast,[COMPOUND] shen (kill) + vrumkast (bread). Kill-bread = bun with meat. Metaphorical: the bread that contains the kill.
+comparison (measure against),ashm-thask,[COMPOUND] ashm (comparative bigger) + thask (measure). Comparative-measure = comparison.
+patch / game version,galo,[INVENTED] Game version/patch. gal=revision + o=state.
+support (role),lefs,[INVENTED] Support role. lefs=sustain-function.
+raw / unprocessed (adj),rav,[INVENTED] Raw/unprocessed data. Simplified from ravq. rav=unrefined.
+increase / go up,foth,[INVENTED] Positive increase. foth=rise-state. 'ves foth shith' = only positive lane.
+decrease / go down,shild,[INVENTED] Decrease/downward shift. Paired with foth (increase/upward shift).
+strength (stat),krath,[INVENTED] Strength stat. krath=physical-force.
+intelligence (stat),ensh-poz,[COMPOUND] ensh (knowledge) + poz (power). Knowledge-power = intelligence stat.
+elixir / transform-liquid,mol-tiv,[COMPOUND] mol (transform/liquid) + tiv (consumable). Liquid-consumable = elixir.
+blink dagger (item),velthok-vlath,[COMPOUND] velthok (blink) + vlath (blade). Travel-blade = Blink Dagger.
+arcane blink (item),arkan-velthok,[COMPOUND] arkan (arcane/knowledge-power) + velthok (blink). Knowledge-blink = Arcane Blink.
+swift blink (item),ranzh-velthok,[COMPOUND] ranzh (speed/velocity) + velthok (blink). Speed-blink = Swift Blink.
+overwhelming blink (item),ahm'velthok,[COMPOUND] ahm' (maximum intensifier) + velthok (blink). Maximum-blink = Overwhelming Blink.
+battle fury (raging force),voth-safrath,[COMPOUND] voth (battle) + safrath (fury/force: safras+th). Battle-fury = Battle Fury.
+blood / vitality element,vloth,[INVENTED] Blood/life-fluid element. vloth=life-fluid. Bloodthorn = Vloth-Thilq.
+diffusal blade (item),molkash-vlath,[COMPOUND] molkash (dissolve-cut) + vlath (blade). Dissolving-cut-blade = Diffusal Blade.
+vanguard (big shield),ashm'skarm,[COMPOUND] ashm' (bigger) + skarm (shield). Big-shield = Vanguard.
+power treads (big boots),poz-ashm'nithvath,[COMPOUND] poz (power) + ashm' (bigger) + nithvath (boots). Power-big-boots = Power Treads.
+assault cuirass (battle armor),sath-skorm,[COMPOUND] sath (assault/battle-intensity) + skorm (body armor). Battle-armor = Assault Cuirass.
+assault / battle intensity,sath,[INVENTED] Combat intensity/assault. sath=combat-intensity.
+anti / against prefix,vo',[CANONICAL] Negation prefix. Anti-Mage = Vo'Ensh'Osh.
+scorpion king compound,thrask-arkosh,[COMPOUND] thrask (sand/scorpion) + arkosh (king-entity). Sand King.
+demon / demon being,ozka,[CANONICAL] Demon. The Ozhkavosh word for demonic entity. Canonical.
+two (number),duvath,[INVENTED] The number two. duv=dual + ath=count. Jakiro = Duvath-Ashm'Mezrath.
+corruption / decay (element),dekrath,[INVENTED] Corruption/decay. dekr=decay-force + ath=state. Pugna = corruption mage.
+undead / death-touched state,irushkai,[DERIVED] irushkai = undead-state. irush (illness/death-sickness) + -ai (state-of-being). Used in hero names (Irushaiosh = Necrophos). Also used as Lore term for the undead in general.
+song / singing action,rash,[INVENTED] Song/singing. rash=resonant-voice. rashosh = singer-entity.
+bottle / liquid-container (general),molkast,"[COMPOUND] mol (liquid/fluid, from mol=dissolve/flow root) + kast (formed-object, instrument suffix). Liquid-container = bottle/flask. Used for the Bottle item and any flask-type vessel. Distinct from kethul (orb/spherical vessel) and droth-keth (soul-vessel/urn)."
+healing ointment / salve (applied liquid),desh-molkath,"[COMPOUND] desh (heal/restore) + molkath (flowing-cover, from mol=flowing + kath=cover — established for cloak). Flowing-healing-cover = a salve or ointment applied to the surface. Healing Salve = Desh-Molkath."
+wrap / band (flexible covering),vreth,"[INVENTED] A wrap, band, or flexible covering. vreth=wrap/bind. Used in: sol-vreth (consecrated-wraps), krav-vreth (bracer = arm-wrap), omoz-vreth (wraith band = shadow-wrap). vr=binding-motion + eth=formed-state."
+wraith band / shadow-wrap,omoz-vreth,"[COMPOUND] omoz (shadow/dark, canonical) + vreth (wrap/band). Shadow-wrap = Wraith Band. The shadow-spirit energy bound into a wristband."
+amulet / protective charm,amul,"[ADAPTED] Phonological simplification of the amulet concept. amul=charm-object. Used in: nushk-amul (Null Talisman), omoz-amul (Shadow Amulet). The protective charm worn on the body."
+null / void (absence state),holv,"[INVENTED] null/void — the state of absolute emptiness. From hollom (without/exclusion, established) root hol=hollow/empty + v=state-end. Short, final-sounding. Paired with hollom for stronger: hollom=without-something, holv=total-void. Used in: Holv-Vom'Rast (Null Talisman), Holv-Grakh (Nullifier)."
+trinket / small worn item,vom'rast,"[COMPOUND] vom' (lesser prefix, established) + rast (item/toy, established). Lesser-item = trinket. Small wearable accessory/charm. Distinct from amul (amulet = protective charm worn with intent), vom'rast = small decorative/functional item. Used in: Holv-Vom'Rast (Null Talisman), Ses-Vom'Rast (Talisman of Evasion)."
+null talisman (void-trinket),holv-vom'rast,[COMPOUND] holv (null/void) + vom'rast (trinket/small-item). Void-trinket = Null Talisman. The small charm that channels void/null energy to reduce magical resonance.
+nullifier (void-iron),holv-grakh,"[COMPOUND] holv (null/void) + grakh (iron/metal, established). Void-iron = Nullifier. The iron weapon that channels void to stop and nullify escape abilities — heavy, canceling, absolute."
+emblem / mark / badge (worn distinction),gilath,"[COMPOUND] gil (mark/image, from logo=gil root) + ath (formed-state). A mark or emblem of distinction. Used in: Nith-Velzath-Gilath (Partisan's Brand = faction-fire-mark), Poz-Gilath (Medallion of Courage = power-emblem), Sol-Gilath (Solar Crest = sacred-emblem)."
+vapor / mist / cloud (gaseous state),vapth,"[INVENTED] vap (gaseous/dispersed: v=dispersal + ap=air-particle) + th (state suffix). A vapor, mist, or cloud. Used in: Omoz-Vapth (Smoke of Deceit = shadow-vapor). Distinct from mol (liquid-flowing) — vapth is gaseous dispersal."
+falling stone / meteor,doz-keth,"[COMPOUND] doz (below/descent, canonical) + keth (stone/mineral, established). Below-stone = a stone descending = meteor. Used in: Doz-Keth-Grakh (Meteor Hammer = falling-stone-iron)."
+skull (head-stone),skav-keth,"[COMPOUND] skav (head-surface, root of skaveth=helmet) + keth (stone/mineral). Head-stone = skull. The hard bone-plate of the head. Used in: Skav-Keth-Sath (Skull Basher = skull-combat)."
+slippers / lesser boots,vom'nithvath,"[COMPOUND] vom' (lesser prefix, established) + nithvath (boots, established). Lesser-boots = light footwear/slippers. Used in: Ranzh-Vom'Nithvath (Slippers of Agility = agility-lesser-boots)."
+shadow-vapor / smoke of concealment,omoz-vapth,"[COMPOUND] omoz (shadow/dark/deception, established) + vapth (vapor/cloud). Shadow-vapor = concealment smoke. Smoke of Deceit = Omoz-Vapth. The dark cloud that deceives and hides."
+meteor hammer (falling-stone-iron),doz-keth-grakh,[COMPOUND] doz-keth (falling-stone/meteor) + grakh (iron/metal). Falling-stone-iron = Meteor Hammer. The iron weapon that falls like a meteor to stun.
+medallion / power-emblem,poz-gilath,[COMPOUND] poz (power/courage) + gilath (emblem/mark). Power-emblem = Medallion of Courage. A badge of power and bravery.
+magic-speed orb (octarine core),ensh-ranzh-kethul,[COMPOUND] ensh (magic/knowledge/spell) + ranzh (speed/velocity) + kethul (orb/vessel). Magic-speed-orb = Octarine Core. The orb that accelerates spell casting and reduces cooldowns.
+skull-combat (skull basher),skav-keth-sath,[COMPOUND] skav-keth (skull = head-stone) + sath (combat-intensity). Skull-combat-intensity = Skull Basher. The weapon of skull-crushing combat force.
+solar emblem / sacred crest,sol-gilath,"[COMPOUND] sol (sacred/light/radiant, canonical) + gilath (emblem/mark). Sacred-emblem = Solar Crest. The radiant badge that bestows divine protection."
+diadem / sacred-peak crown,Sol-Gorn,"[COMPOUND] sol (sacred/light/radiant, canonical) + gorn (peak/top, from arkgorn=Crown). Sacred-peak = diadem. Contrast with Arkgorn (mastery-peak = Crown) — where Crown is authority, Diadem is radiance. Neutral item granting all stats."
+spectral / ethereal-void (adjective),Hol'ethiresh,"[COMPOUND] hol (void, short for hollom) + ethir (ethereal quality) + -esh (adjective suffix) = 'of void-ethereal nature.' Brand name for Spectral.gg."
+ethereal / ghost-quality (adjective component),ethir,"[INVENTED ROOT] The ethereal quality; relates to ghost-light, immaterial essence as an adjective quality. Distinct from drezath (ethereal-essence as a noun/substance, used in items like Aether Lens). ethir = the quality, drezath = the material."
+hub / gathering-center,gliskesk,[INVENTED] glis (flow/gathering) + kesk (fixed-center structure) = gathering-center. Used for 'Spectral Stats Hub'.
+professional / skilled (long-form root),hedoqesh,[DERIVED] hedoqesh = full form of hesh. hedoq (desirable/best) + -esh (adjective-suffix). The root from which 'hesh' derives. Hesh is the short practical form used in UI.
+month / moon-cycle (time unit),wroth-chron,"[COMPOUND] wroth (canonical: the going-again, returning motion = cycle) + chron (time) = cycle-time = month. Fits the chron-based time system: vom'chron=minute, wroth-chron=month."
+ranked / competitive-grade (adjective),saz,"[INVENTED] saz = graded/ranked by merit. Used consistently for 'Ranked' mode in Dota 2 (Ranked matches, Ranked stats)."
+report / compiled document,vorsk,"[INVENTED] vorsk = a compiled, structured record of events. vors=gather-record + k=finalized. Plural: vorskai."
+reports (plural),vorskai,[DERIVED] vorsk (report) + -ai (plural suffix) = compiled reports. Follows standard Ozhkavosh plural convention.
+notice / alert / warning,vask,"[INVENTED] vask = a short warning or data-quality alert. Short, harsh consonant cluster."
+tag / short label / identifier,shriv,[INVENTED] shriv = a compact identifier or label. shr- consonant cluster (Ozhkavosh-style) + -iv ending. Used for league tags and team tags.
+count / number / score,thov,"[INVENTED] thov = count/number. Short single-syllable word, ends in v. Used for 'number of X', milestones (chron-thov = time-counts)."
+over / above (spatial relational),doq,[CANONICAL] Uses established doq (above/over) for spatial relation; shared with hover-over and overview contexts.
+hover / inspect (interactive action),shov,[INVENTED] shov = hover or interactive inspect action. Used as 'shov vosf' = 'hover over' (UI interaction). Related form: shovz (hover-action ongoing).
+list / sequence,sash,"[INVENTED] sash = a list or ordered sequence. Used for 'Reports List' (Vorskai sash), 'Categories List' (Catqai sash). Short and clean."
+donations / act of giving,lefth,[INVENTED] lef (give/offer freely) + th (act/result) = act of giving. Used for 'Donations' and 'Donations this month' (Lefth zoth wroth-chron).
+league / competition / battle-group,rashk,[INVENTED] rashk = structured competition group. rash (battle-form) + k (finalized-structure). 'Group of structured battles' = tournament/league. Plural: rashkai.
+leagues (plural),rashkai,[DERIVED] rashk (league) + -ai (plural suffix). Follows standard Ozhkavosh plural convention.
+pro / professional (short adjective),hesh,[SHORT FORM] Abbreviated form of hedoqesh (hedoq=best + esh=adj). Used as the practical 'pro' label. shosiz-hesh = semi-pro. Full form: hedoqesh.
+ally / comrade (individual),kesh,"[INVENTED] kesh = ally/comrade in battle. Harsh consonant-closed syllable, Ozhkavosh-style. Root for keshai (allies plural)."
+allies / combos (plural),keshai,"[DERIVED] kesh (ally) + -ai (plural suffix) = allies/comrades. Used for 'Combos' (hero/player ally groupings), Lane Combos (Shith keshai), Full hero combinations (keshai gok)."
+pairs / duos (plural of two),duvai,"[DERIVED] duv (two, canonical in Jakiro=Duv'Korn-Mezrath) + -ai (plural suffix) = twos/pairs. Used for 'Pairs' section (hero and player pair statistics). Singular pair: duv-osh or just duv context."
+description / explanation,tharv,[INVENTED] tharv = a textual description or explanation. thar (explain/describe-root) + v (output/result). Used as UI label for 'Description' fields. Distinct from nesh (name) and eyik (view).
+expected / projected (calculated-forward),thozich,[INVENTED] thozich = expected/projected value. thoz (calculated result) + ich (from icha = forward-potential). 'thozich thov' = expected count.
+but / however / yet (contrastive connector),suq,"[INVENTED] suq = contrastive pivot conjunction. su (continuation-flow) + q (pivot-closure) = 'continuation that pivots' = but/however. 'X vak Y, suq Z' = X and Y, but Z."
