@@ -97,5 +97,5 @@ function register_locale_string($string, $tag, $reglocale = null) {
 }
 
 function is_special_locale($locale) {
-  return in_array($locale, ['emoji', 'def']);
+  return in_array($locale, ['emoji', 'ozh', 'def']);
 }
