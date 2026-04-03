@@ -2,7 +2,7 @@
 
 require_once('head.php');
 
-$conn = new mysqli($lrg_sql_host, $lrg_sql_user, $lrg_sql_pass, $lrg_sql_db);
+$conn = lrg_mysqli_connect($lrg_sql_db);
 
 if ($conn->connect_error) die("[F] Connection to SQL server failed: ".$conn->connect_error."\n");
 

@@ -11,7 +11,7 @@ $localesMap = include __DIR__ . "/../locales/map.php";
 $vpkRoot = $argv[1] ?? "https://raw.githubusercontent.com/dotabuff/d2vpkr/master/dota/resource/localization/";
 
 // const vpkdata_npc_abilities_root = "https://raw.githubusercontent.com/dotabuff/d2vpkr/master/dota/scripts/npc/";
-const vpkdata_npc_abilities_root = "/mnt/c/code/dota-npc/";
+const vpkdata_npc_abilities_root = "/home/lea/code/dota-npc/";
 const vpkdata_npc_abilities_main = "npc_abilities.txt";
 const vpkdata_npc_abilities_heroes = "heroes/npc_dota_hero_%TAG%.txt";
 

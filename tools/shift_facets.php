@@ -5,7 +5,7 @@ include __DIR__ . "/../modules/commons/metadata.php";
 
 $meta = new lrg_metadata;
 
-$conn = new mysqli($lrg_sql_host, $lrg_sql_user, $lrg_sql_pass, $lrg_sql_db);
+$conn = lrg_mysqli_connect($lrg_sql_db);
 
 include_once("modules/commons/schema.php");
 

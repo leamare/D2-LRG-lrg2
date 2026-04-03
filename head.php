@@ -6,7 +6,7 @@ require_once("modules/commons/instaquery.php");
 require_once("modules/commons/unzero.php");
 
 if(isset($argv)) {
-    $options = getopt("l:m:d:FfKT:o:c:SsRrZQw:LAP:N:e:uUpG:nW");
+    $options = getopt("l:m:d:FfKT:o:c:SsRrZQw:LAP:N:e:uUpG:nWa");
 
     if(isset($options['l'])) {
       $lrg_league_tag = $options['l'];
@@ -38,6 +38,7 @@ if(isset($argv)) {
   $lrg_sql_host  = $settings['mysql_host'] ?? '';
   $lrg_sql_user  = $settings['mysql_user'] ?? '';
   $lrg_sql_pass  = $settings['mysql_pass'] ?? '';
+  $lrg_sql_port  = (int)($settings['mysql_port'] ?? 0);
   $lrg_db_prefix = $settings['mysql_prefix'] ?? '';
   $steamapikey   = $settings['steamapikey'] ?? '';
   $stratztoken   = $settings['stratztoken'] ?? '';
@@ -50,6 +51,8 @@ if(isset($argv)) {
   $stratz_user_agent = $settings['stratz_user_agent'] ?? "STRATZ_API";
 
   unset($settings);
+
+  require_once __DIR__ . '/modules/commons/mysqli_lrg.php';
 
   if(isset($lrg_league_tag) && file_exists("leagues/".$lrg_league_tag.".json")) {
     $lrg_sql_db   = $lrg_db_prefix."_".$lrg_league_tag;

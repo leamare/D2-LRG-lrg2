@@ -37,7 +37,7 @@ if (!function_exists("array_key_last")) {
   }
 }
 
-$conn = new mysqli($lrg_sql_host, $lrg_sql_user, $lrg_sql_pass, $lrg_sql_db);
+$conn = lrg_mysqli_connect($lrg_sql_db);
 $conn->set_charset('utf8mb4');
 $meta = new lrg_metadata;
 
@@ -76,6 +76,7 @@ if (!empty($options['d'])) {
 }
 
 $rewrite_existing = isset($options['W']);
+$addition_mode    = isset($options['a']);
 $update_unparsed = isset($options['u']) || isset($options['U']);
 
 $use_stratz = isset($options['S']) || isset($options['s']);

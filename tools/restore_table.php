@@ -15,7 +15,7 @@ $table = $options['t'] ?? '';
 if (empty($input) || !file_exists($input))
   die("[E] Can't restore without backup!\n");
 
-$conn = new mysqli($lrg_sql_host, $lrg_sql_user, $lrg_sql_pass, $lrg_sql_db);
+$conn = lrg_mysqli_connect($lrg_sql_db);
 
 echo("[ ] Restoring $input to $lrg_league_tag\n");
 

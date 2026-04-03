@@ -52,7 +52,7 @@ if ($restore) {
   copy($dir.'/descriptor.json', 'leagues/'.$lrg_league_tag.'.json');
   copy($dir.'/matchlist.list', 'matchlists/'.$lrg_league_tag.'.list');
 
-  $conn = new mysqli($lrg_sql_host, $lrg_sql_user, $lrg_sql_pass, $lrg_sql_db);
+  $conn = lrg_mysqli_connect($lrg_sql_db);
   $conn->set_charset('utf8mb4');
 
   $tables = [
@@ -185,7 +185,7 @@ if ($restore) {
   rmdir($dir);
 } else {
   $lrg_sql_db   = $lrg_db_prefix."_".$lrg_league_tag;
-  $conn = new mysqli($lrg_sql_host, $lrg_sql_user, $lrg_sql_pass, $lrg_sql_db);
+  $conn = lrg_mysqli_connect($lrg_sql_db);
   $conn->set_charset('utf8mb4');
   $conn->query("set names utf8mb4");
   
@@ -286,7 +286,7 @@ if ($restore) {
     echo "OK.\n";
     
     $conn->close();
-    $conn = new mysqli($lrg_sql_host, $lrg_sql_user, $lrg_sql_pass, $lrg_sql_db);
+    $conn = lrg_mysqli_connect($lrg_sql_db);
     $conn->set_charset('utf8mb4');
   }
 
@@ -325,7 +325,7 @@ if ($restore) {
   echo "OK.\n";
 
   if ($remove) {
-    $conn = new mysqli($lrg_sql_host, $lrg_sql_user, $lrg_sql_pass);
+    $conn = lrg_mysqli_connect(null);
     echo "[ ] Removing database...";
     $sql = "DROP DATABASE $lrg_sql_db;";
     if ($conn->multi_query($sql) === FALSE)

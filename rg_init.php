@@ -112,7 +112,7 @@ passthru("php tools/league_matches_steamapi.php -l".$lg_settings['league_tag']."
 
 echo "[ ] Creating database...";
 
-$conn = new mysqli($lrg_sql_host, $lrg_sql_user, $lrg_sql_pass);
+$conn = lrg_mysqli_connect(null);
 $conn->set_charset('utf8mb4');
 
 if ($conn->connect_error) die("[F] Connection to SQL server failed: ".$conn->connect_error."\n");
