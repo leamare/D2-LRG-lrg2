@@ -14,7 +14,7 @@ include_once __DIR__.'/../../modules/commons/fantasy_mvp.php';
 function conn_restart() {
   global $conn, $lrg_sql_host, $lrg_sql_user, $lrg_sql_pass, $lrg_sql_db;
   $conn->close();
-  $conn = new mysqli($lrg_sql_host, $lrg_sql_user, $lrg_sql_pass, $lrg_sql_db);
+  $conn = lrg_mysqli_connect($lrg_sql_db);
   $conn->set_charset('utf8mb4');
 }
 
@@ -23,7 +23,8 @@ function fetch($match) {
   $request_unparsed, $meta, $stratz_timeout_retries, $force_adding, $cache_dir, $lg_settings, $lrg_use_cache, $first_scheduled,
   $use_full_stratz, $scheduled_wait_period, $steamapikey, $force_await, $players_list, $rank_limit, $stratztoken, $ignore_stratz,
   $update_unparsed, $request_unparsed_players, $stratz_graphql, $api_cooldown_seconds, $update_names, $updated_names, $rewrite_existing,
-  $ignore_abandons, $lastversion, $schema, $min_duration_seconds, $min_score_side, $fallback_valveapi, $meta_spells_tags_flip;
+  $ignore_abandons, $lastversion, $schema, $min_duration_seconds, $min_score_side, $fallback_valveapi, $meta_spells_tags_flip,
+  $addition_mode, $present_tables, $missing_tables, $cache_was_incomplete;
 
   $t_match = [];
   $t_matchlines = [];
@@ -39,6 +40,11 @@ function fetch($match) {
 
   $players_update = false;
   $match_skip = false;
+  $present_tables = [];
+  $missing_tables = [];
+  $cache_was_incomplete = false;
+  $needs_od_supplement = false;
+  $_items_tbl = ($lg_settings['main']['itemslines'] ?? false) ? 'itemslines' : 'items';
 
   if ($lg_settings['main']['teams']) {
     $t_team_matches = [];
@@ -89,7 +95,43 @@ function fetch($match) {
       }
     }
 
-    if (!$rewrite_existing && (!$update_unparsed || $match_parsed)) {
+    if ($addition_mode) {
+      $q = $conn->query("SELECT matchid FROM adv_matchlines WHERE matchid=$match LIMIT 1");
+      if ($q && $q->num_rows) $present_tables[] = 'adv_matchlines';
+      else $missing_tables[] = 'adv_matchlines';
+
+      if ($lg_settings['main']['items'] ?? false) {
+        $q = $conn->query("SELECT matchid FROM $_items_tbl WHERE matchid=$match LIMIT 1");
+        if ($q && $q->num_rows) $present_tables[] = $_items_tbl;
+        else $missing_tables[] = $_items_tbl;
+      }
+      if ($schema['skill_builds'] ?? false) {
+        $q = $conn->query("SELECT matchid FROM skill_builds WHERE matchid=$match LIMIT 1");
+        if ($q && $q->num_rows) $present_tables[] = 'skill_builds';
+        else $missing_tables[] = 'skill_builds';
+      }
+      if ($schema['starting_items'] ?? false) {
+        $q = $conn->query("SELECT matchid FROM starting_items WHERE matchid=$match LIMIT 1");
+        if ($q && $q->num_rows) $present_tables[] = 'starting_items';
+        else $missing_tables[] = 'starting_items';
+      }
+      if ($schema['wards'] ?? false) {
+        $q = $conn->query("SELECT matchid FROM wards WHERE matchid=$match LIMIT 1");
+        if ($q && $q->num_rows) $present_tables[] = 'wards';
+        else $missing_tables[] = 'wards';
+      }
+      if (($lg_settings['main']['fantasy'] ?? false) && ($schema['fantasy_mvp'] ?? false)) {
+        $q = $conn->query("SELECT matchid FROM fantasy_mvp_points WHERE matchid=$match LIMIT 1");
+        if ($q && $q->num_rows) $present_tables[] = 'fantasy_mvp_points';
+        else $missing_tables[] = 'fantasy_mvp_points';
+      }
+
+      if (empty($missing_tables)) {
+        echo("All tables populated, skipping\n");
+        return true;
+      }
+      echo("Missing: ".implode(', ', $missing_tables)."..Adding.");
+    } elseif (!$rewrite_existing && (!$update_unparsed || $match_parsed)) {
       echo("Already in database, skipping\n");
       return true;
     } else {
@@ -137,6 +179,25 @@ function fetch($match) {
     $t_starting_items = $matchdata['starting_items'] ?? [];
     $t_skill_builds = $matchdata['skill_builds'] ?? [];
     $t_wards = $matchdata['wards'] ?? [];
+
+    if ($addition_mode && !empty($missing_tables)) {
+      $od_cache_keys = [
+        'adv_matchlines' => 'adv_matchlines',
+        'items'          => 'items',
+        'itemslines'     => 'items',
+        'skill_builds'   => 'skill_builds',
+        'starting_items' => 'starting_items',
+        'wards'          => 'wards',
+      ];
+      foreach ($missing_tables as $_mt) {
+        $ck = $od_cache_keys[$_mt] ?? null;
+        if ($ck !== null && empty($matchdata[$ck])) {
+          $needs_od_supplement = true;
+          $cache_was_incomplete = true;
+        }
+      }
+      unset($_mt, $ck);
+    }
 
     $player_tags = [];
 
@@ -252,7 +313,7 @@ function fetch($match) {
       }
     }
     if (!empty($lg_settings['time_limit_before'])) {
-      if ($matchdata['matches']['start_date'] > $lg_settings['time_limit_after']) {
+      if ($matchdata['matches']['start_date'] > $lg_settings['time_limit_before']) {
         echo("..Match outside the time range, skipping...\n");
         return true;
       }
@@ -335,7 +396,7 @@ function fetch($match) {
         }
       }
       if (!empty($lg_settings['time_limit_before'])) {
-        if ($matchdata['matches']['start_date'] > $lg_settings['time_limit_after']) {
+        if ($matchdata['matches']['start_date'] > $lg_settings['time_limit_before']) {
           echo("..Match outside the time range, skipping...\n");
           return true;
         }
@@ -406,7 +467,7 @@ function fetch($match) {
     }
   }
   
-  if (empty($matchdata) || ( empty($matchdata['items']) && !$bad_replay && !$force_adding ) || ( $bad_replay && !$force_adding )) {
+  if (empty($matchdata) || $needs_od_supplement || ( empty($matchdata['items']) && !$bad_replay && !$force_adding ) || ( $bad_replay && !$force_adding )) {
     echo("Requesting.");
 
     if (!$ignore_stratz && !$stratz_graphql && (!empty($players_list) || !empty($rank_limit))) {
@@ -435,6 +496,8 @@ function fetch($match) {
 
     $matchdata_stratz = $matchdata ?? null;
     $matchdata = empty($matchdata_od) ? $opendota->match($match) : $matchdata_od;
+    
+    if ($needs_od_supplement) $cache_was_incomplete = true;
     echo("..OK.");
     
     if (empty($matchdata) || empty($matchdata['duration']) || empty($matchdata['players'])) {
@@ -549,7 +612,7 @@ function fetch($match) {
         }
       }
       if (!empty($lg_settings['time_limit_before'])) {
-        if ($matchdata['start_time'] > $lg_settings['time_limit_after']) {
+        if ($matchdata['start_time'] > $lg_settings['time_limit_before']) {
           echo("..Match outside the time range, skipping...\n");
           return true;
         }
@@ -1898,7 +1961,8 @@ function fetch($match) {
 
   echo "..Recording.";
 
-  if ($match_exists) {
+  // In addition mode we never remove existing data — only INSERT into tables that were missing.
+  if ($match_exists && !$addition_mode) {
     // remove match before readding it
     $sql = "DELETE from matchlines where matchid = $match;".
       "DELETE from adv_matchlines where matchid = $match;".
@@ -1925,7 +1989,8 @@ function fetch($match) {
   }
 
   // TODO:
-  if(!empty($cache_dir) && !empty($matchdata) && $lrg_use_cache && !$bad_replay && !file_exists("$cache_dir/".$match.".lrgcache.json")) {
+  if(!empty($cache_dir) && !empty($matchdata) && $lrg_use_cache && !$bad_replay &&
+     (!file_exists("$cache_dir/".$match.".lrgcache.json") || $cache_was_incomplete)) {
     //$f = fopen("$cache_dir/".($bad_replay ? "unparsed_" : "").$match.".json", "w");
     //fwrite($f, $json);
     //fclose($f);

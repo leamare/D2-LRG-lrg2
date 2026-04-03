@@ -202,45 +202,49 @@ $_tx_fail = function(string $table) use ($conn, $match, &$matches) {
   return null;
 };
 
-// --- matches ---
-$sql = "INSERT INTO matches (
-  matchid, radiantWin, duration, modeID, leagueID, start_date, " .
-  (($schema['matches_opener'] ?? false) ? "analysis_status, radiant_opener, seriesid, " : "") .
-  "stomp, comeback, cluster, version) VALUES (" .
-  $mid . ", " . ($t_match['radiantWin'] ? "true" : "false") . ", " . $t_match['duration'] . ", " .
-  $t_match['modeID'] . ", " . $t_match['leagueID'] . ", " . $t_match['start_date'] . ", " .
-  (($schema['matches_opener'] ?? false)
-    ? ($t_match['analysis_status'] ?? (!empty($t_adv_matchlines) ? '1' : '0')) . ", " .
-      ($t_match['radiant_opener'] ?? 'null') . ", " . ($t_match['seriesid'] ?? 'null') . ", "
-    : ""
-  ) .
-  ($t_match['stomp'] ?? 0) . ", " . $t_match['comeback'] . ", " .
-  ($t_match['cluster'] ?? 0) . ", " . $t_match['version'] . ");";
+$_addition_existing = ($addition_mode ?? false) && ($match_exists ?? false);
 
-if (!$conn->query($sql)) { return $_tx_fail('matches'); }
+if (!$_addition_existing) {
+  // --- matches ---
+  $sql = "INSERT INTO matches (
+    matchid, radiantWin, duration, modeID, leagueID, start_date, " .
+    (($schema['matches_opener'] ?? false) ? "analysis_status, radiant_opener, seriesid, " : "") .
+    "stomp, comeback, cluster, version) VALUES (" .
+    $mid . ", " . ($t_match['radiantWin'] ? "true" : "false") . ", " . $t_match['duration'] . ", " .
+    $t_match['modeID'] . ", " . $t_match['leagueID'] . ", " . $t_match['start_date'] . ", " .
+    (($schema['matches_opener'] ?? false)
+      ? ($t_match['analysis_status'] ?? (!empty($t_adv_matchlines) ? '1' : '0')) . ", " .
+        ($t_match['radiant_opener'] ?? 'null') . ", " . ($t_match['seriesid'] ?? 'null') . ", "
+      : ""
+    ) .
+    ($t_match['stomp'] ?? 0) . ", " . $t_match['comeback'] . ", " .
+    ($t_match['cluster'] ?? 0) . ", " . $t_match['version'] . ");";
 
-// --- matchlines ---
-$rows = [];
-foreach ($t_matchlines as $ml) {
-  if (!$ml['heroid']) continue;
-  $rows[] = "(" . $ml['matchid'] . ", " . $ml['playerid'] . ", " . $ml['heroid'] . ", " .
-    ($schema['variant_supported'] ? ((isset($ml['variant']) && $ml['variant']) ? $ml['variant'] : "null") . ", " : "") .
-    $ml['level'] . ", " . ($ml['isRadiant'] ? "true" : "false") . ", " .
-    $ml['kills'] . ", " . $ml['deaths'] . ", " . $ml['assists'] . ", " .
-    $ml['networth'] . ", " . $ml['gpm'] . ", " . $ml['xpm'] . ", " .
-    ($ml['heal'] ?? 0) . ", " . ($ml['heroDamage'] ?? 0) . ", " .
-    ($ml['towerDamage'] ?? 0) . ", " . $ml['lastHits'] . ", " . $ml['denies'] . ")";
+  if (!$conn->query($sql)) { return $_tx_fail('matches'); }
+
+  // --- matchlines ---
+  $rows = [];
+  foreach ($t_matchlines as $ml) {
+    if (!$ml['heroid']) continue;
+    $rows[] = "(" . $ml['matchid'] . ", " . $ml['playerid'] . ", " . $ml['heroid'] . ", " .
+      ($schema['variant_supported'] ? ((isset($ml['variant']) && $ml['variant']) ? $ml['variant'] : "null") . ", " : "") .
+      $ml['level'] . ", " . ($ml['isRadiant'] ? "true" : "false") . ", " .
+      $ml['kills'] . ", " . $ml['deaths'] . ", " . $ml['assists'] . ", " .
+      $ml['networth'] . ", " . $ml['gpm'] . ", " . $ml['xpm'] . ", " .
+      ($ml['heal'] ?? 0) . ", " . ($ml['heroDamage'] ?? 0) . ", " .
+      ($ml['towerDamage'] ?? 0) . ", " . $ml['lastHits'] . ", " . $ml['denies'] . ")";
+  }
+  $sql = "INSERT INTO matchlines (matchid, playerid, heroid, " .
+    ($schema['variant_supported'] ? "variant, " : "") .
+    "level, isRadiant, kills, deaths, assists, networth,
+    gpm, xpm, heal, heroDamage, towerDamage, lastHits, denies) VALUES " .
+    implode(",\n\t", $rows) . ";";
+
+  if (!$conn->query($sql)) { return $_tx_fail('matchlines'); }
 }
-$sql = "INSERT INTO matchlines (matchid, playerid, heroid, " .
-  ($schema['variant_supported'] ? "variant, " : "") .
-  "level, isRadiant, kills, deaths, assists, networth,
-  gpm, xpm, heal, heroDamage, towerDamage, lastHits, denies) VALUES " .
-  implode(",\n\t", $rows) . ";";
-
-if (!$conn->query($sql)) { return $_tx_fail('matchlines'); }
 
 // --- adv_matchlines ---
-if (!$bad_replay && !empty($t_adv_matchlines)) {
+if (!$bad_replay && !empty($t_adv_matchlines) && !in_array('adv_matchlines', $present_tables ?? [])) {
   $rows = [];
   foreach ($t_adv_matchlines as $aml) {
     if (!$aml['heroid']) continue;
@@ -263,7 +267,7 @@ if (!$bad_replay && !empty($t_adv_matchlines)) {
 }
 
 // --- draft ---
-if (!empty($t_draft)) {
+if (!empty($t_draft) && !$addition_mode) {
   $rows = [];
   foreach ($t_draft as $i => $d) {
     $rows[] = "(" . $d['matchid'] . ", " . ($d['is_radiant'] ? "true" : "false") . ", " .
@@ -278,7 +282,7 @@ if (!empty($t_draft)) {
 }
 
 // --- items / itemslines ---
-if (!empty($t_items) && ($lg_settings['main']['items'] ?? false)) {
+if (!empty($t_items) && ($lg_settings['main']['items'] ?? false) && !in_array($_items_tbl ?? 'items', $present_tables ?? [])) {
   if ($lg_settings['main']['itemslines'] ?? false) {
     $t_itemslines = [];
     foreach ($t_items as $item) {
@@ -306,7 +310,7 @@ if (!empty($t_items) && ($lg_settings['main']['items'] ?? false)) {
 }
 
 // --- skill_builds ---
-if (!empty($t_skill_builds) && ($schema['skill_builds'] ?? false) && ($lg_settings['main']['skill_builds'] ?? false)) {
+if (!empty($t_skill_builds) && ($schema['skill_builds'] ?? false) && (($addition_mode ?? false) || ($lg_settings['main']['skill_builds'] ?? false)) && !in_array('skill_builds', $present_tables ?? [])) {
   $rows = [];
   foreach ($t_skill_builds as $t) {
     if (!$t['hero_id']) continue;
@@ -325,7 +329,7 @@ if (!empty($t_skill_builds) && ($schema['skill_builds'] ?? false) && ($lg_settin
 }
 
 // --- starting_items ---
-if (!empty($t_starting_items) && ($schema['starting_items'] ?? false) && ($lg_settings['main']['starting'] ?? false)) {
+if (!empty($t_starting_items) && ($schema['starting_items'] ?? false) && (($addition_mode ?? false) || ($lg_settings['main']['starting'] ?? false)) && !in_array('starting_items', $present_tables ?? [])) {
   $rows = [];
   foreach ($t_starting_items as $t) {
     if (!$t['hero_id']) continue;
@@ -340,7 +344,7 @@ if (!empty($t_starting_items) && ($schema['starting_items'] ?? false) && ($lg_se
 }
 
 // --- wards ---
-if (!empty($t_wards) && ($schema['wards'] ?? false) && ($lg_settings['main']['wards'] ?? false)) {
+if (!empty($t_wards) && ($schema['wards'] ?? false) && (($addition_mode ?? false) || ($lg_settings['main']['wards'] ?? false)) && !in_array('wards', $present_tables ?? [])) {
   $rows = [];
   foreach ($t_wards as $t) {
     if (empty($t['wards_log']) && empty($t['sentries_log']) && empty($t['destroyed_log'])) continue;
@@ -356,7 +360,7 @@ if (!empty($t_wards) && ($schema['wards'] ?? false) && ($lg_settings['main']['wa
 }
 
 // --- fantasy_mvp_points + awards ---
-if (!empty($t_fantasy_points) && ($lg_settings['main']['fantasy'] ?? false) && ($schema['fantasy_mvp'] ?? false)) {
+if (!empty($t_fantasy_points) && ($lg_settings['main']['fantasy'] ?? false) && ($schema['fantasy_mvp'] ?? false) && !in_array('fantasy_mvp_points', $present_tables ?? [])) {
   $rows = [];
   foreach ($t_fantasy_points as $t) {
     $rows[] = "({$t['matchid']}, {$t['playerid']}, {$t['heroid']}, {$t['total_points']},
