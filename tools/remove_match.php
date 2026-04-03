@@ -1,17 +1,25 @@
 <?php
 require_once("head.php");
 
-$options = getopt("m:", [ "match" ]);
+$options = getopt("l:m:", [ "league", "match" ]);
 
-if(isset($options['m']))
+if (isset($options['m'])) {
   $mids = $options['m'];
-else die("[F] No match ID specified\n");
+} else {
+  die("[F] No match ID specified\n");
+}
 
+$conn = lrg_mysqli_connect($lrg_sql_db);
 
-
-$conn = new mysqli($lrg_sql_host, $lrg_sql_user, $lrg_sql_pass, $lrg_sql_db);
-
-if( !is_array($mids) ) $mids = [$mids];
+if (!is_array($mids)) {
+  $mids = [$mids];
+}
+$mids = array_values(array_filter(array_map('trim', $mids), 'strlen'));
+foreach ($mids as $mid) {
+  if ($mid === '' || !ctype_digit((string)$mid)) {
+    die("[F] Invalid match id (must be numeric): " . $mid . "\n");
+  }
+}
 
 include_once("modules/commons/schema.php");
 
