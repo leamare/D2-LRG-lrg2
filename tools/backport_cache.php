@@ -11,12 +11,32 @@ $conn->set_charset("utf8");
 include_once("modules/commons/schema.php");
 
 $skip = isset($options['s']);
-
 $normturbo = $lg_settings['main']['normalize_turbo'] ?? true;
 
-if(isset($options['c'])) {
-  $file = $options['c'];
-  $matches = explode("\n", file_get_contents($file));
+$last = function ($v) { return is_array($v) ? end($v) : $v; };
+$c = isset($options['c']) ? $last($options['c']) : null;
+if (isset($options['M'])) {
+  $matchlist_file = $last($options['M']);
+  $cache_dir = $c ?? 'cache';
+} elseif (is_string($c) && is_file($c)) {
+  $matchlist_file = $c;
+  $cache_dir = 'cache';
+} else {
+  $matchlist_file = null;
+  $cache_dir = $c ?? 'cache';
+}
+if ($cache_dir === 'NULL') {
+  $cache_dir = '';
+}
+if ($cache_dir !== '' && !is_dir($cache_dir) && !mkdir($cache_dir, 0775, true) && !is_dir($cache_dir)) {
+  die("[F] Could not create cache directory: $cache_dir\n");
+}
+$cache_file = function ($m) use ($cache_dir) {
+  return $cache_dir === '' ? "$m.lrgcache.json" : rtrim($cache_dir, "/\\") . "/$m.lrgcache.json";
+};
+
+if ($matchlist_file !== null) {
+  $matches = explode("\n", file_get_contents($matchlist_file));
 } else {
   if(isset($options['T'])) {
     $endt = isset($options['e']) ? $options['e'] : 0;
@@ -55,8 +75,9 @@ for ($i = 0; $i < $sz; $i++) {
   $m = $matches[$i];
   if (empty($m) || $m[0] === '#' || strpos($m, '[ ]') !== false) continue;
 
-  if ($skip && file_exists("cache/$m.lrgcache.json")) {
-    echo "[ ] ($i/$sz) cache/$m.lrgcache.json exists, skipping\n";
+  $outfile = $cache_file($m);
+  if ($skip && file_exists($outfile)) {
+    echo "[ ] ($i/$sz) $outfile exists, skipping\n";
     continue;
   }
 
@@ -170,6 +191,6 @@ for ($i = 0; $i < $sz; $i++) {
     continue;
   }
 
-  file_put_contents("cache/$m.lrgcache.json", $out);
-  echo "[ ] ($i/$sz) backported $m to cache/$m.lrgcache.json\n";
+  file_put_contents($outfile, $out);
+  echo "[ ] ($i/$sz) backported $m to $outfile\n";
 }
