@@ -238,6 +238,9 @@ const STRATZ_GRAPHQL_QUERY = "fragment MatchInfo on MatchType {
     position
     steamAccount {
       name
+      seasonRank
+      seasonLeaderboardDivisionId
+      seasonLeaderboardRank
     }
   }
   direTeam {
@@ -371,6 +374,7 @@ function get_stratz_response($match) {
     $ml = [];
     $ml['matchid'] = $stratz['data']['match']['id'];
     $ml['playerid'] = $pl['steamAccountId'];
+    $ml['seasonRank'] = $pl['steamAccount']['seasonRank'];
     $ml['heroid'] = $pl['heroId'];
     $ml['variant'] = $pl['variant'];
     $ml['isRadiant'] = $pl['isRadiant'];

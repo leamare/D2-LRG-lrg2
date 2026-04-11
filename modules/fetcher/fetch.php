@@ -1268,7 +1268,7 @@ function fetch($match) {
         $t_matchlines[$i]['towerDamage'] = $matchdata['players'][$j]['tower_damage'] ?? 0;
         $t_matchlines[$i]['lastHits'] = $matchdata['players'][$j]['last_hits'];
         $t_matchlines[$i]['denies'] = $matchdata['players'][$j]['denies'];
-
+        $t_matchlines[$i]['seasonRank'] = $matchdata['players'][$j]['rank_tier'] ?? null;
 
         $t_adv_matchlines[$i]['matchid'] = $match;
         $t_adv_matchlines[$i]['playerid'] = $matchdata['players'][$j]['account_id'];
@@ -1958,6 +1958,51 @@ function fetch($match) {
     unset($first_scheduled[$match]);
   }
 
+
+  // Rank filters (player_min_rank, player_avg_rank, player_unknown_rank_allowed)
+  if (!empty($t_matchlines)) {
+    $filter_min_rank     = $lg_settings['player_min_rank']             ?? null;
+    $filter_avg_rank     = $lg_settings['player_avg_rank']             ?? null;
+    $filter_max_unknown  = $lg_settings['player_unknown_rank_allowed'] ?? null;
+
+    if ($filter_min_rank !== null || $filter_avg_rank !== null || $filter_max_unknown !== null) {
+      $ranks         = [];
+      $unknown_count = 0;
+      foreach ($t_matchlines as $ml) {
+        $r = isset($ml['seasonRank']) && $ml['seasonRank'] !== null && $ml['seasonRank'] !== '' ? (int)$ml['seasonRank'] : null;
+        if ($r === null || $r === 0) {
+          $unknown_count++;
+        } else {
+          $ranks[] = $r;
+        }
+      }
+
+      $max_unknown = $filter_max_unknown !== null ? (int)$filter_max_unknown : PHP_INT_MAX;
+      if ($unknown_count > $max_unknown) {
+        echo("..Too many players with unknown rank ($unknown_count unknown, max $max_unknown), skipping...\n");
+        return true;
+      }
+
+      if (!empty($ranks)) {
+        if ($filter_min_rank !== null) {
+          foreach ($ranks as $r) {
+            if ($r < (int)$filter_min_rank) {
+              echo("..Player rank $r below minimum $filter_min_rank, skipping...\n");
+              return true;
+            }
+          }
+        }
+        if ($filter_avg_rank !== null) {
+          $computed_avg = array_sum($ranks) / count($ranks);
+          if ($computed_avg < (float)$filter_avg_rank) {
+            $disp = round($computed_avg, 2);
+            echo("..Average rank $disp below required $filter_avg_rank, skipping...\n");
+            return true;
+          }
+        }
+      }
+    }
+  }
 
   echo "..Recording.";
 

@@ -4,6 +4,9 @@
   "time_limit_before": null,
   "match_limit_after": null,
   "match_limit_before": null,
+  "player_min_rank": null,
+  "player_avg_rank": null,
+  "player_unknown_rank_allowed": null,
   "main": {
     "teams": true,
     "fantasy": true,
