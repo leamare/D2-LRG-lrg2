@@ -54,9 +54,10 @@ function rg_generator_laning_profile($table_id, &$context, $id_o, $heroes_flag =
   
     $min = end($context[$id])['wrank'];
     $max = reset($context[$id])['wrank'];
+    $range = $max - $min;
   
     foreach ($context[$id] as $k => $el) {
-      $context[$id][$k]['rank'] = 100 * ($el['wrank']-$min) / ($max-$min);
+      $context[$id][$k]['rank'] = $range ? 100 * ($el['wrank']-$min) / $range : 0;
       unset($context[$id][$k]['wrank']);
     }
   }

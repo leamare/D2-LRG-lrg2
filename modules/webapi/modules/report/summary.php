@@ -38,6 +38,7 @@ public function process() {
     }
     $res['__endp'] = "teams-summary";
   } else if (in_array("players", $mods)) {
+    if (!isset($context['players_summary'])) throw new UserInputException("No player data in this report");
     if (is_wrapped($context['players_summary'])) $context['players_summary'] = unwrap_data($context['players_summary']);
     if (isset($report['players_additional']) && isset($report['player_positions'])) {
       foreach($context['players_summary'] as $id => $player) {

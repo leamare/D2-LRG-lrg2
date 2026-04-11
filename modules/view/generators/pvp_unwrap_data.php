@@ -1,7 +1,7 @@
 <?php
 
 function rg_generator_pvp_unwrap_data(&$context, &$context_wrs, $heroes_flag = true, $facets = false) {
-  if(!sizeof($context)) return [];
+  if(!is_array($context) || !sizeof($context)) return [];
 
   $pvp = [];
   $id = $heroes_flag ? "heroid" : "playerid";
