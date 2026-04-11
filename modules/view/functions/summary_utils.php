@@ -9,7 +9,7 @@ function summary_prepare_value($key, $value) {
     return convert_time($value);
 
   if (strpos($key, "volatility") !== FALSE)
-    return number_format($value, 2)."%";
+    return number_format((float)($value ?? 0), 2)."%";
 
   if (
     strpos($key, "winrate") !== FALSE ||
@@ -17,7 +17,7 @@ function summary_prepare_value($key, $value) {
     strpos($key, "ratio") !== FALSE ||
     strpos($key, "diversity") !== FALSE
   )
-    return number_format($value*100, 2)."%";
+    return number_format((float)($value ?? 0) * 100, 2)."%";
 
   if (strpos($key, "matches") !== FALSE) return number_format((float)($value ?? 0), 0);
   

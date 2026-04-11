@@ -823,12 +823,18 @@ function rg_view_generate_items_profiles() {
 
     $res['itemid'.$item] .= "</tbody></table>";
 
-    if (isset($report['starting_items']['builds'])) {
+    if (
+      isset(
+        $report['starting_items']['builds'][0]['data'][0],
+        $report['starting_items']['builds'][0]['head'][1]
+      )
+      && is_array($report['starting_items']['builds'][0]['data'][0])
+    ) {
       $builds = [];
 
       foreach ($report['starting_items']['builds'][0]['data'][0] as $build) {
         $build = array_combine($report['starting_items']['builds'][0]['head'][1], $build);
-        if (!in_array($item, $build['build'])) continue;
+        if ($build === false || !in_array($item, $build['build'])) continue;
         $builds[] = $build;
       }
 

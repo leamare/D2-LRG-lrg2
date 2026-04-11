@@ -11,18 +11,35 @@ public function process() {
   $mods = $this->mods; $vars = $this->vars; $report = $this->report;
   if (!in_array("heroes", $mods)) throw new UserInputException("This module is only available for heroes");
 
-  if (is_wrapped($report['hero_summary_variants'])) $report['hero_summary_variants'] = unwrap_data($report['hero_summary_variants']);
+  if (!isset($report['hero_summary_variants'])) {
+    return [];
+  }
+  if (is_wrapped($report['hero_summary_variants'])) {
+    $report['hero_summary_variants'] = unwrap_data($report['hero_summary_variants']);
+  }
+  if (!is_array($report['hero_summary_variants'])) {
+    return [];
+  }
 
   $i = $vars['position'] ? array_search($vars['position'], ROLES_IDS_SIMPLE) : 0;
+  if ($i === false) {
+    $i = 0;
+  }
 
-  $context = array_filter($report['hero_summary_variants'][$i], function($e) {
+  $variant_row = $report['hero_summary_variants'][$i] ?? [];
+  $context = array_filter(is_array($variant_row) ? $variant_row : [], function($e) {
     return !empty($e) && !empty($e['matches_s']);
   });
   uasort($context, function($a, $b) {
     return $b['matches_s'] <=> $a['matches_s'];
   });
 
+  if (empty($context)) {
+    return [];
+  }
+
   $total_matches = 0;
+  $matches = [];
   foreach ($context as $id => $c) {
     if (empty($c) || !$id) continue;
     if ($total_matches < $c['matches_s']) $total_matches = $c['matches_s'];

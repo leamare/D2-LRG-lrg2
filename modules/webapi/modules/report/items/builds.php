@@ -249,6 +249,9 @@ public function process() {
           $stib_context =& $report['starting_items']['builds'][0][0];
         }
 
+        if (!is_array($stib_context)) {
+          $stib_context = [];
+        }
         $stib_context = array_filter($stib_context, function($el) { return !empty($el); });
 
         usort($stib_context, function($a, $b) {
