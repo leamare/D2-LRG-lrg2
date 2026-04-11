@@ -705,8 +705,7 @@ function fetch($match) {
       // this block of code is outdated and is supposed to work only in emergency situations
       // I'll still change it to use graphql though
       $full_request = false;
-      if(($matchdata['game_mode'] == 22 || $matchdata['game_mode'] == 3 || empty($matchdata['picks_bans'])) && 
-          (!in_array($match, $failed_matches))) {
+      if (empty($matchdata['picks_bans']) && !in_array($match, $failed_matches)) {
         $stratz_retries = $stratz_timeout_retries+1;
         
         while ((empty($stratz['stats']['pickBans']) || empty($stratz['stats']['pickBans']) || empty($stratz)) && $use_full_stratz) {
@@ -1554,19 +1553,22 @@ function fetch($match) {
         $t_draft[$i]['order'] = $i;
         $i++;
       }
-    }
-    
-    if (empty($t_draft)) {
-      foreach($matchdata['players'] as $draft_instance) {
-          if (!isset($draft_instance['hero_id']) || !$draft_instance['hero_id'])
-            continue;
-          $t_draft[$i]['matchid'] = $match;
-          $t_draft[$i]['is_radiant'] = $draft_instance['isRadiant'];
-          $t_draft[$i]['is_pick'] = 1;
-          $t_draft[$i]['hero_id'] = $draft_instance['hero_id'];
-          $t_draft[$i]['stage'] = 1;
-          $t_draft[$i]['order'] = 0;
-          $i++;
+    } else if (($matchdata['game_mode'] == 22 || $matchdata['game_mode'] == 3)) {
+      foreach ($matchdata['picks_bans'] as $draft_instance) {
+        $is_radiant = $draft_instance['team'] == 0 ? 1 : 0;
+        $is_pick = $draft_instance['is_pick'] ?? $draft_instance['pick'];
+        $hero_id = $draft_instance['hero_id'] ?? $draft_instance['heroId'];
+        $order = $is_pick ? $draft_instance['order'] : 0;
+
+        $stage = $order < 4 ? 1 : ($order < 8 ? 2 : 3);
+        
+        $t_draft[$i]['matchid'] = $match;
+        $t_draft[$i]['is_radiant'] = $is_radiant;
+        $t_draft[$i]['is_pick'] = $is_pick;
+        $t_draft[$i]['hero_id'] = $hero_id;
+        $t_draft[$i]['stage'] = $stage;
+        $t_draft[$i]['order'] = $order;
+        $i++;
       }
     }
   }
