@@ -145,15 +145,43 @@ function rg_view_generate_players_profiles() {
     }
     $res['playerid'.$player] .= "</div>";
 
+    $has_teams = isset($report['match_participants_teams']);
+
+    // primary position per hero via hero_positions_matches overlap with player's match IDs
+    $has_pos_data = isset($report['hero_positions_matches']);
+    $hero_primary_pos = [];
+    if ($has_pos_data) {
+      foreach ($heroes as $hid => $hdata) {
+        $pos_counts = [];
+        for ($i=1; $i>=0; $i--) {
+          for ($j=($i ? 0 : 5); $j<6 && $j>=0; ($i ? $j++ : $j--)) {
+            if (empty($report['hero_positions_matches'][$i][$j][$hid])) continue;
+            $overlap = count(array_intersect(
+              $report['hero_positions_matches'][$i][$j][$hid],
+              $hdata['matchlinks']
+            ));
+            if ($overlap > 0) $pos_counts["$i.$j"] = $overlap;
+          }
+        }
+        if (!empty($pos_counts)) {
+          arsort($pos_counts);
+          $hero_primary_pos[$hid] = array_key_first($pos_counts);
+        }
+      }
+    }
+
     $res['playerid'.$player] .= "<table id=\"player-profile-pid$player-heroes\" class=\"list sortable\"><thead><tr>".
       "<th width=\"2%\"></th>".
       "<th>".locale_string("hero")."</th>".
       "<th>".locale_string("matches")."</th>".
       "<th>".locale_string("winrate")."</th>".
+      ($has_pos_data ? "<th>".locale_string("position")."</th>" : "").
       "<th>".locale_string("matchlinks")."</th>".
     "</tr></thead>";
 
-    $has_teams = isset($report['match_participants_teams']);
+    if ($has_pos_data) {
+      generate_positions_strings();
+    }
 
     $res['playerid'.$player] .= "<tbody>";
     foreach ($heroes as $hid => $data) {
@@ -177,18 +205,14 @@ function rg_view_generate_players_profiles() {
         }
         if (!empty($vs_teams)) {
           uasort($vs_teams, function($a, $b) { return $b['matches'] <=> $a['matches']; });
-          $modal_html .= "<table class=\"list\"><thead><tr>".
-            "<th>".locale_string("team")."</th>".
-            "<th>".locale_string("matches")."</th>".
-            "<th>".locale_string("winrate")."</th>".
-            "</tr></thead><tbody>";
           foreach ($vs_teams as $tid => $tdata) {
-            $modal_html .= "<tr><td>".($tid > 0 ? team_link($tid) : '-')."</td>".
-              "<td>".$tdata['matches']."</td>".
-              "<td>".number_format(100*$tdata['wins']/max(1, $tdata['matches']), 2)."%</td>".
-              "</tr>";
+            $modal_html .= "<div class=\"match-link-modal\">".
+              ($tid > 0 ? team_link($tid) : '-').
+              " - ".$tdata['matches']." ".locale_string("matches").
+              " - ".number_format(100*$tdata['wins']/max(1, $tdata['matches']), 2)."%".
+              "</div>";
           }
-          $modal_html .= "</tbody></table>";
+          $modal_html .= "<br><hr><br>";
         }
       }
       $modal_html .= join_matches_add($data['matchlinks'], false, $player);
@@ -197,6 +221,7 @@ function rg_view_generate_players_profiles() {
         "<td>".hero_link($hid)."</td>".
         "<td>".number_format($data['matches'])."</td>".
         "<td>".number_format(100*$data['wins']/$data['matches'], 2)."%</td>".
+        ($has_pos_data ? "<td>".(isset($hero_primary_pos[$hid]) ? locale_string("position_".$hero_primary_pos[$hid]) : '-')."</td>" : "").
         "<td><a onclick=\"showModal('".
           htmlspecialchars($modal_html).
           "', '".addcslashes(player_name($player)." - ".hero_name($hid), "'")."');\">".
