@@ -153,14 +153,52 @@ function rg_view_generate_players_profiles() {
       "<th>".locale_string("matchlinks")."</th>".
     "</tr></thead>";
 
+    $has_teams = isset($report['match_participants_teams']);
+
     $res['playerid'.$player] .= "<tbody>";
     foreach ($heroes as $hid => $data) {
+      $modal_html = "";
+      if ($has_teams) {
+        $vs_teams = [];
+        foreach ($data['matchlinks'] as $mid) {
+          $rw = $report['matches_additional'][$mid]['radiant_win'] ?? null;
+          $rad = null;
+          foreach ($report['matches'][$mid] as $ml) {
+            if ($ml['player'] == $player && $ml['hero'] == $hid) { $rad = $ml['radiant']; break; }
+          }
+          if ($rad === null) continue;
+          $opp_tid = $rad
+            ? ($report['match_participants_teams'][$mid]['dire'] ?? -2)
+            : ($report['match_participants_teams'][$mid]['radiant'] ?? -1);
+          $won = ($rw !== null) ? ($rw == $rad) : null;
+          if (!isset($vs_teams[$opp_tid])) $vs_teams[$opp_tid] = ['matches' => 0, 'wins' => 0];
+          $vs_teams[$opp_tid]['matches']++;
+          if ($won) $vs_teams[$opp_tid]['wins']++;
+        }
+        if (!empty($vs_teams)) {
+          uasort($vs_teams, function($a, $b) { return $b['matches'] <=> $a['matches']; });
+          $modal_html .= "<table class=\"list\"><thead><tr>".
+            "<th>".locale_string("team")."</th>".
+            "<th>".locale_string("matches")."</th>".
+            "<th>".locale_string("winrate")."</th>".
+            "</tr></thead><tbody>";
+          foreach ($vs_teams as $tid => $tdata) {
+            $modal_html .= "<tr><td>".($tid > 0 ? team_link($tid) : '-')."</td>".
+              "<td>".$tdata['matches']."</td>".
+              "<td>".number_format(100*$tdata['wins']/max(1, $tdata['matches']), 2)."%</td>".
+              "</tr>";
+          }
+          $modal_html .= "</tbody></table>";
+        }
+      }
+      $modal_html .= join_matches_add($data['matchlinks'], false, $player);
+
       $res['playerid'.$player] .= "<tr><td>".hero_portrait($hid)."</td>".
         "<td>".hero_link($hid)."</td>".
         "<td>".number_format($data['matches'])."</td>".
         "<td>".number_format(100*$data['wins']/$data['matches'], 2)."%</td>".
         "<td><a onclick=\"showModal('".
-          htmlspecialchars(join_matches($data['matchlinks'])).
+          htmlspecialchars($modal_html).
           "', '".addcslashes(player_name($player)." - ".hero_name($hid), "'")."');\">".
           locale_string("matches").
         "</a></td>";
@@ -481,6 +519,8 @@ function rg_view_generate_players_profiles() {
       return $b['matches_s'] <=> $a['matches_s'];
     });
 
+    $has_pos_matches = isset($report['player_positions_matches']);
+
     $res['playerid'.$player] .= "<table id=\"player-profile-pid$player-positions\" class=\"list\"><caption>".locale_string("positions")."</caption><thead><tr>".
       "<th>".locale_string("position")."</th>".
       "<th>".locale_string("matches")."</th>".
@@ -489,10 +529,22 @@ function rg_view_generate_players_profiles() {
       "<th>".locale_string("kda")."</th>".
       "<th>".locale_string("gpm")."</th>".
       "<th>".locale_string("xpm")."</th>".
+      ($has_pos_matches ? "<th>".locale_string("matchlinks")."</th>" : "").
     "</tr></thead>";
 
     $res['playerid'.$player] .= "<tbody>";
     foreach ($roles as $role => $data) {
+      $pos_matchlinks_cell = "";
+      if ($has_pos_matches) {
+        [$ri, $rj] = explode('.', $role);
+        $pos_matches = $report['player_positions_matches'][$ri][$rj][$player] ?? [];
+        $pos_matchlinks_cell = "<td>".(!empty($pos_matches) ?
+          "<a onclick=\"showModal('".
+            htmlspecialchars(join_matches_add($pos_matches, false, $player)).
+            "', '".addcslashes(player_name($player)." - ".locale_string("position_$role"), "'")."');\">".
+            locale_string("matches")."</a>"
+          : '-')."</td>";
+      }
       $res['playerid'.$player] .= "<tr>".
         "<td>".locale_string("position_$role")."</td>".
         "<td>".number_format($data['matches_s'], 0)."</td>".
@@ -501,6 +553,7 @@ function rg_view_generate_players_profiles() {
         "<td>".number_format($data['kda'] ?? 0, 2)."</td>".
         "<td>".number_format($data['gpm'], 0)."</td>".
         "<td>".number_format($data['xpm'], 0)."</td>".
+        $pos_matchlinks_cell.
       "</tr>";
     }
     $res['playerid'.$player] .= "</tbody></table>";

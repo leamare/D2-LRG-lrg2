@@ -156,7 +156,7 @@ function rg_view_generate_heroes_profiles() {
 
         if (isset($report['hero_positions_matches'])) {
           $roles["$i.$j"][] = "<a onclick=\"showModal('".
-            htmlspecialchars(join_matches($report['hero_positions_matches'][$i][$j][$hero])).
+            htmlspecialchars(join_matches_add($report['hero_positions_matches'][$i][$j][$hero], true, $hero, false, true)).
             "', '".locale_string("matches")." - ".addcslashes(hero_name($hero)." - ".locale_string("position_$i.$j"), "'")."');\">".
             locale_string("matches")."</a>";
         }
@@ -556,12 +556,28 @@ function rg_view_generate_heroes_profiles() {
   }
 
   if (isset($report['hero_variants'])) {
+    $has_variant_matches = isset($report['matches']);
+
+    // index match IDs by facet variant
+    $variant_matchlinks = [];
+    if ($has_variant_matches) {
+      foreach ($report['matches'] as $mid => $mlines) {
+        foreach ($mlines as $ml) {
+          if ($ml['hero'] != $hero) continue;
+          $var = $ml['var'] ?? null;
+          if ($var !== null) $variant_matchlinks[$var][] = $mid;
+          break;
+        }
+      }
+    }
+
     $res['heroid'.$hero] .= "<div class=\"content-text\"><h1>".locale_string("variants")."</h1></div>";
     $res['heroid'.$hero] .= "<table id=\"profile-$hero-variants\" class=\"list\"><thead><tr>".
       "<th>".locale_string("facet")."</th>".
       "<th>".locale_string("ratio")."</th>".
       "<th>".locale_string("matches")."</th>".
       "<th>".locale_string("winrate")."</th>".
+      ($has_variant_matches ? "<th>".locale_string("matchlinks")."</th>" : "").
     "</tr></thead><tbody>";
 
     $meta['facets'];
@@ -582,11 +598,18 @@ function rg_view_generate_heroes_profiles() {
         continue;
       }
 
+      $vmatches = $variant_matchlinks[$i] ?? [];
+
       $res['heroid'.$hero] .= "<tr>".
         "<td>".facet_full_element($hero, $i)."</td>".
         "<td>".number_format(100*$stats['f'], 2)."%</td>".
         "<td>".$stats['m']."</td>".
         "<td>".number_format($stats['m'] ? 100*$stats['w']/$stats['m'] : 0, 2)."%</td>".
+        ($has_variant_matches ? "<td>".(!empty($vmatches) ?
+          "<a onclick=\"showModal('".htmlspecialchars(join_matches_add($vmatches, true, $hero, false, true))."', '".
+            addcslashes(hero_name($hero)." - ".get_facet_name($hero, $i), "'")."');\">".
+            locale_string("matches")."</a>"
+          : '-')."</td>" : "").
       "</tr>";
     }
 
@@ -916,6 +939,8 @@ function rg_view_generate_heroes_profiles() {
       'matches_s', 'winrate_s', 'kills', 'deaths', 'assists', 'gpm', 'xpm', 
     ];
 
+    $has_facet_matches = isset($report['hero_positions_matches']) && isset($report['matches']);
+
     $stats = [];
     $facets_list = isset($report['meta']['variants']) ? array_keys($report['meta']['variants'][$hero]) : $meta['facets']['heroes'][$hero];
     foreach ($facets_list as $i => $facet) {
@@ -929,6 +954,22 @@ function rg_view_generate_heroes_profiles() {
           continue;
         }
 
+        $facet_matchlinks = [];
+        if ($has_facet_matches) {
+          $pos_key = ROLES_IDS_SIMPLE[$j] ?? '';
+          if ($pos_key !== '') {
+            [$ri, $rj] = explode('.', $pos_key);
+            foreach ($report['hero_positions_matches'][$ri][$rj][$hero] ?? [] as $mid) {
+              if (!isset($report['matches'][$mid])) continue;
+              foreach ($report['matches'][$mid] as $ml) {
+                if ($ml['hero'] != $hero) continue;
+                if (($ml['var'] ?? null) == $i) $facet_matchlinks[] = $mid;
+                break;
+              }
+            }
+          }
+        }
+
         $stats[] = [
           'variant' => $i,
           'position' => ROLES_IDS[$j],
@@ -939,6 +980,7 @@ function rg_view_generate_heroes_profiles() {
           'assists' => isset($hero_stats['assists']) ? round($hero_stats['assists'], 1) : '-',
           'gpm' => isset($hero_stats['gpm']) ? round($hero_stats['gpm'], 1) : '-',
           'xpm' => isset($hero_stats['xpm']) ? round($hero_stats['xpm'], 1) : '-',
+          'matchlinks' => $facet_matchlinks,
         ];
       }
     }
@@ -956,6 +998,7 @@ function rg_view_generate_heroes_profiles() {
       "<th>".locale_string("assists")."</th>".
       "<th>".locale_string("gpm")."</th>".
       "<th>".locale_string("xpm")."</th>".
+      ($has_facet_matches ? "<th>".locale_string("matchlinks")."</th>" : "").
       "</tr>".
     "</thead><tbody>";
 
@@ -974,6 +1017,11 @@ function rg_view_generate_heroes_profiles() {
         "<td>".$line['assists']."</td>".
         "<td>".$line['gpm']."</td>".
         "<td>".$line['xpm']."</td>".
+        ($has_facet_matches ? "<td>".(!empty($line['matchlinks']) ?
+          "<a onclick=\"showModal('".htmlspecialchars(join_matches_add($line['matchlinks'], true, $hero, false, true))."', '".
+            addcslashes(hero_name($hero)." - ".locale_string($line['position']), "'")."');\">".
+            locale_string("matches")."</a>"
+          : '-')."</td>" : "").
       "</tr>";
     }
 
@@ -1458,38 +1506,100 @@ function rg_view_generate_heroes_profiles() {
   // players
   if (isset($report['matches']) && isset($report['players'])) {
     $players = [];
-    foreach ($report['matches'] as $mid => $heroes) {
-      foreach ($heroes as $data) {
-        if ($data['hero'] != $hero) continue;
-        if (!isset($players[ $data['player'] ])) {
-          $players[ $data['player'] ] = [
-            'wins' => 0,
-            'matches' => 0,
-          ];
+    foreach ($report['matches'] as $mid => $mheroes) {
+      foreach ($mheroes as $ml) {
+        if ($ml['hero'] != $hero) continue;
+        $pid = $ml['player'];
+        if (!isset($players[$pid])) {
+          $players[$pid] = ['wins' => 0, 'matches' => 0, 'matchlinks' => []];
         }
-        $players[ $data['player'] ]['matches']++;
-        if ($data['radiant'] == $report['matches_additional'][$mid]['radiant_win'])
-          $players[ $data['player'] ]['wins']++;
+        $players[$pid]['matches']++;
+        if ($ml['radiant'] == $report['matches_additional'][$mid]['radiant_win'])
+          $players[$pid]['wins']++;
+        $players[$pid]['matchlinks'][] = $mid;
       }
     }
+
+    // primary position per player via hero_positions_matches overlap
+    $has_pos_data = isset($report['hero_positions_matches']);
+    $player_primary_pos = [];
+    if ($has_pos_data) {
+      foreach (array_keys($players) as $pid) {
+        $pos_counts = [];
+        for ($i=1; $i>=0; $i--) {
+          for ($j=($i ? 0 : 5); $j<6 && $j>=0; ($i ? $j++ : $j--)) {
+            if (empty($report['hero_positions_matches'][$i][$j][$hero])) continue;
+            $overlap = count(array_intersect(
+              $report['hero_positions_matches'][$i][$j][$hero],
+              $players[$pid]['matchlinks']
+            ));
+            if ($overlap > 0) $pos_counts["$i.$j"] = $overlap;
+          }
+        }
+        if (!empty($pos_counts)) {
+          arsort($pos_counts);
+          $player_primary_pos[$pid] = array_key_first($pos_counts);
+        }
+      }
+    }
+
+    $has_teams = isset($report['match_participants_teams']);
 
     $res['heroid'.$hero] .= "<div class=\"content-text\"><h1>".locale_string("players")."</h1></div>";
 
     $res['heroid'.$hero] .= search_filter_component("profile-$hero-players");
-    $res['heroid'.$hero] .=  "<table id=\"profile-$hero-players\" class=\"list sortable\"><thead><tr>".
+    $res['heroid'.$hero] .= "<table id=\"profile-$hero-players\" class=\"list sortable\"><thead><tr>".
       "<th>".locale_string("player")."</th>".
       "<th>".locale_string("matches")."</th>".
       "<th>".locale_string("winrate")."</th>".
       "<th>".locale_string("ratio")."</th>".
-      "</tr>".
-    "</thead><tbody>";
+      ($has_pos_data ? "<th>".locale_string("position")."</th>" : "").
+      "<th>".locale_string("matchlinks")."</th>".
+      "</tr></thead><tbody>";
 
     foreach ($players as $pid => $data) {
-      $res['heroid'.$hero] .=  "<tr>".
+      $modal_html = "";
+      if ($has_teams) {
+        $vs_teams = [];
+        foreach ($data['matchlinks'] as $mid) {
+          $rw = $report['matches_additional'][$mid]['radiant_win'] ?? null;
+          $rad = null;
+          foreach ($report['matches'][$mid] as $ml) {
+            if ($ml['hero'] == $hero) { $rad = $ml['radiant']; break; }
+          }
+          if ($rad === null) continue;
+          $opp_tid = $rad
+            ? ($report['match_participants_teams'][$mid]['dire'] ?? -2)
+            : ($report['match_participants_teams'][$mid]['radiant'] ?? -1);
+          $won = ($rw !== null) ? ($rw == $rad) : null;
+          if (!isset($vs_teams[$opp_tid])) $vs_teams[$opp_tid] = ['matches' => 0, 'wins' => 0];
+          $vs_teams[$opp_tid]['matches']++;
+          if ($won) $vs_teams[$opp_tid]['wins']++;
+        }
+        if (!empty($vs_teams)) {
+          uasort($vs_teams, function($a, $b) { return $b['matches'] <=> $a['matches']; });
+          foreach ($vs_teams as $tid => $tdata) {
+            $modal_html .= "<div class=\"match-link-modal\">".
+              ($tid > 0 ? team_link($tid) : '-').
+              " - ".$tdata['matches']." ".locale_string("matches").
+              " - ".number_format(100*$tdata['wins']/max(1, $tdata['matches']), 2)."%".
+              "</div>";
+          }
+          $modal_html .= "<br><hr><br>";
+        }
+      }
+      $modal_html .= join_matches_add($data['matchlinks'], true, $hero);
+
+      $res['heroid'.$hero] .= "<tr>".
         "<td>".player_link($pid)."</td>".
         "<td>".$data['matches']."</td>".
         "<td>".number_format(100*$data['wins']/$data['matches'], 2)."%</td>".
         "<td>".number_format(100*$data['matches']/max(1, $el['matches_total'] ?? 0), 2)."%</td>".
+        ($has_pos_data ? "<td>".(isset($player_primary_pos[$pid]) ? locale_string("position_".$player_primary_pos[$pid]) : '-')."</td>" : "").
+        "<td><a onclick=\"showModal('".htmlspecialchars($modal_html)."', '".
+          addcslashes(hero_name($hero)." - ".player_name($pid), "'")."');\">".
+          locale_string("matches").
+        "</a></td>".
       "</tr>";
     }
 

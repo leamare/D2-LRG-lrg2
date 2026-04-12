@@ -10,7 +10,7 @@ function join_matches($matches) {
   return "<div class=\"match-link-modal\">".implode("</div><div class=\"match-link-modal\">", $output)."</div>";
 }
 
-function join_matches_add($matches, $ishero, $id, $variants = false) {
+function join_matches_add($matches, $ishero, $id, $variants = false, $show_player = false) {
   global $report;
 
   // !isset($report['match_participants_teams']) || 
@@ -23,10 +23,12 @@ function join_matches_add($matches, $ishero, $id, $variants = false) {
     $rw = $report['matches_additional'][$match]['radiant_win'];
     $rad = null;
     $variant = null;
+    $match_player = null;
     foreach ($report['matches'][$match] as $l) {
       if ($l[ $ishero ? 'hero' : 'player' ] == $id) {
         $rad = $l['radiant'];
         $variant = $l['var'] ?? null;
+        if ($show_player && $ishero) $match_player = $l['player'] ?? null;
         break;
       }
     }
@@ -44,6 +46,7 @@ function join_matches_add($matches, $ishero, $id, $variants = false) {
             $report['match_participants_teams'][$match]['dire'] ?? -2,
           $rw == $rad
         ).
+        ($show_player && $match_player !== null ? ' ('.htmlspecialchars(player_name($match_player)).')' : '').
       "</span>";
     } else {
       $output[] = "<span class=\"match-link-modal\">".
