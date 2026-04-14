@@ -171,7 +171,12 @@ function rg_generator_pickban_overview($table_id, $context, $context_main, $limi
 
   uasort($context, $compound_ranking_sort);
 
-  $increment = 100 / sizeof($context); $i = 0;
+  if (empty($context)) {
+    $increment = 0;
+  } else {  
+    $increment = 100 / sizeof($context);
+  }
+  $i = 0;
 
   foreach ($context as $id => $el) {
     $ranks[$id] = 100 - $increment*$i++;

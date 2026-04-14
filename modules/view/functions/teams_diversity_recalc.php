@@ -123,6 +123,15 @@ function balance_rank($pickban) {
   sort($wr);
   $medwr = $wr[ round(count($wr)*0.5) ];
 
+  if (empty($wr)) {
+    return [
+      0,
+      0,
+      0,
+      0
+    ];
+  }
+
   $maxwr = max($wr)-$medwr;
 
   $skew_wr = core_picked_percentage($wr, $medwr-0.5*$maxwr, $medwr+0.5*$maxwr);

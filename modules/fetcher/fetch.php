@@ -1439,6 +1439,10 @@ function fetch($match) {
     else 
       $drafts =& $matchdata['draft_timings'];
 
+    if (empty($matchdata['game_mode'])) {
+      $matchdata['game_mode'] = $matchdata['mode'] ?? 1;
+    }
+
     if (($matchdata['game_mode'] == 2 || $matchdata['game_mode'] == 8) && !empty($drafts)) {
         $stage = 0;
         $last_stage_pick = null;
