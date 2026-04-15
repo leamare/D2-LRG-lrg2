@@ -11,6 +11,7 @@
     "notice_missing_data": "Este relatório inclui dados de um evento que não foi totalmente gravado, com um número significativo de partidas ausentes. Para isso, várias técnicas foram usadas para restaurar os dados ausentes. Haverá alguns recursos ausentes, desvios de medição ou inconsistências, mas tentei manter tudo o mais consistente possível, dadas as circunstâncias.",
     "sources_used": "Fontes usadas para este relatório",
     "enchantments_recalc_notice": "Os dados de encantamentos neste relatório foram coletados e registrados usando métodos menos robustos e foram recalculados, usando técnicas de estimativa para aproximadamente corresponder à imagem real",
+    "items_recalc_notice": "Os dados de itens neste relatório foram parcialmente restaurados de um conjunto de dados de referência usando recálculo Bayesiano. Os resultados podem estar incompletos ou imprecisos para entidades não observadas no conjunto de dados original.",
     "game_num": "Partida",
     "meet_num": "Séries",
     "league_name": "Nome de relatório",

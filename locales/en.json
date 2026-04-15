@@ -32,6 +32,7 @@
     "notice_missing_data": "This report includes data from an event, which was not fully recorded, with a significant number of matches missing. For this several techniques were used to restore the missing data. There will be some missing features, measurement deviations or inconsistencies, but I tried to keep everything as consistent as possible, given the circumstances.",
     "sources_used": "Sources used for this report",
     "enchantments_recalc_notice": "Enchantments data in this report was collected and recorded using less robust methods and was recalculated, using estimation techniques to roughly match the real picture",
+    "items_recalc_notice": "Items data in this report was partially restored from a reference dataset using Bayesian recalculation. Results may be incomplete or inaccurate for entities not observed in the original dataset.",
     "game_num": "Game",
     "meet_num": "Series",
     "minute_short": "min",

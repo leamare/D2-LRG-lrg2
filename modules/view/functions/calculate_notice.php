@@ -38,11 +38,17 @@ function calculate_notice() {
         $notice = "notice_source1";
       }
     } else {
-      return "";
+      $notice = "";
     }
   }
 
-  return "<div class=\"content-text alert info\">".locale_string($notice)."</div>";
+  $out = $notice ? "<div class=\"content-text alert info\">".locale_string($notice)."</div>" : "";
+
+  if (!empty($report['settings']['items_recalc'])) {
+    $out .= "<div class=\"content-text alert\">".locale_string("items_recalc_notice")."</div>";
+  }
+
+  return $out;
 }
 
 function sources_notice() {
