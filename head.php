@@ -6,7 +6,7 @@ require_once("modules/commons/instaquery.php");
 require_once("modules/commons/unzero.php");
 
 if(isset($argv)) {
-    $options = getopt("l:m:d:FfKT:o:c:SsRrZQw:LAP:N:e:uUpG:nWaM:j:");
+    $options = getopt("l:m:d:Ff:KT:o:c:SsRrZQw:LAP:N:e:uUpG:nWaM:j:");
 
     if(isset($options['l'])) {
       $lrg_league_tag = $options['l'];
@@ -61,3 +61,5 @@ if(isset($argv)) {
     $lg_settings = json_decode($lg_settings, true);
   }
   $lrg_use_cache = true;
+
+  $ignore_api_key = null;
