@@ -48,7 +48,9 @@ foreach ([[$file_a, 'A'], [$file_b, 'B']] as [$f, $label]) {
   if (!is_file($f)) die("[F] $label report not found: $f\n");
 }
 
-$outfile = $outfile ?: preg_replace('/\.json$/', '', $file_a).'.replaced.json';
+// Default: overwrite A in-place, back up original as .old
+$explicit_outfile = $outfile;
+$outfile = $outfile ?: $file_a;
 
 echo "[I] Loading A: $file_a\n";
 $rep_a = json_decode((string)file_get_contents($file_a), true);
@@ -265,83 +267,94 @@ function scale_items_combos(array $b_raw, ?array $a_raw, int $n_b_total, int $n_
   $b_combos = unwrap_data($b_raw);
   $a_combos = $a_raw ? unwrap_data($a_raw) : [];
 
-  foreach ($b_combos as $iid1 => &$pairs) {
-    if (!is_array($pairs)) continue;
-    foreach ($pairs as $iid2 => &$b_data) {
-      if (!is_array($b_data) || !isset($b_data['matches'])) continue;
-      $a_data = $a_combos[$iid1][$iid2] ?? null;
+  // Start from A's data; inject/update from B where B has a notably higher pair rate.
+  $merged = $a_combos;
 
-      if ($a_data !== null) {
-        // prefer A if its match count is proportionally similar (within 25%)
-        $m_b = max(1, (int)$b_data['matches']);
-        $m_a = max(0, (int)$a_data['matches']);
-        $expected_a = (int)round($m_b * $n_a_total / $n_b_total);
-        if ($expected_a > 0 && abs($m_a - $expected_a) / $expected_a <= 0.25) {
-          $b_data = $a_data;
+  foreach ($b_combos as $iid1 => $pairs) {
+    if (!is_array($pairs)) continue;
+    foreach ($pairs as $iid2 => $b_data) {
+      if (!is_array($b_data) || !isset($b_data['matches'])) continue;
+
+      $m_b    = max(0, (int)$b_data['matches']);
+      $rate_b = $n_b_total > 0 ? $m_b / $n_b_total : 0.0;
+      $se_b   = $n_b_total > 0 ? sqrt(max(0.0, $rate_b * (1.0 - $rate_b)) / $n_b_total) : 1.0;
+
+      if (isset($a_combos[$iid1][$iid2])) {
+        $m_a_ex  = max(0, (int)($a_combos[$iid1][$iid2]['matches'] ?? 0));
+        $rate_a  = $n_a_total > 0 ? $m_a_ex / $n_a_total : 0.0;
+        // Keep A unless B's rate is notably higher (more than 1 SE above A)
+        if ($rate_b <= $rate_a + $se_b) {
+          $merged[$iid1][$iid2] = $a_combos[$iid1][$iid2];
           continue;
         }
       }
 
-      // scale B
-      $m_b = max(0, (int)$b_data['matches']);
+      // Missing in A, or B rate clearly higher → scale B
       $w_b = max(0, (int)$b_data['wins']);
       $e_b = max(0, (int)($b_data['exp'] ?? 0));
-
       $m_a = scale_count($m_b, $n_b_total, $n_a_total);
       $w_a = $m_a > 0 ? scale_count($w_b, $m_b, $m_a) : 0;
       $e_a = $m_a > 0 ? scale_count($e_b, $m_b, $m_a) : 0;
-
-      $b_data['matches'] = $m_a;
-      $b_data['wins']    = $w_a;
-      $b_data['exp']     = $e_a;
+      $merged[$iid1][$iid2] = array_merge($b_data, [
+        'matches' => $m_a,
+        'wins'    => $w_a,
+        'exp'     => $e_a,
+      ]);
     }
   }
 
-  // Re-add any pairs only present in A (Rule 1)
-  foreach ($a_combos as $iid1 => $pairs) {
-    if (!is_array($pairs)) continue;
-    foreach ($pairs as $iid2 => $a_data) {
-      if (!isset($b_combos[$iid1][$iid2])) {
-        $b_combos[$iid1][$iid2] = $a_data;
-      }
-    }
-  }
-
-  return wrap_data($b_combos, true, true, true);
+  return wrap_data($merged, true, true, true);
 }
 
 // ---------------------------------------------------------------------------
 // Section: items/progr and items/progrole
 // ---------------------------------------------------------------------------
 
-function scale_progr_pairs(array $pairs, array $a_pairs_by_key, int $n_b, int $n_a): array {
-  $out = [];
-  foreach ($pairs as &$pair) {
+/**
+ * Merge B's progression pairs into A's, preferring A when the pair exists in both.
+ * B-only pairs are scaled from n_b → n_a.
+ */
+function scale_progr_pairs(array $b_pairs, array $a_pairs_by_key, int $n_b, int $n_a): array {
+  $out      = [];
+  $b_keys   = [];
+
+  foreach ($b_pairs as $pair) {
     if (empty($pair)) continue;
     $key = ($pair['item1'] ?? '').'-'.($pair['item2'] ?? '');
-    $a_pair = $a_pairs_by_key[$key] ?? null;
+    $b_keys[] = $key;
 
-    $t_b = max(0, (int)($pair['total'] ?? 0));
-    $w_b = max(0, (int)($pair['wins']  ?? 0));
+    $t_b    = max(0, (int)($pair['total'] ?? 0));
+    $w_b    = max(0, (int)($pair['wins']  ?? 0));
+    $rate_b = $n_b > 0 ? $t_b / $n_b : 0.0;
+    $se_b   = $n_b > 0 ? sqrt(max(0.0, $rate_b * (1.0 - $rate_b)) / $n_b) : 1.0;
 
-    if ($a_pair !== null) {
-      $t_a = max(0, (int)($a_pair['total'] ?? 0));
-      $expected = $n_b > 0 ? (int)round($t_b * $n_a / $n_b) : 0;
-      // Within 30% of expected → prefer A
-      if ($expected > 0 && abs($t_a - $expected) / $expected <= 0.30) {
-        $out[] = $a_pair;
+    if (isset($a_pairs_by_key[$key])) {
+      $t_a_ex  = max(0, (int)($a_pairs_by_key[$key]['total'] ?? 0));
+      $rate_a  = $n_a > 0 ? $t_a_ex / $n_a : 0.0;
+      // Keep A unless B's pair rate is notably higher
+      if ($rate_b <= $rate_a + $se_b) {
+        $out[] = $a_pairs_by_key[$key];
         continue;
       }
     }
 
+    // Missing in A or B rate clearly higher → scale B
     $t_a = scale_count($t_b, $n_b, $n_a);
     $w_a = $t_a > 0 ? scale_count($w_b, $t_b, $t_a) : 0;
-
-    $pair['total']   = $t_a;
-    $pair['wins']    = $w_a;
-    $pair['winrate'] = $t_a > 0 ? round($w_a / $t_a, 4) : 0.0;
-    $out[] = $pair;
+    $out[] = array_merge($pair, [
+      'total'   => $t_a,
+      'wins'    => $w_a,
+      'winrate' => $t_a > 0 ? round($w_a / $t_a, 4) : 0.0,
+    ]);
   }
+
+  // A-only pairs
+  foreach ($a_pairs_by_key as $key => $a_pair) {
+    if (!in_array($key, $b_keys, true)) {
+      $out[] = $a_pair;
+    }
+  }
+
   return $out;
 }
 
@@ -366,7 +379,7 @@ function scale_items_progr(array $b_raw, ?array $a_raw, array $hero_a, array $he
     $a_pairs = $a_progr[$hid] ?? [];
 
     if ($b_pairs === null) {
-      $b_progr[$hid] = $a_pairs; // only in A
+      $b_progr[$hid] = $a_pairs;
       continue;
     }
 
@@ -374,21 +387,7 @@ function scale_items_progr(array $b_raw, ?array $a_raw, array $hero_a, array $he
     $n_a = hero_target($hid, $hero_a, $hero_b);
     if ($n_b <= 0 || $n_a <= 0) continue;
 
-    $a_idx = index_progr_pairs($a_pairs);
-
-    // Also carry A-only pairs at the end
-    $b_progr[$hid] = scale_progr_pairs($b_pairs, $a_idx, $n_b, $n_a);
-
-    foreach ($a_pairs as $ap) {
-      $key = ($ap['item1'] ?? '').'-'.($ap['item2'] ?? '');
-      $found = false;
-      foreach ($b_progr[$hid] as $bp) {
-        if (($bp['item1'] ?? '').(($bp['item2'] ?? '') === ($ap['item1'] ?? '').($ap['item2'] ?? ''))) {
-          $found = true; break;
-        }
-      }
-      if (!$found) $b_progr[$hid][] = $ap;
-    }
+    $b_progr[$hid] = scale_progr_pairs($b_pairs, index_progr_pairs($a_pairs), $n_b, $n_a);
   }
 
   return wrap_data($b_progr, true, true, true);
@@ -409,10 +408,10 @@ function scale_items_progrole(array $b_raw, ?array $a_raw, array $hero_a, array 
     $a_hero_roles = $a_data[$hid] ?? [];
 
     foreach ($roles as $roleid => &$pairs_encoded) {
-      $decode_pair = function(array $elem) use ($keys) {
+      $decode_pair = function(array $elem) use ($keys): array {
         return !empty($keys) ? array_combine($keys, $elem) : $elem;
       };
-      $encode_pair = function(array $p) use ($keys) {
+      $encode_pair = function(array $p) use ($keys): array {
         if (empty($keys)) return $p;
         $out = [];
         foreach ($keys as $k) { $out[] = $p[$k] ?? null; }
@@ -421,17 +420,17 @@ function scale_items_progrole(array $b_raw, ?array $a_raw, array $hero_a, array 
 
       $b_pairs = array_map($decode_pair, $pairs_encoded);
       $a_pairs = array_map($decode_pair, $a_hero_roles[$roleid] ?? []);
-      $a_idx   = index_progr_pairs($a_pairs);
 
-      $scaled  = scale_progr_pairs($b_pairs, $a_idx, $n_b, $n_a);
+      $scaled        = scale_progr_pairs($b_pairs, index_progr_pairs($a_pairs), $n_b, $n_a);
       $pairs_encoded = array_map($encode_pair, $scaled);
     }
   }
 
   // Carry heroes/roles only in A
   foreach ($a_data as $hid => $roles) {
-    if (!isset($b_data[$hid])) { $b_data[$hid] = $roles; }
-    else {
+    if (!isset($b_data[$hid])) {
+      $b_data[$hid] = $roles;
+    } else {
       foreach ($roles as $rid => $pairs) {
         if (!isset($b_data[$hid][$rid])) $b_data[$hid][$rid] = $pairs;
       }
@@ -451,11 +450,10 @@ function scale_enchantments(array $b_enc, ?array $a_enc, array $hero_a, array $h
   $all_heroes = array_unique(array_merge(array_keys($b_enc), array_keys($a_enc)));
 
   foreach ($all_heroes as $hid) {
-    $b_hero = $b_enc[$hid] ?? null;
     $a_hero = $a_enc[$hid] ?? [];
 
-    if ($b_hero === null) {
-      $b_enc[$hid] = $a_hero; // only in A
+    if (!isset($b_enc[$hid])) {
+      $b_enc[$hid] = $a_hero; // A-only hero
       continue;
     }
 
@@ -463,44 +461,63 @@ function scale_enchantments(array $b_enc, ?array $a_enc, array $hero_a, array $h
     $n_a = hero_target($hid, $hero_a, $hero_b);
     if ($n_b <= 0 || $n_a <= 0) continue;
 
-    foreach ($b_hero as $cat_id => &$b_items) {
+    // Iterate $b_enc[$hid] directly by reference — $b_hero = $b_enc[$hid] would be a
+    // copy and modifications via &$b_items would never write back.
+    foreach ($b_enc[$hid] as $cat_id => &$b_items) {
       if (empty($b_items)) continue;
       $a_items = $a_hero[$cat_id] ?? [];
 
-      $cat_total_b = 0;
-      foreach ($b_items as $idata) { $cat_total_b += max(0, (int)($idata['matches'] ?? 0)); }
-      $cat_total_a = scale_count($cat_total_b, $n_b, $n_a);
+      // The real denominator per category is cat_total (= matches + matches_wo for any item),
+      // not the hero's total match count. For tier categories it's the sum of all picks in
+      // that tier; for category 0 it's the hero's total enchantment pickups.
+      $n_enc_b = 0;
+      foreach ($b_items as $idata) {
+        if (isset($idata['matches_wo'])) {
+          $n_enc_b = (int)($idata['matches'] ?? 0) + (int)($idata['matches_wo'] ?? 0);
+          break;
+        }
+      }
+      if ($n_enc_b <= 0) {
+        // fallback: sum of matches in this category
+        foreach ($b_items as $idata) { $n_enc_b += (int)($idata['matches'] ?? 0); }
+      }
+      if ($n_enc_b <= 0) continue;
+
+      // Always scale proportionally to A's match count.
+      // Never derive from A's existing enchantment data which may be stale/wrong.
+      $n_enc_a = $n_b > 0 ? (int)round($n_enc_b * $n_a / $n_b) : 0;
+      if ($n_enc_a <= 0) continue;
 
       foreach ($b_items as $iid => &$idata) {
         $a_idata = $a_items[$iid] ?? null;
 
-        $m_b = max(0, (int)($idata['matches'] ?? 0));
-        $w_b = max(0, (int)($idata['wins']    ?? 0));
+        $m_b   = max(0, (int)($idata['matches'] ?? 0));
+        $w_b   = max(0, (int)($idata['wins']    ?? 0));
+        $wo_b  = max(0, (int)($idata['matches_wo'] ?? max(0, $n_enc_b - $m_b)));
+        $wo_wr_b = (float)($idata['wr_wo'] ?? 0);
+        $wo_wins_b = (int)round($wo_wr_b * $wo_b);
 
         if ($a_idata !== null) {
-          $m_a = max(0, (int)($a_idata['matches'] ?? 0));
-          $wr_a = (float)($a_idata['wr'] ?? 0);
-          $wr_b = $m_b > 0 ? round($w_b / $m_b, 4) : 0.0;
+          $m_a   = max(0, (int)($a_idata['matches'] ?? 0));
+          $wr_a  = (float)($a_idata['wr'] ?? 0);
+          $wr_b  = $m_b > 0 ? $w_b / $m_b : 0.0;
           $wr_se = $m_b > 0 ? sqrt($wr_b * (1.0 - $wr_b) / $m_b) : 1.0;
-          $expected_m = scale_count($m_b, $n_b, $n_a);
+          $expected_m = scale_count($m_b, $n_enc_b, $n_enc_a);
           if (abs($wr_a - $wr_b) <= 2.0 * $wr_se && abs($m_a - $expected_m) <= max(1, $expected_m * 0.25)) {
-            // similar → keep A
-            continue;
+            continue; // similar → keep A
           }
         }
 
-        $m_a  = scale_count($m_b, $n_b, $n_a);
+        $m_a  = scale_count($m_b, $n_enc_b, $n_enc_a);
         $w_a  = $m_a > 0 ? scale_count($w_b, $m_b, $m_a) : 0;
-        $idata['matches'] = $m_a;
-        $idata['wins']    = $w_a;
-        $idata['wr']      = $m_a > 0 ? round($w_a / $m_a, 4) : 0.0;
-        $idata['matches_wo'] = max(0, $cat_total_a - $m_a);
+        $wo_a = max(0, $n_enc_a - $m_a);
+        $wo_wins_a = ($wo_a > 0 && $wo_b > 0) ? scale_count($wo_wins_b, $wo_b, $wo_a) : 0;
 
-        $wo_b     = max(0, $cat_total_b - $m_b);
-        $wo_wins_b = (int)round(($idata['wr_wo'] ?? 0) * $wo_b);
-        $wo_a     = max(0, $cat_total_a - $m_a);
-        $wo_wins_a = $wo_a > 0 ? scale_count($wo_wins_b, $wo_b, $wo_a) : 0;
-        $idata['wr_wo'] = $wo_a > 0 ? round($wo_wins_a / $wo_a, 4) : 0.0;
+        $idata['matches']    = $m_a;
+        $idata['wins']       = $w_a;
+        $idata['wr']         = $m_a > 0 ? round($w_a / $m_a, 4) : 0.0;
+        $idata['matches_wo'] = $wo_a;
+        $idata['wr_wo']      = $wo_a > 0 ? round($wo_wins_a / $wo_a, 4) : 0.0;
       }
 
       // A-only items in this category
@@ -508,6 +525,7 @@ function scale_enchantments(array $b_enc, ?array $a_enc, array $hero_a, array $h
         if (!isset($b_items[$iid])) $b_items[$iid] = $a_idata;
       }
     }
+    unset($b_items);
 
     // A-only categories
     foreach ($a_hero as $cat_id => $a_items) {
@@ -520,208 +538,242 @@ function scale_enchantments(array $b_enc, ?array $a_enc, array $hero_a, array $h
 
 // ---------------------------------------------------------------------------
 // Section: starting_items
+//
+// ALL three sub-sections are wrap_data structures.
+//   matches[role]       = wrap_data({hid: {m,wr,l}},  with_keys, deep, explicit)
+//   items[role][hid]    = wrap_data({iid: {matches,wins,lane_wins,freq}}, ...) with 'head' REMOVED
+//                         (head is stored once at items_head)
+//   builds[role]        = wrap_data({hid: [build_obj,...]}, with_keys, deep, explicit)
+//                         (deeply wrapped since build values are arrays)
+// After unwrap_data:
+//   matches[role]    → {hid: {m,wr,l}}
+//   items[role][hid] → {iid: {matches,wins,lane_wins,freq}}  (restored by prepending items_head)
+//   builds[role]     → {hid: {idx: build_obj}}  (builds indexed by position)
 // ---------------------------------------------------------------------------
 
 function scale_starting_items(array $b_si, ?array $a_si, array $hero_a, array $hero_b): array {
   $a_si = $a_si ?? [];
+  $items_head = $b_si['items_head'] ?? ['matches', 'wins', 'lane_wins', 'freq'];
 
-  // Build per-role hero match counts for B (from starting_items/matches)
-  $role_hero_b = [];
-  $role_hero_a = [];
+  // Helper: unwrap a wrapped per-role dict (matches or builds).
+  $uw = fn(?array $w): array => (is_array($w) && !empty($w)) ? (unwrap_data($w) ?: []) : [];
 
-  if (!empty($b_si['matches'])) {
-    foreach ($b_si['matches'] as $role => $wrapped) {
-      $role_data = unwrap_data($wrapped);
-      $role_hero_b[$role] = [];
-      $role_hero_a[$role] = [];
-      foreach ($role_data as $hid => $row) {
-        if (!$row) continue;
-        $n_b = max(0, (int)($row['m'] ?? 0));
-        $role_hero_b[$role][(string)$hid] = $n_b;
-        $h_b_total = hero_n($hid, $hero_b);
-        $h_a_total = hero_target($hid, $hero_a, $hero_b);
-        $scale     = $h_b_total > 0 ? $h_a_total / $h_b_total : 0.0;
-        $role_hero_a[$role][(string)$hid] = max(0, (int)round($n_b * $scale));
+  // Helper: unwrap a per-hero items entry (stored without 'head'; head in items_head).
+  $uw_items = function(?array $w) use ($items_head): array {
+    if (!is_array($w) || empty($w)) return [];
+    return unwrap_data(array_merge(['head' => $items_head], $w)) ?: [];
+  };
+
+  // Helper: re-wrap a per-hero items dict and remove 'head' (stored centrally).
+  $rw_items = function(array $items) use ($items_head): array {
+    if (empty($items)) return [];
+    $w = wrap_data($items, true, true, true);
+    unset($w['head']);
+    return $w;
+  };
+
+  // --- Build per-role hero match counts from UNWRAPPED matches ---
+  $role_hero_b        = [];
+  $role_hero_a        = [];
+  $unwrapped_matches  = []; // store for later use in builds section
+
+  foreach (($b_si['matches'] ?? []) as $role => $b_matches_wrapped) {
+    $b_role  = $uw($b_matches_wrapped);  // {hid: {m, wr, l}}
+    $a_role  = $uw($a_si['matches'][$role] ?? null);
+    $unwrapped_matches[$role] = ['b' => $b_role, 'a' => $a_role];
+
+    if (empty($b_role)) continue;
+    $role_hero_b[$role] = [];
+    $role_hero_a[$role] = [];
+    foreach ($b_role as $hid => $row) {
+      if (!is_array($row)) continue;
+      $n_b = max(0, (int)($row['m'] ?? 0));
+      $role_hero_b[$role][(string)$hid] = $n_b;
+      $a_row = $a_role[$hid] ?? null;
+      if (is_array($a_row) && (int)($a_row['m'] ?? 0) > 0) {
+        $role_hero_a[$role][(string)$hid] = (int)$a_row['m'];
+      } else {
+        $h_b = hero_n($hid, $hero_b);
+        $h_a = hero_target($hid, $hero_a, $hero_b);
+        $role_hero_a[$role][(string)$hid] = $h_b > 0 ? max(0, (int)round($n_b * $h_a / $h_b)) : 0;
       }
     }
   }
 
   $out = $b_si;
+  $out_matches_plain = []; // {role: {hid: row}}; populated by the matches section, used in builds
 
-  // --- matches ---
+  // --- matches (unwrap → scale → re-wrap) ---
   if (!empty($b_si['matches'])) {
-    foreach ($b_si['matches'] as $role => &$wrapped) {
-      $b_role = unwrap_data($wrapped);
-      $a_role = [];
-      if (!empty($a_si['matches'][$role])) {
-        $a_role = unwrap_data($a_si['matches'][$role]);
-      }
+    $out_matches_wrapped = [];
+    foreach ($b_si['matches'] as $role => $b_matches_wrapped) {
+      $b_role = $unwrapped_matches[$role]['b'] ?? [];
+      $a_role = $unwrapped_matches[$role]['a'] ?? [];
+      $out_role = [];
 
-      foreach ($b_role as $hid => &$row) {
-        if (!$row) continue;
+      foreach ($b_role as $hid => $row) {
+        if (!is_array($row)) continue;
+        $hid_s = (string)$hid;
+        $n_b   = $role_hero_b[$role][$hid_s] ?? 0;
+        $n_a   = $role_hero_a[$role][$hid_s] ?? 0;
+        $a_row = $a_role[$hid] ?? null;
+
+        if (is_array($a_row) && (int)($a_row['m'] ?? 0) > 0) {
+          $out_role[$hid] = $a_row; continue;
+        }
+        if ($n_b <= 0 || $n_a <= 0) {
+          $out_role[$hid] = $row; continue;
+        }
+        $new_row        = $row;
+        $new_row['m']   = $n_a;
+        $new_row['wr']  = round(smooth_rate_value((float)($row['wr'] ?? 0), $n_b), 4);
+        if (isset($row['l'])) $new_row['l'] = scale_count((int)$row['l'], $n_b, $n_a);
+        $out_role[$hid] = $new_row;
+      }
+      foreach ($a_role as $hid => $a_row) {
+        if (!isset($out_role[$hid]) && is_array($a_row)) $out_role[$hid] = $a_row;
+      }
+      $out_matches_plain[$role]   = $out_role;
+      $out_matches_wrapped[$role] = !empty($out_role) ? wrap_data($out_role, true, true, true) : $b_matches_wrapped;
+    }
+    $out['matches'] = $out_matches_wrapped;
+  }
+
+  // --- items (unwrap → scale → re-wrap, no similarity check) ---
+  if (!empty($b_si['items'])) {
+    $out_items_all = [];
+    foreach ($b_si['items'] as $role => $b_role_heroes) {
+      if (!is_array($b_role_heroes)) continue;
+      $out_role = [];
+      foreach ($b_role_heroes as $hid => $b_hero_wrapped) {
         $hid_s = (string)$hid;
         $n_b = $role_hero_b[$role][$hid_s] ?? 0;
         $n_a = $role_hero_a[$role][$hid_s] ?? 0;
-        if ($n_b <= 0) continue;
+        if ($n_b <= 0) $n_b = hero_n($hid, $hero_b);
+        if ($n_a <= 0) $n_a = hero_target($hid, $hero_a, $hero_b);
 
-        $a_row = $a_role[$hid] ?? null;
-        $a_wr  = (float)($a_row['wr'] ?? -1);
-        $b_wr  = (float)($row['wr'] ?? 0);
-        $wr_se = $n_b > 0 ? sqrt($b_wr * (1.0 - $b_wr) / $n_b) : 1.0;
-        if ($a_row !== null && $a_wr >= 0 && abs($a_wr - $b_wr) <= 2.0 * $wr_se) {
-          // similar → scale just m/l, keep A's wr
-          $row['m']  = $n_a;
-          $row['l']  = scale_count((int)($row['l'] ?? 0), $n_b, $n_a);
-          $row['wr'] = $a_wr;
-        } else {
-          $row['m']  = $n_a;
-          $row['l']  = scale_count((int)($row['l'] ?? 0), $n_b, $n_a);
-          $row['wr'] = smooth_rate_value($b_wr, $n_b);
-        }
-      }
+        $b_items = $uw_items($b_hero_wrapped);        // {iid: {matches,wins,lane_wins,freq}}
+        $a_items = $uw_items($a_si['items'][$role][$hid] ?? null);
 
-      // Carry A-only heroes
-      foreach ($a_role as $hid => $a_row) {
-        if (!isset($b_role[$hid]) && $a_row) $b_role[$hid] = $a_row;
-      }
-      $wrapped = wrap_data($b_role, true, true, true);
-    }
-    $out['matches'] = $b_si['matches'];
-  }
-
-  // --- items ---
-  if (!empty($b_si['items'])) {
-    $items_head = $b_si['items_head'] ?? ['matches', 'wins', 'lane_wins', 'freq'];
-
-    foreach ($b_si['items'] as $role => &$hero_map) {
-      foreach ($hero_map as $hid => &$wrapped) {
-        $hid_s = (string)$hid;
-        $n_b   = $role_hero_b[$role][$hid_s] ?? 0;
-        $n_a   = $role_hero_a[$role][$hid_s] ?? 0;
-        if ($n_b <= 0) continue;
-
-        $b_items_u = is_wrapped($wrapped)
-          ? unwrap_data($wrapped)
-          : unwrap_data(['head' => $items_head, 'data' => array_values($wrapped), 'keys' => array_keys($wrapped)]);
-
-        $a_items_u = [];
-        if (!empty($a_si['items'][$role][$hid])) {
-          $aw = $a_si['items'][$role][$hid];
-          $a_items_u = is_wrapped($aw)
-            ? unwrap_data($aw)
-            : unwrap_data(['head' => $items_head, 'data' => array_values($aw), 'keys' => array_keys($aw)]);
-        }
-
-        foreach ($b_items_u as $iid => &$iv) {
-          if (!$iv) continue;
-          $a_iv = $a_items_u[$iid] ?? null;
-
+        $out_hero = [];
+        foreach ($b_items as $iid => $iv) {
+          if (!is_array($iv)) continue;
+          if ($n_b <= 0 || $n_a <= 0) { $out_hero[$iid] = $iv; continue; }
           $m_b  = max(0, (int)($iv['matches']   ?? 0));
-          $freq_b = $n_b > 0 ? $m_b / $n_b : 0.0;
-          $freq_se = $n_b > 0 ? sqrt($freq_b * (1.0 - $freq_b) / $n_b) : 1.0;
-
-          if ($a_iv !== null) {
-            $freq_a = $n_a > 0 ? ((int)($a_iv['matches'] ?? 0)) / $n_a : 0.0;
-            if (abs($freq_a - $freq_b) <= 2.0 * $freq_se) { $iv = $a_iv; continue; }
-          }
-
-          $w_b  = max(0, (int)($iv['wins']      ?? 0));
-          $lw_b = max(0, (int)($iv['lane_wins'] ?? 0));
+          $w_b  = max(0, (int)($iv['wins']       ?? 0));
+          $lw_b = max(0, (int)($iv['lane_wins']  ?? 0));
           $m_a  = scale_count($m_b, $n_b, $n_a);
           $w_a  = $m_a > 0 ? scale_count($w_b,  $m_b, $m_a) : 0;
           $lw_a = $m_a > 0 ? scale_count($lw_b, $m_b, $m_a) : 0;
-          $iv['matches']   = $m_a;
-          $iv['wins']      = $w_a;
-          $iv['lane_wins'] = $lw_a;
-          $iv['freq']      = $n_a > 0 ? round($m_a / $n_a, 4) : 0.0;
+          $out_hero[$iid] = array_merge($iv, [
+            'matches'   => $m_a,
+            'wins'      => $w_a,
+            'lane_wins' => $lw_a,
+            'freq'      => $n_a > 0 ? round($m_a / $n_a, 4) : 0.0,
+          ]);
         }
-
-        foreach ($a_items_u as $iid => $a_iv) {
-          if (!isset($b_items_u[$iid]) && $a_iv) $b_items_u[$iid] = $a_iv;
+        foreach ($a_items as $iid => $a_iv) {
+          if (!isset($out_hero[$iid]) && is_array($a_iv)) $out_hero[$iid] = $a_iv;
         }
-
-        $wrapped = wrap_data($b_items_u, true, true, true);
+        $out_role[$hid] = !empty($out_hero) ? $rw_items($out_hero) : $b_hero_wrapped;
       }
+      foreach (($a_si['items'][$role] ?? []) as $hid => $a_w) {
+        if (!isset($out_role[$hid]) && is_array($a_w)) $out_role[$hid] = $a_w;
+      }
+      $out_items_all[$role] = $out_role;
     }
-    $out['items'] = $b_si['items'];
+    $out['items'] = $out_items_all;
   }
 
-  // --- builds ---
+  // --- builds (unwrap → scale → re-wrap) ---
+  // After unwrap_data, builds[role] → {hid: {idx: build_obj}}
   if (!empty($b_si['builds'])) {
-    foreach ($b_si['builds'] as $role => &$b_wrapped) {
-      $b_builds = unwrap_data($b_wrapped);
+    $out_builds_all = [];
+    foreach ($b_si['builds'] as $role => $b_builds_wrapped) {
+      $b_role_builds = $uw($b_builds_wrapped);          // {hid: {idx: build_obj}}
+      $a_role_builds = $uw($a_si['builds'][$role] ?? null);
+      $out_role      = [];
 
-      foreach ($b_builds as $hid => &$builds_list) {
-        if (empty($builds_list)) continue;
-        $hid_s = (string)$hid;
-        $n_b   = $role_hero_b[$role][$hid_s] ?? 0;
-        $n_a   = $role_hero_a[$role][$hid_s] ?? 0;
-        $lim_a = 1;
-        if (!empty($out['matches'][$role])) {
-          $mr = unwrap_data($out['matches'][$role]);
-          $lim_a = (int)(($mr[$hid]['l'] ?? 1));
+      foreach ($b_role_builds as $hid => $b_hero_builds) {
+        if (!is_array($b_hero_builds)) continue;
+        $hid_s  = (string)$hid;
+        $n_b    = $role_hero_b[$role][$hid_s] ?? 0;
+        $n_a    = $role_hero_a[$role][$hid_s] ?? 0;
+
+        // lim_a from the already-scaled matches row (plain, stored above)
+        $lim_a  = 1;
+        $mr_row = $out_matches_plain[$role][$hid] ?? null;
+        if (is_array($mr_row)) $lim_a = max(1, (int)($mr_row['l'] ?? 1));
+
+        // Index A's builds by fingerprint
+        $a_hero_builds = $a_role_builds[$hid] ?? [];
+        $a_by_tag = [];
+        foreach ($a_hero_builds as $ab) {
+          if (!is_array($ab) || empty($ab['build'])) continue;
+          $a_by_tag[implode(',', $ab['build'])] = $ab;
         }
-        if ($n_b <= 0) continue;
 
-        $a_builds_by_tag = [];
-        if (!empty($a_si['builds'][$role])) {
-          $a_builds = unwrap_data($a_si['builds'][$role]);
-          foreach ($a_builds[$hid] ?? [] as $ab) {
-            $tag = implode(',', $ab['build'] ?? []);
-            $a_builds_by_tag[$tag] = $ab;
-          }
+        if ($n_b <= 0) $n_b = hero_n($hid, $hero_b);
+        if ($n_a <= 0) $n_a = hero_target($hid, $hero_a, $hero_b);
+
+        if ($n_b <= 0 || $n_a <= 0) {
+          $out_role[$hid] = array_values(array_filter(
+            array_values($a_by_tag), fn($ab) => (int)($ab['matches'] ?? 0) >= $lim_a));
+          continue;
         }
 
         $builds_out = [];
-        foreach ($builds_list as &$bld) {
-          if (empty($bld)) continue;
+        foreach ($b_hero_builds as $bld) {
+          if (!is_array($bld) || empty($bld)) continue;
           $tag = implode(',', $bld['build'] ?? []);
-          $a_bld = $a_builds_by_tag[$tag] ?? null;
 
-          $m_b = max(0, (int)($bld['matches'] ?? 0));
+          if ($n_a >= 30 && count($bld['build'] ?? []) <= 1) continue;
 
+          $m_b        = max(0, (int)($bld['matches'] ?? 0));
+          $expected_a = scale_count($m_b, $n_b, $n_a);
+
+          $a_bld = $a_by_tag[$tag] ?? null;
           if ($a_bld !== null) {
-            $ratio_b = $n_b > 0 ? $m_b / $n_b : 0.0;
-            $ratio_se = $n_b > 0 ? sqrt($ratio_b * (1 - $ratio_b) / $n_b) : 1.0;
-            $ratio_a = $n_a > 0 ? ((int)($a_bld['matches'] ?? 0)) / $n_a : 0.0;
-            if (abs($ratio_a - $ratio_b) <= 2.0 * $ratio_se) {
-              if ((int)($a_bld['matches'] ?? 0) >= $lim_a) { $builds_out[] = $a_bld; }
-              continue;
+            $m_a_actual = max(0, (int)($a_bld['matches'] ?? 0));
+            if ($m_a_actual >= $lim_a && ($expected_a <= 0 || $m_a_actual >= (int)($expected_a * 0.4))) {
+              $builds_out[] = $a_bld; continue;
             }
           }
 
-          $m_a  = scale_count($m_b, $n_b, $n_a);
+          $m_a = $expected_a;
           if ($m_a < $lim_a) continue;
           $w_b  = max(0, (int)($bld['wins']      ?? 0));
           $lw_b = max(0, (int)($bld['lane_wins'] ?? 0));
           $w_a  = $m_a > 0 ? scale_count($w_b,  $m_b, $m_a) : 0;
           $lw_a = $m_a > 0 ? scale_count($lw_b, $m_b, $m_a) : 0;
-          $bld['matches']   = $m_a;
-          $bld['wins']      = $w_a;
-          $bld['lane_wins'] = $lw_a;
-          $bld['winrate']   = $m_a > 0 ? round($w_a  / $m_a, 4) : 0.0;
-          $bld['lane_wr']   = $m_a > 0 ? round($lw_a / $m_a, 4) : 0.0;
-          $bld['ratio']     = $n_a > 0 ? round($m_a  / $n_a, 4) : 0.0;
-          $builds_out[] = $bld;
+          $builds_out[] = array_merge($bld, [
+            'matches'   => $m_a,  'wins'    => $w_a,  'lane_wins' => $lw_a,
+            'winrate'   => $m_a > 0 ? round($w_a  / $m_a, 4) : 0.0,
+            'lane_wr'   => $m_a > 0 ? round($lw_a / $m_a, 4) : 0.0,
+            'ratio'     => $n_a > 0 ? round($m_a  / $n_a, 4) : 0.0,
+          ]);
         }
 
         // A-only builds
-        foreach ($a_builds_by_tag as $tag => $ab) {
-          $found = false;
-          foreach ($builds_out as $ob) {
-            if (implode(',', $ob['build'] ?? []) === $tag) { $found = true; break; }
-          }
-          if (!$found && (int)($ab['matches'] ?? 0) >= $lim_a) $builds_out[] = $ab;
+        $used = array_map(fn($ob) => implode(',', $ob['build'] ?? []), $builds_out);
+        foreach ($a_by_tag as $tag => $ab) {
+          if (!in_array($tag, $used, true) && (int)($ab['matches'] ?? 0) >= $lim_a)
+            $builds_out[] = $ab;
         }
-
-        $builds_list = $builds_out;
+        $out_role[$hid] = $builds_out;
       }
-      $b_wrapped = wrap_data($b_builds, true, true, true);
+      // A-only heroes
+      foreach ($a_role_builds as $hid => $ab_list) {
+        if (!isset($out_role[$hid]) && is_array($ab_list))
+          $out_role[$hid] = array_values(array_filter(array_values($ab_list), 'is_array'));
+      }
+      // Re-wrap: {hid: [b0,b1,...]} → same deeply-wrapped format as original
+      $out_builds_all[$role] = !empty($out_role) ? wrap_data($out_role, true, true, true) : $b_builds_wrapped;
     }
-    $out['builds'] = $b_si['builds'];
+    $out['builds'] = $out_builds_all;
   }
 
-  // --- consumables ---
+  // --- consumables (wrapped structure) ---
   if (!empty($b_si['consumables'])) {
     foreach ($b_si['consumables'] as $blk => &$b_roles) {
       foreach ($b_roles as $role => &$b_hero_map) {
@@ -729,7 +781,10 @@ function scale_starting_items(array $b_si, ?array $a_si, array $hero_a, array $h
           $hid_s = (string)$hid;
           $n_b = $role_hero_b[$role][$hid_s] ?? 0;
           $n_a = $role_hero_a[$role][$hid_s] ?? 0;
-          if ($n_b <= 0) continue;
+          // Fallback to global hero counts if role-specific are unavailable
+          if ($n_b <= 0) $n_b = hero_n($hid, $hero_b);
+          if ($n_a <= 0) $n_a = hero_target($hid, $hero_a, $hero_b);
+          if ($n_b <= 0 || $n_a <= 0) continue;
 
           $cons_head = $b_si['cons_head'] ?? ['min', 'q1', 'med', 'q3', 'max', 'total', 'matches'];
           $b_cons = is_wrapped($b_wrapped)
@@ -744,24 +799,20 @@ function scale_starting_items(array $b_si, ?array $a_si, array $hero_a, array $h
               : unwrap_data(['head' => $cons_head, 'data' => array_values($a_cw), 'keys' => array_keys($a_cw)]);
           }
 
-          foreach ($b_cons as $iid => &$cv) {
+          // Always scale B → A (no similarity check; freq is scale-invariant and
+          // would falsely keep stale A data). A-only items are added below.
+          $b_cons_out = [];
+          foreach ($b_cons as $iid => $cv) {
             if (!$cv) continue;
-            $a_cv = $a_cons[$iid] ?? null;
-
             $m_b = max(0, (int)($cv['matches'] ?? 0));
-            $freq_b = $n_b > 0 ? $m_b / $n_b : 0.0;
-            $freq_se = $n_b > 0 ? sqrt($freq_b * (1.0 - $freq_b) / $n_b) : 1.0;
-
-            if ($a_cv !== null) {
-              $freq_a = $n_a > 0 ? ((int)($a_cv['matches'] ?? 0)) / $n_a : 0.0;
-              if (abs($freq_a - $freq_b) <= 2.0 * $freq_se) { $cv = $a_cv; continue; }
-            }
-
-            $cv['matches'] = scale_count($m_b, $n_b, $n_a);
-            $cv['total']   = scale_count(max(0, (int)($cv['total'] ?? 0)), $n_b, $n_a);
-            // timing quantiles kept from B (distribution-invariant)
+            $t_b = max(0, (int)($cv['total']   ?? 0));
+            $m_a = scale_count($m_b, $n_b, $n_a);
+            $t_a = $m_a > 0 && $m_b > 0 ? scale_count($t_b, $m_b, $m_a) : 0;
+            $b_cons_out[$iid] = array_merge($cv, ['matches' => $m_a, 'total' => $t_a]);
           }
+          $b_cons = $b_cons_out;
 
+          // A-only consumable items
           foreach ($a_cons as $iid => $a_cv) {
             if (!isset($b_cons[$iid]) && $a_cv) $b_cons[$iid] = $a_cv;
           }
@@ -771,6 +822,19 @@ function scale_starting_items(array $b_si, ?array $a_si, array $hero_a, array $h
       }
     }
     $out['consumables'] = $b_si['consumables'];
+
+    // Carry A-only consumable heroes/roles not present in B
+    foreach (($a_si['consumables'] ?? []) as $blk => $a_roles) {
+      foreach ($a_roles as $role => $a_hero_map) {
+        foreach ($a_hero_map as $hid => $a_cw) {
+          if (!isset($out['consumables'][$blk][$role][$hid])) {
+            $out['consumables'][$blk][$role][$hid] = $a_cw;
+          }
+        }
+      }
+    }
+  } elseif (!empty($a_si['consumables'])) {
+    $out['consumables'] = $a_si['consumables'];
   }
 
   return $out;
@@ -865,10 +929,22 @@ if (!empty($rep_b['items'])) {
     }
   }
 
-  // records: actual match-level records — keep A's if present, else B's
+  // records: merge A and B; A's entries take precedence for shared item keys
   if (!empty($items_b['records']) || !empty($items_a['records'])) {
-    $items_out['records'] = $items_a['records'] ?? $items_b['records'];
-    echo "[I] Keeping records from ".(!empty($items_a['records']) ? 'A' : 'B')."\n";
+    $b_rec = $items_b['records'] ?? [];
+    $a_rec = $items_a['records'] ?? [];
+    if (is_wrapped($b_rec) && !empty($a_rec)) {
+      $b_rd = unwrap_data($b_rec);
+      $a_rd = is_wrapped($a_rec) ? unwrap_data($a_rec) : $a_rec;
+      // A overrides B for shared keys; B-only entries are included
+      $items_out['records'] = wrap_data($a_rd + $b_rd, true, true, true);
+    } elseif (!empty($a_rec)) {
+      // Both plain associative or A only
+      $items_out['records'] = is_array($b_rec) ? ($a_rec + $b_rec) : $a_rec;
+    } else {
+      $items_out['records'] = $b_rec;
+    }
+    echo "[I] Merging items/records from A and B\n";
   }
 
   if (!empty($items_b['enchantments'])) {
@@ -938,6 +1014,14 @@ $rep_a['settings']['items_recalc'] = true;
 // ---------------------------------------------------------------------------
 
 $json_out = json_encode($rep_a, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+
+// Back up A as .old when writing in-place
+if (!$explicit_outfile && $outfile === $file_a) {
+  $backup = $file_a.'.old';
+  if (!rename($file_a, $backup)) die("[F] Could not rename $file_a → $backup\n");
+  echo "[I] Backed up original A to: $backup\n";
+}
+
 file_put_contents($outfile, $json_out);
 
 $sz = number_format(strlen($json_out) / 1024, 1);
