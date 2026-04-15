@@ -400,18 +400,24 @@ function rg_view_generate_items_builds() {
 
   if (isset($report['starting_items'])) {
     $sti_matches_context = [];
+    $sti_scope = ['rid' => 0, 'hid' => 0];
+    $stib_scope = null;
 
     $srid = array_search($crole, ROLES_IDS_SIMPLE);
 
     if (isset($report['starting_items']['items'])) {
       if (isset($report['starting_items']['items'][$srid][$hero])) {
         $sti_context =& $report['starting_items']['items'][$srid][$hero];
+        $sti_scope = ['rid' => $srid, 'hid' => $hero];
       } else if (isset($report['starting_items']['items'][0][$hero])) {
         $sti_context =& $report['starting_items']['items'][0][$hero];
+        $sti_scope = ['rid' => 0, 'hid' => $hero];
       } else if (isset($report['starting_items']['items'][$srid][0])) {
         $sti_context =& $report['starting_items']['items'][$srid][0];
+        $sti_scope = ['rid' => $srid, 'hid' => 0];
       } else {
         $sti_context =& $report['starting_items']['items'][0][0];
+        $sti_scope = ['rid' => 0, 'hid' => 0];
       }
 
       $sti_context['head'] = $report['starting_items']['items_head'];
@@ -420,16 +426,6 @@ function rg_view_generate_items_builds() {
 
     $report['starting_items']['matches'][$srid] = unwrap_data($report['starting_items']['matches'][$srid]);
     $report['starting_items']['matches'][0] = unwrap_data($report['starting_items']['matches'][0]);
-
-    if (isset($report['starting_items']['matches'][$srid][$hero])) {
-      $sti_matches_context =& $report['starting_items']['matches'][$srid][$hero];
-    } else if (isset($report['starting_items']['items'][0][$hero])) {
-      $sti_matches_context =& $report['starting_items']['matches'][0][$hero];
-    } else if (isset($report['starting_items']['items'][$srid][0])) {
-      $sti_matches_context =& $report['starting_items']['matches'][$srid][0];
-    } else {
-      $sti_matches_context =& $report['starting_items']['matches'][0][0];
-    }
 
     $builds_fallback = false;
     $sti_builds = [];
@@ -440,12 +436,16 @@ function rg_view_generate_items_builds() {
 
       if (isset($report['starting_items']['builds'][$srid][$hero])) {
         $stib_context =& $report['starting_items']['builds'][$srid][$hero];
+        $stib_scope = ['rid' => $srid, 'hid' => $hero];
       } else if (isset($report['starting_items']['builds'][0][$hero])) {
         $stib_context =& $report['starting_items']['builds'][0][$hero];
+        $stib_scope = ['rid' => 0, 'hid' => $hero];
       } else if (isset($report['starting_items']['builds'][$srid][0])) {
         $stib_context =& $report['starting_items']['builds'][$srid][0];
+        $stib_scope = ['rid' => $srid, 'hid' => 0];
       } else {
         $stib_context =& $report['starting_items']['builds'][0][0];
+        $stib_scope = ['rid' => 0, 'hid' => 0];
       }
 
       if (!is_array($stib_context)) $stib_context = [];
@@ -495,6 +495,31 @@ function rg_view_generate_items_builds() {
           'factor' => $factor,
         ];
       }
+    }
+
+    // Keep matches denominator aligned with the data source used for the displayed builds.
+    // If builds are shown from totals (hid=0), using hero matches inflates percentages.
+    $scope = $stib_scope ?? $sti_scope;
+    $m_rid = $scope['rid'];
+    $m_hid = $scope['hid'];
+
+    if (isset($report['starting_items']['matches'][$m_rid][$m_hid])) {
+      $sti_matches_context =& $report['starting_items']['matches'][$m_rid][$m_hid];
+    } else if (isset($report['starting_items']['matches'][$m_rid][0])) {
+      $sti_matches_context =& $report['starting_items']['matches'][$m_rid][0];
+    } else if (isset($report['starting_items']['matches'][0][$m_hid])) {
+      $sti_matches_context =& $report['starting_items']['matches'][0][$m_hid];
+    } else {
+      $sti_matches_context =& $report['starting_items']['matches'][0][0];
+    }
+
+    // When builds are taken from a broader scope than items stats, rebuild item stats
+    // from selected builds so purchase rates stay in the same scope.
+    if (
+      $stib_scope !== null &&
+      ($stib_scope['rid'] !== $sti_scope['rid'] || $stib_scope['hid'] !== $sti_scope['hid'])
+    ) {
+      $sti_stats = [];
     }
   }
 

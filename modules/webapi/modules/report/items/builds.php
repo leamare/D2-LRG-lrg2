@@ -192,6 +192,8 @@ public function process() {
       $sti_builds = [];
       $sti_stats = [];
       $sti_matches_context = [];
+      $sti_scope = ['rid' => 0, 'hid' => 0];
+      $stib_scope = null;
 
       
 
@@ -200,12 +202,16 @@ public function process() {
       if (isset($report['starting_items']['items'])) {
         if (isset($report['starting_items']['items'][$srid][$hero])) {
           $sti_context =& $report['starting_items']['items'][$srid][$hero];
+          $sti_scope = ['rid' => $srid, 'hid' => $hero];
         } else if (isset($report['starting_items']['items'][0][$hero])) {
           $sti_context =& $report['starting_items']['items'][0][$hero];
+          $sti_scope = ['rid' => 0, 'hid' => $hero];
         } else if (isset($report['starting_items']['items'][$srid][0])) {
           $sti_context =& $report['starting_items']['items'][$srid][0];
+          $sti_scope = ['rid' => $srid, 'hid' => 0];
         } else {
           $sti_context =& $report['starting_items']['items'][0][0];
+          $sti_scope = ['rid' => 0, 'hid' => 0];
         }
 
         $sti_context['head'] = $report['starting_items']['items_head'];
@@ -217,16 +223,6 @@ public function process() {
       }
       if (isset($report['starting_items']['matches'][0]['data'])) {
         $report['starting_items']['matches'][0] = unwrap_data($report['starting_items']['matches'][0]);
-      }
-
-      if (isset($report['starting_items']['matches'][$srid][$hero])) {
-        $sti_matches_context =& $report['starting_items']['matches'][$srid][$hero];
-      } else if (isset($report['starting_items']['items'][0][$hero])) {
-        $sti_matches_context =& $report['starting_items']['matches'][0][$hero];
-      } else if (isset($report['starting_items']['items'][$srid][0])) {
-        $sti_matches_context =& $report['starting_items']['matches'][$srid][0];
-      } else {
-        $sti_matches_context =& $report['starting_items']['matches'][0][0];
       }
 
       $builds_fallback = false;
@@ -241,12 +237,16 @@ public function process() {
 
         if (isset($report['starting_items']['builds'][$srid][$hero])) {
           $stib_context =& $report['starting_items']['builds'][$srid][$hero];
+          $stib_scope = ['rid' => $srid, 'hid' => $hero];
         } else if (isset($report['starting_items']['builds'][0][$hero])) {
           $stib_context =& $report['starting_items']['builds'][0][$hero];
+          $stib_scope = ['rid' => 0, 'hid' => $hero];
         } else if (isset($report['starting_items']['builds'][$srid][0])) {
           $stib_context =& $report['starting_items']['builds'][$srid][0];
+          $stib_scope = ['rid' => $srid, 'hid' => 0];
         } else {
           $stib_context =& $report['starting_items']['builds'][0][0];
+          $stib_scope = ['rid' => 0, 'hid' => 0];
         }
 
         if (!is_array($stib_context)) {
@@ -299,6 +299,30 @@ public function process() {
         }
       }
 
+      // Keep denominator scope aligned with selected builds context.
+      $scope = $stib_scope ?? $sti_scope;
+      $m_rid = $scope['rid'];
+      $m_hid = $scope['hid'];
+
+      if (isset($report['starting_items']['matches'][$m_rid][$m_hid])) {
+        $sti_matches_context =& $report['starting_items']['matches'][$m_rid][$m_hid];
+      } else if (isset($report['starting_items']['matches'][$m_rid][0])) {
+        $sti_matches_context =& $report['starting_items']['matches'][$m_rid][0];
+      } else if (isset($report['starting_items']['matches'][0][$m_hid])) {
+        $sti_matches_context =& $report['starting_items']['matches'][0][$m_hid];
+      } else {
+        $sti_matches_context =& $report['starting_items']['matches'][0][0];
+      }
+
+      // If builds are from broader scope than items stats, force rebuilding stats
+      // from selected builds to preserve denominator consistency.
+      if (
+        $stib_scope !== null &&
+        ($stib_scope['rid'] !== $sti_scope['rid'] || $stib_scope['hid'] !== $sti_scope['hid'])
+      ) {
+        $sti_stats = [];
+      }
+
       if (empty($sti_stats)) {
         $sti_stats = [];
     
@@ -323,6 +347,7 @@ public function process() {
       $res['starting_items'] = [
         'stats' => $sti_stats,
         'builds' => $sti_builds,
+        'context' => $sti_matches_context,
       ];
     }
 
@@ -391,7 +416,8 @@ if (is_docs_mode()) {
       'tree' => TypeDefs::obj([]),
       'starting_items' => TypeDefs::obj([
         'stats' => TypeDefs::mapOf(TypeDefs::obj(['wins' => TypeDefs::num(), 'matches' => TypeDefs::num(), 'lane_wins' => TypeDefs::num()])),
-        'builds' => TypeDefs::arrayOf(TypeDefs::obj([]))
+        'builds' => TypeDefs::arrayOf(TypeDefs::obj([])),
+        'context' => TypeDefs::obj([]),
       ]),
       'enchantments' => TypeDefs::arrayOf('ItemsBuildsEnchantmentTier'), // only when enchantments data present
     ])
