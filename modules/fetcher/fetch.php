@@ -59,8 +59,13 @@ function fetch($match) {
 
   $match_rules = processRules($match);
 
-  echo("[$rnum\t] Match $match: ");
-  $rnum++;
+  if (function_exists('lrg_fetcher_alloc_match_seq')) {
+    $match_seq = lrg_fetcher_alloc_match_seq();
+  } else {
+    $match_seq = $rnum;
+    $rnum++;
+  }
+  echo("[$match_seq\t] Match $match: ");
 
   if (!empty($lg_settings['match_limit_after'])) {
     if ($match < $lg_settings['match_limit_after']) {

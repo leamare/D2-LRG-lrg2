@@ -7,6 +7,7 @@ mysqli_report(MYSQLI_REPORT_OFF); //FIXME:
 include_once("head.php");
 include_once("modules/fetcher/get_patchid.php");
 include_once("modules/fetcher/processRules.php");
+include_once("modules/fetcher/fetcher_parallel_sync.php");
 include_once("modules/fetcher/fetch.php");
 include_once("modules/fetcher/stratz.php");
 include_once("modules/commons/generate_tag.php");
@@ -14,6 +15,8 @@ include_once("modules/commons/metadata.php");
 include_once("modules/commons/array_pslice.php");
 
 include_once("libs/simple-opendota-php/simple_opendota.php");
+
+$parallel_child = false;
 
 echo("\nInitialising...\n");
 
@@ -87,6 +90,17 @@ $stratz_graphql = isset($options['G']);
 $stratz_graphql_group = isset($options['G']) ? (int)($options['G']) : 0;
 $stratz_graphql_group_counter = 0;
 
+$fetch_workers = max(1, (int)($options['j'] ?? 1));
+if ($fetch_workers > 1) {
+  if ($listen || $stratz_graphql_group) {
+    echo "[W] Parallel fetch (-j) is not compatible with listen mode (-L) or grouped Stratz (-G N); using one worker.\n";
+    $fetch_workers = 1;
+  } elseif (!function_exists('pcntl_fork')) {
+    echo "[W] pcntl_fork unavailable; parallel fetch (-j) disabled.\n";
+    $fetch_workers = 1;
+  }
+}
+
 $ignore_stratz = isset($options['Q']);
 
 $update_names = isset($options['n']);
@@ -101,6 +115,14 @@ if(!empty($odapikey) && !isset($ignore_api_key))
   $opendota = new \SimpleOpenDotaPHP\odota_api(false, "", $api_cooldown ?? 0, $odapikey);
 else
   $opendota = new \SimpleOpenDotaPHP\odota_api(false, "", $api_cooldown ?? 0);
+
+if (!empty($options['d'])) {
+  $opendota_effective_cooldown_s = (float)$options['d'];
+} elseif (!empty($odapikey) && !isset($ignore_api_key)) {
+  $opendota_effective_cooldown_s = 0.25;
+} else {
+  $opendota_effective_cooldown_s = 1.0;
+}
 
 if ($conn->connect_error) die("[F] Connection to SQL server failed: ".$conn->connect_error."\n");
 
@@ -183,51 +205,18 @@ if (!$listen) {
   }
   $matches = array_unique($matches);
   echo "[ ] Total: ".count($matches)."\n";
+  echo "[ ] OpenDota cooldown: {$opendota_effective_cooldown_s} s, workers: {$fetch_workers}\n";
 } else {
   $matches = [];
+  echo "[ ] OpenDota cooldown: {$opendota_effective_cooldown_s} s, workers: {$fetch_workers}\n";
 }
 
-// workaround for matches that have teams data, but report has teams disabled
-// and there's a teams table still remaining
-// teams data will be recorded regardless UNLESS you manually remove the table
-if (!$lg_settings['main']['teams']) {
-  $sql = "SELECT COUNT(*) z
-  FROM information_schema.tables WHERE table_schema = '$lrg_sql_db' 
-  AND table_name = 'teams_matches' HAVING z > 0;";
-
-  $query = $conn->query($sql);
-  if (isset($query->num_rows) && $query->num_rows) {
-    $lg_settings['main']['teams'] = true;
-    echo "[N] Set &settings.teams to true.\n";
-  }
-}
-
-// items support detection
-$sql = "SELECT COUNT(*) z
-FROM information_schema.tables WHERE table_schema = '$lrg_sql_db' 
-AND table_name = 'items' HAVING z > 0;";
-
-$query = $conn->query($sql);
-if (!isset($query->num_rows) || !$query->num_rows) {
-  $sql = "SELECT COUNT(*) z
-  FROM information_schema.tables WHERE table_schema = '$lrg_sql_db' 
-  AND table_name = 'itemslines' HAVING z > 0;";
-
-  $query = $conn->query($sql);
-  if (!isset($query->num_rows) || !$query->num_rows) {
-    $lg_settings['main']['items'] = false;
-    $lg_settings['main']['itemslines'] = false;
-    echo "[N] Set &settings.items to false.\n";
-  } else {
-    $lg_settings['main']['items'] = true;
-    $lg_settings['main']['itemslines'] = true;
-    echo "[N] Set &settings.itemslines to true.\n";
-  }
-} else {
-  $lg_settings['main']['items'] = true;
-  $lg_settings['main']['itemslines'] = false;
-  echo "[N] Set &settings.items to true.\n";
-}
+// Feature toggles for this run follow actual tables (see modules/commons/schema.php SHOW FULL TABLES).
+$lg_settings['main']['teams'] = !empty($schema['teams']);
+$lg_settings['main']['items'] = !empty($schema['items']);
+$lg_settings['main']['itemslines'] = !empty($schema['itemslines']);
+$lg_settings['main']['skill_builds'] = !empty($schema['skill_builds']);
+$lg_settings['main']['starting'] = !empty($schema['starting_items']);
 
 if ($lg_settings['main']['fantasy'] && !$schema['fantasy_mvp']) {
   create_fantasy_mvp_tables($conn);
@@ -282,6 +271,51 @@ if ($schema['leagues'] ?? false) {
 }
 
 $stdin_flag = false;
+
+if ($fetch_workers > 1 && count($matches) > 0) {
+  $chunks = array_chunk($matches, (int)ceil(count($matches) / $fetch_workers));
+  $chunks = array_values(array_filter($chunks, function ($c) {
+    return !empty($c);
+  }));
+  if (!empty($chunks)) {
+    $GLOBALS['lrg_fetcher_stdout_lock_path'] = sys_get_temp_dir().'/lrg_fetcher_'.bin2hex(random_bytes(8)).'.flock';
+    $GLOBALS['lrg_fetcher_rnum_counter_path'] = sys_get_temp_dir().'/lrg_fetcher_'.bin2hex(random_bytes(8)).'.rnum';
+    touch($GLOBALS['lrg_fetcher_stdout_lock_path']);
+    file_put_contents($GLOBALS['lrg_fetcher_rnum_counter_path'], "0");
+    $GLOBALS['lrg_fetcher_stdout_lock_fp'] = null;
+
+    $pids = [];
+    foreach ($chunks as $chunk) {
+      $pid = pcntl_fork();
+      if ($pid === -1) {
+        echo "[E] pcntl_fork failed after starting ".count($pids)." worker(s); waiting for them, then exit(1). Re-run with -j1 or fewer workers.\n";
+        foreach ($pids as $wpid) {
+          pcntl_waitpid($wpid, $wstatus);
+        }
+        lrg_fetcher_parallel_cleanup();
+        exit(1);
+      }
+      if ($pid === 0) {
+        $parallel_child = true;
+        $pids = [];
+        $matches = array_values($chunk);
+        $conn->close();
+        $conn = lrg_mysqli_connect($lrg_sql_db);
+        $conn->set_charset('utf8mb4');
+        break;
+      }
+      $pids[] = $pid;
+    }
+    if (!empty($pids)) {
+      foreach ($pids as $wpid) {
+        pcntl_waitpid($wpid, $wstatus);
+      }
+      lrg_fetcher_parallel_cleanup();
+      echo "[S] Fetch complete.\n";
+      exit(0);
+    }
+  }
+}
 
 if ($listen)
   echo "Listening...\n";
@@ -375,7 +409,12 @@ while(sizeof($matches) || $listen) {
   }
 
 
-  $r = fetch($match);
+  lrg_fetcher_parallel_ob_begin();
+  try {
+    $r = fetch($match);
+  } finally {
+    lrg_fetcher_parallel_ob_end_flush();
+  }
   if ($r === FALSE) { //|| ($force_await && $request_unparsed && $r !== TRUE)) {
     array_push($matches, $match);
   } else if ($r === NULL) {
@@ -389,7 +428,8 @@ if (sizeof($failed_matches)) {
   echo "[_] Recording failed matches to file...\n";
 
   $output = implode("\n", $failed_matches);
-  $filename = "tmp/failed_$lrg_league_tag".'_'.time();
+  $pid_tag = ($parallel_child && function_exists('posix_getpid')) ? '_'.posix_getpid() : '';
+  $filename = "tmp/failed_$lrg_league_tag".'_'.time().$pid_tag;
   $f = fopen($filename, "w");
   fwrite($f, $output);
   fclose($f);
@@ -397,6 +437,8 @@ if (sizeof($failed_matches)) {
   echo "[S] Recorded failed matches to $filename\n";
 }
 
-echo "[S] Fetch complete.\n";
+if (!$parallel_child) {
+  echo "[S] Fetch complete.\n";
+}
 
 ?>
