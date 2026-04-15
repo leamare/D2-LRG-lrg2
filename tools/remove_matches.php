@@ -44,29 +44,64 @@ if(isset($options['T'])) {
 
   $query_res->free_result();
 } else {
-  $mids = explode("\n", file_get_contents($file));
+  $raw = str_replace("\r\n", "\n", (string)file_get_contents($file));
+  $mids = explode("\n", $raw);
 }
 
 if( !is_array($mids) ) $mids = [$mids];
 
-foreach ($mids as $mid) {
-  if (empty($mid) || $mid[0] == '#') continue;
+$mids = array_values(array_filter(array_map('trim', $mids), 'strlen'));
+$mids = array_values(array_filter($mids, function ($mid) {
+  $s = (string)$mid;
+  return $s !== '' && $s[0] !== '#' && ctype_digit($s);
+}));
+$mids = array_map('intval', $mids);
+$mids = array_values(array_filter($mids, function ($id) {
+  return $id > 0;
+}));
 
-  $sql = "DELETE from matchlines where matchid = $mid; DELETE from adv_matchlines where matchid = $mid; ".
-      ( $schema['items'] ? "delete from items where matchid = $mid;" : "").
-      "DELETE from draft where matchid = $mid; ".
-      ( $schema['teams'] ? "delete from teams_matches where matchid = $mid;" : "").
-      ( $schema['skill_builds'] ? "delete from skill_builds where matchid = $mid;" : "").
-      ( $schema['starting_items'] ? "delete from starting_items where matchid = $mid;" : "").
-      ( $schema['wards'] ? "delete from wards where matchid = $mid;" : "").
-      ( $schema['fantasy_mvp'] ? "delete from fantasy_mvp_points where matchid = $mid; delete from fantasy_mvp_awards where matchid = $mid;" : "").
-      "delete from matches where matchid = $mid;";
+$chunkSize = 200;
 
-  if ($conn->multi_query($sql) === TRUE) echo "$mid\n";
-  else echo("# [F] Unexpected problems when quering database.\n".$conn->error."\n");
-  
+foreach (array_chunk($mids, $chunkSize) as $chunk) {
+  if (empty($chunk)) {
+    continue;
+  }
+  $in = implode(',', $chunk);
+
+  $sql = "DELETE FROM matchlines WHERE matchid IN ($in); DELETE FROM adv_matchlines WHERE matchid IN ($in); ";
+  if ($schema['itemslines']) {
+    $sql .= "DELETE FROM itemslines WHERE matchid IN ($in); ";
+  } elseif ($schema['items']) {
+    $sql .= "DELETE FROM items WHERE matchid IN ($in); ";
+  }
+  $sql .= "DELETE FROM draft WHERE matchid IN ($in); ";
+  if ($schema['teams']) {
+    $sql .= "DELETE FROM teams_matches WHERE matchid IN ($in); ";
+  }
+  if ($schema['skill_builds']) {
+    $sql .= "DELETE FROM skill_builds WHERE matchid IN ($in); ";
+  }
+  if ($schema['starting_items']) {
+    $sql .= "DELETE FROM starting_items WHERE matchid IN ($in); ";
+  }
+  if ($schema['wards']) {
+    $sql .= "DELETE FROM wards WHERE matchid IN ($in); ";
+  }
+  if ($schema['fantasy_mvp']) {
+    $sql .= "DELETE FROM fantasy_mvp_points WHERE matchid IN ($in); DELETE FROM fantasy_mvp_awards WHERE matchid IN ($in); ";
+  }
+  $sql .= "DELETE FROM matches WHERE matchid IN ($in);";
+
+  if ($conn->multi_query($sql) === TRUE) {
+    foreach ($chunk as $mid) {
+      echo "$mid\n";
+    }
+  } else {
+    echo("# [F] Unexpected problems when quering database.\n".$conn->error."\n");
+  }
+
   do {
-      $conn->store_result();
+    $conn->store_result();
   } while($conn->next_result());
 }
 
