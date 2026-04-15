@@ -159,6 +159,7 @@ Parameters:
 * `-P` - Playerlist to use (discards any match that doesn't have all 10 players in the playerlist)
 * `-N` - Set a minimal (stratz) raNk required for the match
 * `-d123` - Specify a custom API cooldown (in seconds)
+* `-jN` - Run up to N parallel worker processes (each has its own OpenDota client and DB connection). Speeds up bulk fetch when the API is the bottleneck. Not compatible with listen mode (`-L`) or grouped Stratz (`-G` with a size). Requires `pcntl` (typical on Linux CLI PHP)
 * `-u` - try to update matches without adv_matchlines data (unparsed matches)
 * `-U` - try to update all the matches, finding unparsed ones. Automatically enables `-u`
 * `-p` - counts matches with negative player ids are required for data update
@@ -167,7 +168,7 @@ Parameters:
 * `-n` - force update player names
 * `-f` - ignore abandons
 
-Fetcher has two modes: "listen" mode and the regular one. Fetcher is using matchlist from `matchlists` follder by default, listen mode changes it to STDIN. It's not async because of time limitation on OpenDota side (basically you can't be too fast with your requests anyway, so there's no need to be asynchronous).
+Fetcher has two modes: "listen" mode and the regular one. Fetcher is using matchlist from `matchlists` follder by default, listen mode changes it to STDIN. Throughput is usually limited by how long each OpenDota response takes; use `-j` to process disjoint subsets of the matchlist in parallel (each worker still respects `-d` cooldown for its own requests).
 
 Matchlist is basically a line delimited text file, each line is a new match string. It's using following rules:
 * Lines starting with `#` symbol or empty lines are skipped
