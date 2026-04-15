@@ -90,7 +90,7 @@ foreach ($matches as $match) {
       ],
       'http' => [
         'method' => 'POST',
-        'header'  => "Content-Type: application/json\r\nKey: $stratztoken\r\nUser-Agent: STRATZ_API\r\n",
+        'header'  => "Content-Type: application/json\r\nKey: $stratztoken\r\nUser-Agent: $stratz_user_agent\r\n",
         'content' => json_encode($data),
         'timeout' => 60,
       ]
