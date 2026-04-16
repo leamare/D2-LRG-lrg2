@@ -192,6 +192,11 @@ function lrg_fetcher_timer_add(string $match, int $readyAt): void {
 /**
  * Atomically move all ready timer entries (ready_time <= now) into the
  * main work queue so any idle worker can pick them up immediately.
+ *
+ * Ready matches are pushed to the work queue *before* the timer file is
+ * rewritten while still holding LOCK_EX. Otherwise another worker can see
+ * an empty timer + empty queue between truncate and push and exit early,
+ * leaving matches stuck until killed.
  */
 function lrg_fetcher_timer_flush_ready(): void {
   $tpath = $GLOBALS['lrg_fetcher_timer_path'] ?? null;
@@ -206,34 +211,51 @@ function lrg_fetcher_timer_flush_ready(): void {
   foreach (explode("\n", (string)$content) as $line) {
     $line = trim($line);
     if ($line === '') continue;
-    [$mid, $ts] = explode("\t", $line, 2);
+    $parts = explode("\t", $line, 2);
+    if (count($parts) < 2) {
+      $pending[] = $line;
+      continue;
+    }
+    [$mid, $ts] = $parts;
     if ((int)$ts <= $now) {
       $ready[] = $mid;
     } else {
       $pending[] = $line;
     }
   }
+  foreach ($ready as $mid) {
+    lrg_fetcher_queue_push($mid);
+  }
+  $new_body = $pending ? implode("\n", $pending)."\n" : '';
   rewind($fp);
   ftruncate($fp, 0);
-  fwrite($fp, $pending ? implode("\n", $pending)."\n" : "");
+  fwrite($fp, $new_body);
   fflush($fp);
   flock($fp, LOCK_UN);
   fclose($fp);
-  foreach ($ready as $mid) lrg_fetcher_queue_push($mid);
 }
 
 /** Return the earliest ready-timestamp in the timer queue, or null if empty. */
 function lrg_fetcher_timer_next_time(): ?int {
   $path = $GLOBALS['lrg_fetcher_timer_path'] ?? null;
   if (!$path || !is_file($path)) return null;
-  $raw = @file_get_contents($path);
+  $fp = @fopen($path, 'rb');
+  if (!$fp) return null;
+  if (!flock($fp, LOCK_SH)) {
+    fclose($fp);
+    return null;
+  }
+  $raw = stream_get_contents($fp);
+  flock($fp, LOCK_UN);
+  fclose($fp);
   if ($raw === false || $raw === '') return null;
   $min = null;
   foreach (explode("\n", $raw) as $line) {
     $line = trim($line);
     if ($line === '') continue;
-    [, $ts] = explode("\t", $line, 2);
-    $t = (int)$ts;
+    $parts = explode("\t", $line, 2);
+    if (count($parts) < 2) continue;
+    $t = (int)$parts[1];
     if ($min === null || $t < $min) $min = $t;
   }
   return $min;
