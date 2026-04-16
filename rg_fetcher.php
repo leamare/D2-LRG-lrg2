@@ -336,20 +336,34 @@ while(sizeof($matches) || $listen || $parallel_child) {
     $matches = $pulled;
   }
 
-  if (!$stdin_flag && !empty($first_scheduled) && sizeof($matches) < 2 && !$force_await) {
+  if ($listen && !$stdin_flag && !empty($first_scheduled) && sizeof($matches) < 2 && !$force_await) {
     asort($first_scheduled);
     $first_requested = reset($first_scheduled);
     if (time() - $first_requested < $scheduled_wait_period)
       $stdin_flag = true;
   }
 
-  if (!sizeof($matches) || $stdin_flag) {
+  if ($listen && (!sizeof($matches) || $stdin_flag)) {
     if (feof(STDIN)) break;
-    $match_str = fgets(STDIN);
-    if (!$match_str || strlen($match_str) === 0) {
-      $stdin_flag = false;
+    // Non-blocking peek so pending retries are not starved by a blocking read.
+    // If $matches is empty we wait longer (up to 1 s); if there are retries
+    // queued we only peek for 50 ms and fall through if nothing is ready.
+    $read     = [STDIN];
+    $write    = null;
+    $except   = null;
+    $timeout  = sizeof($matches) ? 0 : 1;
+    $utimeout = sizeof($matches) ? 50000 : 0;
+    $ready = stream_select($read, $write, $except, $timeout, $utimeout);
+    if ($ready) {
+      $match_str = fgets(STDIN);
+      if (!$match_str || strlen($match_str) === 0) {
+        $stdin_flag = false;
+      } else {
+        array_unshift($matches, trim($match_str));
+        $stdin_flag = false;
+      }
     } else {
-      array_unshift($matches, trim($match_str));
+      // Nothing on stdin right now — clear the flag and let retries run.
       $stdin_flag = false;
     }
   }
