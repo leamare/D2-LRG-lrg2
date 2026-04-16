@@ -1,6 +1,8 @@
 #!/bin/php
 <?php
-$options = getopt("f:");
+include_once(__DIR__."/../modules/commons/parallel_workers.php");
+
+$options = getopt("f:j:c:");
 if(isset($options['f'])) {
   $filename = $options['f'];
   $input_cont = file_get_contents($filename) or die("[F] Error while opening file.\n");
@@ -9,15 +11,30 @@ if(isset($options['f'])) {
   $matches = array_unique($matches);
 } else die();
 
-foreach ($matches as $match) {
-    if ($match[0] == "#") continue;
+$workers = max(1, (int)($options['j'] ?? 1));
+$cacheDir = $options['c'] ?? "cache";
+$cacheDir = rtrim($cacheDir, "/\\");
+$ctx = lrg_parallel_init_context();
+$matches = array_values(array_filter(array_map('trim', $matches), 'strlen'));
 
-    //`rm cache/$match.json`;
-    if(file_exists("cache/$match.json"))
-      unlink("cache/$match.json");
-    if(file_exists("cache/$match.lrgcache.json"))
-      unlink("cache/$match.lrgcache.json");
-    echo "[ ] RM $match\n";
-}
+$exitCode = lrg_parallel_run($matches, $workers, function ($chunk) use (&$ctx, $cacheDir) {
+  foreach ($chunk as $match) {
+    if ($match === '' || $match[0] === '#') {
+      continue;
+    }
 
-echo "[S] All matches were removed.\n";
+    $json = $cacheDir."/$match.json";
+    $lrg = $cacheDir."/$match.lrgcache.json";
+    if(file_exists($json)) {
+      unlink($json);
+    }
+    if(file_exists($lrg)) {
+      unlink($lrg);
+    }
+    lrg_parallel_log($ctx, "[ ] RM $match\n");
+  }
+});
+
+lrg_parallel_log($ctx, "[S] All matches were removed.\n");
+lrg_parallel_cleanup($ctx);
+exit($exitCode);

@@ -2,6 +2,7 @@
 
 require_once('head.php');
 include_once("modules/commons/utf8ize.php");
+include_once("modules/commons/parallel_workers.php");
 $conn = lrg_mysqli_connect($lrg_sql_db);
 
 if ($conn->connect_error) die("[F] Connection to SQL server failed: ".$conn->connect_error."\n");
@@ -12,6 +13,7 @@ include_once("modules/commons/schema.php");
 
 $skip = isset($options['s']);
 $normturbo = $lg_settings['main']['normalize_turbo'] ?? true;
+$workers = max(1, (int)($options['j'] ?? 1));
 
 $last = function ($v) { return is_array($v) ? end($v) : $v; };
 $c = isset($options['c']) ? $last($options['c']) : null;
@@ -36,7 +38,7 @@ $cache_file = function ($m) use ($cache_dir) {
 };
 
 if ($matchlist_file !== null) {
-  $matches = explode("\n", file_get_contents($matchlist_file));
+  $matches = explode("\n", (string)file_get_contents($matchlist_file));
 } else {
   if(isset($options['T'])) {
     $endt = isset($options['e']) ? $options['e'] : 0;
@@ -69,23 +71,33 @@ if ($matchlist_file !== null) {
   $query_res->free_result();
 }
 
-$sz = sizeof($matches);
+$matches = array_values(array_filter(array_map('trim', $matches), 'strlen'));
+$matches = array_values(array_filter($matches, function ($mid) {
+  $s = (string)$mid;
+  return $s !== '' && $s[0] !== '#' && strpos($s, '[ ]') === false && ctype_digit($s);
+}));
+$matches = array_map('intval', $matches);
+$matches = array_values(array_filter($matches, function ($mid) {
+  return $mid > 0;
+}));
 
-for ($i = 0; $i < $sz; $i++) {
-  $m = $matches[$i];
-  if (empty($m) || $m[0] === '#' || strpos($m, '[ ]') !== false) continue;
+$sz = sizeof($matches);
+$ctx = lrg_parallel_init_context();
+
+$process_match = function (int $m, mysqli $connLocal) use ($cache_file, $skip, $normturbo, $schema, $lg_settings, $sz, &$ctx) {
+  $seq = lrg_parallel_alloc_seq($ctx);
 
   $outfile = $cache_file($m);
   if ($skip && file_exists($outfile)) {
-    echo "[ ] ($i/$sz) $outfile exists, skipping\n";
-    continue;
+    lrg_parallel_log($ctx, "[ ] ($seq/$sz) $outfile exists, skipping\n");
+    return;
   }
 
   $match = [];
 
   $q = "select * from matches where matchid = $m;";
-  $r = instaquery($conn, $q);
-  if (empty($r)) continue;
+  $r = instaquery($connLocal, $q);
+  if (empty($r)) return;
   if ($normturbo && $r[0]['modeID'] == 23) {
     $r[0]['duration'] /= 2;
   }
@@ -93,7 +105,7 @@ for ($i = 0; $i < $sz; $i++) {
   $match['matches'] = $r[0];
 
   $q = "select * from matchlines where matchid = $m;";
-  $match['matchlines'] = instaquery($conn, $q);
+  $match['matchlines'] = instaquery($connLocal, $q);
   if ($normturbo && $match['matches']['modeID'] == 23) {
     foreach ($match['matchlines'] as $i => $line) {
       $match['matchlines'][$i]['gpm'] *= 2;
@@ -104,7 +116,7 @@ for ($i = 0; $i < $sz; $i++) {
   }
 
   $q = "select * from adv_matchlines where matchid = $m;";
-  $match['adv_matchlines'] = instaquery($conn, $q);
+  $match['adv_matchlines'] = instaquery($connLocal, $q);
   if ($normturbo && $match['matches']['modeID'] == 23) {
     foreach ($match['adv_matchlines'] as $i => $line) {
       $match['adv_matchlines'][$i]['lh_at10'] /= 2;
@@ -116,31 +128,31 @@ for ($i = 0; $i < $sz; $i++) {
   }
 
   $q = "select * from draft where matchid = $m;";
-  $match['draft'] = instaquery($conn, $q);
+  $match['draft'] = instaquery($connLocal, $q);
 
   $q = "select players.playerID, players.nickname from players 
     join matchlines on matchlines.playerid = players.playerID 
     where matchlines.matchid = $m;";
-  $match['players'] = instaquery($conn, $q);
+  $match['players'] = instaquery($connLocal, $q);
 
   if ($schema['skill_builds']) {
     $q = "select * from skill_builds where matchid = $m;";
-    $match['skill_builds'] = instaquery($conn, $q);
+    $match['skill_builds'] = instaquery($connLocal, $q);
   }
 
   if ($schema['starting_items']) {
     $q = "select * from starting_items where matchid = $m;";
-    $match['starting_items'] = instaquery($conn, $q);
+    $match['starting_items'] = instaquery($connLocal, $q);
   }
 
   if ($schema['wards']) {
     $q = "select * from wards where matchid = $m;";
-    $match['wards'] = instaquery($conn, $q);
+    $match['wards'] = instaquery($connLocal, $q);
   }
 
   if($lg_settings['main']['teams']) {
     $q = "select * from teams_matches where matchid = $m;";
-    $match['teams_matches'] = instaquery($conn, $q);
+    $match['teams_matches'] = instaquery($connLocal, $q);
 
     $teams = [];
     foreach ($match['teams_matches'] as $tm) {
@@ -149,19 +161,19 @@ for ($i = 0; $i < $sz; $i++) {
 
     if (!empty($teams)) {
       $q = "select * from teams where teamid in (".implode(',', $teams).");";
-      $match['teams'] = instaquery($conn, $q);
+      $match['teams'] = instaquery($connLocal, $q);
     }
 
     if (!empty($teams)) {
       $q = "select * from teams_rosters where teamid in (".implode(',', $teams).");";
-      $match['teams_rosters'] = instaquery($conn, $q);
+      $match['teams_rosters'] = instaquery($connLocal, $q);
     }
   }
 
   if (($schema['leagues'] ?? false) && !empty($match['matches']['leagueID']) && (int)$match['matches']['leagueID'] > 0) {
     $lid = (int)$match['matches']['leagueID'];
     $q = "SELECT ticket_id, name, url, description FROM leagues WHERE ticket_id = $lid LIMIT 1;";
-    $lr = instaquery($conn, $q);
+    $lr = instaquery($connLocal, $q);
     if (!empty($lr)) {
       $match['leagues'] = [[
         'ticket_id' => (int)$lr[0]['ticket_id'],
@@ -174,7 +186,7 @@ for ($i = 0; $i < $sz; $i++) {
 
   if($lg_settings['main']['items']) {
     $q = "select * from items where matchid = $m;";
-    $match['items'] = instaquery($conn, $q);
+    $match['items'] = instaquery($connLocal, $q);
 
     if ($normturbo && $match['matches']['modeID'] == 23) {
       foreach ($match['items'] as $i => $line) {
@@ -185,12 +197,25 @@ for ($i = 0; $i < $sz; $i++) {
 
   $out = json_encode(utf8ize($match));
   if (empty($out)) {
-    echo "[E] ($i/$sz) Empty response for match $m\n";
-    $sz++;
-    $matches[] = $m;
-    continue;
+    lrg_parallel_log($ctx, "[E] ($seq/$sz) Empty response for match $m\n");
+    return;
   }
 
   file_put_contents($outfile, $out);
-  echo "[ ] ($i/$sz) backported $m to $outfile\n";
+  lrg_parallel_log($ctx, "[ ] ($seq/$sz) backported $m to $outfile\n");
+};
+
+$exitCode = lrg_parallel_run($matches, $workers, function ($chunk) use ($process_match, $lrg_sql_db) {
+  $connLocal = lrg_mysqli_connect($lrg_sql_db);
+  $connLocal->set_charset("utf8");
+  foreach ($chunk as $m) {
+    $process_match((int)$m, $connLocal);
+  }
+  $connLocal->close();
+});
+
+lrg_parallel_cleanup($ctx);
+$conn->close();
+if ($exitCode !== 0) {
+  exit($exitCode);
 }
