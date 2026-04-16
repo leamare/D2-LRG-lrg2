@@ -89,11 +89,70 @@ function lrg_fetcher_parallel_cleanup(): void {
     @fclose($fp);
     $GLOBALS['lrg_fetcher_stdout_lock_fp'] = null;
   }
-  foreach (['lrg_fetcher_stdout_lock_path', 'lrg_fetcher_rnum_counter_path'] as $k) {
+  foreach ([
+    'lrg_fetcher_stdout_lock_path',
+    'lrg_fetcher_rnum_counter_path',
+    'lrg_fetcher_queue_path',
+    'lrg_fetcher_failures_path',
+  ] as $k) {
     $p = $GLOBALS[$k] ?? null;
     if ($p !== null && $p !== '' && is_file($p)) {
       @unlink($p);
     }
     $GLOBALS[$k] = null;
   }
+}
+
+// ---------------------------------------------------------------------------
+// Shared work queue: workers pop matches instead of processing fixed chunks.
+// ---------------------------------------------------------------------------
+
+/** Write all matches to the shared queue file (call once before forking). */
+function lrg_fetcher_queue_init(array $items): void {
+  $path = $GLOBALS['lrg_fetcher_queue_path'] ?? null;
+  if (!$path) return;
+  file_put_contents($path, implode("\n", array_map('strval', $items)));
+}
+
+/** Atomically pop up to $n matches from the queue. Returns [] when empty. */
+function lrg_fetcher_queue_pop(int $n = 1): array {
+  $path = $GLOBALS['lrg_fetcher_queue_path'] ?? null;
+  if (!$path) return [];
+  $fp = @fopen($path, 'c+');
+  if (!$fp) return [];
+  flock($fp, LOCK_EX);
+  $content = stream_get_contents($fp);
+  $lines = ($content !== '' && $content !== false)
+    ? array_values(array_filter(explode("\n", $content), 'strlen'))
+    : [];
+  $batch = array_splice($lines, 0, $n);
+  rewind($fp);
+  ftruncate($fp, 0);
+  fwrite($fp, implode("\n", $lines));
+  fflush($fp);
+  flock($fp, LOCK_UN);
+  fclose($fp);
+  return $batch;
+}
+
+/** Append a match to the shared failures log (written by workers, read by parent). */
+function lrg_fetcher_failure_add(string $match): void {
+  $path = $GLOBALS['lrg_fetcher_failures_path'] ?? null;
+  if (!$path) return;
+  $fp = @fopen($path, 'a');
+  if (!$fp) return;
+  flock($fp, LOCK_EX);
+  fwrite($fp, $match."\n");
+  fflush($fp);
+  flock($fp, LOCK_UN);
+  fclose($fp);
+}
+
+/** Read all failures accumulated by workers (call from parent after they exit). */
+function lrg_fetcher_failures_get(): array {
+  $path = $GLOBALS['lrg_fetcher_failures_path'] ?? null;
+  if (!$path || !is_file($path)) return [];
+  $raw = file_get_contents($path);
+  if ($raw === false || $raw === '') return [];
+  return array_values(array_filter(explode("\n", $raw), 'strlen'));
 }

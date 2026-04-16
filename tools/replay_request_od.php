@@ -28,43 +28,68 @@ $matches = array_values(array_filter($matches, function ($match) {
   return $match !== '' && $match[0] !== '#';
 }));
 
-$ctx = lrg_parallel_init_context();
-lrg_parallel_log($ctx, "[ ] OpenDota cooldown: ".number_format($cooldownSeconds, 2)." s, workers: $workers\n");
-
+$batchSize   = max(1, (int)($options['b'] ?? 1));
 $totalMatches = count($matches);
-$exitCode = lrg_parallel_run($matches, $workers, function ($chunk, $workerIndex, $workersTotal) use (&$ctx, $cooldownMs, $odapikey, $useApiKey, $totalMatches) {
-  if($useApiKey) {
-    $opendota = new \SimpleOpenDotaPHP\odota_api(false, "", $cooldownMs, $odapikey);
-  } else {
-    $opendota = new \SimpleOpenDotaPHP\odota_api(false, "", $cooldownMs);
-  }
 
-  foreach ($chunk as $match) {
-    $seq = lrg_parallel_alloc_seq($ctx);
-    lrg_parallel_log(
-      $ctx,
-      "[ ] #$seq/$totalMatches w".($workerIndex + 1)."/$workersTotal requesting match $match\n"
-    );
-    ob_start();
-    // Mode 1 avoids recursive retries inside the library (mode 0 can hang forever
-    // on repeated API errors). We throttle manually per worker below.
-    $res = $opendota->request_match($match, 1);
-    $libOut = trim((string)ob_get_clean());
-    if ($libOut !== '') {
-      lrg_parallel_log($ctx, $libOut."\n");
-    }
-    if ($res === false) {
-      lrg_parallel_log($ctx, "[E] #$seq/$totalMatches match $match request failed\n");
-    } else {
-      lrg_parallel_log($ctx, "[S] #$seq/$totalMatches match $match requested\n");
-    }
-    if ($cooldownMs > 0) {
-      usleep($cooldownMs * 1000);
+$ctx = lrg_parallel_init_context();
+lrg_parallel_queue_init($ctx, $matches);
+
+lrg_parallel_log(
+  $ctx,
+  "[ ] OpenDota cooldown: ".number_format($cooldownSeconds, 2)
+    ." s, workers: $workers, batch: $batchSize, total: $totalMatches\n"
+);
+
+$exitCode = lrg_parallel_run_queue(
+  $ctx,
+  $workers,
+  function (array &$ctx, int $workerIdx, int $totalWorkers)
+    use ($batchSize, $cooldownMs, $odapikey, $useApiKey, $totalMatches)
+  {
+    $opendota = $useApiKey
+      ? new \SimpleOpenDotaPHP\odota_api(false, "", $cooldownMs, $odapikey)
+      : new \SimpleOpenDotaPHP\odota_api(false, "", $cooldownMs);
+
+    while (true) {
+      $batch = lrg_parallel_queue_pop($ctx, $batchSize);
+      if (empty($batch)) break;
+
+      foreach ($batch as $match) {
+        $seq = lrg_parallel_alloc_seq($ctx);
+        lrg_parallel_log(
+          $ctx,
+          "[ ] #$seq/$totalMatches w".($workerIdx + 1)."/$totalWorkers requesting match $match\n"
+        );
+        ob_start();
+        // Mode 1 avoids recursive retries (mode 0 can hang on repeated API errors).
+        $res    = $opendota->request_match($match, 1);
+        $libOut = trim((string)ob_get_clean());
+        if ($libOut !== '') lrg_parallel_log($ctx, $libOut."\n");
+
+        if ($res === false) {
+          lrg_parallel_log($ctx, "[E] #$seq/$totalMatches match $match request failed\n");
+          lrg_parallel_failures_add($ctx, [$match]);
+        } else {
+          lrg_parallel_log($ctx, "[S] #$seq/$totalMatches match $match requested\n");
+        }
+
+        if ($cooldownMs > 0) usleep($cooldownMs * 1000);
+      }
     }
   }
-});
+);
 
-lrg_parallel_log($ctx, "[S] All matches were requested.\n");
+$failures  = lrg_parallel_failures_get($ctx);
+$failCount = count($failures);
+if ($failCount > 0) {
+  lrg_parallel_log($ctx, "[!] $failCount / $totalMatches match(es) failed:\n");
+  foreach ($failures as $m) {
+    lrg_parallel_log($ctx, "    $m\n");
+  }
+} else {
+  lrg_parallel_log($ctx, "[S] All $totalMatches match(es) requested successfully.\n");
+}
+
 lrg_parallel_cleanup($ctx);
 exit($exitCode);
 

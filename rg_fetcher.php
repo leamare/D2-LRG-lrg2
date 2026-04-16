@@ -273,47 +273,54 @@ if ($schema['leagues'] ?? false) {
 $stdin_flag = false;
 
 if ($fetch_workers > 1 && count($matches) > 0) {
-  $chunks = array_chunk($matches, (int)ceil(count($matches) / $fetch_workers));
-  $chunks = array_values(array_filter($chunks, function ($c) {
-    return !empty($c);
-  }));
-  if (!empty($chunks)) {
-    $GLOBALS['lrg_fetcher_stdout_lock_path'] = sys_get_temp_dir().'/lrg_fetcher_'.bin2hex(random_bytes(8)).'.flock';
-    $GLOBALS['lrg_fetcher_rnum_counter_path'] = sys_get_temp_dir().'/lrg_fetcher_'.bin2hex(random_bytes(8)).'.rnum';
-    touch($GLOBALS['lrg_fetcher_stdout_lock_path']);
-    file_put_contents($GLOBALS['lrg_fetcher_rnum_counter_path'], "0");
-    $GLOBALS['lrg_fetcher_stdout_lock_fp'] = null;
+  $GLOBALS['lrg_fetcher_stdout_lock_path']  = sys_get_temp_dir().'/lrg_fetcher_'.bin2hex(random_bytes(8)).'.flock';
+  $GLOBALS['lrg_fetcher_rnum_counter_path'] = sys_get_temp_dir().'/lrg_fetcher_'.bin2hex(random_bytes(8)).'.rnum';
+  $GLOBALS['lrg_fetcher_queue_path']        = sys_get_temp_dir().'/lrg_fetcher_'.bin2hex(random_bytes(8)).'.queue';
+  $GLOBALS['lrg_fetcher_failures_path']     = sys_get_temp_dir().'/lrg_fetcher_'.bin2hex(random_bytes(8)).'.failures';
+  touch($GLOBALS['lrg_fetcher_stdout_lock_path']);
+  file_put_contents($GLOBALS['lrg_fetcher_rnum_counter_path'], "0");
+  $GLOBALS['lrg_fetcher_stdout_lock_fp'] = null;
+  lrg_fetcher_queue_init($matches);
 
-    $pids = [];
-    foreach ($chunks as $chunk) {
-      $pid = pcntl_fork();
-      if ($pid === -1) {
-        echo "[E] pcntl_fork failed after starting ".count($pids)." worker(s); waiting for them, then exit(1). Re-run with -j1 or fewer workers.\n";
-        foreach ($pids as $wpid) {
-          pcntl_waitpid($wpid, $wstatus);
-        }
-        lrg_fetcher_parallel_cleanup();
-        exit(1);
-      }
-      if ($pid === 0) {
-        $parallel_child = true;
-        $pids = [];
-        $matches = array_values($chunk);
-        $conn->close();
-        $conn = lrg_mysqli_connect($lrg_sql_db);
-        $conn->set_charset('utf8mb4');
-        break;
-      }
-      $pids[] = $pid;
-    }
-    if (!empty($pids)) {
-      foreach ($pids as $wpid) {
-        pcntl_waitpid($wpid, $wstatus);
-      }
+  $pids = [];
+  for ($wi = 0; $wi < $fetch_workers; $wi++) {
+    $pid = pcntl_fork();
+    if ($pid === -1) {
+      echo "[E] pcntl_fork failed after starting ".count($pids)." worker(s); waiting for them, then exit(1).\n";
+      foreach ($pids as $wpid) pcntl_waitpid($wpid, $wstatus);
       lrg_fetcher_parallel_cleanup();
-      echo "[S] Fetch complete.\n";
-      exit(0);
+      exit(1);
     }
+    if ($pid === 0) {
+      $parallel_child = true;
+      $pids = [];
+      $matches = [];  // workers pull from shared queue instead of fixed chunks
+      $conn->close();
+      $conn = lrg_mysqli_connect($lrg_sql_db);
+      $conn->set_charset('utf8mb4');
+      // Close inherited stdout-lock handle so child opens its own
+      if (!empty($GLOBALS['lrg_fetcher_stdout_lock_fp']) && is_resource($GLOBALS['lrg_fetcher_stdout_lock_fp'])) {
+        @fclose($GLOBALS['lrg_fetcher_stdout_lock_fp']);
+        $GLOBALS['lrg_fetcher_stdout_lock_fp'] = null;
+      }
+      break;
+    }
+    $pids[] = $pid;
+  }
+  if (!empty($pids)) {
+    foreach ($pids as $wpid) pcntl_waitpid($wpid, $wstatus);
+    // Collect failures written by all workers and report once
+    $all_failed = lrg_fetcher_failures_get();
+    if (!empty($all_failed)) {
+      echo "[R] Unparsed matches:\t".count($all_failed)."\n";
+      echo "[_] Recording failed matches to file...\n";
+      $filename = "tmp/failed_$lrg_league_tag".'_'.time();
+      file_put_contents($filename, implode("\n", $all_failed));
+      echo "[S] Recorded failed matches to $filename\n";
+    }
+    lrg_fetcher_parallel_cleanup();
+    echo "[S] Fetch complete.\n";
+    exit(0);
   }
 }
 
@@ -321,7 +328,14 @@ if ($listen)
   echo "Listening...\n";
 
 // this code is such a shitshow tbh, but I don't want to fix it, c ya in lrg-simon
-while(sizeof($matches) || $listen) {
+while(sizeof($matches) || $listen || $parallel_child) {
+  // Workers pull the next match from the shared queue when their local list is empty.
+  if ($parallel_child && empty($matches)) {
+    $pulled = lrg_fetcher_queue_pop(1);
+    if (empty($pulled)) break;
+    $matches = $pulled;
+  }
+
   if (!$stdin_flag && !empty($first_scheduled) && sizeof($matches) < 2 && !$force_await) {
     asort($first_scheduled);
     $first_requested = reset($first_scheduled);
@@ -418,7 +432,11 @@ while(sizeof($matches) || $listen) {
   if ($r === FALSE) { //|| ($force_await && $request_unparsed && $r !== TRUE)) {
     array_push($matches, $match);
   } else if ($r === NULL) {
-    $failed_matches[] = $match;
+    if ($parallel_child) {
+      lrg_fetcher_failure_add($match);
+    } else {
+      $failed_matches[] = $match;
+    }
   }
 }
 

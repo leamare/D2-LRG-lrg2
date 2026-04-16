@@ -1,6 +1,6 @@
 # Dota 2 League Report Generator (D2-LRG-lrg2)
 
-## Current version: 2.30.0
+## Current version: 2.31.0
 
 This is the **lrg2** version that won't be updated any further.
 
@@ -66,19 +66,21 @@ D2LRG is made of four scripts, divided into smaller modules:
 
 ### What do I need to use it?
 
-MySQL database server and PHP interpreter. Nothing really special, you can use regular XAMPP for it.
+MySQL database server and PHP interpreter. MariaDB is mostly compatible, but there are some changes that have to be done to the medians related code.
 
 I also recommend using PHPMyAdmin for manual data change.
 
-It would be nice to have bash on your system. For Windows it's recommended to have git bash or cygwin with ConEmu.
+As of 2.30.0, it's incompatible with Windows, so it's heavily advised to run it inside WSL.
 
 ## Dependencies:
+
 * PHP 8+
 * php mbstring
 * MySQL 5.7+
 * cURL
 
 After getting D2LRG code to your computer, run `php setup.php`. It will install the rest of dependencies:
+
 * Vis.js @ 4.21.0
 * Chart.js @ 2.9.1
 * Chart.js Boxplot @ 2.3.2
