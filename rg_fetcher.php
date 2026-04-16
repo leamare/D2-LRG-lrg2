@@ -277,6 +277,7 @@ if ($fetch_workers > 1 && count($matches) > 0) {
   $GLOBALS['lrg_fetcher_rnum_counter_path'] = sys_get_temp_dir().'/lrg_fetcher_'.bin2hex(random_bytes(8)).'.rnum';
   $GLOBALS['lrg_fetcher_queue_path']        = sys_get_temp_dir().'/lrg_fetcher_'.bin2hex(random_bytes(8)).'.queue';
   $GLOBALS['lrg_fetcher_failures_path']     = sys_get_temp_dir().'/lrg_fetcher_'.bin2hex(random_bytes(8)).'.failures';
+  $GLOBALS['lrg_fetcher_timer_path']        = sys_get_temp_dir().'/lrg_fetcher_'.bin2hex(random_bytes(8)).'.timer';
   touch($GLOBALS['lrg_fetcher_stdout_lock_path']);
   file_put_contents($GLOBALS['lrg_fetcher_rnum_counter_path'], "0");
   $GLOBALS['lrg_fetcher_stdout_lock_fp'] = null;
@@ -329,43 +330,41 @@ if ($listen)
 
 // this code is such a shitshow tbh, but I don't want to fix it, c ya in lrg-simon
 while(sizeof($matches) || $listen || $parallel_child) {
-  // Workers pull the next match from the shared queue when their local list is empty.
-  if ($parallel_child && empty($matches)) {
-    $pulled = lrg_fetcher_queue_pop(1);
-    if (empty($pulled)) break;
-    $matches = $pulled;
+  // Parallel workers: flush any timer entries that are now ready back into
+  // the work queue, then pull the next match. If both queues are empty,
+  // sleep briefly until the nearest timer entry is due rather than blocking.
+  if ($parallel_child) {
+    lrg_fetcher_timer_flush_ready();
+    if (empty($matches)) {
+      $pulled = lrg_fetcher_queue_pop(1);
+      if (empty($pulled)) {
+        $nextTime = lrg_fetcher_timer_next_time();
+        if ($nextTime === null) break; // work queue and timer queue both empty
+        $sleepSecs = max(1, min($nextTime - time(), 30));
+        sleep($sleepSecs);
+        continue;
+      }
+      $matches = $pulled;
+    }
   }
 
-  if ($listen && !$stdin_flag && !empty($first_scheduled) && sizeof($matches) < 2 && !$force_await) {
-    asort($first_scheduled);
-    $first_requested = reset($first_scheduled);
-    if (time() - $first_requested < $scheduled_wait_period)
-      $stdin_flag = true;
-  }
-
-  if ($listen && (!sizeof($matches) || $stdin_flag)) {
+  // Only read from STDIN when the local queue is fully drained (no pending
+  // retries). This ensures that an updated/appended matchlist file does not
+  // bleed into the current run while matches are still being retried.
+  if ($listen && !sizeof($matches)) {
     if (feof(STDIN)) break;
-    // Non-blocking peek so pending retries are not starved by a blocking read.
-    // If $matches is empty we wait longer (up to 1 s); if there are retries
-    // queued we only peek for 50 ms and fall through if nothing is ready.
-    $read     = [STDIN];
-    $write    = null;
-    $except   = null;
-    $timeout  = sizeof($matches) ? 0 : 1;
-    $utimeout = sizeof($matches) ? 50000 : 0;
-    $ready = stream_select($read, $write, $except, $timeout, $utimeout);
+    $read   = [STDIN];
+    $write  = null;
+    $except = null;
+    // Wait up to 1 s for a new match ID; loop back if nothing arrives.
+    $ready = stream_select($read, $write, $except, 1, 0);
     if ($ready) {
       $match_str = fgets(STDIN);
-      if (!$match_str || strlen($match_str) === 0) {
-        $stdin_flag = false;
-      } else {
+      if ($match_str && strlen(trim($match_str)) > 0) {
         array_unshift($matches, trim($match_str));
-        $stdin_flag = false;
       }
-    } else {
-      // Nothing on stdin right now — clear the flag and let retries run.
-      $stdin_flag = false;
     }
+    $stdin_flag = false;
   }
 
   if ($stratz_graphql_group) {
@@ -419,13 +418,15 @@ while(sizeof($matches) || $listen || $parallel_child) {
     processRules($match_raw);
   } else $match_raw = $match;
 
-  if($request_unparsed && isset($first_scheduled[$match_raw])) {
+  // Single-worker only: gate retries via $first_scheduled.
+  // Parallel workers use the timer queue instead (see above).
+  if (!$parallel_child && $request_unparsed && isset($first_scheduled[$match_raw])) {
     if (time() - $first_scheduled[$match_raw] < $scheduled_wait_period) {
       if (!sizeof($matches)) {
         if ($listen && !$force_await) {
-          $stdin_flag = true;
-        }
-        if (!$stdin_flag) {
+          // In listen mode pace retries without blocking STDIN.
+          sleep(1);
+        } else {
           echo "[W] Waiting for $scheduled_wait_period seconds\n";
           sleep($scheduled_wait_period);
         }
@@ -444,7 +445,12 @@ while(sizeof($matches) || $listen || $parallel_child) {
     lrg_fetcher_parallel_ob_end_flush();
   }
   if ($r === FALSE) { //|| ($force_await && $request_unparsed && $r !== TRUE)) {
-    array_push($matches, $match);
+    if ($parallel_child) {
+      // Don't block: park the match in the shared timer queue and keep working.
+      lrg_fetcher_timer_add($match, time() + $scheduled_wait_period);
+    } else {
+      array_push($matches, $match);
+    }
   } else if ($r === NULL) {
     if ($parallel_child) {
       lrg_fetcher_failure_add($match);

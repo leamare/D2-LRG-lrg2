@@ -94,6 +94,7 @@ function lrg_fetcher_parallel_cleanup(): void {
     'lrg_fetcher_rnum_counter_path',
     'lrg_fetcher_queue_path',
     'lrg_fetcher_failures_path',
+    'lrg_fetcher_timer_path',
   ] as $k) {
     $p = $GLOBALS[$k] ?? null;
     if ($p !== null && $p !== '' && is_file($p)) {
@@ -112,6 +113,19 @@ function lrg_fetcher_queue_init(array $items): void {
   $path = $GLOBALS['lrg_fetcher_queue_path'] ?? null;
   if (!$path) return;
   file_put_contents($path, implode("\n", array_map('strval', $items)));
+}
+
+/** Append a single match back to the tail of the shared work queue. */
+function lrg_fetcher_queue_push(string $match): void {
+  $path = $GLOBALS['lrg_fetcher_queue_path'] ?? null;
+  if (!$path) return;
+  $fp = @fopen($path, 'a');
+  if (!$fp) return;
+  flock($fp, LOCK_EX);
+  fwrite($fp, $match."\n");
+  fflush($fp);
+  flock($fp, LOCK_UN);
+  fclose($fp);
 }
 
 /** Atomically pop up to $n matches from the queue. Returns [] when empty. */
@@ -155,4 +169,72 @@ function lrg_fetcher_failures_get(): array {
   $raw = file_get_contents($path);
   if ($raw === false || $raw === '') return [];
   return array_values(array_filter(explode("\n", $raw), 'strlen'));
+}
+
+// ---------------------------------------------------------------------------
+// Shared timer queue: workers park scheduled retries here instead of blocking.
+// Format: one "match_id\tready_timestamp" per line.
+// ---------------------------------------------------------------------------
+
+/** Schedule $match to re-enter the work queue at $readyAt (Unix timestamp). */
+function lrg_fetcher_timer_add(string $match, int $readyAt): void {
+  $path = $GLOBALS['lrg_fetcher_timer_path'] ?? null;
+  if (!$path) return;
+  $fp = @fopen($path, 'a');
+  if (!$fp) return;
+  flock($fp, LOCK_EX);
+  fwrite($fp, $match."\t".$readyAt."\n");
+  fflush($fp);
+  flock($fp, LOCK_UN);
+  fclose($fp);
+}
+
+/**
+ * Atomically move all ready timer entries (ready_time <= now) into the
+ * main work queue so any idle worker can pick them up immediately.
+ */
+function lrg_fetcher_timer_flush_ready(): void {
+  $tpath = $GLOBALS['lrg_fetcher_timer_path'] ?? null;
+  if (!$tpath || !is_file($tpath)) return;
+  $fp = @fopen($tpath, 'c+');
+  if (!$fp) return;
+  flock($fp, LOCK_EX);
+  $content = stream_get_contents($fp);
+  $now     = time();
+  $ready   = [];
+  $pending = [];
+  foreach (explode("\n", (string)$content) as $line) {
+    $line = trim($line);
+    if ($line === '') continue;
+    [$mid, $ts] = explode("\t", $line, 2);
+    if ((int)$ts <= $now) {
+      $ready[] = $mid;
+    } else {
+      $pending[] = $line;
+    }
+  }
+  rewind($fp);
+  ftruncate($fp, 0);
+  fwrite($fp, $pending ? implode("\n", $pending)."\n" : "");
+  fflush($fp);
+  flock($fp, LOCK_UN);
+  fclose($fp);
+  foreach ($ready as $mid) lrg_fetcher_queue_push($mid);
+}
+
+/** Return the earliest ready-timestamp in the timer queue, or null if empty. */
+function lrg_fetcher_timer_next_time(): ?int {
+  $path = $GLOBALS['lrg_fetcher_timer_path'] ?? null;
+  if (!$path || !is_file($path)) return null;
+  $raw = @file_get_contents($path);
+  if ($raw === false || $raw === '') return null;
+  $min = null;
+  foreach (explode("\n", $raw) as $line) {
+    $line = trim($line);
+    if ($line === '') continue;
+    [, $ts] = explode("\t", $line, 2);
+    $t = (int)$ts;
+    if ($min === null || $t < $min) $min = $t;
+  }
+  return $min;
 }
