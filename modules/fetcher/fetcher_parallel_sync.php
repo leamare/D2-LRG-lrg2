@@ -180,10 +180,32 @@ function lrg_fetcher_failures_get(): array {
 function lrg_fetcher_timer_add(string $match, int $readyAt): void {
   $path = $GLOBALS['lrg_fetcher_timer_path'] ?? null;
   if (!$path) return;
-  $fp = @fopen($path, 'a');
+  $fp = @fopen($path, 'c+');
   if (!$fp) return;
   flock($fp, LOCK_EX);
-  fwrite($fp, $match."\t".$readyAt."\n");
+  $raw = stream_get_contents($fp);
+  $entries = [];
+  foreach (explode("\n", (string)$raw) as $line) {
+    $line = trim($line);
+    if ($line === '') continue;
+    $parts = explode("\t", $line, 2);
+    if (count($parts) < 2) continue;
+    $mid = (string)$parts[0];
+    $ts  = (int)$parts[1];
+    // Keep the earliest timestamp seen for each match.
+    if (!isset($entries[$mid]) || $ts < $entries[$mid]) {
+      $entries[$mid] = $ts;
+    }
+  }
+  // Upsert: one timer row per match id.
+  $entries[$match] = $readyAt;
+  $rows = [];
+  foreach ($entries as $mid => $ts) {
+    $rows[] = $mid."\t".$ts;
+  }
+  rewind($fp);
+  ftruncate($fp, 0);
+  fwrite($fp, $rows ? implode("\n", $rows)."\n" : '');
   fflush($fp);
   flock($fp, LOCK_UN);
   fclose($fp);
@@ -218,15 +240,19 @@ function lrg_fetcher_timer_flush_ready(): void {
     }
     [$mid, $ts] = $parts;
     if ((int)$ts <= $now) {
-      $ready[] = $mid;
+      $ready[$mid] = true;
     } else {
-      $pending[] = $line;
+      $pending[$mid] = (int)$ts;
     }
   }
-  foreach ($ready as $mid) {
+  foreach (array_keys($ready) as $mid) {
     lrg_fetcher_queue_push($mid);
   }
-  $new_body = $pending ? implode("\n", $pending)."\n" : '';
+  $pending_rows = [];
+  foreach ($pending as $mid => $ts) {
+    $pending_rows[] = $mid."\t".$ts;
+  }
+  $new_body = $pending_rows ? implode("\n", $pending_rows)."\n" : '';
   rewind($fp);
   ftruncate($fp, 0);
   fwrite($fp, $new_body);
