@@ -2,6 +2,7 @@
 <?php
 ini_set('memory_limit', '4000M');
 ini_set('mysqli.reconnect', '1');
+ini_set('default_socket_timeout', '30');
 mysqli_report(MYSQLI_REPORT_OFF); //FIXME:
 
 include_once("head.php");
@@ -273,14 +274,23 @@ if ($schema['leagues'] ?? false) {
 $stdin_flag = false;
 
 if ($fetch_workers > 1 && count($matches) > 0) {
-  $GLOBALS['lrg_fetcher_stdout_lock_path']  = sys_get_temp_dir().'/lrg_fetcher_'.bin2hex(random_bytes(8)).'.flock';
-  $GLOBALS['lrg_fetcher_rnum_counter_path'] = sys_get_temp_dir().'/lrg_fetcher_'.bin2hex(random_bytes(8)).'.rnum';
-  $GLOBALS['lrg_fetcher_queue_path']        = sys_get_temp_dir().'/lrg_fetcher_'.bin2hex(random_bytes(8)).'.queue';
-  $GLOBALS['lrg_fetcher_failures_path']     = sys_get_temp_dir().'/lrg_fetcher_'.bin2hex(random_bytes(8)).'.failures';
-  $GLOBALS['lrg_fetcher_timer_path']        = sys_get_temp_dir().'/lrg_fetcher_'.bin2hex(random_bytes(8)).'.timer';
+  $ipc_tag = preg_replace('/[^a-zA-Z0-9_-]/', '_', (string)$lrg_league_tag).'_'.getmypid().'_'.bin2hex(random_bytes(4));
+  $ipc_base = rtrim(sys_get_temp_dir(), "/\\").'/lrg_fetcher_'.$ipc_tag;
+  $GLOBALS['lrg_fetcher_stdout_lock_path']  = $ipc_base.'_stdout.flock';
+  $GLOBALS['lrg_fetcher_rnum_counter_path'] = $ipc_base.'_rnum.counter';
+  $GLOBALS['lrg_fetcher_queue_path']        = $ipc_base.'_work.queue';
+  $GLOBALS['lrg_fetcher_failures_path']     = $ipc_base.'_failures.log';
+  $GLOBALS['lrg_fetcher_timer_path']        = $ipc_base.'_wait.timer';
+  $GLOBALS['lrg_fetcher_ipc_lock_path']     = $ipc_base.'_ipc.flock';
+  $GLOBALS['lrg_fetcher_ipc_lock_fp']       = null;
   touch($GLOBALS['lrg_fetcher_stdout_lock_path']);
+  touch($GLOBALS['lrg_fetcher_ipc_lock_path']);
   file_put_contents($GLOBALS['lrg_fetcher_rnum_counter_path'], "0");
   $GLOBALS['lrg_fetcher_stdout_lock_fp'] = null;
+  echo "[ ] Parallel IPC (this run only; other rg_fetcher processes use other paths):\n";
+  echo "    queue:  ".$GLOBALS['lrg_fetcher_queue_path']."\n";
+  echo "    timer:  ".$GLOBALS['lrg_fetcher_timer_path']."\n";
+  echo "    ipc:    ".$GLOBALS['lrg_fetcher_ipc_lock_path']."\n";
   lrg_fetcher_queue_init($matches);
 
   $pids = [];
@@ -299,10 +309,14 @@ if ($fetch_workers > 1 && count($matches) > 0) {
       $conn->close();
       $conn = lrg_mysqli_connect($lrg_sql_db);
       $conn->set_charset('utf8mb4');
-      // Close inherited stdout-lock handle so child opens its own
+      // Close inherited stdout-lock / IPC handles so child opens its own
       if (!empty($GLOBALS['lrg_fetcher_stdout_lock_fp']) && is_resource($GLOBALS['lrg_fetcher_stdout_lock_fp'])) {
         @fclose($GLOBALS['lrg_fetcher_stdout_lock_fp']);
         $GLOBALS['lrg_fetcher_stdout_lock_fp'] = null;
+      }
+      if (!empty($GLOBALS['lrg_fetcher_ipc_lock_fp']) && is_resource($GLOBALS['lrg_fetcher_ipc_lock_fp'])) {
+        @fclose($GLOBALS['lrg_fetcher_ipc_lock_fp']);
+        $GLOBALS['lrg_fetcher_ipc_lock_fp'] = null;
       }
       break;
     }
@@ -341,6 +355,14 @@ while(sizeof($matches) || $listen || $parallel_child) {
         $nextTime = lrg_fetcher_timer_next_time();
         if ($nextTime === null) break; // work queue and timer queue both empty
         $sleepSecs = max(1, min($nextTime - time(), 30));
+        $ts = function_exists('lrg_fetcher_match_log_timestamp')
+          ? lrg_fetcher_match_log_timestamp() : date('Y-m-d H:i:s');
+        $eta = max(0, $nextTime - time());
+        lrg_fetcher_stdout_lock_for_fetch();
+        echo "[$ts] [w".(function_exists('posix_getpid') ? posix_getpid() : getmypid())
+          ."] queue empty, next retry in {$eta}s, sleeping {$sleepSecs}s\n";
+        if (defined('STDOUT') && is_resource(STDOUT)) fflush(STDOUT);
+        lrg_fetcher_stdout_unlock_for_fetch();
         sleep($sleepSecs);
         continue;
       }
@@ -365,6 +387,10 @@ while(sizeof($matches) || $listen || $parallel_child) {
       }
     }
     $stdin_flag = false;
+  }
+
+  if (!sizeof($matches)) {
+    continue;
   }
 
   if ($stratz_graphql_group) {
@@ -437,6 +463,18 @@ while(sizeof($matches) || $listen || $parallel_child) {
     }
   }
 
+
+  if ($parallel_child) {
+    // Pre-fetch heartbeat that bypasses ob_start so silence in the main log
+    // never hides which match a worker is currently stuck on.
+    $ts  = function_exists('lrg_fetcher_match_log_timestamp')
+      ? lrg_fetcher_match_log_timestamp() : date('Y-m-d H:i:s');
+    $pid = function_exists('posix_getpid') ? posix_getpid() : getmypid();
+    lrg_fetcher_stdout_lock_for_fetch();
+    echo "[$ts] [w$pid] starting match $match\n";
+    if (defined('STDOUT') && is_resource(STDOUT)) fflush(STDOUT);
+    lrg_fetcher_stdout_unlock_for_fetch();
+  }
 
   lrg_fetcher_parallel_ob_begin();
   try {

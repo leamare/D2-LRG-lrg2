@@ -66,7 +66,7 @@ function fetch($match) {
     $rnum++;
   }
   $log_ts = function_exists('lrg_fetcher_match_log_timestamp') ? lrg_fetcher_match_log_timestamp() : date('Y-m-d H:i:s');
-  echo('['.$log_ts."] [$match_seq\t] Match $match: ");
+  echo("[ $match_seq\t] [ $log_ts ] Match $match: ");
 
   if (!empty($lg_settings['match_limit_after'])) {
     if ($match < $lg_settings['match_limit_after']) {
