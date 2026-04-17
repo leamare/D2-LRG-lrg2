@@ -164,6 +164,7 @@ function lrg_fetcher_parallel_cleanup(): void {
     'lrg_fetcher_queue_path',
     'lrg_fetcher_failures_path',
     'lrg_fetcher_timer_path',
+    'lrg_fetcher_scheduled_path',
     'lrg_fetcher_ipc_lock_path',
   ] as $k) {
     $p = $GLOBALS[$k] ?? null;
@@ -259,6 +260,42 @@ function lrg_fetcher_failures_get(): array {
   $raw = file_get_contents($path);
   if ($raw === false || $raw === '') return [];
   return array_values(array_filter(explode("\n", $raw), 'strlen'));
+}
+
+// ---------------------------------------------------------------------------
+// Shared "already rescheduled" set.
+// When a worker requests an OD re-parse it writes the match ID here so that
+// other workers who later dequeue the same match know not to request again.
+// ---------------------------------------------------------------------------
+
+/** Mark $match as already re-requested (idempotent). */
+function lrg_fetcher_scheduled_add(string $match): void {
+  $path = $GLOBALS['lrg_fetcher_scheduled_path'] ?? null;
+  if (!$path) return;
+  lrg_fetcher_ipc_lock();
+  try {
+    $fp = @fopen($path, 'a');
+    if ($fp) { fwrite($fp, $match."\n"); fclose($fp); }
+  } finally {
+    lrg_fetcher_ipc_unlock();
+  }
+}
+
+/** Return true if $match has already been re-requested by any worker. */
+function lrg_fetcher_scheduled_has(string $match): bool {
+  $path = $GLOBALS['lrg_fetcher_scheduled_path'] ?? null;
+  if (!$path || !is_file($path)) return false;
+  lrg_fetcher_ipc_lock();
+  try {
+    $raw = @file_get_contents($path);
+  } finally {
+    lrg_fetcher_ipc_unlock();
+  }
+  if ($raw === false || $raw === '') return false;
+  foreach (explode("\n", $raw) as $line) {
+    if (trim($line) === $match) return true;
+  }
+  return false;
 }
 
 // ---------------------------------------------------------------------------
@@ -363,6 +400,35 @@ function lrg_fetcher_timer_flush_ready(): void {
     fwrite($fp, $new_body);
     fflush($fp);
     fclose($fp);
+  } finally {
+    lrg_fetcher_ipc_unlock();
+  }
+}
+
+/** Return the earliest ready-timestamp and count of entries in the timer queue. */
+function lrg_fetcher_timer_info(): array {
+  $path = $GLOBALS['lrg_fetcher_timer_path'] ?? null;
+  if (!$path || !is_file($path)) {
+    return ['next' => null, 'count' => 0];
+  }
+  lrg_fetcher_ipc_lock();
+  try {
+    $raw = @file_get_contents($path);
+    if ($raw === false || $raw === '') {
+      return ['next' => null, 'count' => 0];
+    }
+    $min   = null;
+    $count = 0;
+    foreach (explode("\n", $raw) as $line) {
+      $line = trim($line);
+      if ($line === '') continue;
+      $parts = explode("\t", $line, 2);
+      if (count($parts) < 2) continue;
+      $t = (int)$parts[1];
+      $count++;
+      if ($min === null || $t < $min) $min = $t;
+    }
+    return ['next' => $min, 'count' => $count];
   } finally {
     lrg_fetcher_ipc_unlock();
   }
