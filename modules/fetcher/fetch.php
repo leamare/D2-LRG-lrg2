@@ -413,12 +413,15 @@ function fetch($match) {
         $bad_replay = true;
 
         // 14*24*3600 = two weeks
-        if($request_unparsed && !in_array($match, $scheduled) && !empty($match) && (time() - $matchdata['matches']['start_date'] < 1209600)) {
-          // @file_get_contents($request);
+        $already_scheduled = in_array($match, $scheduled)
+          || (isset($GLOBALS['lrg_fetcher_scheduled_path']) && lrg_fetcher_scheduled_has($match));
+
+        if($request_unparsed && !$already_scheduled && !empty($match) && (time() - $matchdata['matches']['start_date'] < 1209600)) {
           `php tools/replay_request_stratz.php -m$match`;
           echo "..Requested and scheduled $match\n";
           $first_scheduled[$match] = time();
           $scheduled_stratz[] = $match;
+          if (isset($GLOBALS['lrg_fetcher_scheduled_path'])) lrg_fetcher_scheduled_add($match);
         }
 
         //unset($matchdata);
@@ -530,13 +533,17 @@ function fetch($match) {
         echo("..MISSING: Unable to read JSON skipping.\n");
         //if (!isset($matchdata['duration'])) var_dump($matchdata);
 
-        if($request_unparsed && !in_array($match, $scheduled)) {
+        $already_scheduled = in_array($match, $scheduled)
+          || (isset($GLOBALS['lrg_fetcher_scheduled_path']) && lrg_fetcher_scheduled_has($match));
+
+        if($request_unparsed && !$already_scheduled) {
           $opendota->request_match($match);
           echo "[\t] Requested and scheduled $match\n";
           $first_scheduled[$match] = time();
           $scheduled[] = $match;
+          if (isset($GLOBALS['lrg_fetcher_scheduled_path'])) lrg_fetcher_scheduled_add($match);
           return false;
-        } else { //if (in_array($match, $scheduled) && !$force_adding) {
+        } else {
           return null;
         }
       } else {
@@ -625,11 +632,16 @@ function fetch($match) {
       }
 
       if (empty($matchdata['players'][0]['lh_t'])) {
-        if($request_unparsed && !in_array($match, $scheduled)) {
+        $already_scheduled = in_array($match, $scheduled)
+          || (isset($GLOBALS['lrg_fetcher_scheduled_path']) && lrg_fetcher_scheduled_has($match));
+        if($request_unparsed && !$already_scheduled) {
           $opendota->request_match($match);
           echo "..Unparsed. Requested and scheduled $match\n";
           $first_scheduled[$match] = time();
           $scheduled[] = $match;
+          if (isset($GLOBALS['lrg_fetcher_scheduled_path'])) {
+            lrg_fetcher_scheduled_add($match);
+          }
           return false;
         }
 
