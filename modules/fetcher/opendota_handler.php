@@ -1,42 +1,39 @@
 <?php
 
-function lrg_opendota_http_request(string $method, string $full_url, array $data = []) {
-  $ch = curl_init();
+const LRG_OPENDOTA_TIMEOUT = 30;
 
-  if (strtoupper($method) === 'GET') {
-    if (!empty($data)) {
-      $full_url .= (strpos($full_url, '?') === false ? '?' : '&') . http_build_query($data);
-    }
-    curl_setopt($ch, CURLOPT_URL, $full_url);
-  } else {
-    curl_setopt($ch, CURLOPT_URL, $full_url);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
-    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/x-www-form-urlencoded']);
+function lrg_opendota_http_request(string $method, string $full_url, array $data = []) {
+  $method = strtoupper($method);
+  $scheme = (stripos($full_url, 'https') === 0) ? 'https' : 'http';
+
+  $opts = [
+    $scheme => [
+      'timeout'       => LRG_OPENDOTA_TIMEOUT,
+      'ignore_errors' => true,
+      'user_agent'    => 'lrg-fetcher/1.0',
+    ],
+  ];
+
+  if ($method === 'POST') {
+    $body = http_build_query($data);
+    $opts[$scheme]['method']  = 'POST';
+    $opts[$scheme]['header']  = "Content-Type: application/x-www-form-urlencoded\r\n"
+                              . "Content-Length: " . strlen($body);
+    $opts[$scheme]['content'] = $body;
+  } elseif (!empty($data)) {
+    $full_url .= (strpos($full_url, '?') === false ? '?' : '&') . http_build_query($data);
   }
 
-  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-  curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-  curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
-  curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-  curl_setopt($ch, CURLOPT_USERAGENT, 'lrg-fetcher/1.0');
-
-  $resp = curl_exec($ch);
-  $err  = curl_error($ch);
-  curl_close($ch);
-
+  $resp = @file_get_contents($full_url, false, stream_context_create($opts));
   if ($resp === false) {
-    if ($err !== '') {
-      echo "[E] OpenDota HTTP: $err\n";
-    }
+    $err = error_get_last();
+    if (!empty($err['message'])) echo "[E] OpenDota HTTP: ".$err['message']."\n";
     return false;
   }
   if (strpos($resp, '<!DOCTYPE HTML>') !== false) {
     return ['error' => 'Node disabled'];
   }
-
-  $decoded = json_decode($resp, true);
-  return $decoded;
+  return json_decode($resp, true);
 }
 
 function lrg_install_opendota_handler(
