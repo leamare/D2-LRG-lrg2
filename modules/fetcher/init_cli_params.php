@@ -64,6 +64,8 @@ if (!empty($odapikey) && !isset($ignore_api_key))
 else
   $opendota = new \SimpleOpenDotaPHP\odota_api(false, "", $api_cooldown ?? 0);
 
+lrg_install_opendota_handler($opendota);
+
 if (!empty($options['d'])) {
   $opendota_effective_cooldown_s = (float)$options['d'];
 } elseif (!empty($odapikey) && !isset($ignore_api_key)) {

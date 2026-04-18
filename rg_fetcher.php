@@ -10,6 +10,7 @@ include_once("modules/commons/array_key_compat.php");
 include_once("modules/fetcher/get_patchid.php");
 include_once("modules/fetcher/processRules.php");
 include_once("modules/fetcher/fetcher_parallel_sync.php");
+include_once("modules/fetcher/opendota_handler.php");
 include_once("modules/fetcher/fetch.php");
 include_once("modules/fetcher/stratz.php");
 include_once("modules/commons/generate_tag.php");
