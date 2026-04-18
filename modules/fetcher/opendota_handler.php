@@ -25,11 +25,7 @@ function lrg_opendota_http_request(string $method, string $full_url, array $data
   }
 
   $resp = @file_get_contents($full_url, false, stream_context_create($opts));
-  if ($resp === false) {
-    $err = error_get_last();
-    if (!empty($err['message'])) echo "[E] OpenDota HTTP: ".$err['message']."\n";
-    return false;
-  }
+  if ($resp === false) return false;
   if (strpos($resp, '<!DOCTYPE HTML>') !== false) {
     return ['error' => 'Node disabled'];
   }
