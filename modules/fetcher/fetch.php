@@ -217,6 +217,13 @@ function fetch($match) {
       return true;
     }
 
+    $bot = lrg_detect_bot_match($matchdata);
+    if ($bot['bot']) {
+      echo("..Bot match detected (".$bot['reason']."), skipping.\n");
+      if (function_exists('lrg_fetcher_bot_increment')) lrg_fetcher_bot_increment();
+      return true;
+    }
+
     foreach($matchdata['players'] as $p) {
       if(!isset($t_players[$p['playerID']]) || ($update_names && !isset($updated_names[$p['playerID']])) ) {
         $t_new_players[$p['playerID']] = $p['nickname'];
@@ -367,6 +374,14 @@ function fetch($match) {
         echo("..Duration is less than ".($min_duration_seconds/60)." minutes, skipping...\n");
         return true;
       }
+      
+      $bot = lrg_detect_bot_match($matchdata);
+      if ($bot['bot']) {
+        echo("..Bot match detected (".$bot['reason']."), skipping.\n");
+        if (function_exists('lrg_fetcher_bot_increment')) lrg_fetcher_bot_increment();
+        return true;
+      }
+    
       if($matchdata['payload']['score_radiant'] < $min_score_side && $matchdata['payload']['score_dire'] < $min_score_side) {
         echo("..Low score, skipping.\n");
         return true;
@@ -2083,6 +2098,14 @@ function fetch($match) {
       'fantasy_mvp_points' => $t_fantasy_points,
       'fantasy_mvp_awards' => $t_fantasy_awards,
     ];
+
+    if (function_exists('lrg_detect_bot_match')) {
+      $bot = lrg_detect_bot_match($matchdata);
+      if ($bot['bot']) {
+        $matchdata['is_bot_match'] = true;
+        $matchdata['is_bot_match_reason'] = $bot['reason'];
+      }
+    }
 
     $matchdata['players'] = [];
     foreach ($t_matchlines as $ml) {
