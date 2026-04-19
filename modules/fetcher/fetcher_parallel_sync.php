@@ -187,7 +187,8 @@ function lrg_fetcher_queue_init(array $items): void {
   }
   lrg_fetcher_ipc_lock();
   try {
-    file_put_contents($path, implode("\n", array_map('strval', $items)));
+    $body = $items ? implode("\n", array_map('strval', $items))."\n" : '';
+    file_put_contents($path, $body);
   } finally {
     lrg_fetcher_ipc_unlock();
   }
@@ -223,9 +224,10 @@ function lrg_fetcher_queue_pop(int $n = 1): array {
       ? array_values(array_filter(explode("\n", $content), 'strlen'))
       : [];
     $batch = array_splice($lines, 0, $n);
+    $body = $lines ? implode("\n", $lines)."\n" : '';
     rewind($fp);
     ftruncate($fp, 0);
-    fwrite($fp, implode("\n", $lines));
+    fwrite($fp, $body);
     fflush($fp);
     fclose($fp);
     return $batch;
