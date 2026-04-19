@@ -11,6 +11,7 @@ include_once("modules/fetcher/get_patchid.php");
 include_once("modules/fetcher/processRules.php");
 include_once("modules/fetcher/fetcher_parallel_sync.php");
 include_once("modules/fetcher/opendota_handler.php");
+include_once("modules/fetcher/bot_match_detector.php");
 include_once("modules/fetcher/fetch.php");
 include_once("modules/fetcher/stratz.php");
 include_once("modules/commons/generate_tag.php");
@@ -158,5 +159,9 @@ if (sizeof($failed_matches)) {
 }
 
 if (!$parallel_child) {
+  $bot_total = lrg_fetcher_bot_count();
+  if ($bot_total > 0) {
+    echo "[B] Bot matches skipped:\t{$bot_total}\n";
+  }
   echo "[S] Fetch complete.\n";
 }

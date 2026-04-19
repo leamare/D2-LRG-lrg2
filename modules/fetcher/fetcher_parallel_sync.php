@@ -124,6 +124,34 @@ function lrg_fetcher_alloc_match_seq(): int {
   return $n;
 }
 
+function lrg_fetcher_bot_increment(): void {
+  $path = $GLOBALS['lrg_fetcher_bot_counter_path'] ?? null;
+  if ($path === null || $path === '') {
+    $GLOBALS['lrg_fetcher_bot_count_local'] = ($GLOBALS['lrg_fetcher_bot_count_local'] ?? 0) + 1;
+    return;
+  }
+  $fp = fopen($path, 'c+');
+  if (!$fp) return;
+  flock($fp, LOCK_EX);
+  $n = (int)trim((string)stream_get_contents($fp));
+  $n++;
+  rewind($fp);
+  ftruncate($fp, 0);
+  fwrite($fp, (string)$n);
+  fflush($fp);
+  flock($fp, LOCK_UN);
+  fclose($fp);
+}
+
+function lrg_fetcher_bot_count(): int {
+  $path = $GLOBALS['lrg_fetcher_bot_counter_path'] ?? null;
+  if ($path === null || $path === '' || !is_file($path)) {
+    return (int)($GLOBALS['lrg_fetcher_bot_count_local'] ?? 0);
+  }
+  $raw = @file_get_contents($path);
+  return (int)trim((string)$raw);
+}
+
 function lrg_fetcher_parallel_ob_begin(): void {
   if (!empty($GLOBALS['lrg_fetcher_stdout_lock_path'])) {
     ob_start();
@@ -165,6 +193,7 @@ function lrg_fetcher_parallel_cleanup(): void {
     'lrg_fetcher_failures_path',
     'lrg_fetcher_timer_path',
     'lrg_fetcher_scheduled_path',
+    'lrg_fetcher_bot_counter_path',
     'lrg_fetcher_ipc_lock_path',
   ] as $k) {
     $p = $GLOBALS[$k] ?? null;

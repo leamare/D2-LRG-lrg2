@@ -267,6 +267,13 @@ function fetch($match) {
       return true;
     }
 
+    $abuse_bot = lrg_detect_bot_match($matchdata);
+    if ($abuse_bot['bot']) {
+      echo("..Bot match detected (".$abuse_bot['reason']."), skipping.\n");
+      if (function_exists('lrg_fetcher_bot_increment')) lrg_fetcher_bot_increment();
+      return true;
+    }
+
     if (!isset($matchdata['payload'])) {
       $matchdata['payload'] = [
         'score_radiant' => 0,

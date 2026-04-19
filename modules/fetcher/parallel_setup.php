@@ -10,6 +10,7 @@ if ($fetch_workers > 1 && count($matches) > 0) {
   $GLOBALS['lrg_fetcher_failures_path']     = $ipc_base . '_failures.log';
   $GLOBALS['lrg_fetcher_timer_path']        = $ipc_base . '_wait.timer';
   $GLOBALS['lrg_fetcher_scheduled_path']    = $ipc_base . '_scheduled.log';
+  $GLOBALS['lrg_fetcher_bot_counter_path']  = $ipc_base . '_bot.counter';
   $GLOBALS['lrg_fetcher_ipc_lock_path']     = $ipc_base . '_ipc.flock';
   $GLOBALS['lrg_fetcher_ipc_lock_fp']       = null;
   $GLOBALS['lrg_fetcher_stdout_lock_fp']    = null;
@@ -17,6 +18,7 @@ if ($fetch_workers > 1 && count($matches) > 0) {
   touch($GLOBALS['lrg_fetcher_stdout_lock_path']);
   touch($GLOBALS['lrg_fetcher_ipc_lock_path']);
   file_put_contents($GLOBALS['lrg_fetcher_rnum_counter_path'], "0");
+  file_put_contents($GLOBALS['lrg_fetcher_bot_counter_path'], "0");
 
   lrg_fetcher_queue_init($matches);
 
@@ -58,6 +60,10 @@ if ($fetch_workers > 1 && count($matches) > 0) {
       $filename = "tmp/failed_{$lrg_league_tag}_" . time();
       file_put_contents($filename, implode("\n", $all_failed));
       echo "[S] Recorded failed matches to $filename\n";
+    }
+    $bot_total = lrg_fetcher_bot_count();
+    if ($bot_total > 0) {
+      echo "[B] Bot matches skipped:\t{$bot_total}\n";
     }
     lrg_fetcher_parallel_cleanup();
     echo "[S] Fetch complete.\n";
