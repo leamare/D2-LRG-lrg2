@@ -559,8 +559,9 @@ function fetch($match) {
           || (isset($GLOBALS['lrg_fetcher_scheduled_path']) && lrg_fetcher_scheduled_has($match));
 
         if($request_unparsed && !$already_scheduled) {
-          $opendota->request_match($match);
-          echo "[\t] Requested and scheduled $match\n";
+          $req = $opendota->request_match($match);
+          $jobId = $req['job']['jobId'] ?? null;
+          echo "[\t] Requested and scheduled $match" . ($jobId ? " (jobId $jobId)" : "") . "\n";
           $first_scheduled[$match] = time();
           $scheduled[] = $match;
           if (isset($GLOBALS['lrg_fetcher_scheduled_path'])) lrg_fetcher_scheduled_add($match);
@@ -657,8 +658,9 @@ function fetch($match) {
         $already_scheduled = in_array($match, $scheduled)
           || (isset($GLOBALS['lrg_fetcher_scheduled_path']) && lrg_fetcher_scheduled_has($match));
         if($request_unparsed && !$already_scheduled) {
-          $opendota->request_match($match);
-          echo "..Unparsed. Requested and scheduled $match\n";
+          $req = $opendota->request_match($match);
+          $jobId = $req['job']['jobId'] ?? null;
+          echo "..Unparsed. Requested and scheduled $match" . ($jobId ? " (jobId $jobId)" : "") . "\n";
           $first_scheduled[$match] = time();
           $scheduled[] = $match;
           if (isset($GLOBALS['lrg_fetcher_scheduled_path'])) {
