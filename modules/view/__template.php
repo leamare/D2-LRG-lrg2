@@ -12,11 +12,11 @@
        $uni_title = "";
        $rep_sm_title = $instance_title;
        if (!empty($leaguetag)) {
-          $rep_sm_title .= " $title_separator ".$report['league_name'];
+          $rep_sm_title .= " $title_separator ".($report['league_name'] ?? '');
           $rep_sm_desc = ($report['league_name'] ?? "Tournaments")." Stats";
-          $rep_sm_desc .= " $title_separator ".$report['league_desc'];
+          $rep_sm_desc .= " $title_separator ".($report['league_desc'] ?? '');
 
-          $uni_title .= $report['orig_name'] ?? $report['league_name'];
+          $uni_title .= $report['orig_name'] ?? $report['league_name'] ?? '';
 
           $title = explode("-", $mod);
           if ($title_slice_max) $title = array_slice($title, 0, $title_slice_max);
@@ -162,9 +162,11 @@
       <div id="header-image" class="section-header">
     <?php if (!empty($leaguetag)) { ?>
       <?php if(!isset($custom_logo)) {?>
-        <h1><?php echo $report['league_name']; ?></h1>
+        <h1><?php echo $report['league_name'] ?? ''; ?></h1>
         <h2><?php echo $report['league_desc'] ?? ''; ?></h2>
+        <?php if (!empty($h3) && isset($report['random'][$h3])) { ?>
         <h3><?php echo locale_string($h3).": ".$report['random'][$h3]; ?></h3>
+        <?php } ?>
         <?php if (isset($report['settings']['3rd_party'])) echo "<h3>".implode(', ', (array)$report['settings']['3rd_party'])."</h3>"; ?>
         <?php 
           if (isset($report['league_id']) && isset($league_logo_provider) && !isset($custom_logo)) 

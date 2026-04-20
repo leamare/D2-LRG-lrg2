@@ -15,7 +15,7 @@ function rg_view_generate_items_heroes() {
 
   $res = [];
 
-  $item_ids = array_keys($report['items']['stats']['total']);
+  $item_ids = array_keys($report['items']['stats']['total'] ?? []);
   $item_names = [];
 
   $meta['items_full'];

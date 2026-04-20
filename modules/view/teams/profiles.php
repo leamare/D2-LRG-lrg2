@@ -261,8 +261,8 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
 
             if (check_module($parent."series")) {
               $team_series = [];
-              if (!empty($_GET['opponent'])) {
-                $opponent = +$_GET['opponent'];
+              if (!empty($_GET['opponent']) && is_numeric($_GET['opponent'])) {
+                $opponent = (int)$_GET['opponent'];
               } else {
                 $opponent = null;
               }

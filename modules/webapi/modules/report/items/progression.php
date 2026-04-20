@@ -70,10 +70,12 @@ public function process() {
   $res['matches_amplitude'] = $max_games;
   $res['items'] = [];
   foreach ($items as $iid) {
+    $istat = $report['items']['stats'][$hero][$iid] ?? null;
+    if (!$istat) continue;
     $res['items'][$iid] = [
-      'purchases' => $report['items']['stats'][$hero][$iid]['purchases'],
-      'median_time' => $report['items']['stats'][$hero][$iid]['median'],
-      'winrate' => $report['items']['stats'][$hero][$iid]['winrate'],
+      'purchases' => $istat['purchases'] ?? 0,
+      'median_time' => $istat['median'] ?? null,
+      'winrate' => $istat['winrate'] ?? null,
     ];
   }
   $res['edges'] = $pairs;

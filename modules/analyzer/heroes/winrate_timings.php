@@ -12,6 +12,11 @@ if (!empty($players_interest)) {
   $wheres = " AND ml.playerid in (".implode(',', $players_interest).")";
 }
 
+/** @var mysqli|null $conn */
+$db = $conn;
+if (!$db) {
+  die("[F] Unexpected problems when requesting database.\n");
+}
 
 foreach ($result["pickban"] as $hid => $data) {
   $h = [];
@@ -43,62 +48,31 @@ foreach ($result["pickban"] as $hid => $data) {
   $h['matches'] = $matches;
 
   // duration quantiles
-
-  $sql = "SELECT m.duration FROM matchlines ml JOIN matches m ON m.matchid = ml.matchid
-    WHERE ml.heroid = $hid $wheres ORDER BY m.duration ASC LIMIT 0, 1;";
-
-  if ($query_res = $conn->query($sql)) {
+  $fetch_duration = function(string $order, int $offset, int $fallback = 0) use (&$db, &$hid, &$wheres): int {
+    $sql = "SELECT m.duration FROM matchlines ml JOIN matches m ON m.matchid = ml.matchid
+      WHERE ml.heroid = $hid $wheres ORDER BY m.duration $order LIMIT $offset, 1;";
+    $query_res = $db->query($sql);
+    if (!$query_res) die("[F] Unexpected problems when requesting database.\n".$db->error."\n");
     $row = $query_res->fetch_row();
-    $h['min_duration'] = (int)$row[0];
-  } else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
-  $query_res->close();
-
-  $sql = "SELECT m.duration FROM matchlines ml JOIN matches m ON m.matchid = ml.matchid
-    WHERE ml.heroid = $hid $wheres ORDER BY m.duration ASC LIMIT $q1, 1;";
-
-  if ($query_res = $conn->query($sql)) {
-    $row = $query_res->fetch_row();
-    $h['q1duration'] = (int)$row[0];
-  } else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
-  $query_res->close();
-
-  $sql = "SELECT m.duration FROM matchlines ml JOIN matches m ON m.matchid = ml.matchid
-    WHERE ml.heroid = $hid $wheres ORDER BY m.duration ASC LIMIT $q2, 1;";
-
-  if ($query_res = $conn->query($sql)) {
-    $row = $query_res->fetch_row();
-    $h['q2duration'] = (int)$row[0];
-  } else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
-  $query_res->close();
-
-  $sql = "SELECT m.duration FROM matchlines ml JOIN matches m ON m.matchid = ml.matchid
-    WHERE ml.heroid = $hid $wheres ORDER BY m.duration ASC LIMIT $q3, 1;";
-
-  if ($query_res = $conn->query($sql)) {
-    $row = $query_res->fetch_row();
-    $h['q3duration'] = (int)$row[0];
-  } else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
-  $query_res->close();
-
-  $sql = "SELECT m.duration FROM matchlines ml JOIN matches m ON m.matchid = ml.matchid
-    WHERE ml.heroid = $hid $wheres ORDER BY m.duration DESC LIMIT 0, 1;";
-
-  if ($query_res = $conn->query($sql)) {
-    $row = $query_res->fetch_row();
-    $h['max_duration'] = (int)$row[0];
-  } else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
-  $query_res->close();
+    $query_res->close();
+    return isset($row[0]) ? (int)$row[0] : $fallback;
+  };
+  $h['min_duration'] = $fetch_duration('ASC', 0, 0);
+  $h['q1duration'] = $fetch_duration('ASC', $q1, $h['min_duration']);
+  $h['q2duration'] = $fetch_duration('ASC', $q2, $h['q1duration']);
+  $h['q3duration'] = $fetch_duration('ASC', $q3, $h['q2duration']);
+  $h['max_duration'] = $fetch_duration('DESC', 0, $h['q3duration']);
 
   // early winrate
 
   $sql = "SELECT SUM(1) matches, SUM(NOT m.radiantWin XOR ml.isradiant)/SUM(1) winrate FROM matchlines ml JOIN matches m ON m.matchid = ml.matchid
     WHERE ml.heroid = $hid AND m.duration <= ".$h['q1duration']." $wheres ;";
 
-  if ($query_res = $conn->query($sql)) {
-    $row = $query_res->fetch_row();
-    // $h['early_matches'] = (int)$row[0];
-    $h['early_wr'] = (float)$row[1];
-  } else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+  $query_res = $db->query($sql);
+  if (!$query_res) die("[F] Unexpected problems when requesting database.\n".$db->error."\n");
+  $row = $query_res->fetch_row();
+  // $h['early_matches'] = (int)$row[0];
+  $h['early_wr'] = isset($row[1]) ? (float)$row[1] : 0.0;
   $query_res->close();
 
   // late winrate
@@ -106,11 +80,11 @@ foreach ($result["pickban"] as $hid => $data) {
   $sql = "SELECT SUM(1) matches, SUM(NOT m.radiantWin XOR ml.isradiant)/SUM(1) winrate FROM matchlines ml JOIN matches m ON m.matchid = ml.matchid
     WHERE ml.heroid = $hid AND m.duration >= ".$h['q3duration']." $wheres ;";
 
-  if ($query_res = $conn->query($sql)) {
-    $row = $query_res->fetch_row();
-    // $h['late_matches'] = (int)$row[0];
-    $h['late_wr'] = (float)$row[1];
-  } else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+  $query_res = $db->query($sql);
+  if (!$query_res) die("[F] Unexpected problems when requesting database.\n".$db->error."\n");
+  $row = $query_res->fetch_row();
+  // $h['late_matches'] = (int)$row[0];
+  $h['late_wr'] = isset($row[1]) ? (float)$row[1] : 0.0;
   $query_res->close();
 
   // average duration
@@ -118,10 +92,10 @@ foreach ($result["pickban"] as $hid => $data) {
   $sql = "SELECT AVG(m.duration) FROM matchlines ml JOIN matches m ON m.matchid = ml.matchid
     WHERE ml.heroid = $hid $wheres ;";
 
-  if ($query_res = $conn->query($sql)) {
-    $row = $query_res->fetch_row();
-    $h['avg_duration'] = round( (float)$row[0] );
-  } else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+  $query_res = $db->query($sql);
+  if (!$query_res) die("[F] Unexpected problems when requesting database.\n".$db->error."\n");
+  $row = $query_res->fetch_row();
+  $h['avg_duration'] = round( (float)$row[0] );
   $query_res->close();
 
   // standart deviation
@@ -129,13 +103,13 @@ foreach ($result["pickban"] as $hid => $data) {
   $sql = "SELECT m.duration-".$h['avg_duration']." FROM matchlines ml JOIN matches m ON m.matchid = ml.matchid
     WHERE ml.heroid = $hid $wheres ;";
 
-  if ($query_res = $conn->query($sql)) {
-    $sum = 0;
-    for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
-      $sum += pow($row[0], 2);
-    }
-    $h['std_dev'] = $matches == 1 ? 0 : round( sqrt( $sum/($matches-1) ) );
-  } else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+  $query_res = $db->query($sql);
+  if (!$query_res) die("[F] Unexpected problems when requesting database.\n".$db->error."\n");
+  $sum = 0;
+  for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+    $sum += pow($row[0], 2);
+  }
+  $h['std_dev'] = $matches == 1 ? 0 : round( sqrt( $sum/($matches-1) ) );
   $query_res->close();
 
   // average winrate
