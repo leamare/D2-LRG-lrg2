@@ -870,6 +870,13 @@ function scale_skill_builds(array $b_sb, ?array $a_sb, array $hero_a, array $her
 
 $sections_replaced = [];
 
+$pre_snapshot = [
+  'items'          => $rep_a['items']          ?? null,
+  'enchantments'   => $rep_a['enchantments']   ?? null,
+  'starting_items' => $rep_a['starting_items'] ?? null,
+  'skill_builds'   => $rep_a['skill_builds']   ?? null,
+];
+
 // --- items ---
 if (!empty($rep_b['items'])) {
   $items_b   = $rep_b['items'];
@@ -1002,12 +1009,21 @@ if (empty($sections_replaced)) {
   die("[W] Report B has none of the target sections. Nothing to do.\n");
 }
 
-// ---------------------------------------------------------------------------
-// Write settings flag
-// ---------------------------------------------------------------------------
 
-if (!isset($rep_a['settings'])) $rep_a['settings'] = [];
-$rep_a['settings']['items_recalc'] = true;
+$changed_sections = [];
+foreach ($pre_snapshot as $key => $before) {
+  $after = $rep_a[$key] ?? null;
+  if ($before !== $after) $changed_sections[] = $key;
+}
+
+if (empty($changed_sections)) {
+  echo "[I] No effective changes after merge — A already covered B's data at normal scale.\n";
+  echo "[I] Skipping items_recalc flag.\n";
+} else {
+  if (!isset($rep_a['settings'])) $rep_a['settings'] = [];
+  $rep_a['settings']['items_recalc'] = true;
+  echo "[I] items_recalc flag set; changed: ".implode(', ', $changed_sections)."\n";
+}
 
 // ---------------------------------------------------------------------------
 // Save output
@@ -1025,5 +1041,5 @@ if (!$explicit_outfile && $outfile === $file_a) {
 file_put_contents($outfile, $json_out);
 
 $sz = number_format(strlen($json_out) / 1024, 1);
-echo "[S] Replaced sections: ".implode(', ', $sections_replaced)."\n";
+echo "[S] Processed sections: ".implode(', ', $sections_replaced)."\n";
 echo "[S] Written to: $outfile ($sz KB)\n";
