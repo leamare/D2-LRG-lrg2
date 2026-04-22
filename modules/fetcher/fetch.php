@@ -1600,11 +1600,25 @@ function fetch($match) {
         $i++;
       }
     } else if (($matchdata['game_mode'] == 22 || $matchdata['game_mode'] == 3)) {
+      $active_heroes = [];
+      foreach ($t_matchlines as $ml) {
+        if ($ml['matchid'] == $match) {
+          $active_heroes[] = $ml['heroid'];
+        }
+      }
+
       foreach ($matchdata['picks_bans'] as $draft_instance) {
         $is_radiant = $draft_instance['team'] == 0 ? 1 : 0;
         $is_pick = $draft_instance['is_pick'] ?? $draft_instance['pick'];
         $hero_id = $draft_instance['hero_id'] ?? $draft_instance['heroId'];
         $order = $is_pick ? $draft_instance['order'] : 0;
+
+        // assigning ban stage to pick collisions
+        // thought about skipping them, but where's the fun in that?
+        // is_pick = 0 and order > 0 => pick collision
+        if ($is_pick && !in_array($hero_id, $active_heroes)) {
+          $is_pick = 0;
+        }
 
         $stage = $order < 4 ? 1 : ($order < 8 ? 2 : 3);
         
