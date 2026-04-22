@@ -1,13 +1,20 @@
 <?php
 
+ini_set('memory_limit', '4000M');
+
 /**
  * Rebuild descriptor (leagues/*.json) and optionally matchlists/*.list from a baked report JSON.
  *
  * Usage (from repo root):
  *   php tools/restore_league_from_report.php -l <league_tag> [-i path/to/report.json] [-f]
+ *   (Glued -l<tag> is fine; the tool must re-parse -l in getopt so a letter "i" inside the tag is not treated as -i.)
  *
  *   -i,--report  Path to baked report (default: reports/report_<tag>.json)
  *   -f,--force   Overwrite existing descriptor / matchlist
+ *
+ * When the report includes first_match / last_match ({ mid, date }), the descriptor gets
+ * match_limit_* and time_limit_* derived with ±1 slack so rg_fetcher range checks include
+ * those boundary matches (see modules/fetcher/fetch.php).
  */
 
 $root = dirname(__DIR__);
@@ -20,11 +27,16 @@ if (!isset($lrg_league_tag)) {
   die("[F] Pass -l <league_tag>.\n");
 }
 
+// Include l: so glued -l<tag> is one option; otherwise a literal "i" inside the tag (e.g. …_imm…) is parsed as -i.
 $longopts = ['report:', 'input:', 'force'];
-$tool_opts = getopt('i:f', $longopts);
+$tool_opts = getopt('i:fl:', $longopts);
 
 $force = isset($tool_opts['f']) || isset($tool_opts['force']);
 $report_path = $tool_opts['i'] ?? $tool_opts['report'] ?? $tool_opts['input'] ?? ($root . '/reports/report_' . $lrg_league_tag . '.json');
+if (is_array($report_path)) {
+  $report_path = end($report_path);
+}
+$report_path = (string)$report_path;
 
 if (!is_readable($report_path)) {
   die("[F] Cannot read report: {$report_path}\n");
@@ -217,6 +229,40 @@ if (array_key_exists('starting_items', $report) && empty($report['starting_items
 }
 if (array_key_exists('consumables', $report) && empty($report['consumables'])) {
   $desc['ana']['consumables'] = false;
+}
+
+// Match / time windows from rg_analyzer report: first_match & last_match are { "mid", "date" } (unix).
+// fetch.php skips when match < match_limit_after, match > match_limit_before, start_date < time_limit_after,
+// start_date > time_limit_before. Off-by-one slack so boundary ids/times still pass.
+$fetch_limits_from_report = false;
+$fm = $report['first_match'] ?? null;
+if (is_array($fm)) {
+  if (isset($fm['mid']) && is_numeric($fm['mid'])) {
+    $desc['match_limit_after'] = (int)$fm['mid'] - 1;
+    $fetch_limits_from_report = true;
+  }
+  if (isset($fm['date']) && is_numeric($fm['date'])) {
+    $desc['time_limit_after'] = (int)$fm['date'] - 1;
+    $fetch_limits_from_report = true;
+  }
+}
+$lm = $report['last_match'] ?? null;
+if (is_array($lm)) {
+  if (isset($lm['mid']) && is_numeric($lm['mid'])) {
+    $desc['match_limit_before'] = (int)$lm['mid'] + 1;
+    $fetch_limits_from_report = true;
+  }
+  if (isset($lm['date']) && is_numeric($lm['date'])) {
+    $desc['time_limit_before'] = (int)$lm['date'] + 1;
+    $fetch_limits_from_report = true;
+  }
+}
+if ($fetch_limits_from_report) {
+  echo "[ ] Set fetch window from report first/last match: match_limit_after=" .
+    json_encode($desc['match_limit_after']) . ", match_limit_before=" .
+    json_encode($desc['match_limit_before']) . ", time_limit_after=" .
+    json_encode($desc['time_limit_after']) . ", time_limit_before=" .
+    json_encode($desc['time_limit_before']) . "\n";
 }
 
 $league_file = $root . '/leagues/' . $lrg_league_tag . '.json';
