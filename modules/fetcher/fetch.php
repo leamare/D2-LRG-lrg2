@@ -1065,20 +1065,24 @@ function fetch($match) {
         $assigned_roles = [];
         $unassigned = [];
         
-        // cores are processed directly
+        // cores are processed directly; roaming players are never preferred for a core slot
         foreach ([1, 2, 3] as $lane) {
           if (isset($lanes[$lane]) && !empty($lanes[$lane])) {
-            // Multiple players in same lane - sort by farm (higher farm = core)
-            usort($lanes[$lane], function($a, $b) {
-              // if ($b['gpm'] != $a['gpm']) return $b['gpm'] <=> $a['gpm'];
-              if (abs($b['eff']-$a['eff']) > 0.05) return $b['eff'] <=> $a['eff'];
-              return $b['lh_at10'] <=> $a['lh_at10'];
-            });
-            
-            $core_player = array_shift($lanes[$lane]);
-            $assigned_roles[$lane] = $core_player;
+            $lane_non_roaming = array_values(array_filter($lanes[$lane], fn($p) => !$p['roaming']));
+            $lane_roaming     = array_values(array_filter($lanes[$lane], fn($p) =>  $p['roaming']));
 
-            $unassigned = array_merge($unassigned, $lanes[$lane]);
+            if (!empty($lane_non_roaming)) {
+              usort($lane_non_roaming, function($a, $b) {
+                if (abs($b['eff']-$a['eff']) > 0.05) return $b['eff'] <=> $a['eff'];
+                return $b['lh_at10'] <=> $a['lh_at10'];
+              });
+              $core_player = array_shift($lane_non_roaming);
+              $assigned_roles[$lane] = $core_player;
+              $unassigned = array_merge($unassigned, $lane_non_roaming, $lane_roaming);
+            } else {
+              // Lane occupied only by roaming players – leave slot empty, dump them to unassigned
+              $unassigned = array_merge($unassigned, $lane_roaming);
+            }
           }
         }
         
@@ -1134,17 +1138,15 @@ function fetch($match) {
             $assigned_roles[4] = array_shift($unassigned);
           }
         } else {
-          // Fill missing core roles first (if any)
-          for ($role = 0; $role < 3; $role++) {
+          // Fill missing core roles first (if any); non-roaming players preferred
+          for ($role = 1; $role <= 3; $role++) {
             if (!isset($assigned_roles[$role]) && !empty($unassigned)) {
-              $highest_farm = array_pop($unassigned);
-              array_unshift($unassigned, $highest_farm);
-
               usort($unassigned, function($a, $b) {
+                if ($a['roaming'] !== $b['roaming']) return $a['roaming'] <=> $b['roaming'];
                 return $b['gpm'] <=> $a['gpm'];
               });
               $assigned_roles[$role] = array_shift($unassigned);
-              
+
               usort($unassigned, function($a, $b) {
                 return $a['gpm'] <=> $b['gpm'];
               });
@@ -1158,7 +1160,7 @@ function fetch($match) {
             $assigned_roles[4] = array_shift($unassigned);
           }
           
-          $role_slot = 0;
+          $role_slot = 1;
           while (!empty($unassigned)) {
             if (!isset($assigned_roles[$role_slot])) {
               $assigned_roles[$role_slot] = array_shift($unassigned);
