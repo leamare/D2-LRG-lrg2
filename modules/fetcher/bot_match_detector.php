@@ -107,12 +107,13 @@ function lrg_detect_bot_match(array $matchdata): array {
        lrg_bot_team_inventory_cloned($teamInv[0])
     || lrg_bot_team_inventory_cloned($teamInv[1]);
 
-  if ($invCloned) {
-    return ['bot' => true, 'reason' => 'inventory clones within a team'];
-  }
-
-  if ($deniesOK && $lhpmOK) {
-    return ['bot' => true, 'reason' => 'all denies <'.LRG_BOT_DENIES_MAX.' and all LH/min <'.LRG_BOT_LHPM_MAX];
+  $markers = (int)$invCloned + (int)$deniesOK + (int)$lhpmOK;
+  if ($markers >= 2) {
+    $reasons = [];
+    if ($invCloned) $reasons[] = 'inventory clones within a team';
+    if ($deniesOK)  $reasons[] = 'all denies <'.LRG_BOT_DENIES_MAX;
+    if ($lhpmOK)    $reasons[] = 'all LH/min <'.LRG_BOT_LHPM_MAX;
+    return ['bot' => true, 'reason' => implode(', ', $reasons)];
   }
 
   return $out;
