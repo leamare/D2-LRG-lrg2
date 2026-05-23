@@ -3,6 +3,7 @@ backups/
 cache/
 cache2/
 cache3/
+cache_db/
 leagues/
 matchlists/
 reports/
@@ -53,3 +54,4 @@ res/custom_styles
 
 # special locales
 !locales_additional/heroes_emoji.json
+!locales_additional/heroes_ozh.json
