@@ -338,6 +338,12 @@ function fetch($match) {
         return true;
       }
     }
+    if (!empty($lg_settings['game_mode_allowlist'])) {
+      if (!in_array($matchdata['matches']['modeID'], $lg_settings['game_mode_allowlist'])) {
+        echo("..Game mode ".($matchdata['matches']['modeID'] ?? 0)." is not in allowlist, skipping...\n");
+        return true;
+      }
+    }
   } elseif($lrg_use_cache && file_exists("$cache_dir/".$match.".json") && !$players_update) {
     echo("Reusing cache.");
     $json = file_get_contents("$cache_dir/".$match.".json");
@@ -426,6 +432,12 @@ function fetch($match) {
       if (!empty($lg_settings['time_limit_before'])) {
         if ($matchdata['matches']['start_date'] > $lg_settings['time_limit_before']) {
           echo("..Match outside the time range, skipping...\n");
+          return true;
+        }
+      }
+      if (!empty($lg_settings['game_mode_allowlist'])) {
+        if (!in_array($matchdata['matches']['game_mode'], $lg_settings['game_mode_allowlist'])) {
+          echo("..Game mode ".($matchdata['matches']['game_mode'] ?? 0)." is not in allowlist, skipping...\n");
           return true;
         }
       }
@@ -623,6 +635,13 @@ function fetch($match) {
       if (!empty($lg_settings['cluster_denylist'])) {
         if (in_array($matchdata['cluster'] ?? 0, $lg_settings['cluster_denylist'])) {
           echo("..Cluster ".($matchdata['cluster'] ?? 0)." is in denylist, skipping...\n");
+          return true;
+        }
+      }
+
+      if (!empty($lg_settings['game_mode_allowlist'])) {
+        if (!in_array($matchdata['game_mode'], $lg_settings['game_mode_allowlist'])) {
+          echo("..Game mode ".($matchdata['game_mode'] ?? 0)." is not in allowlist, skipping...\n");
           return true;
         }
       }
