@@ -126,7 +126,7 @@ function traverse_build_tree(&$stats, &$tree, $m_lim, $m_role, $root = '0', $bui
       // because of the "same timing" check
       // this check is much more important for early game items, and lategame point is usually 5 or 6
       // so I'm sticking to 5 as the lower limit for lategame point
-      if ($root && $ord < 5 && abs($stats[$root]['median'] - $stats[$id]['median']) < 60) continue;
+      if ($root && $ord < 5 && abs(($stats[$root]['median'] ?? 0) - ($stats[$id]['median'] ?? 0)) < 60) continue;
 
       if (!$max_id) {
         $max_id = $id;
@@ -346,7 +346,9 @@ function traverse_build_tree(&$stats, &$tree, $m_lim, $m_role, $root = '0', $bui
 
   $build_times = [];
 
-  $build_times[] = $tree['0']['children'][ $build['path'][0] ]['diff'];
+  if (!empty($build['path'])) {
+    $build_times[] = $tree['0']['children'][ $build['path'][0] ]['diff'] ?? 0;
+  }
   $alts_keys = array_keys($build['path']);
   $sz = count($alts_keys);
   for ($i = 1; $i < $sz; $i++) {

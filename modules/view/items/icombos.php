@@ -66,6 +66,7 @@ function rg_view_generate_items_icombos() {
       return $b['matches'] <=> $a['matches'];
     });
 
+    $res['itemid'.$item] ??= '';
     $res['itemid'.$item] .= "<details class=\"content-text explainer\"><summary>".locale_string("explain_summary")."</summary>".
       "<div class=\"explain-content\">".
         "<div class=\"line\">".locale_string("items_combos_desc")."</div>".

@@ -54,7 +54,7 @@ function rg_view_generate_players_sti_items() {
 
   $bcnt = 0;
 
-  if (is_array($res[$selected_tag])) {
+  if (!empty($selected_tag) && is_array($res[$selected_tag] ?? null)) {
     if($mod == $parent_module.$selected_tag) $unset_module = true;
     $parent_module = $parent_module.$selected_tag."-";
 

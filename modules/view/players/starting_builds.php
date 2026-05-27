@@ -95,10 +95,14 @@ function rg_view_generate_players_sti_builds() {
   if ($selected_pid != 0) {
     $pbdata = $report['players_summary'][$selected_pid] ?? [];
 
-    if (is_wrapped($report['player_laning'])) {
-      $report['player_laning'] = unwrap_data($report['player_laning']);
+    if (isset($report['player_laning'])) {
+      if (is_wrapped($report['player_laning'])) {
+        $report['player_laning'] = unwrap_data($report['player_laning']);
+      }
+      $lanedata = $report['player_laning'][0][$selected_pid] ?? [];
+    } else {
+      $lanedata = [];
     }
-    $lanedata = $report['player_laning'][0][$selected_pid] ?? [];
 
     $context_info = [
       'matches' => $pbdata['matches_s'] ?? 0,

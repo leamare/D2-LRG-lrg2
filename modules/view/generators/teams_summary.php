@@ -26,8 +26,10 @@ function rg_view_generator_teams_summary($context = null, $short_flag = false) {
     $res  = "<div class=\"content-text\">".locale_string("desc_teams_summary")."</div>";
 
   uasort($context, function($a, $b) use ($report) {
-    if($report['teams'][$a]['matches_total'] == $report['teams'][$b]['matches_total']) return 0;
-    else return ($report['teams'][$a]['matches_total'] < $report['teams'][$b]['matches_total']) ? 1 : -1;
+    $ta = $report['teams'][$a]['matches_total'] ?? 0;
+    $tb = $report['teams'][$b]['matches_total'] ?? 0;
+    if($ta == $tb) return 0;
+    else return ($ta < $tb) ? 1 : -1;
   });
 
   foreach ($report['teams'] as $vals) {
@@ -40,6 +42,7 @@ function rg_view_generator_teams_summary($context = null, $short_flag = false) {
     $keys = array_intersect($keys ?? [], TEAM_SUMMARY_SHORT_LIST);
   }
 
+  $keys = $keys ?? [];
   array_unshift($keys, 'matches');
   array_unshift($keys, 'winrate');
 
@@ -108,10 +111,10 @@ function rg_view_generator_teams_summary($context = null, $short_flag = false) {
   foreach($context as $team_id) {
     if (isset($report['teams_interest']) && !in_array($team_id, $report['teams_interest'])) continue;
 
-    $el = $report['teams'][$team_id]['averages'];
-    $el['matches'] = $report['teams'][$team_id]['matches_total'];
-    $el['winrate'] = $report['teams'][$team_id]['matches_total'] ? 
-      $report['teams'][$team_id]['wins']/$report['teams'][$team_id]['matches_total'] : 0;
+    $el = $report['teams'][$team_id]['averages'] ?? [];
+    $el['matches'] = $report['teams'][$team_id]['matches_total'] ?? 0;
+    $el['winrate'] = ($report['teams'][$team_id]['matches_total'] ?? 0) ? 
+      ($report['teams'][$team_id]['wins'] ?? 0)/($report['teams'][$team_id]['matches_total']) : 0;
     if (empty($el['matches_median_duration '])) $el['matches_median_duration'] = $el['avg_match_len'] ?? 0;
 
     $res .= "<tr>".

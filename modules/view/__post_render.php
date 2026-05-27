@@ -4,7 +4,7 @@ if (isset($__lrg_onrequest)) {
   $_ip =
     $_SERVER['HTTP_CLIENT_IP'] ??
     $_SERVER['HTTP_X_FORWARDED_FOR'] ??
-    $_SERVER['REMOTE_ADDR'];
+    $_SERVER['REMOTE_ADDR'] ?? '';
 
   if (!empty($leaguetag)) {
     $path = "league=".$leaguetag."::".($mod ?? "");

@@ -43,11 +43,13 @@ function teams_diversity_recalc(&$team) {
 function balance_rank($pickban) {
   global $meta, $report;
 
+  if (empty($pickban)) return [0, 0, 0, 0];
+
   $key = array_keys($pickban)[0];
   $facets = false;
   $hlist = $meta['heroes'];
 
-  if (!is_numeric($key) && strpos($key, '-')) {
+  if (!is_numeric($key) && strpos($key ?? '', '-')) {
     $facets = true;
     $hlist_var = [];
     if (isset($report['meta']['variants'])) {
@@ -68,12 +70,14 @@ function balance_rank($pickban) {
   uasort($pickban, function($a, $b) {
     return $b['matches_total'] <=> $a['matches_total'];
   });
-  $mc = $pickban[ array_keys($pickban)[ round(count($pickban)/2) ] ]['matches_total'];
+  $__keys = array_keys($pickban);
+  $mc = $pickban[ $__keys[ min(round(count($pickban)/2), count($__keys)-1) ] ]['matches_total'] ?? 0;
 
   uasort($pickban, function($a, $b) {
       return $b['matches_picked'] <=> $a['matches_picked'];
   });
-  $mp = $pickban[ array_keys($pickban)[ round(count($pickban)/2) ] ]['matches_picked'];
+  $__keys = array_keys($pickban);
+  $mp = $pickban[ $__keys[ min(round(count($pickban)/2), count($__keys)-1) ] ]['matches_picked'] ?? 0;
 
   $cr = [];
   $pr = [];
@@ -121,16 +125,12 @@ function balance_rank($pickban) {
   }
 
   sort($wr);
-  $medwr = $wr[ round(count($wr)*0.5) ];
 
   if (empty($wr)) {
-    return [
-      0,
-      0,
-      0,
-      0
-    ];
+    return [0, 0, 0, 0];
   }
+
+  $medwr = $wr[ min(round(count($wr)*0.5), count($wr)-1) ];
 
   $maxwr = max($wr)-$medwr;
 

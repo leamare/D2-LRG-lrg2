@@ -61,7 +61,9 @@ if (!empty($report['match_participants_teams'])) {
     uasort($report['pickban'], function($a, $b) {
       return $b['matches_picked'] <=> $a['matches_picked'];
     });
-    $mp = array_values($report['pickban'])[ ceil(count($report['pickban']) * 0.5) ]['matches_picked'];
+    $__pb_vals = array_values($report['pickban']);
+    $__pb_idx = min((int)ceil(count($__pb_vals) * 0.5), max(count($__pb_vals) - 1, 0));
+    $mp = $__pb_vals[$__pb_idx]['matches_picked'] ?? 0;
     foreach ($context[$tid]['pickban'] as $hid => $data) {
       if (!isset($report['pickban'][$hid]) || $report['pickban'][$hid]['matches_picked'] > $mp || !$data['matches_picked']) continue;
       if (!$teams) continue;

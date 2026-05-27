@@ -129,7 +129,8 @@
       </div>
       <div class="locale-changer">
         <?php
-        $link = substr($_SERVER['REQUEST_URI'], strrpos($_SERVER['REQUEST_URI'], "/")+1);
+        $__request_uri = $_SERVER['REQUEST_URI'] ?? '';
+        $link = substr($__request_uri, strrpos($__request_uri, "/")+1);
           echo '<label><select onchange="setLocale(this.value);" class="select-locale">';
           foreach($locales as $loc => $lname) {
             $loc = str_replace(".json", "", $loc);

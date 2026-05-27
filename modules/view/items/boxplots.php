@@ -59,6 +59,10 @@ function rg_view_generate_items_boxplots() {
     $cat = [];
   }
 
+  if (empty($report['items']['stats'][$hero])) {
+    $report['items']['stats'][$hero] = [];
+  }
+
   foreach ($report['items']['stats'][$hero] as $iid => $v) {
     if (empty($v)) unset($report['items']['stats'][$hero][$iid]);
 
