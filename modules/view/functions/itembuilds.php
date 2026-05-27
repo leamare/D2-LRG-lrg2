@@ -582,7 +582,7 @@ function traverse_build_tree_partial(array &$stats, array &$tree, int $m_lim, in
   return $build;
 }
 
-function inject_item_stats(array &$build, array &$stats, int|string $hero) {
+function inject_item_stats(array &$build, array &$stats, array $hero) {
   global $meta;
 
   $lategame = $build['lategamePoint'];
@@ -723,7 +723,7 @@ function inject_item_stats(array &$build, array &$stats, int|string $hero) {
   });
 }
 
-function generate_item_builds(array &$pairs, array &$stats, int|string $hero) {
+function generate_item_builds(array &$pairs, array &$stats, array $hero) {
   global $report;
 
   if (!empty($pairs)) {
