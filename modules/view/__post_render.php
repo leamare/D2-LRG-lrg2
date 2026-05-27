@@ -14,7 +14,7 @@ if (isset($__lrg_onrequest)) {
 
   if (empty($path)) $path = "index";
 
-  if (is_array($linkvars)) $linkvars = http_build_query($linkvars);
+  if (isset($linkvars) && is_array($linkvars)) $linkvars = http_build_query($linkvars);
 
   $__lrg_onrequest([
     'type' => 'request',

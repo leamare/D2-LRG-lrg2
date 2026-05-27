@@ -1,5 +1,8 @@
 <?php 
-
+/** @var string $root */
+/** @var array $context */
+/** @var array $res */
+/** @var string $foreword */
 
 $percentages = [
   "rad_ratio",
@@ -181,14 +184,14 @@ if (!empty($report['match_participants_teams'])) {
 
     $fp_filter = function($a, $k) use (&$context, &$report, &$tid) {
       $radiant = null;
-      foreach ($report['matches'][$a] as $i => $hero) {
+      foreach (($report['matches'][$a] ?? []) as $i => $hero) {
         if ($hero['hero'] == $k) {
           $radiant = $hero['radiant'];
           break;
         }
       }
 
-      return isset($context[$tid]['matches'][$a]) && array_search($tid, $report['match_participants_teams'][$a]) == ($radiant ? 'radiant' : 'dire');
+      return isset($context[$tid]['matches'][$a]) && array_search($tid, $report['match_participants_teams'][$a] ?? []) == ($radiant ? 'radiant' : 'dire');
     };
 
     $res["team".$tid]['overview'] .= "<div class=\"content-cards unique-heroes-card\">".

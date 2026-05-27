@@ -1,6 +1,6 @@
 <?php 
 
-function core_picked_percentage($array, $q1 = null, $q3 = null) {
+function core_picked_percentage(array $array, $q1 = null, $q3 = null) {
   if (empty($array)) return 0;
 
   sort($array);
@@ -18,7 +18,7 @@ function core_picked_percentage($array, $q1 = null, $q3 = null) {
   return count($arr2)/($sz);
 }
 
-function teams_diversity_recalc(&$team) {
+function teams_diversity_recalc(array &$team) {
   global $meta;
 
   $pb = [];
@@ -40,7 +40,7 @@ function teams_diversity_recalc(&$team) {
   return sqrt( ( $pool / $denom) * $core );
 }
 
-function balance_rank($pickban) {
+function balance_rank(array $pickban) {
   global $meta, $report;
 
   if (empty($pickban)) return [0, 0, 0, 0];
@@ -48,6 +48,9 @@ function balance_rank($pickban) {
   $key = array_keys($pickban)[0];
   $facets = false;
   $hlist = $meta['heroes'];
+  $hlist_var = [];
+  $cr_f = [];
+  $pr_f = [];
 
   if (!is_numeric($key) && strpos($key ?? '', '-')) {
     $facets = true;

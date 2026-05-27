@@ -34,6 +34,9 @@ function rg_view_generate_items_heroboxplots() {
     else return ($a['name'] > $b['name']) ? 1 : -1;
   });
 
+  $item = null;
+  $tag = null;
+
   foreach($item_names as $iid => $name) {
     $res["itemid".$iid] = "";
 

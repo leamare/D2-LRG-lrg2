@@ -1,6 +1,6 @@
 <?php
 
-function calculate_favor_score($array) {
+function calculate_favor_score(array $array) {
   $res = 0;
   $sz = count($array);
 
@@ -11,7 +11,7 @@ function calculate_favor_score($array) {
   return $res;
 }
 
-function traverse_build_tree(&$stats, &$tree, $m_lim, $m_role, $root = '0', $build = null) {
+function traverse_build_tree(array &$stats, array &$tree, int $m_lim, int|string $m_role, $root = '0', $build = null) {
   // metadata usage for item categories
   global $meta;
 
@@ -81,7 +81,7 @@ function traverse_build_tree(&$stats, &$tree, $m_lim, $m_role, $root = '0', $bui
           $local_ord[] = $child['min_ord'];
         }
         sort($local_ord);
-        $tree[$id]['med_ord'] = !empty($local_ord) ? $local_ord[ floor(count($local_ord)/2) ] - 1 : $ord;
+        $tree[$id]['med_ord'] = !empty($local_ord) ? $local_ord[ (int)floor(count($local_ord)/2) ] - 1 : $ord;
       }
 
       // early items might be very flexible with order swaps so need to skip the first bunch
@@ -360,7 +360,7 @@ function traverse_build_tree(&$stats, &$tree, $m_lim, $m_role, $root = '0', $bui
   return $build;
 }
 
-function traverse_build_tree_partial(&$stats, &$tree, $m_lim, $m_role) {
+function traverse_build_tree_partial(array &$stats, array &$tree, int $m_lim, int|string $m_role) {
   // this method is largely based on traverse_build_tree
   // but is intended to be used only if there is not enough tree data to generate a build
   // so it uses stats instead
@@ -560,6 +560,8 @@ function traverse_build_tree_partial(&$stats, &$tree, $m_lim, $m_role) {
 
   $build['alts_items'] = array_unique($build['alts_items']);
 
+  $item = null;
+  $i = 0;
   foreach ($build['path'] as $i => $item) {
     if ($i && $stats[ $item ]['q1'] < $stats[ $build['path'][$i-1] ]['q3']) {
       $build['swap'][ $build['path'][$i-1] ] = $item;
@@ -568,7 +570,7 @@ function traverse_build_tree_partial(&$stats, &$tree, $m_lim, $m_role) {
     $build['times'][] = ($i ? $stats[ $item ]['q1']-$stats[ $build['path'][$i-1] ]['q1'] : $stats[ $item ]['q1'])/60;
   }
 
-  $lasttime = $stats[ $item ]['q1'];
+  $lasttime = $item !== null ? $stats[ $item ]['q1'] : 0;
   $lastord = $i;
 
   if (empty($build['lategame'])) {
@@ -580,7 +582,7 @@ function traverse_build_tree_partial(&$stats, &$tree, $m_lim, $m_role) {
   return $build;
 }
 
-function inject_item_stats(&$build, &$stats, $hero) {
+function inject_item_stats(array &$build, array &$stats, int|string $hero) {
   global $meta;
 
   $lategame = $build['lategamePoint'];
@@ -721,11 +723,11 @@ function inject_item_stats(&$build, &$stats, $hero) {
   });
 }
 
-function generate_item_builds(&$pairs, &$stats, $hero) {
+function generate_item_builds(array &$pairs, array &$stats, int|string $hero) {
   global $report;
 
   if (!empty($pairs)) {
-    $m_lim = $pairs[ ceil(count($pairs)*0.5)-1 ]['total'];
+    $m_lim = $pairs[ (int)ceil(count($pairs)*0.5)-1 ]['total'];
   } else {
     $m_lim = 1;
   }

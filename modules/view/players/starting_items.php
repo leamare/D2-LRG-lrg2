@@ -1,4 +1,5 @@
 <?php 
+/** @var string $root */
 
 include_once($root."/modules/view/generators/starting_items.php");
 

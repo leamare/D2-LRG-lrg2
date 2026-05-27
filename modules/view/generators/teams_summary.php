@@ -1,4 +1,5 @@
 <?php
+/** @var string $root */
 include_once("$root/modules/view/functions/links.php");
 include_once("$root/modules/view/functions/convert_time.php");
 
