@@ -1,6 +1,19 @@
 <?php
 
-function rg_query_hero_trios(&$conn, &$pickban, $matches_total, $limiter = 0, $cluster = null, $team = null, $players = null) {
+/**
+ * @param array<int, array{matches_picked: int|float}> $pickban
+ * @param list<int>|null $cluster
+ * @param list<int>|null $players
+ */
+function rg_query_hero_trios(
+  mysqli &$conn,
+  array &$pickban,
+  int|float $matches_total,
+  int|float $limiter = 0,
+  ?array $cluster = null,
+  ?int $team = null,
+  ?array $players = null
+): array {
   global $players_interest;
   if (empty($players) && empty($team) && !empty($players_interest)) {
     $players = $players_interest;
@@ -43,6 +56,10 @@ function rg_query_hero_trios(&$conn, &$pickban, $matches_total, $limiter = 0, $c
   $query_res = $conn->store_result();
 
   for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+    if (!isset($pickban[$row[0]], $pickban[$row[1]], $pickban[$row[2]])) {
+      continue;
+    }
+
     $hero1_pickrate = $pickban[$row[0]]['matches_picked'] / $matches_total;
     $hero2_pickrate = $pickban[$row[1]]['matches_picked'] / $matches_total;
     $hero3_pickrate = $pickban[$row[2]]['matches_picked'] / $matches_total;
@@ -63,7 +80,8 @@ function rg_query_hero_trios(&$conn, &$pickban, $matches_total, $limiter = 0, $c
   return $result;
 }
 
-function rg_query_hero_trios_matches(&$conn, &$trios) {
+function rg_query_hero_trios_matches(mysqli &$conn, array &$trios): array
+{
   $result = [];
 
   foreach($trios as $pair) {
