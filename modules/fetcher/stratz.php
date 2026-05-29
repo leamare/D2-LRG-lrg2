@@ -945,7 +945,22 @@ function get_stratz_response($match) {
   }
 
   $r['draft'] = [];
-  if (!empty($stratz['data']['match']['pickBans'])) {
+  if ($r['matches']['modeID'] == 18) {
+    foreach ($stratz['data']['match']['players'] as $draft_instance) {
+      if (empty($draft_instance['heroId'])) {
+        continue;
+      }
+      $r['draft'][] = [
+        'matchid' => $match,
+        'is_radiant' => $draft_instance['isRadiant'] ? 1 : 0,
+        'is_pick' => 1,
+        'hero_id' => (int)$draft_instance['heroId'],
+        'stage' => 1,
+        'order' => 0,
+      ];
+    }
+    $r['matches']['radiant_opener'] = $r['draft'][0]['is_radiant'] ?? null;
+  } else if (!empty($stratz['data']['match']['pickBans'])) {
     $stage = 0;
     $last_stage_pick = null;
 

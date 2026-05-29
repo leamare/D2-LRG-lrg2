@@ -1491,22 +1491,20 @@ function fetch($match) {
     # 2  = Captain's Mode
     # 9  = Reverse Captain's Mode
     # 16 = Captain's Draft
+    # 18 = Ability Draft (no draft phase — fallback in final else)
     #
     # versions:
     # <= 20 = before 7.07
     # > 20 = after 7.07
     # TODO Draft information from Stratz for ranked all pick (22)
 
-    if (isset($matchdata['picks_bans']))
-      $drafts =& $matchdata['picks_bans'];
-    else 
-      $drafts =& $matchdata['draft_timings'];
-
     if (empty($matchdata['game_mode'])) {
-      $matchdata['game_mode'] = $matchdata['mode'] ?? 1;
+      $matchdata['game_mode'] = $matchdata['mode'] ?? $matchdata['matches']['modeID'] ?? ($t_match['modeID'] ?? 1);
     }
+    $game_mode = (int)$matchdata['game_mode'];
 
-    if (($matchdata['game_mode'] == 2 || $matchdata['game_mode'] == 8) && !empty($drafts)) {
+    if (($game_mode == 2 || $game_mode == 8) && !empty($matchdata['draft_timings'] ?? $matchdata['picks_bans'])) {
+        $drafts = !empty($matchdata['draft_timings']) ? $matchdata['draft_timings'] : $matchdata['picks_bans'];
         $stage = 0;
         $last_stage_pick = null;
 
@@ -1557,7 +1555,8 @@ function fetch($match) {
         if ($t_match['radiant_opener'] === null) {
           $t_match['radiant_opener'] = $t_draft[0]['is_radiant'];
         }
-    } else if ($matchdata['game_mode'] == 16) {
+    } else if ($game_mode == 16) {
+        $drafts = $matchdata['picks_bans'] ?? $matchdata['draft_timings'] ?? [];
         foreach ($drafts as $draft_instance) {
             if (!isset($draft_instance['hero_id']) || !$draft_instance['hero_id'])
               continue;
@@ -1595,7 +1594,7 @@ function fetch($match) {
         if ($t_match['radiant_opener'] === null) {
           $t_match['radiant_opener'] = $t_draft[0]['is_radiant'];
         }
-    } else if (!empty($matchdata['picks_bans_stratz']) && ($matchdata['game_mode'] == 22 || $matchdata['game_mode'] == 3)) {
+    } else if (!empty($matchdata['picks_bans_stratz']) && ($game_mode == 22 || $game_mode == 3)) {
       foreach ($matchdata['picks_bans_stratz'] as $draft_instance) {
         // I'm skipping opendota picks_bans information since it lacks information on
         // who nominated hero to ban and is missing pick order info
@@ -1620,7 +1619,7 @@ function fetch($match) {
         $t_draft[$i]['order'] = $i;
         $i++;
       }
-    } else if (($matchdata['game_mode'] == 22 || $matchdata['game_mode'] == 3)) {
+    } else if ($game_mode == 22 || $game_mode == 3) {
       $active_heroes = [];
       foreach ($t_matchlines as $ml) {
         if ($ml['matchid'] == $match) {
@@ -1650,6 +1649,60 @@ function fetch($match) {
         $t_draft[$i]['stage'] = $stage;
         $t_draft[$i]['order'] = $order;
         $i++;
+      }
+    } else if (!empty($matchdata['draft_timings'])) {
+      $drafts = $matchdata['draft_timings'];
+      $stage = 0;
+      $last_stage_pick = null;
+      
+      foreach ($drafts as $draft_instance) {
+        if (!isset($draft_instance['hero_id']) || !$draft_instance['hero_id']) {
+          continue;
+        }
+
+        $pick = $draft_instance['is_pick'] ?? $draft_instance['pick'];
+
+        if (isset($draft_instance['team'])) {
+          $team = $draft_instance['team'];
+        } else if (isset($draft_instance['player_slot'])) {
+          $team = $draft_instance['player_slot'] >= 5;
+        } else {
+          $team = $draft_instance['active_team'] - 2;
+        }
+
+        if ($last_stage_pick !== $pick && !$pick) {
+          $stage++;
+        }
+
+        $last_stage_pick = $pick;
+
+        $t_draft[$i]['matchid'] = $match;
+        $t_draft[$i]['is_radiant'] = $team ? 0 : 1;
+        $t_draft[$i]['is_pick'] = $pick;
+        $t_draft[$i]['hero_id'] = $draft_instance['hero_id'];
+        $t_draft[$i]['stage'] = $stage;
+        $t_draft[$i]['order'] = $i;
+        $i++;
+      }
+
+      if ($t_match['radiant_opener'] === null && !empty($t_draft)) {
+        $t_match['radiant_opener'] = $t_draft[0]['is_radiant'];
+      }
+    } else {
+      foreach ($t_matchlines as $ml) {
+        if (($ml['matchid'] ?? null) != $match || empty($ml['heroid'])) {
+          continue;
+        }
+        $t_draft[$i]['matchid'] = $match;
+        $t_draft[$i]['is_radiant'] = !empty($ml['isRadiant']) ? 1 : 0;
+        $t_draft[$i]['is_pick'] = 1;
+        $t_draft[$i]['hero_id'] = (int)$ml['heroid'];
+        $t_draft[$i]['stage'] = 1;
+        $t_draft[$i]['order'] = 0;
+        $i++;
+      }
+      if ($t_match['radiant_opener'] === null && !empty($t_draft)) {
+        $t_match['radiant_opener'] = $t_draft[0]['is_radiant'];
       }
     }
   }

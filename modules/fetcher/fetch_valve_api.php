@@ -169,5 +169,18 @@ function fetch_valve_api($match_id): array {
     }
   }
 
+  if (empty($res['draft']) && (int)$match['result']['game_mode'] === 18) {
+    foreach ($res['matchlines'] as $ml) {
+      $res['draft'][] = [
+        'matchid' => $match_id,
+        'is_radiant' => !empty($ml['isRadiant']) ? 1 : 0,
+        'is_pick' => 1,
+        'hero_id' => (int)$ml['heroid'],
+        'stage' => 1,
+        'order' => 0,
+      ];
+    }
+  }
+
    return $res;
 }
