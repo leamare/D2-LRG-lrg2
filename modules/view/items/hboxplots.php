@@ -46,12 +46,25 @@ function rg_view_generate_items_heroboxplots() {
     }
   }
 
+  if ($item === null) {
+    if (empty($item_names)) {
+      return $res;
+    }
+    $item = array_key_first($item_names);
+    $tag = 'itemid'.$item;
+  }
+
+  if (empty($report['items']['stats']['total'][$item])) {
+    $res[$tag] .= "<div class=\"content-text\">".locale_string("items_stats_empty")."</div>";
+    return $res;
+  }
+
   $data = $report['items']['stats']['total'][$item];
 
   $res[$tag] .= "<div class=\"content-text\">".locale_string("items_boxplots_timings_desc")."</div>";
 
-  $res['itemid'.$item] .= "<table id=\"items-itemid$item-reference\" class=\"list wide\">";
-  $res['itemid'.$item] .= "<thead><tr class=\"overhead\">".
+  $res[$tag] .= "<table id=\"items-itemid$item-reference\" class=\"list wide\">";
+  $res[$tag] .= "<thead><tr class=\"overhead\">".
       "<th width=\"12%\" colspan=\"2\"></th>".
       "<th width=\"18%\" colspan=\"2\"></th>".
       "<th class=\"separator\" width=\"30%\" colspan=\"4\">".locale_string("items_winrate_shifts")."</th>".
@@ -73,7 +86,7 @@ function rg_view_generate_items_heroboxplots() {
     "<th data-sorter=\"time\">".locale_string("item_time_max")."</th>".
     "<th data-sorter=\"time\">".locale_string("std_dev")."</th>".
   "</tr></thead><tbody>";
-  $res['itemid'.$item] .= "<tr>".
+  $res[$tag] .= "<tr>".
     "<td>".item_icon($item)."</td>".
     "<td>".item_name($item)."</td>".
     "<td class=\"separator\">".$data['purchases']."</td>".
@@ -90,7 +103,7 @@ function rg_view_generate_items_heroboxplots() {
     "<td>".convert_time_seconds($data['max_time'])."</td>".
     "<td>".convert_time_seconds($data['std_dev'])."</td>".
   "</tr>";
-  $res['itemid'.$item] .= "</tbody></table>";
+  $res[$tag] .= "</tbody></table>";
 
   unset($report['items']['stats']['total']);
   $heroes = [];

@@ -481,8 +481,12 @@ function rg_view_generate_heroes_profiles() {
         return !empty($a);
       });
 
-      $el['role_matches'] = $el['matches_picked'];
-      [ $build, $tree ] = generate_item_builds($pairs, $report['items']['stats'][$hero], $el);
+      $pbdata = is_array($el) ? $el : [
+        'matches_picked' => 0,
+        'winrate_picked' => 0,
+      ];
+      $pbdata['role_matches'] = $pbdata['matches_picked'] ?? 0;
+      [ $build, $tree ] = generate_item_builds($pairs, $report['items']['stats'][$hero], $pbdata);
 
       if (!empty($build['path'])) {
         $res['heroid'.$hero] .=  "<div class=\"hero-build-overview-container hero-build\">";
@@ -1215,13 +1219,13 @@ function rg_view_generate_heroes_profiles() {
         return $a['avg_advantage'] <=> $b['avg_advantage'];
       });
       $mk = array_keys($context[0]);
-      $median_adv = $context[0][ $mk[ floor( count($mk)/2 ) ] ]['avg_advantage'];
+      $median_adv = $context[0][ $mk[ (int)floor( count($mk)/2 ) ] ]['avg_advantage'];
 
       uasort($context[0], function($a, $b) {
         return $a['avg_disadvantage'] <=> $b['avg_disadvantage'];
       });
       $mk = array_keys($context[0]);
-      $median_disadv = $context[0][ $mk[ floor( count($mk)/2 ) ] ]['avg_disadvantage'];
+      $median_disadv = $context[0][ $mk[ (int)floor( count($mk)/2 ) ] ]['avg_disadvantage'];
 
       compound_ranking_laning($context[0], $mm, $median_adv, $median_disadv);
   
