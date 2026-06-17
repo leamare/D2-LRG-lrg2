@@ -81,6 +81,8 @@ public function process() {
       } else {
         estimate_players_draft_processor_pvp_report($context);
       }
+
+      sync_players_bans_total_from_stages($context, $context_draft);
     }
   }
 

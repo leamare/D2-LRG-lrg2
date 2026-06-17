@@ -33,6 +33,8 @@ function rg_view_generate_players_draft() {
 
       estimate_players_draft_processor_pvp_report($context_pickban);
     }
+
+    sync_players_bans_total_from_stages($context_pickban, $report['players_draft']);
   }
 
   $res = "<details class=\"content-text explainer\"><summary>".locale_string("explain_summary")."</summary>".

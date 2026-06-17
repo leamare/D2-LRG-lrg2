@@ -476,3 +476,38 @@ function estimate_players_draft_processor_tvt_single_team(&$context, $tid) {
 
   $context[$tid]['players_draft'][0] = $pdb;
 }
+
+function sync_players_bans_total_from_stages(&$context_pickban, &$context_draft) {
+  if (empty($context_pickban) || empty($context_draft[0])) return;
+
+  $bans = [];
+
+  foreach ($context_draft[0] as $stage => $players) {
+    if (!is_array($players)) continue;
+    foreach ($players as $el) {
+      if (!isset($el['playerid'])) continue;
+      $pid = $el['playerid'];
+      $matches = (float)($el['matches'] ?? 0);
+      $wr = (float)($el['winrate'] ?? 0);
+
+      if (!isset($bans[$pid])) {
+        $bans[$pid] = [
+          'matches' => 0.0,
+          'wins' => 0.0,
+        ];
+      }
+
+      $bans[$pid]['matches'] += $matches;
+      $bans[$pid]['wins'] += $matches * $wr;
+    }
+  }
+
+  foreach ($context_pickban as $pid => &$row) {
+    $matchesBanned = $bans[$pid]['matches'] ?? 0.0;
+    $winsBanned = $bans[$pid]['wins'] ?? 0.0;
+
+    $row['matches_banned'] = (int)round($matchesBanned);
+    $row['winrate_banned'] = $matchesBanned > 0 ? ($winsBanned / $matchesBanned) : 0;
+  }
+  unset($row);
+}
