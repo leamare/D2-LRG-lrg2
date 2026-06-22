@@ -2432,6 +2432,18 @@ tr.shady td.banner-row .shady-notice {
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }
+.facet-micro-offset {
+  width: 1.8em;
+  min-width: 1.8em;
+  visibility: hidden;
+}
+.facet-micro-passive .facet-icon {
+  background-color: rgba(255,255,255,.1);
+}
+.facet-micro-passive:hover {
+  border-top-right-radius: .15em;
+  border-bottom-right-radius: .15em;
+}
 
 .match-hero .hero-facet-element {
   position: absolute;

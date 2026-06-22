@@ -37,9 +37,9 @@ function rg_view_generate_players_positions() {
         }
         if(isset($report['player_positions_matches'])) {
           foreach($report['player_positions_matches'][$i][$j] as $id => $matches) {
-            $report['player_positions'][$i][$j][$id]['matchlinks'] = "<a onclick=\"showModal('".
-                htmlspecialchars(join_matches($matches)).
-                "', '".locale_string("matches")." - ".addcslashes(player_name($id)." - ".locale_string("position_$i.$j"), "'")."');\">".
+            $report['player_positions'][$i][$j][$id]['matchlinks'] = "<a onclick=\"showModal(".
+                lrg_js_string(join_matches($matches)).
+                ", ".lrg_js_string(locale_string("matches")." - ".player_name($id)." - ".locale_string("position_$i.$j")).");\">".
                 locale_string("matches")."</a>";
           }
         }

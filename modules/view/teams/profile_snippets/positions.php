@@ -100,9 +100,9 @@ if (check_module($parent_module."overview")) {
             }
           }
 
-          $context[$tid]['hero_positions'][$i][$j][$hid]['matchlinks'] = "<a onclick=\"showModal('".
-              htmlspecialchars(join_matches($matches)).
-              "', '".locale_string("matches")." - ".addcslashes(hero_name($hid)." - ".locale_string("position_$i.$j"), "'")."');\">".
+          $context[$tid]['hero_positions'][$i][$j][$hid]['matchlinks'] = "<a onclick=\"showModal(".
+              lrg_js_string(join_matches($matches)).
+              ", ".lrg_js_string(locale_string("matches")." - ".hero_name($hid)." - ".locale_string("position_$i.$j")).");\">".
               locale_string("matches")."</a>";
         }
       }

@@ -222,9 +222,9 @@ function rg_view_generate_players_profiles() {
         "<td>".number_format($data['matches'])."</td>".
         "<td>".number_format(100*$data['wins']/$data['matches'], 2)."%</td>".
         ($has_pos_data ? "<td>".(isset($hero_primary_pos[$hid]) ? locale_string("position_".$hero_primary_pos[$hid]) : '-')."</td>" : "").
-        "<td><a onclick=\"showModal('".
-          htmlspecialchars($modal_html).
-          "', '".addcslashes(player_name($player)." - ".hero_name($hid), "'")."');\">".
+        "<td><a onclick=\"showModal(".
+          lrg_js_string($modal_html).
+          ", ".lrg_js_string(player_name($player)." - ".hero_name($hid)).");\">".
           locale_string("matches").
         "</a></td>";
     }
@@ -564,9 +564,9 @@ function rg_view_generate_players_profiles() {
         [$ri, $rj] = explode('.', $role);
         $pos_matches = $report['player_positions_matches'][$ri][$rj][$player] ?? [];
         $pos_matchlinks_cell = "<td>".(!empty($pos_matches) ?
-          "<a onclick=\"showModal('".
-            htmlspecialchars(join_matches_add($pos_matches, false, $player)).
-            "', '".addcslashes(player_name($player)." - ".locale_string("position_$role"), "'")."');\">".
+          "<a onclick=\"showModal(".
+            lrg_js_string(join_matches_add($pos_matches, false, $player)).
+            ", ".lrg_js_string(player_name($player)." - ".locale_string("position_$role")).");\">".
             locale_string("matches")."</a>"
           : '-')."</td>";
       }

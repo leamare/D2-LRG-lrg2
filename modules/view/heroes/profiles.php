@@ -155,9 +155,9 @@ function rg_view_generate_heroes_profiles() {
         $roles["$i.$j"] = [ $report['hero_positions'][$i][$j][$hero]['matches_s'], $report['hero_positions'][$i][$j][$hero]['winrate_s'] ];
 
         if (isset($report['hero_positions_matches'])) {
-          $roles["$i.$j"][] = "<a onclick=\"showModal('".
-            htmlspecialchars(join_matches_add($report['hero_positions_matches'][$i][$j][$hero], true, $hero, false, true)).
-            "', '".locale_string("matches")." - ".addcslashes(hero_name($hero)." - ".locale_string("position_$i.$j"), "'")."');\">".
+          $roles["$i.$j"][] = "<a onclick=\"showModal(".
+            lrg_js_string(join_matches_add($report['hero_positions_matches'][$i][$j][$hero], true, $hero, false, true)).
+            ", ".lrg_js_string(locale_string("matches")." - ".hero_name($hero)." - ".locale_string("position_$i.$j")).");\">".
             locale_string("matches")."</a>";
         }
       }
@@ -610,8 +610,8 @@ function rg_view_generate_heroes_profiles() {
         "<td>".$stats['m']."</td>".
         "<td>".number_format($stats['m'] ? 100*$stats['w']/$stats['m'] : 0, 2)."%</td>".
         ($has_variant_matches ? "<td>".(!empty($vmatches) ?
-          "<a onclick=\"showModal('".htmlspecialchars(join_matches_add($vmatches, true, $hero, false, true))."', '".
-            addcslashes(hero_name($hero)." - ".get_facet_name($hero, $i), "'")."');\">".
+          "<a onclick=\"showModal(".lrg_js_string(join_matches_add($vmatches, true, $hero, false, true)).", ".
+            lrg_js_string(hero_name($hero)." - ".get_facet_name($hero, $i)).");\">".
             locale_string("matches")."</a>"
           : '-')."</td>" : "").
       "</tr>";
@@ -1022,8 +1022,8 @@ function rg_view_generate_heroes_profiles() {
         "<td>".$line['gpm']."</td>".
         "<td>".$line['xpm']."</td>".
         ($has_facet_matches ? "<td>".(!empty($line['matchlinks']) ?
-          "<a onclick=\"showModal('".htmlspecialchars(join_matches_add($line['matchlinks'], true, $hero, false, true))."', '".
-            addcslashes(hero_name($hero)." - ".locale_string($line['position']), "'")."');\">".
+          "<a onclick=\"showModal(".lrg_js_string(join_matches_add($line['matchlinks'], true, $hero, false, true)).", ".
+            lrg_js_string(hero_name($hero)." - ".locale_string($line['position'])).");\">".
             locale_string("matches")."</a>"
           : '-')."</td>" : "").
       "</tr>";
@@ -1600,8 +1600,8 @@ function rg_view_generate_heroes_profiles() {
         "<td>".number_format(100*$data['wins']/$data['matches'], 2)."%</td>".
         "<td>".number_format(100*$data['matches']/max(1, $el['matches_total'] ?? 0), 2)."%</td>".
         ($has_pos_data ? "<td>".(isset($player_primary_pos[$pid]) ? locale_string("position_".$player_primary_pos[$pid]) : '-')."</td>" : "").
-        "<td><a onclick=\"showModal('".htmlspecialchars($modal_html)."', '".
-          addcslashes(hero_name($hero)." - ".player_name($pid), "'")."');\">".
+        "<td><a onclick=\"showModal(".lrg_js_string($modal_html).", ".
+          lrg_js_string(hero_name($hero)." - ".player_name($pid)).");\">".
           locale_string("matches").
         "</a></td>".
       "</tr>";

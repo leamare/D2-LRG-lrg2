@@ -1,5 +1,16 @@
 <?php
 
+function lrg_js_string($value): string {
+  return htmlspecialchars(
+    json_encode(
+      (string)$value,
+      JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE
+    ),
+    ENT_QUOTES,
+    'UTF-8'
+  );
+}
+
 function join_matches($matches) {
   $output = [];
   foreach($matches as $match) {
@@ -18,6 +29,8 @@ function join_matches_add($matches, $ishero, $id, $variants = false, $show_playe
     return join_matches($matches);
   }
 
+  $has_report_facets = $variants && $ishero && report_has_facets();
+
   $output = [];
   foreach($matches as $match) {
     $rw = $report['matches_additional'][$match]['radiant_win'];
@@ -35,8 +48,12 @@ function join_matches_add($matches, $ishero, $id, $variants = false, $show_playe
 
     if ($rad !== null) {
       $output[] = "<span class=\"match-link-modal\">".
-        ($variants && $ishero ? 
-          facet_micro_element($id, $variant, false).' ' :
+        ($variants && $ishero ?
+          (
+            !empty($variant) ?
+              facet_micro_element($id, $variant, false) :
+              ($has_report_facets ? facet_micro_undefined_icon() : facet_micro_offset())
+          ).' ' :
           ''
         ).
         match_link(
