@@ -52,6 +52,26 @@ function get_hero_variants_list($hid) {
   }
 }
 
+function report_has_facets(): bool {
+  global $report;
+
+  if (!empty($report['meta']['variants'])) return true;
+  if (!empty($report['hero_variants'])) return true;
+  if (!empty($report['hero_summary_variants'])) return true;
+
+  foreach (($report['regions_data'] ?? []) as $region) {
+    if (!empty($region['hvariants'])) return true;
+  }
+
+  foreach (($report['matches'] ?? []) as $match) {
+    foreach ($match as $line) {
+      if (!empty($line['var'])) return true;
+    }
+  }
+
+  return false;
+}
+
 function get_facet_color($hid, $variant) {
   global $report, $meta;
 
@@ -124,4 +144,18 @@ function facet_micro_element($hid, $variant, $modal = true) {
     "<span class=\"facet-icon\"><img src=\"$icon_link\" alt=\"$name\" /></span>".
     "<span class=\"facet-name\">".locale_string("#facet::".$name)."</span>".
   "</div>";
+}
+
+function facet_micro_offset(): string {
+  return "<span class=\"hero-facet-element facet-micro facet-micro-offset\" aria-hidden=\"true\"></span>";
+}
+
+function facet_micro_undefined_icon(): string {
+  global $varianticon_logo_provider;
+
+  $icon_link = str_replace("%FACET%", "unique", $varianticon_logo_provider);
+
+  return "<span class=\"hero-facet-element facet-micro facet-Black facet-micro-passive\" data-tag=\"undefined\">".
+    "<span class=\"facet-icon\"><img src=\"$icon_link\" alt=\"\" /></span>".
+  "</span>";
 }
