@@ -109,6 +109,44 @@ function lrg_parallel_cleanup(array &$ctx): void {
   }
 }
 
+function lrg_parallel_kill_pids(array $pids, int $signal): void {
+  foreach ($pids as $pid) {
+    $pid = (int)$pid;
+    if ($pid <= 0) continue;
+    if (function_exists('posix_kill')) {
+      @posix_kill($pid, $signal);
+    } else {
+      @exec('kill -'.(int)$signal.' '.(int)$pid.' 2>/dev/null');
+    }
+  }
+}
+
+function lrg_parallel_register_child_shutdown(array &$pids): void {
+  $term = defined('SIGTERM') ? SIGTERM : 15;
+  $kill = defined('SIGKILL') ? SIGKILL : 9;
+  register_shutdown_function(function () use (&$pids, $term, $kill) {
+    if (empty($pids)) return;
+    lrg_parallel_kill_pids($pids, $term);
+    usleep(200000);
+    lrg_parallel_kill_pids($pids, $kill);
+  });
+
+  if (function_exists('pcntl_async_signals') && function_exists('pcntl_signal')) {
+    pcntl_async_signals(true);
+    $handler = function (int $sig) use (&$pids, $term, $kill): void {
+      if (!empty($pids)) {
+        lrg_parallel_kill_pids($pids, $term);
+        usleep(200000);
+        lrg_parallel_kill_pids($pids, $kill);
+      }
+      exit(128 + $sig);
+    };
+    if (defined('SIGTERM')) @pcntl_signal(SIGTERM, $handler);
+    if (defined('SIGINT')) @pcntl_signal(SIGINT, $handler);
+    if (defined('SIGHUP')) @pcntl_signal(SIGHUP, $handler);
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Queue-based dispatch: workers pull batches from a shared file queue
 // instead of being pre-assigned a fixed chunk.
@@ -196,6 +234,8 @@ function lrg_parallel_run_queue(array &$ctx, int $workers, callable $workerFn): 
     $pids[] = $pid;
   }
 
+  lrg_parallel_register_child_shutdown($pids);
+
   $exitCode = 0;
   foreach ($pids as $wpid) {
     pcntl_waitpid($wpid, $status);
@@ -247,6 +287,8 @@ function lrg_parallel_run(array $items, int $workers, callable $workerFn): int {
     }
     $pids[] = $pid;
   }
+
+  lrg_parallel_register_child_shutdown($pids);
 
   $exitCode = 0;
   foreach ($pids as $wpid) {
