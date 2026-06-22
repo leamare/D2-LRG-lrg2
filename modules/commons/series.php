@@ -49,18 +49,25 @@ function generate_series_data(&$report) {
 
     if (!isset($meetCnts[$teamstag])) {
       $meetCnts[$teamstag] = [
-        0,
-        null,
-        0
+        0,    // meeting index for this team pair
+        null, // previous match start time
+        0,    // max inter-game gap seen
+        0,    // previous match duration
       ];
     }
-    // 3600 * 4 = 10800
-    $timeDiff = $meetCnts[$teamstag][1] ? $time - $meetCnts[$teamstag][1] - $duration : 0;
+    // Gap between end of previous game and start of this one.
+    $prevDuration = $meetCnts[$teamstag][3];
+    $timeDiff = $meetCnts[$teamstag][1] ? $time - $meetCnts[$teamstag][1] - $prevDuration : 0;
     if ($meetCnts[$teamstag][1]) {
       $timeCondition = ($partCnts[$teamstag] < 2 && $timeDiff > 14400) || ($partCnts[$teamstag] >= 2 && $timeDiff > $meetCnts[$teamstag][2] * 3);
       $pairSeriesId = $seriesIds[$teamstag.'.'.$meetCnts[$teamstag][0]][0] ?? null;
       $seriesCondition = $pairSeriesId === null || ($pairSeriesId && $seriesid != $pairSeriesId);
-      $condition = ($sip && $seriesid) ? $seriesCondition : $timeCondition;
+      
+      if ($seriesid && $pairSeriesId && $seriesid == $pairSeriesId) {
+        $condition = false;
+      } else {
+        $condition = ($sip && $seriesid) ? $seriesCondition : $timeCondition;
+      }
     } else {
       $condition = true;
     }
@@ -71,6 +78,7 @@ function generate_series_data(&$report) {
     }
     $meetCnts[$teamstag][1] = $time;
     $meetCnts[$teamstag][2] = max($timeDiff, 1700);
+    $meetCnts[$teamstag][3] = $duration;
     $series_tag = $seriesIds[$teamstag.'.'.$meetCnts[$teamstag][0]][1];
     if (!isset($series[$series_tag])) {
       $series[$series_tag] = [
