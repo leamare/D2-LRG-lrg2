@@ -204,6 +204,10 @@ function get_report_descriptor(&$report, $generate_endpoints = false) {
     $desc['endpoints'][] = "series";
   }
 
+  if ($desc['tvt'] && isset($report['match_participants_teams'])) {
+    $desc['endpoints'][] = "bracket";
+  }
+
   if ($desc['matches_details']) $desc['endpoints'][] = "matches";
   if (!$desc['anonymous_players']) $desc['endpoints'][] = "participants";
 

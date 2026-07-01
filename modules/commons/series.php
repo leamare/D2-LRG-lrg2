@@ -101,7 +101,9 @@ function generate_series_data(&$report) {
       $series[$series_tag]['seriesid'] = $seriesid;
       $seriesIds[$teamstag.'.'.$meetCnts[$teamstag][0]][0] = $seriesid;
     }
-    $seriesTt[$seriesid] = $teamstag;
+    if (!empty($seriesid)) {
+      $seriesTt[$seriesid] = $teamstag;
+    }
     $series[$series_tag]['matches'][] = $mid;
     $_rep_add['match_parts_series_tag'][$mid] = $series_tag;
     if (!empty($teamsStr)) {
