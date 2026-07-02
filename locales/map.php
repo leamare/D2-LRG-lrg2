@@ -43,6 +43,7 @@ return [
     "emoji" => [
         "file" => __DIR__ . "/emoji.json",
         "name" => "😀 Emoji",
+        "months_set" => true,
     ],
     "ozh" => [
         "file" => __DIR__ . "/ozh.json",
