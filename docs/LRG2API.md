@@ -293,7 +293,41 @@ It’s fairly simple to explain. It doesn’t have a structure and is used in `s
 * `items/icritical` - may use `hero` variable
 * `items/progression` and `items/proglist` (identical) - may use `hero` variable, returns `overview` if not set
 * `items/progrole` - may use `hero` and `position`, supports repeaters for both, if hero is not set returns the list of all possible role progressions for every hero
-* `items/builds` - may use `hero` and `position`, pretty much same rules as progrole. When enchantments data is present in the report, each hero build profile includes an `enchantments` array (per tier, items sorted by matches) containing `tier`, `category`, and `items` fields.
+* `items/builds` - may use `hero` and `position`, pretty much same rules as progrole. When enchantments data is present in the report, each hero build profile includes an `enchantments` array (per tier, items sorted by matches) containing `tier`, `category`, and `items` fields. When neutral items are present in the build, a `neutral_items` array is also included. Neither field is capped — all qualifying items are returned.
+
+#### items/builds response (hero profile fields)
+
+When requesting a specific hero role build, the response may include:
+
+```json
+{
+  "hero": 65,
+  "role": "1.2",
+  "stats": { /* pickban / role stats */ },
+  "build": { /* generated build object */ },
+  "enchantments": [
+    {
+      "tier": 1,
+      "category": "enhancement_tier_1",
+      "items": {
+        "123": {
+          "matches": 10,
+          "prate": 0.45,
+          "winrate": 0.6,
+          "wr_incr": 0.05,
+          "wr_wo": 0.55,
+          "med_time": 1800
+        }
+      }
+    }
+  ],
+  "neutral_items": [
+    { "tier": 1, "items": [ 123, 456 ] }
+  ]
+}
+```
+
+`enchantments` and `neutral_items` are omitted when no data is available for that hero build.
 * `items/enchantments` - may use `heroid` variable, returns data for `total` if not set. Returns `[]` if the report has no enchantments data or if the specified hero has no enchantment stats.
 
 #### items/enchantments response
