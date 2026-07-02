@@ -32,6 +32,7 @@
 ini_set('memory_limit', '8G');
 
 require_once __DIR__.'/../modules/commons/wrap_data.php';
+require_once __DIR__.'/../modules/commons/enchantments_stats.php';
 
 // ---------------------------------------------------------------------------
 // CLI
@@ -531,6 +532,12 @@ function scale_enchantments(array $b_enc, ?array $a_enc, array $hero_a, array $h
     foreach ($a_hero as $cat_id => $a_items) {
       if (!isset($b_enc[$hid][$cat_id])) $b_enc[$hid][$cat_id] = $a_items;
     }
+
+    foreach ($b_enc[$hid] as $cat_id => &$b_items) {
+      if (!is_array($b_items) || empty($b_items)) continue;
+      enchantments_finalize_category($b_items);
+    }
+    unset($b_items);
   }
 
   return $b_enc;
