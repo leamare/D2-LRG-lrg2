@@ -476,7 +476,7 @@ function rg_view_generate_items_builds() {
 
         foreach ($sti_stats as $i => $stats) {
           $iid = floor($i/100);
-          $gold -= $meta['items_full'][$iid]['cost'];
+          $gold -= (int)$meta['items_full']["$iid"]['cost'];
           if ($gold < 0) break;
 
           $lane_wins[] = $stats['lane_wins'];
@@ -604,6 +604,11 @@ function rg_view_generate_items_builds() {
     "situational" => [],
   ];
 
+  $enchantments_list = itembuild_enchantment_iids();
+  $is_enchantment = function($item) use ($enchantments_list) {
+    return in_array($item, $enchantments_list);
+  };
+
   if (!empty($build['early'][0])) {
     foreach ($build['early'][0] as $item => $stats) {
       if ($stats['prate'] > 0.8) {
@@ -660,6 +665,12 @@ function rg_view_generate_items_builds() {
     return $build['stats'][$a]['med_time'] <=> $build['stats'][$b]['med_time'];
   });
 
+
+  foreach ($overview_categories as $codename => $items) {
+    $overview_categories[$codename] = array_values(array_filter($items, function($item) use ($is_enchantment) {
+      return !$is_enchantment($item);
+    }));
+  }
 
   foreach ($overview_categories as $codename => $items) {
     $reslocal .= "<div class=\"build-overview-container main-build-$codename\">";
@@ -795,6 +806,7 @@ function rg_view_generate_items_builds() {
         $reslocal .= "<div class=\"header\">".locale_string("builds_lategame_main_route")."</div>";
     
         foreach ($lategame as $item) {
+          if ($is_enchantment($item)) continue;
           $reslocal .= itembuild_item_component($build, $item);
         }
         $reslocal .= "</div>";
@@ -806,81 +818,56 @@ function rg_view_generate_items_builds() {
         return $build['stats'][$a]['med_time'] <=> $build['stats'][$b]['med_time'];
       });
       foreach($build['lategame'] as $item) {
+        if ($is_enchantment($item)) continue;
         $reslocal .= itembuild_item_component($build, $item);
       }
       $reslocal .= "</div>";
     }
 
   $reslocal .= "</div>";
-  // full neutral items
+  // neutral items + enchantments
 
-  if (!empty($build['neutrals'])) {
+  $neutral_tiers = itembuild_get_neutral_tiers($build);
+  $enchantment_tiers = itembuild_get_enchantment_tiers($hero, $report, $report['items']['stats'][$hero] ?? []);
+  $has_neutral_tiers = !empty($neutral_tiers);
+  $has_enchantment_tiers = !empty($enchantment_tiers);
+
+  if ($has_neutral_tiers || $has_enchantment_tiers) {
     $reslocal .= "<div class=\"content-header\">".locale_string("builds_neutrals")."</div>";
     $reslocal .= "<div class=\"hero-build-overview-container hero-build\">";
-    $reslocal .= "<div class=\"build-blocks-container\">";
-    foreach ($build['neutrals'] as $i => $items) {
-      $reslocal .= "<div class=\"items-list\">".
-        "<div class=\"build-item-component text common\"><a class=\"item-text\">T$i</a></div>".
-        "<div class=\"build-item-arrow build-item-arrow-right\"></div><div class=\"items-list items-list-inner\">";
-      foreach ($items as $j => $item) {
-        $reslocal .= itembuild_item_component($build, $item);
-      } 
-      $reslocal .= "</div></div>";
+    $split_class = ($has_neutral_tiers && $has_enchantment_tiers) ? " build-blocks-split" : "";
+    $reslocal .= "<div class=\"build-blocks-container{$split_class}\">";
+
+    if ($has_neutral_tiers) {
+      $neutral_col_class = $has_enchantment_tiers
+        ? "build-blocks-column build-blocks-neutrals"
+        : "build-blocks-column build-blocks-full";
+      $reslocal .= "<div class=\"{$neutral_col_class}\">";
+      $reslocal .= itembuild_render_tiered_block($neutral_tiers, function($item_id) use (&$build) {
+        return itembuild_item_component($build, $item_id);
+      }, $has_enchantment_tiers ? 5 : 20);
+      $reslocal .= "</div>";
     }
+
+    if ($has_enchantment_tiers) {
+      $reslocal .= "<div class=\"build-blocks-column build-blocks-enchantments\">";
+      $reslocal .= itembuild_render_tiered_block($enchantment_tiers, function($item_id, $item, $tier) use (&$build) {
+        return itembuild_item_component($build, $item_id, [], itembuild_stats_from_enchantment($item, $tier['median'] ?? 0));
+      }, 5);
+      $reslocal .= "</div>";
+    }
+
     $reslocal .= "</div>";
     $reslocal .= "</div>";
   }
   
-  // enchantments
-
-  if (isset($report['items']['enchantments'])) {
-    if (is_wrapped($report['items']['enchantments'])) {
-      $report['items']['enchantments'] = unwrap_data($report['items']['enchantments']);
-    }
-
-    if (!empty($report['items']['enchantments'][$hero])) {
-      $reslocal .= "<div class=\"content-header\">".locale_string("builds_enchantments")."</div>";
-      $reslocal .= "<div class=\"hero-build-overview-container hero-build\">";
-      $reslocal .= "<div class=\"build-blocks-container\">";
-      $tier = 1;
-      foreach ($report['items']['enchantments'][$hero] as $i => $items) {
-        if ($i == 0) continue;
-
-        if (!is_array($items)) continue;
-        $items = array_filter($items, function($a) {
-          return !empty($a) && $a['matches'] > 0;
-        });
-
-        uasort($items, function($a, $b) {
-          return $b['matches'] <=> $a['matches'];
-        });
-
-        $reslocal .= "<div class=\"items-list\">".
-          "<div class=\"build-item-component text common\"><a class=\"item-text\">T$tier</a></div>".
-          "<div class=\"build-item-arrow build-item-arrow-right\"></div><div class=\"items-list items-list-inner\">";
-        foreach ($items as $j => $item) {
-          if (empty($item) || !$item['matches']) continue;
-          // $reslocal .= itembuild_item_component($build, $item);
-          $reslocal .= itembuild_item_component_simple($j, [
-            'prate' => $item['matches'] / ($item['matches'] + $item['matches_wo']),
-            'winrate' => $item['wr'],
-            'wr_incr' => $item['wr'] - $item['wr_wo'],
-          ]);
-        } 
-        $reslocal .= "</div></div>";
-        $tier++;
-      }
-      $reslocal .= "</div>";
-      $reslocal .= "</div>";
-    }
-  }
-
   // other value items
 
   if (!empty($build['significant'])) {
     $reslocal .= "<div class=\"content-header\">".locale_string("builds_other_value")."</div>";
     $reslocal .= "<div class=\"hero-build-overview-container hero-build\">";
     foreach($build['significant'] as $item) {
+      if ($is_enchantment($item)) continue;
       $reslocal .= itembuild_item_component($build, $item);
     }
     $reslocal .= "</div>";

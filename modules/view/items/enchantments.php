@@ -51,6 +51,7 @@ function rg_view_generate_items_enchantments() {
   }
 
   $data = $report['items']['enchantments'][$selected_hid];
+  enchantments_finalize_hero_categories($data);
 
   $category_ids = array_keys($data);
   $tier_ids = array_filter($category_ids, function($id) { return $id != 0; });

@@ -351,38 +351,14 @@ public function process() {
       ];
     }
 
-    if (isset($report['items']['enchantments'])) {
-      if (is_wrapped($report['items']['enchantments'])) {
-        $report['items']['enchantments'] = unwrap_data($report['items']['enchantments']);
-      }
-      $res['enchantments'] = [];
-      if (!empty($report['items']['enchantments'][$hero])) {
-        $tier = 1;
-        foreach ($report['items']['enchantments'][$hero] as $i => $items) {
-          if ($i == 0) continue;
-          $items = array_filter($items, function($a) {
-            return !empty($a) && $a['matches'] > 0;
-          });
-          uasort($items, function($a, $b) {
-            return $b['matches'] <=> $a['matches'];
-          });
-          $items = array_map(function($a) {
-            return [
-              'matches' => $a['matches'],
-              'prate' => round($a['matches'] / ($a['matches'] + $a['matches_wo']), 4),
-              'winrate' => round($a['wr'], 4),
-              'wr_incr' => round($a['wr'] - $a['wr_wo'], 4),
-              'wr_wo' => round($a['wr_wo'], 4),
-            ];
-          }, $items);
-          $res['enchantments'][] = [
-            'tier' => $tier,
-            'category' => array_keys($meta['item_categories'])[$i] ?? $i,
-            'items' => $items,
-          ];
-          $tier++;
-        }
-      }
+    $enchantment_tiers = itembuild_get_enchantment_tiers($hero, $report, $report['items']['stats'][$hero] ?? []);
+    if (!empty($enchantment_tiers)) {
+      $res['enchantments'] = itembuild_format_enchantment_tiers_for_api($enchantment_tiers);
+    }
+
+    $neutral_tiers = itembuild_get_neutral_tiers($build);
+    if (!empty($neutral_tiers)) {
+      $res['neutral_items'] = itembuild_format_neutral_tiers_for_api($neutral_tiers);
     }
 
     return $res;
@@ -393,6 +369,11 @@ public function process() {
 }
 
 if (is_docs_mode()) {
+  SchemaRegistry::register('ItemsBuildsNeutralTier', TypeDefs::obj([
+    'tier' => TypeDefs::int(),
+    'items' => TypeDefs::arrayOf(TypeDefs::int()),
+  ]));
+
   SchemaRegistry::register('ItemsBuildsEnchantmentTier', TypeDefs::obj([
     'tier' => TypeDefs::int(),
     'category' => TypeDefs::str(),
@@ -402,6 +383,7 @@ if (is_docs_mode()) {
       'winrate' => TypeDefs::num(),
       'wr_incr' => TypeDefs::num(),
       'wr_wo' => TypeDefs::num(),
+      'med_time' => TypeDefs::num(),
     ])),
   ]));
 
@@ -420,6 +402,7 @@ if (is_docs_mode()) {
         'context' => TypeDefs::obj([]),
       ]),
       'enchantments' => TypeDefs::arrayOf('ItemsBuildsEnchantmentTier'), // only when enchantments data present
+      'neutral_items' => TypeDefs::arrayOf('ItemsBuildsNeutralTier'), // only when neutral items present in build
     ])
   ]));
 }

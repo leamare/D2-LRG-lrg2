@@ -635,34 +635,39 @@ function inject_item_stats(array &$build, array &$stats, array $hero) {
   for ($i = 1; $i < 6; $i++) {
     $neutrals_list = array_merge($neutrals_list, $meta['item_categories']['neutral_tier_'.$i]);
 
-    $tier = [];
+    $tier_prates = [];
     foreach ($meta['item_categories']['neutral_tier_'.$i] as $item) {
       if (empty($stats[$item])) continue;
-      $tier[$item] = $stats[$item]['prate'];
+      $tier_prates[$item] = $stats[$item]['prate'];
     }
 
-    if (empty($tier)) continue;
+    if (empty($tier_prates)) continue;
 
-    $local_lim = max($tier) * 0.4;
+    arsort($tier_prates);
+    $top_items = array_slice(array_keys($tier_prates), 0, 3);
 
-    $tier = array_keys(
-      array_filter($tier, function($a) use ($local_lim) {
+    $local_lim = max(max($tier_prates) * 0.15, 0.02);
+    $filtered_items = array_keys(
+      array_filter($tier_prates, function($a) use ($local_lim) {
         return $a > $local_lim;
       })
     );
 
+    $tier = array_values(array_unique(array_merge($top_items, $filtered_items)));
     if (empty($tier)) continue;
 
     $build['neutrals'][$i] = $tier;
 
     usort($build['neutrals'][$i], function($a, $b) use (&$stats) {
-      return $stats[ $b ]['winrate'] <=> $stats[ $a ]['winrate'];
+      return ($stats[ $b ]['prate'] ?? 0) <=> ($stats[ $a ]['prate'] ?? 0);
     });
   }
 
   // other significant items
 
-  $items = array_merge($items ?? [], $build['path'], array_keys($build['sit']), $build['lategame'], $build['alts_items'], $neutrals_list, $meta['item_categories']['early']);
+  $enchantments_list = itembuild_enchantment_iids();
+
+  $items = array_merge($items ?? [], $build['path'], array_keys($build['sit']), $build['lategame'], $build['alts_items'], $neutrals_list, $enchantments_list, $meta['item_categories']['early']);
   $items = array_unique($items);
 
   $significant = [];
@@ -683,6 +688,8 @@ function inject_item_stats(array &$build, array &$stats, array $hero) {
   $build['lategame'] = array_values(array_unique($build['lategame']));
 
   $build['significant'] = $significant;
+  $build['lategame'] = array_values(array_diff($build['lategame'], $enchantments_list));
+  $build['significant'] = array_values(array_diff($build['significant'], $enchantments_list));
 
   // items stats
   // only includes prate, median timing and wo_wr as the most useful stats for the build
@@ -721,6 +728,168 @@ function inject_item_stats(array &$build, array &$stats, array $hero) {
   usort($build['significant'], function($a, $b) use (&$build) {
     return $build['stats'][ $a ]['med_time'] <=> $build['stats'][ $b ]['med_time'];
   });
+}
+
+function itembuild_enchantment_iids() {
+  global $meta;
+
+  static $ids = null;
+  if ($ids !== null) return $ids;
+
+  $ids = [];
+  foreach ($meta['item_categories'] as $category_name => $category_items) {
+    if (strpos($category_name, 'enhancement_tier_') === 0) {
+      $ids = array_merge($ids, $category_items);
+    }
+  }
+
+  return array_unique($ids);
+}
+
+function itembuild_neutral_tier_median(int $tier, array $stats) {
+  global $meta;
+
+  $times = [];
+  foreach ($meta['item_categories']['neutral_tier_'.$tier] ?? [] as $item) {
+    if (!empty($stats[$item]['median'])) {
+      $times[] = $stats[$item]['median'];
+    }
+  }
+
+  if (empty($times)) return 0;
+
+  sort($times);
+  return $times[(int)floor((count($times) - 1) / 2)];
+}
+
+function itembuild_stats_from_enchantment(array $item_data, $tier_median = 0) {
+  $matches = $item_data['matches'] ?? 0;
+  $matches_wo = $item_data['matches_wo'] ?? 0;
+  $denom = $matches + $matches_wo;
+
+  return [
+    'prate' => $denom ? $matches / $denom : 0,
+    'winrate' => $item_data['wr'] ?? 0,
+    'wo_wr_incr' => ($item_data['wr'] ?? 0) - ($item_data['wr_wo'] ?? 0),
+    'med_time' => $tier_median ?: ($item_data['median'] ?? 0),
+  ];
+}
+
+function itembuild_get_neutral_tiers(array &$build) {
+  $tiers = [];
+
+  foreach ($build['neutrals'] ?? [] as $i => $items) {
+    if (empty($items)) continue;
+
+    $tiers[] = [
+      'tier' => $i,
+      'label' => "T$i",
+      'items' => array_fill_keys($items, null),
+    ];
+  }
+
+  return $tiers;
+}
+
+function itembuild_get_enchantment_tiers($hero, &$report, array $hero_stats = [], int $min_matches = 5) {
+  global $meta;
+
+  if (!isset($report['items']['enchantments'])) return [];
+  if (is_wrapped($report['items']['enchantments'])) {
+    $report['items']['enchantments'] = unwrap_data($report['items']['enchantments']);
+  }
+  if (empty($report['items']['enchantments'][$hero])) return [];
+
+  $hero_data = $report['items']['enchantments'][$hero];
+  enchantments_finalize_hero_categories($hero_data, $min_matches);
+
+  $category_names = array_keys($meta['item_categories']);
+  $tiers = [];
+  $tier = 1;
+
+  foreach ($hero_data as $i => $items) {
+    if ($i == 0 || !is_array($items)) continue;
+
+    $items = array_filter($items, function($a) use ($min_matches) {
+      return !empty($a) && enchantment_item_passes_filter($a, $min_matches);
+    });
+    if (empty($items)) continue;
+
+    uasort($items, function($a, $b) {
+      return $b['matches'] <=> $a['matches'];
+    });
+
+    $tiers[] = [
+      'tier' => $tier,
+      'category' => $category_names[$i] ?? "enhancement_tier_$tier",
+      'label' => "T$tier",
+      'median' => itembuild_neutral_tier_median($tier, $hero_stats),
+      'items' => $items,
+    ];
+    $tier++;
+  }
+
+  return $tiers;
+}
+
+function itembuild_render_tiered_block($tiers, $item_renderer, ?int $max_items = null) {
+  if (empty($tiers)) {
+    return "<div class=\"content-text\">".locale_string("stats_no_elements")."</div>";
+  }
+
+  $res = '';
+
+  foreach ($tiers as $tier) {
+    $items = $tier['items'];
+    if ($max_items !== null) {
+      $items = array_slice($items, 0, $max_items, true);
+    }
+
+    $res .= "<div class=\"items-list\">";
+    $res .= "<div class=\"build-item-component text common\"><a class=\"item-text\">{$tier['label']}</a></div>";
+    $res .= "<div class=\"build-item-arrow build-item-arrow-right\"></div>";
+    $res .= "<div class=\"items-list items-list-inner\">";
+
+    foreach ($items as $item_id => $item_data) {
+      $res .= $item_renderer($item_id, $item_data, $tier);
+    }
+
+    $res .= "</div></div>";
+  }
+
+  return $res;
+}
+
+function itembuild_format_enchantment_tiers_for_api(array $tiers) {
+  return array_map(function($tier) {
+    $items = [];
+    foreach ($tier['items'] as $item_id => $item) {
+      $stats = itembuild_stats_from_enchantment($item, $tier['median'] ?? 0);
+      $items[$item_id] = [
+        'matches' => $item['matches'],
+        'prate' => round($stats['prate'], 4),
+        'winrate' => round($stats['winrate'], 4),
+        'wr_incr' => round($stats['wo_wr_incr'], 4),
+        'wr_wo' => round($item['wr_wo'], 4),
+        'med_time' => $stats['med_time'],
+      ];
+    }
+
+    return [
+      'tier' => $tier['tier'],
+      'category' => $tier['category'],
+      'items' => $items,
+    ];
+  }, $tiers);
+}
+
+function itembuild_format_neutral_tiers_for_api(array $tiers) {
+  return array_map(function($tier) {
+    return [
+      'tier' => $tier['tier'],
+      'items' => array_map('intval', array_keys($tier['items'])),
+    ];
+  }, $tiers);
 }
 
 function generate_item_builds(array &$pairs, array &$stats, array $hero) {

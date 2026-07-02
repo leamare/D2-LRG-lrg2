@@ -21,6 +21,7 @@ public function process() {
   }
 
   $data = $report['items']['enchantments'][$selected_hid] ?? [];
+  enchantments_finalize_hero_categories($data);
 
 
   $category_ids = array_keys($data);
