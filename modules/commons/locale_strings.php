@@ -99,3 +99,40 @@ function register_locale_string($string, $tag, $reglocale = null) {
 function is_special_locale($locale) {
   return in_array($locale, ['emoji', 'ozh', 'def']);
 }
+
+
+function locale_month($ts, $short = true) {
+  global $strings, $locale, $localesMap;
+  $n   = (int)date('n', $ts);
+  $key = $short ? "month_{$n}_s" : "month_$n";
+
+  foreach ([$locale, $localesMap[$locale]['fallback'] ?? null] as $l) {
+    if ($l && isset($strings[$l][$key])) return $strings[$l][$key];
+  }
+
+  if (class_exists('IntlDateFormatter')) {
+    $loc = $localesMap[$locale]['locale'] ?? str_replace('-', '_', (string)$locale);
+    try {
+      $fmt = new IntlDateFormatter(
+        $loc,
+        IntlDateFormatter::NONE,
+        IntlDateFormatter::NONE,
+        date_default_timezone_get(),
+        IntlDateFormatter::GREGORIAN,
+        $short ? 'LLL' : 'LLLL',
+      );
+      $m = $fmt->format((int)$ts);
+      if ($m) return mb_strtoupper(mb_substr($m, 0, 1)).mb_substr($m, 1);
+    } catch (\Throwable $ex) {} // non-ICU locale (emoji/ozh) -> fall through
+  }
+  return date($short ? 'M' : 'F', $ts);
+}
+
+function locale_month_year($ts) {
+  return locale_month($ts, true).' '.(int)date('Y', $ts);
+}
+
+function locale_day($ts) {
+  if (!$ts) return '';
+  return locale_month($ts).' '.(int)date('j', $ts);
+}
