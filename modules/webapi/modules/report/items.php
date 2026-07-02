@@ -54,6 +54,14 @@ public function process() {
     'enchantments'   => ['items-enchantments', 'heroid'],
   ];
 
+  // "items-builds-list" modline is split into ["items","builds","list"].
+  if (in_array('builds', $mods, true) && in_array('list', $mods, true)) {
+    $res = $endpoints['items-builds-list']($mods, $vars, $report);
+    $res['__endp'] = 'items-builds-list';
+    $res['__stopRepeater'] = true;
+    return $res;
+  }
+
   foreach ($mapping as $key => [$endp, $stopRepeater]) {
     if (in_array($key, $mods)) {
       $res = $endpoints[$endp]($mods, $vars, $report);

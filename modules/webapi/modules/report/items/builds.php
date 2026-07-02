@@ -2,6 +2,19 @@
 
 include_once($root."/modules/view/functions/itembuilds.php");
 
+function items_builds_collect_list(array $report): array {
+  $res = [];
+  foreach (($report['items']['progrole']['data'] ?? []) as $hid => $positions) {
+    if (empty($hid)) continue;
+    $res[] = [
+      'hero' => (int)$hid,
+      'positions' => array_values(array_keys((array)$positions)),
+    ];
+  }
+  usort($res, fn($a, $b) => $a['hero'] <=> $b['hero']);
+  return $res;
+}
+
 #[Endpoint(name: 'items-builds')]
 #[Description('Starting from role progression, generate item builds/tree for a hero role')]
 #[ModlineVar(name: 'heroid', schema: ['type' => 'integer'], description: 'Hero id')]
@@ -28,29 +41,27 @@ public function process() {
     $hero = null;
   }
 
-  if (!isset($report['items']['progrole']['data'][$hero]))
-    $report['items']['progrole']['data'][$hero] = [];
-
   if (isset($vars['position'])) {
+    if ($hero === null) return [];
+    if (!isset($report['items']['progrole']['data'][$hero])) return [];
     if (!isset($report['items']['progrole']['data'][$hero][ $vars['position'] ]))
       return [];
     $crole = $vars['position'];
   } else {
+    if ($hero === null) {
+      $crole = null;
+    } else {
+    if ($hero !== null && !isset($report['items']['progrole']['data'][$hero])) {
+      $report['items']['progrole']['data'][$hero] = [];
+    }
     $crole = array_keys($report['items']['progrole']['data'][$hero])[0] ?? null;
+    }
   }
 
 
 
   if ($hero === null) {
-    foreach ($report['items']['progrole']['data'] as $hid => $positions) {
-      if (empty($hid)) continue;
-      $res[] = [
-        'hero' => $hid,
-        'positions' => array_keys($positions),
-      ];
-    }
-
-    return $res;
+    return items_builds_collect_list($report);
   } else {
     if ($crole === null) return [];
 
@@ -279,7 +290,7 @@ public function process() {
 
           foreach ($sti_stats as $i => $stats) {
             $iid = floor($i/100);
-            $gold -= $meta['items_full'][$iid]['cost'];
+            $gold -= (int)$meta['items_full']["$iid"]['cost'];
             if ($gold < 0) break;
 
             $lane_wins[] = $stats['lane_wins'];
@@ -368,6 +379,18 @@ public function process() {
 }
 }
 
+#[Endpoint(name: 'items-builds-list')]
+#[Description('List heroes with available role builds and helper bulk requests')]
+class ItemsBuildsList extends EndpointTemplate {
+public function process() {
+  $report = $this->report;
+  if (!isset($report['items']) || empty($report['items']['pi']) || !isset($report['items']['progr']) || !isset($report['items']['progrole']))
+    throw new UserInputException("No items data");
+
+  return items_builds_collect_list($report);
+}
+}
+
 if (is_docs_mode()) {
   SchemaRegistry::register('ItemsBuildsNeutralTier', TypeDefs::obj([
     'tier' => TypeDefs::int(),
@@ -405,4 +428,9 @@ if (is_docs_mode()) {
       'neutral_items' => TypeDefs::arrayOf('ItemsBuildsNeutralTier'), // only when neutral items present in build
     ])
   ]));
+
+  SchemaRegistry::register('ItemsBuildsListResult', TypeDefs::arrayOf(TypeDefs::obj([
+    'hero' => TypeDefs::int(),
+    'positions' => TypeDefs::arrayOf(TypeDefs::str()),
+  ])));
 }

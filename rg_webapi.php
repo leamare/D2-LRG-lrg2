@@ -83,16 +83,18 @@ $include_team = isset($_REQUEST['teamcard']);
 // View functions imports
 $_ipath = "modules/view/functions/";
 $imports = scandir($_ipath);
+
+$_ipath_api = "modules/webapi/functions/";
+$imports_api = scandir($_ipath_api);
+
 foreach ($imports as $f) {
-  if ($f[0] == '.' || in_array($f, $imports_ignore) || is_dir($_ipath."$f")) continue;
+  if ($f[0] == '.' || in_array($f, $imports_ignore) || in_array($f, $imports_api) || is_dir($_ipath."$f")) continue;
   include_once($_ipath."$f");
 }
 
-$_ipath = "modules/webapi/functions/";
-$imports_api = scandir($_ipath);
 foreach ($imports_api as $f) {
-  if ($f[0] == '.' || in_array($f, $imports_ignore) || is_dir($_ipath."$f")) continue;
-  include_once($_ipath."$f");
+  if ($f[0] == '.' || in_array($f, $imports_ignore) || is_dir($_ipath_api."$f")) continue;
+  include_once($_ipath_api."$f");
 }
 
 // Additional imports
