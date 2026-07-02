@@ -843,14 +843,16 @@ function rg_view_generate_items_builds() {
         ? "build-blocks-column build-blocks-neutrals"
         : "build-blocks-column build-blocks-full";
       $reslocal .= "<div class=\"{$neutral_col_class}\">";
+      $reslocal .= "<div class=\"header\">".locale_string("builds_neutrals_short")."</div>";
       $reslocal .= itembuild_render_tiered_block($neutral_tiers, function($item_id) use (&$build) {
         return itembuild_item_component($build, $item_id);
-      }, $has_enchantment_tiers ? 5 : 20);
+      }, 5);
       $reslocal .= "</div>";
     }
 
     if ($has_enchantment_tiers) {
       $reslocal .= "<div class=\"build-blocks-column build-blocks-enchantments\">";
+      $reslocal .= "<div class=\"header\">".locale_string("builds_enchantments")."</div>";
       $reslocal .= itembuild_render_tiered_block($enchantment_tiers, function($item_id, $item, $tier) use (&$build) {
         return itembuild_item_component($build, $item_id, [], itembuild_stats_from_enchantment($item, $tier['median'] ?? 0));
       }, 5);

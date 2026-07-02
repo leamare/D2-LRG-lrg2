@@ -703,6 +703,7 @@ function inject_item_stats(array &$build, array &$stats, array $hero) {
 
   foreach ($items as $item) {
     if (empty($stats[$item])) continue;
+    if (in_array($item, $enchantments_list)) continue;
 
     $build['stats'][$item] = [
       'prate' => $stats[$item]['prate'] ?? 0,
@@ -728,6 +729,50 @@ function inject_item_stats(array &$build, array &$stats, array $hero) {
   usort($build['significant'], function($a, $b) use (&$build) {
     return $build['stats'][ $a ]['med_time'] <=> $build['stats'][ $b ]['med_time'];
   });
+
+  itembuild_strip_enchantments_from_build($build);
+}
+
+function itembuild_strip_enchantments_from_build(array &$build): void {
+  $enchantments_list = itembuild_enchantment_iids();
+  if (empty($enchantments_list)) return;
+
+  $build['path'] = array_values(array_diff($build['path'] ?? [], $enchantments_list));
+  $build['lategame'] = array_values(array_diff($build['lategame'] ?? [], $enchantments_list));
+  $build['significant'] = array_values(array_diff($build['significant'] ?? [], $enchantments_list));
+
+  foreach ($enchantments_list as $iid) {
+    unset($build['sit'][$iid], $build['critical'][$iid]);
+    if (isset($build['swap'][$iid])) {
+      unset($build['swap'][$iid]);
+    }
+  }
+
+  foreach ($build['swap'] ?? [] as $i1 => $i2) {
+    if (in_array($i1, $enchantments_list) || in_array($i2, $enchantments_list)) {
+      unset($build['swap'][$i1]);
+    }
+  }
+
+  foreach ($build['early'] ?? [] as $ord => &$items) {
+    foreach ($enchantments_list as $iid) {
+      unset($items[$iid]);
+    }
+  }
+  unset($items);
+
+  foreach ($build['alt'] ?? [] as $item => &$alts) {
+    if (in_array($item, $enchantments_list)) {
+      unset($build['alt'][$item]);
+      continue;
+    }
+    $alts = array_values(array_diff($alts, $enchantments_list));
+  }
+  unset($alts);
+
+  if (!empty($build['path'])) {
+    $build['lategamePoint'] = min($build['lategamePoint'] ?? count($build['path']), count($build['path']));
+  }
 }
 
 function itembuild_enchantment_iids() {

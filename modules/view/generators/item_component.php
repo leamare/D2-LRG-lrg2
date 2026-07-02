@@ -32,21 +32,10 @@ function itembuild_item_component(&$build, $item, $flags = [], $item_stats = nul
   if ($incr > 0.125) $tags[] = "winrate-strong";
   if ($incr < -0.1) $tags[] = "winrate-weak";
 
-  return "<div class=\"".implode(" ", $tags)."\">".
-    "<a class=\"item-image\" title=\"".
-      addcslashes(
-        item_name($item)." - ".
-        locale_string('purchase_rate').": ".number_format($stats['prate'] * 100, 2)."%, ".
-        locale_string('items_winrate_increase').": ".number_format($stats['wo_wr_incr'] * 100, 2)."%, ".
-        locale_string('winrate').": ".number_format($stats['winrate'] * 100, 2)."%, ".
-        locale_string('item_time_median_long').": ".convert_time_seconds($stats['med_time']).
-        (!$item_stats && isset($build['critical'][$item]) ? ", ".locale_string('items_wr_gradient').": ".number_format($build['critical'][$item]['grad'] * 100, 1)."%" : "")
-      , '"').
-      "\">".
-      ($big ? item_big_icon($item) : item_icon($item)).
-      ($prate ? "<span class=\"item-prate\">".number_format($stats['prate'] * 100, 2)."%</span>" : "").
-    "</a>".
-    "<div class=\"labels\">".
+  $is_enchantment = $item_stats !== null;
+  if ($is_enchantment) $tags[] = "enchantment";
+
+  $labels = "<div class=\"labels\">".
     (
       $critical && !$item_stats && isset($build['critical'][$item]) && $build['critical'][$item]['grad'] < 0 ?
         "<span class=\"item-time item-stat-tooltip-line\">".
@@ -81,7 +70,23 @@ function itembuild_item_component(&$build, $item, $flags = [], $item_stats = nul
           "%</a>"
         )
     ).
-    "</div>".
+    "</div>";
+
+  return "<div class=\"".implode(" ", $tags)."\">".
+    "<a class=\"item-image\" title=\"".
+      addcslashes(
+        item_name($item)." - ".
+        locale_string('purchase_rate').": ".number_format($stats['prate'] * 100, 2)."%, ".
+        locale_string('items_winrate_increase').": ".number_format($stats['wo_wr_incr'] * 100, 2)."%, ".
+        locale_string('winrate').": ".number_format($stats['winrate'] * 100, 2)."%, ".
+        locale_string('item_time_median_long').": ".convert_time_seconds($stats['med_time']).
+        (!$item_stats && isset($build['critical'][$item]) ? ", ".locale_string('items_wr_gradient').": ".number_format($build['critical'][$item]['grad'] * 100, 1)."%" : "")
+      , '"').
+      "\">".
+      ($big ? item_big_icon($item) : item_icon($item)).
+      ($prate ? "<span class=\"item-prate\">".number_format($stats['prate'] * 100, 2)."%</span>" : "").
+    "</a>".
+    $labels.
   "</div>";
 }
 
