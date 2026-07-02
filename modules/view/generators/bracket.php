@@ -8,8 +8,13 @@ foreach (['helpers', 'config', 'series', 'roster', 'split', 'rounds', 'phases', 
 
 function bracket_available() {
   global $report;
-  return is_array($report) && !empty($report['teams']) && !empty($report['tvt'])
-    && !empty($report['match_participants_teams']) && !empty($report['matches_additional']);
+
+  return is_array($report) && (!empty($report['bracket']) || (
+      !empty($report['teams']) 
+      && !empty($report['tvt'])
+      && !empty($report['match_participants_teams'])
+      && !empty($report['matches_additional'])
+    ));
 }
 
 function bracket_team_index() {
@@ -1073,7 +1078,7 @@ function bracket_match_card($s, $ctx = '') {
   $wa = $s['winner'] === $ta;
   $wb = $s['winner'] === $tb;
 
-  $meta = locale_day($s['start']).' · BO'.($s['bo'] ?? 0);
+  $meta = locale_day($s['start']).' · '.locale_string("bracket_bo").($s['bo'] ?? 0);
 
   $row = function ($tid, $sc, $win, $lose) {
     $cls = 'bracket-team'.($win ? ' win' : ($lose ? ' lose' : ''));

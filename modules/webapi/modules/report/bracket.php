@@ -8,7 +8,7 @@ include_once(__DIR__ . "/../../../view/generators/bracket.php");
 class Bracket extends EndpointTemplate {
 public function process() {
   global $report, $meta;
-  if (!bracket_available())
+  if (empty($report['bracket']) && !bracket_available())
     throw new UserInputException("No team match data available for this report");
 
   return bracket_json(bracket_generate());
