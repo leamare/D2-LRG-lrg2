@@ -1,0 +1,47 @@
+{
+  "bracket": {
+    "_doc": "Optional per-report bracket override. Add this as a top-level 'bracket' block in the report's analyzer template (alongside 'main' / 'ana' / 'web'); the analyzer copies it to settings.bracket, where the bracket view reads it. The reconstructed bracket auto-detects group stages / playoffs from match data; use these only to force the shape when detection gets a specific event wrong. Every key is optional.",
+
+    "_doc_overrides": "Force a series winner (tech loss / mis-scored final). Key = series key or tag, value = winning team id. The real map score is kept; the result just shows as overridden.",
+    "overrides": {
+      "0_1001": 8291895
+    },
+
+    "_doc_stages": "Force the phase/format shape. An ordered array, one entry per stage. Each entry is an object {kind, format, teams, groups} or a short 'kind[:format[:teams[:groups]]]' string. kind = group | bracket | none. format = rr | swiss | de | se. Bare 'de'/'se'/'rr'/'swiss' is shorthand. Add until/from/dates to an object stage to split strictly by calendar when phases share a roster and run back-to-back.",
+    "stages": [
+      "group:swiss",
+      "bracket:de"
+    ],
+    "_example_stages_objects": [
+      { "kind": "group", "format": "swiss", "until": "2026-02-06" },
+      { "kind": "group", "format": "rr",    "until": "2026-03-06" },
+      { "kind": "bracket", "format": "de" }
+    ],
+
+    "_doc_divisions": "Force a parallel-division split detection misses. Name => filter. teams = team ids in the division; days = weekdays it plays; dates = 'A..B' range; qualifies_to = shared meta event the winners advance to.",
+    "divisions": {
+      "Sunday Division": { "teams": [1, 2, 3, 4], "days": ["sun"], "qualifies_to": "playoffs" },
+      "Monday Division": { "teams": [5, 6, 7, 8], "days": ["mon"], "qualifies_to": "playoffs" }
+    },
+
+    "_doc_months": "Force (true) or suppress (false) the month-by-month performance grid shown for long, overlapping multi-event seasons.",
+    "months": false
+  },
+
+  "_doc_precomputed_bracket": "DIFFERENT feature / different key. The block above is the forcing config (report.settings.bracket). A fully precomputed bracket instead goes on report.bracket (top level), and the view renders it AS-IS — no detection, no match data needed. Compact webapi-like shape shown below under '_report_bracket'. Series: {teams:[idA,idB], score:[a,b], bo?, mids?(match ids for the popup), date?, winner?(else inferred from score)}. Stages: group {standings:[{team,w,d,l,mw,ml}], format} or bracket {upper/lower:[{name,series}], grand_final:[series]}.",
+  "_report_bracket": {
+    "events": [
+      {
+        "name": "Main Event",
+        "stages": [
+          { "type": "group", "name": "Group A", "format": "round_robin",
+            "standings": [ { "team": 1, "w": 3, "d": 0, "l": 0, "mw": 6, "ml": 1 } ] },
+          { "type": "bracket", "name": "Playoffs", "format": "double_elimination",
+            "upper": [ { "name": "bracket_ub_final", "series": [ { "teams": [1, 2], "score": [2, 1], "bo": 3 } ] } ],
+            "lower": [ { "name": "bracket_lb_final", "series": [ { "teams": [3, 4], "score": [2, 0], "bo": 3 } ] } ],
+            "grand_final": [ { "teams": [1, 3], "score": [3, 1], "bo": 5 } ] }
+        ]
+      }
+    ]
+  }
+}

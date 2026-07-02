@@ -167,11 +167,15 @@ a:hover {
 	color: var(--caption);
 	text-transform: uppercase;
 	letter-spacing: 4px;
-	padding: 17px 0;
+	padding: 17px 10px;
 	font-family: 'Radiance-SemiBold';
 
 	text-shadow: 2px 2px 6px var(--text-shadow);
   margin-top: 30px;
+}
+.bracket .content-header {
+  width: 880px;
+  letter-spacing: 3px;
 }
 
 .content-text {
@@ -481,7 +485,7 @@ a:hover {
   margin-top: -0.3em;
 }
 
-.content-text h1 , .content-cards h1{
+.content-text h1 , .content-cards h1, .content-text h2{
     margin: 42px 0 18px;
     font-size: 24px;
     text-transform: uppercase;
@@ -492,6 +496,9 @@ a:hover {
     font-weight: bold;
     color: var(--caption);
     flex-basis: 100%;
+}
+.content-text h2 {
+    font-size: 20px;
 }
 
 .faqAnswer {

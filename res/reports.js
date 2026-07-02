@@ -823,3 +823,31 @@ $.tablesorter.addParser({
   },
   type: 'numeric'
 });
+// Bracket section: team highlight on hover, series popup on click
+(function () {
+  function clearBracketHl() {
+    document.querySelectorAll('.bracket .bracket-hl').forEach(function (n) { n.classList.remove('bracket-hl'); });
+  }
+  document.addEventListener('mouseover', function (e) {
+    var el = e.target.closest ? e.target.closest('.bracket [data-bracket-team]') : null;
+    if (!el) return;
+    clearBracketHl();
+    var tid = el.getAttribute('data-bracket-team');
+    document.querySelectorAll('.bracket [data-bracket-team="' + tid + '"]').forEach(function (n) {
+      n.classList.add('bracket-hl');
+      if (n.classList.contains('bracket-team')) {
+        var card = n.closest('.bracket-card');
+        if (card) card.classList.add('bracket-hl');
+      }
+    });
+  });
+  document.addEventListener('mouseout', function (e) {
+    if (e.target.closest && e.target.closest('.bracket [data-bracket-team]')) clearBracketHl();
+  });
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest ? e.target.closest('.bracket [data-pop]') : null;
+    if (!el) return;
+    var pop = document.getElementById(el.getAttribute('data-pop'));
+    if (pop) showModal(pop.innerHTML, pop.getAttribute('data-title') || '');
+  });
+})();
