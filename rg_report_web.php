@@ -9,15 +9,18 @@ $imports_ignore = [
   "check_directory.php",
 ];
 
+$imports_api = $imports_api ?? [];
+
 $lg_version = [ 2, 30, 0, 0, 0 ];
 $isApi = false;
 
 $root = dirname(__FILE__);
 
-$imports = scandir("modules/commons/");
+$_ipath = "modules/commons/";
+$imports = scandir($_ipath);
 foreach ($imports as $f) {
-  if ($f[0] == '.' || in_array($f, $imports_ignore)) continue;
-  include_once("modules/commons/$f");
+  if ($f[0] == '.' || in_array($f, $imports_ignore) || in_array($f, $imports_api) || is_dir($_ipath."$f")) continue;
+  include_once($_ipath."$f");
 }
 
 $localesMap = include_once("locales/map.php");
@@ -71,10 +74,11 @@ $host_link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ?
                 dirname($_SERVER['REQUEST_URI']); 
 
 // View functions imports
-$imports = scandir("modules/view/functions/");
+$_ipath = "modules/view/functions/";
+$imports = scandir($_ipath);
 foreach ($imports as $f) {
-  if ($f[0] == '.' || in_array($f, $imports_ignore)) continue;
-  include_once("modules/view/functions/$f");
+  if ($f[0] == '.' || in_array($f, $imports_ignore) || is_dir($_ipath."$f")) continue;
+  include_once($_ipath."$f");
 }
 
 // Additional imports
@@ -195,6 +199,9 @@ if (isset($report)) {
   include_once("modules/view/overview.php");
 
   if ($report['random']['matches_total']) {
+    if (isset($report['teams']) && !empty($report['match_participants_teams']))
+      include_once("modules/view/bracket.php");
+
     if (isset($report['records']))
       include_once("modules/view/records.php");
 
@@ -234,6 +241,11 @@ if (isset($report)) {
   # overview
   if (check_module("overview")) {
     merge_mods($modules['overview'], rg_view_generate_overview());
+  }
+
+  # bracket
+  if (isset($modules['bracket']) && check_module("bracket")) {
+    merge_mods($modules['bracket'], rg_view_generate_bracket());
   }
 
   # records

@@ -81,15 +81,18 @@ $include_descriptor = isset($_REQUEST['desc']);
 $include_team = isset($_REQUEST['teamcard']);
 
 // View functions imports
-$imports_api = scandir("modules/webapi/functions/");
-$imports = scandir("modules/view/functions/");
+$_ipath = "modules/view/functions/";
+$imports = scandir($_ipath);
 foreach ($imports as $f) {
-  if ($f[0] == '.' || in_array($f, $imports_ignore) || in_array($f, $imports_api)) continue;
-  include_once("modules/view/functions/$f");
+  if ($f[0] == '.' || in_array($f, $imports_ignore) || is_dir($_ipath."$f")) continue;
+  include_once($_ipath."$f");
 }
+
+$_ipath = "modules/webapi/functions/";
+$imports_api = scandir($_ipath);
 foreach ($imports_api as $f) {
-  if ($f[0] == '.' || in_array($f, $imports_ignore)) continue;
-  include_once("modules/webapi/functions/$f");
+  if ($f[0] == '.' || in_array($f, $imports_ignore) || is_dir($_ipath."$f")) continue;
+  include_once($_ipath."$f");
 }
 
 // Additional imports
