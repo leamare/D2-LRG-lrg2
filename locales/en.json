@@ -620,6 +620,7 @@
     "builds_alts": "Alternatives",
     "builds_swaps": "Order swaps",
     "builds_neutrals": "Neutral items",
+    "builds_neutrals_short": "Neutrals",
     "builds_enchantments": "Enchantments",
     "builds_timeline": "Timeline",
     "builds_lategame_main_route": "Main route",
