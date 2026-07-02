@@ -344,7 +344,7 @@ function rg_generator_series_list($table_id, $series) {
     $end_date = [];
     $playtime = 0;
 
-    $scores = [];
+    $scores = series_match_scores($report, $series_data['matches']);
     $winner = null;
     $heroes_picks = [];
     $heroes_bans = [];
@@ -352,14 +352,6 @@ function rg_generator_series_list($table_id, $series) {
 
     foreach ($series_data['matches'] as $match) {
       if (!isset($report['match_participants_teams'][$match])) continue;
-      if (!isset($scores[$report['match_participants_teams'][$match]['radiant'] ?? 0]))  {
-        $scores[$report['match_participants_teams'][$match]['radiant'] ?? 0] = 0;
-      }
-      $scores[$report['match_participants_teams'][$match]['radiant'] ?? 0] += $report['matches_additional'][$match]['radiant_win'] ? 1 : 0;
-      if (!isset($scores[$report['match_participants_teams'][$match]['dire'] ?? 0]))  {
-        $scores[$report['match_participants_teams'][$match]['dire'] ?? 0] = 0;
-      }
-      $scores[$report['match_participants_teams'][$match]['dire'] ?? 0] += $report['matches_additional'][$match]['radiant_win'] ? 0 : 1;
 
       foreach ($report['matches'][$match] as $l) {
         $heroes_picks[$l['hero']] = ($heroes_picks[$l['hero']] ?? 0) + 1;
@@ -419,7 +411,9 @@ function rg_generator_series_list($table_id, $series) {
     }
 
     $res .= "<td data-col-group=\"teams\">".($winner ? team_link_short($winner) : "<span class=\"placeholder\">".locale_string("tie")."</span>")."</td>".
-      "<td data-col-group=\"teams\">".(implode("-", $scores))."</td>".
+      "<td data-col-group=\"teams\">".implode("-", array_map(function($team) use ($scores) {
+        return $scores[$team] ?? 0;
+      }, $teams))."</td>".
       "<td class=\"separator\" data-col-group=\"heroes\">".implode("", array_map(function($hero) {
         return hero_icon($hero);
       }, array_keys($heroes_picks)))."</td>".

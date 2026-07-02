@@ -86,18 +86,10 @@ if (!empty($team_series)) {
     $tvt[$tid][$s['opponent']]['series']++;
 
     $scores = [];
-    $matches_count = count($s['matches']);
-    foreach ($s['matches'] as $match) {
-      if (!isset($report['match_participants_teams'][$match])) continue;
-      if (!isset($scores[$report['match_participants_teams'][$match]['radiant'] ?? 0]))  {
-        $scores[$report['match_participants_teams'][$match]['radiant'] ?? 0] = 0;
-      }
-      $scores[$report['match_participants_teams'][$match]['radiant'] ?? 0] += $report['matches_additional'][$match]['radiant_win'] ? 1 : 0;
-      if (!isset($scores[$report['match_participants_teams'][$match]['dire'] ?? 0]))  {
-        $scores[$report['match_participants_teams'][$match]['dire'] ?? 0] = 0;
-      }
-      $scores[$report['match_participants_teams'][$match]['dire'] ?? 0] += $report['matches_additional'][$match]['radiant_win'] ? 0 : 1;
+    if (!empty($report)) {
+      $scores = series_match_scores($report, $s['matches']);
     }
+    $matches_count = count($s['matches']);
 
     $non_tie_factor = ($matches_count > 1 && ((array_sum($scores)/2) != max($scores))) || $matches_count == 1;
 

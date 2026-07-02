@@ -1,5 +1,169 @@
 <?php
 
+function tb_roster_sig(array $m, string $side): string {
+  $tid = (int)($m['teams'][$side]['team_id'] ?? 0);
+  $pids = [];
+  foreach (($m['players'][$side] ?? []) as $p) {
+    $pid = (int)($p['player_id'] ?? 0);
+    if ($pid) {
+      $pids[] = $pid;
+    }
+  }
+  sort($pids);
+  if (count($pids) >= 4) {
+    return 'r:' . implode(',', $pids);
+  }
+  if ($tid) {
+    return 't:' . $tid;
+  }
+  $nm = mb_strtolower((string)($m['teams'][$side]['team_name'] ?? ''));
+  return $nm !== '' ? 'n:' . $nm : 'u:0';
+}
+
+function tb_match_pair_key(array $m): string {
+  $a = tb_roster_sig($m, 'radiant');
+  $b = tb_roster_sig($m, 'dire');
+  return $a < $b ? "$a~$b" : "$b~$a";
+}
+
+function tb_meeting_team_sigs(array $m): array {
+  return [tb_roster_sig($m, 'radiant'), tb_roster_sig($m, 'dire')];
+}
+
+function tb_team_played_other_between(string $sig, int $after, int $before, array $matches): bool {
+  foreach ($matches as $om) {
+    $d = (int)($om['date'] ?? 0);
+    if ($d <= $after || $d >= $before) {
+      continue;
+    }
+    [$ra, $da] = tb_meeting_team_sigs($om);
+    if ($ra === $sig || $da === $sig) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function tb_meeting_cluster_complete(array $ms): bool {
+  if (count($ms) < 2) {
+    return false;
+  }
+  $teams = array_values(tb_match_teams($ms[0]));
+  if (count($teams) < 2) {
+    return false;
+  }
+  [$ta, $tb] = $teams;
+  $score = [$ta => 0, $tb => 0];
+  foreach ($ms as $m) {
+    $w = tb_match_winner($m);
+    if ($w !== null && isset($score[$w])) {
+      $score[$w]++;
+    }
+  }
+  if ($score[$ta] === $score[$tb]) {
+    return false;
+  }
+  $winner = $score[$ta] > $score[$tb] ? $ta : $tb;
+  $bo = tb_infer_bo($score, count($ms), true);
+  return $score[$winner] >= intdiv($bo, 2) + 1;
+}
+
+function tb_canonicalize_cluster_team_ids(array &$ms): void {
+  $sig_to_tids = [];
+  foreach ($ms as $m) {
+    foreach (['radiant', 'dire'] as $side) {
+      $sig = tb_roster_sig($m, $side);
+      $tid = (int)($m['teams'][$side]['team_id'] ?? 0);
+      if ($tid) {
+        $sig_to_tids[$sig][$tid] = ($sig_to_tids[$sig][$tid] ?? 0) + 1;
+      }
+    }
+  }
+  $canon = [];
+  foreach ($sig_to_tids as $sig => $cnts) {
+    arsort($cnts);
+    $canon[$sig] = (int)array_key_first($cnts);
+  }
+  foreach ($ms as &$m) {
+    foreach (['radiant', 'dire'] as $side) {
+      $sig = tb_roster_sig($m, $side);
+      if (isset($canon[$sig])) {
+        $m['teams'][$side]['team_id'] = $canon[$sig];
+      }
+    }
+  }
+  unset($m);
+}
+
+function tb_cluster_matches_by_meeting(array $matches): array {
+  if (!$matches) {
+    return [];
+  }
+
+  $by_pair = [];
+  foreach ($matches as $m) {
+    $by_pair[tb_match_pair_key($m)][] = $m;
+  }
+
+  $clusters = [];
+  foreach ($by_pair as $pair_matches) {
+    usort($pair_matches, fn($a, $b) => (int)($a['date'] ?? 0) <=> (int)($b['date'] ?? 0));
+
+    $cur = [];
+    $prev_date = null;
+    $max_gap = 0;
+    $game_cnt = 0;
+
+    foreach ($pair_matches as $m) {
+      $date = (int)($m['date'] ?? 0);
+      $split = false;
+
+      if ($prev_date !== null) {
+        $gap = $date - $prev_date;
+        $time_split = ($game_cnt < 2 && $gap > 14400)
+          || ($game_cnt >= 2 && $gap > max($max_gap * 3, 14400));
+
+        if ($time_split) {
+          $split = true;
+        }
+
+        if (!$split) {
+          [$sa, $sb] = tb_meeting_team_sigs($m);
+          if (tb_team_played_other_between($sa, $prev_date, $date, $matches)
+            || tb_team_played_other_between($sb, $prev_date, $date, $matches)) {
+            $split = true;
+          }
+        }
+
+        if (!$split && $cur && tb_meeting_cluster_complete($cur) && tb_match_winner($m) !== null) {
+          $split = true;
+        }
+      }
+
+      if ($split && $cur) {
+        $clusters[] = $cur;
+        $cur = [];
+        $game_cnt = 0;
+        $max_gap = 0;
+      }
+
+      $cur[] = $m;
+      if ($prev_date !== null) {
+        $max_gap = max($max_gap, $date - $prev_date);
+      }
+      $game_cnt++;
+      $prev_date = $date;
+    }
+
+    if ($cur) {
+      $clusters[] = $cur;
+    }
+  }
+
+  usort($clusters, fn($a, $b) => (int)($a[0]['date'] ?? 0) <=> (int)($b[0]['date'] ?? 0));
+  return $clusters;
+}
+
 function tb_build_series(array $matches, array $api_series, array $teams): array {
   usort(
     $matches,
@@ -14,20 +178,10 @@ function tb_build_series(array $matches, array $api_series, array $teams): array
     }
   }
 
-  $groups = [];
-  $group_tags = [];
-
-  foreach ($matches as $m) {
-    $key = tb_series_key($m);
-    $groups[$key][] = $m;
-    $tag = (string)($m['series_tag'] ?? '');
-    if ($tag !== '') {
-      $group_tags[$key][$tag] = true;
-    }
-  }
-
   $out = [];
-  foreach ($groups as $key => $ms) {
+  foreach (tb_cluster_matches_by_meeting($matches) as $ms) {
+    tb_canonicalize_cluster_team_ids($ms);
+
     $tids = array_values(tb_match_teams($ms[0]));
     if (count($tids) < 2) {
       continue;
@@ -50,7 +204,7 @@ function tb_build_series(array $matches, array $api_series, array $teams): array
 
     [$ta, $tb] = $tids;
     $score = [$ta => 0, $tb => 0];
-    
+
     $name_of = fn($id) => mb_strtolower((string)($teams[$id]['name'] ?? $id));
     $canon  = [$name_of($ta) => $ta, $name_of($tb) => $tb];
 
@@ -64,8 +218,16 @@ function tb_build_series(array $matches, array $api_series, array $teams): array
       }
     }
 
+    $group_tags = [];
+    foreach ($ms as $m) {
+      $tag = (string)($m['series_tag'] ?? '');
+      if ($tag !== '') {
+        $group_tags[$tag] = true;
+      }
+    }
+
     $api_entries = [];
-    foreach (array_keys($group_tags[$key] ?? []) as $tg) {
+    foreach (array_keys($group_tags) as $tg) {
       if (isset($by_tag[$tg])) {
         $api_entries[] = $by_tag[$tg];
       }
@@ -103,15 +265,22 @@ function tb_build_series(array $matches, array $api_series, array $teams): array
     $lmap   = array_count_values(array_map(fn($m) => (int)($m['lid'] ?? 0), $ms));
     arsort($lmap);
 
-    // 'incomplete' = a winner with fewer map wins than the best-of needs (a missing
-    // decider). A 'tech-loss' / 'overridden' flag is set elsewhere when a structured
-    // signal exists; LRG2 has no per-match description text to scan here.
     $flags = [];
     $wins_needed = intdiv($bo, 2) + 1;
     if ($winner !== null && $score[$winner] < $wins_needed) $flags[] = 'incomplete';
 
+    $key = tb_series_key($ms[0]);
+    foreach ($ms as $m) {
+      $k = tb_series_key($m);
+      if ($k !== $key) {
+        $key = 'meet:' . tb_match_pair_key($ms[0]) . ':' . $start;
+        break;
+      }
+    }
+
     $out[] = [
       'key'    => $key,
+      'pair_key' => tb_match_pair_key($ms[0]),
       'teams'  => $tids,
       'score'  => $score,
       'winner' => $winner,
@@ -124,7 +293,7 @@ function tb_build_series(array $matches, array $api_series, array $teams): array
       'games'  => count($ms),
       'mids'   => array_values(array_filter(array_column($ms, 'match_id'))),
       'id_anomaly' => $id_anomaly,
-      'tags'   => array_keys($group_tags[$key] ?? []),
+      'tags'   => array_keys($group_tags),
     ];
   }
 
@@ -135,7 +304,7 @@ function tb_build_series(array $matches, array $api_series, array $teams): array
   $last_by_team = [];
   foreach ($out as $s) {
     $p = $s['teams']; sort($p);
-    $pk = implode('-', $p);
+    $pk = $s['pair_key'] ?? implode('-', $p);
     $pi = $last_by_pair[$pk] ?? null;
     if ($pi !== null) {
       $prev        = $merged[$pi];
@@ -147,10 +316,6 @@ function tb_build_series(array $matches, array $api_series, array $teams): array
       $prev_tie = tb_is_tie($prev);
       if ($gap < 86400 && $no_intervene && ($prev['winner'] !== null || $prev_tie)
         && !($full($prev) && $full($s))) {
-        // One series split across two groups (e.g. a bo3+ straddling a 6h series
-        // bucket). Combine the games and SUM the fragment scores, so the merged
-        // series' score/winner/bo always reflect all of its games — never just the
-        // last fragment (which left a 3-game series showing 1-0 bo1).
         $merged[$pi]['end']   = max($prev['end'], $s['end']);
         $merged[$pi]['games'] += $s['games'];
         $merged[$pi]['mids']   = array_merge($prev['mids'], $s['mids']);
@@ -272,9 +437,9 @@ function tb_elim_count(array $series): int {
   $e = 0;
   foreach ($series as $s) {
     if (empty($s['winner'])) continue;
-    
+
     $loser = $s['teams'][0] === $s['winner'] ? ($s['teams'][1] ?? 0) : $s['teams'][0];
-    
+
     if (!$loser) continue;
 
     if (($last_app[$s['winner']] > $s['start']) && ($last_app[$loser] <= $s['start'])) {

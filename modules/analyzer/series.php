@@ -36,20 +36,11 @@ if ((!empty($result['teams'])) && !empty($result['matches']) && !empty($result['
 
     $playtime = 0;
 
-    $scores = [];
+    $scores = series_match_scores($result, $series_data['matches']);
     $winner = null;
 
     foreach ($series_data['matches'] as $match) {
       if (!isset($result['match_participants_teams'][$match])) continue;
-      if (!isset($scores[$result['match_participants_teams'][$match]['radiant'] ?? 0]))  {
-        $scores[$result['match_participants_teams'][$match]['radiant'] ?? 0] = 0;
-      }
-      $scores[$result['match_participants_teams'][$match]['radiant'] ?? 0] += $result['matches_additional'][$match]['radiant_win'] ? 1 : 0;
-      if (!isset($scores[$result['match_participants_teams'][$match]['dire'] ?? 0]))  {
-        $scores[$result['match_participants_teams'][$match]['dire'] ?? 0] = 0;
-      }
-      $scores[$result['match_participants_teams'][$match]['dire'] ?? 0] += $result['matches_additional'][$match]['radiant_win'] ? 0 : 1;
-
 
       $playtime += $result['matches_additional'][$match]['duration'];
     }

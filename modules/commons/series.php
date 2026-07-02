@@ -1,5 +1,7 @@
 <?php 
 
+require_once __DIR__ . '/roster_pair.php';
+
 function generate_series_data(&$report) {
   $partCnts = [];
   $meetCnts = [];
@@ -35,7 +37,7 @@ function generate_series_data(&$report) {
     }
 
     sort($teams);
-    $teamstag = implode('.', $teams);
+    $teamstag = series_report_pair_key($report, $mid);
 
     if (!empty($seriesid)) {
       if (isset($seriesTt[$seriesid])) {
@@ -65,6 +67,10 @@ function generate_series_data(&$report) {
       
       if ($seriesid && $pairSeriesId && $seriesid == $pairSeriesId) {
         $condition = false;
+      } elseif ($seriesid && $pairSeriesId && $seriesid != $pairSeriesId) {
+        // Nested / wrong series ids for the same meeting (e.g. games 1+3 share one id,
+        // game 2 carries another). Trust inter-game timing, not the id mismatch alone.
+        $condition = $timeCondition;
       } else {
         $condition = ($sip && $seriesid) ? $seriesCondition : $timeCondition;
       }
