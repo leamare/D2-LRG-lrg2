@@ -23,6 +23,8 @@ function generate_series_data(&$report) {
   $mids = array_keys($report['matches']);
   sort($mids);
 
+  $pairCanon = ['aliases' => [], 'refs' => []];
+
   foreach ($mids as $i => $mid) {
     $teams = [ $report['match_participants_teams'][$mid]['radiant'] ?? 0, $report['match_participants_teams'][$mid]['dire'] ?? 0 ];
     $time = $report['matches_additional'][$mid]['date'];
@@ -37,7 +39,7 @@ function generate_series_data(&$report) {
     }
 
     sort($teams);
-    $teamstag = series_report_pair_key($report, $mid);
+    $teamstag = series_resolve_meeting_key($report, $mid, series_report_team_pair_key($report, $mid), $pairCanon);
 
     if (!empty($seriesid)) {
       if (isset($seriesTt[$seriesid])) {
