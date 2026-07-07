@@ -1506,6 +1506,7 @@ function fetch($match) {
     $draft_source = empty($matchdata['draft_timings']) ? ($matchdata['picks_bans'] ?? []) : ($matchdata['draft_timings'] ?? []);
 
     if (($game_mode == 2 || $game_mode == 8) && !empty($draft_source)) {
+        $drafts = $draft_source;
         $stage = 0;
         $last_stage_pick = null;
         uasort($draft_source, function($a, $b) {
@@ -1556,7 +1557,7 @@ function fetch($match) {
           $t_match['radiant_opener'] = $t_draft[0]['is_radiant'];
         }
     } else if ($game_mode == 16) {
-        $drafts = $matchdata['picks_bans'] ?? $matchdata['draft_timings'] ?? [];
+        $drafts = $draft_source;
         foreach ($drafts as $draft_instance) {
             if (!isset($draft_instance['hero_id']) || !$draft_instance['hero_id'])
               continue;
