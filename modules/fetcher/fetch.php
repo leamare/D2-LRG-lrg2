@@ -1503,12 +1503,12 @@ function fetch($match) {
     }
     $game_mode = (int)$matchdata['game_mode'];
 
-    if (($game_mode == 2 || $game_mode == 8) && !empty($matchdata['draft_timings'] ?? $matchdata['picks_bans'])) {
-        $drafts = !empty($matchdata['draft_timings']) ? $matchdata['draft_timings'] : $matchdata['picks_bans'];
+    $draft_source = empty($matchdata['draft_timings']) ? ($matchdata['picks_bans'] ?? []) : ($matchdata['draft_timings'] ?? []);
+
+    if (($game_mode == 2 || $game_mode == 8) && !empty($draft_source)) {
         $stage = 0;
         $last_stage_pick = null;
-
-        uasort($drafts, function($a, $b) {
+        uasort($draft_source, function($a, $b) {
           if ($a == $b) {
             $pick_a = $a['is_pick'] ?? $a['pick'];
             $pick_b = $b['is_pick'] ?? $b['pick'];
