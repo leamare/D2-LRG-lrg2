@@ -4,10 +4,12 @@
  * Find Captains Mode matches in the live league DB with broken draft data,
  * remove them (DB + cache), and re-fetch.
  *
- * Broken CM (matches.modeID = 2) means any of:
- *   - no ban rows in draft
- *   - only one distinct draft stage
- *   - all draft rows share the same `order` value
+ * Targets the fetcher fallback fingerprint (no picks_bans / draft_timings):
+ *   every row is a pick, stage=1, order=0 — i.e. no bans AND a single stage
+ *   AND identical order. Also matches CM with zero draft rows.
+ *
+ * Do NOT OR those signals independently: real CM often stores bans with
+ * order=0 / stage=1, which would wipe almost every match.
  *
  * Usage (from repo root):
  *   php tools/refresh_broken_drafts.php -lLEAGUE_TAG [-c cache] [-n] [-S]
@@ -37,8 +39,7 @@ $useStratz = isset($tool_opts['S']);
 
 $conn = lrg_mysqli_connect($lrg_sql_db);
 
-// CM matches whose draft is missing bans, collapsed to one stage, or has a
-// single shared order (fetcher fallback writes order=0 on every pick).
+// Fallback draft = picks only, one stage, one shared order (usually all 0).
 $sql = "
   SELECT m.matchid
   FROM matches m
@@ -46,10 +47,10 @@ $sql = "
   WHERE m.modeID = 2
   GROUP BY m.matchid
   HAVING
-    COALESCE(SUM(CASE WHEN d.is_pick = 0 THEN 1 ELSE 0 END), 0) = 0
-    OR COUNT(DISTINCT d.stage) <= 1
+    COUNT(d.matchid) = 0
     OR (
-      COUNT(d.matchid) > 0
+      COALESCE(SUM(CASE WHEN d.is_pick = 0 THEN 1 ELSE 0 END), 0) = 0
+      AND COUNT(DISTINCT d.stage) <= 1
       AND MIN(d.`order`) = MAX(d.`order`)
     )
   ORDER BY m.matchid ASC
