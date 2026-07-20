@@ -923,6 +923,7 @@ function fetch($match) {
     if (!empty($t_team_matches))
       foreach ($t_team_matches as $i => $tm) {
         $tag = $tm['is_radiant'] ? 'radiant_team' : 'dire_team';
+        $short_tag = $tm['is_radiant'] ? 'radiant' : 'dire';
         
         if (!empty($match_rules['team']) && isset($match_rules['team'][ $tm['teamid'] ])) {
           $t_team_matches[$i]['teamid'] = (int)$match_rules['team'][ $tm['teamid'] ];
@@ -932,12 +933,25 @@ function fetch($match) {
           $t_team_matches[$i]['teamid'] = (int) ($match_rules['side'][ $tag ] ?? $match_rules['side'][ $tm['is_radiant'] ? 'radiant' : 'dire' ] ?? $match_rules['side'][ $tm['is_radiant'] ] ?? $tm['teamid']);
 
         if (!isset($t_teams[ $tm['teamid'] ])) {
-          $json = @file_get_contents('https://api.steampowered.com/IDOTA2Match_570/GetTeamInfoByTeamID/v001/?key='.$steamapikey.'&teams_requested=1&start_at_team_id='.$tm['teamid']);
-          $team = json_decode($json, true);
+          $team_name = isset($matchdata[$tag]) ? $matchdata[$tag]['name'] : $matchdata[$short_tag.'_name'];
+
+          if (empty($team_name)) {
+            $json = @file_get_contents('https://api.steampowered.com/IDOTA2Match_570/GetTeamInfoByTeamID/v001/?key='.$steamapikey.'&teams_requested=1&start_at_team_id='.$tm['teamid']);
+            $team = json_decode($json, true);
+
+            $team_name = $team['result']['teams'][0]['name'] ?? "Team {$tm['teamid']}";
+            $team_tag = $team['result']['teams'][0]['tag'] ?? "";
+          } else {
+            $team_tag = isset($matchdata[$tag]) ? $matchdata[$tag]['tag'] : $matchdata[$short_tag.'_tag'];
+          }
+
+          if (empty($team_tag) || strlen($team_tag) > 8 || strlen($team_tag) < 3) {
+            $team_tag = generate_tag($team_name);
+          }
 
           $t_teams[ $tm['teamid'] ] = [
-            'name' => $team['result']['teams'][0]['name'] ?? "Team {$tm['teamid']}",
-            'tag' => $team['result']['teams'][0]['tag'] ?? generate_tag($team['result']['teams'][0]['name'] ?? "Team {$tm['teamid']}"),
+            'name' => $team_name,
+            'tag' => $team_tag,
             'added' => false
           ];
         }
