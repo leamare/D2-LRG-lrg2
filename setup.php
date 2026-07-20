@@ -180,6 +180,10 @@ if ( $update_settings ) {
         echo("[I] MySQL database name prefix: ");
         $line = readline_rg();
         if ( !empty($line) )  $settings['mysql_prefix'] = $line;
+
+        echo("[I] Web reports location (LRG2 web folder path, empty to keep/skip): ");
+        $line = readline_rg();
+        if ( !empty($line) )  $settings['web_reports_dir'] = $line;
     } else {
         echo("[ ] Enter your settings\n");
 
@@ -216,6 +220,10 @@ if ( $update_settings ) {
             $settings['mysql_prefix'] = "d2_report";
             echo "    Using default prefix (`d2_report`)\n";
         }
+
+        echo("[I] Web reports location (LRG2 web folder path, empty for none): ");
+        $line = readline_rg();
+        $settings['web_reports_dir'] = !empty($line) ? $line : "";
     }
 
     echo("[ ] Saving settings to `rg_settings.json`...");
