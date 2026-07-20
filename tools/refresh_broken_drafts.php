@@ -44,7 +44,7 @@ $sql = "
   SELECT m.matchid
   FROM matches m
   LEFT JOIN draft d ON d.matchid = m.matchid
-  WHERE m.modeID = 2
+  WHERE m.modeID IN (2, 16)
   GROUP BY m.matchid
   HAVING
     COUNT(d.matchid) = 0
