@@ -237,7 +237,8 @@ function bracket_generate() {
   ];
 
   foreach ($events as $ev) {
-    $analyzed = tb_analyze_event($ev, $teams, $config);
+    $ev_config = tb_config_for_event($config, $ev);
+    $analyzed = tb_analyze_event($ev, $teams, $ev_config);
     // Season-aggregate sub-events are only kept when they reconstruct into a
     // coherent bracket; the rest stay covered by the performance grid.
     if (($ev['mode'] ?? '') === 'aggregate_sub' && !tb_event_is_coherent($ev, $analyzed)) {
@@ -259,16 +260,54 @@ function bracket_config() {
     return [];
   }
 
+  $config = tb_parse_bracket_config($c);
+
+  // Per-event overrides
+  if (!empty($c['events']) && is_array($c['events'])) {
+    $per_event = [];
+    foreach ($c['events'] as $key => $spec) {
+      if (!is_array($spec)) continue;
+      $sub = tb_parse_bracket_config($spec);
+      if (!empty($sub['overrides'])) {
+        $config['overrides'] = array_merge($config['overrides'] ?? [], $sub['overrides']);
+      }
+      unset($sub['overrides'], $sub['divisions']);
+      $per_event[] = ['match' => tb_normalize_event_match($spec['match'] ?? null, (string)$key)] + $sub;
+    }
+    if ($per_event) $config['events'] = $per_event;
+  }
+
+  return $config;
+}
+
+// Normalizes one events{} entry's match criteria
+function tb_normalize_event_match($match, string $key): array {
+  if (!is_array($match)) {
+    return ['name' => $key, 'teams' => [], 'lid' => []];
+  }
+  $teams = $match['teams'] ?? [];
+  if (is_string($teams)) $teams = explode(',', $teams);
+  $lid = $match['lid'] ?? [];
+  if (is_string($lid) || is_int($lid)) $lid = [$lid];
+
+  return [
+    'name'  => (string)($match['name'] ?? ''),
+    'teams' => array_values(array_filter(array_map('intval', (array)$teams))),
+    'lid'   => array_values(array_filter(array_map('intval', (array)$lid))),
+  ];
+}
+
+// Parses the {overrides, stages, divisions, months} shape
+function tb_parse_bracket_config(array $c): array {
   $config = [];
   if (!empty($c['overrides']) && is_array($c['overrides'])) {
     foreach ($c['overrides'] as $k => $v) {
       $config['overrides'][(string)$k] = (int)$v;
     }
   }
-  if (!empty($c['stages']) && is_array($c['stages'])) {
+  if (array_key_exists('stages', $c) && is_array($c['stages'])) {
     $config['stages'] = tb_normalize_stages($c['stages']);
   }
-
   if (!empty($c['divisions']) && is_array($c['divisions'])) {
     foreach ($c['divisions'] as $name => $spec) {
       $config['divisions'][(string)$name] = tb_normalize_division((array)$spec);
@@ -277,8 +316,50 @@ function bracket_config() {
   if (array_key_exists('months', $c)) {
     $config['months'] = !in_array(strtolower((string)$c['months']), ['0', 'false', 'no', 'off', ''], true);
   }
-  
+
   return $config;
+}
+
+function tb_config_for_event(array $config, array $event): array {
+  $per_event = $config['events'] ?? [];
+  unset($config['events']);
+
+  $name   = $event['name'] ?? '';
+  $series = $event['series'] ?? [];
+
+  foreach ($per_event as $entry) {
+    if (!tb_event_matches($entry['match'] ?? [], $name, $series)) {
+      continue;
+    }
+
+    if (array_key_exists('stages', $entry)) $config['stages'] = $entry['stages'];
+    if (array_key_exists('months', $entry)) $config['months'] = $entry['months'];
+    return $config;
+  }
+
+  return $config;
+}
+
+function tb_event_matches(array $match, string $name, array $series): bool {
+  $has_criteria = false;
+
+  if (($match['name'] ?? '') !== '') {
+    $has_criteria = true;
+    if (stripos($name, $match['name']) === false) return false;
+  }
+
+  if (!empty($match['teams'])) {
+    $has_criteria = true;
+    if (array_diff($match['teams'], tb_unique_teams($series))) return false;
+  }
+
+  if (!empty($match['lid'])) {
+    $has_criteria = true;
+    $lids = array_unique(array_map(fn($s) => (int)($s['lid'] ?? 0), $series));
+    if (!array_intersect($match['lid'], $lids)) return false;
+  }
+
+  return $has_criteria;
 }
 
 function bracket_team_obj($id, $cards) {
@@ -347,6 +428,8 @@ function bracket_json($result) {
         $stage['lower']      = bracket_rounds_obj($b['lb_rounds'] ?? [], $cards);
         $stage['grand_final'] = !empty($b['grand_final'])
           ? bracket_rounds_obj([$b['grand_final']], $cards)[0] : null;
+        $stage['third_place'] = !empty($b['third_place'])
+          ? bracket_rounds_obj([$b['third_place']], $cards)[0] : null;
         if (!empty($b['unplaced']))
           $stage['unplaced'] = array_map(fn($s) => bracket_series_obj($s, $cards), $b['unplaced']);
 
@@ -721,7 +804,7 @@ function bracket_render_playoff($st, $event = '') {
   } elseif ($b['type'] === 'double_elimination') {
     $out .= bracket_render_de($b['ub_rounds'] ?? [], $b['lb_rounds'] ?? [], $b['ub_to_lb'] ?? [], $b['grand_final']['series'] ?? [], $base);
   } else {
-    $out .= bracket_render_section($b['ub_rounds'] ?? [], $base);
+    $out .= bracket_render_section($b['ub_rounds'] ?? [], $base, $b['third_place']['series'] ?? []);
   }
 
   if (!empty($b['unplaced'])) {
@@ -790,7 +873,40 @@ function bracket_edge_svg($card_pos, $row_h, $drop_entry = []) {
   return "<svg class='bracket-conn' width='$max_x' height='$row_h'>$lines</svg>";
 }
 
-function bracket_render_section($rounds, $ctx = '') {
+// Vertical slot centre (px) for series #$si in a column with $n series spread over $slots power-of-two slots
+function bracket_slot_y($si, $n, $slots) {
+  $slot_size = $n > 0 ? $slots / $n : $slots;
+  return (int)round(($si + 0.5) * $slot_size * BRACKET_SLOT_H);
+}
+
+// One column of positioned match cards. $extra (if given) is a standalone decider
+function bracket_col_html($round, $slots, $total_h, $ctx, array $extra = []) {
+  $half = intdiv(BRACKET_CARD_H, 2);
+  $n = count($round['series']);
+  $rname = bracket_name($round['name'] ?? '');
+
+  $out = "<div class=\"bracket-col\" style=\"height:".$total_h."px\">";
+  $bottom = 0;
+  foreach ($round['series'] as $si => $s) {
+    $top = bracket_slot_y($si, $n, $slots) - $half;
+    $out .= "<div class=\"bracket-cwrap\" style=\"top:".$top."px\">".bracket_match_card($s, trim("$ctx, $rname", " ,"))."</div>";
+    $bottom = max($bottom, $top + BRACKET_CARD_H);
+  }
+
+  if ($extra) {
+    $label = locale_string("bracket_3rd_place");
+    $out .= "<div class=\"bracket-cwrap bracket-3rd\" style=\"top:".($bottom + 24)."px\">".
+      "<div class=\"bracket-colname bracket-gf-label\">".bracket_esc($label)."</div>";
+    foreach ($extra as $s) {
+      $out .= bracket_match_card($s, trim("$ctx, $label", " ,"));
+    }
+    $out .= "</div>";
+  }
+
+  return $out."</div>";
+}
+
+function bracket_render_section($rounds, $ctx = '', $extra_last = []) {
   if (!$rounds) {
     return '';
   }
@@ -798,7 +914,13 @@ function bracket_render_section($rounds, $ctx = '') {
   $max_n = max(array_map(fn($r) => count($r['series']), $rounds));
   $slots = tb_next_pow2($max_n);
   $total_h = $slots * BRACKET_SLOT_H;
-  $half = intdiv(BRACKET_CARD_H, 2);
+
+  if ($extra_last) {
+    $last_n = count(end($rounds)['series']);
+    $last_bottom = bracket_slot_y($last_n - 1, $last_n, $slots) + intdiv(BRACKET_CARD_H, 2);
+    $tp_h = 24 + count($extra_last) * (BRACKET_CARD_H + 10);
+    $total_h = max($total_h, $last_bottom + $tp_h);
+  }
 
   $hdr = "<div class=\"bracket-hdr\">";
   foreach ($rounds as $ri => $round) {
@@ -812,28 +934,21 @@ function bracket_render_section($rounds, $ctx = '') {
   $card_pos = [];
   foreach ($rounds as $ri => $round) {
     $n = count($round['series']);
-    $slot_size = $n > 0 ? $slots / $n : $slots;
     foreach ($round['series'] as $si => $s) {
       $card_pos[$s['key']] = [
         'x' => $ri * (BRACKET_COL_W + BRACKET_CONN_W),
-        'y' => (int)round(($si + 0.5) * $slot_size * BRACKET_SLOT_H),
+        'y' => bracket_slot_y($si, $n, $slots),
         's' => $s,
       ];
     }
   }
 
+  $n_rounds = count($rounds);
   $body = "<div class=\"bracket-outer\">".bracket_edge_svg($card_pos, $total_h);
   foreach ($rounds as $ri => $round) {
-    $n = count($round['series']);
-    $slot_size = $n > 0 ? $slots / $n : $slots;
-    $body .= "<div class=\"bracket-col\" style=\"height:".$total_h."px\">";
-    $rname = bracket_name($round['name'] ?? '');
-    foreach ($round['series'] as $si => $s) {
-      $top = (int)round(($si + 0.5) * $slot_size * BRACKET_SLOT_H) - $half;
-      $body .= "<div class=\"bracket-cwrap\" style=\"top:".$top."px\">".bracket_match_card($s, trim("$ctx, $rname", " ,"))."</div>";
-    }
-    $body .= "</div>";
-    if ($ri + 1 < count($rounds)) $body .= "<div class=\"bracket-conn-sp\" style=\"width:".BRACKET_CONN_W."px;height:".$total_h."px\"></div>";
+    $extra = ($ri === $n_rounds - 1) ? $extra_last : [];
+    $body .= bracket_col_html($round, $slots, $total_h, $ctx, $extra);
+    if ($ri + 1 < $n_rounds) $body .= "<div class=\"bracket-conn-sp\" style=\"width:".BRACKET_CONN_W."px;height:".$total_h."px\"></div>";
   }
   $body .= "</div>";
 
@@ -931,6 +1046,11 @@ function bracket_render_de($ub_rounds, $lb_rounds, $ub_to_lb, $gf_series, $ctx =
       $out .= "<div class=\"bracket-label bracket-lb-label\">".locale_string("bracket_lb")."</div>".
         bracket_render_section($lb_rounds, trim("$ctx, ".locale_string("bracket_lb"), " ,"));
     }
+    // Keep the grand final clear of the last column: cards overflow their
+    // 200px columns slightly, so without a spacer the blocks overlap.
+    if ($gf_html) {
+      $gf_html = "<div class=\"bracket-conn-sp\" style=\"width:".BRACKET_CONN_W."px\"></div>".$gf_html;
+    }
     return $out."</div>$gf_html</div>";
   }
 
@@ -942,7 +1062,6 @@ function bracket_render_de($ub_rounds, $lb_rounds, $ub_to_lb, $gf_series, $ctx =
   $lb_slots = tb_next_pow2($max_l_bn);
   $ub_total_h = $ub_slots * BRACKET_SLOT_H;
   $lb_total_h = $lb_slots * BRACKET_SLOT_H;
-  $half = intdiv(BRACKET_CARD_H, 2);
 
   $ub_positions = [];
   foreach ($columns as $ci => $col) if ($col['ub'] !== null) $ub_positions[] = $ci;
@@ -953,9 +1072,8 @@ function bracket_render_de($ub_rounds, $lb_rounds, $ub_to_lb, $gf_series, $ctx =
     foreach (['ub' => $ub_slots, 'lb' => $lb_slots] as $side => $slots) {
       if (!$col[$side]) continue;
       $n = count($col[$side]['series']);
-      $slot_size = $n > 0 ? $slots / $n : $slots;
       foreach ($col[$side]['series'] as $si => $s) {
-        $card_pos[$side][$s['key']] = ['x' => $col_x, 'y' => (int)round(($si + 0.5) * $slot_size * BRACKET_SLOT_H), 's' => $s];
+        $card_pos[$side][$s['key']] = ['x' => $col_x, 'y' => bracket_slot_y($si, $n, $slots), 's' => $s];
       }
     }
   }
@@ -993,15 +1111,7 @@ function bracket_render_de($ub_rounds, $lb_rounds, $ub_to_lb, $gf_series, $ctx =
         "<div class=\"bracket-conn-sp\" style=\"width:".BRACKET_CONN_W."px;height:".$ub_total_h."px\"></div>";
     }
     foreach ($ub_positions as $k => $pos) {
-      $col = $columns[$pos]; $n = count($col['ub']['series']);
-      $slot_size = $n > 0 ? $ub_slots / $n : $ub_slots;
-      $rname = bracket_name($col['ub']['name'] ?? '');
-      $out .= "<div class=\"bracket-col\" style=\"height:".$ub_total_h."px\">";
-      foreach ($col['ub']['series'] as $si => $s) {
-        $top = (int)round(($si + 0.5) * $slot_size * BRACKET_SLOT_H) - $half;
-        $out .= "<div class=\"bracket-cwrap\" style=\"top:".$top."px\">".bracket_match_card($s, trim("$ctx, $rname", " ,"))."</div>";
-      }
-      $out .= "</div>";
+      $out .= bracket_col_html($columns[$pos]['ub'], $ub_slots, $ub_total_h, $ctx);
       if ($k + 1 < count($ub_positions)) {
         $next_pos = $ub_positions[$k + 1];
         $span_w = BRACKET_CONN_W + ($next_pos - $pos - 1) * (BRACKET_COL_W + BRACKET_CONN_W);
@@ -1025,15 +1135,7 @@ function bracket_render_de($ub_rounds, $lb_rounds, $ub_to_lb, $gf_series, $ctx =
     $out .= "<div class=\"bracket-body-row\">".bracket_edge_svg($card_pos['lb'], $lb_total_h, $drop_entry);
     foreach ($columns as $ci => $col) {
       if ($col['lb']) {
-        $n = count($col['lb']['series']);
-        $slot_size = $n > 0 ? $lb_slots / $n : $lb_slots;
-        $rname = bracket_name($col['lb']['name'] ?? '');
-        $out .= "<div class=\"bracket-col\" style=\"height:".$lb_total_h."px\">";
-        foreach ($col['lb']['series'] as $si => $s) {
-          $top = (int)round(($si + 0.5) * $slot_size * BRACKET_SLOT_H) - $half;
-          $out .= "<div class=\"bracket-cwrap\" style=\"top:".$top."px\">".bracket_match_card($s, trim("$ctx, $rname", " ,"))."</div>";
-        }
-        $out .= "</div>";
+        $out .= bracket_col_html($col['lb'], $lb_slots, $lb_total_h, $ctx);
       } else {
         $out .= "<div class=\"bracket-col bracket-spacer\" style=\"height:".$lb_total_h."px\"></div>";
       }

@@ -262,14 +262,13 @@ function tb_core_groups(array $series): array {
     $changed   = false;
     $pair_count = [];
     foreach ($work as $s) {
-      $p = $s['teams']; sort($p);
-      $pair_count[implode('-', $p)] = ($pair_count[implode('-', $p)] ?? 0) + 1;
+      $pk = tb_pair_key($s['teams']);
+      $pair_count[$pk] = ($pair_count[$pk] ?? 0) + 1;
     }
 
     $base = count(tb_find_groups($work));
     foreach ($work as $i => $s) {
-      $p = $s['teams']; sort($p);
-      if (($pair_count[implode('-', $p)] ?? 0) !== 1) {
+      if (($pair_count[tb_pair_key($s['teams'])] ?? 0) !== 1) {
         continue;
       }
 

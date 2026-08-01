@@ -1,21 +1,29 @@
 <?php
 
+// True when the last round of $group_rounds replays a pairing from an earlier round.
+function tb_last_round_is_rematch(array $group_rounds): bool {
+  $earlier_pairs = [];
+  foreach (array_slice($group_rounds, 0, count($group_rounds) - 1) as $gr) {
+    foreach ($gr['series'] as $gs) {
+      $earlier_pairs[tb_pair_key($gs['teams'])] = true;
+    }
+  }
+
+  foreach (end($group_rounds)['series'] as $s) {
+    if (isset($earlier_pairs[tb_pair_key($s['teams'])])) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 function tb_detect_phases(array $series): array {
   $rr_split = tb_rr_playoff_split($series);
   if ($rr_split) {
     return [
-      [
-        'rounds' => tb_temporal_rounds($rr_split['group']),
-        'series' => $rr_split['group'],
-        'is_elim' => false,
-        'phase_type' => 'group'
-      ],
-      [
-        'rounds' => tb_temporal_rounds($rr_split['playoff']),
-        'series' => $rr_split['playoff'],
-        'is_elim' => true,
-        'phase_type' => 'bracket'
-      ],
+      tb_phase(tb_temporal_rounds($rr_split['group']), 'group', $rr_split['group']),
+      tb_phase(tb_temporal_rounds($rr_split['playoff']), 'bracket', $rr_split['playoff']),
     ];
   }
 
@@ -31,14 +39,7 @@ function tb_detect_phases(array $series): array {
 
     $n_groups = count(tb_find_groups($all_series));
     $is_elim  = $n_groups <= 1 || tb_is_elim_phase($rounds);
-    return [
-      [
-        'rounds' => $rounds,
-        'series' => $all_series,
-        'is_elim' => $is_elim,
-        'phase_type' => $is_elim ? 'bracket' : 'group',
-      ],
-    ];
+    return [tb_phase($rounds, $is_elim ? 'bracket' : 'group', $all_series)];
   }
 
   $wc_front = tb_wildcard_front($rounds);
@@ -56,15 +57,7 @@ function tb_detect_phases(array $series): array {
     unset($rp);
 
     return array_merge(
-      [
-        [
-          'rounds' => $wc_rounds,
-          'series' => tb_rounds_series($wc_rounds),
-          'is_elim' => false,
-          'phase_type' => 'group',
-          'no_merge' => true
-        ],
-      ],
+      [tb_phase($wc_rounds, 'group') + ['no_merge' => true]],
       $rest_phases
     );
   }
@@ -73,27 +66,12 @@ function tb_detect_phases(array $series): array {
   if ($front_end === null && count(tb_find_groups($series)) <= 1 && tb_is_elim_phase($rounds)) {
     $tie_tail = tb_playoff_tail($rounds);
     if ($tie_tail === null) {
-      return [
-        [
-          'rounds' => $rounds,
-          'series' => $series,
-          'is_elim' => true,
-          'phase_type' => 'bracket',
-        ],
-      ];
+      return [tb_phase($rounds, 'bracket', $series)];
     }
 
-    $play_r = array_slice($rounds, $tie_tail);
     return array_merge(
       tb_split_group_rounds(array_slice($rounds, 0, $tie_tail)),
-      [
-        [
-          'rounds' => $play_r,
-          'series' => tb_rounds_series($play_r),
-          'is_elim' => true,
-          'phase_type' => 'bracket',
-        ],
-      ]
+      [tb_phase(array_slice($rounds, $tie_tail), 'bracket')]
     );
   }
 
@@ -111,7 +89,7 @@ function tb_detect_phases(array $series): array {
       $bracket = tb_is_elim_phase($rounds)
         || (!tb_is_group_stage($rounds) && $avg_app < 3.0);
       if ($bracket) {
-        return [['rounds' => $rounds, 'series' => $all_series, 'is_elim' => true, 'phase_type' => 'bracket']];
+        return [tb_phase($rounds, 'bracket', $all_series)];
       }
     }
   }
@@ -180,20 +158,7 @@ function tb_detect_phases(array $series): array {
 
       $round_teams = tb_unique_teams($last_series);
       if (array_intersect($round_teams, $er_team_seen)) break;
-
-      $earlier_pairs = [];
-      foreach (array_slice($group_rounds, 0, count($group_rounds) - 1) as $gr) {
-        foreach ($gr['series'] as $gs) {
-          $p = $gs['teams']; sort($p);
-          $earlier_pairs[implode('-', $p)] = true;
-        }
-      }
-      $is_rematch = false;
-      foreach ($last_series as $s) {
-        $p = $s['teams']; sort($p);
-        if (isset($earlier_pairs[implode('-', $p)])) { $is_rematch = true; break; }
-      }
-      if ($is_rematch) break;
+      if (tb_last_round_is_rematch($group_rounds)) break;
 
       $winners = []; $losers = [];
       foreach ($last_series as $s) {
@@ -227,20 +192,7 @@ function tb_detect_phases(array $series): array {
       $last_series = $last_round['series'];
       if (count($last_series) < 1) break;
       if (tb_round_stats($last_round)['maxapp'] > 1) break;
-
-      $earlier_pairs = [];
-      foreach (array_slice($group_rounds, 0, count($group_rounds) - 1) as $gr) {
-        foreach ($gr['series'] as $gs) {
-          $p = $gs['teams']; sort($p);
-          $earlier_pairs[implode('-', $p)] = true;
-        }
-      }
-      $is_rematch = false;
-      foreach ($last_series as $s) {
-        $p = $s['teams']; sort($p);
-        if (isset($earlier_pairs[implode('-', $p)])) { $is_rematch = true; break; }
-      }
-      if ($is_rematch) break;
+      if (tb_last_round_is_rematch($group_rounds)) break;
 
       $tent_teams = $tentative
         ? tb_unique_teams(tb_rounds_series($tentative))
@@ -248,8 +200,9 @@ function tb_detect_phases(array $series): array {
       $future  = array_merge($playoff_team_set_x, $tent_teams);
       $winners = array_filter(array_column($last_series, 'winner'));
       if (!$winners) break;
-      $w_in = count(array_intersect($winners, $future)) / count($winners);
-      if ($w_in < 0.8) break;
+      // Every winner of this round must already be a confirmed member of the
+      // playoff/decider field
+      if (array_diff($winners, $future)) break;
 
       array_unshift($tentative, array_pop($group_rounds));
     }
@@ -300,12 +253,7 @@ function tb_detect_phases(array $series): array {
     }
     if ($wc_ok) {
       $wc_round       = array_shift($group_rounds);
-      $wildcard_phase = [
-        'rounds'     => [$wc_round],
-        'series'     => $wc_round['series'],
-        'is_elim'    => false,
-        'phase_type' => 'wildcard',
-      ];
+      $wildcard_phase = tb_phase([$wc_round], 'wildcard', $wc_round['series']);
     }
   }
 
@@ -313,12 +261,7 @@ function tb_detect_phases(array $series): array {
   if ($wildcard_phase) array_unshift($phases, $wildcard_phase);
 
   if ($er_rounds) {
-    $phases[] = [
-      'rounds'     => $er_rounds,
-      'series'     => tb_rounds_series($er_rounds),
-      'is_elim'    => true,
-      'phase_type' => 'elimination_round',
-    ];
+    $phases[] = tb_phase($er_rounds, 'elimination_round');
   }
 
   if ($playoff_rounds) {
@@ -356,15 +299,14 @@ function tb_detect_phases(array $series): array {
         }
         $pair_count = [];
         foreach ($remain_series as $s) {
-          $p = $s['teams']; sort($p);
-          $pair_count[implode('-', $p)] = ($pair_count[implode('-', $p)] ?? 0) + 1;
+          $pk = tb_pair_key($s['teams']);
+          $pair_count[$pk] = ($pair_count[$pk] ?? 0) + 1;
         }
         $seed_start = min(array_column($seeding_prefix, 'start'));
         $seed_end   = max(array_column($seeding_prefix, 'end'));
         foreach ($group_rounds as $ri => $gr) {
           foreach ($gr['series'] as $si => $s) {
-            $p = $s['teams']; sort($p);
-            if (($pair_count[implode('-', $p)] ?? 0) !== 1) continue;
+            if (($pair_count[tb_pair_key($s['teams'])] ?? 0) !== 1) continue;
             $ca = $team_comp[$s['teams'][0]] ?? -1;
             $cb = $team_comp[$s['teams'][1] ?? 0] ?? -2;
             if ($ca >= 0 && $cb >= 0 && $ca === $cb) continue;
@@ -398,12 +340,7 @@ function tb_detect_phases(array $series): array {
         $phases = tb_split_group_rounds($group_rounds);
         if ($wildcard_phase) array_unshift($phases, $wildcard_phase);
         if ($er_rounds) {
-          $phases[] = [
-            'rounds'     => $er_rounds,
-            'series'     => tb_rounds_series($er_rounds),
-            'is_elim'    => true,
-            'phase_type' => 'elimination_round',
-          ];
+          $phases[] = tb_phase($er_rounds, 'elimination_round');
         }
       }
     }
@@ -421,12 +358,7 @@ function tb_detect_phases(array $series): array {
         $playoff_rounds = array_merge($seeding_all, $playoff_rounds);
         usort($playoff_rounds, fn($a, $b) => $a['start'] <=> $b['start']);
       } else {
-        $phases[] = [
-          'rounds'     => $seeding_all,
-          'series'     => $seed_series,
-          'is_elim'    => false,
-          'phase_type' => 'seeding',
-        ];
+        $phases[] = tb_phase($seeding_all, 'seeding', $seed_series);
       }
     }
   }
@@ -442,13 +374,11 @@ function tb_detect_phases(array $series): array {
       if (tb_round_stats($r)['maxapp'] > 1) break;
       $fresh = true;
       foreach ($r['series'] as $s) {
-        $p = $s['teams']; sort($p);
-        if (isset($seen_pairs[implode('-', $p)])) { $fresh = false; break; }
+        if (isset($seen_pairs[tb_pair_key($s['teams'])])) { $fresh = false; break; }
       }
       if (!$fresh) break;
       foreach ($r['series'] as $s) {
-        $p = $s['teams']; sort($p);
-        $seen_pairs[implode('-', $p)] = true;
+        $seen_pairs[tb_pair_key($s['teams'])] = true;
       }
       $rr_rounds[] = $r;
     }
@@ -466,66 +396,18 @@ function tb_detect_phases(array $series): array {
         if ($l !== null) $losses[$l] = ($losses[$l] ?? 0) + 1;
       }
       if ($no_elim) {
-        $second_group_phases[] = [
-          'rounds'     => $rr_rounds,
-          'series'     => $flat,
-          'is_elim'    => false,
-          'phase_type' => 'group',
-        ];
+        $second_group_phases[] = tb_phase($rr_rounds, 'group', $flat);
         $playoff_rounds = array_slice($playoff_rounds, count($rr_rounds));
       }
     }
   }
 
   if ($playoff_rounds) {
-    $phases[] = [
-      'rounds'     => $playoff_rounds,
-      'series'     => tb_rounds_series($playoff_rounds),
-      'is_elim'    => true,
-      'phase_type' => 'bracket',
-    ];
+    $phases[] = tb_phase($playoff_rounds, 'bracket');
   }
 
-  $premerge = [];
-  foreach ($phases as $ph) {
-    $prev_pt_ne = end($premerge)['phase_type'] ?? '';
-    $cur_pt_ne  = $ph['phase_type'] ?? '';
-    if ($premerge && !$ph['is_elim'] && !end($premerge)['is_elim'] && $prev_pt_ne === $cur_pt_ne
-      && empty($ph['no_merge'])) {
-      $last = &$premerge[count($premerge) - 1];
-      $prev_end   = max(array_column($last['rounds'], 'end'));
-      $next_start = min(array_column($ph['rounds'], 'start'));
-      if ($next_start - $prev_end < 259200) {
-        $last['rounds'] = array_merge($last['rounds'], $ph['rounds']);
-        $last['series'] = array_merge($last['series'], $ph['series']);
-      } else {
-        $premerge[] = $ph;
-      }
-    } else {
-      $premerge[] = $ph;
-    }
-  }
-  unset($last);
-
-  $merged = [];
-  foreach ($premerge as $ph) {
-    $prev_pt = end($merged)['phase_type'] ?? '';
-    $cur_pt  = $ph['phase_type'] ?? '';
-    if ($merged && $ph['is_elim'] && end($merged)['is_elim'] && $prev_pt === $cur_pt) {
-      $last = &$merged[count($merged) - 1];
-      $prev_end   = max(array_column($last['rounds'], 'end'));
-      $next_start = min(array_column($ph['rounds'], 'start'));
-      if ($next_start - $prev_end < 864000) {
-        $last['rounds'] = array_merge($last['rounds'], $ph['rounds']);
-        $last['series'] = array_merge($last['series'], $ph['series']);
-      } else {
-        $merged[] = $ph;
-      }
-    } else {
-      $merged[] = $ph;
-    }
-  }
-  unset($last);
+  $merged = tb_merge_adjacent_phases($phases, false, 259200);
+  $merged = tb_merge_adjacent_phases($merged, true, 864000);
 
   if ($second_group_phases) {
     $bi = count($merged);
@@ -539,12 +421,40 @@ function tb_detect_phases(array $series): array {
 
   if (count($merged) === 1 && empty($merged[0]['is_elim'])
     && ($cut = tb_topcut_playoff_tail($rounds)) !== null) {
-    $play_r = array_slice($rounds, $cut);
     return array_merge(
       tb_split_group_rounds(array_slice($rounds, 0, $cut)),
-      [['rounds' => $play_r, 'series' => tb_rounds_series($play_r),
-       'is_elim' => true, 'phase_type' => 'bracket']]
+      [tb_phase(array_slice($rounds, $cut), 'bracket')]
     );
+  }
+
+  return $merged;
+}
+
+// Merge adjacent phases of the same elim-kind and phase_type when the time gap
+// between them is below $max_gap seconds.
+function tb_merge_adjacent_phases(array $phases, bool $elim, int $max_gap): array {
+  $merged = [];
+  foreach ($phases as $ph) {
+    $prev = $merged ? end($merged) : null;
+    $same = $prev
+      && (bool)$ph['is_elim'] === $elim
+      && (bool)$prev['is_elim'] === $elim
+      && ($prev['phase_type'] ?? '') === ($ph['phase_type'] ?? '')
+      && ($elim || empty($ph['no_merge']));
+
+    if ($same) {
+      $prev_end   = max(array_column($prev['rounds'], 'end'));
+      $next_start = min(array_column($ph['rounds'], 'start'));
+      if ($next_start - $prev_end < $max_gap) {
+        $last = &$merged[count($merged) - 1];
+        $last['rounds'] = array_merge($last['rounds'], $ph['rounds']);
+        $last['series'] = array_merge($last['series'], $ph['series']);
+        unset($last);
+        continue;
+      }
+    }
+
+    $merged[] = $ph;
   }
 
   return $merged;

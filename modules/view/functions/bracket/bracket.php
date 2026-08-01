@@ -1,5 +1,13 @@
 <?php
 
+// Force a series outcome and mark it as repaired.
+function tb_fix_outcome(array $s, int $winner): array {
+  $s['winner'] = $winner;
+  $s['flags']  = array_values(array_unique(array_merge($s['flags'] ?? [], ['outcome-fixed'])));
+
+  return $s;
+}
+
 function tb_gf_reachable(array $br_series): array {
   if (count($br_series) < 2) {
     return array_column($br_series, 'key');
@@ -130,6 +138,69 @@ function tb_lb_seeds(array $all): array {
   return array_keys($seeds);
 }
 
+// Detects a standalone third-/fourth-place decider
+function tb_find_3rd_place(array $all): ?string {
+  if (count($all) < 4) {
+    return null;
+  }
+
+  $fwd = [];
+  foreach ($all as $s) {
+    $fwd[$s['key']] = [];
+    foreach ($s['teams'] as $t) {
+      $nxt = tb_next_series_for_team($t, $all, $s['end']);
+      if ($nxt !== null) {
+        $fwd[$s['key']][] = $nxt;
+      }
+    }
+  }
+
+  $terminals = array_values(array_filter(
+    $all,
+    fn($s) => count($s['teams']) === 2 && empty($fwd[$s['key']])
+  ));
+  if (count($terminals) !== 2) {
+    return null;
+  }
+
+  $prior_loss = function(array $s) use ($all): array {
+    $losses = [];
+    foreach ($s['teams'] as $t) {
+      $losses[$t] = null;
+      foreach ($all as $p) {
+        if ($p['key'] === $s['key'] || $p['start'] >= $s['start'] || !in_array($t, $p['teams'])) {
+          continue;
+        }
+        if (tb_loser($p) === $t) {
+          $losses[$t] = $p;
+        }
+      }
+    }
+    return $losses;
+  };
+
+  foreach ([[$terminals[0], $terminals[1]], [$terminals[1], $terminals[0]]] as [$final, $cand]) {
+    if (array_filter($prior_loss($final))) {
+      continue;
+    }
+
+    $cand_losses = array_filter($prior_loss($cand));
+    if (count($cand_losses) !== 2) {
+      continue;
+    }
+
+    $beat_by = array_values(array_map(fn($p) => $p['winner'], $cand_losses));
+    sort($beat_by);
+    $final_teams = $final['teams'];
+    sort($final_teams);
+    if ($beat_by === $final_teams) {
+      return $cand['key'];
+    }
+  }
+
+  return null;
+}
+
 function tb_build_bracket(array $rounds, array $teams, array $lb_seeds = [], bool $allow_peel = true): array {
   $all = [];
   foreach ($rounds as $r) {
@@ -165,8 +236,7 @@ function tb_build_bracket(array $rounds, array $teams, array $lb_seeds = [], boo
       $b_rematch = in_array($a, $all[$nb]['teams'] ?? [], true);
       $win = ($a_rematch && !$b_rematch) ? $a : (($b_rematch && !$a_rematch) ? $b : null);
       if ($win !== null) {
-        $all[$k]['winner'] = $win;
-        $all[$k]['flags']  = array_values(array_unique(array_merge($all[$k]['flags'] ?? [], ['outcome-fixed'])));
+        $all[$k] = tb_fix_outcome($all[$k], $win);
       }
     }
   }
@@ -219,6 +289,25 @@ function tb_build_bracket(array $rounds, array $teams, array $lb_seeds = [], boo
       'ub_rounds' => [],
       'lb_rounds' => [],
       'grand_final' => null,
+      'third_place' => null,
+      'unplaced' => $unplaced,
+    ];
+  }
+
+  $third_place = null;
+  $tp_key = tb_find_3rd_place($all);
+  if ($tp_key !== null) {
+    $third_place = $all[$tp_key];
+    unset($all[$tp_key]);
+  }
+
+  if (!$all) {
+    return [
+      'type' => 'single_elimination',
+      'ub_rounds' => [],
+      'lb_rounds' => [],
+      'grand_final' => null,
+      'third_place' => $third_place ? ['name' => 'bracket_3rd_place', 'series' => [$third_place]] : null,
       'unplaced' => $unplaced,
     ];
   }
@@ -679,6 +768,7 @@ function tb_build_bracket(array $rounds, array $teams, array $lb_seeds = [], boo
       'name' => 'bracket_gf',
       'series' => $gf_series,
     ] : null,
+    'third_place' => $third_place ? ['name' => 'bracket_3rd_place', 'series' => [$third_place]] : null,
     'ub_to_lb'    => $ub_to_lb,
     'unplaced'    => $unplaced,
   ];
@@ -737,10 +827,7 @@ function tb_repair_outcomes(array $all, bool $is_double): array {
     asort($cands);
 
     $fk = array_key_first($cands);
-    $all[$fk]['winner'] = tb_loser($all[$fk]);
-    $all[$fk]['flags']  = array_values(array_unique(array_merge(
-      $all[$fk]['flags'] ?? [], ['outcome-fixed']
-    )));
+    $all[$fk] = tb_fix_outcome($all[$fk], tb_loser($all[$fk]));
     $applied++;
   }
 
@@ -781,10 +868,7 @@ function tb_repair_orphan_winners(array $all): array {
   }
   asort($cands);
   foreach (array_keys($cands) as $k) {
-    $all[$k]['winner'] = tb_loser($all[$k]);
-    $all[$k]['flags']  = array_values(array_unique(array_merge(
-      $all[$k]['flags'] ?? [], ['outcome-fixed']
-    )));
+    $all[$k] = tb_fix_outcome($all[$k], tb_loser($all[$k]));
   }
 
   return $all;
@@ -819,35 +903,8 @@ function tb_loser(array $s): ?int {
   return null;
 }
 
-function tb_bracket_placements(array $br): array {
-  $lb = $br['lb_rounds'] ?? [];
-  $ub = $br['ub_rounds'] ?? [];
-  $gf = $br['grand_final']['series'] ?? [];
-
-  $all = [];
-  foreach (['ub_rounds', 'lb_rounds'] as $rk) {
-    foreach ($br[$rk] ?? [] as $r) {
-      foreach ($r['series'] as $s) {
-        foreach ($s['teams'] as $t) {
-          if ($t) $all[$t] = true;
-        }
-      }
-    }
-  }
-
-  foreach ($gf as $s) {
-    foreach ($s['teams'] as $t) {
-      if ($t) {
-        $all[$t] = true;
-      }
-    }
-  }
-
-  if (!$all) return [];
-
-  $groups = [];
-  $placed = [];
-  $add = function(array $ids) use (&$groups, &$placed) {
+function tb_placement_adder(array &$groups, array &$placed): callable {
+  return function(array $ids) use (&$groups, &$placed) {
     $ids = array_values(array_filter($ids, fn($t) => $t && !isset($placed[$t])));
     if (!$ids) {
       return;
@@ -857,6 +914,21 @@ function tb_bracket_placements(array $br): array {
     }
     $groups[] = $ids;
   };
+}
+
+function tb_bracket_placements(array $br): array {
+  $lb = $br['lb_rounds'] ?? [];
+  $ub = $br['ub_rounds'] ?? [];
+  $gf = $br['grand_final']['series'] ?? [];
+  $tp = $br['third_place']['series'] ?? [];
+
+  $all = array_fill_keys(array_filter(tb_unique_teams(tb_bracket_series($br))), true);
+
+  if (!$all) return [];
+
+  $groups = [];
+  $placed = [];
+  $add = tb_placement_adder($groups, $placed);
 
   $gf_last = $gf ? end($gf) : null;
   $gf_decided = $gf_last && ($gf_last['winner'] ?? null) !== null;
@@ -873,8 +945,18 @@ function tb_bracket_placements(array $br): array {
   } elseif ($se_decided) {
     $add([$se_final[0]['winner']]);
 
+    $tp_last = $tp ? end($tp) : null;
+    $tp_decided = $tp_last && ($tp_last['winner'] ?? null) !== null;
+
     for ($i = count($ub) - 1; $i >= 0; $i--) {
-      $add(array_map('tb_loser', $ub[$i]['series']));
+      $losers = array_map('tb_loser', $ub[$i]['series']);
+      
+      if ($tp_decided && count($losers) === 2 && !array_diff($losers, $tp_last['teams']) && !array_diff($tp_last['teams'], $losers)) {
+        $add([$tp_last['winner']]);
+        $add([tb_loser($tp_last)]);
+      } else {
+        $add($losers);
+      }
     }
   } else {
     $elim = [];
@@ -937,17 +1019,7 @@ function tb_event_placements(array $stages): array {
 
   $groups = [];
   $placed = [];
-  $add = function(array $ids) use (&$groups, &$placed) {
-    $ids = array_values(array_filter($ids, fn($t) => $t && !isset($placed[$t])));
-    if (!$ids) {
-      return;
-    }
-
-    foreach ($ids as $t) {
-      $placed[$t] = true;
-    }
-    $groups[] = $ids;
-  };
+  $add = tb_placement_adder($groups, $placed);
 
   foreach ($br_groups as $g) {
     $add($g);

@@ -4,51 +4,19 @@ function tb_is_valid_playoff(array $bracket): bool {
   $ub = $bracket['ub_rounds'] ?? [];
   if (!$ub) return false;
 
-  $total = 0;
-  foreach (['ub_rounds', 'lb_rounds'] as $rk) {
-    foreach ($bracket[$rk] ?? [] as $rd) {
-      $total += count($rd['series']);
-    }
-  }
-  $total += count($bracket['grand_final']['series'] ?? []);
-
-  if ($total < 2) {
+  if (count(tb_bracket_series($bracket)) < 2) {
     return false;
   }
 
-  $ub_teams = [];
-  foreach ($ub as $rd) {
-    foreach ($rd['series'] as $s) {
-      foreach ($s['teams'] as $t) {
-        $ub_teams[$t] = true;
-      }
-    }
-  }
-  $n = count($ub_teams);
+  $n = count(tb_unique_teams(tb_rounds_series($ub)));
 
   if ($n < 2) {
     return false;
   }
 
-  if (!empty($bracket['lb_rounds'])) {
-    $all_teams = $ub_teams;
-    foreach ($bracket['lb_rounds'] as $rd) {
-      foreach ($rd['series'] as $s) {
-        foreach ($s['teams'] as $t) {
-          $all_teams[$t] = true;
-        }
-      }
-    }
-
-    foreach ($bracket['grand_final']['series'] ?? [] as $s) {
-      foreach ($s['teams'] as $t) {
-        $all_teams[$t] = true;
-      }
-    }
-
-    if (count($all_teams) < 4) {
-      return false;
-    }
+  if (!empty($bracket['lb_rounds'])
+    && count(tb_unique_teams(tb_bracket_series($bracket))) < 4) {
+    return false;
   }
   
   $is_de = !empty($bracket['grand_final']['series']) && !empty($bracket['lb_rounds']);
@@ -246,7 +214,7 @@ function tb_analyze_event(array $event, array $teams, array $config = []): array
         }
       }
     }
-    if ($phase_type === 'bracket' && $pending_lb_seeds) {
+    if (in_array($phase_type, ['bracket', 'seeding_bracket'], true) && $pending_lb_seeds) {
       $phase['lb_seeds'] = $pending_lb_seeds;
       $pending_lb_seeds = [];
     }
@@ -257,6 +225,8 @@ function tb_analyze_event(array $event, array $teams, array $config = []): array
       $stage_name = 'bracket_decider';
     } else if ($phase_type === 'wildcard') {
       $stage_name = 'bracket_wildcard';
+    } else if ($phase_type === 'seeding_bracket') {
+      $stage_name = 'bracket_playin';
     } else if ($phase_type === 'bracket') {
       $stage_name = 'bracket_main_event';
     } else {
@@ -271,7 +241,7 @@ function tb_analyze_event(array $event, array $teams, array $config = []): array
         'series' => $phase['series'],
       ];
     } else {
-      $allow_peel = $phase_type === 'bracket';
+      $allow_peel = in_array($phase_type, ['bracket', 'seeding_bracket'], true);
       $stage = tb_analyze_phase($phase, $teams, $stage_name, $is_elim, $allow_peel);
 
       if ($is_elim && ($stage['type'] ?? '') === 'group_stage') {
@@ -287,13 +257,7 @@ function tb_analyze_event(array $event, array $teams, array $config = []): array
       $sb = $stage['seeding_bracket'];
       unset($stage['seeding_bracket']);
 
-      $sb_phase = [
-        'rounds' => tb_temporal_rounds($sb),
-        'series' => $sb,
-        'is_elim' => true,
-      ];
-
-      $sb_stage = tb_analyze_phase($sb_phase, $teams, 'bracket_playin', true, false);
+      $sb_stage = tb_restage($sb, $teams, 'bracket_playin', true, false);
       $sb_stage['phase_type'] = 'seeding_bracket';
     }
 
@@ -302,13 +266,7 @@ function tb_analyze_event(array $event, array $teams, array $config = []): array
       $pb = $stage['playoff_bracket'];
       unset($stage['playoff_bracket']);
 
-      $pb_phase = [
-        'rounds' => tb_temporal_rounds($pb),
-        'series' => $pb,
-        'is_elim' => true,
-      ];
-
-      $pb_stage = tb_analyze_phase($pb_phase, $teams, 'bracket_main_event', true, true);
+      $pb_stage = tb_restage($pb, $teams, 'bracket_main_event', true, true);
       $pb_stage['phase_type'] = 'bracket';
     }
 
@@ -359,13 +317,43 @@ function tb_refine_phases(array $phases, array $series, array $teams): array {
 
     $pairs = [];
     foreach ($ph['series'] as $s) {
-      $p = $s['teams'];
-      sort($p);
-      $pairs[$p[0] . '-' . ($p[1] ?? 0)] = true;
+      $pairs[tb_pair_key($s['teams'])] = true;
     }
 
     $expected_pairs = $p_teams > 1 ? $p_teams * ($p_teams - 1) / 2 : 0;
     $complete_rr = $p_teams >= 3 && $expected_pairs > 0 && count($pairs) / $expected_pairs >= 0.9;
+
+    // Small DE brackets also cover (nearly) every pair, so full pair coverage
+    // alone can't separate them from a round robin
+    if ($complete_rr && $n > count($pairs) && $n - count($pairs) <= 2) {
+      $by_start = $ph['series'];
+      usort($by_start, fn($a, $b) => $a['start'] <=> $b['start']);
+
+      $seen_pairs = [];
+      $rec = [];
+      $rematches = [];
+      foreach ($by_start as $s) {
+        $pk = tb_pair_key($s['teams']);
+        if (isset($seen_pairs[$pk])) {
+          $rematches[] = $s;
+          continue;
+        }
+        $seen_pairs[$pk] = true;
+        $w = $s['winner'] ?? null;
+        $l = tb_loser($s);
+        if ($w !== null) $rec[$w]['w'] = ($rec[$w]['w'] ?? 0) + 1;
+        if ($l !== null) $rec[$l]['l'] = ($rec[$l]['l'] ?? 0) + 1;
+      }
+      foreach ($rematches as $s) {
+        [$a, $b] = $s['teams'];
+        $ra = [$rec[$a]['w'] ?? 0, $rec[$a]['l'] ?? 0];
+        $rb = [$rec[$b]['w'] ?? 0, $rec[$b]['l'] ?? 0];
+        if ($ra !== $rb) {
+          $complete_rr = false;
+          break;
+        }
+      }
+    }
     $looks_group =
       ($n >= 5 && tb_progression_is_group($ph['series']))
       || ($tied >= 2 && !tb_is_elim_phase($ph['rounds']))
@@ -417,18 +405,8 @@ function tb_refine_phases(array $phases, array $series, array $teams): array {
     $group_ser = array_values(array_filter($series, fn($s) => !isset($tail_keys[$s['key']])));
     if (count($group_ser) >= count($tail)) {
       $phases = [
-        [
-          'series' => $group_ser,
-          'rounds' => tb_temporal_rounds($group_ser),
-          'is_elim' => false,
-          'phase_type' => 'group',
-        ],
-        [
-          'series' => $tail,
-          'rounds' => tb_temporal_rounds($tail),
-          'is_elim' => true,
-          'phase_type' => 'bracket',
-        ],
+        tb_phase(tb_temporal_rounds($group_ser), 'group', $group_ser),
+        tb_phase(tb_temporal_rounds($tail), 'bracket', $tail),
       ];
     }
   }
@@ -453,6 +431,12 @@ function tb_split_division_events(array $event, array $analyzed, array $teams): 
     return [$analyzed];
   }
 
+  $t_in  = tb_unique_teams($in);
+  $t_out = tb_unique_teams($out);
+  if (count(array_intersect($t_in, $t_out)) * 4 > min(count($t_in), count($t_out))) {
+    return [$analyzed];
+  }
+
   $out_team_set = array_flip(tb_unique_teams($out));
   $play_in = [];
   $in = array_values(array_filter($in, function ($s) use ($out_team_set, &$play_in) {
@@ -465,15 +449,8 @@ function tb_split_division_events(array $event, array $analyzed, array $teams): 
     return true;
   }));
 
-  $p_in  = tb_analyze_phase([
-    'rounds' => tb_temporal_rounds($in),
-    'series' => $in,
-  ], $teams, 'bracket_main_event', true, true);
-
-  $p_out = tb_analyze_phase([
-    'rounds' => tb_temporal_rounds($out),
-    'series' => $out,
-  ], $teams, 'bracket_main_event', true, true);
+  $p_in  = tb_restage($in, $teams, 'bracket_main_event', true, true);
+  $p_out = tb_restage($out, $teams, 'bracket_main_event', true, true);
 
   if (($p_in['type'] ?? '') !== 'playoff' || ($p_out['type'] ?? '') !== 'playoff'
     || empty($p_in['bracket']['grand_final']) || empty($p_out['bracket']['grand_final'])
@@ -542,13 +519,7 @@ function tb_split_division_events(array $event, array $analyzed, array $teams): 
     $name   = $event['name'] . ', ' . $suffix;
     $stages = [];
     if ($gser) {
-      $g_stage = tb_analyze_phase(
-        ['rounds' => tb_temporal_rounds($gser), 'series' => $gser],
-        $teams,
-        'bracket_group_stage',
-        false,
-        false,
-      );
+      $g_stage = tb_restage($gser, $teams, 'bracket_group_stage', false, false);
 
       if (!empty($g_stage['decider']['series'])) {
         $sser = array_merge($sser, $g_stage['decider']['series']);

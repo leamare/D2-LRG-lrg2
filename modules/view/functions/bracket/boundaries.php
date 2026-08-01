@@ -53,12 +53,7 @@ function tb_peel_outlier_wildcard(array $phases): array {
       continue;
     }
 
-    $out[] = [
-      'rounds' => tb_temporal_rounds($wc),
-      'series' => $wc,
-      'is_elim' => false,
-      'phase_type' => 'wildcard',
-    ];
+    $out[] = tb_phase(tb_temporal_rounds($wc), 'wildcard', $wc);
 
     $wc_keys = array_flip(array_column($wc, 'key'));
     $rounds = [];
@@ -103,9 +98,7 @@ function tb_clean_group_block(array $series, array $allowed_teams = []): bool {
   $tot = 0;
   $seen = [];
   foreach ($series as $s) {
-    $p = $s['teams'];
-    sort($p);
-    $pk = $p[0] . '-' . ($p[1] ?? 0);
+    $pk = tb_pair_key($s['teams']);
 
     if (isset($seen[$pk])) {
       continue;
@@ -159,9 +152,7 @@ function tb_find_regroup_block(array $rounds): ?array {
     $pairs = [];
 
     foreach ($blk as $s) {
-      $p = $s['teams'];
-      sort($p);
-      $pairs[$p[0] . '-' . ($p[1] ?? 0)] = true;
+      $pairs[tb_pair_key($s['teams'])] = true;
     }
 
     $cov_sum = 0;
@@ -195,9 +186,7 @@ function tb_find_regroup_block(array $rounds): ?array {
       $u = $s['teams'][0];
       $v = $s['teams'][1] ?? -1;
       if (isset($bt[$u], $bt[$v])) {
-        $p = [$u, $v];
-        sort($p);
-        $prefix_pairs[$p[0] . '-' . $p[1]] = true;
+        $prefix_pairs[tb_pair_key([$u, $v])] = true;
       }
     }
 
@@ -246,9 +235,7 @@ function tb_group_stage_front(array $rounds): ?int {
   if ($nt >= 3) {
     $pairs = [];
     foreach ($all_series as $s) {
-      $p = $s['teams'];
-      sort($p);
-      $pairs[$p[0] . '-' . ($p[1] ?? 0)] = true;
+      $pairs[tb_pair_key($s['teams'])] = true;
     }
     if (count($pairs) / ($nt * ($nt - 1) / 2) >= 0.85) {
       return null;
@@ -432,14 +419,7 @@ function tb_split_group_rounds(array $rounds): array {
   }
 
   if (count($rounds) === 1) {
-    return [
-      [
-        'rounds' => $rounds,
-        'series' => $rounds[0]['series'],
-        'is_elim' => false,
-        'phase_type' => 'group',
-      ],
-    ];
+    return [tb_phase($rounds, 'group', $rounds[0]['series'])];
   }
 
   // Split where a fresh cohort joins after a qualifier\
@@ -482,14 +462,7 @@ function tb_split_group_rounds(array $rounds): array {
   $final_components = count(tb_find_groups($all_series));
 
   if ($final_components > 1) {
-    return [
-      [
-        'rounds' => $rounds,
-        'series' => $all_series,
-        'is_elim' => false,
-        'phase_type' => 'group',
-      ],
-    ];
+    return [tb_phase($rounds, 'group', $all_series)];
   }
 
   $block = tb_find_regroup_block($rounds);
@@ -498,13 +471,7 @@ function tb_split_group_rounds(array $rounds): array {
     $first  = array_slice($rounds, 0, $a);
     $second = array_slice($rounds, $a, $b - $a + 1);
     $tail   = array_slice($rounds, $b + 1);
-    $mk = fn(array $rs, bool $nm = false) => array_filter([
-      'rounds' => $rs,
-      'series' => tb_rounds_series($rs),
-      'is_elim' => false,
-      'phase_type' => 'group',
-      'no_merge' => $nm ?: null,
-    ], fn($v) => $v !== null);
+    $mk = fn(array $rs, bool $nm = false) => tb_phase($rs, 'group') + ($nm ? ['no_merge' => true] : []);
     $out = [$mk($first), $mk($second, true)];
 
     if ($tail) {
@@ -532,27 +499,14 @@ function tb_split_group_rounds(array $rounds): array {
   }
 
   if (!$bounds) {
-    return [
-      [
-        'rounds' => $rounds,
-        'series' => $all_series,
-        'is_elim' => false,
-        'phase_type' => 'group',
-      ],
-    ];
+    return [tb_phase($rounds, 'group', $all_series)];
   }
 
   $phases = [];
   $prev   = 0;
   foreach (array_unique($bounds) as $b) {
     if ($b > $prev) {
-      $rds = array_slice($rounds, $prev, $b - $prev);
-      $phases[] = [
-        'rounds'     => $rds,
-        'series'     => tb_rounds_series($rds),
-        'is_elim'    => false,
-        'phase_type' => 'group',
-      ];
+      $phases[] = tb_phase(array_slice($rounds, $prev, $b - $prev), 'group');
     }
 
     $prev = $b;
@@ -560,12 +514,7 @@ function tb_split_group_rounds(array $rounds): array {
 
   $rds = array_slice($rounds, $prev);
   if ($rds) {
-    $phases[] = [
-      'rounds'     => $rds,
-      'series'     => tb_rounds_series($rds),
-      'is_elim'    => false,
-      'phase_type' => 'group',
-    ];
+    $phases[] = tb_phase($rds, 'group');
   }
 
   return $phases;
@@ -589,8 +538,7 @@ function tb_rr_playoff_split(array $series): ?array {
   $seen = [];
   $c = null;
   foreach ($series as $i => $s) {
-    $p = $s['teams']; sort($p);
-    $seen[$p[0] . '-' . $p[1]] = true;
+    $seen[tb_pair_key($s['teams'])] = true;
     if (count($seen) >= $expected) {
       $c = $i + 1;
       break;

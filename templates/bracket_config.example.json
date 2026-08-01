@@ -7,7 +7,8 @@
       "0_1001": 8291895
     },
 
-    "_doc_stages": "Force the phase/format shape. An ordered array, one entry per stage. Each entry is an object {kind, format, teams, groups} or a short 'kind[:format[:teams[:groups]]]' string. kind = group | bracket | none. format = rr | swiss | de | se. Bare 'de'/'se'/'rr'/'swiss' is shorthand. Add until/from/dates to an object stage to split strictly by calendar when phases share a roster and run back-to-back.",
+    "_doc_stages": "Force the phase/format shape. An ordered array, one entry per stage. Each entry is an object {kind, format, teams, groups} or a short 'kind[:format[:teams[:groups]]]' string. format = rr | swiss | de | se, and only shapes a 'group' stage's inferred format -- a bracket-y stage's single/double-elimination shape always comes from the actual loss pattern, not from format. Bare 'de'/'se'/'rr'/'swiss' is kind+format shorthand. Add until/from/dates ('YYYY-MM-DD..YYYY-MM-DD', until is inclusive) to an object stage to split strictly by calendar when phases share a roster and run back-to-back -- either date every stage or none of them.",
+    "_doc_stages_kinds": "kind (or shorthand) values: 'group' -- standings. 'bracket' -- full UB/LB/GF tree, labeled Main Event. 'elimination_round' (er/elim) -- a bracket build shown as flat match cards, labeled Elimination Round. 'seeding_bracket' (playin/play_in/pi) -- a full UB/LB/GF tree shown before the main event, labeled Play-In. 'wildcard' (wc) -- flat cards, no tree, labeled Wildcard. 'seeding' (seed/decider) -- flat cards, no tree, labeled Seeding Decider; its losers are pre-seeded into the lower bracket of the NEXT bracket/seeding_bracket stage (auto-relabeled Elimination Round if most of them turn out not to reappear later). 'none' -- drop these series from the bracket entirely.",
     "stages": [
       "group:swiss",
       "bracket:de"
@@ -17,6 +18,12 @@
       { "kind": "group", "format": "rr",    "until": "2026-03-06" },
       { "kind": "bracket", "format": "de" }
     ],
+    "_example_stages_with_decider_and_playin": [
+      "group:swiss",
+      "seeding",
+      "seeding_bracket",
+      "bracket:se"
+    ],
 
     "_doc_divisions": "Force a parallel-division split detection misses. Name => filter. teams = team ids in the division; days = weekdays it plays; dates = 'A..B' range; qualifies_to = shared meta event the winners advance to.",
     "divisions": {
@@ -25,7 +32,22 @@
     },
 
     "_doc_months": "Force (true) or suppress (false) the month-by-month performance grid shown for long, overlapping multi-event seasons.",
-    "months": false
+    "months": false,
+
+    "_doc_events": "Scope stages/months/overrides to specific sub-events instead of the whole report -- useful when a multi-region/multi-division report needs hinting for one region but everything else detects fine on its own. Value = {match?, stages, months, overrides} (same {stages, months, overrides} shape as the top level, plus an optional 'match'). First entry (declaration order) whose match criteria all hold wins for a given sub-event. A sub-event matching no entry keeps the top-level 'stages'/'months' (or full auto-detection if there are none); give a matched entry an explicit 'stages': [] to opt that one sub-event back into auto-detection even though the top level forces a shape. 'divisions' is report-wide only and is ignored here.",
+    "_doc_events_match": "match = {name?, teams?, lid?}, ALL given criteria must hold. name = case-insensitive substring of the sub-event's display name. teams = team ids that must ALL be participants in the sub-event (a subset check -- pick teams specific to that sub-event, not ones that recur all season). lid = league ids (LRG2 'lid'); matches if any series in the sub-event carries one of them, the most exact/stable criterion when the source data tags matches with a per-sub-tournament league id. If an entry has no 'match' object, its own key is used as the name criterion (shorthand, see 'US East' below).",
+    "events": {
+      "US East": {
+        "stages": ["group:swiss", "seeding_bracket", "elimination_round", "bracket:se"]
+      },
+      "NA qualifier": {
+        "match": { "lid": [17420], "teams": [123, 456] },
+        "stages": ["bracket:se"]
+      },
+      "Grand Finals": {
+        "stages": []
+      }
+    }
   },
 
   "_doc_precomputed_bracket": "DIFFERENT feature / different key. The block above is the forcing config (report.settings.bracket). A fully precomputed bracket instead goes on report.bracket (top level), and the view renders it AS-IS — no detection, no match data needed. Compact webapi-like shape shown below under '_report_bracket'. Series: {teams:[idA,idB], score:[a,b], bo?, mids?(match ids for the popup), date?, winner?(else inferred from score)}. Stages: group {standings:[{team,w,d,l,mw,ml}], format} or bracket {upper/lower:[{name,series}], grand_final:[series]}.",

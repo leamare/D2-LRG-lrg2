@@ -7,10 +7,7 @@ function tb_analyze_phase(array $phase, array $teams, string $name, bool $is_eli
   if ($is_elim) {
     $bracket = tb_build_bracket($rounds, $teams, $phase['lb_seeds'] ?? [], $allow_peel);
 
-    $placed = 0;
-    foreach (($bracket['ub_rounds'] ?? []) as $r) $placed += count($r['series']);
-    foreach (($bracket['lb_rounds'] ?? []) as $r) $placed += count($r['series']);
-    if ($bracket['grand_final']) $placed += count($bracket['grand_final']['series']);
+    $placed = count(tb_bracket_series($bracket));
 
     $min_placed = (tb_count_genuine_ties($series) === 0 && count($series) <= 2) ? 1 : 2;
     if ($placed >= $min_placed) {
@@ -75,7 +72,7 @@ function tb_analyze_phase(array $phase, array $teams, string $name, bool $is_eli
     $within = 0;
     $seen_pk = [];
     foreach ($series as $s) {
-      $p = $s['teams']; sort($p); $pk = $p[0] . '-' . $p[1];
+      $pk = tb_pair_key($s['teams']);
       if (isset($seen_pk[$pk])) continue;
 
       $seen_pk[$pk] = true;
@@ -121,9 +118,7 @@ function tb_analyze_phase(array $phase, array $teams, string $name, bool $is_eli
   $tiebreak_series  = [];
 
   foreach ($group_series as $s) {
-    $pair = $s['teams'];
-    sort($pair);
-    $key = $pair[0] . '-' . $pair[1];
+    $key = tb_pair_key($s['teams']);
 
     if (isset($seen_pairs[$key])) {
       if ($s['winner'] === null) continue;
@@ -154,9 +149,7 @@ function tb_analyze_phase(array $phase, array $teams, string $name, bool $is_eli
       $ok = true;
 
       foreach ($cand as $s) {
-        $p = $s['teams'];
-        sort($p);
-        $pk = implode('-', $p);
+        $pk = tb_pair_key($s['teams']);
         if (isset($pairs[$pk])) { $ok = false; break; }
         $pairs[$pk] = true;
         $l = tb_loser($s);
@@ -252,11 +245,7 @@ function tb_color_group_stages(array $stages, array $teams, array $series): arra
     $br_teams = [];
     for ($j = $si + 1; $j < count($stages); $j++) {
       if (($stages[$j]['phase_type'] ?? '') === 'bracket') {
-        foreach ($stages[$j]['series'] as $s) {
-          foreach ($s['teams'] as $t) {
-            $br_teams[$t] = true;
-          }
-        }
+        $br_teams += array_fill_keys(tb_unique_teams($stages[$j]['series']), true);
       }
     }
 
@@ -288,11 +277,7 @@ function tb_color_group_stages(array $stages, array $teams, array $series): arra
   $lb_team_set = [];
   foreach ($stages as $st) {
     if (in_array($st['phase_type'] ?? '', ['elimination_round', 'seeding_bracket'], true)) {
-      foreach ($st['series'] as $ser) {
-        foreach ($ser['teams'] as $t) {
-          $er_team_set[$t] = true;
-        }
-      }
+      $er_team_set += array_fill_keys(tb_unique_teams($st['series']), true);
     }
     if (($st['phase_type'] ?? '') === 'bracket' && !empty($st['bracket'])) {
       $b = $st['bracket'];
@@ -349,6 +334,17 @@ function tb_color_group_stages(array $stages, array $teams, array $series): arra
     return 3;
   };
 
+  // W/D/L points first, then a per-team rank hint, then map difference.
+  $sort_standings = function(array &$groups, callable $rank) {
+    foreach ($groups as &$g) {
+      usort($g['standings'], fn($x, $y) =>
+        [2 * $y['w'] + $y['d'], -$y['l'], $rank($y['team']), $y['mw'] - $y['ml'], $y['mw']] <=>
+        [2 * $x['w'] + $x['d'], -$x['l'], $rank($x['team']), $x['mw'] - $x['ml'], $x['mw']]
+      );
+    }
+    unset($g);
+  };
+
   foreach ($stages as $si => &$st) {
     if ($st['type'] !== 'group_stage') continue;
 
@@ -375,26 +371,13 @@ function tb_color_group_stages(array $stages, array $teams, array $series): arra
       $st['ub_teams'] = array_keys($adv_set);
       $st['lb_teams'] = [];
       $st['er_teams'] = [];
-      $adv_rank = fn(int $t) => isset($adv_set[$t]) ? 1 : 0;
-      foreach ($st['groups'] as &$g) {
-        usort($g['standings'], fn($x, $y) =>
-          [2 * $y['w'] + $y['d'], -$y['l'], $adv_rank($y['team']), $y['mw'] - $y['ml'], $y['mw']] <=>
-          [2 * $x['w'] + $x['d'], -$x['l'], $adv_rank($x['team']), $x['mw'] - $x['ml'], $x['mw']]
-        );
-      }
-      unset($g);
+      $sort_standings($st['groups'], fn(int $t) => isset($adv_set[$t]) ? 1 : 0);
     } else {
       $st['er_teams'] = $er_team_list;
       $st['ub_teams'] = $ub_team_list;
       $st['lb_teams'] = $lb_team_list;
       if ($ub_team_list || $lb_team_list) {
-        foreach ($st['groups'] as &$g) {
-          usort($g['standings'], fn($x, $y) =>
-            [2 * $y['w'] + $y['d'], -$y['l'], -$tier_of($y['team']), $y['mw'] - $y['ml'], $y['mw']] <=>
-            [2 * $x['w'] + $x['d'], -$x['l'], -$tier_of($x['team']), $x['mw'] - $x['ml'], $x['mw']]
-          );
-        }
-        unset($g);
+        $sort_standings($st['groups'], fn(int $t) => -$tier_of($t));
       }
     }
 

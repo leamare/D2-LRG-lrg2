@@ -108,3 +108,56 @@ A phase's `is_elim` flag then decides group vs bracket; `tb_refine_phases` corre
 
 - **group** (`tb_build_group`): standings + `tb_infer_group_format` -- full pairwise coverage -> `round_robin`; no rematches with a handful of games each -> `swiss`/`short_swiss`; else `mixed`.
 - **bracket** (`tb_build_bracket`): assign each series to UB/LB/GF by tracking losses chronologically; teams that open in the lower bracket (TI-style bottom half) are detected (`tb_detect_lb_seeds`) and given a phantom loss; outcomes are repaired for connectivity (tech-loss / orphan-winner).
+
+## Format hinting (`report.settings.bracket`)
+
+Full shape and examples: `templates/bracket_config.example.json`. Read by `bracket_config()` (generators/bracket.php) into the `$config` passed down the pipeline.
+
+### `stages`: forcing the phase shape
+
+An ordered array, one entry per phase, each a `{kind, format, teams, groups, until/from/dates}` object or a `"kind[:format[:teams[:groups]]]"` shorthand string. `tb_normalize_stages` (config.php) parses it; `tb_phases_from_hint` turns it into phases either by literal date ranges (if any entry has `until`/`from`/`dates`) or by carving `tb_detect_phases`'s own round boundaries into `count($stages)` pieces otherwise.
+
+`kind` is one of:
+
+| kind | shorthand | phase build | label |
+|------|-----------|--------------|-------|
+| `group` | `rr`/`swiss` (also sets `format`) | `tb_build_group` (standings) | "Group Stage" |
+| `bracket` | `de`/`se` (also sets `format`) | `tb_build_bracket` (full UB/LB/GF tree) | "Main Event" |
+| `elimination_round` | `er`, `elim` | `tb_build_bracket`, rendered as flat match cards instead of a tree | "Elimination Round" |
+| `seeding_bracket` | `playin`, `play_in`, `pi` | `tb_build_bracket` (full tree), for a preliminary mini-bracket rendered before the main event | "Play-In" |
+| `wildcard` | `wc` | flat match cards, no tree | "Wildcard" |
+| `seeding` | `seed`, `decider` | flat match cards, no tree; losers are marked as pre-seeded lower-bracket entrants for the *next* `bracket`/`seeding_bracket` phase | "Seeding Decider" (auto-relabeled to "Elimination Round" by `tb_color_group_stages` if most of its losers turn out not to reappear later, i.e. it wasn't a re-seed after all) |
+| `none` | | dropped: matching series are excluded from the bracket entirely | |
+
+`format` (`rr`/`swiss` for `group`, `de`/`se` for `bracket`) only affects a `group` phase's inferred format; a `bracket`/`elimination_round`/`seeding_bracket` phase's single/double-elimination shape is still detected from the actual loss pattern, not forced.
+
+Add `until`/`from`/`dates` ("YYYY-MM-DD..YYYY-MM-DD") to any entry to cut strictly by calendar instead of relying on `tb_detect_phases`'s boundary count; `until` is inclusive of that whole day. Mixing dated and un-dated entries in the same `stages` array is not supported -- date every entry, or none of them.
+
+### `events`: scoping hints to specific sub-events
+
+A report can contain many sub-events (`tb_split_events`/`tb_name_units` — one per region/division/season-chunk); `stages` and `months` above apply to *all* of them by default. To hint only some sub-events and leave the rest on automatic detection, add an `events` object: each key is a label, each value is `{match, stages, months}` (`stages`/`months` in the same shape as the top level; `match` is optional). The first entry (declaration order) whose `match` criteria all hold wins for that sub-event.
+
+`match` can combine, all of which must hold when given:
+- `name` -- case-insensitive substring of the sub-event's display name.
+- `teams` -- team ids that must *all* be participants in the sub-event (subset check, not exact roster; pick teams that are actually specific to that sub-event, not ones that recur all season).
+- `lid` -- league ids (LRG2 `lid`); matches if any series in the sub-event carries one of them. The most exact/stable criterion when the source data tags matches with a league id per sub-tournament.
+
+If an entry has no `match` object at all, its own key is used as the `name` criterion (so the simple `"US East": {...}` shorthand from the example below still works). An entry with a `match` object but none of `name`/`teams`/`lid` set matches nothing.
+
+```json
+"bracket": {
+  "stages": ["group:swiss", "bracket:de"],
+  "events": {
+    "US East": {
+      "stages": ["group:swiss", "seeding_bracket", "elimination_round", "bracket:se"]
+    },
+    "NA qualifier": {
+      "match": { "lid": [17420], "teams": [123, 456] },
+      "stages": ["bracket:se"]
+    },
+    "Grand Finals": { "stages": [] }
+  }
+}
+```
+
+Sub-events that don't match any `events` entry keep using the top-level `stages`/`months` (or full auto-detection if the top level has none). A matched sub-event whose entry has no `stages` key keeps the top-level default too; give it an explicit `"stages": []` to opt that one sub-event *back* into auto-detection instead. `overrides` can also be nested under an `events` entry (merged into the report-wide `overrides` — series keys are globally unique so this is just a scoping convenience, not a hard boundary). `divisions` is a report-wide-only key and is ignored inside `events`, since division splitting runs before sub-events exist.

@@ -139,13 +139,7 @@ function tb_fold_back_strays(array $stages, array $teams): array {
     if ($tgt !== null) {
       $merged = tb_dedup_series(array_merge($stages[$tgt]['series'], $leftover));
       usort($merged, fn($a, $b) => $a['start'] <=> $b['start']);
-      $rebuilt = tb_analyze_phase(
-        ['rounds' => tb_temporal_rounds($merged), 'series' => $merged],
-        $teams,
-        $stages[$tgt]['name'],
-        false,
-        false,
-      );
+      $rebuilt = tb_restage($merged, $teams, $stages[$tgt]['name'], false, false);
       $rebuilt['phase_type'] = $stages[$tgt]['phase_type'];
       $stages[$tgt] = $rebuilt;
     } else {
@@ -174,24 +168,11 @@ function tb_pp_tiebreaker_playoff(array $stages, array $teams): array {
       if (empty($brk['unplaced']) && !empty($brk['grand_final']) && tb_is_valid_playoff($brk)) {
         $tb_keys = array_flip(array_map(fn($s) => $s['key'], $tb));
         $rr_series = array_values(array_filter($st['series'], fn($s) => !isset($tb_keys[$s['key']])));
-        $play = tb_analyze_phase(
-          ['rounds' => tb_temporal_rounds($tb), 'series' => $tb],
-          $teams,
-          'bracket_main_event',
-          true,
-          true,
-        );
+        $play = tb_restage($tb, $teams, 'bracket_main_event', true, true);
 
         if (($play['type'] ?? '') === 'playoff') {
           $play['phase_type'] = 'bracket';
-          $rebuilt[] = tb_analyze_phase(
-            ['rounds' => tb_temporal_rounds($rr_series), 'series' => $rr_series],
-            $teams,
-            $st['name'],
-            false,
-            false,
-          );
-
+          $rebuilt[] = tb_restage($rr_series, $teams, $st['name'], false, false);
           $rebuilt[] = $play;
           continue;
         }
@@ -236,17 +217,7 @@ function tb_pp_group_to_bracket(array $stages, array $teams): array {
     if ($follow_bracket && !$bracket_pieces) continue;
 
     $br = tb_build_bracket(tb_temporal_rounds($gs), $teams);
-    $placed = 0;
-    foreach (['ub_rounds', 'lb_rounds'] as $rk) {
-      foreach ($br[$rk] ?? [] as $r) {
-        $placed += count($r['series']);
-      }
-    }
-
-    if (!empty($br['grand_final'])) {
-      $placed += count($br['grand_final']['series']);
-    }
-
+    $placed = count(tb_bracket_series($br));
     $un = count($br['unplaced'] ?? []);
     $clean = $un === 0 && tb_is_valid_playoff($br);
     $pieces = count($sizes) >= 2 && $maxg <= 5 && $placed >= 2 && $placed > $un;
@@ -255,13 +226,7 @@ function tb_pp_group_to_bracket(array $stages, array $teams): array {
       continue;
     }
 
-    $conv = tb_analyze_phase(
-      ['rounds' => tb_temporal_rounds($gs), 'series' => $gs],
-      $teams,
-      'bracket_playoffs',
-      true,
-      true,
-    );
+    $conv = tb_restage($gs, $teams, 'bracket_playoffs', true, true);
 
     if (($conv['type'] ?? '') === 'playoff') {
       $conv['phase_type'] = 'bracket';
@@ -300,14 +265,7 @@ function tb_pp_group_decider(array $stages, array $teams): array {
         'series' => $dec,
       ];
     } else {
-      $p_stage = tb_analyze_phase(
-        ['rounds' => tb_temporal_rounds($dec), 'series' => $dec],
-        $teams,
-        'bracket_playoffs',
-        true,
-        true,
-      );
-
+      $p_stage = tb_restage($dec, $teams, 'bracket_playoffs', true, true);
       $p_stage['phase_type'] = ($p_stage['type'] ?? '') === 'playoff' ? 'bracket' : 'group';
       $rebuilt[] = $p_stage;
     }
@@ -332,13 +290,7 @@ function tb_pp_merge_brackets(array $stages, array $teams): array {
   $merged = [];
   foreach ($br_idx as $i) $merged = array_merge($merged, $stages[$i]['series']);
   usort($merged, fn($a, $b) => $a['start'] <=> $b['start']);
-  $reb = tb_analyze_phase(
-    ['rounds' => tb_temporal_rounds($merged), 'series' => $merged],
-    $teams,
-    'bracket_main_event',
-    true,
-    true,
-  );
+  $reb = tb_restage($merged, $teams, 'bracket_main_event', true, true);
 
   if (($reb['type'] ?? '') === 'playoff') {
     $reb['phase_type'] = 'bracket';
@@ -389,26 +341,14 @@ function tb_pp_fold_seed_round(array $stages, array $teams): array {
     $move_keys = array_flip(array_map(fn($s) => $s['key'], $first_ub));
     $br_series = array_values(array_filter($st['series'], fn($s) => !isset($move_keys[$s['key']])));
     $grp_series = array_merge($stages[$si - 1]['series'], $first_ub);
-    $reb_br = tb_analyze_phase(
-      ['rounds' => tb_temporal_rounds($br_series), 'series' => $br_series],
-      $teams,
-      $st['name'],
-      true,
-      true,
-    );
+    $reb_br = tb_restage($br_series, $teams, $st['name'], true, true);
     if (($reb_br['type'] ?? '') !== 'playoff') {
       continue;
     }
 
     $reb_br['phase_type'] = 'bracket';
     $stages[$si] = $reb_br;
-    $stages[$si - 1] = tb_analyze_phase(
-      ['rounds' => tb_temporal_rounds($grp_series), 'series' => $grp_series],
-      $teams,
-      $stages[$si - 1]['name'],
-      false,
-      false,
-    );
+    $stages[$si - 1] = tb_restage($grp_series, $teams, $stages[$si - 1]['name'], false, false);
   }
 
   return $stages;
@@ -450,14 +390,7 @@ function tb_pp_fold_late_seeding(array $stages, array $teams): array {
   if ($extra) {
     $merged = tb_dedup_series(array_merge($stages[$brk_idx]['series'], $extra));
     usort($merged, fn($a, $b) => $a['start'] <=> $b['start']);
-    $reb = tb_analyze_phase(
-      ['rounds' => tb_temporal_rounds($merged), 'series' => $merged],
-      $teams,
-      $stages[$brk_idx]['name'],
-      true,
-      true,
-    );
-
+    $reb = tb_restage($merged, $teams, $stages[$brk_idx]['name'], true, true);
     $reb['phase_type'] = 'bracket';
     $stages[$brk_idx] = $reb;
     $stages = array_values(array_filter($stages, fn($i) => !isset($fold[$i]), ARRAY_FILTER_USE_KEY));

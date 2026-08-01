@@ -1,5 +1,12 @@
 <?php
 
+const TB_STAGE_KIND_ALIASES = [
+  'er'      => 'elimination_round', 'elim'    => 'elimination_round',
+  'wc'      => 'wildcard',
+  'seed'    => 'seeding',           'decider' => 'seeding',
+  'playin'  => 'seeding_bracket',   'play_in' => 'seeding_bracket', 'pi' => 'seeding_bracket',
+];
+
 function tb_apply_overrides(array $series, array $config): array {
   $ov = $config['overrides'] ?? [];
   if (!$ov) return $series;
@@ -22,6 +29,17 @@ function tb_apply_overrides(array $series, array $config): array {
 
   unset($s);
   return $series;
+}
+
+// Maps a hinted stage
+function tb_hint_kind_shape(string $kind): array {
+  if (in_array($kind, ['bracket', 'elimination_round', 'seeding_bracket'], true)) {
+    return [true, $kind];
+  }
+  if (in_array($kind, ['wildcard', 'seeding'], true)) {
+    return [false, $kind];
+  }
+  return [false, 'group'];
 }
 
 function tb_phases_from_hint(array $series, array $stages): array {
@@ -61,8 +79,7 @@ function tb_phases_from_hint(array $series, array $stages): array {
   foreach ($detected as $i => &$ph) {
     if (!isset($effective[$i])) break;
     $st = $effective[$i];
-    $ph['is_elim']     = $st['kind'] === 'bracket';
-    $ph['phase_type']  = $ph['is_elim'] ? 'bracket' : 'group';
+    [$ph['is_elim'], $ph['phase_type']] = tb_hint_kind_shape($st['kind']);
     $ph['format_hint'] = $st['format'];
     $ph['groups_hint'] = $st['groups'] ?? 0;
   }
@@ -77,13 +94,13 @@ function tb_phases_from_hint(array $series, array $stages): array {
 }
 
 function tb_hint_phase(array $st, array $series): array {
-  $is_elim = ($st['kind'] ?? '') === 'bracket';
+  [$is_elim, $phase_type] = tb_hint_kind_shape($st['kind'] ?? '');
 
   return [
     'rounds'      => tb_temporal_rounds($series),
     'series'      => $series,
     'is_elim'     => $is_elim,
-    'phase_type'  => $is_elim ? 'bracket' : 'group',
+    'phase_type'  => $phase_type,
     'format_hint' => $st['format'] ?? '',
     'groups_hint' => $st['groups'] ?? 0,
   ];
@@ -172,7 +189,11 @@ function tb_divide_series(array $series, array $config): array {
 
 // Normalize the report's "stages" into stage records. Each entry is an object
 // {kind, format, teams, groups, until/from/dates}, or a short
-// "kind[:format[:teams[:groups]]]" string ("de"/"se"/"rr"/"swiss" as shorthand).
+// "kind[:format[:teams[:groups]]]" string. kind (or its shorthand) can be:
+//   group | bracket | elimination_round (er/elim) | seeding_bracket
+//   (playin/play_in/pi) | wildcard (wc) | seeding (seed/decider) | none
+// format = rr | swiss | de | se; bare "de"/"se"/"rr"/"swiss" is kind shorthand
+// too (sets both kind and format in one token).
 function tb_normalize_stages(array $stages): array {
   $out = [];
   foreach ($stages as $s) {
@@ -182,13 +203,16 @@ function tb_normalize_stages(array $stages): array {
       $format = strtolower($p[1] ?? '');
       if (in_array($kind, ['de', 'se'], true))        { $format = $kind; $kind = 'bracket'; }
       elseif (in_array($kind, ['rr', 'swiss'], true)) { $format = $kind; $kind = 'group'; }
+      else                                            { $kind = TB_STAGE_KIND_ALIASES[$kind] ?? $kind; }
       $s = ['kind' => $kind, 'format' => $format, 'teams' => (int)($p[2] ?? 0), 'groups' => (int)($p[3] ?? 0)];
     }
 
     $s = (array)$s;
     [$start, $end] = tb_date_frame($s);
+    $kind = strtolower((string)($s['kind'] ?? 'group'));
+    $kind = TB_STAGE_KIND_ALIASES[$kind] ?? $kind;
     $out[] = [
-      'kind'   => strtolower((string)($s['kind'] ?? 'group')),
+      'kind'   => $kind,
       'format' => strtolower((string)($s['format'] ?? '')),
       'teams'  => (int)($s['teams'] ?? 0),
       'groups' => (int)($s['groups'] ?? 0),

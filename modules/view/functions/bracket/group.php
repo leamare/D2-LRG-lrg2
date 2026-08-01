@@ -75,8 +75,7 @@ function tb_infer_group_format(array $series, array $team_ids, array $rounds): s
   $pairs  = [];
   $appear = [];
   foreach ($series as $s) {
-    $p = $s['teams']; sort($p);
-    $pairs[implode('-', $p)] = true;
+    $pairs[tb_pair_key($s['teams'])] = true;
     foreach ($s['teams'] as $t) {
       $appear[$t] = ($appear[$t] ?? 0) + 1;
     }
