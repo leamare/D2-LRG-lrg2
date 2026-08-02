@@ -136,9 +136,33 @@ $sql .= "SELECT \"lowest_rampage_lost\" cap, m.matchid, (CASE WHEN ABS(comeback)
           FROM matches m JOIN adv_matchlines am ON m.matchid = am.matchid JOIN matchlines ml ON am.matchid = ml.matchid AND am.playerid = ml.playerid
           WHERE am.multi_kill > 4 AND m.radiantWin <> ml.isRadiant GROUP BY m.matchid ORDER BY val ASC, m.matchid DESC LIMIT $limit;";
 # rampage with highest nw difference
-$sql .= "SELECT \"highest_rampage_lost\" cap, m.matchid, (CASE WHEN ABS(comeback) > ABS(stomp) THEN ABS(comeback) ELSE ABS(stomp) END) val, am.playerid playerid, am.heroid heroid 
+$sql .= "SELECT \"highest_rampage_lost\" cap, m.matchid, (CASE WHEN ABS(comeback) > ABS(stomp) THEN ABS(comeback) ELSE ABS(stomp) END) val, am.playerid playerid, am.heroid heroid
           FROM matches m JOIN adv_matchlines am ON m.matchid = am.matchid JOIN matchlines ml ON am.matchid = ml.matchid AND am.playerid = ml.playerid
           WHERE am.multi_kill > 4 AND m.radiantWin <> ml.isRadiant GROUP BY m.matchid ORDER BY val DESC, m.matchid DESC LIMIT $limit;";
+
+if (($lg_settings['ana']['consumables_records'] ?? false) && ($schema['starting_consumables'] ?? false)) {
+  $_cons = function($ids) {
+    return implode(' + ', array_map(function($i) {
+      return "CAST(COALESCE(JSON_EXTRACT(si.consumables, '$.\"all\".\"$i\"'), 0) AS UNSIGNED)";
+    }, (array)$ids));
+  };
+
+  # tango purchases in a single match (player)
+  $sql .= "SELECT \"tango_purchases_match\" cap, si.matchid, ".$_cons([44, 241])." val, si.playerid, si.hero_id heroid
+    FROM starting_items si ORDER BY val DESC LIMIT $limit;";
+  # mango purchases in a single match (player)
+  $sql .= "SELECT \"mango_purchases_match\" cap, si.matchid, ".$_cons(216)." val, si.playerid, si.hero_id heroid
+    FROM starting_items si ORDER BY val DESC LIMIT $limit;";
+
+  if ($lg_settings['main']['teams']) {
+    # smoke of deceit purchases in a single match (team)
+    $sql .= "SELECT \"smoke_purchases_team_match\" cap, si.matchid, SUM(".$_cons(188).") val, teams_matches.teamid playerid, 0 heroid
+      FROM starting_items si
+      JOIN matchlines ON si.matchid = matchlines.matchid AND si.playerid = matchlines.playerid
+      JOIN teams_matches ON matchlines.matchid = teams_matches.matchid AND matchlines.isRadiant = teams_matches.is_radiant
+      GROUP BY si.matchid, teams_matches.teamid ORDER BY val DESC LIMIT $limit;";
+  }
+}
 
 # fantasy MVP records
 if ($lg_settings['main']['fantasy'] ?? false) {
