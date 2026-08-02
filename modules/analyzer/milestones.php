@@ -7,6 +7,20 @@ if (!empty($players_interest)) {
 
 $result['milestones'] = [];
 
+$_cons_ms = function($ids) {
+  return implode(' + ', array_map(function($i) {
+    return "CAST(COALESCE(JSON_EXTRACT(si.consumables, '$.\"all\".\"$i\"'), 0) AS UNSIGNED)";
+  }, (array)$ids));
+};
+
+const MILESTONE_CONSUMABLES = [
+  'tangos_purchased' => [ 44, 241 ],
+  'clarities_purchased' => 38,
+  'mangoes_purchased' => 216,
+  'faerie_fire_purchased' => 237,
+  'smokes_purchased' => 188,
+];
+
 // === total milestones
 
 $sql  = "SELECT \"total:matches\", 0, COUNT(distinct matchid) value FROM matches ORDER BY value DESC LIMIT $avg_limit;";
@@ -28,6 +42,12 @@ $sql .= "SELECT \"total:wards_destroyed\", 0, SUM(wards_destroyed) value FROM ad
 $sql .= "SELECT \"total:buybacks\", 0, SUM(buybacks) value FROM adv_matchlines;";
 $sql .= "SELECT \"total:stacks\", 0, SUM(stacks) value FROM adv_matchlines;";
 $sql .= "SELECT \"total:pings\", 0, SUM(pings) value FROM adv_matchlines;";
+
+if (($lg_settings['ana']['consumables_milestones'] ?? false) && ($schema['starting_consumables'] ?? false)) {
+  foreach (MILESTONE_CONSUMABLES as $_ms_name => $_ms_ids) {
+    $sql .= "SELECT \"total:$_ms_name\", 0, SUM(".$_cons_ms($_ms_ids).") value FROM starting_items si;";
+  }
+}
 
 $sql .= "SELECT \"total:rampages\", 0, SUM(multi_kill >= 5) value FROM adv_matchlines;";
 $sql .= "SELECT \"total:godlikes\", 0, SUM(streak >= 9) value FROM adv_matchlines;";
@@ -62,6 +82,14 @@ $sql .= "SELECT \"heroes:wards_destroyed\", heroid, SUM(wards_destroyed) value F
 $sql .= "SELECT \"heroes:buybacks\", heroid, SUM(buybacks) value FROM adv_matchlines $wheres GROUP BY heroid ORDER BY value DESC LIMIT $avg_limit;";
 $sql .= "SELECT \"heroes:stacks\", heroid, SUM(stacks) value FROM adv_matchlines $wheres GROUP BY heroid ORDER BY value DESC LIMIT $avg_limit;";
 $sql .= "SELECT \"heroes:pings\", heroid, SUM(pings) value FROM adv_matchlines $wheres GROUP BY heroid ORDER BY value DESC LIMIT $avg_limit;";
+
+if (($lg_settings['ana']['consumables_milestones'] ?? false) && ($schema['starting_consumables'] ?? false)) {
+  foreach (MILESTONE_CONSUMABLES as $_ms_name => $_ms_ids) {
+    $sql .= "SELECT \"heroes:$_ms_name\", si.hero_id, SUM(".$_cons_ms($_ms_ids).") value
+      FROM starting_items si ".(!empty($players_interest) ? " WHERE si.playerid in (".implode(',', $players_interest).") " : "")."
+      GROUP BY si.hero_id ORDER BY value DESC LIMIT $avg_limit;";
+  }
+}
 
 $sql .= "SELECT \"heroes:rampages\", heroid, SUM(multi_kill >= 5) value FROM adv_matchlines $wheres GROUP BY heroid ORDER BY value DESC LIMIT $avg_limit;";
 $sql .= "SELECT \"heroes:godlikes\", heroid, SUM(streak >= 9) value FROM adv_matchlines $wheres GROUP BY heroid ORDER BY value DESC LIMIT $avg_limit;";
@@ -99,6 +127,14 @@ if (!$lg_settings['ana']['anon_records']) {
   $sql .= "SELECT \"players:buybacks\", playerid, SUM(buybacks) value FROM adv_matchlines $wheres GROUP BY playerid ORDER BY value DESC LIMIT $avg_limit;";
   $sql .= "SELECT \"players:stacks\", playerid, SUM(stacks) value FROM adv_matchlines $wheres GROUP BY playerid ORDER BY value DESC LIMIT $avg_limit;";
   $sql .= "SELECT \"players:pings\", playerid, SUM(pings) value FROM adv_matchlines $wheres GROUP BY playerid ORDER BY value DESC LIMIT $avg_limit;";
+
+  if (($lg_settings['ana']['consumables_milestones'] ?? false) && ($schema['starting_consumables'] ?? false)) {
+    foreach (MILESTONE_CONSUMABLES as $_ms_name => $_ms_ids) {
+      $sql .= "SELECT \"players:$_ms_name\", si.playerid, SUM(".$_cons_ms($_ms_ids).") value
+        FROM starting_items si ".(!empty($players_interest) ? " WHERE si.playerid in (".implode(',', $players_interest).") " : "")."
+        GROUP BY si.playerid ORDER BY value DESC LIMIT $avg_limit;";
+    }
+  }
 
   $sql .= "SELECT \"players:rampages\", playerid, SUM(multi_kill >= 5) value FROM adv_matchlines $wheres GROUP BY playerid ORDER BY value DESC LIMIT $avg_limit;";
   $sql .= "SELECT \"players:godlikes\", playerid, SUM(streak >= 9) value FROM adv_matchlines $wheres GROUP BY playerid ORDER BY value DESC LIMIT $avg_limit;";
@@ -172,7 +208,17 @@ if ($lg_settings['main']['teams']) {
     FROM matchlines ml JOIN teams_matches tm ON ml.matchid = tm.matchid AND ml.isRadiant = tm.is_radiant
     JOIN adv_matchlines am ON am.matchid = ml.matchid AND am.playerid = ml.playerid $wheres_tm
     GROUP BY teamid ORDER BY value DESC LIMIT $avg_limit;";
-  $sql .= "SELECT \"teams:buybacks\", teamid, SUM(am.buybacks) value 
+  
+  if (($lg_settings['ana']['consumables_milestones'] ?? false) && ($schema['starting_consumables'] ?? false)) {
+    foreach (MILESTONE_CONSUMABLES as $_ms_name => $_ms_ids) {
+      $sql .= "SELECT \"teams:$_ms_name\", teamid, SUM(".$_cons_ms($_ms_ids).") value
+        FROM matchlines ml JOIN teams_matches tm ON ml.matchid = tm.matchid AND ml.isRadiant = tm.is_radiant
+        JOIN starting_items si ON si.matchid = ml.matchid AND si.playerid = ml.playerid $wheres_tm
+        GROUP BY teamid ORDER BY value DESC LIMIT $avg_limit;";
+    }
+  }
+
+  $sql .= "SELECT \"teams:buybacks\", teamid, SUM(am.buybacks) value
     FROM matchlines ml JOIN teams_matches tm ON ml.matchid = tm.matchid AND ml.isRadiant = tm.is_radiant
     JOIN adv_matchlines am ON am.matchid = ml.matchid AND am.playerid = ml.playerid $wheres_tm
     GROUP BY teamid ORDER BY value DESC LIMIT $avg_limit;";
