@@ -212,6 +212,15 @@ if ($schema['matches_opener'] ?? false && $schema['fpable']) {
       WHERE teamid = ".$id." AND is_radiant = false AND radiant_opener = true AND modeID in (".implode(',', FP_ABLE).");";
 }
 
+if ($schema['adv_matchlines_roles'] ?? false) {
+  # lane winrate from stored lane_won (2=win, 1=tie, 0=loss)
+  $sql .= "SELECT \"lane_winrate\", SUM(adv_matchlines.lane_won)/(COUNT(*)*2)
+            FROM adv_matchlines
+            JOIN matchlines ON adv_matchlines.matchid = matchlines.matchid AND adv_matchlines.playerid = matchlines.playerid
+            JOIN teams_matches ON matchlines.matchid = teams_matches.matchid AND matchlines.isRadiant = teams_matches.is_radiant
+            WHERE teams_matches.teamid = ".$id.";";
+}
+
 # duration
 $sql .= "SELECT \"avg_match_len\", (SUM(matches.duration)/60)/COUNT(DISTINCT matches.matchid) FROM matches JOIN teams_matches
           ON matches.matchid = teams_matches.matchid WHERE teams_matches.teamid = ".$id.";";
@@ -246,7 +255,71 @@ do {
   }
 } while($conn->next_result());
 
-// Additional stuff 
+// WRD@20 / STR@20 / WKS@20 / SPWK@20
+if (($lg_settings['ana']['teams_wards_summary'] ?? false) && ($schema['wards'] ?? false)) {
+  $w_kills = $lg_settings['ana']['teams_wards_summary_wk'] ?? true;
+
+  $wsql = "SELECT wards.matchid, wards.playerid, wards.wards_log, wards.sentries_log, ".
+      ($w_kills ? "wards.destroyed_log, " : "").
+      "matches.duration, ".($w_kills ? "(matchlines.isRadiant = teams_matches.is_radiant)" : "1")." own
+    FROM wards
+    JOIN matchlines ON wards.matchid = matchlines.matchid AND wards.playerid = matchlines.playerid
+    JOIN teams_matches ON matchlines.matchid = teams_matches.matchid ".
+      ($w_kills ? "" : "AND matchlines.isRadiant = teams_matches.is_radiant ").
+    "JOIN matches ON wards.matchid = matches.matchid
+    WHERE teams_matches.teamid = ".$id."
+    ORDER BY wards.matchid;";
+
+  $wres = $conn->query($wsql);
+  if ($wres === FALSE) die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+
+  $tm_agg = [];
+  $s_raw_sum = 0;
+  $k_raw_sum = 0;
+
+  $cur_match = null; $cur_rows = []; $cur_duration = 0; $cur_own = [];
+
+  $flush = function() use (&$tm_agg, &$s_raw_sum, &$k_raw_sum, &$cur_rows, &$cur_duration, &$cur_own, &$cur_match, $w_kills) {
+    if (empty($cur_rows)) return;
+    $counts = wards_at20_match_counts($cur_rows, $cur_duration, $w_kills);
+    $agg = ['w'=>0,'s'=>0,'k'=>0];
+    foreach ($counts as $pid => $c) {
+      if (empty($cur_own[$pid])) continue;
+      $agg['w'] += $c['w'];
+      $agg['s'] += $c['s'];
+      $agg['k'] += $c['k'];
+      $s_raw_sum += $c['s_raw'];
+      $k_raw_sum += $c['k_raw'];
+    }
+    $tm_agg[$cur_match ?? 0] = $agg;
+    $cur_rows = []; $cur_own = [];
+  };
+
+  while ($wrow = $wres->fetch_assoc()) {
+    if ($cur_match !== $wrow['matchid']) {
+      $flush();
+      $cur_match = $wrow['matchid'];
+      $cur_duration = $wrow['duration'];
+    }
+    $cur_rows[] = $wrow;
+    if ($wrow['own']) $cur_own[$wrow['playerid']] = true;
+  }
+  $flush();
+  $wres->free();
+
+  $mtch_n = count($tm_agg);
+  if ($mtch_n > 0) {
+    $result['teams'][$id]['averages']['wards_at20'] = array_sum(array_column($tm_agg, 'w')) / $mtch_n;
+    $result['teams'][$id]['averages']['sentries_at20'] = array_sum(array_column($tm_agg, 's')) / $mtch_n;
+
+    if ($w_kills) {
+      $result['teams'][$id]['averages']['wards_killed_at20'] = array_sum(array_column($tm_agg, 'k')) / $mtch_n;
+      $result['teams'][$id]['averages']['sentries_per_wardkill_at20'] = $k_raw_sum > 0 ? $s_raw_sum / $k_raw_sum : 0;
+    }
+  }
+}
+
+// Additional stuff
 
 # rampages
 $sql = "SELECT \"rampages_total\", SUM(adv_matchlines.multi_kill > 4) FROM adv_matchlines JOIN matchlines

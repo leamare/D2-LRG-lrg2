@@ -144,7 +144,7 @@ do {
 
  if (!empty($row)) {
   $result["averages_players"][$row[0]] = array();
-  
+
   for ($i=0; $i<$avg_limit && $row != null; $i++, $row = $query_res->fetch_row()) {
       $result["averages_players"][$row[0]][$i] = array (
       "playerid" => $row[1],
