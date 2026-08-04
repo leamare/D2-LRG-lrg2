@@ -222,6 +222,24 @@ function positions_ranking(&$arr, $total_matches) {
   }
 }
 
+// Shannon entropy of a hero's/player's match distribution across position buckets
+function positions_flex_enthropy(&$matches_by_bucket, $n_buckets) {
+  $out = [];
+  foreach ($matches_by_bucket as $id => $buckets) {
+    $total = array_sum($buckets);
+    $entropy = 0;
+    if ($total > 0) {
+      foreach ($buckets as $m) {
+        if (!$m) continue;
+        $p = $m / $total;
+        $entropy -= $p * log($p, 2);
+      }
+    }
+    $out[$id] = $n_buckets > 1 ? $entropy / log($n_buckets, 2) : 0;
+  }
+  return $out;
+}
+
 function items_ranking_sort($a, $b) {
   $a_rank = wilson_rating( $a['wins'], $a['purchases'], 1-$a['prate'] );
   $b_rank = wilson_rating( $b['wins'], $b['purchases'], 1-$b['prate'] );

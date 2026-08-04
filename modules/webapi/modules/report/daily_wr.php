@@ -12,13 +12,21 @@ public function process() {
     throw new UserInputException("Endpoint `daily_wr` only works for heroes");
   }
 
+  if (empty($report['hero_daily_wr'])) {
+    throw new UserInputException("No hero daily winrate data");
+  }
+
   if (is_wrapped($report['hero_daily_wr'])) {
     $days = $report['hero_daily_wr']['head'][0];
     sort($days);
     $report['hero_daily_wr_days'] = $days;
     $report['hero_daily_wr'] = unwrap_data($report['hero_daily_wr']);
   } else {
-    $days = array_keys($report['hero_daily_wr'][ array_keys($report['hero_daily_wr'])[0] ]);
+    $heroKeys = array_keys($report['hero_daily_wr']);
+    if (empty($heroKeys)) {
+      throw new UserInputException("No hero daily winrate data");
+    }
+    $days = array_keys($report['hero_daily_wr'][ $heroKeys[0] ]);
     sort($days);
   }
 

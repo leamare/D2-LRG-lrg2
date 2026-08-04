@@ -94,6 +94,22 @@ function rg_generator_positions_overview($table_id, &$context, $hero_flag = true
       //if (!$i) { break; }
     }
   }
+
+  $n_positions = count($position_overview_template) - 1;
+  $matches_by_bucket = [];
+  foreach ($overview as $id => $ov) {
+    $matches_by_bucket[$id] = [];
+    foreach ($ov as $k => $v) {
+      if ($k === 'total' || !is_array($v)) continue;
+      $matches_by_bucket[$id][$k] = $v['matches'] ?? 0;
+    }
+  }
+  $flex = positions_flex_enthropy($matches_by_bucket, $n_positions);
+  foreach ($flex as $id => $v) {
+    $overview[$id]['flex'] = $v;
+  }
+  unset($matches_by_bucket, $flex);
+
   uasort($overview, function($a, $b) {
     if($a['total'] == $b['total']) return 0;
     else return ($a['total'] < $b['total']) ? 1 : -1;
@@ -113,7 +129,7 @@ function rg_generator_positions_overview($table_id, &$context, $hero_flag = true
 
   $res .= search_filter_component($table_id, true);
 
-  $res .= "<table id=\"$table_id\" class=\"list wide sortable\"><thead><tr class=\"overhead\"><th width=\"20%\" colspan=\"".(2+$hero_flag)."\"></th>";
+  $res .= "<table id=\"$table_id\" class=\"list wide sortable\"><thead><tr class=\"overhead\"><th width=\"20%\" colspan=\"".(3+$hero_flag)."\"></th>";
 
   $heroline = "<tr>".
                 ($hero_flag ?
@@ -121,7 +137,8 @@ function rg_generator_positions_overview($table_id, &$context, $hero_flag = true
                   "<th data-sortInitialOrder=\"asc\" data-sorter=\"text\" data-col-group=\"_index\">".locale_string("hero")."</th>" :
                   "<th data-sortInitialOrder=\"asc\" data-sorter=\"text\" data-col-group=\"_index\">".locale_string("player")."</th>"
                 ).
-                "<th data-col-group=\"_index\">".locale_string("matches_s")."</th>";
+                "<th data-col-group=\"_index\">".locale_string("matches_s")."</th>".
+                "<th data-sorter=\"digit\" data-col-group=\"_index\" title=\"".locale_string("flex_enthropy")."\">".locale_string("flex_enthropy_s")."</th>";
   $i = 2;
   foreach($position_overview_template as $k => $v) {
     if ($k == "total") continue;
@@ -167,7 +184,9 @@ function rg_generator_positions_overview($table_id, &$context, $hero_flag = true
 
     $res .= "<tr ".implode(" ", $params)."><td data-col-group=\"_index\">".
         ($hero_flag ? hero_portrait($elid)."</td><td data-col-group=\"_index\">".hero_link($elid) : player_link($elid)).
-        "</td><td data-col-group=\"total\">".$el['total']."</td>".$elres."</tr>";
+        "</td><td data-col-group=\"total\">".$el['total']."</td>".
+        "<td data-col-group=\"_index\">".number_format($el['flex']*100,1)."%</td>".
+        $elres."</tr>";
   }
   $res .= "</table>";
 

@@ -99,18 +99,25 @@ public function process() {
   // positions overview
   $res = [];
   $res['total'] = [];
+  $matches_by_bucket = [];
+  $n_buckets = 0;
   for ($i=1; $i>=0; $i--) {
     foreach ($context[$i] as $j => &$pos_summary) {
       if (empty($pos_summary)) continue;
       positions_ranking_helper($pos_summary, $context_total_matches);
+      $n_buckets++;
       foreach ($pos_summary as $id => $data) {
         if (isset($res['total'][$id])) $res['total'][$id] += $data['matches_s'];
         else $res['total'][$id] = $data['matches_s'];
         $pos_summary[$id]['picks_to_median'] = isset($median_picks) ? round($data['matches_s']/$median_picks, 3) : null;
+        $matches_by_bucket[$id]["$i.$j"] = $data['matches_s'];
       }
       $res["$i.$j"] = $pos_summary;
     }
   }
+  
+  $res['flex'] = positions_flex_enthropy($matches_by_bucket, $n_buckets);
+
   return $res;
 }
 }
@@ -118,6 +125,7 @@ public function process() {
 if (is_docs_mode()) {
   SchemaRegistry::register('PositionsResult', TypeDefs::obj([
     'total' => TypeDefs::mapOfIdKeys(TypeDefs::int()),
+    'flex' => TypeDefs::mapOfIdKeys(TypeDefs::num()),
   ]));
 }
 

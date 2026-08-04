@@ -231,6 +231,9 @@ if (isset($report)) {
 
     if (isset($report['players']))
       include_once("modules/view/participants.php");
+
+    if (isset($report['pickban']) && (!empty($report['matches']) || !empty($report['teams'])))
+      include_once("modules/view/tierlists.php");
   }
 
   if(empty($mod)) $unset_module = true;
@@ -290,6 +293,11 @@ if (isset($report)) {
   # participants
   if(isset($modules['participants']) && check_module("participants")) {
     merge_mods($modules['participants'], rg_view_generate_participants());
+  }
+
+  # tier lists
+  if(isset($modules['tierlists']) && check_module("tierlists")) {
+    merge_mods($modules['tierlists'], rg_view_generate_tierlists());
   }
 } else {
   include_once("modules/view/index.php");
