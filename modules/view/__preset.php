@@ -73,6 +73,12 @@ const SUMMARY_GROUPS = [
   'sentries_placed' => 'vision',
   'wards_destroyed' => 'vision',
   'wards_lost' => 'vision',
+  'wards_at20' => 'vision',
+  'sentries_at20' => 'vision',
+  'wards_killed_at20' => 'vision',
+  'sentries_per_wardkill_at20' => 'vision',
+
+  'lane_winrate' => 'draft',
 
   'tower_damage_per_min_s' => 'objectives,combat',
   'roshan_kills_with_team' => 'objectives',
@@ -148,6 +154,10 @@ const SUMMARY_KEYS_REPLACEMENTS = [
   "sentries_placed" => "sentries_placed_s",
   "wards_destroyed" => "wards_destroyed_s",
   "wards_lost" => "wards_lost_s",
+  "wards_at20" => "wards_at20_s",
+  "sentries_at20" => "sentries_at20_s",
+  "wards_killed_at20" => "wards_killed_at20_s",
+  "sentries_per_wardkill_at20" => "sentries_per_wardkill_at20_s",
   "radiant_wr" => "rad_wr_s",
   "dire_wr" => "dire_wr_s",
   "avg_match_len" => "duration_s",

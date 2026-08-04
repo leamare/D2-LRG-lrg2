@@ -9,6 +9,7 @@ $percentages = [
   "radiant_wr",
   "dire_wr",
   "diversity",
+  "lane_winrate",
 
   "opener_ratio",
   "opener_pick_winrate",

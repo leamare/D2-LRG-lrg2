@@ -2,6 +2,36 @@
 /** @var string $root */
 include_once("$root/modules/view/functions/links.php");
 include_once("$root/modules/view/functions/convert_time.php");
+include_once("$root/modules/view/functions/hero_name.php");
+
+function teams_summary_top_heroes($tid, $count = 4) {
+  global $report;
+
+  if (empty($report['teams'][$tid]['pickban'])) return "";
+
+  $heroes = $report['teams'][$tid]['pickban'];
+  uasort($heroes, function($a, $b) {
+    return ($b['matches_picked'] ?? 0) <=> ($a['matches_picked'] ?? 0);
+  });
+
+  $out = "";
+  $i = 0;
+  foreach ($heroes as $hid => $stats) {
+    if ($i++ >= $count) break;
+    if (empty($stats['matches_picked'])) break;
+
+    $wr = isset($stats['wins_picked'])
+      ? $stats['wins_picked'] / $stats['matches_picked']
+      : ($stats['winrate_picked'] ?? 0);
+
+    $out .= "<a title=\"".addcslashes(
+        hero_name($hid)." - ".$stats['matches_picked']." ".locale_string('picks').
+        " - ".number_format($wr*100, 2)."% ".locale_string('winrate'), "'\"").
+      "\">".hero_icon($hid)."</a>";
+  }
+
+  return $out === "" ? "" : "<div class=\"team-top-heroes\">".$out."</div>";
+}
 
 const TEAM_SUMMARY_SHORT_LIST = [
   "kills",
@@ -66,8 +96,19 @@ function rg_view_generator_teams_summary($context = null, $short_flag = false) {
 
   // TABLE RENDERING
 
+  $has_top_heroes = false;
+  foreach ($context as $team_id) {
+    if (!empty($report['teams'][$team_id]['pickban'])) { $has_top_heroes = true; break; }
+  }
+
   if (!$short_flag) {
-    $res .= table_columns_toggle('teams-summary', array_keys($groups), true, $priorities);
+    $toggle_groups = array_keys($groups);
+    $toggle_priorities = $priorities;
+    if ($has_top_heroes) {
+      $toggle_groups[] = 'heroes';
+      $toggle_priorities[] = SUMMARY_GROUPS_PRIORITIES['heroes'] ?? count($toggle_groups);
+    }
+    $res .= table_columns_toggle('teams-summary', $toggle_groups, true, $toggle_priorities);
 
     $res .= search_filter_component("teams-summary", true);
   }
@@ -83,7 +124,9 @@ function rg_view_generator_teams_summary($context = null, $short_flag = false) {
       function($a) use (&$groups) {
         return "<th class=\"separator\" colspan=\"".count($groups[$a])."\" data-col-group=\"$a\">".locale_string($a)."</th>";
       }, array_keys($groups)
-    ))."</tr>".
+    )).
+    ($has_top_heroes ? "<th class=\"separator\" data-col-group=\"heroes\">".locale_string("heroes")."</th>" : "").
+    "</tr>".
     "<tr>".
       "<th data-col-group=\"_index\"></th>".
       "<th data-sortInitialOrder=\"asc\" data-col-group=\"_index\">".locale_string("team_name")."</th>".
@@ -106,6 +149,7 @@ function rg_view_generator_teams_summary($context = null, $short_flag = false) {
           );
         }, $groups, array_keys($groups)
       )).
+      ($has_top_heroes ? "<th class=\"separator sorter-no-parser\" data-col-group=\"heroes\">".locale_string("most_played")."</th>" : "").
     "</tr>".
   "</thead><tbody>";
 
@@ -141,6 +185,10 @@ function rg_view_generator_teams_summary($context = null, $short_flag = false) {
       }, array_keys($groups)
     ));
 
+    if ($has_top_heroes) {
+      $res .= "<td class=\"separator\" data-col-group=\"heroes\">".teams_summary_top_heroes($team_id)."</td>";
+    }
+
     $res .= "</tr>";
   }
   $res .= "</tbody></table>";
@@ -148,4 +196,3 @@ function rg_view_generator_teams_summary($context = null, $short_flag = false) {
   return $res;
 }
 
-?>
