@@ -12,7 +12,11 @@ class lrg_metadata implements ArrayAccess {
     if (!file_exists("{$this->dir}/$metafile.json"))
       throw new UserInputException("wrong metadata endpoint"."-- {$this->dir}/$metafile.json");
     $content = file_get_contents("{$this->dir}/$metafile.json");
-    $this->metadata[ $metafile ] = json_decode($content, true);
+    $decoded = json_decode($content, true);
+    if (!is_array($decoded)) {
+      throw new UserInputException("invalid metadata JSON"."-- {$this->dir}/$metafile.json");
+    }
+    $this->metadata[ $metafile ] = $decoded;
   }
 
   public function & get($metafile) {
@@ -32,7 +36,8 @@ class lrg_metadata implements ArrayAccess {
   }
 
   public function offsetExists($offset): bool {
-      return isset($this->metadata[$offset]);
+      if (isset($this->metadata[$offset])) return true;
+      return file_exists("{$this->dir}/$offset.json");
   }
 
   public function offsetUnset($offset): void {
