@@ -4,12 +4,19 @@ function generate_fantasy_mvp($match, $matchlines, $adv_matchlines) {
   if (empty($adv_matchlines)) {
     return [ [], [] ];
   }
+
+  // Duration scales creep/ward/teamfight points — without a positive duration
+  // (unparsed / incomplete match blobs) the multipliers below divide by zero.
+  $durationSec = (int)($match['duration'] ?? 0);
+  if ($durationSec <= 0) {
+    return [ [], [] ];
+  }
   
   $fantasy = [];
   $mvp = [];
   $players_points = [];
 
-  $dMult = 25 / (((int)$match['duration']) / 60);
+  $dMult = 25 / ($durationSec / 60);
   $dMultRev = 2 - $dMult;
 
   foreach ($matchlines as $i => $pl) {
