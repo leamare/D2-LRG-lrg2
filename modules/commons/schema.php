@@ -10,6 +10,7 @@ $schema = [
   'starting_items' => false,
   'matches_opener' => false, // radiant_opener, seriesid, analysis_status
   'matches_mmr' => false, // mmr (ranked matches, see league_monitor_v2)
+  'matches_replay_salt' => false, // replay_salt from OpenDota when present
   'adv_matchlines_roles' => false, // role, lane_won, networth
   'players_fixname' => false, // name_fixed
   'draft_order' => false, // order
@@ -86,6 +87,9 @@ for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row(
   }
   if ($row[0] == "mmr") {
     $schema['matches_mmr'] = true;
+  }
+  if ($row[0] == "replay_salt") {
+    $schema['matches_replay_salt'] = true;
   }
 }
 $query_res->free_result();

@@ -59,11 +59,6 @@ function fetch($match) {
 
   $match_rules = processRules($match);
 
-  // Do NOT write mmr (or anything else) onto $t_match here — the OpenDota
-  // populate path below is gated on empty($t_match), so a lone early key
-  // skips matchid/duration/modeID/… entirely and record_match builds
-  // broken SQL. MMR is applied after that block instead.
-
   if (function_exists('lrg_fetcher_alloc_match_seq')) {
     $match_seq = lrg_fetcher_alloc_match_seq();
   } else {
@@ -152,6 +147,41 @@ function fetch($match) {
     $match_exists = true;
   } else {
     $match_exists = false;
+  }
+
+  // Snapshot known ranked identity before a rewrite wipe
+  $prior_match_meta = null;
+  if ($match_exists && !$addition_mode) {
+    $prior_match_meta = ['mmr' => null, 'replay_salt' => null, 'by_hero' => []];
+    if (!empty($schema['matches_mmr']) || !empty($schema['matches_replay_salt'])) {
+      $cols = [];
+      if (!empty($schema['matches_mmr'])) $cols[] = 'mmr';
+      if (!empty($schema['matches_replay_salt'])) $cols[] = 'replay_salt';
+      $pq = $conn->query("SELECT ".implode(', ', $cols)." FROM matches WHERE matchid = ".$match." LIMIT 1");
+      if ($pq && ($prow = $pq->fetch_assoc())) {
+        if (!empty($schema['matches_mmr']) && $prow['mmr'] !== null && $prow['mmr'] !== '') {
+          $prior_match_meta['mmr'] = (int)$prow['mmr'];
+        }
+        if (!empty($schema['matches_replay_salt']) && isset($prow['replay_salt'])
+            && $prow['replay_salt'] !== null && $prow['replay_salt'] !== '') {
+          $prior_match_meta['replay_salt'] = (int)$prow['replay_salt'];
+        }
+      }
+    }
+    $pq = $conn->query("SELECT heroid, playerid FROM matchlines WHERE matchid = ".$match);
+    if ($pq) {
+      while ($prow = $pq->fetch_assoc()) {
+        $hid = (int)$prow['heroid'];
+        $pid = (int)$prow['playerid'];
+        if ($hid > 0 && $pid > 0) {
+          $prior_match_meta['by_hero'][$hid] = $pid;
+        }
+      }
+    }
+    if ($prior_match_meta['mmr'] === null && $prior_match_meta['replay_salt'] === null
+        && empty($prior_match_meta['by_hero'])) {
+      $prior_match_meta = null;
+    }
   }
 
   $data = [
@@ -1040,6 +1070,49 @@ function fetch($match) {
   // gating is never tripped by this alone.
   if (isset($match_rules['mmr'][0])) {
     $t_match['mmr'] = (int)$match_rules['mmr'][0];
+  } elseif ($prior_match_meta !== null && $prior_match_meta['mmr'] !== null && !isset($t_match['mmr'])) {
+    // Re-record without a fresh ::mmr rule — keep the previous match mmr.
+    $t_match['mmr'] = (int)$prior_match_meta['mmr'];
+    echo("..Cloned mmr ".$t_match['mmr']." from prior record.");
+  }
+
+  // replay_salt from OpenDota (or Stratz camelCase) when present; else clone on rewrite.
+  if (isset($matchdata['replay_salt']) && $matchdata['replay_salt'] !== '' && $matchdata['replay_salt'] !== null) {
+    $t_match['replay_salt'] = (int)$matchdata['replay_salt'];
+  } elseif (isset($matchdata['replaySalt']) && $matchdata['replaySalt'] !== '' && $matchdata['replaySalt'] !== null) {
+    $t_match['replay_salt'] = (int)$matchdata['replaySalt'];
+  } elseif (!isset($t_match['replay_salt']) && $prior_match_meta !== null
+      && ($prior_match_meta['replay_salt'] ?? null) !== null) {
+    $t_match['replay_salt'] = (int)$prior_match_meta['replay_salt'];
+    echo("..Cloned replay_salt ".$t_match['replay_salt']." from prior record.");
+  }
+
+  // Cache / Stratz preloaded rows: same playerid clone as the OpenDota path
+  // below (by heroid when the fresh row is still anonymous).
+  if (!empty($prior_match_meta['by_hero']) && !empty($t_matchlines)) {
+    $cloned_pids = 0;
+    foreach ($t_matchlines as &$ml) {
+      $hid = (int)($ml['heroid'] ?? 0);
+      $cur = (int)($ml['playerid'] ?? 0);
+      if ($hid > 0 && $cur <= 0 && isset($prior_match_meta['by_hero'][$hid])) {
+        $ml['playerid'] = $prior_match_meta['by_hero'][$hid];
+        $cloned_pids++;
+      }
+    }
+    unset($ml);
+    if (!empty($t_adv_matchlines)) {
+      foreach ($t_adv_matchlines as &$aml) {
+        $hid = (int)($aml['heroid'] ?? 0);
+        $cur = (int)($aml['playerid'] ?? 0);
+        if ($hid > 0 && $cur <= 0 && isset($prior_match_meta['by_hero'][$hid])) {
+          $aml['playerid'] = $prior_match_meta['by_hero'][$hid];
+        }
+      }
+      unset($aml);
+    }
+    if ($cloned_pids) {
+      echo("..Cloned $cloned_pids playerid(s) from prior record.");
+    }
   }
 
   // teams / players allow/deny lists block 
@@ -1313,8 +1386,6 @@ function fetch($match) {
           $t_matchlines[$i]['playerid'] = $matchdata['players'][$j]['account_id'];
         }
 
-        $player_tags[ "npc_dota_hero_".($meta['heroes'][$matchdata['players'][$j]['hero_id']]['tag'] ?? "none") ] = $t_matchlines[$i]['playerid'];
-
         $pid = (int)$matchdata['players'][$j]['account_id'];
         if(!isset($t_players[$pid]) || ($update_names && !isset($updated_names[$pid]))) {
           if ($pid < 0) {
@@ -1351,6 +1422,22 @@ function fetch($match) {
           $t_new_players[ $t_matchlines[$i]['playerid'] ] = $player_info['profile']['name'] ?? $player_info['profile']['personaname'] ?? "Player ".$t_matchlines[$i]['playerid'];
         }
 
+        // Re-record: if still anonymous and a prior DB row had a real
+        // playerid for this hero, keep it (rules above still win when set).
+        $hid_for_clone = (int)$matchdata['players'][$j]['hero_id'];
+        if (!empty($prior_match_meta['by_hero'][$hid_for_clone])
+            && (int)($t_matchlines[$i]['playerid'] ?? 0) <= 0) {
+          $t_matchlines[$i]['playerid'] = (int)$prior_match_meta['by_hero'][$hid_for_clone];
+          $matchdata['players'][$j]['account_id'] = $t_matchlines[$i]['playerid'];
+          $pid = $t_matchlines[$i]['playerid'];
+          if (!isset($t_players[$pid]) && !isset($t_new_players[$pid])) {
+            $player_info = $opendota->player($pid);
+            $t_new_players[$pid] = $player_info['profile']['name'] ?? $player_info['profile']['personaname'] ?? "Player ".$pid;
+          }
+        }
+
+        $player_tags[ "npc_dota_hero_".($meta['heroes'][$matchdata['players'][$j]['hero_id']]['tag'] ?? "none") ] = $t_matchlines[$i]['playerid'];
+
         $t_matchlines[$i]['heroid'] = $matchdata['players'][$j]['hero_id'];
         $t_matchlines[$i]['variant'] = $matchdata['players'][$j]['hero_variant'] ?? $matchdata['players'][$j]['variant'] ?? null;
         $t_matchlines[$i]['isRadiant'] = $matchdata['players'][$j]['isRadiant'];
@@ -1369,7 +1456,9 @@ function fetch($match) {
         $t_matchlines[$i]['seasonRank'] = $matchdata['players'][$j]['rank_tier'] ?? null;
 
         $t_adv_matchlines[$i]['matchid'] = $match;
-        $t_adv_matchlines[$i]['playerid'] = $matchdata['players'][$j]['account_id'];
+        // Use the (possibly remapped/cloned) matchlines playerid, not the
+        // raw OpenDota account_id — remaps must stay consistent across tables.
+        $t_adv_matchlines[$i]['playerid'] = $t_matchlines[$i]['playerid'];
         $t_adv_matchlines[$i]['heroid'] = $matchdata['players'][$j]['hero_id'];
 
         if (!$bad_replay) {

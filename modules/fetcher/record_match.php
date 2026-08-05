@@ -210,6 +210,7 @@ if (!$_addition_existing) {
     matchid, radiantWin, duration, modeID, leagueID, start_date, " .
     (($schema['matches_opener'] ?? false) ? "analysis_status, radiant_opener, seriesid, " : "") .
     (($schema['matches_mmr'] ?? false) ? "mmr, " : "") .
+    (($schema['matches_replay_salt'] ?? false) ? "replay_salt, " : "") .
     "stomp, comeback, cluster, version) VALUES (" .
     $mid . ", " . ($t_match['radiantWin'] ? "true" : "false") . ", " . $t_match['duration'] . ", " .
     $t_match['modeID'] . ", " . $t_match['leagueID'] . ", " . $t_match['start_date'] . ", " .
@@ -219,6 +220,7 @@ if (!$_addition_existing) {
       : ""
     ) .
     (($schema['matches_mmr'] ?? false) ? (($t_match['mmr'] ?? null) !== null ? (int)$t_match['mmr'] : 'null') . ", " : "") .
+    (($schema['matches_replay_salt'] ?? false) ? (($t_match['replay_salt'] ?? null) !== null ? (int)$t_match['replay_salt'] : 'null') . ", " : "") .
     ($t_match['stomp'] ?? 0) . ", " . $t_match['comeback'] . ", " .
     ($t_match['cluster'] ?? 0) . ", " . $t_match['version'] . ");";
 

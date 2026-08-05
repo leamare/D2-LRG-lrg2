@@ -2007,6 +2007,10 @@ table.list thead {
   font-style: italic;
 }
 
+.meta-level-cards {
+  vertical-align: baseline;
+}
+
 /* tier lists */
 
 table.tier-list-table {
@@ -2693,7 +2697,7 @@ tr.shady td.banner-row .shady-notice {
   font-style: italic;
 }
 
-/* Bracket — reconstructed tournament structure */
+/* Bracket -- reconstructed tournament structure */
 .bracket {
   margin-top: 20px;
 }

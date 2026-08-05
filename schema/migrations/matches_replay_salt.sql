@@ -1,0 +1,1 @@
+ALTER TABLE matches ADD `replay_salt` INT UNSIGNED DEFAULT NULL;
