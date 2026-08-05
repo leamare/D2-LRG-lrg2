@@ -29,6 +29,13 @@
     "avg_heroes" : true,
     "avg_players" : true,
 
+    "teams_wards_summary" : true,
+    "teams_wards_summary_wk" : true,
+    "players_wards_summary" : true,
+    "players_wards_summary_wk" : true,
+    "consumables_records" : true,
+    "consumables_milestones" : true,
+
     "hero_positions" : true,
     "hero_positions_matches" : true,
     "hero_positions_player_data" : true,
@@ -177,6 +184,7 @@
 
     "heroes_combo_graph" : true,
     "players_combo_graph" : true,
+    "meta_levels" : true,
 
     "overview_versions" : true,
     "overview_versions_chart" : true,

@@ -1965,6 +1965,126 @@ table.list thead {
   border-width: 2px;
 }
 
+.build-item-component.meta-hero-card {
+  display: inline-flex;
+  align-items: center;
+  min-width: 118px;
+}
+
+.build-item-component.meta-hero-card.winrate-strong .item-image {
+  border-color: var(--high-wr-bright);
+}
+.build-item-component.meta-hero-card.winrate-weak .item-image {
+  border-color: var(--low-wr-bright);
+}
+.build-item-component.meta-hero-card .item-image {
+  width: 80px;
+  height: auto;
+  aspect-ratio: 128 / 76;
+}
+.build-item-component.meta-hero-card .hero_portrait {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  margin: 0;
+}
+.meta-hero-card-name {
+  font-size: 12px;
+  font-weight: bold;
+  line-height: 1.2;
+}
+.meta-hero-card-wr, .meta-hero-card-role {
+  font-size: 10px;
+  opacity: 0.85;
+}
+.build-item-component.meta-hero-card.winrate-strong .meta-hero-card-wr {
+  color: var(--high-wr-bright);
+}
+.build-item-component.meta-hero-card.winrate-weak .meta-hero-card-wr {
+  color: var(--low-wr-bright);
+}
+.meta-hero-card-role {
+  font-style: italic;
+}
+
+/* tier lists */
+
+table.tier-list-table {
+  table-layout: fixed;
+}
+table.tier-list-table th:first-child, table.tier-list-table td.tier-label {
+  width: 90px;
+}
+table.tier-list-table td {
+  vertical-align: top;
+}
+.tier-list-table .tier-label {
+  font-size: 28px;
+  font-weight: bold;
+  text-align: center;
+  letter-spacing: 2px;
+  vertical-align: middle !important;
+}
+.tier-list-table .tier-row-none .tier-label {
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+
+.tier-range {
+  display: block;
+  font-size: 13px;
+  font-weight: normal;
+  letter-spacing: 0;
+  text-align: center;
+  opacity: 0.85;
+  white-space: nowrap;
+}
+.tier-list-columns .tier-cards .tier-range {
+  margin-bottom: 4px;
+}
+.tier-list-table .tier-cards .build-item-component {
+  vertical-align: top;
+}
+
+.tier-list-table .tier-row-s   { background-color: rgba(255, 92, 92, 0.16); }
+.tier-list-table .tier-row-a   { background-color: rgba(255, 154, 78, 0.15); }
+.tier-list-table .tier-row-b   { background-color: rgba(232, 206, 88, 0.14); }
+.tier-list-table .tier-row-c   { background-color: rgba(130, 202, 106, 0.13); }
+.tier-list-table .tier-row-d   { background-color: rgba(102, 170, 255, 0.12); }
+.tier-list-table .tier-row-e   { background-color: rgba(163, 133, 224, 0.12); }
+.tier-list-table .tier-row-none{ background-color: rgba(128, 128, 128, 0.10); }
+
+.tier-list-table .tier-row-s   .tier-label { color: #ff5c5c; }
+.tier-list-table .tier-row-a   .tier-label { color: #ff9a4e; }
+.tier-list-table .tier-row-b   .tier-label { color: #e8ce58; }
+.tier-list-table .tier-row-c   .tier-label { color: #82ca6a; }
+.tier-list-table .tier-row-d   .tier-label { color: #66aaff; }
+.tier-list-table .tier-row-e   .tier-label { color: #a385e0; }
+.tier-list-table .tier-row-none .tier-label { color: #999; }
+
+.build-item-component.entity-card-player .item-image,
+.build-item-component.entity-card-team .item-image {
+  aspect-ratio: 1 / 1;
+  width: 76px;
+}
+.build-item-component.entity-card-team .item-image {
+  background-color: rgba(0,0,0,0.25);
+}
+.build-item-component.entity-card-team .hero_portrait {
+  width: auto;
+  max-width: 100%;
+  max-height: 100%;
+  min-width: 0;
+  object-fit: contain;
+}
+
+.team-top-heroes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  align-items: center;
+}
+
 .hero-build-timeline-container {
   display: flex;
 }
