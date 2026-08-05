@@ -209,6 +209,7 @@ if (!$_addition_existing) {
   $sql = "INSERT INTO matches (
     matchid, radiantWin, duration, modeID, leagueID, start_date, " .
     (($schema['matches_opener'] ?? false) ? "analysis_status, radiant_opener, seriesid, " : "") .
+    (($schema['matches_mmr'] ?? false) ? "mmr, " : "") .
     "stomp, comeback, cluster, version) VALUES (" .
     $mid . ", " . ($t_match['radiantWin'] ? "true" : "false") . ", " . $t_match['duration'] . ", " .
     $t_match['modeID'] . ", " . $t_match['leagueID'] . ", " . $t_match['start_date'] . ", " .
@@ -217,6 +218,7 @@ if (!$_addition_existing) {
         ($t_match['radiant_opener'] ?? 'null') . ", " . ($t_match['seriesid'] ?? 'null') . ", "
       : ""
     ) .
+    (($schema['matches_mmr'] ?? false) ? (($t_match['mmr'] ?? null) !== null ? (int)$t_match['mmr'] : 'null') . ", " : "") .
     ($t_match['stomp'] ?? 0) . ", " . $t_match['comeback'] . ", " .
     ($t_match['cluster'] ?? 0) . ", " . $t_match['version'] . ");";
 

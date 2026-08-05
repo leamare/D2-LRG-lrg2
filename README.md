@@ -188,6 +188,10 @@ Rules types:
 * `team` - replaces one team ID with another (`team:1:2`)
 * `side` - replaces team ID of a team based on it's side, given sides are either `radiant_team` or `dire_team` (`side:dire_team:1234`)
 * `cluster` - replaces current cluster (`cluster:rep:123`)
+* `hero` - injects/remaps a player `account_id` keyed by hero id, for cases where there is no pre-existing player id to key off of like `player`/`pslot` (`hero:14:12345678`). Values are Steam account_id (not full 64-bit SteamID); `d2_scripts/league_monitor_v2` gets these from GetTopLiveGame. Used for ranked matches.
+* `mmr` - injects the match's average mmr; the id slot is unused (always `0`) since there's only one mmr per match (`mmr:0:6420`). Requires the `mmr` column on `matches` (see below). Used by `d2_scripts/league_monitor_v2` for ranked matches.
+
+`league_monitor_v2` writes ranked lines to `ranked_log_location` in this same `::` matchrule format (`{matchid}::hero:H:account_id::...::mmr:0:M`), so that file can be fed straight back into the fetcher (`-f<file>` or piped into listen mode).
 
 Additional parameters to inject in league json descriptor:
 * `teams_allowlist`

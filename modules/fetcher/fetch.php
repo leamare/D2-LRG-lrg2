@@ -59,6 +59,10 @@ function fetch($match) {
 
   $match_rules = processRules($match);
 
+  if (isset($match_rules['mmr'][0])) {
+    $t_match['mmr'] = (int)$match_rules['mmr'][0];
+  }
+
   if (function_exists('lrg_fetcher_alloc_match_seq')) {
     $match_seq = lrg_fetcher_alloc_match_seq();
   } else {
@@ -1325,6 +1329,14 @@ function fetch($match) {
 
         if (isset($match_rules['pslot'][$i])) {
           $t_matchlines[$i]['playerid'] = (int)$match_rules['pslot'][$i];
+          $player_info = $opendota->player($t_matchlines[$i]['playerid']);
+          $t_new_players[ $t_matchlines[$i]['playerid'] ] = $player_info['profile']['name'] ?? $player_info['profile']['personaname'] ?? "Player ".$t_matchlines[$i]['playerid'];
+        }
+
+        // ranked matches (league_monitor_v2): inject known player_id by hero,
+        // since there is no existing playerid/slot to key off of like above
+        if (isset($match_rules['hero'][ $matchdata['players'][$j]['hero_id'] ])) {
+          $t_matchlines[$i]['playerid'] = (int)$match_rules['hero'][ $matchdata['players'][$j]['hero_id'] ];
           $player_info = $opendota->player($t_matchlines[$i]['playerid']);
           $t_new_players[ $t_matchlines[$i]['playerid'] ] = $player_info['profile']['name'] ?? $player_info['profile']['personaname'] ?? "Player ".$t_matchlines[$i]['playerid'];
         }
