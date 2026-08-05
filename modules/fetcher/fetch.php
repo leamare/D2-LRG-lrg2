@@ -59,9 +59,10 @@ function fetch($match) {
 
   $match_rules = processRules($match);
 
-  if (isset($match_rules['mmr'][0])) {
-    $t_match['mmr'] = (int)$match_rules['mmr'][0];
-  }
+  // Do NOT write mmr (or anything else) onto $t_match here — the OpenDota
+  // populate path below is gated on empty($t_match), so a lone early key
+  // skips matchid/duration/modeID/… entirely and record_match builds
+  // broken SQL. MMR is applied after that block instead.
 
   if (function_exists('lrg_fetcher_alloc_match_seq')) {
     $match_seq = lrg_fetcher_alloc_match_seq();
@@ -963,7 +964,9 @@ function fetch($match) {
     else $t_team_matches = [];
   }
 
-  if (empty($t_match)) {
+  // Gate on matchid, not empty($t_match) — a stray early key (e.g. the old
+  // mmr-before-populate bug) must not skip filling the rest of the row.
+  if (empty($t_match['matchid'])) {
     $t_match['matchid'] = $match;
     if (empty($matchdata['start_time'])) return true;
     $t_match['version'] = get_patchid($matchdata['start_time'], $meta);
@@ -1030,6 +1033,13 @@ function fetch($match) {
         }
       }
     }
+  }
+
+  // Ranked (lm2) / ::mmr:0:N rule — apply after $t_match is fully populated
+  // (OpenDota path above) or loaded from cache/Stratz, so empty($t_match)
+  // gating is never tripped by this alone.
+  if (isset($match_rules['mmr'][0])) {
+    $t_match['mmr'] = (int)$match_rules['mmr'][0];
   }
 
   // teams / players allow/deny lists block 
