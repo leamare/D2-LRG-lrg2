@@ -232,7 +232,7 @@ if (isset($report)) {
     if (isset($report['players']))
       include_once("modules/view/participants.php");
 
-    if (isset($report['pickban']) && (!empty($report['matches']) || !empty($report['teams'])))
+    if (isset($report['pickban']) || (!empty($report['matches']) || !empty($report['teams'])))
       include_once("modules/view/tierlists.php");
   }
 

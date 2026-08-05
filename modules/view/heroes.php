@@ -54,6 +54,10 @@ if (isset($report['hvh']))
 if (isset($report['hvh']))
   include("heroes/counters.php");
 
+if (isset($report['hero_daily_wr']) && isset($report['pickban']) && isset($report['hvh']) && isset($report['hph']) 
+  && ($report['settings']['meta_levels'] ?? true))
+  include("heroes/meta_levels.php");
+
 if (isset($report['hero_winrate_timings']))
   include("heroes/winrate_timings.php");
 
@@ -149,6 +153,11 @@ function rg_view_generate_heroes() {
   //     $res['counters'] = rg_view_generate_heroes_counters();
   //   }
   // }
+  if (isset($report['hero_daily_wr']) && isset($report['pickban']) && isset($report['hvh']) && isset($report['hph']) && ($report['settings']['meta_levels'] ?? true)) {
+    if (check_module($parent."meta_levels")) {
+      $res['meta_levels'] = rg_view_generate_heroes_meta_levels();
+    }
+  }
   if (isset($report['hph'])) {
     if (check_module($parent."hph")) {
       $res['hph'] = rg_view_generate_heroes_hph();
