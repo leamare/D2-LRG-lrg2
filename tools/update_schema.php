@@ -38,6 +38,7 @@ function lrg_load_report_schema(mysqli $conn): array {
 
 $migration_order = [
   'matches_opener',
+  'matches_mmr',
   'adv_matchlines_roles',
   'players_fixname',
   'draft_order',

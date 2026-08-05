@@ -9,6 +9,7 @@ $schema = [
   'skill_builds' => false,
   'starting_items' => false,
   'matches_opener' => false, // radiant_opener, seriesid, analysis_status
+  'matches_mmr' => false, // mmr (ranked matches, see league_monitor_v2)
   'adv_matchlines_roles' => false, // role, lane_won, networth
   'players_fixname' => false, // name_fixed
   'draft_order' => false, // order
@@ -82,6 +83,9 @@ for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row(
   }
   if ($row[0] == "seriesid") {
     $schema['series'] = true;
+  }
+  if ($row[0] == "mmr") {
+    $schema['matches_mmr'] = true;
   }
 }
 $query_res->free_result();
