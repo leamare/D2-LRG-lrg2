@@ -200,11 +200,20 @@ public function process() {
     // positions
     if (isset($report['hero_positions'])) {
       $req = $endpoints['positions']($mods, $vars, $report);
-      unset($req['total']);
+      $res['flex'] = $req['flex'][ $vars['heroid'] ] ?? null;
+      unset($req['total'], $req['flex']);
       $res['positions'] = [];
+      $main_role = null;
+      $main_role_matches = 0;
       foreach($req as $role => $heroes) {
-        $res['positions'][$role] = $heroes[ $vars['heroid'] ] ?? null;
+        $pos = $heroes[ $vars['heroid'] ] ?? null;
+        $res['positions'][$role] = $pos;
+        if ($pos && ($pos['matches_s'] ?? 0) > $main_role_matches) {
+          $main_role_matches = $pos['matches_s'];
+          $main_role = $role;
+        }
       }
+      $res['common_position'] = $main_role;
       unset($req);
     }
 

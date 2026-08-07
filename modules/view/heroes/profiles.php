@@ -1,6 +1,7 @@
 <?php
 
 include_once($root."/modules/view/functions/itembuilds.php");
+include_once($root."/modules/view/functions/ranking.php");
 include_once($root."/modules/view/generators/item_component.php");
 
 include_once($root."/modules/view/generators/laning.php");
@@ -139,16 +140,27 @@ function rg_view_generate_heroes_profiles() {
 
   $scripts = [];
 
+  $flex_score = null;
+
   if (isset($report['hero_positions'])) {
     if (is_wrapped($report['hero_positions'])) $report['hero_positions'] = unwrap_data($report['hero_positions']);
 
     $roles = [];
+    $matches_by_bucket = [ $hero => [] ];
+    $n_buckets = 0;
 
     generate_positions_strings();
 
     for ($i=1; $i>=0; $i--) {
       for ($j=($i ? 0 : 5); $j<6 && $j>=0; ($i ? $j++ : $j--)) {
-        if (empty($report['hero_positions'][$i][$j]) || empty($report['hero_positions'][$i][$j][$hero])) {
+        if (empty($report['hero_positions'][$i][$j])) {
+          continue;
+        }
+
+        $n_buckets++;
+        $matches_by_bucket[$hero]["$i.$j"] = $report['hero_positions'][$i][$j][$hero]['matches_s'] ?? 0;
+
+        if (empty($report['hero_positions'][$i][$j][$hero])) {
           continue;
         }
         
@@ -169,11 +181,19 @@ function rg_view_generate_heroes_profiles() {
       });
 
       $main_role = array_keys($roles)[0];
+      $flex_score = positions_flex_enthropy($matches_by_bucket, $n_buckets)[$hero] ?? null;
     }
   }
 
-  $data = array_slice($data, 0, 2, true) + 
-    [ "common_position" => isset($main_role) ? locale_string("position_".$main_role) : locale_string("none") ] + 
+  $profile_extras = [
+    "common_position" => isset($main_role) ? locale_string("position_".$main_role) : locale_string("none"),
+  ];
+  if ($flex_score !== null) {
+    $profile_extras["flex_enthropy"] = number_format($flex_score * 100, 1)."%";
+  }
+
+  $data = array_slice($data, 0, 2, true) +
+    $profile_extras +
     array_slice($data, 2, count($data)-1);
 
   $rare = rand(0, 100);
