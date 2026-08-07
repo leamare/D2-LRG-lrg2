@@ -149,6 +149,14 @@ if ($schema['leagues'] ?? false) {
   }
 }
 
+// --- Missing team IDs recovered from rosters ---
+if (($lg_settings['main']['teams'] ?? false) && function_exists('lrg_fill_missing_team_matches')) {
+  if (!isset($t_team_matches) || !is_array($t_team_matches)) $t_team_matches = [];
+  lrg_fill_missing_team_matches(
+    $conn, $t_team_matches, $t_matchlines, (int)$match, (int)$t_match['start_date']
+  );
+}
+
 // --- Teams ---
 if ($lg_settings['main']['teams'] ?? false) {
   $new_teams = array_filter($t_teams, fn($t) => !$t['added']);

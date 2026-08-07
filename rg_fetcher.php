@@ -12,6 +12,7 @@ include_once("modules/fetcher/processRules.php");
 include_once("modules/fetcher/fetcher_parallel_sync.php");
 include_once("modules/fetcher/opendota_handler.php");
 include_once("modules/fetcher/bot_match_detector.php");
+include_once("modules/fetcher/resolve_team_by_roster.php");
 include_once("modules/fetcher/fetch.php");
 include_once("modules/fetcher/stratz.php");
 include_once("modules/commons/generate_tag.php");
