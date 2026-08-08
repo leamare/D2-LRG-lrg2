@@ -1,6 +1,7 @@
 <?php 
 
 include_once($root."/modules/view/functions/itembuilds.php");
+include_once($root."/modules/view/generators/skill_component.php");
 
 function items_builds_collect_list(array $report): array {
   $res = [];
@@ -360,6 +361,41 @@ public function process() {
         'builds' => $sti_builds,
         'context' => $sti_matches_context,
       ];
+    }
+
+    if (!empty($report['skill_builds']['priority'])) {
+      $sb_rid = array_search($crole, ROLES_IDS_SIMPLE);
+      if ($sb_rid === false) $sb_rid = 0;
+
+      $sb_data = skillbuild_collect($hero, $sb_rid);
+      if (empty($sb_data['priority']) && $sb_rid !== 0) {
+        $sb_rid = 0;
+        $sb_data = skillbuild_collect($hero, $sb_rid);
+      }
+
+      if (!empty($sb_data['priority'])) {
+        // top popularity + top rank, deduped to one row if they're the same variant
+        $featured = skillbuild_featured_rows($sb_data['priority']);
+
+        $talents_overview = [];
+        foreach (SB_TALENT_LEVELS_VIEW as $tier => $level) {
+          $options = $sb_data['tiers'][$tier] ?? [];
+          sb_talent_ranking($options);
+          [ $left, $right, $extra ] = sb_talent_lr($hero, $tier, $options);
+          $talents_overview[] = [
+            'level' => $level,
+            'left' => $left,
+            'right' => $right,
+          ];
+        }
+
+        $res['skill_build'] = [
+          'role' => $sb_rid,
+          'featured_priorities' => $featured,
+          'talents_overview' => $talents_overview,
+          'ultimate' => $sb_data['ultimate'],
+        ];
+      }
     }
 
     $enchantment_tiers = itembuild_get_enchantment_tiers($hero, $report, $report['items']['stats'][$hero] ?? []);
