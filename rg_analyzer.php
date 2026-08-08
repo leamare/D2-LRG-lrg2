@@ -347,6 +347,12 @@ if ($lg_settings['ana']['skill_builds'] && $schema['skill_builds']) {
   require_once("modules/analyzer/skill_builds.php");
 }
 
+// ABILITY DRAFT
+
+if (($lg_settings['ana']['ability_draft'] ?? false) && $schema['skill_builds']) {
+  require_once("modules/analyzer/ability_draft.php");
+}
+
 // FANTASY MVP
 
 if ($lg_settings['main']['fantasy'] && $schema['fantasy_mvp']) {

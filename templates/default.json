@@ -151,6 +151,10 @@
 
     "items": true,
     "skill_builds": false,
+    "skill_builds_roles": true,
+    "skill_builds_talents": true,
+    "skill_builds_limit": true,
+    "ability_draft": false,
     "starting_items": true,
     "starting_builds": true,
     "consumables": false,
