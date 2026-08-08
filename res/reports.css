@@ -1898,6 +1898,269 @@ table.list thead {
   box-shadow: none;
 }
 
+/* Skill builds: spell icons are square (unlike the 86x62 item icon box) */
+
+.build-item-component.spell .item-image {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 0;
+}
+.build-item-component.spell.lg .item-image {
+  width: 64px;
+  height: 64px;
+}
+.build-item-component.spell .item-image img.spell_icon {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  object-fit: cover;
+}
+.build-item-component.spell.ultimate .item-image {
+  border-color: var(--content-header);
+  box-shadow: 0 0 6px var(--content-header);
+}
+.build-item-component.spell.inline {
+  vertical-align: middle;
+  margin: 0 8px 0 0 !important;
+}
+
+/* Icon has labels (first/maxed) under it in priority rows, needs the gap back;
+   the timeline is icon-only so it keeps the margin-bottom:0 default above. */
+.skillbuild-priority-row .build-item-component.spell .item-image {
+  margin-bottom: 5px;
+}
+
+.build-item-arrow-equal:after {
+  content: '=';
+}
+
+.skillbuild-others-label {
+  display: inline-flex;
+  align-items: center;
+  height: 48px;
+  font-size: 16px;
+  font-style: italic;
+  color: var(--caption);
+  opacity: 0.8;
+}
+
+/* Skill builds: overview two-column layout (featured priorities | talent overview) */
+
+.skillbuild-overview-columns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  align-items: flex-start;
+  justify-content: center;
+  width: 82%;
+  margin-top: 30px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.skillbuild-overview-column {
+  flex: 1;
+  min-width: 420px;
+}
+.skillbuild-overview-column.skillbuild-talents-col {
+  flex: 1.3;
+  min-width: 480px;
+}
+
+/* Both captions match table.list caption's own text styling. */
+.skillbuild-featured-caption, .skillbuild-timeline-caption {
+  font-size: 24px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  text-align: center;
+  font-weight: bold;
+  color: var(--caption);
+  margin-bottom: 30px;
+}
+/* Wraps the timeline caption + tabs + panels together, same width/margin as
+   table.list, so the tabs and icon rows line up under the caption instead of
+   spanning the full content width independently of it. */
+.skillbuild-timeline-section {
+  width: 82%;
+  margin: 30px auto 0;
+}
+.skillbuild-featured-row {
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--table-border);
+}
+.skillbuild-featured-row:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+/* Shrink-wraps to the priority icon row's width, so the summary line below
+   spreads only across that width instead of the whole column. */
+.skillbuild-featured-build {
+  display: inline-flex;
+  flex-direction: column;
+}
+.skillbuild-priority-summary {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--caption);
+  opacity: 0.75;
+}
+
+/* Skill builds: side-by-side captioned tables (skills | attributes) - captions
+   use the site-wide table.list caption style, no override needed here. */
+
+.skillbuild-columns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  align-items: flex-start;
+}
+.skillbuild-columns > .skillbuild-column {
+  flex: 1;
+  min-width: 360px;
+}
+
+/* Skill builds: talent table (mimics Valve's in-game talent panel). Talent
+   options are their own component (skilltalent-card), not the icon-oriented
+   build-item-component - talents have no icon, so that shape doesn't fit. */
+
+table.skilltalent-table {
+  margin: 20px auto 0;
+}
+/* Sits next to .skillbuild-featured-caption (a plain div with no top margin
+   of its own) in the overview columns - drop the table's default top margin,
+   and let the caption's margin-bottom fall back to the site-wide table.list
+   caption rule (30px), so both captions start and end at the same level. */
+table.skilltalent-table.compact {
+  margin-top: 0;
+}
+.skilltalent-level-cell {
+  width: 40px;
+  text-align: center;
+  font-weight: bold;
+  color: var(--caption);
+  vertical-align: middle;
+}
+.skilltalent-options-cell {
+  padding: 4px 12px 4px 0;
+}
+.skilltalent-options-row {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+}
+.skilltalent-card {
+  flex: 1;
+  min-width: 0; /* flex items default to min-width:auto, which blocks text wrap and overflows instead */
+  display: flex;
+  flex-direction: column;
+  min-height: 52px;
+  padding: 8px 12px;
+  border-radius: 5px;
+  background-color: rgba(0,0,0,0.2);
+  border: 2px solid var(--selectors-bg);
+  transition: 250ms all linear;
+}
+.skilltalent-card.tbc {
+  opacity: 0.5;
+  align-items: center;
+  justify-content: center;
+}
+/* Reserves a 2-line-tall zone so a 1-line name sits vertically centered in it
+   (via its own flex) rather than pinned to the top; a 3+ line name just grows
+   past the minimum, and the row's align-items:stretch (below) makes every
+   sibling card in that row match its height. */
+.skilltalent-name {
+  display: flex;
+  align-items: center;
+  min-height: 2.6em;
+  font-size: 15px;
+  font-weight: bold;
+  color: var(--caption);
+  line-height: 1.3em;
+  margin-bottom: 6px;
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+/* margin-top:auto eats any extra height a taller sibling card forces onto this
+   one, so the stats block always sits flush at the bottom regardless of how
+   many lines the name above took. */
+.skilltalent-stats {
+  margin-top: auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px 10px;
+}
+.skilltalent-stat {
+  font-size: 12px;
+  color: var(--caption);
+  opacity: 0.8;
+}
+.skilltalent-card.popular {
+  background-color: var(--content-header);
+}
+/* Text color stays the normal caption color - these vars are dark (meant for
+   glow, see .winrate-strong/.winrate-weak on item components), not for fill. */
+.skilltalent-card.winrate-strong .skilltalent-stat.wr {
+  opacity: 1;
+  font-weight: bold;
+  text-shadow: 0 0 10px var(--high-wr-bright), 0 0 7px var(--high-wr-bright), 0 0 5px var(--high-wr-bright), 0 0 5px var(--high-wr-bright), 0 0 5px var(--high-wr-bright),
+               0 0 10px var(--high-wr-bright), 0 0 7px var(--high-wr-bright), 0 0 5px var(--high-wr-bright), 0 0 5px var(--high-wr-bright), 0 0 5px var(--high-wr-bright),
+               0 0 5px var(--high-wr-bright), 0 0 5px var(--high-wr-bright), 0 0 5px var(--high-wr-bright);
+}
+.skilltalent-card.winrate-weak .skilltalent-stat.wr {
+  opacity: 1;
+  font-weight: bold;
+  text-shadow: 0 0 10px var(--low-wr-bright), 0 0 7px var(--low-wr-bright), 0 0 5px var(--low-wr-bright), 0 0 5px var(--low-wr-bright), 0 0 5px var(--low-wr-bright),
+               0 0 10px var(--low-wr-bright), 0 0 7px var(--low-wr-bright), 0 0 5px var(--low-wr-bright), 0 0 5px var(--low-wr-bright), 0 0 5px var(--low-wr-bright),
+               0 0 5px var(--low-wr-bright), 0 0 5px var(--low-wr-bright), 0 0 5px var(--low-wr-bright);
+}
+table.skilltalent-table.compact .skilltalent-card {
+  min-height: 40px;
+  padding: 6px 10px;
+}
+table.skilltalent-table.compact .skilltalent-name {
+  font-size: 13px;
+}
+
+/* Skill builds: reconstructed featured build timeline */
+
+.skillbuild-timeline-tabs {
+  display: flex;
+  justify-content: flex-start;
+  gap: 8px;
+  margin: 20px 0 12px;
+}
+.skillbuild-timeline-tab {
+  cursor: pointer;
+  padding: 4px 14px;
+  background-color: var(--selectors-bg);
+  color: var(--caption);
+  opacity: 0.6;
+  font-size: 13px;
+  transition: 150ms all linear;
+}
+.skillbuild-timeline-tab:hover {
+  opacity: 0.85;
+}
+.skillbuild-timeline-tab.active {
+  opacity: 1;
+  background-color: var(--content-header);
+  font-weight: bold;
+}
+.skillbuild-timeline-panel {
+  display: none;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: flex-start;
+  width: 100%;
+}
+.skillbuild-timeline-panel.active {
+  display: flex;
+}
+
 .build-item-component.small, .build-item-component.smallest {
   display: inline-flex;
   flex-basis: 100%;

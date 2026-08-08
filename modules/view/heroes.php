@@ -33,6 +33,9 @@ if (isset($report['items']) && isset($report['items']['progrole'])) {
   ];
 }
 
+if (!empty($report['skill_builds']))
+  include("heroes/skillbuilds.php");
+
 if (isset($report['hero_laning']))
   include("heroes/laning.php");
 
@@ -121,6 +124,11 @@ function rg_view_generate_heroes() {
   if (isset($report['hero_variants'])) {
     if(check_module($parent."variantspb")) {
       $res['pickban'] = rg_view_generate_heroes_variants_pickban();
+    }
+  }
+  if (!empty($report['skill_builds'])) {
+    if(check_module($parent."skillbuilds")) {
+      $res['skillbuilds'] = rg_view_generate_heroes_skillbuilds();
     }
   }
   if (isset($report['hero_laning'])) {

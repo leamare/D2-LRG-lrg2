@@ -2,6 +2,7 @@
 
 include_once($root."/modules/view/functions/itembuilds.php");
 include_once($root."/modules/view/generators/item_component.php");
+include_once($root."/modules/view/generators/skill_component.php");
 
 const STARTING_GOLD = 600;
 
@@ -592,10 +593,26 @@ function rg_view_generate_items_builds() {
     $reslocal .= "</div>";
   }
 
+  if (!empty($report['skill_builds']['priority'])) {
+    $sb_rid = array_search($crole, ROLES_IDS_SIMPLE);
+    if ($sb_rid === false) $sb_rid = 0;
+
+    $sb_data = skillbuild_collect($hero, $sb_rid);
+    if (empty($sb_data['priority']) && $sb_rid !== 0) {
+      $sb_rid = 0;
+      $sb_data = skillbuild_collect($hero, $sb_rid);
+    }
+
+    if (!empty($sb_data['priority'])) {
+      $reslocal .= "<div class=\"content-header\">".locale_string("skill_build")."</div>";
+      $reslocal .= skillbuild_render_overview($hero, $sb_rid, $sb_data);
+    }
+  }
+
   $reslocal .= "<div class=\"content-header\">".locale_string("builds_main_build")."</div>";
 
   $reslocal .= "<div class=\"hero-build-overview-container hero-build\">";
-  
+
   $overview_categories = [
     "early" => [],
     "core" => [],
