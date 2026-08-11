@@ -134,6 +134,8 @@ $icons_provider = "https://courier.spectral.gg/images/dota/icons/%HERO%.png";
 $item_icons_provider = "https://courier.spectral.gg/images/dota/items/%HERO%.png";
 $item_profile_icons_provider = "https://courier.spectral.gg/images/dota/profile_badges/%HERO%.png?size=!source";
 
+$spell_icons_provider = "https://courier.spectral.gg/images/dota/spellicons/%HERO%.png";
+
 $link_provider_icon = "https://courier.spectral.gg/images/other/link_providers/%LPN%.png?size=smaller";
 $league_logo_provider = "https://courier.spectral.gg/images/dota/leagues/%LID%_ticket.png?size=smaller";
 $league_logo_banner_provider = "https://courier.spectral.gg/images/dota/leagues/%LID%_banner.png";

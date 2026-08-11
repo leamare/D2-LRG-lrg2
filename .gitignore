@@ -24,6 +24,7 @@ ___*
 _default.json
 nohup.out
 ex.out
+.DS_Store
 
 # Testing files
 test/

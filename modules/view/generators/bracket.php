@@ -415,6 +415,13 @@ function bracket_json($result) {
           }
           $stage['groups'][] = ['name' => bracket_name($g['name']), 'format' => $g['format'], 'standings' => $standings];
         }
+        if (!empty($st['form_months']) && !empty($st['form'])) {
+          $stage['form_months'] = array_values($st['form_months']);
+          $stage['form'] = [];
+          foreach ($st['form'] as $tid => $months) {
+            $stage['form'][(string)$tid] = $months;
+          }
+        }
         if (!empty($st['tiebreakers']))
           $stage['tiebreakers'] = array_map(fn($s) => bracket_series_obj($s, $cards), $st['tiebreakers']);
         if (!empty($st['decider']['series']))

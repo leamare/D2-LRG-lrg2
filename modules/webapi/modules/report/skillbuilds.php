@@ -6,6 +6,15 @@ $repeatVars['heroes-skillbuilds'] = ['heroid'];
 // modules/view/functions/skillbuilds.php, auto-imported into both this (webapi)
 // and the view runtime - see that file for why.
 
+function sb_matches_from_priority($rows) {
+  $matches = array_sum(array_column($rows, 'matches'));
+  $wins = array_sum(array_column($rows, 'wins'));
+  return [
+    'matches' => $matches,
+    'winrate' => $matches ? round($wins / $matches, 4) : 0,
+  ];
+}
+
 #[Endpoint(name: 'heroes-skillbuilds')]
 #[Description('Skill build stats for a hero: priority, first point/maxed at per skill, talents, attribute (stat) points - by role or total')]
 #[ModlineVar(name: 'heroid', schema: ['type' => 'integer'], description: 'Hero id')]
@@ -15,7 +24,7 @@ class HeroesSkillbuilds extends EndpointTemplate {
 public function process() {
   $vars = $this->vars; $report = $this->report;
 
-  if (empty($report['skill_builds']['matches']))
+  if (empty($report['skill_builds']['priority']))
     throw new UserInputException("No skill builds data");
 
   $rid = 0;
@@ -24,30 +33,32 @@ public function process() {
     if ($found !== false) $rid = (int)$found;
   }
 
-  $matches = sb_unwrap_role($report['skill_builds']['matches'], $rid);
+  $priorityByHero = sb_unwrap_rows($report['skill_builds']['priority'], $rid);
 
   if (!isset($vars['heroid'])) {
-    return array_values(array_map('intval', array_keys($matches)));
+    return array_values(array_map('intval', array_keys($priorityByHero)));
   }
 
   $hero = (int)$vars['heroid'];
 
-  if (!isset($matches[$hero]) && $rid !== 0) {
+  if (!isset($priorityByHero[$hero]) && $rid !== 0) {
     $rid = 0;
-    $matches = sb_unwrap_role($report['skill_builds']['matches'], $rid);
+    $priorityByHero = sb_unwrap_rows($report['skill_builds']['priority'], $rid);
   }
 
-  if (!isset($matches[$hero])) return [];
+  if (!isset($priorityByHero[$hero])) return [];
 
-  $priority = sb_decode_featured_build(
-    sb_decode_priority(sb_unwrap_rows($report['skill_builds']['priority'], $rid)[$hero] ?? [])
-  );
+  $priority = sb_decode_featured_build(sb_decode_priority($priorityByHero[$hero]));
   sb_priority_ranking($priority);
+
+  $section = $report['skill_builds']['matches'] ?? [];
+
+  $matches = sb_unwrap_role($section, $rid);
 
   $res = [
     'hero' => $hero,
     'role' => $rid,
-    'matches' => $matches[$hero],
+    'matches' => $matches[$hero] ?? sb_matches_from_priority($priority),
     'priority' => $priority,
     'skills' => sb_unwrap_rows($report['skill_builds']['skills'], $rid)[$hero] ?? [],
     'attributes' => sb_unwrap_role($report['skill_builds']['attributes'], $rid)[$hero] ?? [],
@@ -67,10 +78,10 @@ public function process() {
 class HeroesSkillbuildsList extends EndpointTemplate {
 public function process() {
   $report = $this->report;
-  if (empty($report['skill_builds']['matches']))
+  if (empty($report['skill_builds']['priority']))
     throw new UserInputException("No skill builds data");
 
-  return array_values(array_map('intval', array_keys(sb_unwrap_role($report['skill_builds']['matches'], 0))));
+  return array_values(array_map('intval', array_keys(sb_unwrap_role($report['skill_builds']['priority'], 0))));
 }
 }
 
