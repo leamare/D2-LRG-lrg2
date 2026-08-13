@@ -451,8 +451,13 @@ function tb_analyze_interest(array $event, array $teams, string $stage_name = 'b
     $sb = (int)($s['score'][$b] ?? 0);
 
     foreach ([$a, $b] as $t) {
-      $form[$t][$mk] ??= ['w' => 0, 'l' => 0, 'd' => 0];
+      $form[$t][$mk] ??= ['w' => 0, 'l' => 0, 'd' => 0, 'mw' => 0, 'ml' => 0];
     }
+
+    $form[$a][$mk]['mw'] += $sa;
+    $form[$a][$mk]['ml'] += $sb;
+    $form[$b][$mk]['mw'] += $sb;
+    $form[$b][$mk]['ml'] += $sa;
 
     if ($sa === $sb) {
       $form[$a][$mk]['d']++;

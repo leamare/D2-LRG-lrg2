@@ -37,12 +37,16 @@ function team_card($tid, $full = false) {
 
   $output .= "<div class=\"team-info-block\">".
                 "<div class=\"section-caption\">".locale_string("active_roster").":</div>";
+  $roster = $report['teams'][$tid]['active_roster'] ?? [];
+  if (!is_array($roster)) {
+    $roster = [];
+  }
   $player_pos = [];
-  foreach($report['teams'][$tid]['active_roster'] as $player) {
+  foreach ($roster as $player) {
     if (!isset($report['players'][$player])) continue;
     $player_pos[$player] = reset($report['players_additional'][$player]['positions']);
   }
-  uasort($report['teams'][$tid]['active_roster'], function($a, $b) use ($player_pos) {
+  uasort($roster, function($a, $b) use ($player_pos) {
     if (!isset($player_pos[$a]['core']) || !isset($player_pos[$b]['core'])) return 0;
     if ($player_pos[$a]['core'] > $player_pos[$b]['core']) return -1;
     if ($player_pos[$a]['core'] < $player_pos[$b]['core']) return 1;
@@ -50,7 +54,7 @@ function team_card($tid, $full = false) {
     if ($player_pos[$a]['lane'] > $player_pos[$b]['lane']) return ($player_pos[$a]['core'] ? 1 : -1)*1;
     return 0;
   });
-  foreach($report['teams'][$tid]['active_roster'] as $player) {
+  foreach ($roster as $player) {
     if (!isset($report['players'][$player])) continue;
     $position = $player_pos[$player];
     $output .= "<div class=\"team-info-line\">".player_link($player, true, true).
