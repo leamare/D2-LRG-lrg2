@@ -160,7 +160,8 @@ function rg_view_generator_teams_summary($context = null, $short_flag = false) {
     $el['matches'] = $report['teams'][$team_id]['matches_total'] ?? 0;
     $el['winrate'] = ($report['teams'][$team_id]['matches_total'] ?? 0) ? 
       ($report['teams'][$team_id]['wins'] ?? 0)/($report['teams'][$team_id]['matches_total']) : 0;
-    if (empty($el['matches_median_duration '])) $el['matches_median_duration'] = $el['avg_match_len'] ?? 0;
+    // Fallback only when the analyzer never produced a median (older reports).
+    if (!isset($el['matches_median_duration'])) $el['matches_median_duration'] = $el['avg_match_len'] ?? 0;
 
     $res .= "<tr>".
       "<td data-col-group=\"_index\">".team_logo($team_id)."</td>".
