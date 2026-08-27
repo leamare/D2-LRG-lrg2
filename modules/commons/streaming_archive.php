@@ -18,7 +18,7 @@ class StreamingArchive {
     private $buffer_size;
     private $compression_level;
 
-    public function __construct($output_path, $compression_level = 9, $buffer_size = 65536) {
+    public function __construct($output_path, $compression_level = 6, $buffer_size = 1048576) {
         $this->buffer_size = $buffer_size;
         $this->compression_level = max(1, min(9, $compression_level));
         
@@ -28,7 +28,10 @@ class StreamingArchive {
         }
     }
 
-    public function addFile($name, $real_path) {
+    /**
+     * @param callable|null $on_progress function(int $bytes_written, int $total_bytes): void
+     */
+    public function addFile($name, $real_path, $on_progress = null) {
         if (!file_exists($real_path)) {
             throw new Exception("File does not exist: $real_path");
         }
@@ -52,7 +55,7 @@ class StreamingArchive {
         $this->current_file_pos = 0;
 
         $this->writeHeader();
-        $this->writeFileContent();
+        $this->writeFileContent($on_progress);
         $this->writePadding();
 
         fclose($this->current_file);
@@ -101,7 +104,7 @@ class StreamingArchive {
         gzwrite($this->gz, $header);
     }
 
-    private function writeFileContent() {
+    private function writeFileContent($on_progress = null) {
         while ($this->current_file_pos < $this->current_file_size) {
             $remaining = $this->current_file_size - $this->current_file_pos;
             $to_read = min($this->buffer_size, $remaining);
@@ -111,6 +114,9 @@ class StreamingArchive {
             }
             gzwrite($this->gz, $data);
             $this->current_file_pos += strlen($data);
+            if ($on_progress) {
+                $on_progress($this->current_file_pos, $this->current_file_size);
+            }
         }
     }
 

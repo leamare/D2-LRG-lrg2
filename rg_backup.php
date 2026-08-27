@@ -3,9 +3,279 @@
 include_once("head.php");
 include_once("modules/commons/streaming_archive.php");
 
-ini_set('memory_limit', '16192M');
+// Streaming dump keeps a bounded working set; 2G is enough even for wide JSON rows.
+ini_set('memory_limit', '2048M');
 const DISK_CACHE_COUNTER = 25000;
 const QUERY_COUNTER = 10000;
+const BACKUP_WRITE_BUFFER = 262144;
+const BACKUP_PROGRESS_EVERY = 2000;
+const BACKUP_MATCHID_BATCH = 250;
+const BACKUP_SOCKET_TIMEOUT = 28800;
+
+if (function_exists('ob_implicit_flush')) {
+  ob_implicit_flush(true);
+}
+while (ob_get_level() > 0) {
+  ob_end_flush();
+}
+
+function backup_connect($database) {
+  $conn = lrg_mysqli_connect($database);
+  if ($conn->connect_error) {
+    die("[F] DB connect failed: ".$conn->connect_error."\n");
+  }
+  $conn->set_charset('utf8mb4');
+  $conn->query("SET NAMES utf8mb4");
+  $timeout = (int)BACKUP_SOCKET_TIMEOUT;
+  $conn->query("SET SESSION net_read_timeout=$timeout");
+  $conn->query("SET SESSION net_write_timeout=$timeout");
+  $conn->query("SET SESSION wait_timeout=$timeout");
+  @ini_set('default_socket_timeout', (string)$timeout);
+  @ini_set('mysqlnd.net_read_timeout', (string)$timeout);
+  return $conn;
+}
+
+function backup_progress($prefix, $done, $total = 0, $final = false, $approx = true) {
+  static $last_len = 0;
+  static $last_t = 0.0;
+  static $last_prefix = '';
+
+  $now = microtime(true);
+  if (!$final && $prefix === $last_prefix && ($now - $last_t) < 0.2) {
+    return;
+  }
+  $last_t = $now;
+  $last_prefix = $prefix;
+
+  $done = (int)$done;
+  $total = (int)$total;
+  $done_s = number_format($done);
+
+  if ($total > 0) {
+    $pct = $final ? 100.0 : min(99.9, 100.0 * $done / $total);
+    $count = $final ? $done_s : $done_s.($approx ? ' / ~' : ' / ').number_format($total);
+    $line = sprintf("%s %5.1f%% (%s)", $prefix, $pct, $count);
+  } else {
+    $line = sprintf("%s %s", $prefix, $done_s);
+  }
+  if ($final) {
+    $line .= " OK.";
+  }
+
+  $pad = $last_len > strlen($line) ? str_repeat(' ', $last_len - strlen($line)) : '';
+  echo "\r".$line.$pad;
+  $last_len = strlen($line);
+  if ($final) {
+    echo "\n";
+    $last_len = 0;
+    $last_prefix = '';
+  }
+  if (defined('STDOUT')) {
+    fflush(STDOUT);
+  }
+}
+
+function backup_table_row_estimate(mysqli $conn, $db, $table) {
+  $db_e = $conn->real_escape_string($db);
+  $t_e = $conn->real_escape_string($table);
+  $res = $conn->query(
+    "SELECT TABLE_ROWS FROM information_schema.TABLES ".
+    "WHERE TABLE_SCHEMA='{$db_e}' AND TABLE_NAME='{$t_e}'"
+  );
+  if (!$res) {
+    return 0;
+  }
+  $row = $res->fetch_row();
+  $res->free();
+  return (int)($row[0] ?? 0);
+}
+
+function backup_csv_line(array $row) {
+  $els = [];
+  foreach ($row as $r) {
+    if ($r === null) {
+      $els[] = '';
+      continue;
+    }
+    if (strpos($r, ',') !== false || (isset($r[0]) && $r[0] == '"')) {
+      $els[] = '"'.str_replace('"', '""', $r).'"';
+    } else {
+      $els[] = $r;
+    }
+  }
+  return implode(',', $els)."\n";
+}
+
+function backup_ident($name) {
+  return '`'.str_replace('`', '``', $name).'`';
+}
+
+function backup_sql_value(mysqli $conn, $v) {
+  if ($v === null) {
+    return 'NULL';
+  }
+  if (is_int($v) || is_float($v) || (is_string($v) && preg_match('/^-?\d+(\.\d+)?$/', $v))) {
+    return $v;
+  }
+  return "'".$conn->real_escape_string((string)$v)."'";
+}
+
+function backup_col_index(array $schema, $col) {
+  foreach ($schema as $i => $name) {
+    if (strcasecmp($name, $col) === 0) {
+      return $i;
+    }
+  }
+  return false;
+}
+
+/**
+ * How to page a table without OFFSET.
+ * unique / unique_tuple: keyset on PRIMARY/UNIQUE (index range, not a full skip).
+ * group: DISTINCT matchid windows — used when there is no unique key (items, draft, …).
+ * scan: last resort, one unbuffered SELECT * (small leftover tables).
+ */
+function backup_table_chunk_spec(mysqli $conn, $table, array $schema) {
+  $res = $conn->query("SHOW INDEX FROM ".backup_ident($table));
+  if ($res === FALSE) {
+    return ['mode' => 'scan'];
+  }
+
+  $indexes = [];
+  while ($row = $res->fetch_assoc()) {
+    $name = $row['Key_name'];
+    if (!isset($indexes[$name])) {
+      $indexes[$name] = [
+        'unique' => ((int)$row['Non_unique'] === 0),
+        'cols' => [],
+      ];
+    }
+    $indexes[$name]['cols'][(int)$row['Seq_in_index']] = $row['Column_name'];
+  }
+  $res->free();
+
+  foreach ($indexes as &$idx) {
+    ksort($idx['cols']);
+    $idx['cols'] = array_values($idx['cols']);
+  }
+  unset($idx);
+
+  if (isset($indexes['PRIMARY']) && count($indexes['PRIMARY']['cols']) === 1) {
+    return ['mode' => 'unique', 'cols' => $indexes['PRIMARY']['cols']];
+  }
+  foreach ($indexes as $idx) {
+    if ($idx['unique'] && count($idx['cols']) === 1) {
+      return ['mode' => 'unique', 'cols' => $idx['cols']];
+    }
+  }
+  if (isset($indexes['PRIMARY'])) {
+    return ['mode' => 'unique_tuple', 'cols' => $indexes['PRIMARY']['cols']];
+  }
+  foreach ($indexes as $idx) {
+    if ($idx['unique']) {
+      return ['mode' => 'unique_tuple', 'cols' => $idx['cols']];
+    }
+  }
+
+  foreach ($schema as $col) {
+    if (strcasecmp($col, 'matchid') === 0) {
+      return ['mode' => 'group', 'cols' => [$col]];
+    }
+  }
+
+  return ['mode' => 'scan'];
+}
+
+function backup_row_key(array $row, array $schema, array $spec) {
+  $vals = [];
+  foreach ($spec['cols'] as $col) {
+    $i = backup_col_index($schema, $col);
+    $vals[] = ($i === false) ? null : $row[$i];
+  }
+  return $vals;
+}
+
+function backup_reconnect($database, ?mysqli $conn = null) {
+  if ($conn) {
+    @$conn->close();
+  }
+  if (function_exists('gc_collect_cycles')) {
+    gc_collect_cycles();
+  }
+  return backup_connect($database);
+}
+
+function backup_is_gone_away($error) {
+  return (bool)preg_match('/gone away|lost connection|timeout|reset by peer|server has gone/i', $error);
+}
+
+/**
+ * Fetch one unbuffered result into the CSV, updating $buf / $i / $last_key.
+ * Returns [rows_in_chunk, last_key, ok].
+ */
+function backup_fetch_chunk(mysqli $conn, $sql, array $schema, array $spec, $fp, &$buf, &$i, $last_key, $prefix = '', $estimate = 0) {
+  $query_res = $conn->query($sql, MYSQLI_USE_RESULT);
+  if ($query_res === FALSE) {
+    return [0, $last_key, false, $conn->error];
+  }
+
+  $chunk_rows = 0;
+  $new_last = $last_key;
+  while ($row = $query_res->fetch_row()) {
+    $buf .= backup_csv_line($row);
+    $i++;
+    $chunk_rows++;
+    if ($spec['mode'] !== 'scan') {
+      $new_last = backup_row_key($row, $schema, $spec);
+    }
+    if (strlen($buf) >= BACKUP_WRITE_BUFFER) {
+      fwrite($fp, $buf);
+      $buf = '';
+    }
+    if ($prefix !== '' && $i % BACKUP_PROGRESS_EVERY === 0) {
+      backup_progress($prefix, $i, $estimate);
+    }
+  }
+  $err = $conn->error;
+  $query_res->free();
+  if ($err) {
+    return [$chunk_rows, $new_last, false, $err];
+  }
+  return [$chunk_rows, $new_last, true, ''];
+}
+
+function backup_run_chunk(mysqli &$conn, $database, $sql, array $schema, array $spec, $fp, &$buf, &$i, $last_key, $table, $prefix = '', $estimate = 0) {
+  if ($buf !== '') {
+    fwrite($fp, $buf);
+    $buf = '';
+  }
+  $mark_i = $i;
+  $mark_pos = ftell($fp);
+
+  for ($attempt = 1; $attempt <= 3; $attempt++) {
+    [$chunk_rows, $new_last, $ok, $err] = backup_fetch_chunk(
+      $conn, $sql, $schema, $spec, $fp, $buf, $i, $last_key, $prefix, $estimate
+    );
+    if ($ok) {
+      return [$chunk_rows, $new_last];
+    }
+
+    $buf = '';
+    $i = $mark_i;
+    if ($mark_pos !== false) {
+      ftruncate($fp, $mark_pos);
+      fseek($fp, $mark_pos);
+    }
+    echo "\n[W] Dump of `$table` interrupted".($err ? " ($err)" : "").", retry $attempt/3\n";
+    $conn = backup_reconnect($database, $conn);
+    if ($attempt === 3 || ($err && !backup_is_gone_away($err) && stripos($err, 'interrupted') === false)) {
+      die("[F] Unexpected problems when requesting database.\n$err\n");
+    }
+    sleep($attempt);
+  }
+
+  die("[F] Unexpected problems when requesting database.\n");
+}
 
 $options = getopt("l:RrFf:o:S:");
 
@@ -17,7 +287,7 @@ $remove = isset($options['F']);
 
 $input = $options['f'] ?? '';
 
-$skipTables = explode(",", $options['S'] ?? '');
+$skipTables = array_values(array_filter(explode(",", $options['S'] ?? ''), 'strlen'));
 
 $output_path = $options['o'] ?? 'backups/'.$lrg_league_tag.'_'.time().'.tar.gz';
 if (!is_dir('backups')) mkdir('backups');
@@ -52,8 +322,7 @@ if ($restore) {
   copy($dir.'/descriptor.json', 'leagues/'.$lrg_league_tag.'.json');
   copy($dir.'/matchlist.list', 'matchlists/'.$lrg_league_tag.'.list');
 
-  $conn = lrg_mysqli_connect($lrg_sql_db);
-  $conn->set_charset('utf8mb4');
+  $conn = backup_connect($lrg_sql_db);
 
   $tables = [
     'players',
@@ -76,8 +345,8 @@ if ($restore) {
     if (file_exists($dir.'/'.$t.'.csv')) {
       if (in_array($t, $skipTables)) continue;
 
-      echo("[ ] Adding data to `$t`...");
       $table = $t;
+      $restore_prefix = "[ ] Adding data to `$t`...";
 
       // counting lines
       $_lines = 0;
@@ -95,6 +364,9 @@ if ($restore) {
       $handle = fopen($dir.'/'.$t.'.csv', "r");
       $schema = trim(fgets($handle));
       $_lines--;
+      $restore_total = $_lines;
+      $restore_done = 0;
+      backup_progress($restore_prefix, 0, $restore_total, false, false);
 
       $qlines = [];
       $qcnt = 0;
@@ -145,6 +417,7 @@ if ($restore) {
         $qlines[] = '('.$qline;
         $qcnt += $hsz;
         $_lines--;
+        $restore_done++;
 
         if ($qcnt >= QUERY_COUNTER || $_lines <= 1) {
           $sql = "INSERT INTO $t ($schema) VALUES \n".implode(",\n", $qlines).';';
@@ -169,10 +442,11 @@ if ($restore) {
 
           $qcnt = 0;
           $qlines = [];
+          backup_progress($restore_prefix, $restore_done, $restore_total, false, false);
         }
       }
       fclose($handle);
-      echo "OK.\n";
+      backup_progress($restore_prefix, $restore_done, $restore_total, true, false);
     }
   }
 
@@ -185,10 +459,8 @@ if ($restore) {
   rmdir($dir);
 } else {
   $lrg_sql_db   = $lrg_db_prefix."_".$lrg_league_tag;
-  $conn = lrg_mysqli_connect($lrg_sql_db);
-  $conn->set_charset('utf8mb4');
-  $conn->query("set names utf8mb4");
-  
+  $conn = backup_connect($lrg_sql_db);
+
   $tables = [];
   $files = [];
 
@@ -198,100 +470,131 @@ if ($restore) {
     echo "[ ] Skip tables: ".implode(', ', $skipTables)."\n";
   }
 
-  $sql = "SHOW TABLES;";
-  if ($conn->multi_query($sql) === FALSE)
+  $query_res = $conn->query("SHOW TABLES");
+  if ($query_res === FALSE)
     die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
 
-  $query_res = $conn->store_result();
-
-  for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+  while ($row = $query_res->fetch_row()) {
     $tables[] = $row[0];
   }
-
-  $query_res->free_result();
+  $query_res->free();
 
   foreach ($tables as $t) {
     if (in_array($t, $skipTables)) continue;
-    
-    echo "[ ] Fetching `$t`...";
-    $schema = [];
 
-    $sql = "SHOW COLUMNS FROM $t;";
-    if ($conn->multi_query($sql) === FALSE)
+    $schema = [];
+    $query_res = $conn->query("SHOW COLUMNS FROM `$t`");
+    if ($query_res === FALSE)
       die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
 
-    $query_res = $conn->store_result();
-
-    for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+    while ($row = $query_res->fetch_row()) {
       $schema[] = $row[0];
     }
+    $query_res->free();
 
-    $query_res->free_result();
+    $estimate = backup_table_row_estimate($conn, $lrg_sql_db, $t);
+    $spec = backup_table_chunk_spec($conn, $t, $schema);
+    $prefix = "[ ] Fetching `$t`...";
+    backup_progress($prefix, 0, $estimate);
 
-    // fetching data
     $fname = 'tmp/'.$t.'_'.$lrg_league_tag.'_'.time().'.csv';
     $files[$t.'.csv'] = $fname;
 
-    $fp = fopen($fname, "w+");
-    
-    // fwrite($fp, pack("CCC",0xef,0xbb,0xbf)); 
+    $fp = fopen($fname, "w");
+    if ($fp === FALSE) {
+      die("[F] Can't write `$fname`\n");
+    }
     fwrite($fp, implode(',', $schema)."\n");
 
-    
-    for ($off = 0; ; $off++) {
-      $sql = "SELECT * FROM $t LIMIT ".(DISK_CACHE_COUNTER*$off).", ".DISK_CACHE_COUNTER.";";
+    $i = 0;
+    $buf = '';
+    $last_key = null;
+    $tq = backup_ident($t);
 
-      if ($conn->multi_query($sql) === FALSE)
-        die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+    while (true) {
+      if ($spec['mode'] === 'scan') {
+        $sql = "SELECT * FROM $tq";
+      } elseif ($spec['mode'] === 'group') {
+        $colq = backup_ident($spec['cols'][0]);
+        $id_sql = $last_key === null
+          ? "SELECT DISTINCT $colq FROM $tq ORDER BY $colq ASC LIMIT ".BACKUP_MATCHID_BATCH
+          : "SELECT DISTINCT $colq FROM $tq WHERE $colq > ".backup_sql_value($conn, $last_key[0]).
+            " ORDER BY $colq ASC LIMIT ".BACKUP_MATCHID_BATCH;
+        $id_res = $conn->query($id_sql);
+        if ($id_res === FALSE) {
+          echo "\n[W] Could not page `$t` ($conn->error), retrying\n";
+          $conn = backup_reconnect($lrg_sql_db, $conn);
+          $id_res = $conn->query($id_sql);
+        }
+        if ($id_res === FALSE) {
+          die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+        }
+        $ids = [];
+        while ($id_row = $id_res->fetch_row()) {
+          $ids[] = $id_row[0];
+        }
+        $id_res->free();
+        if (!$ids) {
+          break;
+        }
+        $sql = "SELECT * FROM $tq WHERE $colq >= ".backup_sql_value($conn, $ids[0]).
+          " AND $colq <= ".backup_sql_value($conn, $ids[count($ids)-1]);
+        $last_key = [end($ids)];
+      } else {
+        $col_sql = implode(', ', array_map('backup_ident', $spec['cols']));
+        $limit = DISK_CACHE_COUNTER;
+        if ($last_key === null) {
+          $sql = "SELECT * FROM $tq ORDER BY $col_sql LIMIT $limit";
+        } else {
+          $vals = [];
+          foreach ($last_key as $v) {
+            $vals[] = backup_sql_value($conn, $v);
+          }
+          $sql = "SELECT * FROM $tq WHERE ($col_sql) > (".implode(', ', $vals).")".
+            " ORDER BY $col_sql LIMIT $limit";
+        }
+      }
 
-      $query_res = $conn->store_result();
+      [$chunk_rows, $new_last] = backup_run_chunk(
+        $conn, $lrg_sql_db, $sql, $schema, $spec, $fp, $buf, $i, $last_key, $t, $prefix, $estimate
+      );
 
-      if (!$query_res->num_rows) {
+      if ($spec['mode'] !== 'group') {
+        $last_key = $new_last;
+      }
+
+      if ($buf !== '') {
+        fwrite($fp, $buf);
+        $buf = '';
+      }
+      fflush($fp);
+      backup_progress($prefix, $i, $estimate);
+
+      $conn = backup_reconnect($lrg_sql_db, $conn);
+
+      if ($spec['mode'] === 'scan') {
         break;
       }
-
-      for ($i = 1, $row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row(), $i++) {
-        $els = [];
-
-        foreach ($row as $r) {
-          if (strpos($r, ',') !== false || (!empty($r) && $r[0] == '"'))
-            $els[] = '"'.str_replace('"', '""', $r).'"';
-          else 
-            $els[] = $r;
+      if ($spec['mode'] === 'group') {
+        if (count($ids) < BACKUP_MATCHID_BATCH) {
+          break;
         }
-        fwrite($fp, implode(',', $els)."\n");
-
-        unset($row);
-        unset($els);
-
-        if ($i == DISK_CACHE_COUNTER) {
-          fflush($fp);
-          echo '~';
-          $i = 0;
-          // $fp = fopen($fname, "w+");
-        }
+        continue;
       }
-
-      $query_res->free_result();
-
-      if ($i > 1) {
+      if ($chunk_rows < DISK_CACHE_COUNTER) {
         break;
       }
     }
 
-    if ($i != DISK_CACHE_COUNTER) {
-      fclose($fp);
+    if ($buf !== '') {
+      fwrite($fp, $buf);
     }
+    fflush($fp);
+    fclose($fp);
 
-    echo "OK.\n";
-    
-    $conn->close();
-    $conn = lrg_mysqli_connect($lrg_sql_db);
-    $conn->set_charset('utf8mb4');
+    backup_progress($prefix, $i, $estimate > 0 ? $estimate : $i, true);
   }
 
-  unset($lines);
-  unset($buffer);
   $conn->close();
 
   if (!file_exists("leagues/$lrg_league_tag.json")) {
@@ -336,21 +639,28 @@ if ($restore) {
 
   $files['descriptor.json'] = "leagues/$lrg_league_tag.json";
 
-  echo "[ ] Packing files...";
+  echo "[ ] Packing files...\n";
   require_once("modules/commons/streaming_archive.php");
-  $archive = new StreamingArchive($output_path);
+  $archive = new StreamingArchive($output_path, 6);
 
   foreach ($files as $n => $l) {
+    $pack_prefix = "[ ] Packing `$n`...";
+    $size = @filesize($l);
+    if ($size === false) {
+      echo "[E] Couldn't pack file `$n`: file missing\n";
+      continue;
+    }
     try {
-      $archive->addFile($n, $l);
+      $archive->addFile($n, $l, function($pos, $total) use ($pack_prefix) {
+        backup_progress($pack_prefix, $pos, $total, false, false);
+      });
+      backup_progress($pack_prefix, $size, $size, true, false);
     } catch (\Throwable $e) {
       echo "\n[E] Couldn't pack file `$n`: ".$e->getMessage()."\n";
-      echo "\t...";
     }
   }
-  
+
   $archive->close();
-  echo "OK\n";
 
   echo "[ ] Cleaning up...";
   foreach ($files as $n => $l) {
