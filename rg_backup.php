@@ -11,6 +11,8 @@ const BACKUP_WRITE_BUFFER = 262144;
 const BACKUP_PROGRESS_EVERY = 2000;
 const BACKUP_MATCHID_BATCH = 250;
 const BACKUP_SOCKET_TIMEOUT = 28800;
+const BACKUP_LOG_PCT_STEP = 5;
+const BACKUP_LOG_PCT_EVERY_CHUNKS = 10;
 
 if (function_exists('ob_implicit_flush')) {
   ob_implicit_flush(true);
@@ -35,44 +37,149 @@ function backup_connect($database) {
   return $conn;
 }
 
-function backup_progress($prefix, $done, $total = 0, $final = false, $approx = true) {
+function backup_stdout_is_tty() {
+  static $tty = null;
+  if ($tty !== null) {
+    return $tty;
+  }
+  if (!defined('STDOUT') || !is_resource(STDOUT)) {
+    $tty = false;
+    return $tty;
+  }
+  if (function_exists('stream_isatty')) {
+    $tty = @stream_isatty(STDOUT);
+    return $tty;
+  }
+  if (function_exists('posix_isatty')) {
+    $tty = @posix_isatty(STDOUT);
+    return $tty;
+  }
+  $tty = true;
+  return $tty;
+}
+
+function backup_fflush() {
+  if (defined('STDOUT') && is_resource(STDOUT)) {
+    fflush(STDOUT);
+  }
+}
+
+function backup_progress($prefix, $done, $total = 0, $final = false, $approx = true, $chunk = false) {
   static $last_len = 0;
   static $last_t = 0.0;
   static $last_prefix = '';
+  static $last_printed_pct = 0.0;
+  static $tildes_since_pct = 0;
+  static $opened = false;
+  static $last_tilde_done = -1;
 
   $now = microtime(true);
-  if (!$final && $prefix === $last_prefix && ($now - $last_t) < 0.2) {
-    return;
-  }
-  $last_t = $now;
-  $last_prefix = $prefix;
-
+  $tty = backup_stdout_is_tty();
   $done = (int)$done;
   $total = (int)$total;
-  $done_s = number_format($done);
+  $pct = ($total > 0) ? ($final ? 100.0 : min(99.9, 100.0 * $done / $total)) : null;
 
-  if ($total > 0) {
-    $pct = $final ? 100.0 : min(99.9, 100.0 * $done / $total);
-    $count = $final ? $done_s : $done_s.($approx ? ' / ~' : ' / ').number_format($total);
-    $line = sprintf("%s %5.1f%% (%s)", $prefix, $pct, $count);
-  } else {
-    $line = sprintf("%s %s", $prefix, $done_s);
-  }
-  if ($final) {
-    $line .= " OK.";
+  if ($prefix !== $last_prefix) {
+    $last_printed_pct = 0.0;
+    $tildes_since_pct = 0;
+    $last_len = 0;
+    $opened = false;
+    $last_tilde_done = -1;
   }
 
-  $pad = $last_len > strlen($line) ? str_repeat(' ', $last_len - strlen($line)) : '';
-  echo "\r".$line.$pad;
-  $last_len = strlen($line);
+  if ($tty) {
+    if (!$final && $prefix === $last_prefix && ($now - $last_t) < 0.2) {
+      return;
+    }
+
+    $done_s = number_format($done);
+    if ($total > 0) {
+      $count = $final ? $done_s : $done_s.($approx ? ' / ~' : ' / ').number_format($total);
+      $line = sprintf("%s %5.1f%% (%s)", $prefix, $pct, $count);
+    } else {
+      $line = sprintf("%s %s", $prefix, $done_s);
+    }
+    if ($final) {
+      $line .= " OK.";
+    }
+
+    $pad = $last_len > strlen($line) ? str_repeat(' ', $last_len - strlen($line)) : '';
+    echo "\r".$line.$pad;
+    $last_len = strlen($line);
+    $last_t = $now;
+    $last_prefix = $prefix;
+    if ($final) {
+      echo "\n";
+      $last_len = 0;
+      $last_prefix = '';
+      $opened = false;
+      $last_printed_pct = 0.0;
+      $tildes_since_pct = 0;
+      $last_tilde_done = -1;
+    }
+    backup_fflush();
+    return;
+  }
+
+  // Redirected / nohup: one growing line per table — ~ per chunk,
+  // a % every 5%, or every N chunks if 1% would be a long run of tildes.
+  if (!$opened) {
+    echo $prefix;
+    $opened = true;
+    $last_prefix = $prefix;
+  }
+
+  $emitted_tilde = false;
+  if ($chunk && !$final && $done > 0 && $done !== $last_tilde_done) {
+    echo '~';
+    $last_tilde_done = $done;
+    $tildes_since_pct++;
+    $emitted_tilde = true;
+  }
+
+  if (!$final && $pct !== null) {
+    $step = BACKUP_LOG_PCT_STEP;
+    $target5 = (int)(floor($pct / $step) * $step);
+    if ($target5 >= $step && $target5 < 100) {
+      $n = (int)(floor($last_printed_pct / $step) * $step) + $step;
+      while ($n <= $target5 && $n < 100) {
+        echo $n.'%';
+        $last_printed_pct = $n;
+        $n += $step;
+        $tildes_since_pct = 0;
+      }
+    }
+
+    if (
+      $emitted_tilde
+      && $tildes_since_pct >= BACKUP_LOG_PCT_EVERY_CHUNKS
+      && $pct < 100
+    ) {
+      $int = (int)floor($pct);
+      if ($int > (int)$last_printed_pct && $int < 100) {
+        echo $int.'%';
+        $last_printed_pct = $int;
+        $tildes_since_pct = 0;
+      } elseif ($pct > $last_printed_pct + 0.09) {
+        echo sprintf('%.1f%%', $pct);
+        $last_printed_pct = $pct;
+        $tildes_since_pct = 0;
+      }
+    }
+  }
+
   if ($final) {
-    echo "\n";
+    echo " OK.\n";
     $last_len = 0;
     $last_prefix = '';
+    $opened = false;
+    $last_printed_pct = 0.0;
+    $tildes_since_pct = 0;
+    $last_tilde_done = -1;
   }
-  if (defined('STDOUT')) {
-    fflush(STDOUT);
-  }
+
+  $last_t = $now;
+  backup_fflush();
 }
 
 function backup_table_row_estimate(mysqli $conn, $db, $table) {
@@ -232,8 +339,11 @@ function backup_fetch_chunk(mysqli $conn, $sql, array $schema, array $spec, $fp,
       fwrite($fp, $buf);
       $buf = '';
     }
-    if ($prefix !== '' && $i % BACKUP_PROGRESS_EVERY === 0) {
-      backup_progress($prefix, $i, $estimate);
+    if ($prefix !== '') {
+      $chunk_tick = ($i % DISK_CACHE_COUNTER === 0);
+      if ($chunk_tick || $i % BACKUP_PROGRESS_EVERY === 0) {
+        backup_progress($prefix, $i, $estimate, false, true, $chunk_tick);
+      }
     }
   }
   $err = $conn->error;
@@ -442,7 +552,7 @@ if ($restore) {
 
           $qcnt = 0;
           $qlines = [];
-          backup_progress($restore_prefix, $restore_done, $restore_total, false, false);
+          backup_progress($restore_prefix, $restore_done, $restore_total, false, false, true);
         }
       }
       fclose($handle);
@@ -568,7 +678,7 @@ if ($restore) {
         $buf = '';
       }
       fflush($fp);
-      backup_progress($prefix, $i, $estimate);
+      backup_progress($prefix, $i, $estimate, false, true, true);
 
       $conn = backup_reconnect($lrg_sql_db, $conn);
 
