@@ -354,6 +354,38 @@ function backup_fetch_chunk(mysqli $conn, $sql, array $schema, array $spec, $fp,
   return [$chunk_rows, $new_last, true, ''];
 }
 
+function backup_reassemble_split_files($dir) {
+  $entries = scandir($dir);
+  if ($entries === false) return;
+
+  $parts_by_base = [];
+  foreach ($entries as $f) {
+    if (preg_match('/^(.+)\.(\d{4,})$/', $f, $m)) {
+      $parts_by_base[$m[1]][(int)$m[2]] = $f;
+    }
+  }
+
+  foreach ($parts_by_base as $base => $parts) {
+    ksort($parts);
+    if (array_keys($parts) !== range(0, count($parts) - 1)) continue;
+    if (file_exists($dir.'/'.$base)) continue;
+
+    $out = fopen($dir.'/'.$base, 'wb');
+    if ($out === false) continue;
+
+    foreach ($parts as $part_name) {
+      $in = fopen($dir.'/'.$part_name, 'rb');
+      stream_copy_to_stream($in, $out);
+      fclose($in);
+    }
+    fclose($out);
+
+    foreach ($parts as $part_name) {
+      unlink($dir.'/'.$part_name);
+    }
+  }
+}
+
 function backup_run_chunk(mysqli &$conn, $database, $sql, array $schema, array $spec, $fp, &$buf, &$i, $last_key, $table, $prefix = '', $estimate = 0) {
   if ($buf !== '') {
     fwrite($fp, $buf);
@@ -414,14 +446,16 @@ if ($restore) {
   
   echo("[ ] Restoring $input to $lrg_league_tag\n");
 
-  if ($remove) {
+  if ($remove || is_dir($input)) {
     $dir = $input;
+    backup_reassemble_split_files($dir);
   } else {
     echo("[ ] Unpacking...\n");
     $a = new PharData($input);
     $dir = '_restore_'.$lrg_league_tag;
     mkdir($dir);
     $a->extractTo($dir);
+    backup_reassemble_split_files($dir);
   }
 
   echo("[ ] Initializing db...\n");

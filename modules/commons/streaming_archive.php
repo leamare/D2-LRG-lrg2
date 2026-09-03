@@ -6,6 +6,8 @@
  */
 
 class StreamingArchive {
+    const MAX_ENTRY_SIZE = 7 * 1024 * 1024 * 1024;
+
     private $gz;
     private $current_file = null;
     private $current_file_size = 0;
@@ -41,13 +43,43 @@ class StreamingArchive {
             throw new Exception("Could not stat file: $real_path");
         }
 
-        $this->current_file = fopen($real_path, 'rb');
-        if (!$this->current_file) {
+        $total_size = $stat['size'];
+
+        $handle = fopen($real_path, 'rb');
+        if (!$handle) {
             throw new Exception("Could not open file for reading: $real_path");
         }
 
+        if ($total_size < self::MAX_ENTRY_SIZE) {
+            $this->writeEntry($name, $handle, $total_size, $stat, $on_progress ? function($pos) use ($on_progress, $total_size) {
+                $on_progress($pos, $total_size);
+            } : null);
+            fclose($handle);
+            return;
+        }
+
+        // Too big for a single ustar entry: split into consecutively numbered parts
+        $part = 0;
+        $offset = 0;
+        while ($offset < $total_size) {
+            $chunk_size = min(self::MAX_ENTRY_SIZE, $total_size - $offset);
+            $part_name = $name . '.' . str_pad((string)$part, 4, '0', STR_PAD_LEFT);
+            $chunk_offset = $offset;
+
+            $this->writeEntry($part_name, $handle, $chunk_size, $stat, $on_progress ? function($pos) use ($on_progress, $chunk_offset, $total_size) {
+                $on_progress($chunk_offset + $pos, $total_size);
+            } : null);
+
+            $offset += $chunk_size;
+            $part++;
+        }
+        fclose($handle);
+    }
+
+    private function writeEntry($name, $handle, $size, array $stat, $on_progress = null) {
+        $this->current_file = $handle;
         $this->current_file_name = $name;
-        $this->current_file_size = $stat['size'];
+        $this->current_file_size = $size;
         $this->current_file_mode = $stat['mode'] & 0x0FFF;
         $this->current_file_mtime = $stat['mtime'];
         $this->current_file_uid = $stat['uid'];
@@ -58,7 +90,6 @@ class StreamingArchive {
         $this->writeFileContent($on_progress);
         $this->writePadding();
 
-        fclose($this->current_file);
         $this->current_file = null;
     }
 
@@ -115,7 +146,7 @@ class StreamingArchive {
             gzwrite($this->gz, $data);
             $this->current_file_pos += strlen($data);
             if ($on_progress) {
-                $on_progress($this->current_file_pos, $this->current_file_size);
+                $on_progress($this->current_file_pos);
             }
         }
     }
@@ -139,4 +170,4 @@ class StreamingArchive {
     public function __destruct() {
         $this->close();
     }
-} 
+}
