@@ -53,23 +53,47 @@ foreach ($r as $hid => $items) {
           (`min_time` > med_time) as quant,
           items.item_id,
           items.hero_id,
-          median(min_time) as med_med_time,
-          min(min_time) min_min_time,
-          max(min_time) max_min_time,
+          MEDIAN(min_time) OVER (
+              PARTITION BY hero_id, item_id, (`min_time` > med_time)
+          ) AS med_med_time,
+          MIN(min_time) OVER (
+              PARTITION BY hero_id, item_id, (`min_time` > med_time)
+          ) AS min_min_time,
+          MAX(min_time) OVER (
+              PARTITION BY hero_id, item_id, (`min_time` > med_time)
+          ) AS max_min_time,
           med_time
-        FROM (
-          select *, min(`time`) as min_time from items
-          WHERE items.hero_id = $hid
-          GROUP BY matchid, hero_id, item_id
-        ) items JOIN (
-          SELECT median(`min_time`) as med_time, hero_id, item_id FROM (
-            select *, min(`time`) as min_time from items
-            WHERE items.hero_id = $hid
-            GROUP BY matchid, hero_id, item_id
-          ) q GROUP BY 2, 3
-        ) medt ON items.hero_id = medt.hero_id AND items.item_id = medt.item_id
-        GROUP BY 1, 2
-      ) meds ON items.hero_id = meds.hero_id AND items.item_id = meds.item_id
+        FROM
+        (
+            SELECT
+                items.*,
+                medt.med_time
+            FROM
+            (
+                SELECT *, MIN(`time`) AS min_time
+                FROM items
+                WHERE items.hero_id = $hid
+                GROUP BY matchid, hero_id, item_id
+            ) items
+            JOIN
+            (
+                SELECT DISTINCT
+                    hero_id,
+                    item_id,
+                    MEDIAN(min_time) OVER (
+                        PARTITION BY hero_id, item_id
+                    ) AS med_time
+                FROM
+                (
+                    SELECT *, MIN(`time`) AS min_time
+                    FROM items
+                    WHERE items.hero_id = $hid
+                    GROUP BY matchid, hero_id, item_id
+                ) q
+            ) medt
+              ON items.hero_id = medt.hero_id
+            AND items.item_id = medt.item_id
+        ) z
     GROUP BY 1, 2 ORDER BY 2, 1 ASC;";
 
     $res = $conn->query($q);
@@ -111,22 +135,47 @@ foreach ($r as $hid => $items) {
             (`min_time` > med_time) as quant,
             items.item_id,
             items.hero_id,
-            median(min_time) as med_med_time,
-            min(min_time) min_min_time,
-            max(min_time) max_min_time,
+            MEDIAN(min_time) OVER (
+                PARTITION BY hero_id, item_id, (`min_time` > med_time)
+            ) AS med_med_time,
+            MIN(min_time) OVER (
+                PARTITION BY hero_id, item_id, (`min_time` > med_time)
+            ) AS min_min_time,
+            MAX(min_time) OVER (
+                PARTITION BY hero_id, item_id, (`min_time` > med_time)
+            ) AS max_min_time,
             med_time
-          FROM (
-            select *, min(`time`) as min_time from items
-            WHERE items.item_id = $iid
-            GROUP BY matchid, hero_id, item_id
-          ) items JOIN (
-            SELECT median(`min_time`) as med_time, hero_id, item_id FROM (
-              select *, min(`time`) as min_time from items
-              WHERE items.item_id = $iid 
-              GROUP BY matchid, hero_id, item_id
-            ) q GROUP BY 3
-          ) medt ON items.item_id = medt.item_id
-          GROUP BY 1, 2
+            FROM
+            (
+                SELECT
+                    items.*,
+                    medt.med_time
+                FROM
+                (
+                    SELECT *, MIN(`time`) AS min_time
+                    FROM items
+                    WHERE items.hero_id = $hid
+                    GROUP BY matchid, hero_id, item_id
+                ) items
+                JOIN
+                (
+                    SELECT DISTINCT
+                        hero_id,
+                        item_id,
+                        MEDIAN(min_time) OVER (
+                            PARTITION BY hero_id, item_id
+                        ) AS med_time
+                    FROM
+                    (
+                        SELECT *, MIN(`time`) AS min_time
+                        FROM items
+                        WHERE items.hero_id = $hid
+                        GROUP BY matchid, hero_id, item_id
+                    ) q
+                ) medt
+                  ON items.hero_id = medt.hero_id
+                AND items.item_id = medt.item_id
+            ) z
         ) meds ON items.item_id = meds.item_id
       GROUP BY 1, 2 ORDER BY 2, 1 ASC;";
 

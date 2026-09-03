@@ -4,6 +4,7 @@ $enchantments_iids = [];
 $enchantments_cats = [];
 $min_enchantment_tier = 0;
 
+$meta['item_categories'];
 foreach (array_keys($meta['item_categories']) as $i => $category_name) {
   if (strpos($category_name, 'enhancement_tier_') === 0) {
     $enchantments_cats[] = $i;

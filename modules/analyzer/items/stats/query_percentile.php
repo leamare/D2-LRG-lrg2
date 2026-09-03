@@ -78,13 +78,16 @@ $sql = <<<SQL
   JOIN matches m on it.matchid = m.matchid 
   JOIN (
     SELECT 
-      it.item_id,
-      percentile_cont(it.`mintime`, 0.25) q1_time,
-      percentile_cont(it.`mintime`, 0.5) q2_time,
-      percentile_cont(it.`mintime`, 0.75) q3_time,
-      max(it.`mintime`) max_time,
-      min(it.`mintime`) min_time,
-      avg(it.`mintime`) avg_time
+      item_id,
+      PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY mintime)
+          OVER (PARTITION BY item_id) AS q1_time,
+      PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY mintime)
+          OVER (PARTITION BY item_id) AS q2_time,
+      PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY mintime)
+          OVER (PARTITION BY item_id) AS q3_time,
+      MAX(mintime) OVER (PARTITION BY item_id) AS max_time,
+      MIN(mintime) OVER (PARTITION BY item_id) AS min_time,
+      AVG(mintime) OVER (PARTITION BY item_id) AS avg_time
     FROM (
       SELECT *, min(`time`) mintime
       FROM items
@@ -167,12 +170,15 @@ $sql = <<<SQL
     SELECT 
       it.hero_id,
       it.item_id,
-      percentile_cont(it.`mintime`, 0.25) q1_time,
-      percentile_cont(it.`mintime`, 0.5) q2_time,
-      percentile_cont(it.`mintime`, 0.75) q3_time,
-      max(it.`mintime`) max_time,
-      min(it.`mintime`) min_time,
-      avg(it.`mintime`) avg_time
+      PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY it.mintime)
+          OVER (PARTITION BY it.item_id) AS q1_time,
+      PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY it.mintime)
+          OVER (PARTITION BY it.item_id) AS q2_time,
+      PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY it.mintime)
+          OVER (PARTITION BY it.item_id) AS q3_time,
+      MAX(it.mintime) OVER (PARTITION BY it.item_id) AS max_time,
+      MIN(it.mintime) OVER (PARTITION BY it.item_id) AS min_time,
+      AVG(it.mintime) OVER (PARTITION BY it.item_id) AS avg_time
     FROM (
       SELECT *, min(`time`) mintime
       FROM items

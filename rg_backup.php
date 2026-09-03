@@ -122,6 +122,10 @@ if ($restore) {
             $vals[] = $v;
           }
         }
+        
+        if (is_array($vals) && count($vals) != $hsz) {
+          $vals = array_slice($vals, 0, $hsz);
+        }
 
         foreach ($vals as $v) {
           if (empty($v)) {

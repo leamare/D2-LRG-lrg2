@@ -8,7 +8,7 @@ $q = <<<SQL
     items.item_id item,
     items.category_id category,
     SUM(1) purchases,
-    SUM(NOT matches.radiantWin XOR matchlines.isRadiant) wins,
+    SUM(matches.radiantWin = matchlines.isRadiant) wins,
     min(`time`) min_time,
     max(`time`) max_time,
     CAST( SUM(`time`)/SUM(1) AS SIGNED ) avg_time,
@@ -34,7 +34,7 @@ $r['total'] = [];
 if ($conn->multi_query($q) === TRUE) echo "!";
 else die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
 
-$query_res = $conn->store_result();
+$query_res = $conn->use_result();
 
 for ($row = $query_res->fetch_assoc(); $row != null; $row = $query_res->fetch_assoc()) {
   $item = $row['item'];

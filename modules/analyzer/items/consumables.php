@@ -56,35 +56,64 @@ function sti_consumables_query($_isheroes, $_isroles, $_isLimitRoles, $si_matche
 
       if ($_isroles) {
         $sql = <<<SQL
-            SELECT 
+          SELECT 
             si.$_tag,
             si.item_id,
-            am.`role`, 
-            max(item_count) max_item_cnt,
-            min(item_count) min_item_cnt,
-            percentile_cont(item_count, 0.25) q1_cnt,
-            median(item_count) med_cnt,
-            percentile_cont(item_count, 0.75) q3_cnt,
-            SUM(item_count) total_cnt,
+            si.`role`,
+            MAX(si.item_count) max_item_cnt,
+            MIN(si.item_count) min_item_cnt,
+            MAX(si.q1_cnt) q1_cnt,
+            MAX(si.med_cnt) med_cnt,
+            MAX(si.q3_cnt) q3_cnt,
+            SUM(si.item_count) total_cnt,
             COUNT(DISTINCT si.matchid) mtchs,
-            SUM(am.lane_won)/2 lane_wins
+            SUM(si.lane_won)/2 lane_wins
           FROM (
-            SELECT 
-              matchid, 
-              $_tag, 
-              JSON_UNQUOTE( JSON_EXTRACT( JSON_KEYS(JSON_EXTRACT(consumables, CONCAT('$."', $blk_q, '"'))), CONCAT("$[", idx, "]") ) ) item_id,
-              JSON_EXTRACT(consumables, CONCAT('$."', $blk_q, '".', JSON_EXTRACT( JSON_KEYS(JSON_EXTRACT(consumables, CONCAT('$."', $blk_q, '"'))), CONCAT("$[", idx, "]") ), '') ) item_count,
-              hero_id as hid
+            SELECT
+              si.matchid,
+              si.$_tag,
+              si.item_id,
+              am.`role`,
+              si.item_count,
+              am.lane_won,
+              PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY si.item_count)
+                OVER (PARTITION BY si.$_tag, si.item_id, am.`role`) q1_cnt,
+              MEDIAN(si.item_count)
+                OVER (PARTITION BY si.$_tag, si.item_id, am.`role`) med_cnt,
+              PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY si.item_count)
+                OVER (PARTITION BY si.$_tag, si.item_id, am.`role`) q3_cnt
             FROM (
-              SELECT * FROM starting_items LIMIT $blocks_size OFFSET $offset
-            ) si 
-            JOIN ( 
-              $_indexes_tbl
-            ) AS indexes
-            WHERE idx < JSON_LENGTH(consumables, CONCAT('$."', $blk_q, '"'))
-            ORDER BY 1, 2, 4 DESC
-          ) si
+              SELECT 
+                matchid, 
+                $_tag, 
+                JSON_UNQUOTE( JSON_EXTRACT( JSON_KEYS(JSON_EXTRACT(consumables, CONCAT('$."', $blk_q, '"'))), CONCAT("$[", idx, "]") ) ) item_id,
+                CAST(
+                  JSON_UNQUOTE(
+                    JSON_EXTRACT(
+                      consumables,
+                      CONCAT(
+                        '$."', $blk_q, '".',
+                        JSON_EXTRACT(
+                          JSON_KEYS(JSON_EXTRACT(consumables, CONCAT('$."', $blk_q, '"'))),
+                          CONCAT("$[", idx, "]")
+                        ),
+                        ''
+                      )
+                    )
+                  ) AS DECIMAL(20,6)
+                ) item_count,
+                hero_id as hid
+              FROM (
+                SELECT * FROM starting_items LIMIT $blocks_size OFFSET $offset
+              ) si 
+              JOIN ( 
+                $_indexes_tbl
+              ) AS indexes
+              WHERE idx < JSON_LENGTH(consumables, CONCAT('$."', $blk_q, '"'))
+              ORDER BY 1, 2, 4 DESC
+            ) si
             JOIN adv_matchlines am on si.matchid = am.matchid and am.heroid = si.hid
+          ) si
           GROUP BY 1, 2, 3
           ORDER BY 1, 2, 3
         SQL;
@@ -124,30 +153,62 @@ function sti_consumables_query($_isheroes, $_isroles, $_isLimitRoles, $si_matche
         SELECT 
           si.$_tag,
           si.item_id,
-          max(item_count) max_item_cnt,
-          min(item_count) min_item_cnt,
-          percentile_cont(item_count, 0.25) q1_cnt,
-          median(item_count) med_cnt,
-          percentile_cont(item_count, 0.75) q3_cnt,
-          SUM(item_count) total_cnt,
+          MAX(si.item_count) max_item_cnt,
+          MIN(si.item_count) min_item_cnt,
+          MAX(si.q1_cnt) q1_cnt,
+          MAX(si.med_cnt) med_cnt,
+          MAX(si.q3_cnt) q3_cnt,
+          SUM(si.item_count) total_cnt,
           COUNT(DISTINCT si.matchid) mtchs
         FROM (
-          SELECT 
-            matchid, 
-            $_tag, 
-            JSON_UNQUOTE( JSON_EXTRACT( JSON_KEYS(JSON_EXTRACT(consumables, CONCAT('$."', $blk_q, '"'))), CONCAT("$[", idx, "]") ) ) item_id,
-            JSON_EXTRACT(consumables, CONCAT('$."', $blk_q, '".', JSON_EXTRACT( JSON_KEYS(JSON_EXTRACT(consumables, CONCAT('$."', $blk_q, '"'))), CONCAT("$[", idx, "]") ), '') ) item_count
+          SELECT
+            si.matchid,
+            si.$_tag,
+            si.item_id,
+            si.item_count,
+            PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY si.item_count)
+              OVER (PARTITION BY si.$_tag, si.item_id) q1_cnt,
+            MEDIAN(si.item_count)
+              OVER (PARTITION BY si.$_tag, si.item_id) med_cnt,
+            PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY si.item_count)
+              OVER (PARTITION BY si.$_tag, si.item_id) q3_cnt
           FROM (
-            SELECT * FROM starting_items LIMIT $blocks_size OFFSET $offset
-          ) si 
-          JOIN ( 
-            $_indexes_tbl
-          ) AS indexes
-          WHERE idx < JSON_LENGTH(consumables, CONCAT('$."', $blk_q, '"'))
-          ORDER BY 1, 2, 4 DESC
+            SELECT 
+              matchid, 
+              $_tag, 
+              JSON_UNQUOTE(
+                JSON_EXTRACT(
+                  JSON_KEYS(JSON_EXTRACT(consumables, CONCAT('$."', $blk_q, '"'))),
+                  CONCAT("$[", idx, "]")
+                )
+              ) item_id,
+              CAST(
+                JSON_UNQUOTE(
+                  JSON_EXTRACT(
+                    consumables,
+                    CONCAT(
+                      '$."', $blk_q, '".',
+                      JSON_EXTRACT(
+                        JSON_KEYS(JSON_EXTRACT(consumables, CONCAT('$."', $blk_q, '"'))),
+                        CONCAT("$[", idx, "]")
+                      ),
+                      ''
+                    )
+                  )
+                ) AS DECIMAL(20,6)
+              ) item_count
+            FROM (
+              SELECT * FROM starting_items LIMIT $blocks_size OFFSET $offset
+            ) si 
+            JOIN ( 
+              $_indexes_tbl
+            ) AS indexes
+            WHERE idx < JSON_LENGTH(consumables, CONCAT('$."', $blk_q, '"'))
+            ORDER BY 1, 2, 4 DESC
+          ) si
         ) si
         GROUP BY 1, 2
-        ORDER BY 1, 2
+        ORDER BY 1, 2;
       SQL;
 
       if ($conn->multi_query($sql) === TRUE); // echo "~";

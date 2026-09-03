@@ -192,6 +192,11 @@ if (!$isVirtual) {
     if ($conn->connect_error) die("[F] Can't create table `matchlines`: ".$conn->connect_error."\n");
   echo "OK\n[ ] Creating table `adv_matchlines`...";
 
+  $conn->query("CREATE INDEX matchlines_matchid_heroid_isradiant_idx
+    ON matchlines (matchid, heroid, isRadiant);");
+  if ($conn->connect_error) die("[F] Can't create index for table `matchlines`: ".$conn->connect_error."\n");
+    echo "+";
+
   $conn->query("CREATE TABLE `adv_matchlines` (
     `matchid` bigint(20) UNSIGNED NOT NULL,
     `playerid` bigint(20) NOT NULL,
@@ -224,6 +229,11 @@ if (!$isVirtual) {
     KEY `advmatchlines_playerid_heroid_IDX` (`playerid`,`heroid`) USING BTREE
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
     if ($conn->connect_error) die("[F] Can't create table `adv_matchlines`: ".$conn->connect_error."\n");
+
+  $conn->query("CREATE INDEX adv_matchlines_matchid_heroid_lane_eff_idx
+    ON adv_matchlines (matchid, heroid, lane, efficiency_at10);");
+  if ($conn->connect_error) die("[F] Can't create index for table `matchlines`: ".$conn->connect_error."\n");
+    echo "+";
 
   echo "OK\n[ ] Creating table `draft`...";
 
