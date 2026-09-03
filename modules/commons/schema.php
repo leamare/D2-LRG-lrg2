@@ -23,6 +23,8 @@ $schema = [
   'wards' => false,
   'medians_available' => false,
   'percentile_available' => false,
+  'mariadb' => false,
+  'mariadb_version' => null,
   'variant_supported' => false,
   'variant' => false,
   'fantasy_mvp' => false,
@@ -180,18 +182,29 @@ if ($schema['starting_items']) {
   $query_res->free_result();
 }
 
-$sql = "SELECT * FROM mysql.func WHERE name like \"percentile_cont\";";
-$query_res = $conn->query($sql);
-if ($query_res === FALSE) die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
-if ($query_res->num_rows ?? 0) {
-  $schema['percentile_available'] = true;
+$server_info = $conn->server_info ?? '';
+if (stripos($server_info, 'mariadb') !== false) {
+  $schema['mariadb'] = true;
+  if (preg_match('/^(\d+\.\d+\.\d+)/', $server_info, $version_match)) {
+    $schema['mariadb_version'] = $version_match[1];
+  }
 }
-$query_res->free();
 
-$sql = "SELECT * FROM mysql.func WHERE name like \"percentile_cont\";";
-$query_res = $conn->query($sql);
-if ($query_res === FALSE) die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
-if ($query_res->num_rows ?? 0) {
-  $schema['medians_available'] = true;
+
+if ($schema['mariadb']) {
+  $schema['percentile_available'] = $schema['mariadb_version'] === null
+    || version_compare($schema['mariadb_version'], '10.3.3', '>=');
+  $schema['medians_available'] = $schema['percentile_available'];
+} else {
+  $sql = "SELECT * FROM mysql.func WHERE name like \"percentile_cont\";";
+  $query_res = $conn->query($sql);
+  if ($query_res === FALSE) die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+  $schema['percentile_available'] = (bool)($query_res->num_rows ?? 0);
+  $query_res->free();
+
+  $sql = "SELECT * FROM mysql.func WHERE name like \"median\";";
+  $query_res = $conn->query($sql);
+  if ($query_res === FALSE) die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+  $schema['medians_available'] = (bool)($query_res->num_rows ?? 0);
+  $query_res->free();
 }
-$query_res->free();

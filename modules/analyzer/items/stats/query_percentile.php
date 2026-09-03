@@ -54,6 +54,43 @@ $query_res->free_result();
 
 // 2. Query for total without Hero ID
 
+if ($schema['mariadb'] ?? false) {
+  $iit_sql = "
+    (
+      SELECT DISTINCT
+        item_id,
+        PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY mintime) OVER (PARTITION BY item_id) q1_time,
+        PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY mintime) OVER (PARTITION BY item_id) q2_time,
+        PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY mintime) OVER (PARTITION BY item_id) q3_time,
+        MAX(mintime) OVER (PARTITION BY item_id) max_time,
+        MIN(mintime) OVER (PARTITION BY item_id) min_time,
+        AVG(mintime) OVER (PARTITION BY item_id) avg_time
+      FROM (
+        SELECT *, MIN(`time`) mintime
+        FROM items
+        GROUP BY matchid, hero_id, item_id
+      ) it
+    )";
+} else {
+  $iit_sql = "
+    (
+      SELECT 
+        it.item_id,
+        percentile_cont(it.`mintime`, 0.25) q1_time,
+        percentile_cont(it.`mintime`, 0.5) q2_time,
+        percentile_cont(it.`mintime`, 0.75) q3_time,
+        max(it.`mintime`) max_time,
+        min(it.`mintime`) min_time,
+        avg(it.`mintime`) avg_time
+      FROM (
+        SELECT *, min(`time`) mintime
+        FROM items
+        GROUP BY matchid, hero_id, item_id
+      ) it
+      GROUP BY 1
+    )";
+}
+
 $sql = <<<SQL
   SELECT 
     it.item_id,
@@ -76,22 +113,7 @@ $sql = <<<SQL
   ) it
   JOIN matchlines ml ON it.matchid = ml.matchid and it.hero_id = ml.heroid
   JOIN matches m on it.matchid = m.matchid 
-  JOIN (
-    SELECT 
-      it.item_id,
-      percentile_cont(it.`mintime`, 0.25) q1_time,
-      percentile_cont(it.`mintime`, 0.5) q2_time,
-      percentile_cont(it.`mintime`, 0.75) q3_time,
-      max(it.`mintime`) max_time,
-      min(it.`mintime`) min_time,
-      avg(it.`mintime`) avg_time
-    FROM (
-      SELECT *, min(`time`) mintime
-      FROM items
-      GROUP BY matchid, hero_id, item_id
-    ) it
-    GROUP BY 1
-  ) iit ON it.item_id = iit.item_id
+  JOIN {$iit_sql} iit ON it.item_id = iit.item_id
   GROUP BY 1;
 SQL;
 
@@ -140,6 +162,46 @@ $query_res->free_result();
 
 // 3. Query for Hero-Item pairs
 
+// Same `iit` idea as above, keyed by (hero_id, item_id) instead of item_id.
+if ($schema['mariadb'] ?? false) {
+  $iit_pair_sql = "
+    (
+      SELECT DISTINCT
+        hero_id,
+        item_id,
+        PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY mintime) OVER (PARTITION BY hero_id, item_id) q1_time,
+        PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY mintime) OVER (PARTITION BY hero_id, item_id) q2_time,
+        PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY mintime) OVER (PARTITION BY hero_id, item_id) q3_time,
+        MAX(mintime) OVER (PARTITION BY hero_id, item_id) max_time,
+        MIN(mintime) OVER (PARTITION BY hero_id, item_id) min_time,
+        AVG(mintime) OVER (PARTITION BY hero_id, item_id) avg_time
+      FROM (
+        SELECT *, MIN(`time`) mintime
+        FROM items
+        GROUP BY matchid, hero_id, item_id
+      ) it
+    )";
+} else {
+  $iit_pair_sql = "
+    (
+      SELECT 
+        it.hero_id,
+        it.item_id,
+        percentile_cont(it.`mintime`, 0.25) q1_time,
+        percentile_cont(it.`mintime`, 0.5) q2_time,
+        percentile_cont(it.`mintime`, 0.75) q3_time,
+        max(it.`mintime`) max_time,
+        min(it.`mintime`) min_time,
+        avg(it.`mintime`) avg_time
+      FROM (
+        SELECT *, min(`time`) mintime
+        FROM items
+        GROUP BY matchid, hero_id, item_id
+      ) it
+      GROUP BY 1, 2
+    )";
+}
+
 $sql = <<<SQL
   SELECT 
     it.hero_id,
@@ -163,23 +225,7 @@ $sql = <<<SQL
   ) it
   JOIN matchlines ml ON it.matchid = ml.matchid and it.hero_id = ml.heroid
   JOIN matches m on it.matchid = m.matchid 
-  JOIN (
-    SELECT 
-      it.hero_id,
-      it.item_id,
-      percentile_cont(it.`mintime`, 0.25) q1_time,
-      percentile_cont(it.`mintime`, 0.5) q2_time,
-      percentile_cont(it.`mintime`, 0.75) q3_time,
-      max(it.`mintime`) max_time,
-      min(it.`mintime`) min_time,
-      avg(it.`mintime`) avg_time
-    FROM (
-      SELECT *, min(`time`) mintime
-      FROM items
-      GROUP BY matchid, hero_id, item_id
-    ) it
-    GROUP BY 1, 2
-  ) iit ON it.item_id = iit.item_id AND it.hero_id = iit.hero_id
+  JOIN {$iit_pair_sql} iit ON it.item_id = iit.item_id AND it.hero_id = iit.hero_id
   GROUP BY 1, 2;
 SQL;
 

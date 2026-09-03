@@ -27,6 +27,74 @@ foreach ($r as $hid => $items) {
   $quants = [];
 
   if (is_numeric($hid)) {
+    if ($schema['mariadb'] ?? false) {
+      $meds_sql = "
+        (
+          SELECT
+            quant,
+            item_id,
+            MAX(hero_id) hero_id,
+            MAX(med_med_time) med_med_time,
+            MAX(min_min_time) min_min_time,
+            MAX(max_min_time) max_min_time,
+            MAX(med_time) med_time
+          FROM (
+            SELECT
+              z.*,
+              MEDIAN(min_time) OVER (PARTITION BY hero_id, item_id, quant) med_med_time,
+              MIN(min_time) OVER (PARTITION BY hero_id, item_id, quant) min_min_time,
+              MAX(min_time) OVER (PARTITION BY hero_id, item_id, quant) max_min_time
+            FROM (
+              SELECT
+                items.*,
+                medt.med_time,
+                (items.min_time > medt.med_time) quant
+              FROM (
+                SELECT *, MIN(`time`) AS min_time FROM items
+                WHERE items.hero_id = $hid
+                GROUP BY matchid, hero_id, item_id
+              ) items
+              JOIN (
+                SELECT DISTINCT
+                  hero_id,
+                  item_id,
+                  MEDIAN(min_time) OVER (PARTITION BY hero_id, item_id) med_time
+                FROM (
+                  SELECT *, MIN(`time`) AS min_time FROM items
+                  WHERE items.hero_id = $hid
+                  GROUP BY matchid, hero_id, item_id
+                ) q
+              ) medt ON items.hero_id = medt.hero_id AND items.item_id = medt.item_id
+            ) z
+          ) zz
+          GROUP BY quant, item_id
+        )";
+    } else {
+      $meds_sql = "
+        (
+          SELECT
+            (`min_time` > med_time) as quant,
+            items.item_id,
+            items.hero_id,
+            median(min_time) as med_med_time,
+            min(min_time) min_min_time,
+            max(min_time) max_min_time,
+            med_time
+          FROM (
+            select *, min(`time`) as min_time from items
+            WHERE items.hero_id = $hid
+            GROUP BY matchid, hero_id, item_id
+          ) items JOIN (
+            SELECT median(`min_time`) as med_time, hero_id, item_id FROM (
+              select *, min(`time`) as min_time from items
+              WHERE items.hero_id = $hid
+              GROUP BY matchid, hero_id, item_id
+            ) q GROUP BY 2, 3
+          ) medt ON items.hero_id = medt.hero_id AND items.item_id = medt.item_id
+          GROUP BY 1, 2
+        )";
+    }
+
     $q = "SELECT 
       meds.quant quant,
       meds.item_id item_id,
@@ -47,29 +115,7 @@ foreach ($r as $hid => $items) {
       ) items
       JOIN matches m ON items.matchid = m.matchid 
       JOIN matchlines ml ON items.matchid = ml.matchid AND items.hero_id = ml.heroid 
-      JOIN 
-      (
-        SELECT
-          (`min_time` > med_time) as quant,
-          items.item_id,
-          items.hero_id,
-          median(min_time) as med_med_time,
-          min(min_time) min_min_time,
-          max(min_time) max_min_time,
-          med_time
-        FROM (
-          select *, min(`time`) as min_time from items
-          WHERE items.hero_id = $hid
-          GROUP BY matchid, hero_id, item_id
-        ) items JOIN (
-          SELECT median(`min_time`) as med_time, hero_id, item_id FROM (
-            select *, min(`time`) as min_time from items
-            WHERE items.hero_id = $hid
-            GROUP BY matchid, hero_id, item_id
-          ) q GROUP BY 2, 3
-        ) medt ON items.hero_id = medt.hero_id AND items.item_id = medt.item_id
-        GROUP BY 1, 2
-      ) meds ON items.hero_id = meds.hero_id AND items.item_id = meds.item_id
+      JOIN $meds_sql meds ON items.hero_id = meds.hero_id AND items.item_id = meds.item_id
     GROUP BY 1, 2 ORDER BY 2, 1 ASC;";
 
     $res = $conn->query($q);
@@ -85,6 +131,74 @@ foreach ($r as $hid => $items) {
   } else {
     foreach ($items as $iid => $data) {
       echo ",";
+
+      if ($schema['mariadb'] ?? false) {
+        $meds_sql = "
+          (
+            SELECT
+              quant,
+              item_id,
+              MAX(hero_id) hero_id,
+              MAX(med_med_time) med_med_time,
+              MAX(min_min_time) min_min_time,
+              MAX(max_min_time) max_min_time,
+              MAX(med_time) med_time
+            FROM (
+              SELECT
+                z.*,
+                MEDIAN(min_time) OVER (PARTITION BY item_id, quant) med_med_time,
+                MIN(min_time) OVER (PARTITION BY item_id, quant) min_min_time,
+                MAX(min_time) OVER (PARTITION BY item_id, quant) max_min_time
+              FROM (
+                SELECT
+                  items.*,
+                  medt.med_time,
+                  (items.min_time > medt.med_time) quant
+                FROM (
+                  SELECT *, MIN(`time`) AS min_time FROM items
+                  WHERE items.item_id = $iid
+                  GROUP BY matchid, hero_id, item_id
+                ) items
+                JOIN (
+                  SELECT DISTINCT
+                    item_id,
+                    MEDIAN(min_time) OVER (PARTITION BY item_id) med_time
+                  FROM (
+                    SELECT *, MIN(`time`) AS min_time FROM items
+                    WHERE items.item_id = $iid
+                    GROUP BY matchid, hero_id, item_id
+                  ) q
+                ) medt ON items.item_id = medt.item_id
+              ) z
+            ) zz
+            GROUP BY quant, item_id
+          )";
+      } else {
+        $meds_sql = "
+          (
+            SELECT
+              (`min_time` > med_time) as quant,
+              items.item_id,
+              items.hero_id,
+              median(min_time) as med_med_time,
+              min(min_time) min_min_time,
+              max(min_time) max_min_time,
+              med_time
+            FROM (
+              select *, min(`time`) as min_time from items
+              WHERE items.item_id = $iid
+              GROUP BY matchid, hero_id, item_id
+            ) items JOIN (
+              SELECT median(`min_time`) as med_time, hero_id, item_id FROM (
+                select *, min(`time`) as min_time from items
+                WHERE items.item_id = $iid 
+                GROUP BY matchid, hero_id, item_id
+              ) q GROUP BY 3
+            ) medt ON items.item_id = medt.item_id
+            GROUP BY 1, 2
+          )";
+      }
+
       $q = "SELECT 
         meds.quant,
         meds.item_id,
@@ -105,29 +219,7 @@ foreach ($r as $hid => $items) {
         ) items
         JOIN matches m ON items.matchid = m.matchid 
         JOIN matchlines ml ON items.matchid = ml.matchid AND items.hero_id = ml.heroid 
-        JOIN 
-        (
-          SELECT
-            (`min_time` > med_time) as quant,
-            items.item_id,
-            items.hero_id,
-            median(min_time) as med_med_time,
-            min(min_time) min_min_time,
-            max(min_time) max_min_time,
-            med_time
-          FROM (
-            select *, min(`time`) as min_time from items
-            WHERE items.item_id = $iid
-            GROUP BY matchid, hero_id, item_id
-          ) items JOIN (
-            SELECT median(`min_time`) as med_time, hero_id, item_id FROM (
-              select *, min(`time`) as min_time from items
-              WHERE items.item_id = $iid 
-              GROUP BY matchid, hero_id, item_id
-            ) q GROUP BY 3
-          ) medt ON items.item_id = medt.item_id
-          GROUP BY 1, 2
-        ) meds ON items.item_id = meds.item_id
+        JOIN $meds_sql meds ON items.item_id = meds.item_id
       GROUP BY 1, 2 ORDER BY 2, 1 ASC;";
 
       $res = $conn->query($q);
