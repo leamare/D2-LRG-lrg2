@@ -27,5 +27,6 @@ CREATE TABLE `adv_matchlines` (
   KEY `advmatchlines_heroid_iscore_IDX` (`heroid`,`isCore`) USING BTREE,
   KEY `advmatchlines_heroid_lane_IDX` (`heroid`,`lane`) USING BTREE,
   KEY `advmatchlines_playerid_iscore_IDX` (`playerid`,`isCore`) USING BTREE,
-  KEY `advmatchlines_playerid_heroid_IDX` (`playerid`,`heroid`) USING BTREE
+  KEY `advmatchlines_playerid_heroid_IDX` (`playerid`,`heroid`) USING BTREE,
+  KEY `advmatchlines_matchid_heroid_lane_eff_IDX` (`matchid`,`heroid`,`lane`,`efficiency_at10`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

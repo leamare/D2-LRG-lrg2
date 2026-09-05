@@ -20,5 +20,6 @@ CREATE TABLE `matchlines` (
   KEY `matchlines_matchid_heroid_IDX` (`matchid`,`heroid`) USING BTREE,
   KEY `matchlines_heroid_isradiant_IDX` (`heroid`,`isRadiant`) USING BTREE,
   KEY `matchlines_playerid_isradiant_IDX` (`playerid`,`isRadiant`) USING BTREE,
-  KEY `matchlines_playerid_heroid_IDX` (`playerid`,`heroid`) USING BTREE
+  KEY `matchlines_playerid_heroid_IDX` (`playerid`,`heroid`) USING BTREE,
+  KEY `matchlines_matchid_heroid_isradiant_IDX` (`matchid`,`heroid`,`isRadiant`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
