@@ -57,19 +57,20 @@ $query_res->free_result();
 if ($schema['mariadb'] ?? false) {
   $iit_sql = "
     (
-      SELECT DISTINCT
+      SELECT
         item_id,
-        PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY mintime) OVER (PARTITION BY item_id) q1_time,
-        PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY mintime) OVER (PARTITION BY item_id) q2_time,
-        PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY mintime) OVER (PARTITION BY item_id) q3_time,
-        MAX(mintime) OVER (PARTITION BY item_id) max_time,
-        MIN(mintime) OVER (PARTITION BY item_id) min_time,
-        AVG(mintime) OVER (PARTITION BY item_id) avg_time
+        PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY mintime) q1_time,
+        PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY mintime) q2_time,
+        PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY mintime) q3_time,
+        MAX(mintime) max_time,
+        MIN(mintime) min_time,
+        AVG(mintime) avg_time
       FROM (
-        SELECT *, MIN(`time`) mintime
+        SELECT matchid, hero_id, item_id, MIN(`time`) mintime
         FROM items
         GROUP BY matchid, hero_id, item_id
       ) it
+      GROUP BY item_id
     )";
 } else {
   $iit_sql = "
@@ -162,24 +163,24 @@ $query_res->free_result();
 
 // 3. Query for Hero-Item pairs
 
-// Same `iit` idea as above, keyed by (hero_id, item_id) instead of item_id.
 if ($schema['mariadb'] ?? false) {
   $iit_pair_sql = "
     (
-      SELECT DISTINCT
+      SELECT
         hero_id,
         item_id,
-        PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY mintime) OVER (PARTITION BY hero_id, item_id) q1_time,
-        PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY mintime) OVER (PARTITION BY hero_id, item_id) q2_time,
-        PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY mintime) OVER (PARTITION BY hero_id, item_id) q3_time,
-        MAX(mintime) OVER (PARTITION BY hero_id, item_id) max_time,
-        MIN(mintime) OVER (PARTITION BY hero_id, item_id) min_time,
-        AVG(mintime) OVER (PARTITION BY hero_id, item_id) avg_time
+        PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY mintime) q1_time,
+        PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY mintime) q2_time,
+        PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY mintime) q3_time,
+        MAX(mintime) max_time,
+        MIN(mintime) min_time,
+        AVG(mintime) avg_time
       FROM (
-        SELECT *, MIN(`time`) mintime
+        SELECT matchid, hero_id, item_id, MIN(`time`) mintime
         FROM items
         GROUP BY matchid, hero_id, item_id
       ) it
+      GROUP BY hero_id, item_id
     )";
 } else {
   $iit_pair_sql = "
