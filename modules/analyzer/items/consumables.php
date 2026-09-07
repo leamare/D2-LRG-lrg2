@@ -1,13 +1,33 @@
 <?php 
 
 function sti_consumables_query($_isheroes, $_isroles, $_isLimitRoles, $si_matches = []) {
-  global $conn, $__sttime, $sti_blocks_query, $sti_blocks_size;
+  global $conn, $__sttime, $sti_blocks_query, $sti_blocks_size, $schema;
 
   $_tag = $_isheroes ? "hero_id" : "playerid";
 
   echo "[ ] CONSUMABLES $_tag :: ";
 
   $r = [];
+
+  resetbltime();
+
+  // dialect-specific percentile expressions
+  if ($schema['mariadb'] ?? false) {
+    // window function form (MariaDB requires OVER; GROUP BY collapses before window runs per chunk)
+    $pct_q1   = "PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY item_count) OVER (PARTITION BY si.`$_tag`, si.item_id)";
+    $pct_med  = "PERCENTILE_CONT(0.5)  WITHIN GROUP (ORDER BY item_count) OVER (PARTITION BY si.`$_tag`, si.item_id)";
+    $pct_q3   = "PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY item_count) OVER (PARTITION BY si.`$_tag`, si.item_id)";
+    $pct_q1_r = "PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY item_count) OVER (PARTITION BY si.`$_tag`, si.item_id, am.`role`)";
+    $pct_med_r= "PERCENTILE_CONT(0.5)  WITHIN GROUP (ORDER BY item_count) OVER (PARTITION BY si.`$_tag`, si.item_id, am.`role`)";
+    $pct_q3_r = "PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY item_count) OVER (PARTITION BY si.`$_tag`, si.item_id, am.`role`)";
+  } else {
+    $pct_q1   = "percentile_cont(item_count, 0.25)";
+    $pct_med  = "median(item_count)";
+    $pct_q3   = "percentile_cont(item_count, 0.75)";
+    $pct_q1_r = $pct_q1;
+    $pct_med_r= $pct_med;
+    $pct_q3_r = $pct_q3;
+  }
 
   resetbltime();
 
@@ -62,9 +82,9 @@ function sti_consumables_query($_isheroes, $_isroles, $_isLimitRoles, $si_matche
             am.`role`, 
             max(item_count) max_item_cnt,
             min(item_count) min_item_cnt,
-            percentile_cont(item_count, 0.25) q1_cnt,
-            median(item_count) med_cnt,
-            percentile_cont(item_count, 0.75) q3_cnt,
+            {$pct_q1_r} q1_cnt,
+            {$pct_med_r} med_cnt,
+            {$pct_q3_r} q3_cnt,
             SUM(item_count) total_cnt,
             COUNT(DISTINCT si.matchid) mtchs,
             SUM(am.lane_won)/2 lane_wins
@@ -126,9 +146,9 @@ function sti_consumables_query($_isheroes, $_isroles, $_isLimitRoles, $si_matche
           si.item_id,
           max(item_count) max_item_cnt,
           min(item_count) min_item_cnt,
-          percentile_cont(item_count, 0.25) q1_cnt,
-          median(item_count) med_cnt,
-          percentile_cont(item_count, 0.75) q3_cnt,
+          {$pct_q1} q1_cnt,
+          {$pct_med} med_cnt,
+          {$pct_q3} q3_cnt,
           SUM(item_count) total_cnt,
           COUNT(DISTINCT si.matchid) mtchs
         FROM (
