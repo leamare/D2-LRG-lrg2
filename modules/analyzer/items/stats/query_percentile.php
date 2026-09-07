@@ -59,18 +59,21 @@ if ($schema['mariadb'] ?? false) {
     (
       SELECT
         item_id,
-        PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY mintime) q1_time,
-        PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY mintime) q2_time,
-        PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY mintime) q3_time,
-        MAX(mintime) max_time,
-        MIN(mintime) min_time,
-        AVG(mintime) avg_time
+        PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY mintime)
+            OVER (PARTITION BY item_id) AS q1_time,
+        PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY mintime)
+            OVER (PARTITION BY item_id) AS q2_time,
+        PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY mintime)
+            OVER (PARTITION BY item_id) AS q3_time,
+        MAX(mintime) OVER (PARTITION BY item_id) AS max_time,
+        MIN(mintime) OVER (PARTITION BY item_id) AS min_time,
+        AVG(mintime) OVER (PARTITION BY item_id) AS avg_time
       FROM (
-        SELECT matchid, hero_id, item_id, MIN(`time`) mintime
+        SELECT *, min(`time`) mintime
         FROM items
         GROUP BY matchid, hero_id, item_id
       ) it
-      GROUP BY item_id
+      GROUP BY 1
     )";
 } else {
   $iit_sql = "
@@ -166,21 +169,24 @@ $query_res->free_result();
 if ($schema['mariadb'] ?? false) {
   $iit_pair_sql = "
     (
-      SELECT
-        hero_id,
-        item_id,
-        PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY mintime) q1_time,
-        PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY mintime) q2_time,
-        PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY mintime) q3_time,
-        MAX(mintime) max_time,
-        MIN(mintime) min_time,
-        AVG(mintime) avg_time
+      SELECT 
+        it.hero_id,
+        it.item_id,
+        PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY it.mintime)
+            OVER (PARTITION BY it.item_id) AS q1_time,
+        PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY it.mintime)
+            OVER (PARTITION BY it.item_id) AS q2_time,
+        PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY it.mintime)
+            OVER (PARTITION BY it.item_id) AS q3_time,
+        MAX(it.mintime) OVER (PARTITION BY it.item_id) AS max_time,
+        MIN(it.mintime) OVER (PARTITION BY it.item_id) AS min_time,
+        AVG(it.mintime) OVER (PARTITION BY it.item_id) AS avg_time
       FROM (
-        SELECT matchid, hero_id, item_id, MIN(`time`) mintime
+        SELECT *, min(`time`) mintime
         FROM items
         GROUP BY matchid, hero_id, item_id
       ) it
-      GROUP BY hero_id, item_id
+      GROUP BY 1, 2
     )";
 } else {
   $iit_pair_sql = "
