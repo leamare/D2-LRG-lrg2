@@ -9,8 +9,6 @@ function sti_consumables_query($_isheroes, $_isroles, $_isLimitRoles, $si_matche
 
   $r = [];
 
-  resetbltime();
-
   // dialect-specific percentile expressions
   if ($schema['mariadb'] ?? false) {
     // window function form (MariaDB requires OVER; GROUP BY collapses before window runs per chunk)
@@ -93,7 +91,7 @@ function sti_consumables_query($_isheroes, $_isroles, $_isLimitRoles, $si_matche
               matchid, 
               $_tag, 
               JSON_UNQUOTE( JSON_EXTRACT( JSON_KEYS(JSON_EXTRACT(consumables, CONCAT('$."', $blk_q, '"'))), CONCAT("$[", idx, "]") ) ) item_id,
-              JSON_EXTRACT(consumables, CONCAT('$."', $blk_q, '".', JSON_EXTRACT( JSON_KEYS(JSON_EXTRACT(consumables, CONCAT('$."', $blk_q, '"'))), CONCAT("$[", idx, "]") ), '') ) item_count,
+              CAST(JSON_EXTRACT(consumables, CONCAT('$."', $blk_q, '".', JSON_EXTRACT( JSON_KEYS(JSON_EXTRACT(consumables, CONCAT('$."', $blk_q, '"'))), CONCAT("$[", idx, "]") ), '') ) AS UNSIGNED) item_count,
               hero_id as hid
             FROM (
               SELECT * FROM starting_items LIMIT $blocks_size OFFSET $offset
@@ -156,7 +154,7 @@ function sti_consumables_query($_isheroes, $_isroles, $_isLimitRoles, $si_matche
             matchid, 
             $_tag, 
             JSON_UNQUOTE( JSON_EXTRACT( JSON_KEYS(JSON_EXTRACT(consumables, CONCAT('$."', $blk_q, '"'))), CONCAT("$[", idx, "]") ) ) item_id,
-            JSON_EXTRACT(consumables, CONCAT('$."', $blk_q, '".', JSON_EXTRACT( JSON_KEYS(JSON_EXTRACT(consumables, CONCAT('$."', $blk_q, '"'))), CONCAT("$[", idx, "]") ), '') ) item_count
+            CAST(JSON_EXTRACT(consumables, CONCAT('$."', $blk_q, '".', JSON_EXTRACT( JSON_KEYS(JSON_EXTRACT(consumables, CONCAT('$."', $blk_q, '"'))), CONCAT("$[", idx, "]") ), '') ) AS UNSIGNED) item_count
           FROM (
             SELECT * FROM starting_items LIMIT $blocks_size OFFSET $offset
           ) si 
