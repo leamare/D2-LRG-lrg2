@@ -1,7 +1,13 @@
 <?php
 
-// True when the last round of $group_rounds replays a pairing from an earlier round.
+// True when a majority of the last round's pairings already occurred earlier.
+// A single rematch (TI15 elim replaying one Swiss pairing) is not enough —
+// that used to swallow a real elimination round back into the group stage.
 function tb_last_round_is_rematch(array $group_rounds): bool {
+  if (count($group_rounds) < 2) {
+    return false;
+  }
+
   $earlier_pairs = [];
   foreach (array_slice($group_rounds, 0, count($group_rounds) - 1) as $gr) {
     foreach ($gr['series'] as $gs) {
@@ -9,13 +15,16 @@ function tb_last_round_is_rematch(array $group_rounds): bool {
     }
   }
 
+  $n = 0;
+  $rematch = 0;
   foreach (end($group_rounds)['series'] as $s) {
+    $n++;
     if (isset($earlier_pairs[tb_pair_key($s['teams'])])) {
-      return true;
+      $rematch++;
     }
   }
 
-  return false;
+  return $n > 0 && $rematch * 2 >= $n;
 }
 
 function tb_detect_phases(array $series): array {
@@ -158,6 +167,8 @@ function tb_detect_phases(array $series): array {
 
       $round_teams = tb_unique_teams($last_series);
       if (array_intersect($round_teams, $er_team_seen)) break;
+      // Majority rematch => group tiebreak cluster (riyadh_2023 decider).
+      // A minority rematch is fine: TI15's elim replayed one Swiss pair.
       if (tb_last_round_is_rematch($group_rounds)) break;
 
       $winners = []; $losers = [];
