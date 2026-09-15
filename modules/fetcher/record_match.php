@@ -719,6 +719,10 @@ if (!empty($t_chat_report) && ($schema['chat_report'] ?? false) && !in_array('ch
 $conn->commit();
 echo "..OK.\n";
 
+if (!empty($schema['matches_failed'])) {
+  lrg_match_fail_drop_recorded($conn, (int)$mid);
+}
+
 // Cleanup
 
 if ($match && isset($first_scheduled[$match])) unset($first_scheduled[$match]);

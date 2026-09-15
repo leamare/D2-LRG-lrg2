@@ -43,12 +43,23 @@ function lrg_match_fail_counts(mysqli $conn, int $matchid): array {
 function lrg_match_fail_exceeded(mysqli $conn, int $matchid): bool {
   $lim = lrg_match_fail_limit();
   $c = lrg_match_fail_counts($conn, $matchid);
-  return ($c['retries_missing'] >= $lim) || ($c['retries_unparsed'] >= $lim);
+  return $c['retries_missing'] >= $lim;
+}
+
+function lrg_match_fail_drop_recorded(mysqli $conn, ?int $matchid = null): void {
+  global $schema;
+  if (empty($schema['matches_failed'])) return;
+  if ($matchid) {
+    $conn->query("DELETE FROM matches_failed WHERE matchid = ".(int)$matchid);
+    return;
+  }
+  $conn->query("DELETE mf FROM matches_failed mf INNER JOIN matches m ON m.matchid = mf.matchid");
 }
 
 /** @return bool false = retry later, true = give up (skip) */
 function lrg_fetch_retry_or_give_up(string $kind): bool {
   global $conn, $match, $schema;
+  if ($kind === 'unparsed') return false;
   if (empty($schema['matches_failed'])) return false;
   $mid = (int)$match;
   lrg_match_fail_touch($conn, $mid, $kind);

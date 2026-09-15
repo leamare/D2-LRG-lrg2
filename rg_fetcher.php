@@ -32,6 +32,10 @@ include_once("modules/commons/schema.php");
 include_once("modules/fetcher/queue_init.php");
 include_once("modules/fetcher/objects_prep.php");
 
+if (!empty($schema['matches_failed'])) {
+  lrg_match_fail_drop_recorded($conn);
+}
+
 $parallel_child = false;
 $stdin_flag     = false;
 include_once("modules/fetcher/parallel_setup.php");
@@ -147,6 +151,10 @@ while (sizeof($matches) || $listen || $parallel_child) {
       $failed_matches[] = $match;
     }
   }
+}
+
+if (!empty($schema['matches_failed'])) {
+  lrg_match_fail_drop_recorded($conn);
 }
 
 if (sizeof($failed_matches)) {
