@@ -90,6 +90,18 @@ foreach (array_chunk($mids, $chunkSize) as $chunk) {
   if ($schema['fantasy_mvp']) {
     $sql .= "DELETE FROM fantasy_mvp_points WHERE matchid IN ($in); DELETE FROM fantasy_mvp_awards WHERE matchid IN ($in); ";
   }
+  if ($schema['matches_ext']) {
+    $sql .= "DELETE FROM matches_ext WHERE matchid IN ($in); ";
+  }
+  if ($schema['objectives']) {
+    $sql .= "DELETE FROM objectives WHERE matchid IN ($in); ";
+  }
+  if ($schema['runes']) {
+    $sql .= "DELETE FROM runes WHERE matchid IN ($in); ";
+  }
+  if ($schema['chat_report']) {
+    $sql .= "DELETE FROM chat_report WHERE matchid IN ($in); ";
+  }
   $sql .= "DELETE FROM matches WHERE matchid IN ($in);";
 
   if ($conn->multi_query($sql) === TRUE) {
