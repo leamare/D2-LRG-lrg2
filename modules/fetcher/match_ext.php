@@ -53,21 +53,15 @@ function lrg_participants_map(array $t_matchlines, array $t_team_matches = []): 
   foreach ($t_team_matches as $tm) {
     $team_ids[!empty($tm['is_radiant']) ? 0 : 1] = (int)$tm['teamid'];
   }
-  $rows = [];
-  foreach ($t_matchlines as $i => $ml) {
+  foreach ($t_matchlines as $ml) {
     if (empty($ml['heroid'])) continue;
-    $rows[] = [
-      'slot' => (int)($ml['player_slot'] ?? lrg_player_slot_from_row($ml, (int)$i)),
-      'rad' => !empty($ml['isRadiant']),
-      'playerid' => (int)$ml['playerid'],
-      'heroid' => (int)$ml['heroid'],
-    ];
+    $side = !empty($ml['isRadiant']) ? 0 : 1;
+    $players[$side][] = (int)$ml['playerid'];
+    $heroes[$side][] = (int)$ml['heroid'];
   }
-  usort($rows, fn($a, $b) => $a['slot'] <=> $b['slot']);
-  foreach ($rows as $row) {
-    $side = $row['rad'] ? 0 : 1;
-    $players[$side][] = $row['playerid'];
-    $heroes[$side][] = $row['heroid'];
+  foreach ([0, 1] as $side) {
+    sort($players[$side], SORT_NUMERIC);
+    sort($heroes[$side], SORT_NUMERIC);
   }
   return [
     'players_c' => $players,
