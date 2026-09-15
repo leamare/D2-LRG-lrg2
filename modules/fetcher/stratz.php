@@ -2,11 +2,125 @@
 
 include_once __DIR__.'/comebacks.php';
 include_once __DIR__.'/skillPriority.php';
+include_once __DIR__.'/match_ext.php';
 
 const ROSHAN = [133, 134, 135, 263, 324, 325, 326, 371, 593, 594, 595, 640];
+const TORMENTOR = [861, 890];
 const OBS = [110, 499, 768];
 const SENTRY = [500, 769, 111];
 const LEVELS_RESPAWN = [5,7,9,13,16,26,28,30,32,34,36,44,46,48,50,52,54,65,70,75,80,85,90,95,100,100,100,100,100,100];
+
+const STRATZ_NPC_OBJECTIVE_IDS = [
+  // type -- CHAT_MESSAGE_FIRSTBLOOD
+  // type -- CHAT_MESSAGE_MINIBOSS_KILL
+  // type -- CHAT_MESSAGE_ROSHAN_KILL
+  // type -- CHAT_MESSAGE_AEGIS
+  // type -- CHAT_MESSAGE_COURIER_LOST
+
+  // building_kill  
+  16 => 'npc_dota_goodguys_tower1_top',
+  17 => 'npc_dota_goodguys_tower1_mid',
+  18 => 'npc_dota_goodguys_tower1_bot',
+  19 => 'npc_dota_goodguys_tower2_top',
+  20 => 'npc_dota_goodguys_tower2_mid',
+  21 => 'npc_dota_goodguys_tower2_bot',
+  22 => 'npc_dota_goodguys_tower3_top',
+  23 => 'npc_dota_goodguys_tower3_mid',
+  24 => 'npc_dota_goodguys_tower3_bot',
+  25 => 'npc_dota_goodguys_tower4',
+  26 => 'npc_dota_badguys_tower1_top',
+  27 => 'npc_dota_badguys_tower1_mid',
+  28 => 'npc_dota_badguys_tower1_bot',
+  29 => 'npc_dota_badguys_tower2_top',
+  30 => 'npc_dota_badguys_tower2_mid',
+  31 => 'npc_dota_badguys_tower2_bot',
+  32 => 'npc_dota_badguys_tower3_top',
+  33 => 'npc_dota_badguys_tower3_mid',
+  34 => 'npc_dota_badguys_tower3_bot',
+  35 => 'npc_dota_badguys_tower4',
+  36 => 'npc_dota_goodguys_fillers',
+  37 => 'npc_dota_badguys_fillers',
+  38 => 'npc_dota_goodguys_melee_rax_top',
+  39 => 'npc_dota_goodguys_melee_rax_mid',
+  40 => 'npc_dota_goodguys_melee_rax_bot',
+  41 => 'npc_dota_goodguys_range_rax_top',
+  42 => 'npc_dota_goodguys_range_rax_mid',
+  43 => 'npc_dota_goodguys_range_rax_bot',
+  44 => 'npc_dota_badguys_melee_rax_top',
+  45 => 'npc_dota_badguys_melee_rax_mid',
+  46 => 'npc_dota_badguys_melee_rax_bot',
+  47 => 'npc_dota_badguys_range_rax_top',
+  48 => 'npc_dota_badguys_range_rax_mid',
+  49 => 'npc_dota_badguys_range_rax_bot',
+  50 => 'npc_dota_goodguys_fort',
+  51 => 'npc_dota_badguys_fort',
+  254 => 'npc_dota_badguys_healers',
+  255 => 'npc_dota_goodguys_healers',
+
+  // others, not used for objectives, but might come in handy later
+  822 => 'npc_dota_watch_tower',
+  857 => 'npc_dota_mango_tree',
+  864 => 'npc_dota_unit_twin_gate',
+  865 => 'npc_dota_lantern',
+  868 => 'npc_dota_unit_roshans_banner',
+  887 => 'npc_dota_building_generic',
+  890 => 'npc_dota_miniboss_minion',
+];
+
+const STRATZ_RUNE_CODES = [
+  'DOUBLE_DAMAGE' => 0,
+  'DOUBLEDAMAGE' => 0,
+  'HASTE' => 1,
+  'ILLUSION' => 2,
+  'INVISIBILITY' => 3,
+  'INVIS' => 3,
+  'REGENERATION' => 4,
+  'REGEN' => 4,
+  'BOUNTY' => 5,
+  'ARCANE' => 6,
+  'WATER' => 7,
+  'WISDOM' => 8,
+  'XP' => 8,
+  'SHIELD' => 9,
+];
+
+function stratz_npc_objective($npcId): ?array {
+  $npc = STRATZ_NPC_OBJECTIVE_IDS[(int)$npcId] ?? null;
+  if ($npc === null || $npc === '') return null;
+  if (!preg_match('/npc_dota_(goodguys|badguys)_(.+)/i', $npc, $m)) return null;
+  $kind = strtolower($m[2]);
+  if ($kind === 'fort') return null;
+  if ($kind === 'fillers') $kind = 'healers';
+  return [
+    'key' => 'building_' . $kind,
+    'target_is_radiant' => strtolower($m[1]) === 'goodguys',
+  ];
+}
+
+function stratz_trim_zero_delta($series): ?array {
+  if (!is_array($series) || $series === []) return null;
+  $out = array_values($series);
+  $n = count($out);
+  while ($n > 1 && (float)$out[$n - 1] == (float)$out[$n - 2]) {
+    array_pop($out);
+    $n--;
+  }
+  return $out;
+}
+
+function stratz_rune_code($name): ?int {
+  if ($name === null || $name === '') return null;
+  if (is_numeric($name)) return (int)$name;
+  $key = strtoupper(str_replace([' ', '-'], '_', (string)$name));
+  return STRATZ_RUNE_CODES[$key] ?? null;
+}
+
+function stratz_rune_is_pickup($action): bool {
+  $a = strtoupper(trim((string)$action));
+  if (strpos($a, 'BOTTLE') !== false || strpos($a, 'DENY') !== false) return false;
+  if ($a === 'DROP' || $a === 'LOST' || $a === 'ACTIVATE') return false;
+  return true;
+}
 
 const STRATZ_GAME_MODE = [
   'NONE' => 0,
@@ -109,11 +223,23 @@ const STRATZ_GRAPHQL_QUERY = "fragment MatchInfo on MatchType {
   parsedDateTime
   sequenceNum
   replaySalt
+  actualRank
+  barracksStatusDire
+  barracksStatusRadiant
+  towerStatusDire
+  towerStatusRadiant
+  towerDeaths {
+    attacker
+    isRadiant
+    npcId
+    time
+  }
   regionId
   lobbyType
   id
   isStats
   radiantNetworthLeads
+  radiantExperienceLeads
   radiantKills
   direKills
   pickBans {
@@ -155,6 +281,34 @@ const STRATZ_GRAPHQL_QUERY = "fragment MatchInfo on MatchType {
         dealtTotal {
           stunDuration
           disableDuration
+          magicalDamage
+          physicalDamage
+          pureDamage
+          selfHeal
+          allyHeal
+          slowDuration
+        }
+      }
+      runes {
+        action
+        gold
+        rune
+        time
+      }
+      allTalks {
+        message
+        time
+        pausedTick
+      }
+      chatWheels {
+        chatWheelId
+        time
+        pauseTick
+      }
+      farmDistributionReport {
+        creepType {
+          id
+          count
         }
       }
       courierKills {
@@ -162,6 +316,8 @@ const STRATZ_GRAPHQL_QUERY = "fragment MatchInfo on MatchType {
       }
       lastHitsPerMinute
       networthPerMinute
+      experiencePerMinute
+      goldPerMinute
       itemPurchases {
         time
         itemId
@@ -332,6 +488,12 @@ function get_stratz_response($match) {
   $r['matches']['duration'] = $stratz['data']['match']['durationSeconds'];
   $r['matches']['modeID'] = STRATZ_GAME_MODE[ $stratz['data']['match']['gameMode'] ] ?? $stratz['data']['match']['gameMode'];
   $r['matches']['cluster'] = $stratz['data']['match']['clusterId'];
+  $r['matches']['seq_num'] = $stratz['data']['match']['sequenceNum'] ?? null;
+  $r['matches']['avg_rank'] = $stratz['data']['match']['actualRank'] ?? null;
+  $r['matches']['tower_status_radiant'] = $stratz['data']['match']['towerStatusRadiant'] ?? null;
+  $r['matches']['tower_status_dire'] = $stratz['data']['match']['towerStatusDire'] ?? null;
+  $r['matches']['barracks_status_radiant'] = $stratz['data']['match']['barracksStatusRadiant'] ?? null;
+  $r['matches']['barracks_status_dire'] = $stratz['data']['match']['barracksStatusDire'] ?? null;
   $r['matches']['start_date'] = $stratz['data']['match']['startDateTime'];
   $r['matches']['leagueID'] = $stratz['data']['match']['leagueId'] ?? 0;
   $r['matches']['version'] = get_patchid($r['matches']['start_date'], $meta);
@@ -346,6 +508,13 @@ function get_stratz_response($match) {
     $r['matches']['comeback'] = 0;
   }
 
+  $r['matches_ext'] = [
+    'nw_t' => $stratz['data']['match']['radiantNetworthLeads'] ?? null,
+    'gold_t' => null,
+    'xp_t' => stratz_trim_zero_delta($stratz['data']['match']['radiantExperienceLeads'] ?? null),
+    'teamfights' => null,
+  ];
+
   $r['payload'] = [
     'score_radiant' => 0,
     'score_dire' => 0,
@@ -359,6 +528,11 @@ function get_stratz_response($match) {
   $r['skill_builds'] = [];
   $r['starting_items'] = [];
   $r['wards'] = [];
+  $r['runes'] = [];
+  $r['objectives'] = [];
+  $chat_lines = [];
+  $aegis_pickups = [];
+  $match_id = (int)$stratz['data']['match']['id'];
 
   foreach ($stratz['data']['match']['players'] as $i => $pl) {
     $r['payload']['score_radiant'] += $pl['isRadiant'] ? $pl['kills'] : 0;
@@ -378,6 +552,7 @@ function get_stratz_response($match) {
     $ml['heroid'] = $pl['heroId'];
     $ml['variant'] = $pl['variant'];
     $ml['isRadiant'] = $pl['isRadiant'];
+    $ml['player_slot'] = $pl['playerSlot'] ?? null;
     $ml['level'] = $pl['level'];
     $ml['kills'] = $pl['kills'];
     $ml['deaths'] = $pl['deaths'];
@@ -397,6 +572,97 @@ function get_stratz_response($match) {
       'playerID' => $pl['steamAccountId'],
       'nickname' => $pl['steamAccount']['name']
     ];
+
+    foreach ($pl['stats']['runes'] ?? [] as $rn) {
+      if (!stratz_rune_is_pickup($rn['action'] ?? '')) continue;
+      $code = stratz_rune_code($rn['rune'] ?? null);
+      if ($code === null) continue;
+      $timing = (int)($rn['time'] ?? 0);
+      $r['runes'][] = [
+        'matchid' => $match_id,
+        'playerid' => (int)$pl['steamAccountId'],
+        'rune_code' => $code,
+        'timing' => $timing,
+      ];
+      if ($code === 8) {
+        $r['objectives'][] = lrg_objective_row(
+          $match_id,
+          'rune_wisdom_shrine',
+          $timing,
+          $pl['steamAccountId'],
+          empty($pl['isRadiant'])
+        );
+      }
+    }
+
+    foreach ($pl['stats']['allTalks'] ?? [] as $talk) {
+      $msg = (string)($talk['message'] ?? '');
+      if ($msg === '') continue;
+      $chat_lines[] = [
+        'type' => 'chat',
+        'key' => $msg,
+        'time' => (int)($talk['time'] ?? 0),
+        'playerid' => (int)$pl['steamAccountId'],
+        'player_slot' => $pl['playerSlot'] ?? null,
+      ];
+    }
+    foreach ($pl['stats']['chatWheels'] ?? [] as $cw) {
+      if (!isset($cw['chatWheelId']) || $cw['chatWheelId'] === '' || $cw['chatWheelId'] === null) continue;
+      $chat_lines[] = [
+        'type' => 'chatwheel',
+        'key' => (string)$cw['chatWheelId'],
+        'time' => (int)($cw['time'] ?? 0),
+        'playerid' => (int)$pl['steamAccountId'],
+        'player_slot' => $pl['playerSlot'] ?? null,
+      ];
+    }
+
+    foreach ($pl['stats']['courierKills'] ?? [] as $ck) {
+      $r['objectives'][] = lrg_objective_row(
+        $match_id,
+        'unit_courier_kill',
+        (int)($ck['time'] ?? 0),
+        $pl['steamAccountId'],
+        empty($pl['isRadiant'])
+      );
+    }
+
+    $pickup_times = [];
+    $buff117 = [];
+    foreach ($pl['stats']['matchPlayerBuffEvent'] ?? [] as $e) {
+      if ((int)($e['itemId'] ?? 0) === 117) $buff117[] = (int)$e['time'];
+    }
+    sort($buff117);
+    $has_aegis = false;
+    foreach ($pl['stats']['inventoryReport'] ?? [] as $k => $rep) {
+      $ids = [];
+      foreach ($rep as $it) {
+        if (!empty($it['itemId'])) $ids[] = (int)$it['itemId'];
+      }
+      $now = in_array(117, $ids, true);
+      if ($now && !$has_aegis) {
+        $t = ((int)$k > 120) ? (int)$k : (int)$k * 60;
+        foreach ($buff117 as $b) {
+          if ($b >= $t - 90 && $b <= $t + 90) { $t = $b; break; }
+        }
+        $pickup_times[] = $t;
+      }
+      $has_aegis = $now;
+    }
+    if ($pickup_times === [] && $buff117 !== []) {
+      $last_buff = -9999;
+      foreach ($buff117 as $b) {
+        if ($b - $last_buff > 330) $pickup_times[] = $b;
+        $last_buff = $b;
+      }
+    }
+    foreach ($pickup_times as $t) {
+      $aegis_pickups[] = [
+        'time' => $t,
+        'playerid' => (int)$pl['steamAccountId'],
+        'isRadiant' => !empty($pl['isRadiant']),
+      ];
+    }
 
     if ($stratz['data']['match']['statsDateTime'] && !empty($pl['stats']['lastHitsPerMinute'])) {
       $aml = [];
@@ -446,6 +712,42 @@ function get_stratz_response($match) {
         $pl['stats']['networthPerMinute'][$lm-1] : 
         end($pl['stats']['networthPerMinute'])
       ) / $tenMinute;
+
+      $aml['nw_t'] = $pl['stats']['networthPerMinute'] ?? null;
+      $aml['gold_t'] = null;
+      if (!empty($pl['stats']['goldPerMinute']) && is_array($pl['stats']['goldPerMinute'])) {
+        $aml['gold_t'] = [];
+        foreach (array_values($pl['stats']['goldPerMinute']) as $gi => $gv) {
+          $aml['gold_t'][] = (int)round((float)$gv * ($gi + 1));
+        }
+      }
+      $aml['lh_t'] = lrg_prefix_sum_series($pl['stats']['lastHitsPerMinute'] ?? null);
+      $aml['xp_t'] = stratz_trim_zero_delta($pl['stats']['experiencePerMinute'] ?? null);
+      $recv = $pl['stats']['heroDamageReport']['receivedTotal'] ?? [];
+      $deal = $pl['stats']['heroDamageReport']['dealtTotal'] ?? [];
+      if ($recv !== [] || $deal !== []) {
+        $aml['damage_breakdown'] = [
+          'r' => [
+            'm' => (int)($recv['magicalDamage'] ?? 0),
+            'ph' => (int)($recv['physicalDamage'] ?? 0),
+            'p' => (int)($recv['pureDamage'] ?? 0),
+          ],
+          'd' => [
+            'm' => (int)($deal['magicalDamage'] ?? 0),
+            'ph' => (int)($deal['physicalDamage'] ?? 0),
+            'p' => (int)($deal['pureDamage'] ?? 0),
+          ],
+          'cc' => [
+            'ss' => (int)($deal['stunDuration'] ?? 0),
+            'sls' => (int)($deal['slowDuration'] ?? 0),
+            'd' => (int)($deal['disableDuration'] ?? 0),
+          ],
+          'h' => [
+            'sh' => (int)($deal['selfHeal'] ?? 0),
+            'ah' => (int)($deal['allyHeal'] ?? 0),
+          ],
+        ];
+      }
       
       if (!empty($pl['stats']['wards'])) {
         // only includes wards placed
@@ -467,12 +769,14 @@ function get_stratz_response($match) {
       $aml['couriers_killed'] = count($pl['stats']['courierKills'] ?? []);
 
       $aml['roshans_killed'] = 0;
+      $aml['tormentors_killed'] = 0;
       $aml['wards_destroyed'] = count($pl['stats']['wardDestruction'] ?? []);
 
       if (isset($pl['stats']['farmDistributionReport'])) {
-        foreach ($pl['stats']['farmDistributionReport']['creepType'] as $fc) {
+        foreach ($pl['stats']['farmDistributionReport']['creepType'] ?? [] as $fc) {
           // if (in_array($fc['id'], OBS)) $aml['wards_destroyed'] += $fc['count'];
           if (in_array($fc['id'], ROSHAN)) $aml['roshans_killed'] += $fc['count'];
+          if (in_array($fc['id'], TORMENTOR)) $aml['tormentors_killed'] += $fc['count'];
         }
         // foreach ($f['other'] as $fc) {
         //   if (in_array($fc['id'], ROSHAN)) $aml['roshans_killed'] += $fc['count'];
@@ -836,6 +1140,97 @@ function get_stratz_response($match) {
     }
   }
 
+  $gold_adv = null;
+  foreach ($r['adv_matchlines'] as $i => $aml) {
+    $gold = $aml['gold_t'] ?? null;
+    if (!is_array($gold) || $gold === []) continue;
+    if ($gold_adv === null) $gold_adv = [];
+    $rad = !empty($r['matchlines'][$i]['isRadiant']);
+    foreach (array_values($gold) as $m => $g) {
+      if (!isset($gold_adv[$m])) $gold_adv[$m] = 0;
+      $gold_adv[$m] += $rad ? (int)$g : -(int)$g;
+    }
+  }
+  $r['matches_ext']['gold_t'] = $gold_adv;
+
+  $fb = null;
+  foreach ($stratz['data']['match']['players'] as $pl) {
+    foreach ($pl['stats']['killEvents'] ?? [] as $ke) {
+      $t = (int)($ke['time'] ?? 0);
+      if ($fb === null || $t < $fb['time']) {
+        $fb = [
+          'time' => $t,
+          'playerid' => (int)$pl['steamAccountId'],
+          'isRadiant' => !empty($pl['isRadiant']),
+        ];
+      }
+    }
+  }
+  if ($fb !== null) {
+    $r['objectives'][] = lrg_objective_row(
+      $match_id,
+      'hero_first_blood',
+      $fb['time'],
+      $fb['playerid'],
+      empty($fb['isRadiant'])
+    );
+  }
+
+  $t4_count = [1 => 0, 2 => 0];
+  foreach ($stratz['data']['match']['towerDeaths'] ?? [] as $td) {
+    $npc = stratz_npc_objective($td['npcId'] ?? 0);
+    if ($npc === null) continue;
+    $key = $npc['key'];
+    $target_rad = $npc['target_is_radiant'];
+    $t4 = 1;
+    if ($key === 'building_tower4') {
+      $side = $target_rad ? 1 : 2;
+      $t4_count[$side]++;
+      $t4 = $t4_count[$side] ?: 1;
+    }
+    $attacker = $td['attacker'] ?? null;
+    $killer = null;
+    if ($attacker !== null && $attacker !== '' && (int)$attacker !== -1) {
+      $attacker = (int)$attacker;
+      if (isset($slot_pids[$attacker])) {
+        $killer = $slot_pids[$attacker];
+      } else {
+        foreach ($stratz['data']['match']['players'] as $apl) {
+          if ((int)($apl['playerSlot'] ?? -999) === $attacker || (int)$apl['steamAccountId'] === $attacker) {
+            $killer = $apl['steamAccountId'];
+            break;
+          }
+        }
+      }
+    }
+    $r['objectives'][] = lrg_objective_row($match_id, $key, (int)($td['time'] ?? 0), $killer, $target_rad, $t4);
+  }
+
+  usort($aegis_pickups, fn($a, $b) => $a['time'] <=> $b['time']);
+  $last_rosh = -9999;
+  foreach ($aegis_pickups as $ap) {
+    $is_steal = $last_rosh >= 0 && ($ap['time'] - $last_rosh) <= 180;
+    $target = !empty($ap['isRadiant']) ? 0 : 1;
+    if (!$is_steal) {
+      $r['objectives'][] = lrg_objective_row($match_id, 'unit_roshan_kill', $ap['time'], $ap['playerid'], $target);
+      $last_rosh = $ap['time'];
+    }
+    $r['objectives'][] = lrg_objective_row(
+      $match_id,
+      $is_steal ? 'unit_roshan_aegis_stolen' : 'unit_roshan_aegis_pickup',
+      $ap['time'],
+      $ap['playerid'],
+      $target
+    );
+  }
+
+  usort($r['objectives'], fn($a, $b) => $a['timing'] <=> $b['timing']);
+  $r['chat_report'] = lrg_extract_chat_report($match_id, [
+    'chat' => $chat_lines,
+    'matchlines' => $r['matchlines'],
+    'players' => $r['players'],
+  ], $r['matchlines']);
+
   // type 0 is obs
   // currently lacks information about ward killer
   if (!empty($stratz['data']['match']['playbackData']) && isset($stratz['data']['match']['playbackData']['wardEvents'])) {
@@ -1101,6 +1496,8 @@ function get_stratz_multiquery($group) {
   ]));
 
   // $json = @file_get_contents($stratz_request.'?'.$q);
+
+  // var_dump($json);
   
   if (empty($json)) {
     return null;

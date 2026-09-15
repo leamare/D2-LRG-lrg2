@@ -235,6 +235,10 @@ if (!$isVirtual) {
     'skill_builds',
     'starting_items',
     'wards',
+    'matches_ext',
+    'objectives',
+    'runes',
+    'chat_report',
   ];
 
   $tables_clone = [

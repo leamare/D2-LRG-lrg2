@@ -28,7 +28,8 @@ if (!empty($options['d'])) {
 }
 
 $rewrite_existing = isset($options['W']);
-$addition_mode    = isset($options['a']);
+$repair_mode      = isset($options['repair']);
+$addition_mode    = isset($options['a']) || $repair_mode;
 $update_unparsed  = isset($options['u']) || isset($options['U']);
 
 $use_stratz      = isset($options['S']) || isset($options['s']);

@@ -94,6 +94,12 @@ function lrg_rg_init_script_list(bool $teams, bool $fantasy): array {
       'tables/wards.sql',
       'tables/players.sql',
       'tables/leagues.sql',
+      'tables/matches_ext.sql',
+      'tables/objectives.sql',
+      'tables/runes.sql',
+      'tables/chat_report.sql',
+      'tables/matches_failed.sql',
+      'tables/matches_draft_donors.sql',
     ],
     [
       'fk/adv_matchlines.sql',
@@ -102,6 +108,10 @@ function lrg_rg_init_script_list(bool $teams, bool $fantasy): array {
       'fk/items.sql',
       'fk/adv_matchlines_players.sql',
       'fk/matchlines_players.sql',
+      'fk/matches_ext.sql',
+      'fk/objectives.sql',
+      'fk/runes.sql',
+      'fk/chat_report.sql',
     ]
   );
   if ($fantasy) {
@@ -132,6 +142,10 @@ function lrg_schema_main_foreign_keys(): array {
     ['fk/items.sql', 'items'],
     ['fk/adv_matchlines_players.sql', 'adv_matchlines_pl'],
     ['fk/matchlines_players.sql', 'matchlines_pl'],
+    ['fk/matches_ext.sql', 'matches_ext'],
+    ['fk/objectives.sql', 'objectives'],
+    ['fk/runes.sql', 'runes'],
+    ['fk/chat_report.sql', 'chat_report'],
   ];
 }
 
@@ -157,6 +171,12 @@ function lrg_schema_core_table_creates(): array {
     ['tables/wards.sql', 'wards'],
     ['tables/players.sql', 'players'],
     ['tables/leagues.sql', 'leagues'],
+    ['tables/matches_ext.sql', 'matches_ext'],
+    ['tables/objectives.sql', 'objectives'],
+    ['tables/runes.sql', 'runes'],
+    ['tables/chat_report.sql', 'chat_report'],
+    ['tables/matches_failed.sql', 'matches_failed'],
+    ['tables/matches_draft_donors.sql', 'matches_draft_donors'],
   ];
 }
 
@@ -187,5 +207,11 @@ function lrg_schema_migrations_from_init_tables(): array {
     'starting_items' => 'tables/starting_items.sql',
     'skill_builds' => 'tables/skill_builds.sql',
     'wards' => 'tables/wards.sql',
+    'matches_ext' => 'tables/matches_ext.sql',
+    'objectives' => 'tables/objectives.sql',
+    'runes' => 'tables/runes.sql',
+    'chat_report' => 'tables/chat_report.sql',
+    'matches_failed' => 'tables/matches_failed.sql',
+    'matches_draft_donors' => 'tables/matches_draft_donors.sql',
   ];
 }

@@ -5,13 +5,24 @@ if (!isset($schema_quiet)) {
 }
 
 $schema = [
-  // 'runes' => false,
+  'runes' => false,
+  'objectives' => false,
+  'matches_ext' => false,
+  'chat_report' => false,
+  'matches_failed' => false,
+  'matches_draft_donors' => false,
   'skill_builds' => false,
   'starting_items' => false,
   'matches_opener' => false, // radiant_opener, seriesid, analysis_status
   'matches_mmr' => false, // mmr (ranked matches, see league_monitor_v2)
   'matches_replay_salt' => false, // replay_salt from OpenDota when present
+  'matches_seq_num' => false, // seq_num, tower/rax status, players_c, heroes_c, team_ids_c
+  'matches_avg_rank' => false,
+  'matches_source' => false, // 1=opendota 2=stratz 3=od cache (not lrgcache)
+  'matchlines_player_slot' => false,
+  'adv_matchlines_tormentors' => false,
   'adv_matchlines_roles' => false, // role, lane_won, networth
+  'adv_matchlines_timeseries' => false, // nw_t, gold_t, xp_t, lh_t, damage_breakdown
   'players_fixname' => false, // name_fixed
   'draft_order' => false, // order
   'teams' => false,
@@ -40,7 +51,14 @@ if ($conn->multi_query($sql) === FALSE)
 $query_res = $conn->store_result();
 for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
   switch($row[0]) {
-    // case "runes":
+    case "runes":
+    case "objectives":
+    case "matches_ext":
+    case "chat_report":
+    case "matches_failed":
+    case "matches_draft_donors":
+      $schema[$row[0]] = true;
+      break;
     case "teams_matches":
       $schema['teams'] = true;
       break;
@@ -93,6 +111,15 @@ for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row(
   if ($row[0] == "replay_salt") {
     $schema['matches_replay_salt'] = true;
   }
+  if ($row[0] == "seq_num") {
+    $schema['matches_seq_num'] = true;
+  }
+  if ($row[0] == "avg_rank") {
+    $schema['matches_avg_rank'] = true;
+  }
+  if ($row[0] == "source") {
+    $schema['matches_source'] = true;
+  }
 }
 $query_res->free_result();
 
@@ -103,7 +130,9 @@ $query_res = $conn->store_result();
 for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
   if ($row[0] == "variant") {
     $schema['variant_supported'] = true;
-    break;
+  }
+  if ($row[0] == "player_slot") {
+    $schema['matchlines_player_slot'] = true;
   }
 }
 $query_res->free_result();
@@ -125,7 +154,12 @@ $query_res = $conn->store_result();
 for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
   if ($row[0] == "role") {
     $schema['adv_matchlines_roles'] = true;
-    break;
+  }
+  if ($row[0] == "nw_t" || $row[0] == "lh_t") {
+    $schema['adv_matchlines_timeseries'] = true;
+  }
+  if ($row[0] == "tormentors_killed") {
+    $schema['adv_matchlines_tormentors'] = true;
   }
 }
 $query_res->free_result();

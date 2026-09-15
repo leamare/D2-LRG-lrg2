@@ -130,6 +130,14 @@ Parameters:
 * `-v / --virtual` - create a virtual report (using views, not recommended for performance reasons)
 * `-e / --existing` - use existing config if possible
 
+### tools/update_schema
+
+Applies missing tables, foreign keys and column migrations to an existing league database.
+
+```
+php tools/update_schema.php -lLEAGUE_TAG
+```
+
 ### rg_backup
 
 Creates/restores backup.
@@ -162,6 +170,8 @@ Parameters:
 * `-N` - Set a minimal (stratz) raNk required for the match
 * `-d123` - Specify a custom API cooldown (in seconds)
 * `-jN` - Run up to N parallel worker processes (each has its own OpenDota client and DB connection). Speeds up bulk fetch when the API is the bottleneck. Not compatible with listen mode (`-L`) or grouped Stratz (`-G` with a size). Requires `pcntl` (typical on Linux CLI PHP)
+* `-a` - addition mode: insert only into child tables that are missing for matches already in the database
+* `--repair` - fill missing schema parts on existing matches (enables `-a`, and also backfills `seq_num` / building status / `players_c` / `heroes_c` / `team_ids_c`, `player_slot`, and timeseries JSON). `-u` still means “update unparsed matches”
 * `-u` - try to update matches without adv_matchlines data (unparsed matches)
 * `-U` - try to update all the matches, finding unparsed ones. Automatically enables `-u`
 * `-p` - counts matches with negative player ids are required for data update
@@ -205,6 +215,8 @@ Additional parameters to inject in league json descriptor:
 * `cluster_denylist`
 * `min_score_side` (default 5)
 * `min_duration` (default 600)
+* `fail_retries` (default 15; skip the match when missing/unparsed retries are exceeded)
+* `allow_botmatches` (default false; skip public bot lobbies when OpenDota `human_players` is below 10)
 * `version_allowlist`
 * `version_denylist`
 
@@ -297,6 +309,8 @@ Tools are additional scripts that can be used for specific things. All of them s
 * `update_all_reports` - updates all reports
 * `update_web` - re-analyzes a league into the configured web reports folder (`web_reports_dir` from `setup.php`, or `-r/path`). Finds the existing report via `res/cachelist.json` / `reports/report_<tag>.json`, then runs `rg_analyzer -lTAG -o<path>`. Example: `php tools/update_web.php -ltestleague`
 * `refresh_broken_drafts` - finds Captains Mode (modeID 2) matches whose draft matches the fetcher fallback (no bans + single stage + identical `order`), or has no draft rows; removes via `remove_matches` + `remove_cached`, re-fetches with `-W`. Flags: `-n` dry-run, `-S` Stratz, `-c` cache dir. Example: `php tools/refresh_broken_drafts.php -ltestleague -n`
+* `donate_draft` - applies stored `matches_draft_donors` blobs onto matching All Pick (mode 1) remade lobbies (9/10 heroes same sides + 8/10 players) and sets the target's `modeID` from the donor. Flags: `-n` dry-run. Example: `php tools/donate_draft.php -ltestleague -n`
+* `recalc_roles_laning` - recalculates `role` / `isCore` / `lane_won` on `adv_matchlines` from existing DB lanes + early stats (no API). Flags: `-mMATCH`, `-Mlist`, `-n` dry-run. Example: `php tools/recalc_roles_laning.php -ltestleague -n`
 * `backport_matchlist` - generates full matchlist based on league's database. Args: `-l%LEAGUETAG%`, `-Tperiod`, `-P4601` where 4601 is ID of a patch, `-r` to fetch only unparsed matches or `-R` to fetch only parsed, `-Z` to reverse filters (get every match that doesn't fit the filters), `-o` to output to a speficic file
 * `backport_cache` - backports all matches from a league database as .lrgcache.json files. Args: `-l%LEAGUETAG%`, `-c%DIR%` for cache directory (same as fetcher; default `cache`; use `NULL` for empty dir string), `-M%FNAME%` for a match-id list file, or legacy `-c%FNAME%` when the path is an existing regular file. `-Tperiod` / DB-wide when no match list -- for a filtered subset use `backport_matchlist` then `-M` (or legacy `-c` file).
 * `update_rosters` - updates official rosters for all teams in report. Args: `-l%LEAGUETAG%`

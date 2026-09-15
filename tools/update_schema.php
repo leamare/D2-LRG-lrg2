@@ -50,6 +50,18 @@ $migration_order = [
   'wards',
   'variant_supported',
   'fantasy_mvp',
+  'matches_ext',
+  'objectives',
+  'runes',
+  'chat_report',
+  'matches_failed',
+  'matches_draft_donors',
+  'matches_seq_num',
+  'matchlines_player_slot',
+  'adv_matchlines_timeseries',
+  'matches_avg_rank',
+  'matches_source',
+  'adv_matchlines_tormentors',
 ];
 
 $tables = lrg_existing_tables($conn);

@@ -16,6 +16,7 @@ CREATE TABLE `matchlines` (
   `towerDamage` mediumint(9) NOT NULL,
   `lastHits` smallint(6) NOT NULL,
   `denies` smallint(6) NOT NULL,
+  `player_slot` smallint(5) UNSIGNED DEFAULT NULL,
   PRIMARY KEY (`matchid`,`playerid`),
   KEY `matchlines_matchid_heroid_IDX` (`matchid`,`heroid`) USING BTREE,
   KEY `matchlines_heroid_isradiant_IDX` (`heroid`,`isRadiant`) USING BTREE,

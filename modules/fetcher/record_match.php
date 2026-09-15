@@ -34,21 +34,150 @@ if (($lg_settings['main']['normalize_turbo'] ?? true) && ($t_match['modeID'] == 
 }
 
 if (!$bad_replay && !empty($t_adv_matchlines)) {
-  foreach ($t_adv_matchlines as &$aml) {
-    if (!isset($aml['role'])) {
-      if ($aml['isCore']) {
-        $aml['role'] = $aml['lane'];
+  // Fill missing / colliding roles into unique 1-5 per side (lane heuristic, free slots only).
+  // On -repair: always rebuild roles from lanes, then always recompute lane_won.
+  if (!empty($repair_mode)) {
+    foreach ($t_adv_matchlines as &$aml) {
+      unset($aml['role'], $aml['lane_won']);
+    }
+    unset($aml);
+  }
+  $role_by_hero = [];
+  foreach ($t_matchlines as $ml) {
+    $role_by_hero[(int)$ml['heroid']] = $ml;
+  }
+  foreach ([0, 1] as $side) {
+    $idxs = [];
+    foreach ($t_adv_matchlines as $i => $aml) {
+      $hid = (int)($aml['heroid'] ?? 0);
+      $ml = $role_by_hero[$hid] ?? null;
+      if (!$ml || !$hid) continue;
+      if ((!empty($ml['isRadiant']) ? 1 : 0) !== $side) continue;
+      $idxs[] = $i;
+    }
+    if (!$idxs) continue;
+
+    if (!empty($repair_mode)) {
+      $players = [];
+      foreach ($idxs as $i) {
+        $aml = $t_adv_matchlines[$i];
+        $hid = (int)$aml['heroid'];
+        $ml = $role_by_hero[$hid];
+        $lane = (int)($aml['lane'] ?? 4);
+        $players[] = [
+          'hid' => $hid,
+          'gpm' => (int)($ml['gpm'] ?? 0),
+          'roaming' => $lane > 3,
+          'lane' => $lane,
+          'eff' => (float)($aml['efficiency_at10'] ?? 0),
+          'lh_at10' => (int)($aml['lh_at10'] ?? 0),
+        ];
+      }
+      $assigned = lrg_assign_roles_from_lanes($players);
+      foreach ($idxs as $i) {
+        $hid = (int)$t_adv_matchlines[$i]['heroid'];
+        if (!isset($assigned[$hid])) continue;
+        $t_adv_matchlines[$i]['role'] = $assigned[$hid];
+        $t_adv_matchlines[$i]['isCore'] = $assigned[$hid] <= 3 ? 1 : 0;
+      }
+      continue;
+    }
+
+    $counts = [];
+    foreach ($idxs as $i) {
+      $r = isset($t_adv_matchlines[$i]['role']) ? (int)$t_adv_matchlines[$i]['role'] : 0;
+      if ($r >= 1 && $r <= 5) $counts[$r] = ($counts[$r] ?? 0) + 1;
+    }
+
+    $used = [];
+    $need = [];
+    foreach ($idxs as $i) {
+      $r = isset($t_adv_matchlines[$i]['role']) ? (int)$t_adv_matchlines[$i]['role'] : 0;
+      if ($r >= 1 && $r <= 5 && ($counts[$r] ?? 0) === 1) {
+        $used[$r] = true;
       } else {
-        $aml['role'] = ($aml['lane'] == 1) ? 4 : 3;
+        $need[] = $i;
+      }
+    }
+
+    foreach ($need as $ni => $i) {
+      $aml = &$t_adv_matchlines[$i];
+      $lane = (int)($aml['lane'] ?? 4);
+      if (!empty($aml['isCore'])) {
+        $pref = ($lane >= 1 && $lane <= 3) ? $lane : 1;
+      } else {
+        $pref = ($lane == 1) ? 5 : 4;
+      }
+      if (!isset($used[$pref])) {
+        $aml['role'] = $pref;
+        $aml['isCore'] = $pref <= 3 ? 1 : 0;
+        $used[$pref] = true;
+        unset($need[$ni]);
+      }
+      unset($aml);
+    }
+
+    $free = array_values(array_diff(range(1, 5), array_keys($used)));
+    foreach (array_values($need) as $i) {
+      if ($free === []) break;
+      $aml = &$t_adv_matchlines[$i];
+      $pick = null;
+      if (!empty($aml['isCore'])) {
+        foreach ($free as $fi => $role) {
+          if ($role <= 3) { $pick = $fi; break; }
+        }
+      } else {
+        for ($fi = count($free) - 1; $fi >= 0; $fi--) {
+          if ($free[$fi] >= 4) { $pick = $fi; break; }
+        }
+      }
+      if ($pick === null) $pick = 0;
+      $role = $free[$pick];
+      array_splice($free, $pick, 1);
+      $aml['role'] = $role;
+      $aml['isCore'] = $role <= 3 ? 1 : 0;
+      $used[$role] = true;
+      unset($aml);
+    }
+
+    // Still broken (collisions / incomplete) → full lane-based reassignment.
+    $seen = [];
+    $broken = false;
+    foreach ($idxs as $i) {
+      $r = (int)($t_adv_matchlines[$i]['role'] ?? 0);
+      if ($r < 1 || $r > 5 || isset($seen[$r])) { $broken = true; break; }
+      $seen[$r] = true;
+    }
+    if ($broken) {
+      $players = [];
+      foreach ($idxs as $i) {
+        $aml = $t_adv_matchlines[$i];
+        $hid = (int)$aml['heroid'];
+        $ml = $role_by_hero[$hid];
+        $lane = (int)($aml['lane'] ?? 4);
+        $players[] = [
+          'hid' => $hid,
+          'gpm' => (int)($ml['gpm'] ?? 0),
+          'roaming' => $lane > 3,
+          'lane' => $lane,
+          'eff' => (float)($aml['efficiency_at10'] ?? 0),
+          'lh_at10' => (int)($aml['lh_at10'] ?? 0),
+        ];
+      }
+      $assigned = lrg_assign_roles_from_lanes($players);
+      foreach ($idxs as $i) {
+        $hid = (int)$t_adv_matchlines[$i]['heroid'];
+        if (!isset($assigned[$hid])) continue;
+        $t_adv_matchlines[$i]['role'] = $assigned[$hid];
+        $t_adv_matchlines[$i]['isCore'] = $assigned[$hid] <= 3 ? 1 : 0;
       }
     }
   }
-  unset($aml);
 
   // Lane won calculation
   $tie_factor = 0.075;
   foreach ($t_adv_matchlines as &$aml) {
-    if (isset($aml['lane_won'])) continue;
+    if (isset($aml['lane_won']) && empty($repair_mode)) continue;
 
     $opp = []; $self = 0; $side = null;
     foreach ($t_matchlines as $ml) {
@@ -70,7 +199,7 @@ if (!$bad_replay && !empty($t_adv_matchlines)) {
       }
     }
 
-    if (empty($aml['lane_won'])) {
+    if (!isset($aml['lane_won'])) {
       foreach ($t_adv_matchlines as $aml2) {
         if (in_array($aml2['heroid'], $opp) && $aml2['role'] == $aml['role']) {
           if ($aml['role'] > 3) {
@@ -90,7 +219,7 @@ if (!$bad_replay && !empty($t_adv_matchlines)) {
           $aml['lane_won'] = abs($diff) <= $tie_factor ? 1 : ($diff > 0 ? 2 : 0);
         }
       }
-      if (empty($aml['lane_won'])) $aml['lane_won'] = 2;
+      if (!isset($aml['lane_won'])) $aml['lane_won'] = 1;
     }
 
     if (!isset($aml['time_dead']) || $aml['time_dead'] < 0) $aml['time_dead'] = 0;
@@ -219,6 +348,11 @@ if (!$_addition_existing) {
     (($schema['matches_opener'] ?? false) ? "analysis_status, radiant_opener, seriesid, " : "") .
     (($schema['matches_mmr'] ?? false) ? "mmr, " : "") .
     (($schema['matches_replay_salt'] ?? false) ? "replay_salt, " : "") .
+    (($schema['matches_seq_num'] ?? false)
+      ? "seq_num, tower_status_radiant, tower_status_dire, barracks_status_radiant, barracks_status_dire, players_c, heroes_c, team_ids_c, "
+      : "") .
+    (($schema['matches_avg_rank'] ?? false) ? "avg_rank, " : "") .
+    (($schema['matches_source'] ?? false) ? "source, " : "") .
     "stomp, comeback, cluster, version) VALUES (" .
     $mid . ", " . ($t_match['radiantWin'] ? "true" : "false") . ", " . $t_match['duration'] . ", " .
     $t_match['modeID'] . ", " . $t_match['leagueID'] . ", " . $t_match['start_date'] . ", " .
@@ -229,6 +363,22 @@ if (!$_addition_existing) {
     ) .
     (($schema['matches_mmr'] ?? false) ? (($t_match['mmr'] ?? null) !== null ? (int)$t_match['mmr'] : 'null') . ", " : "") .
     (($schema['matches_replay_salt'] ?? false) ? (($t_match['replay_salt'] ?? null) !== null ? (int)$t_match['replay_salt'] : 'null') . ", " : "") .
+    (($schema['matches_seq_num'] ?? false)
+      ? (($t_match['seq_num'] ?? null) !== null ? (int)$t_match['seq_num'] : 'null') . ", " .
+        (($t_match['tower_status_radiant'] ?? null) !== null ? (int)$t_match['tower_status_radiant'] : 'null') . ", " .
+        (($t_match['tower_status_dire'] ?? null) !== null ? (int)$t_match['tower_status_dire'] : 'null') . ", " .
+        (($t_match['barracks_status_radiant'] ?? null) !== null ? (int)$t_match['barracks_status_radiant'] : 'null') . ", " .
+        (($t_match['barracks_status_dire'] ?? null) !== null ? (int)$t_match['barracks_status_dire'] : 'null') . ", " .
+        lrg_sql_json($conn, $t_match['players_c'] ?? null) . ", " .
+        lrg_sql_json($conn, $t_match['heroes_c'] ?? null) . ", " .
+        lrg_sql_json($conn, $t_match['team_ids_c'] ?? null) . ", "
+      : "") .
+    (($schema['matches_avg_rank'] ?? false)
+      ? (($t_match['avg_rank'] ?? null) !== null && $t_match['avg_rank'] !== '' ? (int)$t_match['avg_rank'] : 'null') . ", "
+      : "") .
+    (($schema['matches_source'] ?? false)
+      ? (($t_match['source'] ?? null) !== null && $t_match['source'] !== '' ? (int)$t_match['source'] : 'null') . ", "
+      : "") .
     ($t_match['stomp'] ?? 0) . ", " . $t_match['comeback'] . ", " .
     ($t_match['cluster'] ?? 0) . ", " . $t_match['version'] . ");";
 
@@ -244,15 +394,91 @@ if (!$_addition_existing) {
       $ml['kills'] . ", " . $ml['deaths'] . ", " . $ml['assists'] . ", " .
       $ml['networth'] . ", " . $ml['gpm'] . ", " . $ml['xpm'] . ", " .
       ($ml['heal'] ?? 0) . ", " . ($ml['heroDamage'] ?? 0) . ", " .
-      ($ml['towerDamage'] ?? 0) . ", " . $ml['lastHits'] . ", " . $ml['denies'] . ")";
+      ($ml['towerDamage'] ?? 0) . ", " . $ml['lastHits'] . ", " . $ml['denies'] .
+      (($schema['matchlines_player_slot'] ?? false)
+        ? ", " . (isset($ml['player_slot']) && $ml['player_slot'] !== null && $ml['player_slot'] !== '' ? (int)$ml['player_slot'] : "null")
+        : "") .
+      ")";
   }
   $sql = "INSERT INTO matchlines (matchid, playerid, heroid, " .
     ($schema['variant_supported'] ? "variant, " : "") .
     "level, isRadiant, kills, deaths, assists, networth,
-    gpm, xpm, heal, heroDamage, towerDamage, lastHits, denies) VALUES " .
+    gpm, xpm, heal, heroDamage, towerDamage, lastHits, denies" .
+    (($schema['matchlines_player_slot'] ?? false) ? ", player_slot" : "") .
+    ") VALUES " .
     implode(",\n\t", $rows) . ";";
 
   if (!$conn->query($sql)) { return $_tx_fail('matchlines'); }
+} elseif ($_addition_existing && !empty($repair_mode)) {
+  $sets = [];
+  if (!empty($schema['matches_seq_num'])) {
+    if (($t_match['seq_num'] ?? null) !== null && $t_match['seq_num'] !== '') {
+      $sets[] = "seq_num = ".(int)$t_match['seq_num'];
+    }
+    foreach (['tower_status_radiant', 'tower_status_dire', 'barracks_status_radiant', 'barracks_status_dire'] as $_bcol) {
+      if (($t_match[$_bcol] ?? null) !== null && $t_match[$_bcol] !== '') {
+        $sets[] = "$_bcol = ".(int)$t_match[$_bcol];
+      }
+    }
+    unset($_bcol);
+    foreach (['players_c', 'heroes_c', 'team_ids_c'] as $_pcol) {
+      if (!empty($t_match[$_pcol])) {
+        $sets[] = "$_pcol = ".lrg_sql_json($conn, $t_match[$_pcol]);
+      }
+    }
+    unset($_pcol);
+  }
+  if (!empty($schema['matches_avg_rank']) && ($t_match['avg_rank'] ?? null) !== null && $t_match['avg_rank'] !== '') {
+    $sets[] = "avg_rank = ".(int)$t_match['avg_rank'];
+  }
+  if (!empty($schema['matches_source']) && ($t_match['source'] ?? null) !== null && $t_match['source'] !== '') {
+    $sets[] = "source = ".(int)$t_match['source'];
+  }
+  if (!empty($sets)) {
+    $sql = "UPDATE matches SET ".implode(', ', $sets)." WHERE matchid = $mid";
+    if (!$conn->query($sql)) { return $_tx_fail('matches_repair'); }
+  }
+  if (!empty($schema['matchlines_player_slot']) && !empty($t_matchlines)) {
+    foreach ($t_matchlines as $ml) {
+      if (!isset($ml['player_slot']) || $ml['player_slot'] === null || $ml['player_slot'] === '') continue;
+      $sql = "UPDATE matchlines SET player_slot = ".(int)$ml['player_slot'].
+        " WHERE matchid = $mid AND playerid = ".(int)$ml['playerid'];
+      if (!$conn->query($sql)) { return $_tx_fail('matchlines_repair'); }
+    }
+  }
+}
+
+if ($_addition_existing && !empty($repair_mode)
+    && !empty($t_adv_matchlines) && in_array('adv_matchlines', $present_tables ?? [])) {
+  $repair_ts = !empty($schema['adv_matchlines_timeseries'])
+    && in_array('adv_matchlines_timeseries', $missing_tables ?? []);
+  $repair_roles = !empty($schema['adv_matchlines_roles'])
+    && in_array('adv_matchlines_roles', $missing_tables ?? []);
+  if ($repair_ts || $repair_roles) {
+    foreach ($t_adv_matchlines as $aml) {
+      $sets = [];
+      if ($repair_ts) {
+        $sets[] = "nw_t = ".lrg_sql_json($conn, $aml['nw_t'] ?? null);
+        $sets[] = "gold_t = ".lrg_sql_json($conn, $aml['gold_t'] ?? null);
+        $sets[] = "xp_t = ".lrg_sql_json($conn, $aml['xp_t'] ?? null);
+        $sets[] = "damage_breakdown = ".lrg_sql_json($conn, $aml['damage_breakdown'] ?? null);
+        $sets[] = "lh_t = ".lrg_sql_json($conn, $aml['lh_t'] ?? null);
+        if (!empty($schema['adv_matchlines_tormentors'])) {
+          $sets[] = "tormentors_killed = ".(int)($aml['tormentors_killed'] ?? 0);
+        }
+      }
+      if ($repair_roles) {
+        $sets[] = "role = ".(int)($aml['role'] ?? 0);
+        $sets[] = "lane_won = ".(int)($aml['lane_won'] ?? 1);
+        $sets[] = "isCore = ".(int)($aml['isCore'] ?? 0);
+        if (isset($aml['lane'])) $sets[] = "lane = ".(int)$aml['lane'];
+      }
+      if (!$sets) continue;
+      $sql = "UPDATE adv_matchlines SET ".implode(', ', $sets).
+        " WHERE matchid = $mid AND playerid = ".(int)$aml['playerid'];
+      if (!$conn->query($sql)) { return $_tx_fail('adv_matchlines_repair'); }
+    }
+  }
 }
 
 // --- adv_matchlines ---
@@ -264,15 +490,29 @@ if (!$bad_replay && !empty($t_adv_matchlines) && !in_array('adv_matchlines', $pr
       ($aml['lh_at10'] ?? 0) . ", " . $aml['isCore'] . ", " . $aml['lane'] . ", " .
       (($schema['adv_matchlines_roles'] ?? false) ? $aml['role'] . ", " . $aml['lane_won'] . ", " : "") .
       $aml['efficiency_at10'] . ", " . ($aml['wards'] ?? 0) . ", " . ($aml['sentries'] ?? 0) . ", " .
-      $aml['couriers_killed'] . ", " . $aml['roshans_killed'] . ", " . $aml['wards_destroyed'] . ", " .
+      $aml['couriers_killed'] . ", " . $aml['roshans_killed'] . ", " .
+      ((!empty($schema['adv_matchlines_tormentors'])) ? ($aml['tormentors_killed'] ?? 0) . ", " : "") .
+      $aml['wards_destroyed'] . ", " .
       $aml['multi_kill'] . ", " . $aml['streak'] . ", " . ($aml['stacks'] ?? 0) . ", " .
       $aml['time_dead'] . ", " . ($aml['buybacks'] ?? 0) . ", " . $aml['pings'] . ", " .
-      ($aml['stuns'] ?? 0) . ", " . $aml['teamfight_part'] . ", " . $aml['damage_taken'] . ")";
+      ($aml['stuns'] ?? 0) . ", " . $aml['teamfight_part'] . ", " . $aml['damage_taken'] .
+      (($schema['adv_matchlines_timeseries'] ?? false)
+        ? ", " . lrg_sql_json($conn, $aml['nw_t'] ?? null) .
+          ", " . lrg_sql_json($conn, $aml['gold_t'] ?? null) .
+          ", " . lrg_sql_json($conn, $aml['xp_t'] ?? null) .
+          ", " . lrg_sql_json($conn, $aml['lh_t'] ?? null) .
+          ", " . lrg_sql_json($conn, $aml['damage_breakdown'] ?? null)
+        : "") .
+      ")";
   }
   $sql = "INSERT INTO adv_matchlines (matchid, playerid, heroid, lh_at10, isCore, lane, " .
     (($schema['adv_matchlines_roles'] ?? false) ? "role, lane_won, " : "") .
-    "efficiency_at10, wards, sentries, couriers_killed, roshans_killed, wards_destroyed,
-    multi_kill, streak, stacks, time_dead, buybacks, pings, stuns, teamfight_part, damage_taken) VALUES " .
+    "efficiency_at10, wards, sentries, couriers_killed, roshans_killed" .
+    ((!empty($schema['adv_matchlines_tormentors'])) ? ", tormentors_killed" : "") .
+    ", wards_destroyed,
+    multi_kill, streak, stacks, time_dead, buybacks, pings, stuns, teamfight_part, damage_taken" .
+    (($schema['adv_matchlines_timeseries'] ?? false) ? ", nw_t, gold_t, xp_t, lh_t, damage_breakdown" : "") .
+    ") VALUES " .
     implode(",\n\t", $rows) . ";";
 
   if (!$conn->query($sql)) { return $_tx_fail('adv_matchlines'); }
@@ -416,6 +656,63 @@ if (($lg_settings['main']['teams'] ?? false) && !empty($t_team_matches)) {
     $sql = "INSERT INTO teams_matches (matchid, teamid, is_radiant) VALUES " . implode(",\n\t", $rows) .
       "\n  ON DUPLICATE KEY UPDATE is_radiant = VALUES(is_radiant);";
     if (!$conn->query($sql)) { return $_tx_fail('teams_matches'); }
+  }
+}
+
+// --- matches_ext ---
+if (!empty($t_matches_ext) && ($schema['matches_ext'] ?? false) && !in_array('matches_ext', $present_tables ?? [])) {
+  $ext = $t_matches_ext;
+  $sql = "INSERT INTO matches_ext (matchid, nw_t, xp_t, gold_t, teamfights) VALUES (" .
+    $mid . ", " . lrg_sql_json($conn, $ext['nw_t'] ?? null) . ", " .
+    lrg_sql_json($conn, $ext['xp_t'] ?? null) . ", " .
+    lrg_sql_json($conn, $ext['gold_t'] ?? null) . ", " .
+    lrg_sql_json($conn, $ext['teamfights'] ?? null) . ")";
+  if (!$conn->query($sql)) { return $_tx_fail('matches_ext'); }
+}
+
+// --- objectives ---
+if (!empty($t_objectives) && ($schema['objectives'] ?? false) && !in_array('objectives', $present_tables ?? [])) {
+  $rows = [];
+  foreach ($t_objectives as $o) {
+    $kid = $o['killer_playerid'];
+    $rows[] = "(" . $mid . ", " . (int)($o['objective_id'] ?? 0) . ", '" .
+      $conn->real_escape_string((string)($o['objective_key'] ?? '')) . "', " .
+      (int)$o['timing'] . ", " .
+      ($kid === null || $kid === '' ? "NULL" : (int)$kid) . ", " .
+      (!empty($o['target_is_radiant']) ? "1" : "0") . ")";
+  }
+  if (!empty($rows)) {
+    $sql = "INSERT INTO objectives (matchid, objective_id, objective_key, timing, killer_playerid, target_is_radiant) VALUES " .
+      implode(",\n\t", $rows) . ";";
+    if (!$conn->query($sql)) { return $_tx_fail('objectives'); }
+  }
+}
+
+// --- runes ---
+if (!empty($t_runes) && ($schema['runes'] ?? false) && !in_array('runes', $present_tables ?? [])) {
+  $rows = [];
+  foreach ($t_runes as $rn) {
+    $rows[] = "(" . $mid . ", " . (int)$rn['playerid'] . ", " . (int)$rn['rune_code'] . ", " . (int)$rn['timing'] . ")";
+  }
+  $sql = "INSERT INTO runes (matchid, playerid, rune_code, timing) VALUES " . implode(",\n\t", $rows) . ";";
+  if (!$conn->query($sql)) { return $_tx_fail('runes'); }
+}
+
+// --- chat_report ---
+if (!empty($t_chat_report) && ($schema['chat_report'] ?? false) && !in_array('chat_report', $present_tables ?? [])) {
+  $rows = [];
+  foreach (lrg_chat_report_rows($t_chat_report) as $cr) {
+    $pid = (int)($cr['playerid'] ?? 0);
+    if (!$pid) continue;
+    $rows[] = "(" . $mid . ", " . $pid . ", " . (int)($cr['chat_count'] ?? 0) . ", " .
+      (int)($cr['chatwheel_count'] ?? 0) . ", " . (int)($cr['spray_count'] ?? 0) . ", " .
+      lrg_sql_json($conn, $cr['top_messages'] ?? []) . ", " .
+      lrg_sql_json($conn, $cr['top_chatwheel'] ?? []) . ")";
+  }
+  if ($rows) {
+    $sql = "INSERT INTO chat_report (matchid, playerid, chat_count, chatwheel_count, spray_count, top_messages, top_chatwheel) VALUES " .
+      implode(",\n\t", $rows) . ";";
+    if (!$conn->query($sql)) { return $_tx_fail('chat_report'); }
   }
 }
 
