@@ -1770,7 +1770,7 @@ function fetch($match) {
     }
     $game_mode = (int)$matchdata['game_mode'];
 
-    $draft_source = empty($matchdata['draft_timings']) ? ($matchdata['picks_bans'] ?? []) : ($matchdata['draft_timings'] ?? []);
+    $draft_source = !empty($matchdata['picks_bans']) ? $matchdata['picks_bans'] : ($matchdata['draft_timings'] ?? []);
 
     if (($game_mode == 2 || $game_mode == 8) && !empty($draft_source)) {
         $drafts = $draft_source;
@@ -1918,8 +1918,8 @@ function fetch($match) {
         $t_draft[$i]['order'] = $order;
         $i++;
       }
-    } else if (!empty($matchdata['draft_timings'])) {
-      $drafts = $matchdata['draft_timings'];
+    } else if (!empty($draft_source)) {
+      $drafts = $draft_source;
       $stage = 0;
       $last_stage_pick = null;
       
