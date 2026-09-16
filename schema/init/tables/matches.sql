@@ -12,6 +12,8 @@ CREATE TABLE `matches` (
   `comeback` int(11) NOT NULL,
   `cluster` int(10) UNSIGNED NOT NULL,
   `version` int(10) UNSIGNED NOT NULL,
+  `mmr` smallint(5) UNSIGNED DEFAULT NULL,
+  `replay_salt` int(10) UNSIGNED DEFAULT NULL,
   `seq_num` bigint(20) UNSIGNED DEFAULT NULL,
   `tower_status_radiant` int(10) UNSIGNED DEFAULT NULL,
   `tower_status_dire` int(10) UNSIGNED DEFAULT NULL,
