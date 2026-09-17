@@ -72,6 +72,7 @@ if (!empty($report['match_participants_teams'])) {
       if (!isset($report['pickban'][$hid]) || $report['pickban'][$hid]['matches_picked'] > $mp || !$data['matches_picked']) continue;
       if (!$teams) continue;
       $ref_ratio = $report['pickban'][$hid]['matches_picked']/$teams;
+      if (!$ref_ratio) continue;
       if ($data['matches_picked'] > $ref_ratio && ($data['matches_picked'] - $ref_ratio)/$ref_ratio > 1.5) {
         // $data['ratio'] = $ref_ratio;
         $data['ratio'] = $data['matches_picked']/$report['pickban'][$hid]['matches_picked'];

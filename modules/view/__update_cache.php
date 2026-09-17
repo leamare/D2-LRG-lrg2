@@ -1,6 +1,6 @@
 <?php
 
-$dir = flat_rscandir($reports_dir);
+$dir = empty($reports_dir) ? [] : flat_rscandir($reports_dir);
 
 # checkdir recursively
 foreach($dir as $fname) {
@@ -102,6 +102,6 @@ if(sizeof($cache["files"]) < sizeof($cache["reps"])) {
 
 # end
 
-if ($cache_update) {
+if ($cache_update && !empty($cache_file)) {
   file_put_contents($cache_file, json_encode($cache));
 }

@@ -9,14 +9,14 @@ function check_module($module) {
     $mod = $module;
   }
 
-  return $lrg_use_get &&
+  return ($lrg_use_get ?? true) &&
           (
             (stripos($mod, $module) === 0) && (
               (strlen($mod) == strlen($module)) ||
               (strlen($mod) > strlen($module) && $mod[strlen($module)] === '-' )
             )
           ) ||
-          !$lrg_use_get ||
+          !($lrg_use_get ?? true) ||
           !$lrg_get_depth ||
           $lrg_get_depth <= substr_count($module, "-");
 }

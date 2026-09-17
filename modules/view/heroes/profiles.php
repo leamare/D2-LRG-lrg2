@@ -945,7 +945,7 @@ function rg_view_generate_heroes_profiles() {
           locale_string("position_$role").
         "</a></td>".
         "<td>".$data[0]."</td>".
-        "<td>".number_format(100*$data[0]/$report['pickban'][$hero]['matches_picked'], 2)."%</td>".
+        "<td>".number_format(($report['pickban'][$hero]['matches_picked'] ?? 0) ? 100*$data[0]/$report['pickban'][$hero]['matches_picked'] : 0, 2)."%</td>".
         "<td>".number_format($data[1]*100, 2)."%</td>".
         (isset($data[2]) ? "<td>".$data[2]."</td>" : "").
       "</tr>";

@@ -92,6 +92,13 @@ if (file_exists("modules/__imports/view") && is_dir("modules/__imports/view")) {
 
 include_once("rg_report_out_settings.php");
 
+$lrg_use_get = $lrg_use_get ?? true;
+$mod = $mod ?? "";
+$leaguetag = $leaguetag ?? "";
+$cats_file = $cats_file ?? "";
+$reports_dir = $reports_dir ?? "reports";
+$cache_file = $cache_file ?? "";
+
 // PRESETS
 include_once("modules/view/__preset.php");
 

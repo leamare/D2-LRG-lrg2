@@ -20,24 +20,28 @@ function team_card($tid, $full = false) {
     $region_line = region_link( array_keys($report['teams'][$tid]['regions'])[0] );
   }
 
+  $team = $report['teams'][$tid] ?? [];
+  $matches_total = (int)($team['matches_total'] ?? 0);
+  $wins = (int)($team['wins'] ?? 0);
+
   $output .= "<div class=\"team-info-block\">".
                 "<div class=\"section-caption\">".locale_string("summary").":</div>".
-                "<div class=\"team-info-line\"><span class=\"caption\">".locale_string("matches").":</span> ".$report['teams'][$tid]['matches_total']."</div>".
-                ($report['teams'][$tid]['matches_total'] ?
+                "<div class=\"team-info-line\"><span class=\"caption\">".locale_string("matches").":</span> ".$matches_total."</div>".
+                ($matches_total ?
                   "<div class=\"team-info-line\"><span class=\"caption\">".locale_string("winrate").":</span> ".
-                      number_format($report['teams'][$tid]['wins']*100/$report['teams'][$tid]['matches_total'])."%</div>"
+                      number_format($wins*100/$matches_total)."%</div>"
                     : ""
                   ).
-                "<div class=\"team-info-line\"><span class=\"caption\">".locale_string("gpm").":</span> ".number_format($report['teams'][$tid]['averages']['gpm'] ?? 0)."</div>".
-                "<div class=\"team-info-line\"><span class=\"caption\">".locale_string("xpm").":</span> ".number_format($report['teams'][$tid]['averages']['xpm'] ?? 0)."</div>".
-                "<div class=\"team-info-line\"><span class=\"caption\">".locale_string("kda").":</span> ".number_format($report['teams'][$tid]['averages']['kills'] ?? 0).
-                  "/".number_format($report['teams'][$tid]['averages']['deaths'] ?? 0)."/".number_format($report['teams'][$tid]['averages']['assists'] ?? 0)."</div>".
+                "<div class=\"team-info-line\"><span class=\"caption\">".locale_string("gpm").":</span> ".number_format($team['averages']['gpm'] ?? 0)."</div>".
+                "<div class=\"team-info-line\"><span class=\"caption\">".locale_string("xpm").":</span> ".number_format($team['averages']['xpm'] ?? 0)."</div>".
+                "<div class=\"team-info-line\"><span class=\"caption\">".locale_string("kda").":</span> ".number_format($team['averages']['kills'] ?? 0).
+                  "/".number_format($team['averages']['deaths'] ?? 0)."/".number_format($team['averages']['assists'] ?? 0)."</div>".
                 (isset($region_line) ? "<div class=\"team-info-line\"><span class=\"caption\">".locale_string("main_region").":</span> ".$region_line."</div>" : "").
                   "</div>";
 
   $output .= "<div class=\"team-info-block\">".
                 "<div class=\"section-caption\">".locale_string("active_roster").":</div>";
-  $roster = $report['teams'][$tid]['active_roster'] ?? [];
+  $roster = $team['active_roster'] ?? [];
   if (!is_array($roster)) {
     $roster = [];
   }

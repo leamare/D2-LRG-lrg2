@@ -8,7 +8,7 @@ $cache_update = false;
 
 $cache = [];
 
-if (file_exists($cache_file)) {
+if (!empty($cache_file) && file_exists($cache_file)) {
   try {
     $cache = file_get_contents($cache_file);
     $cache = json_decode($cache, true);

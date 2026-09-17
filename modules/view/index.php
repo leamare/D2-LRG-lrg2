@@ -220,7 +220,7 @@ function report_card_element($report, $smaller = true, $catlabel = false) {
     "</div>".
     "<div class=\"extra content\">".
       "<span class=\"element\">".locale_string($iscat ? 'leag_reports' : 'matches').": ".$report['matches']."</span>".
-      "<a class=\"right element\" onclick=\"showModal('".htmlspecialchars(addcslashes($extra, "'"))."', '".htmlspecialchars(addcslashes($report['name'], "'"))."');\">".
+      "<a class=\"right element\" onclick=\"showModal('".htmlspecialchars(addcslashes((string)($extra ?? ''), "'"))."', '".htmlspecialchars(addcslashes((string)($report['name'] ?? ''), "'"))."');\">".
         locale_string('details').
       "</a>".
     "</div>".

@@ -588,7 +588,7 @@ function rg_view_generate_players_profiles() {
   if (isset($report['teams'])) {
     $teams = [];
     foreach ($report['teams'] as $tid => $data) {
-      if (in_array($player, $data['active_roster'])) {
+      if (in_array($player, $data['active_roster'] ?? [])) {
         $teams[$tid] = [
           'id' => $tid,
           'name' => $data['name'],

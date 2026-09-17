@@ -17,7 +17,9 @@ if (isset($report['starting_items_players']['items'])) {
       $selected_pid = 0;
       $selected_tag = "total";
     }
-    foreach ($context[$tid]['active_roster'] as $pid) {
+    $roster = $context[$tid]['active_roster'] ?? [];
+    if (!is_array($roster)) $roster = [];
+    foreach ($roster as $pid) {
       register_locale_string(player_name($pid), "playerid".$pid);
   
       $res["team".$tid]['items']['stitems']["playerid".$pid] = "";
@@ -43,7 +45,9 @@ if (isset($report['starting_items_players']['items'])) {
       $data = [];
       $matches_total = 0;
   
-      foreach ($context[$tid]['active_roster'] as $pid) {
+      $roster = $context[$tid]['active_roster'] ?? [];
+    if (!is_array($roster)) $roster = [];
+    foreach ($roster as $pid) {
         if (!isset($report['starting_items_players']['items'][0][$pid])) continue;
         $pl_data = $report['starting_items_players']['items'][0][$pid];
         $pl_data['head'] = $report['starting_items_players']['items_head'];
@@ -70,9 +74,10 @@ if (isset($report['starting_items_players']['items'])) {
         $data[$iid]['lane_wr'] = $item['lane_wins'] / $matches_total;
       }
 
+      $mt = max(1, (int)($context[$tid]['matches_total'] ?? 0));
       $matches = [
         'm' => round($matches_total / 5),
-        'wr' => $context[$tid]['wins'] / $context[$tid]['matches_total']
+        'wr' => ($context[$tid]['wins'] ?? 0) / $mt
       ];
     }
 
@@ -100,7 +105,9 @@ if (isset($report['starting_items_players']['consumables'])) {
       $selected_pid = 0;
       $selected_tag = "total";
     }
-    foreach ($context[$tid]['active_roster'] as $pid) {
+    $roster = $context[$tid]['active_roster'] ?? [];
+    if (!is_array($roster)) $roster = [];
+    foreach ($roster as $pid) {
       register_locale_string(player_name($pid), "playerid".$pid);
   
       $res["team".$tid]['items']['sticonsumables']["playerid".$pid] = "";
@@ -136,7 +143,9 @@ if (isset($report['starting_items_players']['consumables'])) {
     } else {
       $matches_total = 0;
   
-      foreach ($context[$tid]['active_roster'] as $pid) {
+      $roster = $context[$tid]['active_roster'] ?? [];
+    if (!is_array($roster)) $roster = [];
+    foreach ($roster as $pid) {
         $pl_data = [
           '5m' => [],
           '10m' => [],
@@ -184,9 +193,10 @@ if (isset($report['starting_items_players']['consumables'])) {
         }
       }
 
+      $mt = max(1, (int)($context[$tid]['matches_total'] ?? 0));
       $matches = [
         'm' => round($matches_total / 5),
-        'wr' => $context[$tid]['wins'] / $context[$tid]['matches_total']
+        'wr' => ($context[$tid]['wins'] ?? 0) / $mt
       ];
     }
 

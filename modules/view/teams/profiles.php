@@ -26,7 +26,7 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
     if(check_module($context_mod."team".$tid)) {
       if($mod == $context_mod."team".$tid) $unset_module = true;
 
-      $multiplier = $report['teams'][$tid]['matches_total'] / $report['random']['matches_total'];
+      $multiplier = ($report['teams'][$tid]['matches_total'] ?? 0) / max(1, (int)($report['random']['matches_total'] ?? 1));
 
       if (isset($context[$tid]['averages'])) {
         $res["team".$tid]['overview'] = "";

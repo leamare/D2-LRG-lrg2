@@ -1,7 +1,9 @@
 <?php
 
 function flat_rscandir($dirname) {
-  $dir = scandir($dirname);
+  if ($dirname === null || $dirname === '') return [];
+  $dir = @scandir($dirname);
+  if ($dir === false) return [];
   $subfolders = [];
 
   foreach ($dir as $k => &$v) {
@@ -26,7 +28,9 @@ function flat_rscandir($dirname) {
 }
 
 function rscandir($dirname) {
-  $dir = scandir($dirname);
+  if ($dirname === null || $dirname === '') return [];
+  $dir = @scandir($dirname);
+  if ($dir === false) return [];
   foreach ($dir as $k => &$v) {
     if($v[0] == ".") {
       unset($dir[$k]);

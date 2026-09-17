@@ -26,7 +26,7 @@ function spell_humanize_tag($tag) {
 
 function spell_icon_link($sid, $tag_override = null) {
   global $spell_icons_provider;
-  return str_replace("%HERO%", $tag_override ?? spell_tag($sid), $spell_icons_provider);
+  return str_replace("%HERO%", $tag_override ?? spell_tag($sid), $spell_icons_provider ?? '');
 }
 
 function spell_icon($sid, $classes = '', $tag_override = null) {

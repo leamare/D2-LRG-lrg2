@@ -214,6 +214,7 @@ function positions_ranking_sort($a, $b, $total_matches) {
 }
 
 function positions_ranking(&$arr, $total_matches) {
+  if ($total_matches <= 0) $total_matches = 1;
   foreach ($arr as $k => $v) {
     $v_matches = $v['matches_s'] ?? $v['matches'];
     $v_winrate = $v['winrate_s'] ?? $v['winrate'];
