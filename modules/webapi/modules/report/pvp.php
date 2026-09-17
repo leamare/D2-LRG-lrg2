@@ -19,7 +19,7 @@ public function process() {
   if (isset($report['players_additional'])) {
     foreach($report['players_additional'] as $id => $player) {
       $winrates[$id]['matches'] = $player['matches'];
-      $winrates[$id]['winrate'] = $player['won']/$player['matches'];
+      $winrates[$id]['winrate'] = !empty($player['matches']) ? $player['won']/$player['matches'] : 0;
     }
   }
 
@@ -44,7 +44,7 @@ public function process() {
     $max = reset($pvp_context)['wrank'];
   
     foreach ($pvp_context as $elid => $el) {
-      $pvp_context[$elid]['rank'] = 100 * ($el['wrank']-$min) / ($max-$min);
+      $pvp_context[$elid]['rank'] = ($max == $min) ? 100 : 100 * ($el['wrank']-$min) / ($max-$min);
       $pvp_context_cpy[$elid]['winrate'] = 1-$pvp_context_cpy[$elid]['winrate'];
     }
 
@@ -58,7 +58,7 @@ public function process() {
     $max = reset($pvp_context_cpy)['wrank'];
   
     foreach ($pvp_context_cpy as $elid => $el) {
-      $pvp_context[$elid]['arank'] = 100 * ($el['wrank']-$min) / ($max-$min);
+      $pvp_context[$elid]['arank'] = ($max == $min) ? 100 : 100 * ($el['wrank']-$min) / ($max-$min);
       unset($pvp_context[$elid]['wrank']);
 
       if (isset($el['expectation']) && !isset($el['deviation'])) {

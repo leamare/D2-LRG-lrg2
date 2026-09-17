@@ -146,7 +146,7 @@ function positions_ranking_helper(&$context, $total_matches) {
   $max = reset($context)['wrank'];
 
   foreach ($context as $elid => $el) {
-    $context[$elid]['rank'] = 100 * ($el['wrank']-$min) / ($max-$min);
+    $context[$elid]['rank'] = ($max == $min) ? 100 : 100 * ($el['wrank']-$min) / ($max-$min);
     $context_copy[$elid]['winrate_s'] = 1-($context_copy[$elid]['winrate'] ?? $context_copy[$elid]['winrate_s']);
   }
 
@@ -160,7 +160,7 @@ function positions_ranking_helper(&$context, $total_matches) {
   $max = reset($context_copy)['wrank'];
 
   foreach ($context_copy as $elid => $el) {
-    $context_copy[$elid]['arank'] = 100 * ($el['wrank']-$min) / ($max-$min);
+    $context_copy[$elid]['arank'] = ($max == $min) ? 100 : 100 * ($el['wrank']-$min) / ($max-$min);
     unset($context[$elid]['wrank']);
   }
 }

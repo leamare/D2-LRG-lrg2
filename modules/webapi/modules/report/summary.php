@@ -18,6 +18,9 @@ public function process() {
   if (in_array("teams", $mods)) {
     include_once(__DIR__ . "/../../../view/functions/teams_diversity_recalc.php");
 
+    if (empty($context['teams']) || !is_array($context['teams'])) {
+      throw new UserInputException("No team data in this report");
+    }
     $context_k = array_keys($context['teams']);
     foreach($context_k as $team_id) {
       if (isset($report['teams_interest']) && !in_array($team_id, $report['teams_interest'])) continue;
@@ -34,7 +37,7 @@ public function process() {
           $report['teams'][$team_id]['wins']*100/$report['teams'][$team_id]['matches_total']
           : 0,2)
       ];
-      $res[] = array_merge($t, $report['teams'][$team_id]['averages']);
+      $res[] = array_merge($t, $report['teams'][$team_id]['averages'] ?? []);
     }
     $res['__endp'] = "teams-summary";
   } else if (in_array("players", $mods)) {
@@ -89,7 +92,10 @@ public function process() {
     throw new UserInputException("What kind of summary do you need?");
   }
 
-  $keys = array_keys( array_values($res)[0] );
+  $keys = [];
+  foreach ($res as $el) {
+    if (is_array($el)) { $keys = array_keys($el); break; }
+  }
   if (in_array("hero_damage_per_min_s", $keys) && in_array("gpm", $keys) && !in_array("damage_to_gold_per_min_s", $keys)) {
     foreach ($res as $id => $el) {
       if (!is_numeric($id)) continue;

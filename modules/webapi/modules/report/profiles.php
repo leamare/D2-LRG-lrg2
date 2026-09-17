@@ -494,7 +494,7 @@ public function process() {
     if (isset($report['teams'])) {
       $res['teams'] = [];
       foreach ($report['teams'] as $tid => $data) {
-        if (in_array($vars['playerid'], $data['active_roster'])) {
+        if (in_array($vars['playerid'], $data['active_roster'] ?? [])) {
           $res['teams'][$tid] = [
             'id' => $tid,
             'name' => $data['name'],

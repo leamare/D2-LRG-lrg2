@@ -11,13 +11,13 @@ function team_card($tid) {
       "team_id" => $tid,
       "team_name" => team_name($tid),
       "team_tag" => team_tag($tid),
-      "matches" => $report['teams'][$tid]['matches_total'],
-      "wins" => $report['teams'][$tid]['wins'],
-      "winrate" => round($report['teams'][$tid]['wins']*100/$report['teams'][$tid]['matches_total']),
+      "matches" => $report['teams'][$tid]['matches_total'] ?? 0,
+      "wins" => $report['teams'][$tid]['wins'] ?? 0,
+      "winrate" => round(($report['teams'][$tid]['matches_total'] ?? 0) ? ($report['teams'][$tid]['wins'] ?? 0)*100/$report['teams'][$tid]['matches_total'] : 0),
     ];
 
     $roster = [];
-    foreach($report['teams'][$tid]['active_roster'] as $player) {
+    foreach($report['teams'][$tid]['active_roster'] ?? [] as $player) {
       $p = [
         "player_id" => $player,
         "player_name" => player_name($player),
@@ -38,9 +38,9 @@ function team_card($tid) {
     "team_id" => $tid,
     "team_name" => team_name($tid),
     "team_tag" => team_tag($tid),
-    "matches" => $report['teams'][$tid]['matches_total'],
-    "wins" => $report['teams'][$tid]['wins'],
-    "winrate" => round($report['teams'][$tid]['wins']*100/$report['teams'][$tid]['matches_total'], 2),
+    "matches" => $report['teams'][$tid]['matches_total'] ?? 0,
+    "wins" => $report['teams'][$tid]['wins'] ?? 0,
+    "winrate" => round(($report['teams'][$tid]['matches_total'] ?? 0) ? ($report['teams'][$tid]['wins'] ?? 0)*100/$report['teams'][$tid]['matches_total'] : 0, 2),
     "gpm" => $report['teams'][$tid]['averages']['gpm'],
     "xpm" => $report['teams'][$tid]['averages']['xpm'],
     "kills" => round($report['teams'][$tid]['averages']['kills'], 2),
@@ -54,7 +54,7 @@ function team_card($tid) {
   }
 
   $roster = [];
-  foreach($report['teams'][$tid]['active_roster'] as $player) {
+  foreach($report['teams'][$tid]['active_roster'] ?? [] as $player) {
     if (!isset($report['players'][$player])) continue;
     $p = [
       "player_id" => $player,

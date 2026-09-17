@@ -15,7 +15,7 @@ class Series extends EndpointTemplate {
 public function process() {
   $mods = $this->mods; $vars = $this->vars; $report = $this->report; global $meta;
   if (empty($report['matches'])) 
-    throw new Exception("No matches available for this report");
+    throw new UserInputException("No matches available for this report");
 
   if (!isset($report['series']))
     throw new Exception("No series available for this report");

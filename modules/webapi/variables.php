@@ -48,14 +48,14 @@ foreach ($modline as $ml) {
     }
   }
 
-  if (strpos($ml, "playerid") !== FALSE) {
-    $ml = str_replace("playerid", "", $ml);
-    if (strpos($ml, ",") !== FALSE) {
-      $vars['playerid'] = explode(',', $ml);
-    } else if ($ml == '*' && !empty($report['players'])) {
+  if (preg_match('/playerid=?([\d,*]+)/', $ml, $pm)) {
+    $raw = $pm[1];
+    if (strpos($raw, ",") !== FALSE) {
+      $vars['playerid'] = array_map('intval', explode(',', $raw));
+    } else if ($raw == '*' && !empty($report['players'])) {
       $vars['playerid'] = array_keys($report['players']);
     } else {
-      $vars['playerid'] = (int)$ml;
+      $vars['playerid'] = (int)$raw;
     }
   }
   

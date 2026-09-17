@@ -57,8 +57,12 @@ public function process() {
           }
         }
         if (isset($report['player_positions_matches']) && isset($vars['playerid'])) {
-          if (!isset($report['player_positions_matches'][$i][$j][ $vars['playerid'] ])) {
-            $list = $list + $report['player_positions_matches'][$i][$j][ $vars['playerid'] ];
+          $pids = is_array($vars['playerid']) ? $vars['playerid'] : [ $vars['playerid'] ];
+          foreach ($pids as $pid) {
+            if (!is_scalar($pid)) continue;
+            if (isset($report['player_positions_matches'][$i][$j][$pid])) {
+              $list = $list + $report['player_positions_matches'][$i][$j][$pid];
+            }
           }
         }
 
