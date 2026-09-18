@@ -7,6 +7,10 @@
  **/
 
 function convert_time($time_decimal) {
+  if ($time_decimal === null || $time_decimal === '' || !is_numeric($time_decimal)) {
+    return is_string($time_decimal) && $time_decimal !== '' ? $time_decimal : '-';
+  }
+  $time_decimal = (float)$time_decimal;
   if ($time_decimal < 0) {
     $str = '-';
     $time_decimal = abs($time_decimal);
@@ -28,6 +32,10 @@ function convert_time($time_decimal) {
 }
 
 function convert_time_seconds($time) {
+  if ($time === null || $time === '' || !is_numeric($time)) {
+    return is_string($time) && $time !== '' ? $time : '-';
+  }
+  $time = (float)$time;
   if ($time < 0) {
     $str = '-';
     $time = abs($time);

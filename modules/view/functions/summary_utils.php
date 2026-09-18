@@ -6,7 +6,7 @@ function get_summary_key_primary_group($key) {
 
 function summary_prepare_value($key, $value) {
   if (strpos($key, "duration") !== FALSE || strpos($key, "_len") !== FALSE)
-    return convert_time($value);
+    return is_numeric($value) ? convert_time($value) : (string)($value ?? '-');
 
   if (strpos($key, "volatility") !== FALSE)
     return number_format((float)($value ?? 0), 2)."%";
