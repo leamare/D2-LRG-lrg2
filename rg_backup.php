@@ -197,20 +197,106 @@ function backup_table_row_estimate(mysqli $conn, $db, $table) {
   return (int)($row[0] ?? 0);
 }
 
+/**
+ * RFC4180-ish CSV field encode.
+ * Quote whenever the value contains comma, quote, CR/LF, or leading/trailing
+ * whitespace — otherwise nicknames / JSON (chat_report.top_messages etc.)
+ * break the hand-rolled importer.
+ */
+function backup_csv_field($r) {
+  if ($r === null) {
+    return '';
+  }
+  $r = (string)$r;
+  if ($r === '' || preg_match('/[",\r\n]/', $r) || $r !== trim($r)) {
+    return '"'.str_replace('"', '""', $r).'"';
+  }
+  return $r;
+}
+
 function backup_csv_line(array $row) {
   $els = [];
   foreach ($row as $r) {
-    if ($r === null) {
-      $els[] = '';
-      continue;
-    }
-    if (strpos($r, ',') !== false || (isset($r[0]) && $r[0] == '"')) {
-      $els[] = '"'.str_replace('"', '""', $r).'"';
-    } else {
-      $els[] = $r;
-    }
+    $els[] = backup_csv_field($r);
   }
   return implode(',', $els)."\n";
+}
+
+/** True when every quoted field in $s is closed ("" counts as escaped, not close). */
+function backup_csv_record_complete($s) {
+  $in = false;
+  $len = strlen($s);
+  for ($i = 0; $i < $len; $i++) {
+    if ($s[$i] !== '"') {
+      continue;
+    }
+    if ($in && $i + 1 < $len && $s[$i + 1] === '"') {
+      $i++;
+      continue;
+    }
+    $in = !$in;
+  }
+  return !$in;
+}
+
+/**
+ * Parse one complete CSV record string into fields (handles "" escapes).
+ * Trailing CR/LF are stripped.
+ */
+function backup_parse_csv_record($s) {
+  $len = strlen($s);
+  while ($len > 0 && ($s[$len - 1] === "\n" || $s[$len - 1] === "\r")) {
+    $len--;
+  }
+  $out = [];
+  $field = '';
+  $in_quotes = false;
+  for ($i = 0; $i < $len; $i++) {
+    $c = $s[$i];
+    if ($in_quotes) {
+      if ($c === '"') {
+        if ($i + 1 < $len && $s[$i + 1] === '"') {
+          $field .= '"';
+          $i++;
+        } else {
+          $in_quotes = false;
+        }
+      } else {
+        $field .= $c;
+      }
+    } elseif ($c === '"') {
+      $in_quotes = true;
+    } elseif ($c === ',') {
+      $out[] = $field;
+      $field = '';
+    } else {
+      $field .= $c;
+    }
+  }
+  $out[] = $field;
+  return $out;
+}
+
+/**
+ * Read one CSV record from a stream (joins physical lines while inside quotes).
+ * Returns null on EOF, [] for a blank line.
+ */
+function backup_csv_read_row($handle) {
+  $acc = '';
+  while (($line = fgets($handle)) !== false) {
+    $acc .= $line;
+    if (!backup_csv_record_complete($acc)) {
+      continue;
+    }
+    if ($acc === "\n" || $acc === "\r\n" || $acc === '') {
+      return [];
+    }
+    return backup_parse_csv_record($acc);
+  }
+  if ($acc !== '') {
+    return backup_parse_csv_record($acc);
+  }
+  return null;
 }
 
 function backup_ident($name) {
@@ -497,68 +583,60 @@ if ($restore) {
       $table = $t;
       $restore_prefix = "[ ] Adding data to `$t`...";
 
-      // counting lines
-      $_lines = 0;
       $handle = fopen($dir.'/'.$t.'.csv', "r");
-      if ($handle) {
-        while (($line = fgets($handle)) !== false) {
-          $_lines++;
-        }
-      
-        fclose($handle);
-      } else {
+      if ($handle === false) {
         die("Error reading the file `$t`\n");
       }
-      
-      $handle = fopen($dir.'/'.$t.'.csv', "r");
-      $schema = trim(fgets($handle));
-      $_lines--;
+
+      $header = backup_csv_read_row($handle);
+      if ($header === null || $header === []) {
+        die("Error reading schema from `$t`\n");
+      }
+
+      // count records with the real parser (quoted newlines ≠ extra rows)
+      $_lines = 0;
+      $pos_after_header = ftell($handle);
+      while (($probe = backup_csv_read_row($handle)) !== null) {
+        if ($probe === [] || (count($probe) === 1 && $probe[0] === '')) {
+          continue;
+        }
+        $_lines++;
+      }
+      fseek($handle, $pos_after_header);
+
       $restore_total = $_lines;
       $restore_done = 0;
       backup_progress($restore_prefix, 0, $restore_total, false, false);
 
       $qlines = [];
       $qcnt = 0;
-      $hsz = count(explode(',', $schema));
+      $hsz = count($header);
+      $schema = '`'.implode('`,`', $header).'`';
 
-      $schema = '`'.implode('`,`', explode(',', $schema)).'`';
-
-      while (($line = fgets($handle)) !== false) {
-        if (empty($line)) continue;
-
-        $qline = "";
-        $_vals = explode(',', trim($line));
-
-        $vals = []; $jstr = false;
-        foreach ($_vals as $v) {
-          if ($jstr) {
-            $vals[ count($vals)-1 ] .= ','.$v;
-            if (!empty($v) && $v[strlen($v)-1] == '"') {
-              $jstr = false;
-            }
-          } else {
-            if (!empty($v) && $v[0] == '"' && ((strlen($v) == 1) || ($v[strlen($v)-1] != '"'))) {
-              $jstr = true;
-            }
-            $vals[] = $v;
-          }
+      while (($vals = backup_csv_read_row($handle)) !== null) {
+        if ($vals === [] || (count($vals) === 1 && $vals[0] === '')) {
+          continue;
         }
 
+        if (count($vals) !== $hsz) {
+          $fname = "tmp/badrow_{$table}_".time().".csv";
+          file_put_contents(
+            $fname,
+            "expected $hsz cols, got ".count($vals)."\n".json_encode($vals, JSON_UNESCAPED_UNICODE)."\n"
+          );
+          echo "\n[E] Column count mismatch in `$t` (expected $hsz, got ".count($vals).")\n    Details: `$fname`\n";
+          die();
+        }
+
+        $qline = "";
         foreach ($vals as $v) {
-          if (empty($v)) {
+          if ($v === null || $v === '') {
             $qline .= "'0',";
             continue;
-          }
-          if (strpos($v, ',') !== false) {
-            // $v = substr($v, 1, strlen($v)-2);
-            $v = str_replace('""', '"', $v);
-            $v = substr($v, 1, strlen($v)-2);
-            // $v = trim($v, '"');
           }
           if (!is_numeric($v) && !mb_check_encoding($v, 'UTF-8')) {
             $v = mb_convert_encoding($v, 'UTF-8');
           }
-          $v = trim($v);
           $qline .= "'".addcslashes($v, "'\\")."',";
         }
         $qline[strlen($qline)-1] = ")";
@@ -569,7 +647,7 @@ if ($restore) {
         $restore_done++;
 
         if ($qcnt >= QUERY_COUNTER || $_lines <= 1) {
-          $sql = "INSERT INTO $t ($schema) VALUES \n".implode(",\n", $qlines).';';
+          $sql = "INSERT INTO $t ($schema) VALUES \n".implode(",\n", $qlines).";";
           try {
             if ($conn->multi_query($sql) === TRUE);
             else {
