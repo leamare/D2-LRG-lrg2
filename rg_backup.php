@@ -222,26 +222,51 @@ function backup_csv_line(array $row) {
   return implode(',', $els)."\n";
 }
 
-/** True when every quoted field in $s is closed ("" counts as escaped, not close). */
+/**
+ * True when every properly-opened quoted field is closed.
+ * A quote only opens a field at field start (BOL or after comma); mid-field
+ * quotes in legacy unquoted nicknames are treated as literal so we don't
+ * glue following rows together.
+ */
 function backup_csv_record_complete($s) {
   $in = false;
+  $at_field_start = true;
   $len = strlen($s);
   for ($i = 0; $i < $len; $i++) {
-    if ($s[$i] !== '"') {
+    $c = $s[$i];
+    if ($c === "\n" || $c === "\r") {
+      // physical EOL ignored for completeness; caller accumulates lines
       continue;
     }
-    if ($in && $i + 1 < $len && $s[$i + 1] === '"') {
-      $i++;
+    if ($in) {
+      if ($c === '"') {
+        if ($i + 1 < $len && $s[$i + 1] === '"') {
+          $i++;
+          continue;
+        }
+        $in = false;
+        $at_field_start = false;
+      }
       continue;
     }
-    $in = !$in;
+    if ($c === ',') {
+      $at_field_start = true;
+      continue;
+    }
+    if ($c === '"' && $at_field_start) {
+      $in = true;
+      $at_field_start = false;
+      continue;
+    }
+    $at_field_start = false;
   }
   return !$in;
 }
 
 /**
  * Parse one complete CSV record string into fields (handles "" escapes).
- * Trailing CR/LF are stripped.
+ * Trailing CR/LF are stripped. Quote enclosure only starts at field start
+ * so legacy rows with bare " inside nicknames still split on newlines.
  */
 function backup_parse_csv_record($s) {
   $len = strlen($s);
@@ -251,6 +276,7 @@ function backup_parse_csv_record($s) {
   $out = [];
   $field = '';
   $in_quotes = false;
+  $at_field_start = true;
   for ($i = 0; $i < $len; $i++) {
     $c = $s[$i];
     if ($in_quotes) {
@@ -260,17 +286,21 @@ function backup_parse_csv_record($s) {
           $i++;
         } else {
           $in_quotes = false;
+          $at_field_start = false;
         }
       } else {
         $field .= $c;
       }
-    } elseif ($c === '"') {
+    } elseif ($c === '"' && $at_field_start) {
       $in_quotes = true;
+      $at_field_start = false;
     } elseif ($c === ',') {
       $out[] = $field;
       $field = '';
+      $at_field_start = true;
     } else {
       $field .= $c;
+      $at_field_start = false;
     }
   }
   $out[] = $field;
