@@ -15,6 +15,21 @@ function lrg_card_winrate_class($wr) {
   return [ 'winrate-neutral', 'item-winrate-neutral' ];
 }
 
+function lrg_card_rank($rank) {
+  return $rank === null ? null : number_format($rank, 1);
+}
+
+function lrg_card_contest_tooltip($rate) {
+  return $rate === null ? "" : ", ".locale_string('contest_rate').": ".number_format($rate*100,2)."%";
+}
+
+function lrg_card_matches_label($matches) {
+  return $matches === null ? "" :
+    "<span class=\"item-stat-tooltip item-stat-tooltip-line meta-hero-card-matches\">".
+      number_format($matches, 0)." ".locale_string('matches').
+    "</span>";
+}
+
 function lrg_card_markup($tags, $href, $tooltip, $portrait, $corner, $labels) {
   return "<div class=\"".implode(" ", $tags)."\">".
     "<a class=\"item-image\" href=\"".$href."\" title=\"".addcslashes($tooltip, "'\"")."\">".
@@ -45,7 +60,7 @@ function lrg_hero_primary_role($hid) {
   return "position_".array_keys($roles)[0];
 }
 
-function lrg_hero_card($hid) {
+function lrg_hero_card($hid, $rank = null) {
   global $report, $leaguetag, $linkvars;
 
   $href = "?league=$leaguetag&mod=heroes-profiles-heroid$hid".(empty($linkvars) ? "" : "&".$linkvars);
@@ -54,6 +69,7 @@ function lrg_hero_card($hid) {
   $wr = $pb['winrate_picked'] ?? null;
   $matches_total = $report['random']['matches_total'] ?? 0;
   $pr = ($pb && $matches_total) ? ($pb['matches_picked'] / $matches_total) : null;
+  $cr = ($pb && $matches_total) ? (($pb['matches_total'] ?? (($pb['matches_picked'] ?? 0) + ($pb['matches_banned'] ?? 0))) / $matches_total) : null;
   $role = lrg_hero_primary_role($hid);
 
   [ $wrtag, $wrclass ] = lrg_card_winrate_class($wr);
@@ -63,7 +79,9 @@ function lrg_hero_card($hid) {
   $tooltip = hero_name($hid).
     ($wr !== null ? " - ".locale_string('winrate').": ".number_format($wr*100,2)."%" : "").
     ($pr !== null ? ", ".locale_string('picks').": ".number_format($pr*100,2)."%" : "").
-    ($role ? ", ".locale_string($role) : "");
+    lrg_card_contest_tooltip($cr).
+    ($role ? ", ".locale_string($role) : "").
+    ($rank !== null ? ", ".locale_string('rank').": ".lrg_card_rank($rank) : "");
 
   $labels = "<span class=\"item-stat-tooltip-line meta-hero-card-name\">".hero_name($hid)."</span>".
     ($wr !== null ? "<span class=\"item-stat-tooltip item-stat-tooltip-line item-winrate $wrclass\">".number_format($wr*100,1)."%</span>" : "").
@@ -71,12 +89,12 @@ function lrg_hero_card($hid) {
 
   return lrg_card_markup(
     $tags, $href, $tooltip, hero_portrait($hid),
-    $pr !== null ? number_format($pr*100,1)."%" : null,
+    $rank !== null ? lrg_card_rank($rank) : ($pr !== null ? number_format($pr*100,1)."%" : null),
     $labels
   );
 }
 
-function lrg_hero_card_role($hid, $stats, $role_total = 0, $role = null) {
+function lrg_hero_card_role($hid, $stats, $role_total = 0, $role = null, $rank = null) {
   global $report, $leaguetag, $linkvars;
 
   $href = "?league=$leaguetag&mod=heroes-profiles-heroid$hid".(empty($linkvars) ? "" : "&".$linkvars);
@@ -86,6 +104,8 @@ function lrg_hero_card_role($hid, $stats, $role_total = 0, $role = null) {
   $matches_total = $report['random']['matches_total'] ?? 0;
   $pr = $matches_total ? $matches / $matches_total : null;
   $ratio = $role_total > 0 ? $matches / $role_total : null;
+  // bans aren't tracked per role: split between the roles by the share of picks, same as for the tier itself
+  $cr = $matches_total ? ($matches + ($report['pickban'][$hid]['matches_banned'] ?? 0) * ($ratio ?? 0)) / $matches_total : null;
 
   [ $wrtag, $wrclass ] = lrg_card_winrate_class($wr);
   $tags = [ "build-item-component", "meta-hero-card" ];
@@ -96,7 +116,9 @@ function lrg_hero_card_role($hid, $stats, $role_total = 0, $role = null) {
     " - ".locale_string('matches').": ".number_format($matches, 0).
     ($wr !== null ? ", ".locale_string('winrate').": ".number_format($wr*100,2)."%" : "").
     ($pr !== null ? ", ".locale_string('pickrate').": ".number_format($pr*100,2)."%" : "").
-    ($ratio !== null ? ", ".locale_string('ratio_pos').": ".number_format($ratio*100,2)."%" : "");
+    lrg_card_contest_tooltip($cr).
+    ($ratio !== null ? ", ".locale_string('ratio_pos').": ".number_format($ratio*100,2)."%" : "").
+    ($rank !== null ? ", ".locale_string('rank').": ".lrg_card_rank($rank) : "");
 
   $labels = "<span class=\"item-stat-tooltip-line meta-hero-card-name\">".hero_name($hid)."</span>".
     ($wr !== null ? "<span class=\"item-stat-tooltip item-stat-tooltip-line item-winrate $wrclass\">".number_format($wr*100,1)."%</span>" : "").
@@ -105,12 +127,45 @@ function lrg_hero_card_role($hid, $stats, $role_total = 0, $role = null) {
 
   return lrg_card_markup(
     $tags, $href, $tooltip, hero_portrait($hid),
-    $pr !== null ? number_format($pr*100,1)."%" : null,
+    $rank !== null ? lrg_card_rank($rank) : ($pr !== null ? number_format($pr*100,1)."%" : null),
     $labels
   );
 }
 
-function lrg_player_card($pid, $record = null) {
+/**
+ * Hero card with the record of a single player/team on that hero
+ * $record: [ 'matches', 'wins', optional 'bans' ]
+ * $games:  matches the player/team played, for the contest rate (picks plus bans over those)
+ */
+function lrg_hero_card_record($hid, $record = null, $rank = null, $games = null) {
+  global $leaguetag, $linkvars;
+
+  $href = "?league=$leaguetag&mod=heroes-profiles-heroid$hid".(empty($linkvars) ? "" : "&".$linkvars);
+
+  $wr = ($record && $record['matches']) ? $record['wins'] / $record['matches'] : null;
+  [ $wrtag, $wrclass ] = lrg_card_winrate_class($wr);
+  $tags = [ "build-item-component", "meta-hero-card" ];
+  if ($wrtag) $tags[] = $wrtag;
+
+  $tooltip = hero_name($hid).
+    ($record ? " - ".locale_string('matches').": ".$record['matches'] : "").
+    ($wr !== null ? ", ".locale_string('winrate').": ".number_format($wr*100,2)."%" : "").
+    (!empty($record['bans']) ? ", ".locale_string('bans').": ".$record['bans'] : "").
+    lrg_card_contest_tooltip(($record && $games) ? ($record['matches'] + ($record['bans'] ?? 0)) / $games : null).
+    ($rank !== null ? ", ".locale_string('rank').": ".lrg_card_rank($rank) : "");
+
+  $labels = "<span class=\"item-stat-tooltip-line meta-hero-card-name\">".hero_name($hid)."</span>".
+    ($wr !== null ? "<span class=\"item-stat-tooltip item-stat-tooltip-line item-winrate $wrclass\">".number_format($wr*100,1)."%</span>" : "").
+    lrg_card_matches_label($record ? $record['matches'] : null);
+
+  return lrg_card_markup(
+    $tags, $href, $tooltip, hero_portrait($hid),
+    $rank !== null ? lrg_card_rank($rank) : ($record ? $record['matches'] : null),
+    $labels
+  );
+}
+
+function lrg_player_card($pid, $record = null, $rank = null) {
   global $leaguetag, $linkvars, $player_photo_provider;
 
   $href = "?league=$leaguetag&mod=players-profiles-playerid$pid".(empty($linkvars) ? "" : "&".$linkvars);
@@ -125,19 +180,21 @@ function lrg_player_card($pid, $record = null) {
 
   $tooltip = player_name($pid).
     ($record ? " - ".locale_string('matches').": ".$record['matches'] : "").
-    ($wr !== null ? ", ".locale_string('winrate').": ".number_format($wr*100,2)."%" : "");
+    ($wr !== null ? ", ".locale_string('winrate').": ".number_format($wr*100,2)."%" : "").
+    ($rank !== null ? ", ".locale_string('rank').": ".lrg_card_rank($rank) : "");
 
   $labels = "<span class=\"item-stat-tooltip-line meta-hero-card-name\">".player_name($pid, false)."</span>".
-    ($wr !== null ? "<span class=\"item-stat-tooltip item-stat-tooltip-line item-winrate $wrclass\">".number_format($wr*100,1)."%</span>" : "");
+    ($wr !== null ? "<span class=\"item-stat-tooltip item-stat-tooltip-line item-winrate $wrclass\">".number_format($wr*100,1)."%</span>" : "").
+    lrg_card_matches_label($record ? $record['matches'] : null);
 
   return lrg_card_markup(
     $tags, $href, $tooltip, $portrait,
-    $record ? $record['matches'] : null,
+    $rank !== null ? lrg_card_rank($rank) : ($record ? $record['matches'] : null),
     $labels
   );
 }
 
-function lrg_team_card_mini($tid, $record = null) {
+function lrg_team_card_mini($tid, $record = null, $rank = null) {
   global $leaguetag, $linkvars, $team_logo_provider;
 
   $href = "?league=$leaguetag&mod=teams-profiles-team$tid".(empty($linkvars) ? "" : "&".$linkvars);
@@ -152,14 +209,16 @@ function lrg_team_card_mini($tid, $record = null) {
 
   $tooltip = team_name($tid).
     ($record ? " - ".locale_string('matches').": ".$record['matches'] : "").
-    ($wr !== null ? ", ".locale_string('winrate').": ".number_format($wr*100,2)."%" : "");
+    ($wr !== null ? ", ".locale_string('winrate').": ".number_format($wr*100,2)."%" : "").
+    ($rank !== null ? ", ".locale_string('rank').": ".lrg_card_rank($rank) : "");
 
   $labels = "<span class=\"item-stat-tooltip-line meta-hero-card-name\">".team_tag($tid)."</span>".
-    ($wr !== null ? "<span class=\"item-stat-tooltip item-stat-tooltip-line item-winrate $wrclass\">".number_format($wr*100,1)."%</span>" : "");
+    ($wr !== null ? "<span class=\"item-stat-tooltip item-stat-tooltip-line item-winrate $wrclass\">".number_format($wr*100,1)."%</span>" : "").
+    lrg_card_matches_label($record ? $record['matches'] : null);
 
   return lrg_card_markup(
     $tags, $href, $tooltip, $portrait,
-    $record ? $record['matches'] : null,
+    $rank !== null ? lrg_card_rank($rank) : ($record ? $record['matches'] : null),
     $labels
   );
 }
