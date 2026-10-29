@@ -105,7 +105,8 @@ function meta_levels_build_emergence(&$pickban, &$daily, $matches_total, &$share
   $total_picks_by_day = [];
   foreach ($daily as $hid => $series) {
     foreach ($series as $ts => $v) {
-      $total_picks_by_day[$ts] = ($total_picks_by_day[$ts] ?? 0) + ($v['ms'] ?? 0);
+      // bans count as well
+      $total_picks_by_day[$ts] = ($total_picks_by_day[$ts] ?? 0) + ($v['ms'] ?? 0) + ($v['bn'] ?? 0);
     }
   }
 
@@ -113,7 +114,8 @@ function meta_levels_build_emergence(&$pickban, &$daily, $matches_total, &$share
   $emergence = [];
   foreach ($daily as $hid => $series) {
     $overall_picks = $pickban[$hid]['matches_picked'] ?? 0;
-    if ($overall_picks < META_LEVELS_MIN_PICKS_FLOOR) continue;
+    $overall_bans = $pickban[$hid]['matches_banned'] ?? 0;
+    if ($overall_picks + $overall_bans < META_LEVELS_MIN_PICKS_FLOOR) continue;
 
     ksort($series);
 
@@ -121,7 +123,7 @@ function meta_levels_build_emergence(&$pickban, &$daily, $matches_total, &$share
     $ewma_by_day = [];
     $shares[$hid] = [];
     foreach ($series as $ts => $v) {
-      $share = $total_picks_by_day[$ts] > 0 ? ($v['ms'] ?? 0) / $total_picks_by_day[$ts] : 0;
+      $share = $total_picks_by_day[$ts] > 0 ? (($v['ms'] ?? 0) + ($v['bn'] ?? 0)) / $total_picks_by_day[$ts] : 0;
       $shares[$hid][$ts] = $share;
       $ewma = $ewma * (1 - META_LEVELS_EWMA_ALPHA) + $share * META_LEVELS_EWMA_ALPHA;
       $ewma_by_day[$ts] = $ewma;
@@ -140,7 +142,8 @@ function meta_levels_build_emergence(&$pickban, &$daily, $matches_total, &$share
 
     $wr = $pickban[$hid]['winrate_picked'] ?? 0;
     $pick_rate = $matches_total > 0 ? $overall_picks / $matches_total : 0;
-    $ban_rate = $matches_total > 0 ? ($pickban[$hid]['matches_banned'] ?? 0) / $matches_total : 0;
+    $ban_rate = $matches_total > 0 ? $overall_bans / $matches_total : 0;
+    $contest_rate = $pick_rate + $ban_rate;
 
     $emergence[$hid] = [
       'emerged' => $emerged,
@@ -149,7 +152,8 @@ function meta_levels_build_emergence(&$pickban, &$daily, $matches_total, &$share
       'overall_picks' => $overall_picks,
       'pick_rate' => $pick_rate,
       'ban_rate' => $ban_rate,
-      'prominence' => ($pick_rate + 0.5 * $ban_rate) * (1 + 4 * max(0, $wr - 0.5)),
+      'contest_rate' => $contest_rate,
+      'prominence' => $contest_rate * (1 + 4 * max(0, $wr - 0.5)),
     ];
   }
 
@@ -157,7 +161,7 @@ function meta_levels_build_emergence(&$pickban, &$daily, $matches_total, &$share
 }
 
 function meta_levels_eligible_pool(&$emergence, $mult = META_LEVELS_ELIGIBILITY_MULT) {
-  $rates = array_column($emergence, 'pick_rate');
+  $rates = array_column($emergence, 'contest_rate');
   if (empty($rates)) return [];
   sort($rates);
   $median = $rates[ (int)floor(count($rates) / 2) ];
@@ -165,7 +169,7 @@ function meta_levels_eligible_pool(&$emergence, $mult = META_LEVELS_ELIGIBILITY_
 
   $pool = [];
   foreach ($emergence as $hid => $e) {
-    if ($e['pick_rate'] >= $floor) $pool[$hid] = true;
+    if ($e['contest_rate'] >= $floor) $pool[$hid] = true;
   }
   return $pool;
 }
