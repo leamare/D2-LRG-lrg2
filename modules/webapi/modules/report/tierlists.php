@@ -4,9 +4,12 @@ include_once(__DIR__ . "/../../../view/functions/tier_lists.php");
 include_once(__DIR__ . "/../../../view/functions/meta_levels.php");
 
 #[Endpoint(name: 'tierlists')]
-#[Description('Tier lists (S..E) for heroes overall, heroes per position, or players/teams on a given hero, with the plain rank span each tier covers')]
+#[Description('Tier lists (S..E): heroes meta overall or per position (tierlists-heroes-meta), players or teams on a hero (tierlists-heroes-players / tierlists-heroes-teams), heroes of a player (tierlists-players-heroes) or of a team (tierlists-teams-heroes), with the plain rank span each tier covers')]
 #[ModlineVar(name: 'position', schema: ['type' => 'string'], description: 'Core.lane dotted pair like 1.2 -- heroes tier list for one position')]
-#[GetParam(name: 'hero', required: false, schema: ['type' => 'integer'], description: 'Hero id -- required for the players and teams tier lists')]
+#[ModlineVar(name: 'heroid', schema: ['type' => 'integer'], description: 'Hero id -- required for the players and teams on a hero tier lists')]
+#[ModlineVar(name: 'playerid', schema: ['type' => 'integer'], description: 'Player id -- required for the heroes of a player tier list')]
+#[ModlineVar(name: 'team', schema: ['type' => 'integer'], description: 'Team id -- required for the heroes of a team tier list')]
+#[GetParam(name: 'hero', required: false, schema: ['type' => 'integer'], description: 'Hero id, same as heroid in the modline')]
 #[ReturnSchema(schema: 'TierListsResult')]
 class Tierlists extends EndpointTemplate {
 public function process() {
@@ -16,11 +19,64 @@ public function process() {
     $report['hero_positions'] = unwrap_data($report['hero_positions']);
   }
 
-  if (in_array("players", $mods) || in_array("teams", $mods)) {
-    $hid = $vars['hero'] ?? $_GET['hero'] ?? null;
-    if (!$hid) throw new UserInputException("A `hero` id is required for the players and teams tier lists");
+  $tokens = array_values(array_reverse($mods));
+  $pos = function($token) use ($tokens) {
+    $i = array_search($token, $tokens, true);
+    return $i === false ? null : $i;
+  };
+  $p_heroes = $pos("heroes");
+  $p_players = $pos("players");
+  $p_teams = $pos("teams");
 
-    $stats = in_array("players", $mods)
+  $heroes_of_player = $p_players !== null && $p_heroes !== null && $p_players < $p_heroes;
+  $heroes_of_team = $p_teams !== null && $p_heroes !== null && $p_teams < $p_heroes;
+
+  if ($heroes_of_player) {
+    $pid = $vars['playerid'] ?? null;
+    if (!$pid || is_array($pid)) throw new UserInputException("A single `playerid` is required for the heroes of a player tier list");
+
+    $stats = tier_list_hero_stats_by_player($report)[$pid] ?? null;
+    if (empty($stats)) throw new UserInputException("No data for this player");
+
+    $games = 0;
+    foreach ($stats as $st) $games += $st['matches'];
+
+    $data = tier_list_entity_heroes($stats, $games);
+    if ($data === null) throw new UserInputException("No data for this player");
+
+    return [
+      'type' => 'heroes',
+      'player' => (int)$pid,
+      'tiers' => $data['tiers'],
+      'ranges' => $this->ranges($data['ranges']),
+    ];
+  }
+
+  if ($heroes_of_team) {
+    $tid = $vars['team'] ?? null;
+    if (!$tid || is_array($tid)) throw new UserInputException("A single `team` id is required for the heroes of a team tier list");
+    if (empty($report['teams'][$tid])) throw new UserInputException("No data for this team");
+
+    [ $stats, $games ] = tier_list_team_heroes_stats($report['teams'][$tid]);
+
+    $data = tier_list_entity_heroes($stats, $games);
+    if ($data === null) throw new UserInputException("No data for this team");
+
+    return [
+      'type' => 'heroes',
+      'team' => (int)$tid,
+      'tiers' => $data['tiers'],
+      'ranges' => $this->ranges($data['ranges']),
+    ];
+  }
+
+  if ($p_players !== null || $p_teams !== null) {
+    $on_players = $p_players !== null;
+
+    $hid = $vars['heroid'] ?? $_GET['hero'] ?? null;
+    if (!$hid || is_array($hid)) throw new UserInputException("A single `hero` id is required for the players and teams tier lists");
+
+    $stats = $on_players
       ? tier_list_player_hero_stats($report)
       : tier_list_team_hero_stats($report);
 
@@ -30,7 +86,7 @@ public function process() {
     if ($data === null) throw new UserInputException("No data for this hero");
 
     return [
-      'type' => in_array("players", $mods) ? 'players' : 'teams',
+      'type' => $on_players ? 'players' : 'teams',
       'hero' => (int)$hid,
       'tiers' => $data['tiers'],
       'ranges' => $this->ranges($data['ranges']),
@@ -38,6 +94,7 @@ public function process() {
   }
 
   if (isset($vars['position'])) {
+    if (is_array($vars['position'])) throw new UserInputException("A single position is required");
     $p = explode(".", $vars['position']);
     $data = tier_list_heroes_position($report, (int)$p[0], (int)($p[1] ?? 0));
     if ($data === null) throw new UserInputException("No data for this position");
@@ -60,7 +117,6 @@ public function process() {
   ];
 }
 
-# tier => { min, max } -- the plain rank span, before the meta-level and pickrate corrections
 private function ranges($ranges) {
   $out = [];
   foreach ($ranges as $tier => $r) {
@@ -81,6 +137,8 @@ if (is_docs_mode()) {
     'type' => TypeDefs::literal(['heroes', 'players', 'teams']),
     'position' => TypeDefs::str(),
     'hero' => TypeDefs::int(),
+    'player' => TypeDefs::int(),
+    'team' => TypeDefs::int(),
     'tiers' => TypeDefs::mapOf(TypeDefs::arrayOf(TypeDefs::int())),
     'ranges' => TypeDefs::mapOf('TierRange'),
   ], [ 'type', 'tiers', 'ranges' ]));

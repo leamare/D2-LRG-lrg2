@@ -2,6 +2,10 @@
 
 $vars = [];
 
+if (!isset($endp_name) && in_array('tierlists', $modline, true) && isset($endpoints['tierlists'])) {
+  $endp_name = 'tierlists';
+}
+
 foreach ($modline as $ml) {
   if (!isset($endp_name) && isset($endpoints[$ml])) {
     $endp_name = $ml;
