@@ -42,7 +42,13 @@ function fetch_valve_api($match_id): array {
       'cluster' => $match['result']['cluster'],
       'start_date' => $match['result']['start_time'],
       'leagueID' => $match['result']['leagueid'],
-      'version' => get_patchid($match['result']['start_time'], $meta),
+      'version' => lrg_resolve_patchid(
+        [
+          'start_time' => $match['result']['start_time'],
+          'lrg_patch_id' => $match['result']['lrg_patch_id'] ?? null
+        ],
+        $meta
+      ),
       'analysis_status' => 0,
       'seriesid' => 0,
       'stomp' => 0,

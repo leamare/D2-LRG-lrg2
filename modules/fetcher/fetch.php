@@ -755,7 +755,7 @@ function fetch($match) {
         }
       }
 
-      $t_version = get_patchid($matchdata['start_time'], $meta);
+      $t_version = lrg_resolve_patchid($matchdata, $meta);
       if (!empty($lg_settings['version_allowlist'])) {
         if (!in_array($t_version, $lg_settings['version_allowlist'])) {
           echo("..Version ".($t_version)." is not in allowlist, skipping...\n");
@@ -1080,7 +1080,7 @@ function fetch($match) {
   if (empty($t_match['matchid'])) {
     $t_match['matchid'] = $match;
     if (empty($matchdata['start_time'])) return true;
-    $t_match['version'] = get_patchid($matchdata['start_time'], $meta);
+    $t_match['version'] = lrg_resolve_patchid($matchdata, $meta);
     $t_match['radiantWin'] = $matchdata['radiant_win'];
     $t_match['duration'] = $matchdata['duration'];
     $t_match['modeID'] = $matchdata['game_mode'];
@@ -1245,7 +1245,7 @@ function fetch($match) {
           'hid' => $player['hero_id'],
           'gpm' => $player['gold_per_min'],
           'xpm' => $player['xp_per_min'],
-          'roaming' => $player['is_roaming'],
+          'roaming' => $player['is_roaming'] ?? false,
           'lane' => $player['lane_role'],
           'eff' => $player['lane_efficiency'],
           'lh_at10' => $player['lh_at10'],
@@ -1581,7 +1581,7 @@ function fetch($match) {
           if ($matchdata['players'][$j]['lane_efficiency'] < 0.35) $support_indicators++;
           
           if ($matchdata['players'][$j]['lane_role'] == 4) $support_indicators+=2;
-          if ($matchdata['players'][$j]['is_roaming']) {
+          if (!empty($matchdata['players'][$j]['is_roaming'])) {
             if ($matchdata['players'][$j]['lane_efficiency'] < 0.40) {
               $support_indicators+=4;
             } else {
@@ -1613,8 +1613,8 @@ function fetch($match) {
         else $t_adv_matchlines[$i]['isCore'] = 1;
 
         if (!$bad_replay) {
-          if ($t_adv_matchlines[$i]['isCore'] && $matchdata['players'][$j]['is_roaming']) {
-          } else if (!$t_adv_matchlines[$i]['isCore'] && $matchdata['players'][$j]['is_roaming']) {
+          if ($t_adv_matchlines[$i]['isCore'] && !empty($matchdata['players'][$j]['is_roaming'])) {
+          } else if (!$t_adv_matchlines[$i]['isCore'] && !empty($matchdata['players'][$j]['is_roaming'])) {
             if ($matchdata['players'][$j]['lane_role'] == 4 || $matchdata['players'][$j]['lane_role'] > 3) {
               $t_adv_matchlines[$i]['lane'] = 4;
             }
@@ -2233,7 +2233,9 @@ function fetch($match) {
         if ($item['time'] > 0) {
           break;
         }
-        
+        if (!isset($items_flip[$item['key']])) {
+          continue;
+        }
         $sti[] = $items_flip[$item['key']];
       }
 
@@ -2247,6 +2249,9 @@ function fetch($match) {
         // FIXME:
         if ($item['key'] == "helm_of_the_dominator_2") {
           $item['key'] = "helm_of_the_overlord";
+        }
+        if (!isset($items_flip[$item['key']])) {
+          continue;
         }
         $iid = $items_flip[$item['key']];
         if (!in_array($iid, $meta['item_categories']['consumables'])) {
