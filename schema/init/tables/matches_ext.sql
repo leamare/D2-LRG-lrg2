@@ -5,4 +5,4 @@ CREATE TABLE `matches_ext` (
   `gold_t` json DEFAULT NULL,
   `teamfights` json DEFAULT NULL,
   PRIMARY KEY (`matchid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=8;
