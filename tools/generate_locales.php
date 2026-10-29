@@ -2,6 +2,7 @@
 
 include __DIR__ . "/../libs/keyvalues-php/src/kv_decode.php";
 include __DIR__ . "/../modules/commons/metadata.php";
+include __DIR__ . "/../modules/commons/special_bonus.php";
 
 use function leamare\SimpleKV\kv_decode;
 
@@ -25,6 +26,7 @@ foreach ($files as $locf) {
 }
 
 $talentValues = [];
+$abilityScripts = [];
 
 $spellsources = [
   vpkdata_npc_abilities_main,
@@ -92,10 +94,12 @@ foreach ($spellsources as $src) {
 
   echo "OK\n";
 
-  foreach ($NPCAbilities['DOTAAbilities'] as $stag => $spell) {
+  foreach (extract_ability_scripts_from_vpk($NPCAbilities ?? []) as $stag => $spell) {
     if (!isset($talentValues[$stag])) $talentValues[$stag] = [];
 
     if (\is_array($spell)) {
+      $abilityScripts[$stag] = $spell;
+
       if (isset($spellTalentsList[$stag])) {
         if (isset($spell['AbilitySpecial'])) {
           foreach ($spell['AbilitySpecial'] as $i => $vals) {
@@ -202,58 +206,88 @@ foreach ($meta['facets']['heroes'] as $hid => $facets) {
   }
 }
 
+$currentTalents = [];
+$preferredAbilities = [];
+foreach ($meta['heroes_spells'] as $hero) {
+  foreach (['main', 'ultimate', 'innate'] as $slot) {
+    $entries = $hero[$slot] ?? [];
+    if (!is_array($entries)) $entries = [$entries];
+    foreach ($entries as $stag) {
+      if (is_array($stag)) {
+        foreach ($stag as $st) {
+          if (is_string($st) && strpos($st, 'special_bonus') !== 0) {
+            $preferredAbilities[$st] = true;
+          }
+        }
+      } elseif (is_string($stag) && strpos($stag, 'special_bonus') !== 0) {
+        $preferredAbilities[$stag] = true;
+      }
+    }
+  }
+  foreach ($hero['talents'] ?? [] as $tlvl) {
+    foreach ((array)$tlvl as $stag) {
+      if (is_string($stag) && strpos($stag, 'special_bonus') === 0) {
+        $currentTalents[$stag] = true;
+      }
+    }
+  }
+}
+foreach ($spellTalentsList as $talent => $_) {
+  if (strpos((string)$talent, 'special_bonus') === 0) {
+    $currentTalents[$talent] = true;
+  }
+}
+
+$talentLookup = build_special_bonus_lookup($abilityScripts, [
+  'currentTalents' => $currentTalents,
+  'preferredAbilities' => $preferredAbilities,
+]);
+
 foreach ($localesMap as $lt => $loc) {
   if (!isset($loc['vpk'])) continue;
 
   echo " - ".$loc['vpk'].": ";
 
   $strings = kv_decode(file_get_contents($vpkRoot."abilities_".$loc['vpk'].".txt"));
+  $nameStrings = ability_name_strings($strings['lang']['Tokens'] ?? []);
 
   echo "spells ";
   if (!isset($addlocales['spells_'.$lt])) {
     $addlocales['spells_'.$lt] = [];
   }
+
+  $abilityNames = [];
   foreach ($spellsList as $spell => $t) {
-    $tag = 
-      $strings['lang']['Tokens']['DOTA_Tooltip_ability_'.$spell] ?? 
-      $strings['lang']['Tokens']['DOTA_Tooltip_Ability_'.$spell] ?? null;
+    $tag = $nameStrings['dota_tooltip_ability_' . strtolower($spell)] ?? null;
 
     if (empty($tag)) {
-      $candidates = array_filter(array_keys($strings['lang']['Tokens']), function($el) use (&$spell) {
-        return strpos($el, 'DOTA_Tooltip_Ability_'.$spell) !== false || strpos($el, 'DOTA_Tooltip_ability_'.$spell) !== false;
+      $candidates = array_filter(array_keys($strings['lang']['Tokens'] ?? []), function($el) use ($spell) {
+        $elLower = strtolower($el);
+        $needle = 'dota_tooltip_ability_' . strtolower($spell);
+        return strpos($elLower, $needle) !== false
+          && substr($elLower, -strlen('_description')) !== '_description';
       });
 
       if (!empty($candidates)) {
-        $tag = implode(" / ", array_map(function($k) use (&$strings) {
+        $tag = implode(" / ", array_map(function($k) use ($strings) {
           return $strings['lang']['Tokens'][$k];
         }, $candidates));
       }
     }
 
-    if (isset($talentValues[$spell]) && \preg_match("/\{s\:(.*?)\}/", $tag)) {
-      $tv = $talentValues[$spell];
-      if (preg_match_all("/\{s\:(.*?)\}/", $tag) > 1 || count($talentValues[$spell]) > 1) {
-        foreach ($talentValues[$spell] as $k => $v) {
-          if (is_array($v)) {
-            $v = $v['value'] ?? reset($v);
-          }
-          $tag = \preg_replace("/\{s\:(bonus_)?".$k."(.*?)\}/", $v, $tag);  
-        }
-      }
-      if (preg_match_all("/\{s\:(.*?)\}/", $tag) > 0) {
-        if (isset($talentValues[$spell]['value']) && is_array($talentValues[$spell]['value'])) {
-          $talentValues[$spell]['value'] = implode(",", $talentValues[$spell]['value']);
-        }
+    if (!empty($tag)) {
+      $abilityNames[$spell] = ['dname' => $tag];
+    }
+  }
 
-        $tag = \preg_replace("/\{s\:(.*?)\}/", $talentValues[$spell]['value'] ?? reset($talentValues[$spell]), $tag);
-      }
+  resolve_special_bonus_placeholders($abilityNames, $talentLookup);
 
-      $tag = \str_replace(
-        ['++', '--', '–-', '%%', '-+', '+-'],
-        ['+', '-', '-', '%', '-', '-'],
-        $tag
-      );
-      $tag = \preg_replace("/x(\d)x/", "$1x", $tag);  
+  foreach ($spellsList as $spell => $t) {
+    $tag = $abilityNames[$spell]['dname'] ?? null;
+
+    // Back-compat: if odota-style lookup left placeholders, use the legacy filler.
+    if (!empty($tag) && isset($talentValues[$spell]) && preg_match('/\{s:/i', $tag)) {
+      $tag = resolve_special_bonus_placeholders_legacy($tag, $talentValues[$spell]);
     }
 
     if (empty($tag) && $lt == 'en') {
@@ -324,33 +358,8 @@ foreach ($localesMap as $lt => $loc) {
       $tv = $talentValues[$facet];
     }
 
-    if (isset($talentValues[$facet]) && (\preg_match("/\{s\:(.*?)\}/", $desc) || \preg_match("/%(.*?)%/", $desc))) {
-      if ((preg_match_all("/\{s\:(.*?)\}/", $desc) > 1 || preg_match_all("/%(.*?)%/", $desc) > 1) || count($talentValues[$facet]) > 1) {
-        foreach ($talentValues[$facet] as $k => $v) {
-          if (is_array($v)) {
-            $v = $v['value'] ?? reset($v);
-          }
-          if (strpos($v, ' ') !== false) {
-            $v = implode('/', array_unique(explode(' ', $v)));
-          }
-          $desc = \preg_replace("/\{s\:(bonus_)?".$k."(.*?)\}/", $v, $desc);
-          $desc = \preg_replace("/%(bonus_)?".$k."%/", $v, $desc);
-        }
-      } else {
-        if (isset($talentValues[$facet]['value']) && is_array($talentValues[$facet]['value'])) {
-          $talentValues[$facet]['value'] = implode(",", $talentValues[$facet]['value']);
-        }
-
-        $desc = \preg_replace("/\{s\:(.*?)\}/", $talentValues[$facet]['value'] ?? reset($talentValues[$facet]), $desc);
-        $desc = \preg_replace("/%(.*?)%/", ($talentValues[$facet]['value'] ?? reset($talentValues[$facet])), $desc);
-      }
-
-      $desc = \str_replace(
-        ['++', '--', '–-', '%%', '-+', '+-'],
-        ['+', '-', '-', '%', '-', '-'],
-        $desc
-      );
-      $desc = \preg_replace("/x(\d)x/", "$1x", $desc);  
+    if (!empty($desc) && isset($talentValues[$facet])) {
+      $desc = resolve_special_bonus_placeholders_legacy($desc, $talentValues[$facet]);
     }
     // if (strpos($desc, "<font") !== false) {
     //   $desc = \preg_replace("/<font(.*)>(.*)<\/font>/", "\\2", $desc);  
