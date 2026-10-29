@@ -535,6 +535,28 @@ function backup_run_chunk(mysqli &$conn, $database, $sql, array $schema, array $
   die("[F] Unexpected problems when requesting database.\n");
 }
 
+/**
+ * Append one file to the open archive. Returns true on success.
+ */
+function backup_pack_file(StreamingArchive $archive, $name, $path) {
+  $pack_prefix = "[ ] Packing `$name`...";
+  $size = @filesize($path);
+  if ($size === false) {
+    echo "[E] Couldn't pack file `$name`: file missing\n";
+    return false;
+  }
+  try {
+    $archive->addFile($name, $path, function($pos, $total) use ($pack_prefix) {
+      backup_progress($pack_prefix, $pos, $total, false, false);
+    });
+    backup_progress($pack_prefix, $size, $size, true, false);
+  } catch (\Throwable $e) {
+    echo "\n[E] Couldn't pack file `$name`: ".$e->getMessage()."\n";
+    return false;
+  }
+  return true;
+}
+
 $options = getopt("l:RrFf:o:S:");
 
 $restore = isset($options['R']);
@@ -721,6 +743,13 @@ if ($restore) {
   $tables = [];
   $files = [];
 
+  // Archive is written while tables are still being dumped: every table CSV goes
+  // dump -> pack -> unlink before the next one starts, so tmp/ only ever holds one table.
+  // Written under a .part name so an interrupted run never leaves a truncated "backup".
+  $output_part = $output_path.'.part';
+  $archive = new StreamingArchive($output_part, 6);
+  $pack_failed = false;
+
   echo "[ ] Getting tables\n";
 
   if (!empty($skipTables)) {
@@ -755,7 +784,6 @@ if ($restore) {
     backup_progress($prefix, 0, $estimate);
 
     $fname = 'tmp/'.$t.'_'.$lrg_league_tag.'_'.time().'.csv';
-    $files[$t.'.csv'] = $fname;
 
     $fp = fopen($fname, "w");
     if ($fp === FALSE) {
@@ -850,6 +878,13 @@ if ($restore) {
     fclose($fp);
 
     backup_progress($prefix, $i, $estimate > 0 ? $estimate : $i, true);
+
+    // pack right away and free the disk space before touching the next table
+    if (!backup_pack_file($archive, $t.'.csv', $fname)) {
+      // keep the dump for inspection; an incomplete archive must not pass as a backup
+      die("[F] Aborting: `$t` is not in the archive (dump kept at `$fname`)\n");
+    }
+    unlink($fname);
   }
 
   $conn->close();
@@ -884,45 +919,41 @@ if ($restore) {
   $files['matchlist.list'] = "matchlists/$lrg_league_tag.list";
   echo "OK.\n";
 
-  if ($remove) {
-    $conn = lrg_mysqli_connect(null);
-    echo "[ ] Removing database...";
-    $sql = "DROP DATABASE $lrg_sql_db;";
-    if ($conn->multi_query($sql) === FALSE)
-      die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
-    echo "OK.\n";
-    $conn->close();
-  }
-
   $files['descriptor.json'] = "leagues/$lrg_league_tag.json";
 
-  echo "[ ] Packing files...\n";
-  require_once("modules/commons/streaming_archive.php");
-  $archive = new StreamingArchive($output_path, 6);
-
+  echo "[ ] Packing remaining files...\n";
   foreach ($files as $n => $l) {
-    $pack_prefix = "[ ] Packing `$n`...";
-    $size = @filesize($l);
-    if ($size === false) {
-      echo "[E] Couldn't pack file `$n`: file missing\n";
-      continue;
-    }
-    try {
-      $archive->addFile($n, $l, function($pos, $total) use ($pack_prefix) {
-        backup_progress($pack_prefix, $pos, $total, false, false);
-      });
-      backup_progress($pack_prefix, $size, $size, true, false);
-    } catch (\Throwable $e) {
-      echo "\n[E] Couldn't pack file `$n`: ".$e->getMessage()."\n";
+    if (!backup_pack_file($archive, $n, $l)) {
+      $pack_failed = true;
     }
   }
 
   $archive->close();
 
+  if (!rename($output_part, $output_path)) {
+    die("[F] Couldn't move `$output_part` to `$output_path`\n");
+  }
+
+  // dropping the database only happens once the archive is complete and in place
+  if ($remove) {
+    if ($pack_failed) {
+      echo "[W] Some files were not packed, keeping the database.\n";
+    } else {
+      $conn = lrg_mysqli_connect(null);
+      echo "[ ] Removing database...";
+      $sql = "DROP DATABASE $lrg_sql_db;";
+      if ($conn->multi_query($sql) === FALSE)
+        die("[F] Unexpected problems when requesting database.\n".$conn->error."\n");
+      echo "OK.\n";
+      $conn->close();
+    }
+  }
+
   echo "[ ] Cleaning up...";
-  foreach ($files as $n => $l) {
-    if (strpos($l, '.csv') === false && !$remove) continue;
-    unlink($l);
+  if ($remove && !$pack_failed) {
+    foreach ($files as $l) {
+      @unlink($l);
+    }
   }
   echo "OK.\n";
   echo "[S] Result saved as `$output_path`\n";
