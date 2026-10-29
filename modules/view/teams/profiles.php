@@ -72,6 +72,17 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
       $res["team".$tid]['heroes'] = [];
       if ($mod == $context_mod."team".$tid."-heroes") $unset_module = true;
 
+      if (!empty($context[$tid]['pickban'])) {
+        include_once($root."/modules/view/functions/tier_lists.php");
+        include_once($root."/modules/view/functions/entity_cards.php");
+
+        $res["team".$tid]['heroes']['tierlist'] = "";
+
+        if(check_module($context_mod."team".$tid."-heroes-tierlist")) {
+          include __DIR__ . "/profile_snippets/tierlist.php";
+        }
+      }
+
       if (isset($context[$tid]['hvariants'])) {
         $res["team".$tid]['heroes']['hvariants'] = "";
 

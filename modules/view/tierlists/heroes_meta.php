@@ -1,11 +1,8 @@
 <?php
 
-$modules['tierlists']['heroes'] = [];
-
-function rg_view_generate_tierlists_heroes() {
-  global $report, $parent, $root, $unset_module, $mod;
-  if ($mod == $parent."heroes") $unset_module = true;
-  $parent_module = $parent."heroes-";
+function rg_view_generate_tierlists_heroes_meta($parent_module) {
+  global $report, $root, $unset_module, $mod;
+  if ($mod == rtrim($parent_module, "-")) $unset_module = true;
 
   include_once($root."/modules/view/generators/tier_list.php");
 
@@ -15,12 +12,7 @@ function rg_view_generate_tierlists_heroes() {
     $report['hero_positions'] = unwrap_data($report['hero_positions']);
   }
 
-  $explainer = "<details class=\"content-text explainer\"><summary>".locale_string("explain_summary")."</summary>".
-      "<div class=\"explain-content\">".
-        "<div class=\"line\">".locale_string("desc_tierlists_heroes")."</div>".
-        "<div class=\"line\">".locale_string("desc_tierlists_heroes_2")."</div>".
-      "</div>".
-    "</details>";
+  $explainer = tier_list_explainer([ "desc_tierlists_heroes", "desc_tierlists_heroes_2" ]);
 
   # total
   $res['total'] = "";
@@ -29,7 +21,7 @@ function rg_view_generate_tierlists_heroes() {
     $res['total'] = $explainer.
       ($data === null
         ? "<div class=\"content-text\">".locale_string("stats_empty")."</div>"
-        : rg_generator_tier_list("tierlists-heroes-total", $data, 'lrg_hero_card'));
+        : rg_generator_tier_list("tierlists-heroes-meta-total", $data, 'lrg_hero_card'));
   }
 
   if (empty($report['hero_positions'])) return $res;
@@ -39,8 +31,8 @@ function rg_view_generate_tierlists_heroes() {
   $role_card = function($core, $lane) use (&$report, $role_totals) {
     $stats = $report['hero_positions'][$core][$lane];
     $role = "position_$core.$lane";
-    return function($hid) use ($stats, $role_totals, $role) {
-      return lrg_hero_card_role($hid, $stats[$hid] ?? [], $role_totals[$hid] ?? 0, $role);
+    return function($hid, $rank = null) use ($stats, $role_totals, $role) {
+      return lrg_hero_card_role($hid, $stats[$hid] ?? [], $role_totals[$hid] ?? 0, $role, $rank);
     };
   };
 
@@ -57,6 +49,7 @@ function rg_view_generate_tierlists_heroes() {
           'group' => "position_$i.$j",
           'tiers' => $data['tiers'],
           'ranges' => $data['ranges'],
+          'base' => $data['base'],
           'card' => $role_card($i, $j),
         ];
       }
@@ -64,7 +57,7 @@ function rg_view_generate_tierlists_heroes() {
     $res['roles'] = $explainer.
       (empty($columns)
         ? "<div class=\"content-text\">".locale_string("stats_empty")."</div>"
-        : rg_generator_tier_list_columns("tierlists-heroes-roles", $columns, 'lrg_hero_card'));
+        : rg_generator_tier_list_columns("tierlists-heroes-meta-roles", $columns, 'lrg_hero_card'));
   }
 
   for ($i=1; $i>=0; $i--) {
@@ -79,7 +72,7 @@ function rg_view_generate_tierlists_heroes() {
       $res[$key] = $explainer.
         ($data === null
           ? "<div class=\"content-text\">".locale_string("stats_empty")."</div>"
-          : rg_generator_tier_list("tierlists-heroes-$i-$j", $data, $role_card($i, $j)));
+          : rg_generator_tier_list("tierlists-heroes-meta-$i-$j", $data, $role_card($i, $j)));
     }
   }
 

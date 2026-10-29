@@ -1,49 +1,41 @@
 <?php
 
-$modules['tierlists']['players'] = [];
-
-function rg_view_generate_tierlists_players() {
-  global $report, $parent, $root, $unset_module, $mod, $meta, $strings;
-  if ($mod == $parent."players") $unset_module = true;
-  $parent_module = $parent."players-";
+function rg_view_generate_tierlists_players($parent_module) {
+  global $report, $root, $unset_module, $mod, $strings;
+  if ($mod == rtrim($parent_module, "-")) $unset_module = true;
 
   include_once($root."/modules/view/generators/tier_list.php");
 
   $res = [];
-  $stats = tier_list_player_hero_stats($report);
 
-  $hnames = $meta["heroes"];
-  uasort($hnames, function($a, $b) {
-    return strcmp($a['name'] ?? '', $b['name'] ?? '');
+  $res['heroes'] = [];
+  if (!check_module($parent_module."heroes")) return $res;
+
+  if ($mod == $parent_module."heroes") $unset_module = true;
+  $parent_module .= "heroes-";
+
+  $stats = tier_list_hero_stats_by_player($report);
+
+  $pnames = [];
+  foreach ($stats as $pid => $heroes) {
+    $pnames[$pid] = player_name($pid, false);
+  }
+  uasort($pnames, function($a, $b) {
+    return strcasecmp($a, $b);
   });
 
-  foreach ($hnames as $hid => $name) {
-    if (empty($stats[$hid])) continue;
+  foreach ($pnames as $pid => $name) {
+    $strings['en']["playerid".$pid] = $name;
+    $res['heroes']["playerid".$pid] = "";
 
-    $strings['en']["heroid".$hid] = hero_name($hid);
-    $res["heroid".$hid] = "";
+    if (!check_module($parent_module."playerid".$pid)) continue;
 
-    if (!check_module($parent_module."heroid".$hid)) continue;
+    $player_stats = $stats[$pid];
+    $games = 0;
+    foreach ($player_stats as $s) $games += $s['matches'];
 
-    $data = tier_list_entities_by_record($stats[$hid]);
-
-    $res["heroid".$hid] = "<details class=\"content-text explainer\"><summary>".locale_string("explain_summary")."</summary>".
-        "<div class=\"explain-content\">".
-          "<div class=\"line\">".locale_string("desc_tierlists_players")."</div>".
-        "</div>".
-      "</details>";
-
-    if ($data === null) {
-      $res["heroid".$hid] .= "<div class=\"content-text\">".locale_string("stats_empty")."</div>";
-      continue;
-    }
-
-    $hero_stats = $stats[$hid];
-    $res["heroid".$hid] .= rg_generator_tier_list(
-      "tierlists-players-$hid",
-      $data,
-      function($pid) use ($hero_stats) { return lrg_player_card($pid, $hero_stats[$pid] ?? null); },
-      'tier_unplaced', 'players'
+    $res['heroes']["playerid".$pid] = rg_generator_tier_list_entity_heroes(
+      "tierlists-players-heroes-$pid", $player_stats, $games, "desc_tierlists_player_heroes"
     );
   }
 
