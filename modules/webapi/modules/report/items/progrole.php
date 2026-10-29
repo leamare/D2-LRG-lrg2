@@ -119,11 +119,13 @@ public function process() {
     $res['matches_amplitude'] = $max_games;
     $res['items'] = [];
     foreach ($items as $iid) {
+      $st = $report['items']['stats'][$hero][$iid] ?? null;
+      if ($st === null) continue;
       $res['items'][$iid] = [
-        'purchases' => $report['items']['stats'][$hero][$iid]['purchases'],
-        'role' => $items_matches[$iid],
-        'median_time' => $report['items']['stats'][$hero][$iid]['median'],
-        'winrate' => $report['items']['stats'][$hero][$iid]['winrate'],
+        'purchases' => $st['purchases'] ?? 0,
+        'role' => $items_matches[$iid] ?? 0,
+        'median_time' => $st['median'] ?? null,
+        'winrate' => $st['winrate'] ?? null,
       ];
     }
     $res['edges'] = $pairs;

@@ -30,7 +30,17 @@ public function process() {
   $descriptor = get_report_descriptor($this->report);
 
   if (isset($this->vars['region'])) {
-    $context =& $this->report['regions_data'][ $this->vars['region'] ];
+    $rid = $this->vars['region'];
+    if (is_array($rid)) {
+      if (count($rid) !== 1) {
+        throw new UserInputException("Overview requires a single region");
+      }
+      $rid = $rid[0];
+    }
+    if (!isset($this->report['regions_data'][$rid])) {
+      throw new UserInputException("Unknown region `$rid`");
+    }
+    $context =& $this->report['regions_data'][$rid];
   } else {
     $context =& $this->report;
   }

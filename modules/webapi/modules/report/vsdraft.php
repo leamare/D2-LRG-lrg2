@@ -46,9 +46,10 @@ public function process() {
 
   $min = end($context)['wrank'];
   $max = reset($context)['wrank'];
+  $span = $max - $min;
 
   foreach ($context as $id => $el) {
-    $context[$id]['rank'] = round(100 * ($el['wrank']-$min) / ($max-$min), 2);
+    $context[$id]['rank'] = round($span > 0 ? 100 * ($el['wrank']-$min) / $span : 100, 2);
     $context[$id]['contest_rate'] = round($el['matches_total']/$context_total_matches, 4);
     unset($context[$id]['wrank']);
   }

@@ -262,7 +262,7 @@ if($lg_settings['ana']['players'] && $lg_settings['ana']['player_laning']) {
 if ($lg_settings['main']['teams']) {
   require_once("modules/analyzer/teams/__main.php");
 
-  if ($lg_settings['ana']['teams']['team_vs_team'])
+  if (!empty($lg_settings['ana']['teams']['team_vs_team']))
     require_once("modules/analyzer/team_vs_team.php");
 } else {
   echo "[ ] Working for players competition...\n";

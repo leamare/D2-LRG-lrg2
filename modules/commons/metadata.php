@@ -1,5 +1,9 @@
 <?php
 
+if (!class_exists('UserInputException', false)) {
+  class UserInputException extends \Exception {}
+}
+
 class lrg_metadata implements ArrayAccess {
   private $metadata = [];
   private $dir;

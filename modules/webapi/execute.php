@@ -1,6 +1,8 @@
 <?php 
 
-class UserInputException extends \Exception {}
+if (!class_exists('UserInputException', false)) {
+  class UserInputException extends \Exception {}
+}
 
 function execute(&$modline, &$endp, &$vars, &$report) {
   global $resp, $__lrg_onerror;

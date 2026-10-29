@@ -30,8 +30,10 @@ function rg_generator_summary($table_id, &$context, $hero_flag = true, $rank = f
   $total_matches = 0;
   foreach ($context as $id => $c) {
     if (empty($c) || !$id) continue;
-    if ($total_matches < ($c['matches_s'] ?? 0)) $total_matches = $c['matches_s'] ?? 0;
-    $matches[] = $c['matches_s'] ?? 0;
+    
+    $c_matches = $c['matches_s'] ?? $c['matches'] ?? 0;
+    if ($total_matches < $c_matches) $total_matches = $c_matches;
+    $matches[] = $c_matches;
   } 
 
   if ($rank) {
@@ -165,7 +167,7 @@ function rg_generator_summary($table_id, &$context, $hero_flag = true, $rank = f
       [$id, $var] = explode('-', $id);
     }
 
-    $res .= "<tr data-value-summary_matches=\"".($el['matches_s'] ?? 0)."\"><td data-col-group=\"_index\">".
+    $res .= "<tr data-value-summary_matches=\"".($el['matches_s'] ?? $el['matches'] ?? 0)."\"><td data-col-group=\"_index\">".
       ($hero_flag ?
         hero_portrait($id)."</td>".
         ($variants ? "<td>".facet_micro_element($id, $var)."</td>" : "").

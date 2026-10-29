@@ -393,13 +393,17 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
         $res["team".$tid]['roster'] = "";
 
         if(check_module($context_mod."team".$tid."-roster")) {
+          $roster = $context[$tid]['active_roster'] ?? [];
+          if (!is_array($roster)) $roster = [];
+
           $player_pos = [];
-          if (!empty($report['players_additional'])) {
-            foreach($context[$tid]['active_roster'] as $player) {
+          if (!empty($report['players_additional']) && !empty($roster)) {
+            foreach($roster as $player) {
               if (!isset($report['players'][$player])) continue;
+              if (empty($report['players_additional'][$player]['positions'])) continue;
               $player_pos[$player] = reset($report['players_additional'][$player]['positions']);
             }
-            usort($context[$tid]['active_roster'], function($a, $b) use ($player_pos) {
+            usort($roster, function($a, $b) use ($player_pos) {
               if (!isset($player_pos[$a]['core']) || !isset($player_pos[$b]['core'])) return 0;
               if ($player_pos[$a]['core'] > $player_pos[$b]['core']) return -1;
               if ($player_pos[$a]['core'] < $player_pos[$b]['core']) return 1;
@@ -407,12 +411,12 @@ function rg_view_generate_teams_profiles($context, $context_mod, $foreword = "")
               if ($player_pos[$a]['lane'] > $player_pos[$b]['lane']) return ($player_pos[$a]['core'] ? 1 : -1)*1;
               return 0;
             });
-          }          
+          }
 
           generate_positions_strings();
           $res["team".$tid]['roster'] = "<div class=\"content-text\">".locale_string("desc_roster")."</div>";
           $res["team".$tid]['roster'] .= "<div class=\"content-cards\">";
-          foreach($context[$tid]['active_roster'] as $player) {
+          foreach($roster as $player) {
             $res["team".$tid]['roster'] .= player_card($player);
           }
           $res["team".$tid]['roster'] .= "</div>";

@@ -169,9 +169,10 @@ public function process() {
   
     $min = end($scores)['wrank'];
     $max = reset($scores)['wrank'];
+    $span = $max - $min;
   
     foreach ($scores as $id => $el) {
-      $draft[$id][$i]['rank'] = 100 * ($el['wrank']-$min) / ($max-$min);
+      $draft[$id][$i]['rank'] = $span > 0 ? 100 * ($el['wrank']-$min) / $span : 100;
       $ranks_stages[$i][$id] = $draft[$id][$i]['rank'];
     }
   }

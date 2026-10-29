@@ -102,16 +102,16 @@ function check_filters($rep, $filters) {
           break;
         case LRG_TAG_FILTER_NAMEDESC:
           if (isset($rep['localized'])) {
-            $r = preg_match($filter[1], ($rep['desc'] ?? '')) || preg_match($filter[1], $rep['name']);
+            $r = preg_match($filter[1], ($rep['desc'] ?? '')) || preg_match($filter[1], ($rep['name'] ?? ''));
             foreach ($rep['localized'] as $loc) {
               if ($r) break;
-              if (isset($loc['desc'])) $r = $r || preg_match($filter[1], $loc['desc']);
-              if (isset($loc['name'])) $r = $r || preg_match($filter[1], $loc['name']);
+              if (isset($loc['desc'])) $r = $r || preg_match($filter[1], ($loc['desc'] ?? ''));
+              if (isset($loc['name'])) $r = $r || preg_match($filter[1], ($loc['name'] ?? ''));
             }
 
             $group_result = $group_result && $r;
           } else {
-            $group_result = $group_result && ( preg_match($filter[1], ($rep['desc'] ?? '')) || preg_match($filter[1], $rep['name']) );
+            $group_result = $group_result && ( preg_match($filter[1], ($rep['desc'] ?? '')) || preg_match($filter[1], ($rep['name'] ?? '')) );
           }
           break;
         case LRG_TAG_FILTER_NAMEDESC_LETTERS:
