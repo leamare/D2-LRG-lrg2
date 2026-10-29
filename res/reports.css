@@ -1581,6 +1581,12 @@ table.list thead {
   overflow: hidden;
   flex-basis: 100%;
 }
+.build-overview-container.main-build-basic {
+  flex-basis: 100%;
+}
+.simple-view .build-overview-container.main-build-basic .build-item-component:hover {
+  z-index: 5;
+}
 .hero-build .flexbreak {
   flex-basis: 100%;
 }
@@ -2256,7 +2262,7 @@ table.skilltalent-table.compact .skilltalent-name {
   font-weight: bold;
   line-height: 1.2;
 }
-.meta-hero-card-wr, .meta-hero-card-role {
+.meta-hero-card-wr, .meta-hero-card-role, .meta-hero-card-matches {
   font-size: 10px;
   opacity: 0.85;
 }
@@ -2535,6 +2541,114 @@ table.tier-list-table td {
 .content-text.explainer .line.header {
   font-size: 1.4em;
   font-weight: bold;
+}
+
+.content-text.simple-view-solo {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+.simple-view-toggle {
+  display: inline-flex;
+  align-items: center;
+  font: inherit;
+  line-height: normal;
+  padding: 5px 1.2em;
+  border: 0;
+  border-radius: 5px;
+  background: var(--content-header);
+  color: var(--caption);
+  cursor: pointer;
+  white-space: nowrap;
+  opacity: .75;
+  transition: .25s all linear;
+}
+.simple-view-toggle:hover,
+.simple-view .simple-view-toggle {
+  opacity: 1;
+}
+.content-text.explainer + .simple-view-filter {
+  margin-top: 15px;
+}
+
+.simple-view-filter label {
+  display: inline-flex;
+  align-items: center;
+}
+.simple-view-toggle:before,
+.simple-view-filter label:before {
+  content: '';
+  flex: none;
+  box-sizing: border-box;
+  width: 2.1em;
+  height: 1.1em;
+  margin-right: .7em;
+  border-radius: 1.1em;
+  background-color: rgba(0,0,0,.45);
+  background-image: radial-gradient(circle closest-side, rgba(255,255,255,.55) 96%, transparent 100%);
+  background-size: .8em .8em;
+  background-repeat: no-repeat;
+  background-position: .15em 50%;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.15);
+  transition: .2s all ease;
+}
+.simple-view .simple-view-toggle:before,
+.simple-view-filter input:checked + label:before {
+  background-color: var(--table-bg);
+  background-image: radial-gradient(circle closest-side, #fff 96%, transparent 100%);
+  background-position: calc(100% - .15em) 50%;
+  box-shadow: none;
+}
+.simple-view-filter label {
+  opacity: .8;
+}
+.simple-view-filter input:checked + label {
+  opacity: 1;
+}
+
+.simple-view .build-item-component:not(.hero-build-timeline-container .build-item-component) {
+  position: relative;
+}
+.simple-view .build-item-component:not(.hero-build-timeline-container .build-item-component) .item-image, .simple-view .build-item-component:not(.hero-build-timeline-container .build-item-component) .item-text {
+  margin-bottom: 0;
+}
+
+.simple-view table.meta-levels-table tbody tr:has(.build-item-component:hover),
+.simple-view table.tier-list-table tbody tr:has(.build-item-component:hover) {
+  opacity: 1 !important;
+  position: relative;
+  z-index: 5;
+}
+.simple-view .build-item-component:not(.hero-build-timeline-container .build-item-component).meta-hero-card {
+  min-width: 0;
+}
+
+.simple-view .build-item-component:not(.hero-build-timeline-container .build-item-component) > .labels {
+  display: block;
+  position: absolute;
+  z-index: 30;
+  top: 100%;
+  left: 50%;
+  transform: translate(calc(-50% + var(--lx, 0px)), 0) scale(0);
+  transform-origin: 50% 0;
+  box-sizing: border-box;
+  width: max-content;
+  min-width: 100%;
+  padding: 4px 8px;
+  border-radius: 5px;
+  background: var(--selectors-bg);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 200ms ease, transform 200ms ease, visibility 200ms;
+}
+.simple-view .build-item-component:not(.hero-build-timeline-container .build-item-component):hover > .labels {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translate(calc(-50% + var(--lx, 0px)), 0) scale(1);
 }
 
 .demo-blocks {
@@ -3325,4 +3439,22 @@ tr.shady td.banner-row .shady-notice {
 .bracket .bracket-gf-conn:has(g.bracket-hl) .bracket-gf-shared line {
   stroke: var(--caption);
   stroke-width: 2.5;
+}
+
+.simple-view .explainer-demo-block .build-item-component {
+  position: static;
+}
+.simple-view .explainer-demo-block .build-item-component > .labels {
+  position: static;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: none;
+  padding: 0;
+  background: none;
+  box-shadow: none;
+  white-space: normal;
+}
+.simple-view .demo-blocks .build-item-component .item-image {
+  margin: 5px auto;
 }

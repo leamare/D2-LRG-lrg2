@@ -3,6 +3,7 @@
 include_once($root."/modules/view/functions/itembuilds.php");
 include_once($root."/modules/view/generators/item_component.php");
 include_once($root."/modules/view/generators/skill_component.php");
+include_once($root."/modules/view/functions/explainer.php");
 
 const STARTING_GOLD = 600;
 
@@ -392,7 +393,8 @@ function rg_view_generate_items_builds() {
       "<div class=\"line\">".locale_string("builds_desc_6")."</div>".
       "<div class=\"line\">".locale_string("builds_desc_7")."</div>".
     "</div>".
-  "</details>";
+  "</details>".
+  simple_view_button();
 
   // BUILD OVERVIEW
 

@@ -3,6 +3,7 @@
 include_once($root."/modules/view/functions/meta_levels.php");
 include_once($root."/modules/view/functions/hero_name.php");
 include_once($root."/modules/view/functions/entity_cards.php");
+include_once($root."/modules/view/functions/explainer.php");
 
 $modules['heroes']['meta_levels'] = "";
 
@@ -25,7 +26,8 @@ function rg_view_generate_heroes_meta_levels() {
         "<div class=\"line\">".locale_string("desc_meta_levels_4")."</div>".
         "<div class=\"line\">".locale_string("desc_meta_levels_5")."</div>".
       "</div>".
-    "</details>";
+    "</details>".
+    simple_view_table_toggle();
 
   $res .= "<table class=\"list wide meta-levels-table\"><thead><tr>".
       "<th>".locale_string("meta_levels_col_level")."</th>".

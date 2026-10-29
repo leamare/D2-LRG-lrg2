@@ -1,4 +1,4 @@
-<?php  $__postfix = "?v=227025"; ?>
+<?php  $__postfix = "?v=227037"; ?>
 <!DOCTYPE html>
 <html lang="<?php echo $locale; ?>">
   <head>
@@ -84,6 +84,7 @@
     
     <link href="res/valve_mimic.css<?php echo $__postfix; ?>" rel="stylesheet" type="text/css" />
     <link href="res/reports.css<?php echo $__postfix; ?>" rel="stylesheet" type="text/css" />
+    <script type="text/javascript">try { if (localStorage.getItem('lrg_simple_view') === '1') document.documentElement.classList.add('simple-view'); } catch (e) {}</script>
     <?php
       if($use_graphjs) {
         echo "<script type=\"text/javascript\" src=\"res/dependencies/Chart.bundle.min.js$__postfix\"></script>";

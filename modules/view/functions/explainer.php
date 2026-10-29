@@ -12,3 +12,18 @@ function explainer_block($string) {
     "</div>".
   "</details>";
 }
+
+function simple_view_button() {
+  return "<div class=\"content-text simple-view-solo\">".
+    "<button type=\"button\" class=\"simple-view-toggle\" aria-pressed=\"false\">".
+      locale_string("simple_view").
+    "</button>".
+  "</div>";
+}
+
+function simple_view_table_toggle() {
+  return "<div class=\"filter-toggles wide simple-view-filter\">".
+    "<input type=\"checkbox\" id=\"simple-view-toggle\" class=\"simple-view-input\" />".
+    "<label for=\"simple-view-toggle\">".locale_string("simple_view")."</label>".
+  "</div>";
+}

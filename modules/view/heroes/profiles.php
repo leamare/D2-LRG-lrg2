@@ -510,7 +510,7 @@ function rg_view_generate_heroes_profiles() {
 
       if (!empty($build['path'])) {
         $res['heroid'.$hero] .=  "<div class=\"hero-build-overview-container hero-build\">";
-        $res['heroid'.$hero] .= "<div class=\"build-overview-container main-build-alts\">";
+        $res['heroid'.$hero] .= "<div class=\"build-overview-container main-build-basic\">";
         $sz = count($build['path']);
         for ($i = 0; $i < $build['lategamePoint'] && isset($build['path'][$i]); $i++) {
           if (isset($build['early'][$i])) {

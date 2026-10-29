@@ -851,3 +851,53 @@ $.tablesorter.addParser({
     if (pop) showModal(pop.innerHTML, pop.getAttribute('data-title') || '');
   });
 })();
+
+// Simple view: hides item/hero card labels
+(function () {
+  var KEY = 'lrg_simple_view';
+
+  function syncButtons() {
+    var on = document.documentElement.classList.contains('simple-view');
+    document.querySelectorAll('.simple-view-toggle').forEach(function (b) {
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    document.querySelectorAll('.simple-view-input').forEach(function (i) {
+      i.checked = on;
+    });
+  }
+
+  function setSimpleView(on) {
+    document.documentElement.classList.toggle('simple-view', on);
+    try { localStorage.setItem(KEY, on ? '1' : '0'); } catch (err) {}
+    syncButtons();
+  }
+
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest ? e.target.closest('.simple-view-toggle') : null;
+    if (!btn) return;
+    e.preventDefault();
+    setSimpleView(!document.documentElement.classList.contains('simple-view'));
+  });
+
+  document.addEventListener('change', function (e) {
+    if (e.target && e.target.classList && e.target.classList.contains('simple-view-input')) {
+      setSimpleView(e.target.checked);
+    }
+  });
+
+  document.addEventListener('mouseover', function (e) {
+    if (!document.documentElement.classList.contains('simple-view')) return;
+    var card = e.target.closest ? e.target.closest('.build-item-component') : null;
+    if (!card || card.closest('.hero-build-timeline-container')) return;
+    var labels = card.querySelector(':scope > .labels');
+    if (!labels) return;
+    var w = labels.offsetWidth;
+    var cr = card.getBoundingClientRect();
+    var vw = document.documentElement.clientWidth;
+    var want = cr.left + cr.width / 2 - w / 2;
+    var left = Math.min(Math.max(want, 8), Math.max(8, vw - 8 - w));
+    card.style.setProperty('--lx', (left - want) + 'px');
+  });
+
+  syncButtons();
+})();

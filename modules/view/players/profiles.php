@@ -5,7 +5,9 @@ include_once($root."/modules/commons/volatility.php");
 include_once($root."/modules/view/generators/pvp_unwrap_data.php");
 
 function rg_view_generate_players_profiles() {
-  global $report, $parent, $root, $unset_module, $mod, $meta, $strings, $player_photo_provider, $links_providers;
+  global $report, $parent, $root, $unset_module,
+    $mod, $meta, $strings, $player_photo_provider,
+    $links_providers, $leaguetag, $linkvars;
 
   if($mod == $parent."profiles") $unset_module = true;
   $parent_module = $parent."profiles-";
@@ -230,6 +232,12 @@ function rg_view_generate_players_profiles() {
     }
     
     $res['playerid'.$player] .= "</tbody></table>";
+
+    $res['playerid'.$player] .= "<div class=\"content-text\">".
+      "<a href=\"?league=$leaguetag&mod=tierlists-players-heroes-playerid$player".(empty($linkvars) ? "" : "&".$linkvars)."\">".
+        locale_string('heroes_tierlist').
+      "</a>".
+    "</div>";
   }
 
   // fantasy_mvp stats
