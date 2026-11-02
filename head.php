@@ -50,6 +50,7 @@ if(isset($argv)) {
   $sti_blocks_size  = $settings['sti_blocks_size'] ?? null;
   $stratz_user_agent = $settings['stratz_user_agent'] ?? "STRATZ_API";
   $lrg_web_reports_dir = (string)($settings['web_reports_dir'] ?? '');
+  $lrg_backup_chunk_max_size = $settings['backup_chunk_max_size'] ?? null;
 
   unset($settings);
 

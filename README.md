@@ -143,6 +143,17 @@ php tools/update_schema.php -lLEAGUE_TAG
 Creates/restores backup.
 Backups are saved to `backups` folder.
 
+Table dumps are written as CSV parts: once a part grows past the chunk size
+limit it is packed into the archive as `<table>.<n>.csv` (e.g.
+`matches_ext.0.csv`) and a new part starts, so the disk only ever holds about
+one part's worth of data. Every backup contains a `tables.index` file mapping
+tables to their ordered CSV parts, and the restore uses it when present.
+Restoring older backups with plain `<table>.csv` files (no index) still works.
+
+The chunk size limit is 5 GiB by default and can be overridden with the
+`backup_chunk_max_size` value in `rg_settings.json` (size string, e.g.
+`"512M"` or `"5G"`), or per run with `-z`.
+
 Parameters:
 * `-R` - restore mode, requires following parameters:
   * `-l` - league tag
@@ -150,6 +161,7 @@ Parameters:
 * `-r` - generate report and add it to backup
 * `-F` - remove data after creating backup
 * `-o` - path for output file
+* `-z` - table CSV part size limit: plain number means MiB, or a size string like `512M` / `5G` (overrides `backup_chunk_max_size`)
 
 ### rg_fetcher
 

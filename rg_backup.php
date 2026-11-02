@@ -13,6 +13,7 @@ const BACKUP_MATCHID_BATCH = 250;
 const BACKUP_SOCKET_TIMEOUT = 28800;
 const BACKUP_LOG_PCT_STEP = 5;
 const BACKUP_LOG_PCT_EVERY_CHUNKS = 10;
+const BACKUP_PART_MAX_BYTES = 5368709120; // 5 GiB
 
 if (function_exists('ob_implicit_flush')) {
   ob_implicit_flush(true);
@@ -557,7 +558,166 @@ function backup_pack_file(StreamingArchive $archive, $name, $path) {
   return true;
 }
 
-$options = getopt("l:RrFf:o:S:");
+/**
+ * Count non-empty records in a CSV (the header line included).
+ */
+function backup_count_csv_records($path) {
+  $handle = fopen($path, 'r');
+  if ($handle === false) {
+    return false;
+  }
+  $lines = 0;
+  while (($probe = backup_csv_read_row($handle)) !== null) {
+    if ($probe === [] || (count($probe) === 1 && $probe[0] === '')) {
+      continue;
+    }
+    $lines++;
+  }
+  fclose($handle);
+  return $lines;
+}
+
+function backup_restore_flush(mysqli $conn, $table, $schema, &$qlines, &$qcnt) {
+  if (empty($qlines)) {
+    $qcnt = 0;
+    return;
+  }
+  $sql = "INSERT INTO $table ($schema) VALUES \n".implode(",\n", $qlines).";";
+  try {
+    if ($conn->multi_query($sql) === TRUE);
+    else {
+      throw new Exception($conn->error);
+    }
+  } catch (Exception $e) {
+    $fname_base = "tmp/query_{$table}_".time();
+    $i = 0;
+    while(file_exists(($fname = $fname_base))) {
+      $fname = $fname_base.".$i";
+    }
+    $fname .= ".sql";
+
+    echo "\n[E] ERROR: ".$conn->error."\n    Details: `$fname`\n";
+    file_put_contents($fname, $sql);
+
+    die();
+  }
+
+  $qcnt = 0;
+  $qlines = [];
+}
+
+/**
+ * Restore one table from an ordered list of CSV parts (tables.index layout)
+ * or a single legacy `<table>.csv`. Every part carries its own schema header
+ * (validated against the first part, then skipped), data rows follow in order.
+ */
+function backup_restore_table(mysqli $conn, $table, array $files) {
+  $restore_prefix = "[ ] Adding data to `$table`...";
+
+  $restore_total = 0;
+  foreach ($files as $f) {
+    $n = backup_count_csv_records($f);
+    if ($n === false) {
+      die("Error reading the file `$f`\n");
+    }
+    $restore_total += max(0, $n - 1); // minus each part's header
+  }
+
+  $restore_done = 0;
+  backup_progress($restore_prefix, 0, $restore_total, false, false);
+
+  $qlines = [];
+  $qcnt = 0;
+  $hsz = null;
+  $schema = null;
+  $remaining = $restore_total;
+
+  foreach ($files as $f) {
+    $handle = fopen($f, "r");
+    if ($handle === false) {
+      die("Error reading the file `$f`\n");
+    }
+
+    $header = backup_csv_read_row($handle);
+    if ($header === null || $header === []) {
+      fclose($handle);
+      die("Error reading schema from `$f`\n");
+    }
+    if ($hsz === null) {
+      $hsz = count($header);
+      $schema = '`'.implode('`,`', $header).'`';
+    } elseif (count($header) !== $hsz) {
+      fclose($handle);
+      die("[E] Schema mismatch in `$table` part `$f`\n");
+    }
+
+    while (($vals = backup_csv_read_row($handle)) !== null) {
+      if ($vals === [] || (count($vals) === 1 && $vals[0] === '')) {
+        continue;
+      }
+
+      if (count($vals) !== $hsz) {
+        $fname = "tmp/badrow_{$table}_".time().".csv";
+        file_put_contents(
+          $fname,
+          "expected $hsz cols, got ".count($vals)."\n".json_encode($vals, JSON_UNESCAPED_UNICODE)."\n"
+        );
+        echo "\n[E] Column count mismatch in `$table` part `$f` (expected $hsz, got ".count($vals).")\n    Details: `$fname`\n";
+        die();
+      }
+
+      $qline = "";
+      foreach ($vals as $v) {
+        if ($v === null || $v === '') {
+          $qline .= "'0',";
+          continue;
+        }
+        if (!is_numeric($v) && !mb_check_encoding($v, 'UTF-8')) {
+          $v = mb_convert_encoding($v, 'UTF-8');
+        }
+        $qline .= "'".addcslashes($v, "'\\")."',";
+      }
+      $qline[strlen($qline)-1] = ")";
+
+      $qlines[] = '('.$qline;
+      $qcnt += $hsz;
+      $remaining--;
+      $restore_done++;
+
+      if ($qcnt >= QUERY_COUNTER || $remaining <= 1) {
+        backup_restore_flush($conn, $table, $schema, $qlines, $qcnt);
+        backup_progress($restore_prefix, $restore_done, $restore_total, false, false, true);
+      }
+    }
+    fclose($handle);
+  }
+
+  backup_restore_flush($conn, $table, $schema, $qlines, $qcnt);
+  backup_progress($restore_prefix, $restore_done, $restore_total, true, false);
+}
+
+/**
+ * Parse a size string like "512M" / "5G" (also K, "GB"/"MiB" spellings, or
+ * plain bytes) into bytes. Returns null on garbage.
+ */
+function backup_parse_size($s) {
+  if (is_int($s) || is_float($s)) {
+    return $s > 0 ? (int)$s : null;
+  }
+  $s = trim((string)$s);
+  if (!preg_match('/^(\d+(?:\.\d+)?)\s*([KMG])?I?B?$/i', $s, $m)) {
+    return null;
+  }
+  $mult = 1;
+  if (!empty($m[2])) {
+    $u = strtoupper($m[2]);
+    $mult = $u === 'K' ? 1024 : ($u === 'M' ? 1048576 : 1073741824);
+  }
+  $bytes = (int)round(((float)$m[1]) * $mult);
+  return $bytes > 0 ? $bytes : null;
+}
+
+$options = getopt("l:RrFf:o:S:z:");
 
 $restore = isset($options['R']);
 
@@ -568,6 +728,34 @@ $remove = isset($options['F']);
 $input = $options['f'] ?? '';
 
 $skipTables = array_values(array_filter(explode(",", $options['S'] ?? ''), 'strlen'));
+
+// table CSVs are rolled into <table>.<n>.csv parts once a part crosses this
+// size; rg_settings `backup_chunk_max_size` overrides the default, -z wins over both
+$part_max = BACKUP_PART_MAX_BYTES;
+if (!empty($lrg_backup_chunk_max_size)) {
+  $sz = backup_parse_size($lrg_backup_chunk_max_size);
+  if ($sz === null) {
+    echo "[W] Couldn't parse rg_settings `backup_chunk_max_size` (`$lrg_backup_chunk_max_size`), using default\n";
+  } else {
+    $part_max = $sz;
+  }
+}
+if (isset($options['z'])) {
+  $zraw = trim((string)$options['z']);
+  if (preg_match('/^\d+$/', $zraw)) {
+    // plain number = MiB
+    $part_max = ((int)$zraw) * 1048576;
+    if ($part_max <= 0) {
+      die("[E] -z expects a positive part size (MiB number or e.g. `512M` / `5G`)\n");
+    }
+  } else {
+    $sz = backup_parse_size($zraw);
+    if ($sz === null) {
+      die("[E] -z expects a positive part size (MiB number or e.g. `512M` / `5G`)\n");
+    }
+    $part_max = $sz;
+  }
+}
 
 $output_path = $options['o'] ?? 'backups/'.$lrg_league_tag.'_'.time().'.tar.gz';
 if (!is_dir('backups')) mkdir('backups');
@@ -628,105 +816,37 @@ if ($restore) {
     'fantasy_mvp_awards',
   ];
 
-  foreach ($tables as $t) {
-    if (file_exists($dir.'/'.$t.'.csv')) {
-      if (in_array($t, $skipTables)) continue;
-
-      $table = $t;
-      $restore_prefix = "[ ] Adding data to `$t`...";
-
-      $handle = fopen($dir.'/'.$t.'.csv', "r");
-      if ($handle === false) {
-        die("Error reading the file `$t`\n");
-      }
-
-      $header = backup_csv_read_row($handle);
-      if ($header === null || $header === []) {
-        die("Error reading schema from `$t`\n");
-      }
-
-      // count records with the real parser (quoted newlines ≠ extra rows)
-      $_lines = 0;
-      $pos_after_header = ftell($handle);
-      while (($probe = backup_csv_read_row($handle)) !== null) {
-        if ($probe === [] || (count($probe) === 1 && $probe[0] === '')) {
-          continue;
-        }
-        $_lines++;
-      }
-      fseek($handle, $pos_after_header);
-
-      $restore_total = $_lines;
-      $restore_done = 0;
-      backup_progress($restore_prefix, 0, $restore_total, false, false);
-
-      $qlines = [];
-      $qcnt = 0;
-      $hsz = count($header);
-      $schema = '`'.implode('`,`', $header).'`';
-
-      while (($vals = backup_csv_read_row($handle)) !== null) {
-        if ($vals === [] || (count($vals) === 1 && $vals[0] === '')) {
-          continue;
-        }
-
-        if (count($vals) !== $hsz) {
-          $fname = "tmp/badrow_{$table}_".time().".csv";
-          file_put_contents(
-            $fname,
-            "expected $hsz cols, got ".count($vals)."\n".json_encode($vals, JSON_UNESCAPED_UNICODE)."\n"
-          );
-          echo "\n[E] Column count mismatch in `$t` (expected $hsz, got ".count($vals).")\n    Details: `$fname`\n";
-          die();
-        }
-
-        $qline = "";
-        foreach ($vals as $v) {
-          if ($v === null || $v === '') {
-            $qline .= "'0',";
-            continue;
-          }
-          if (!is_numeric($v) && !mb_check_encoding($v, 'UTF-8')) {
-            $v = mb_convert_encoding($v, 'UTF-8');
-          }
-          $qline .= "'".addcslashes($v, "'\\")."',";
-        }
-        $qline[strlen($qline)-1] = ")";
-
-        $qlines[] = '('.$qline;
-        $qcnt += $hsz;
-        $_lines--;
-        $restore_done++;
-
-        if ($qcnt >= QUERY_COUNTER || $_lines <= 1) {
-          $sql = "INSERT INTO $t ($schema) VALUES \n".implode(",\n", $qlines).";";
-          try {
-            if ($conn->multi_query($sql) === TRUE);
-            else {
-              throw new Exception($conn->error);
-            }
-          } catch (Exception $e) {
-            $fname_base = "tmp/query_{$table}_".time();
-            $i = 0;
-            while(file_exists(($fname = $fname_base))) {
-              $fname = $fname_base.".$i";
-            }
-            $fname .= ".sql";
-
-            echo "\n[E] ERROR: ".$conn->error."\n    Details: `$fname`\n";
-            file_put_contents($fname, $sql);
-
-            die();
-          }
-
-          $qcnt = 0;
-          $qlines = [];
-          backup_progress($restore_prefix, $restore_done, $restore_total, false, false, true);
-        }
-      }
-      fclose($handle);
-      backup_progress($restore_prefix, $restore_done, $restore_total, true, false);
+  // New backups carry tables.index: an ordered list of CSV parts per table.
+  // Old dumps only have plain <table>.csv files — both layouts are supported.
+  $tables_index = null;
+  if (file_exists($dir.'/tables.index')) {
+    $tables_index = json_decode(file_get_contents($dir.'/tables.index'), true);
+    if (!is_array($tables_index)) {
+      echo "[W] Couldn't parse tables.index, falling back to <table>.csv layout\n";
+      $tables_index = null;
     }
+  }
+
+  foreach ($tables as $t) {
+    if (in_array($t, $skipTables)) continue;
+
+    $table_files = [];
+    if (is_array($tables_index) && !empty($tables_index[$t]) && is_array($tables_index[$t])) {
+      foreach ($tables_index[$t] as $f) {
+        // no path traversal from a hand-edited index
+        $f = basename((string)$f);
+        if (!file_exists($dir.'/'.$f)) {
+          die("[E] tables.index lists `$f` for `$t`, but the file is missing from the dump\n");
+        }
+        $table_files[] = $dir.'/'.$f;
+      }
+    } elseif (file_exists($dir.'/'.$t.'.csv')) {
+      $table_files[] = $dir.'/'.$t.'.csv';
+    }
+
+    if (empty($table_files)) continue;
+
+    backup_restore_table($conn, $t, $table_files);
   }
 
   echo("[ ] Cleaning up...\n");
@@ -742,6 +862,7 @@ if ($restore) {
 
   $tables = [];
   $files = [];
+  $tables_index = [];
 
   // Archive is written while tables are still being dumped: every table CSV goes
   // dump -> pack -> unlink before the next one starts, so tmp/ only ever holds one table.
@@ -783,13 +904,18 @@ if ($restore) {
     $prefix = "[ ] Fetching `$t`...";
     backup_progress($prefix, 0, $estimate);
 
-    $fname = 'tmp/'.$t.'_'.$lrg_league_tag.'_'.time().'.csv';
+    // every part is a self-contained CSV (schema header first); parts past the
+    // size threshold are sealed into the archive as <table>.<n>.csv right away
+    $tables_index[$t] = [];
+    $part_no = 0;
+    $header_line = implode(',', $schema)."\n";
+    $fname = 'tmp/'.$t.'.'.$part_no.'_'.$lrg_league_tag.'_'.time().'.csv';
 
     $fp = fopen($fname, "w");
     if ($fp === FALSE) {
       die("[F] Can't write `$fname`\n");
     }
-    fwrite($fp, implode(',', $schema)."\n");
+    fwrite($fp, $header_line);
 
     $i = 0;
     $buf = '';
@@ -857,6 +983,29 @@ if ($restore) {
 
       $conn = backup_reconnect($lrg_sql_db, $conn);
 
+      // checked after every batch: once the part crossed the threshold it is
+      // packed into the archive and a fresh part starts for the same table,
+      // so tmp/ never holds more than ~one part's worth of data
+      $part_size = ftell($fp);
+      if ($part_size !== false && $part_size >= $part_max) {
+        fclose($fp);
+        $arc_name = $t.'.'.$part_no.'.csv';
+        if (!backup_pack_file($archive, $arc_name, $fname)) {
+          // keep the dump for inspection; an incomplete archive must not pass as a backup
+          die("[F] Aborting: `$t` part $part_no is not in the archive (dump kept at `$fname`)\n");
+        }
+        unlink($fname);
+        $tables_index[$t][] = $arc_name;
+
+        $part_no++;
+        $fname = 'tmp/'.$t.'.'.$part_no.'_'.$lrg_league_tag.'_'.time().'.csv';
+        $fp = fopen($fname, "w");
+        if ($fp === FALSE) {
+          die("[F] Can't write `$fname`\n");
+        }
+        fwrite($fp, $header_line);
+      }
+
       if ($spec['mode'] === 'scan') {
         break;
       }
@@ -873,6 +1022,7 @@ if ($restore) {
 
     if ($buf !== '') {
       fwrite($fp, $buf);
+      $buf = '';
     }
     fflush($fp);
     fclose($fp);
@@ -880,14 +1030,32 @@ if ($restore) {
     backup_progress($prefix, $i, $estimate > 0 ? $estimate : $i, true);
 
     // pack right away and free the disk space before touching the next table
-    if (!backup_pack_file($archive, $t.'.csv', $fname)) {
-      // keep the dump for inspection; an incomplete archive must not pass as a backup
-      die("[F] Aborting: `$t` is not in the archive (dump kept at `$fname`)\n");
+    $last_size = filesize($fname);
+    if ($part_no > 0 && $last_size !== false && $last_size <= strlen($header_line)) {
+      // the table ended exactly on the threshold — this part is header-only
+      unlink($fname);
+    } else {
+      $arc_name = $t.'.'.$part_no.'.csv';
+      if (!backup_pack_file($archive, $arc_name, $fname)) {
+        // keep the dump for inspection; an incomplete archive must not pass as a backup
+        die("[F] Aborting: `$t` part $part_no is not in the archive (dump kept at `$fname`)\n");
+      }
+      unlink($fname);
+      $tables_index[$t][] = $arc_name;
     }
-    unlink($fname);
   }
 
   $conn->close();
+
+  // tables.index goes into every new backup: table -> ordered list of CSV parts
+  echo "[ ] Writing table index...";
+  $index_tmp = 'tmp/tables.index_'.$lrg_league_tag.'_'.time().'.json';
+  file_put_contents($index_tmp, json_encode($tables_index, JSON_PRETTY_PRINT)."\n");
+  if (!backup_pack_file($archive, 'tables.index', $index_tmp)) {
+    $pack_failed = true;
+  }
+  unlink($index_tmp);
+  echo "OK.\n";
 
   if (!file_exists("leagues/$lrg_league_tag.json")) {
     $descriptor = json_decode(file_get_contents("templates/default.json"), true);
