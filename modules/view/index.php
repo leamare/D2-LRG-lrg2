@@ -253,11 +253,11 @@ $tabsContent = [];
 $tabsTags = [];
 
 if (isset($_lid)) {
-  $searchstring = ($searchstring ?? " ") . "!lid:".$_lid;
+  $searchstring = ($searchstring ?? "") . " !lid:".$_lid;
 }
 
 if (isset($_lp)) {
-  $searchstring = ($searchstring ?? " ") . "!lp:".$_lp;
+  $searchstring = ($searchstring ?? "") . " !lp:".$_lp;
 }
 
 if (!empty($searchstring)) {
