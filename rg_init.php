@@ -112,31 +112,39 @@ passthru("php tools/league_matches_steamapi.php -l".$lg_settings['league_tag']."
 
 echo "[ ] Creating database...";
 
-$conn = lrg_mysqli_connect(null);
+$r_name = (string)($lg_settings['resource'] ?? '');
+$init_resource = lrg_resource($r_name !== '' ? $r_name : null);
+if ($init_resource === null) {
+  echo "\n[W] Unknown resource `$r_name`, using `".lrg_resource_default_name()."`\n";
+  $init_resource = lrg_resource(null);
+}
+$init_db_name = lrg_resource_db_name($init_resource, $lg_settings['league_tag']);
+
+$conn = lrg_resource_connect($init_resource, null);
 $conn->set_charset('utf8mb4');
 
 if ($conn->connect_error) die("[F] Connection to SQL server failed: ".$conn->connect_error."\n");
 
 try {
-  if ($conn->select_db($lrg_db_prefix."_".$lg_settings['league_tag'])) {
+  if ($conn->select_db($init_db_name)) {
     echo "\n[E] Database already exists\n";
-  
+
     if ($isForce) {
       echo "[ ] Dropping existing database...\n";
-      $conn->query("DROP DATABASE ".$lrg_db_prefix."_".$lg_settings['league_tag'].";");
+      $conn->query("DROP DATABASE ".$init_db_name.";");
       if ($conn->connect_error || $conn->error) die("[F] Can't drop database: ".($conn->connect_error ?? $conn->error)."\n");
     } else {
       die();
     }
   }
 } catch (\Throwable $e) {
-  
+
 }
 
-$conn->query("CREATE DATABASE ".$lrg_db_prefix."_".$lg_settings['league_tag']." CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;");
+$conn->query("CREATE DATABASE ".$init_db_name." CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;");
 if ($conn->connect_error) die("[F] Can't create database: ".$conn->connect_error."\n");
 if ($conn->error) die("[F] Can't create database: ".$conn->error."\n");
-$conn->select_db($lrg_db_prefix."_".$lg_settings['league_tag']);
+$conn->select_db($init_db_name);
 
 echo "OK\n";
 
@@ -158,8 +166,23 @@ if (!$isVirtual) {
   if (!isset($lg_settings['virtual']) || !isset($lg_settings['virtual']['source']))
     die("[F] Need to specify information on virtual source first.\n");
   
-  $self = $lrg_db_prefix."_".$lg_settings['league_tag'];
-  $src = $lrg_db_prefix."_".$lg_settings['virtual']['source'];
+  $self = $init_db_name;
+
+  // views can't span servers: the source league must be on the same resource
+  $src_tag = $lg_settings['virtual']['source'];
+  $src_resource = $init_resource;
+  if (file_exists("leagues/".$src_tag.".json")) {
+    $src_lg = json_decode(file_get_contents("leagues/".$src_tag.".json"), true);
+    $src_r_name = (string)($src_lg['resource'] ?? '');
+    $src_r = lrg_resource($src_r_name !== '' ? $src_r_name : null);
+    if ($src_r !== null) {
+      $src_resource = $src_r;
+    }
+  }
+  if ($src_resource != $init_resource) {
+    die("[F] Virtual report source `$src_tag` lives on a different resource, can't create views.\n");
+  }
+  $src = lrg_resource_db_name($src_resource, $src_tag);
 
   echo "[ ] Updating schema...\n";
 

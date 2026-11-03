@@ -1,22 +1,36 @@
 <?php
 require_once('head.php');
-$conn = lrg_mysqli_connect(null);
 
-if ($conn->connect_error) die("[F] Connection to SQL server failed: ".$conn->connect_error."\n");
+$dbs_by_resource = [];
+foreach (lrg_resources() as $r_name => $res) {
+  if (($res['driver'] ?? 'mysql') !== 'mysql') continue;
 
-$reports = [];
+  $prefix = (string)($res['prefix'] ?? '');
+  if ($prefix !== '') {
+    $like = addcslashes($prefix, '_%')."\_%";
+  } elseif (!empty($res['database'])) {
+    $like = addcslashes($res['database'], '_%');
+  } else {
+    continue;
+  }
 
-$query = "show databases like \"$lrg_db_prefix%\";";
-$strlen = strlen($lrg_db_prefix);
+  $conn = lrg_resource_connect($res, null);
+  if ($conn->connect_error) {
+    echo "[W] Can't connect to resource `$r_name`: ".$conn->connect_error."\n";
+    continue;
+  }
 
-if ($conn->multi_query($query) !== TRUE) 
-  throw new Exception("[F] Unexpected problems when recording to database.\n".$conn->error."\n");
+  $dbs_by_resource[$r_name] = [];
+  if ($conn->multi_query("show databases like \"$like\";") !== TRUE)
+    throw new Exception("[F] Unexpected problems when recording to database.\n".$conn->error."\n");
 
-$query_res = $conn->store_result();
-for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
-  $reports[] = substr($row[0], $strlen+1);
+  $query_res = $conn->store_result();
+  for ($row = $query_res->fetch_row(); $row != null; $row = $query_res->fetch_row()) {
+    $dbs_by_resource[$r_name][] = $row[0];
+  }
+  $query_res->free_result();
+  $conn->close();
 }
-$query_res->free_result();
 
 $descriptors = scandir("leagues");
 
@@ -29,7 +43,17 @@ foreach ($descriptors as $lf) {
 
   $lm = substr($lf, 0, -5);
 
-  if (!in_array($lm, $reports)) {
+  $lg = json_decode(file_get_contents("leagues/$lf"), true);
+  $r_name = (string)($lg['resource'] ?? '');
+  if ($r_name === '') $r_name = lrg_resource_default_name();
+  $res = lrg_resource($r_name);
+
+  if ($res === null || !isset($dbs_by_resource[$r_name])) {
+    echo "[?] `$lm` — resource `$r_name` is unavailable, skipping\n";
+    continue;
+  }
+
+  if (!in_array(lrg_resource_db_name($res, $lm), $dbs_by_resource[$r_name])) {
     echo "[X] database for report `$lm` does not exist\n";
     $toremove[] = $lm;
   } else {

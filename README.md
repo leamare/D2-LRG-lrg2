@@ -328,3 +328,31 @@ Tools are additional scripts that can be used for specific things. All of them s
 * `update_rosters` - updates official rosters for all teams in report. Args: `-l%LEAGUETAG%`
 * `update_playerids` - updates missing ranked playerids
 * `matchlist_intersect` - computes the intersection of two matchlist files and writes the result to a file. Args: `<A.list> <B.list> [-f output.list] [-R]`. By default writes matches present in both A and B back to A (or to `-f` if specified). With `-R` writes matches that are in A but not in B (set difference A \ B). Comment lines and blank lines are ignored; output order follows A. Example: `php tools/matchlist_intersect.php matchlists/a.list matchlists/b.list -f matchlists/common.list`
+## Connection resources
+
+MySQL connections are defined as named **resources** in `rg_settings.json`:
+
+```json
+{
+  "resources": {
+    "default": {
+      "driver": "mysql",
+      "host": "127.0.0.1",
+      "port": 3306,
+      "user": "lrg",
+      "pass": "...",
+      "prefix": "lrg"
+    },
+    "cache": {
+      "driver": "mysql",
+      "host": "127.0.0.1",
+      "database": "lrg_view_cache"
+    }
+  }
+}
+```
+
+* Every report (league) is assumed to use the **first** resource on the list unless its league config (`leagues/<tag>.json`) has a `"resource": "<name>"` key (optional plain string, not present in the default template).
+* If the specified resource does not exist, the default resource is used (with a warning).
+* League databases are named `<prefix>_<league_tag>`. A resource with `database` (and no `prefix`) addresses one fixed database instead — meant for services like the view cache daemon, which refers to a resource by name.
+* The legacy flat keys (`mysql_host`, `mysql_user`, `mysql_pass`, `mysql_port`, `mysql_prefix`) still work: they act as the last resource on the list with the key `_legacy`. An old configuration with a single resource and no `resource` keys in league configs behaves exactly as before.

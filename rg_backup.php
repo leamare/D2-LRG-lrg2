@@ -784,13 +784,23 @@ if ($restore) {
     backup_reassemble_split_files($dir);
   }
 
-  echo("[ ] Initializing db...\n");
-  exec("php rg_init.php -l$lrg_league_tag -Nq -Dq");
-  $lrg_sql_db   = $lrg_db_prefix."_".$lrg_league_tag;
-
   echo("[ ] Copying descriptor and matchlist...\n");
   copy($dir.'/descriptor.json', 'leagues/'.$lrg_league_tag.'.json');
   copy($dir.'/matchlist.list', 'matchlists/'.$lrg_league_tag.'.list');
+
+  echo("[ ] Initializing db...\n");
+  exec("php rg_init.php -l$lrg_league_tag -Nq -Dq -e");
+
+  $lg = json_decode(file_get_contents('leagues/'.$lrg_league_tag.'.json'), true);
+  $res = lrg_resource((string)($lg['resource'] ?? '') !== '' ? (string)$lg['resource'] : null)
+      ?? lrg_resource(null);
+  $lrg_resource = $res;
+  $lrg_sql_host  = $res['host'];
+  $lrg_sql_user  = $res['user'];
+  $lrg_sql_pass  = $res['pass'];
+  $lrg_sql_port  = $res['port'];
+  $lrg_db_prefix = $res['prefix'];
+  $lrg_sql_db    = lrg_resource_db_name($res, $lrg_league_tag);
 
   $conn = backup_connect($lrg_sql_db);
 
@@ -857,7 +867,8 @@ if ($restore) {
   } 
   rmdir($dir);
 } else {
-  $lrg_sql_db   = $lrg_db_prefix."_".$lrg_league_tag;
+  // head.php resolved the league's resource already (its config exists)
+  $lrg_sql_db = lrg_resource_db_name($lrg_resource, $lrg_league_tag);
   $conn = backup_connect($lrg_sql_db);
 
   $tables = [];
