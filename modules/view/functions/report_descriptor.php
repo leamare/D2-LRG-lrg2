@@ -7,6 +7,8 @@ function get_report_descriptor(&$report, $generate_endpoints = false) {
       "name" => null,
       "desc" => null,
       "id" => null,
+      "tickets" => null,
+      "liquipedia" => null,
       "first_match" => [ 'date' => 0, 'mid' => 0 ],
       "last_match" => [ 'date' => 0, 'mid' => 0 ],
       "matches" => 0,
@@ -24,11 +26,26 @@ function get_report_descriptor(&$report, $generate_endpoints = false) {
     'date' => 0, 'mid' => 0
   ];
 
+  $tickets = [];
+  if (isset($report['tickets']) && is_array($report['tickets'])) {
+    foreach (array_keys($report['tickets']) as $lid) {
+      $lid = (int)$lid;
+      if ($lid) $tickets[] = $lid;
+    }
+  }
+  if (empty($tickets) && !empty($report['league_id'])) {
+    $tickets[] = $report['league_id'];
+  }
+
   $desc = [
     "tag" => $report['league_tag'] ?? null,
     "name" => $report['league_name'] ?? null,
     "desc" => $report['league_desc'] ?? null,
     "id" => $report['league_id'] ?? null,
+    "tickets" => $tickets,
+    "liquipedia" => isset($report['links']['Liquipedia'])
+      ? preg_replace('#^https?://liquipedia\.net/[^/]+/#', '', $report['links']['Liquipedia'])
+      : null,
     "first_match" => $report['first_match'] ?? $empty_match,
     "last_match" => $report['last_match'] ?? $empty_match,
     "matches" => $report['random']['matches_total'] ?? 0,

@@ -11,7 +11,7 @@ $imports_ignore = [
 
 $imports_api = $imports_api ?? [];
 
-$lg_version = [ 2, 30, 0, 0, 0 ];
+$lg_version = [ 2, 33, 0, 0, 0 ];
 $isApi = false;
 
 $root = dirname(__FILE__);
@@ -114,6 +114,7 @@ if ($lrg_use_get) {
   else $mod = "";
 
   $_lid = null;
+  $_lp = null;
 
   if(isset($_GET['league']) && !empty($_GET['league'])) {
     $leaguetag = $_GET['league'];
@@ -152,6 +153,7 @@ if ($lrg_use_get) {
 
   if(isset($_GET['latest'])) $latest = true;
   if(isset($_GET['lid'])) $_lid = $_GET['lid'];
+  if(isset($_GET['lp'])) $_lp = $_GET['lp'];
 }
 
 $_rawmod = $mod;

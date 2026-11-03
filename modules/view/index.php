@@ -256,6 +256,10 @@ if (isset($_lid)) {
   $searchstring = ($searchstring ?? " ") . "!lid:".$_lid;
 }
 
+if (isset($_lp)) {
+  $searchstring = ($searchstring ?? " ") . "!lp:".$_lp;
+}
+
 if (!empty($searchstring)) {
   $searchfilter = create_search_filters($searchstring);
 

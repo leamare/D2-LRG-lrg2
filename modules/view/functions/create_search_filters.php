@@ -178,6 +178,10 @@ function create_search_filters(string $searchstring) {
               $filters[] = [ LRG_TAG_FILTER_ID, $v ];
             }
             break;
+          case 'lp':
+          case 'liquipedia':
+            $filters[] = [ LRG_TAG_FILTER_LIQUIPEDIA, normalize_liquipedia_slug($command[1]) ];
+            break;
           case 'tag-has':
             $vals = explode(',', $command[1]);
             foreach ($vals as $v) {

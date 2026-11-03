@@ -30,6 +30,14 @@ define( 'LRG_TAG_FILTER_LAST_UPDATE_DIFF_DAYS_MORE', 28 );
 define( 'LRG_TAG_FILTER_LAST_UPDATE_DIFF_DAYS_LESS', 29 );
 define( 'LRG_TAG_FILTER_LAST_MATCH_DIFF_DAYS_MORE', 30 );
 define( 'LRG_TAG_FILTER_LAST_MATCH_DIFF_DAYS_LESS', 31 );
+define( 'LRG_TAG_FILTER_LIQUIPEDIA', 32 );
+
+/** lowercase, spaces to underscores; a pasted liquipedia.net URL is stripped to the slug */
+function normalize_liquipedia_slug($slug) {
+  $slug = strtolower(trim((string)$slug));
+  $slug = preg_replace('#^https?://liquipedia\.net/[a-z0-9_-]+/#', '', $slug);
+  return str_replace(' ', '_', $slug);
+}
 
 /*
 filters:
@@ -165,7 +173,16 @@ function check_filters($rep, $filters) {
           }
           break;
         case LRG_TAG_FILTER_ID:
-          $group_result = $group_result && ($filter[1] == $rep['id']);
+          $group_result = $group_result && (
+            $filter[1] == $rep['id'] ||
+            (isset($rep['tickets']) && in_array($filter[1], $rep['tickets']))
+          );
+          break;
+        case LRG_TAG_FILTER_LIQUIPEDIA:
+          $group_result = $group_result && (
+            isset($rep['liquipedia']) &&
+            normalize_liquipedia_slug($rep['liquipedia']) === $filter[1]
+          );
           break;
         case LRG_TAG_FILTER_DATE_START:
           $group_result = $group_result && ($filter[1] <= $rep['first_match']['date']);
