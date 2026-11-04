@@ -21,6 +21,29 @@ Entry points:
 
 Primarily generated live in the web version, but it can be generated and saved in the analyzer loop (`ana.bracket = true`).
 
+## Overview
+
+```mermaid
+flowchart TB
+  Pre{"report.bracket.events<br/>already baked?"}
+  Pre -->|yes| Load["bracket_precomputed()"]
+  Pre -->|no| Need{"teams, tvt,<br/>match_participants_teams,<br/>matches_additional?"}
+  Need -->|no| Empty["unavailable"]
+  Need -->|yes| Matches["bracket_report_matches()"]
+  Matches --> Roster["tb_fix_split_rosters<br/>tb_merge_roster_aliases"]
+  Roster --> Series["tb_build_series"]
+  Series --> Ov["tb_apply_overrides"]
+  Ov --> Split["tb_split_events"]
+  Split --> Each["for each event:<br/>tb_analyze_event"]
+  Each --> Div["tb_split_division_events"]
+  Load --> Out["events → stages"]
+  Div --> Out
+  Out --> View["bracket_render / SVG"]
+  Out --> API["bracket_json"]
+```
+
+Live reconstruction needs a team report with matches. A precomputed `report.bracket` blob short-circuits everything below.
+
 ## Main flow
 
 (not counting small helpers)
@@ -62,6 +85,39 @@ Primarily generated live in the web version, but it can be generated and saved i
             - tb_pp_fold_late_seeding()
           - tb_color_group_stages
 
+```mermaid
+flowchart TD
+  subgraph ingest ["Ingest"]
+    M["matches"] --> R["roster repair"]
+    R --> S["series"]
+    S --> Cfg["config overrides"]
+  end
+  subgraph split ["Split"]
+    Cfg --> Ev["tb_split_events"]
+    Ev --> Int["interest recap"]
+    Ev --> Agg["month-grid aggregate"]
+    Ev --> Units["region / lid / time units"]
+  end
+  subgraph analyze ["Per event"]
+    Int --> Interest["tb_analyze_interest"]
+    Agg --> Interest
+    Units --> Ph{"hinted stages?"}
+    Ph -->|yes| Hint["tb_phases_from_hint"]
+    Ph -->|no| Det["tb_detect_phases → refine"]
+    Hint --> Stage
+    Det --> Stage["tb_analyze_phase per phase"]
+    Stage --> G["tb_build_group"]
+    Stage --> B["tb_build_bracket"]
+    Stage --> Flat["wildcard / seeding cards"]
+  end
+  subgraph post ["Unhinted repairs"]
+    G --> PP["fold strays, tiebreakers,<br/>group→bracket, merge, seed folds"]
+    B --> PP
+    Flat --> PP
+    PP --> Color["tb_color_group_stages"]
+  end
+```
+
 ## Files (by pipeline stage)
 
 | File | Responsibility |
@@ -88,6 +144,31 @@ Primarily generated live in the web version, but it can be generated and saved i
 4. **structural post-passes** (postpass.php, *skipped when the shape is forced*): `tb_fold_back_strays` then the `tb_pp_*` repairs (promote tiebreakers to a playoff, group→bracket, deciders, merge brackets, fold seed rounds).
 5. `tb_color_group_stages` colors standings by who advanced.
 
+```mermaid
+flowchart TD
+  Ev["event.series"] --> Mode{"mode?"}
+  Mode -->|interest / aggregate| Grid["tb_analyze_interest<br/>month / form grid"]
+  Mode -->|else| Incoh{"incoherent aggregate<br/>and no stages hint?"}
+  Incoh -->|yes| Grid
+  Incoh -->|no| Hint{"config.stages?"}
+  Hint -->|yes| PhH["tb_phases_from_hint"]
+  Hint -->|no| PhD["detect → peel wildcard → refine"]
+  PhH --> Loop["each phase"]
+  PhD --> Loop
+  Loop --> Kind{"phase_type"}
+  Kind -->|group| Gr["tb_build_group"]
+  Kind -->|bracket / play-in| Br["tb_build_bracket"]
+  Kind -->|elim / wildcard / seeding| Cards["flat series cards"]
+  Kind -->|seeding| Seeds["losers → pending LB seeds<br/>for the next bracket"]
+  Gr --> Hinted{"hinted?"}
+  Br --> Hinted
+  Cards --> Hinted
+  Seeds --> Loop
+  Hinted -->|no| PP["tb_fold_back_strays + tb_pp_*"]
+  Hinted -->|yes| Color
+  PP --> Color["tb_color_group_stages"]
+```
+
 ### How tb_detect_phases routes (group vs bracket, where the playoff starts)
 
 Series are first grouped into **temporal rounds** (`tb_temporal_rounds`: by day, splitting on gaps). Then, in order:
@@ -104,10 +185,124 @@ Series are first grouped into **temporal rounds** (`tb_temporal_rounds`: by day,
 
 A phase's `is_elim` flag then decides group vs bracket; `tb_refine_phases` corrects obvious misreads (round-robin coverage, repeated meetings, or genuine ties - which elimination forbids - mark it a group).
 
+```mermaid
+flowchart TD
+  Ser["event series"] --> Rounds["tb_temporal_rounds<br/>by day, split on calendar gaps"]
+  Rounds --> Q{"quick route?"}
+  Q -->|RR then playoff| RR["tb_rr_playoff_split"]
+  Q -->|single round| One{"one connected component?"}
+  One -->|yes| Br1["whole event = bracket"]
+  One -->|no| Gr1["whole event = group"]
+  Q -->|wildcard front| WC["peel wildcard phase"]
+  Q -->|all elimination| Tail["tb_playoff_tail"]
+  Q -->|none| Cand["tb_boundary_candidates<br/>3+ day gap or collapse to one component"]
+  Cand --> Pick["tb_pick_playoff_start<br/>latest candidate whose tail looks like a bracket"]
+  Pick --> Adj["regroup / group-stage front / mid-event cohort"]
+  Adj --> Cut["group_rounds + playoff_rounds"]
+  Cut --> Peel["peel elim rounds off the group back<br/>pull wildcard"]
+  Peel --> Refine["tb_refine_phases"]
+```
+
 ### group vs bracket build
 
 - **group** (`tb_build_group`): standings + `tb_infer_group_format` -- full pairwise coverage -> `round_robin`; no rematches with a handful of games each -> `swiss`/`short_swiss`; else `mixed`.
 - **bracket** (`tb_build_bracket`): assign each series to UB/LB/GF by tracking losses chronologically; teams that open in the lower bracket (TI-style bottom half) are detected (`tb_detect_lb_seeds`) and given a phantom loss; outcomes are repaired for connectivity (tech-loss / orphan-winner).
+
+```mermaid
+flowchart LR
+  subgraph group ["tb_build_group"]
+    GS["standings from series W-D-L"] --> Fmt{"pairwise coverage?"}
+    Fmt -->|full| RR["round_robin"]
+    Fmt -->|no rematches, few games| SW["swiss / short_swiss"]
+    Fmt -->|else| MX["mixed"]
+  end
+  subgraph playoff ["tb_build_bracket"]
+    Chron["series in time order"] --> Loss["track losses per team"]
+    LBSeed["tb_detect_lb_seeds"] --> Phantom["phantom loss for LB openers"]
+    Phantom --> Loss
+    Loss --> Place["0 losses → upper<br/>1 loss → lower<br/>last remaining pair → GF"]
+    Place --> Fix["repair tech-loss / orphan winners"]
+  end
+```
+
+```mermaid
+stateDiagram-v2
+  [*] --> Alive: enter event
+  Alive --> Upper: 0 losses
+  Alive --> Lower: LB seed / first loss
+  Upper --> Lower: lose once
+  Upper --> Champion: win GF still unbeaten
+  Lower --> Eliminated: second loss
+  Lower --> Champion: win GF from lower
+```
+
+## Event split (`tb_split_events`)
+
+A report is often several tournaments glued together. Series are partitioned before any phase work.
+
+```mermaid
+flowchart TD
+  All["all series"] --> Div{"config.divisions?"}
+  Div -->|yes| Forced["tb_divide_series by hint"]
+  Div -->|no| Interest{"teams_interest recap?"}
+  Interest -->|yes, ≥ 4 series| Recap["one interest event"]
+  Interest -->|no| Part["tb_partition_units<br/>then split by lid"]
+  Part --> Name["tb_name_units"]
+  Name --> Grid{"want month grid?"}
+  Grid -->|yes, no stages hint| Agg["aggregate event + aggregate_sub chunks"]
+  Grid -->|no| Named["named sub-events"]
+```
+
+## Output model
+
+Each generated event is a list of **stages**. A stage is either a group table or a playoff tree (or a flat seeding/wildcard card list).
+
+```mermaid
+classDiagram
+  class BracketResult {
+    events : Event[]
+  }
+  class Event {
+    name : string
+    report : tag
+    stages : Stage[]
+    team_cards : map
+  }
+  class GroupStage {
+    type = group_stage
+    phase_type = group
+    groups : Group[]
+    tiebreakers : Series[]?
+    decider : Series[]?
+  }
+  class PlayoffStage {
+    type = playoff
+    phase_type = bracket, seeding_bracket, or elimination_round
+    bracket : Tree
+  }
+  class Tree {
+    type : DE or SE
+    ub_rounds : Round[]
+    lb_rounds : Round[]
+    grand_final : Round?
+    third_place : Round?
+    unplaced : Series[]
+  }
+  class Series {
+    teams : [a, b]
+    score : map
+    winner : teamId?
+    bo : int
+    mids : matchId[]
+    flags : string[]
+  }
+  BracketResult --> Event
+  Event --> GroupStage
+  Event --> PlayoffStage
+  PlayoffStage --> Tree
+  Tree --> Series
+  GroupStage --> Series
+```
 
 ## Format hinting (`report.settings.bracket`)
 
@@ -130,6 +325,17 @@ An ordered array, one entry per phase, each a `{kind, format, teams, groups, unt
 | `none` | | dropped: matching series are excluded from the bracket entirely | |
 
 `format` (`rr`/`swiss` for `group`, `de`/`se` for `bracket`) only affects a `group` phase's inferred format; a `bracket`/`elimination_round`/`seeding_bracket` phase's single/double-elimination shape is still detected from the actual loss pattern, not forced.
+
+```mermaid
+flowchart LR
+  JSON["settings.bracket"] --> Parse["tb_parse_bracket_config"]
+  Parse --> Top["top-level stages / months / overrides"]
+  Parse --> Ev["events: per-sub-event match + stages"]
+  Top --> Apply["tb_config_for_event"]
+  Ev --> Apply
+  Apply --> Hint["tb_phases_from_hint<br/>by dates, or carve auto boundaries"]
+  Apply --> Auto["no stages → full auto-detect"]
+```
 
 Add `until`/`from`/`dates` ("YYYY-MM-DD..YYYY-MM-DD") to any entry to cut strictly by calendar instead of relying on `tb_detect_phases`'s boundary count; `until` is inclusive of that whole day. Mixing dated and un-dated entries in the same `stages` array is not supported -- date every entry, or none of them.
 
