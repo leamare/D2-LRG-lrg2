@@ -30,7 +30,6 @@ function rg_view_generate_heroes_positions() {
   {
     include_once($root."/modules/view/generators/summary.php");
     include_once($root."/modules/view/functions/nw_at.php");
-    include_once($root."/modules/analyzer/__constants/positions.php");
 
     for ($i=1; $i>=0; $i--) {
       for ($j=($i ? 0 : 5); $j<6 && $j>=0; ($i ? $j++ : $j--)) {
@@ -49,7 +48,7 @@ function rg_view_generate_heroes_positions() {
           }
         }
 
-        $role = POSITION_TO_ROLE_MAP[$i][$j] ?? null;
+        $role = role_by_position($i, $j);
         $nw_rows = ($role !== null) ? (rg_nw_bucket('hr')[$role] ?? []) : [];
         $res["position_$i.$j"] = rg_generator_summary(
           "heroes-positions-$i-$j",

@@ -594,16 +594,15 @@ function rg_view_generate_players_profiles() {
 
   if (!empty($report['nw_at']['p'][$player]) || !empty($report['nw_at']['pr'])) {
     include_once($root."/modules/view/functions/nw_at.php");
-    include_once($root."/modules/analyzer/__constants/positions.php");
     $nw_rows = [];
     if (!empty($report['nw_at']['p'][$player]) && is_array($report['nw_at']['p'][$player])) {
       $nw_rows[locale_string("all")] = $report['nw_at']['p'][$player];
     }
     foreach ([1, 2, 3, 4, 5] as $nw_role) {
       $role_vals = $report['nw_at']['pr'][$nw_role][$player] ?? null;
-      if (!is_array($role_vals)) continue;
-      $pos = ROLE_TO_POSITION_MAP[$nw_role];
-      $nw_rows[locale_string("position_".$pos['core'].".".$pos['lane'])] = $role_vals;
+      $pos = ROLES_IDS_SIMPLE[$nw_role] ?? '';
+      if (!is_array($role_vals) || $pos === '') continue;
+      $nw_rows[locale_string("position_".$pos)] = $role_vals;
     }
     $res['playerid'.$player] .= rg_nw_profile_table("player-profile-$player-nw", $nw_rows);
   }

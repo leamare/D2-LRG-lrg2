@@ -65,6 +65,7 @@ public function process() {
   // simple stats
 
   $res['matches_total'] = $context_total_matches;
+  if (!empty($context['nw_adv'])) $res['nw_adv'] = $context['nw_adv'];
 
   if(isset($this->report['teams']))
     $res['teams_on_event'] = $context['main']['teams_on_event'];
@@ -463,6 +464,7 @@ if (is_docs_mode()) {
 
     SchemaRegistry::register('OverviewResult', TypeDefs::obj([
         'matches_total' => TypeDefs::int(),
+        'nw_adv' => TypeDefs::arrayOf(TypeDefs::int()),
         'teams_on_event' => TypeDefs::int(),
         'players_on_event' => TypeDefs::int(),
         'versions' => TypeDefs::arrayOf(TypeDefs::int()),

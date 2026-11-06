@@ -82,6 +82,16 @@ public function process() {
       $keys = array_insert_before($keys, array_search("gpm", $keys), [ 'damage_to_gold_per_min_s' ]);
     }
 
+    $nw_key = $type === 'player' ? 'pr' : 'hr';
+    if (!isset($vars['team']) && !isset($vars['region']) && !empty($report['nw_at'][$nw_key])) {
+      $role = role_by_position((int)$position[0], (int)$position[1]);
+      $nw_rows = ($role !== null) ? ($report['nw_at'][$nw_key][$role] ?? []) : [];
+      foreach ($res as $id => $data) {
+        if (!is_array($data) || !isset($nw_rows[$id])) continue;
+        $res[$id] = array_merge($data, labeled_values($nw_rows[$id], [5, 10, 15, 20], 'nw_'));
+      }
+    }
+
     foreach ($res as $id => $data) {
       $res[$id]['picks_to_median'] = isset($median_picks) ? round($data['matches_s']/$median_picks, 3) : null;
       if ($is_dmg_per_min) {
@@ -111,6 +121,15 @@ public function process() {
         else $res['total'][$id] = $data['matches_s'];
         $pos_summary[$id]['picks_to_median'] = isset($median_picks) ? round($data['matches_s']/$median_picks, 3) : null;
         $matches_by_bucket[$id]["$i.$j"] = $data['matches_s'];
+      }
+      $nw_key = $type === 'player' ? 'pr' : 'hr';
+      if (!isset($vars['team']) && !isset($vars['region']) && !empty($report['nw_at'][$nw_key])) {
+        $role = role_by_position($i, $j);
+        $nw_rows = ($role !== null) ? ($report['nw_at'][$nw_key][$role] ?? []) : [];
+        foreach ($pos_summary as $id => $data) {
+          if (!isset($nw_rows[$id])) continue;
+          $pos_summary[$id] = array_merge($data, labeled_values($nw_rows[$id], [5, 10, 15, 20], 'nw_'));
+        }
       }
       $res["$i.$j"] = $pos_summary;
     }

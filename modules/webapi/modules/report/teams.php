@@ -158,6 +158,9 @@ public function process() {
     }
 
     $res['card'] = team_card($vars['team']);
+    if (!empty($report['teams'][$vars['team']]['nw_adv'])) {
+      $res['nw_adv'] = $report['teams'][$vars['team']]['nw_adv'];
+    }
 
     if (!isset($report['teams'][ $vars['team'] ]['averages']))
       return $res;

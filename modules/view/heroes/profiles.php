@@ -956,16 +956,15 @@ function rg_view_generate_heroes_profiles() {
 
   if (!empty($report['nw_at']['h'][$hero]) || !empty($report['nw_at']['hr'])) {
     include_once($root."/modules/view/functions/nw_at.php");
-    include_once($root."/modules/analyzer/__constants/positions.php");
     $nw_rows = [];
     if (!empty($report['nw_at']['h'][$hero]) && is_array($report['nw_at']['h'][$hero])) {
       $nw_rows[locale_string("all")] = $report['nw_at']['h'][$hero];
     }
     foreach ([1, 2, 3, 4, 5] as $nw_role) {
       $role_vals = $report['nw_at']['hr'][$nw_role][$hero] ?? null;
-      if (!is_array($role_vals)) continue;
-      $pos = ROLE_TO_POSITION_MAP[$nw_role];
-      $nw_rows[locale_string("position_".$pos['core'].".".$pos['lane'])] = $role_vals;
+      $pos = ROLES_IDS_SIMPLE[$nw_role] ?? '';
+      if (!is_array($role_vals) || $pos === '') continue;
+      $nw_rows[locale_string("position_".$pos)] = $role_vals;
     }
     $res['heroid'.$hero] .= rg_nw_profile_table("hero-profile-$hero-nw", $nw_rows);
   }

@@ -210,6 +210,19 @@ const ROLES_IDS_SIMPLE = [
   '0.1',
 ];
 
+function labeled_values(array $values, array $labels, string $prefix = ''): array {
+  $out = [];
+  foreach ($labels as $i => $label) {
+    $out[$prefix.$label] = $values[$i] ?? null;
+  }
+  return $out;
+}
+
+function role_by_position($core, $lane): ?int {
+  $role = array_search($core.'.'.$lane, ROLES_IDS_SIMPLE, true);
+  return $role === false ? null : (int)$role;
+}
+
 if (isset($__lrg_onerror) && !$isApi) {
   $projectName = $projectName ?? "LRG2";
 

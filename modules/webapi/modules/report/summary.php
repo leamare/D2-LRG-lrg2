@@ -53,6 +53,13 @@ public function process() {
     }
     $res = $context['players_summary'];
     $res['__endp'] = "players-summary";
+    if (!isset($vars['region']) && !empty($report['nw_at']['p'])) {
+      foreach ($res as $id => &$entry) {
+        if (!is_numeric($id) || !isset($report['nw_at']['p'][$id])) continue;
+        $entry = array_merge($entry, labeled_values($report['nw_at']['p'][$id], [5, 10, 15, 20], 'nw_'));
+      }
+      unset($entry);
+    }
     if (isset($report['pvp']) && isset($report['players_additional'])) {
       include_once(__DIR__ . "/../../../commons/volatility.php");
       include_once(__DIR__ . "/../../functions/pvp_unwrap_data.php");
@@ -75,6 +82,13 @@ public function process() {
     if (is_wrapped($context['hero_summary'])) $context['hero_summary'] = unwrap_data($context['hero_summary']);
     $res = $context['hero_summary'];
     $res['__endp'] = "heroes-summary";
+    if (!isset($vars['region']) && !empty($report['nw_at']['h'])) {
+      foreach ($res as $id => &$entry) {
+        if (!is_numeric($id) || !isset($report['nw_at']['h'][$id])) continue;
+        $entry = array_merge($entry, labeled_values($report['nw_at']['h'][$id], [5, 10, 15, 20], 'nw_'));
+      }
+      unset($entry);
+    }
     if (isset($report['hvh']) && isset($report['pickban'])) {
       include_once(__DIR__ . "/../../../commons/volatility.php");
       include_once(__DIR__ . "/../../functions/pvp_unwrap_data.php");
