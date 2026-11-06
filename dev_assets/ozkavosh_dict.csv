@@ -1,439 +1,1077 @@
-english_concept,Ozkavosh,notes
-I / self,ozh,"[CANON] first-person pronoun Self (I, me, my, mine, etc)"
-You / him / her,izh,"[CANON] Other person (you, him, her, etc)"
-"Group, they, others",izhai,"[CANON] Group (not gender specific), they"
-"at (location), you (direct, locative)",tho,"[CANON] At (where you currently are, etc), also can be used as a second-person singular"
-They / those,ish,[INVENTED] Third-person plural / those ones.
-demons,Ozkavosh,[CANON] Demons and spirits as a group/species
-this (near demonstrative),sa,"[CANON] Near object(this, etc)"
-that,vu,"[CANON] Far object (that, etc)"
-on (locative / from / at / above),doq,"[CANON] On (upon, on top of, above, etc)"
-closeness marker,do-,[DERIVED] Attached to object or direction marker
-Below / downward,doz,"[CANON] follows the same scheme as doq, basically “attached to below” or being lower"
-Inside / within / contents,don,"[INVENTED] same as doq/doz, “attached to inside”"
-"off (not near, etc)",roq,"[CANON] Off (not near, etc), opposite of doq"
-Un-closeness marker,ro-,"[DERIVED] Detached from object, opposite direction, reverse of do-"
-Outside,ron,[INVENTED] literally opposite of inside
-Behind,dosh,[INVENTED] behind
-not below,roz,"[INVENTED] not below (but not necessarily above or not attached to the object, moving away)"
-forward / upward / ahead,alatho,"[CANON] Forward (ahead, etc) – first vowel acts as time marker"
-Backward / downward / behind,ulatho,"[CANON] Back (backwards, etc)"
-forward motion,ala-,[DERIVED] general forward direction marker
-backward motion,ula-,[DERIVED] general backward direction marker
-negation prefix,vo'-,"[CANON] Negative (modifier for negatives, i.e. not, etc)"
-intensifier / very / extreme,ahm'-,[CANON] Very (modifier for emphasis or severity)
-comparative / more / bigger,ashm,[CANON] More
-Less / lesser / smaller,vom,[CANON] less (negative marker + general size marker ‘m’)
-Now / is / present / to be,acha,"[CANON] Current state of being (am, be, now, etc)"
-Before / was / past / ancient,ucha,"[CANON] Past state of being (was, had been, etc)"
-Will be / could / future / potential,icha,"[CANON] Future state of being (could, will be, etc)"
-Without / empty / void,hollom,"[CANON] Without (nothing, hollow, etc)"
-take / have / for / toward (purpose),tak,"[CANON] Take (have, own, for a person, etc)"
-renewal / return / cycle,wroth,"[CANON] Again (once more, etc)"
-renewal (ongoing state),wrothai,[DERIVED] wroth (cycle/return) + -ai (ongoing-state suffix). 'The state of returning.' Used in items: Wrothai-Kethul = Refresher Orb.
-Part / segment / share,lash,"[CANON] Part (segment, share, etc)"
-entity-of suffix,-osh,"[DERIVED] Core noun-maker suffix: 'the thing that is X'. arkosh = entity-of-mastery (king). ensh'osh = entity-of-knowledge (mage). -osh implies singular, concrete personhood"
-entity-of plural suffix,-oshai,[DERIVED] Plural of -osh. ensh'oshai = mages. Krethum-Ensh'Oshai = ogre-mages. -ai is the standard Ozhkavosh plural/ongoing marker appended
-entity-of abstract / many / plural,-ai,[DERIVED] Ongoing state / plural marker. Works both as plural (izhai=others-plural) and as ongoing-action suffix (wroth-ai = returning state = renewal)
-flow or active process / ongoing action,-zh-,[DERIVED] The zh- interfix creates flow/continuity in a word. Used in fekuizhai: fek+ui+zh+ai = ban+past+flow+plural. Represents the stream or set of completed-then-flowing things.
-past completed state,-ui,"[DERIVED] Suffix marking a past action that is now a permanent/completed state. fek=stop → fekui=was-stopped/banned (the stopped state). Pair with -ai (current state). Etymology: u=settled/done, -i=minimal suffix. 'ui' closes the action into its result."
-future ongoing state,-ii,"[DERIVED] Same rules as -ai and -ui, but using future marker"
-possession/compound marker,-',[CANON] The apostrophe-separator in Ozhkavosh compounds shows tight semantic bonding: ensh'osh = knowing-entity (inseparable). Separate from hyphen (looser compound). ensh'poz = knowledge-power as unified concept.
-hyphen compound,-,[CANON] Looser compound marker. Joins two concepts that remain distinct: Glath-Zhelv = frost-female (two concepts). Skavrath-Droth = storm-spirit (two identities). Hyphen reads left-right: modifier then head.
-to know / to learn / to read,ensh,[CANON] Core knowledge verb. Given in the table. ensh = the act of knowing/learning/reading. All knowledge-words derive from this root.
-noun marker,-at / -it / -ath / -ith / -ut / -uth / -ot / -oth,"[INVENTED] A counterpart to -osh for abstract nouns, also domain indicator"
-instrument suffix,-ast,"[INVENTED] Tool/instrument marker. Used for things that are instruments of perception or action. eyikast = seeing-instrument (lens/eye-tool). vethkast = vision-instrument (ward). vrethkast = hand-strike-instrument (gauntlet). Note: -ath is domain suffix (glath=cold-domain), -ast is tool suffix — keep distinct."
-knowledge (noun),enshat,[DERIVED] ensh (know) + -at (abstract-noun essence marker). enshat = the essence/substance of knowing. Used in Enshat-Gankesh (knowledge-assassin = Templar Assassin).
-come,sek,"[CANON] Come (to self, etc)"
-Move / proceed,thok,"[CANON] Move (go, etc), continue, proceed"
-stop / prevent / silence / ban,fek,"[CANON] Stop (cease, etc), prevent, act of being stopped (banned on draft  in dota context)"
-Hide / hidden / unseen,ses,"[CANON] Hide (unseen, etc) – also phantom, stealth"
-Feel / touch / experience,hahsh,"[CANON] Feel (touch, etc)"
-look at / witness / behold,eyik,"[CANON] Look at (witness, behold, etc)"
-Happiness / positivity / leisure,zomfa,"[CANON] leisure (happiness, positive emotions)"
-Reign / dominion / domination / kingship,domosh,"[CANON] Reign (domination, dominion, kingship, etc)"
-master,arkosh,"[CANON] Master (king, etc.)"
-mastery / lordship / ownership,ark,"[DERIVED] mastery, kingship, lordship, ownership"
-War / battle,voth,"[CANON] Battle, war, also match or competition"
-ban / banned,fekui,"[DERIVED] past of fek, literally “was prevented”"
-bans,fekuizhai,"[DERIVED] plural of fekui, multiple of bans"
-Desirable / delicious / wanted / ideal,hedoq,"[CANON] Desirable (delicious, wanted, etc.), ideal, most wanted"
-Land / earth / ground / kingdom,nith,"[CANON] Land (earth, ground, kingdom, etc)"
-Eat / devour / consume / gluttony,gluth,"[CANON] Eat (devour, consume, etc), gluttony"
-Darkness / dire / hell,omoz,"[CANON] Darkness (abyss, blackness, Hell, etc), also Dire"
-Hope / light / sun / radiant,sol,"[CANON] Hope (light, brightness, the sun, etc), also Radiant"
-Home / sanctuary / safety,nesh,"[CANON] Home (sanctuary, safety, etc)"
-Pain / suffering / wound,safras,"[CANON] Pain (suffer, wound, etc)"
-Spread / widen / open / welcome,groth,"[CANON] Spread (widen, open, welcome, etc)"
-Debt / lack thereof,greesh,"[CANON] Debt (lack thereof, etc)"
-Payment / bounty / gold,lieyev,"[CANON] Payment (gift, tithe, etc), also bounty, wealth, gold"
-time,chron,"[CANON] [Length of] time, general temporal root"
-timeless,vo’chron,[DERIVED] timeless
-minute (time unit),vom’chron,"[DERIVED] minute, literally “lesser time”"
-hour (greater time unit),ahm'chron,[DERIVED] ahm' (greater/bigger prefix) + chron (time). A larger unit of time = hour.
-minute (abbreviation),V’c,"[ABBREVIATION] Short form of Vom'chron (lesser-time). V' from Vom', c from chron."
-GPM abbreviation,V.Vc,"[ABBREVIATION] Vorsh per Vom'chron. V=vorsh (gold/wealth), Vc=vom'chron (minute)."
-XPM abbreviation,E.Vc,"[ABBREVIATION] Ensh per Vom'chron. E=ensh (knowledge/experience), Vc=vom'chron."
-MP abbreviation (median picks),ZV,"[ABBREVIATION] Zushk Veshai. Z=zushk (median), V=vesh (pick). Replaces English MP."
-MB abbreviation (median bans),ZF,"[ABBREVIATION] Zushk Fekuizhai. Z=zushk (median), F=fekui (ban). Replaces English MB."
-WR abbreviation (winrate),T.L,"[ABBREVIATION] Trukuth-Lash. T=trukuth (win), L=lash (rate)"
-KDA abbreviation,S.G.A,"[ABBREVIATION] Shen/Gang/Akshen. S=shen (kill), G=gang (death), A=akshen (assist)"
-featured/highlighted (above-light),Doq-sol,"[COMPOUND] doq (above/at, canonical) + sol (light/hope, canonical). Light-from-above = something highlighted/featured. Used for pinned/featured builds."
-Toys / puppets / amusements,rast,"[CANON] Toys, puppets, amusements, entertainments, etc., also items in dota, artifacts"
-Failure / incomplete / unfinished,miskath,"[CANON] Failure (uncompleted, unfinished, etc)"
-Weakling / peasant,fol,"[CANON] Weakling (whelp, peasant, etc), can also mean creep"
-Power / skill / ability,poz,"[CANON] Power (ability, skill, action currently occuring, etc)"
-Illness / sickness / plague,irush,"[CANON] Illness (common cold, [with modifier] plague, etc)"
-full / complete / entire,zuz,"[INVENTED] Complete, full. Follows a similar structure to doz/roz, but with a “completeness status” marker"
-death / kill,gang,[INVENTED] Terminal/death root. gang = death-event. Gang-Shazeth = Book of the Dead. vo'gang = undying.
-more / excess / again / surplus,vo'gang,[INVENTED] Strictly: vo' (negation) + gang (death) = undying. But contextually: vo'gang = the thing that keeps coming back. Used for 'Undying' hero.
-sum / total / all together,meshfuz,[CANON] Complete sum. Literally “complete number”
-average / mean,fomog,[INVENTED] The middle value / distributed quantity.
-one / alone,ov,"[CANON] one, alone, once, etc"
-two,duv,"[INVENTED] two, second, etc"
-seven,sav,"[CANON] seven, seventh, etc"
-Opener / first,rugh,"[INVENTED] opener, also first, in front of"
-Follower / second,dift,"[INVENTED] follower, coming second, next in line"
-Excrement / waste,kish,"[CANON] Excrement, waste, etc., general disgrace, corruption"
-curse,sof,[CANON] [curses beyond mortal knowledge]
-### HERE START INVENTED AND SPECULATIVE WORDS,,
-spirit / soul / essence,droth,"[INVENTED] Spiritual substance root. dro- (subtle, unseen) + -oth (substance domain)"
-protection / guard,nereth,[INVENTED] Defensive root. Comes from “nesh” as safe space
-shield / defense surface,skarm,[INVENTED] Physical shield. Distinct from groth (conceptual protection). skarm = the blocking surface.
-enchantment / magic-shaping,-shath,[INVENTED] Enchantment suffix. Shath = the applied magic.
-recipe / blueprint,suzm,"[INVENTED] Component-assembly. su- (from sesh=quick-assembly, contracted to su-) + -zm (snap-together cluster). Zm cluster chosen specifically for its harsh, clicking sound, evokes snapping pieces into place."
-normalized / adjusted,thaskum,[INVENTED] Calibrated/normalized. Used in volatility stats.
-correlation / relationship,kotf,[INVENTED] Relational metric. kotf = the connective measure between two variables.
-lane (battlefield),shith,"[INVENTED] Lane, general route"
-protected realm / safe (lane),neresh,"[INVENTED] protected realm, defended place, in lane context – safe lane"
-middle,meza,[INVENTED] mez (mid/center: m=median + ez=equal-point) + a (state suffix)
-hard realm / pain realm / off (lane),safresh,"[INVENTED] safras (pain) with realm ending and a vowel change for distinction, literally “pain realm”"
-roamer,thokur,[DERIVED] thok (move) + ur (agent/doer suffix). Moving-agent = roamer/soft support.
-Forest / jungle,shassh,"[INVENTED] wild, uncontrolled area, jkungle"
-pick (hero selection),vesh,[INVENTED] Selection action. vesh = choose/pick.
-Team / family,drav,[INVENTED] The close group/team/family. Used in Ashm-Drav-Ark (Legion Commander = big-group-master).
-kill,shen,[INVENTED] Kill
-death,gang,[INVENTED] Death
-assist,akshen,"[INVENTED] Assist, supporting action"
-player,murf,[INVENTED] The person who plays. murf = participant/player/guy. Also used generically for person
-knowledge-entity / mage,ensh'osh,"[DERIVED] ensh (know, canonical) + ' (bond marker) + -osh (entity suffix). 'The knowing-entity.'"
-knowledge-power / magic,ensh'poz,"[DERIVED] ensh (know) + ' + poz (power, canonical). 'Knowledge-force' = magic as concept."
-knowledge (noun),enshat,[DERIVED] ensh (know) + -at (abstract-quality marker). enshat = the substance of knowing. Enshat-Gankesh = Templar Assassin (knowledge-assassin). Enshat-Shazeth = Tome of Knowledge.
-spirit-caller / shaman,drothvesh,"[INVENTED] droth (spirit, invented) + vesh (pick/call, canonical). 'One who calls spirits.' Replaces shamang which was too close to English 'shaman'. Omoz-Drothvesh = Shadow Shaman."
-storm / sky-crash,skavrath,"[INVENTED] skav (above-domain root, from skaveth=head-cover) + -rath (crashing force suffix). 'The force that crashes from above.' Replaces stormq (too English). Skavrath-Droth = Storm Spirit."
-wind / outward-flowing-force,ozvel,"[INVENTED] oz- (based on particles meaning outside action) + vel (flowing force, invented). 'Force flowing outward' = wind"
-fire / burning-domain,sorath,"[INVENTED] sor (burn/heat: s=sibilant-heat, or=hot-core) + -ath (domain suffix). 'The burning domain.' Used: Sorath-Droth (Ember Spirit), Sorath-Velosh (Phoenix)."
-frost / cold,glath,"[INVENTED] gl (cold cluster, icy vibes) + -ath (domain). 'The cold domain.' gl- chosen specifically to evoke hardness + smooth ice surface. Glath-Zhelv = Crystal Maiden (frost-female). Glath-Kethul = Orb of Frost."
-water / flowing-substance,velzath,"[INVENTED] vel (flowing force) + -zath (fluid-substance: z=liquid-sibilant, -ath=substance). 'Flowing substance.' Droth'Velzath = Morphling (essence-of-water). Velzath-Poz = Tidehunter (water-force)."
-lizard / scales-crawler,mezrath,"[INVENTED] Lizard. mez (scales: short harsh sound, m=mass, ez=surface texture) + -rath (crawler suffix). 'The scales-crawler.' ahm'mezrath = great-lizard (dragon). Duv'Korn-Mezrath = Jakiro (two-headed-lizard)."
-scorpion / sting-creature,thrask,"[INVENTED] thr (sharp, projecting: thr-cluster evokes piercing) + -ask (tail-end, curved suffix). 'Sting-tail creature.' Thrask-Arkosh = Sand King (Scorpion King). thr- cluster used because scorpion moves with sharp, darting motion."
-sand / fine-earth,rashn,"[INVENTED] rash (fine particles: r=scatter, ash=fine-dry) + -n (earth-ground closure). 'Fine-earth particles.' Replaces zand (too English). Used in context for scorpion's desert theme."
-bear / heavy-furred-creature,gruv,"[INVENTED] gr (heavy, grinding: grakh uses same cluster) + -uv (dense-warm form: u=full, v=soft). 'Heavy and full-bodied.' Short word — bears are elemental, simple. Tornath-Gruv = Ursa (angry-bear). Ov-Gruv-Murf = Lone Druid (bear-person)."
-angry / fierce,tornath,"[INVENTED] tor (sharp reactive force: t=impact, or=hot-core) + -nath (force-domain suffix). 'The sharp-reactive-force domain' = anger/ferocity. Tornath-Gruv = Ursa."
-wolf / howling-beast,vokrath,"[INVENTED] vok (howl: v=voiced, ok=open sudden sound, evokes howl) + -rath (beast). 'The howling-beast.' Vokrath-Murf = Lycan (wolf-man)."
-bird / winged-entity,velosh,"[INVENTED] vel (wing/swift-movement) + -osh (entity). 'Winged entity.' Sorath-Velosh = Phoenix (fire-bird). vel from ozvel (wind = outward-flowing-force) -- same root, wings and wind share the 'flowing outward' quality."
-insect / small-crawler,krethim,"[INVENTED] kreth (crawl: kr=multi-limbed scrabbling, eth=quick) + -im (small diminutive suffix). 'Small crawler.' Chron-Krethim = Weaver (time-bug). im diminutive used because insects are tiny."
-goblin / small-mischief-being,trikoth,"[INVENTED] trik (small troublemaker: tr=quick-dart, ik=quick small) + -oth (entity). 'Small trouble-entity.' Nushk-Gankesh-Trikoth = Timbersaw (tree-killer-goblin). Safrash-Trikothai = Techies (explosion-goblins, trikothai=goblins-plural)."
-ape / monkey / nimble-climber,shakmath,"[INVENTED] shak (nimble: sh=quick-sound, ak=grip-syllable) + -math (actor/one-who-does). 'The nimble-gripping actor.' Shakmath-Ark = Monkey King (ape-lord)."
-squirrel / nimble-tree-creature,velshak,"[INVENTED] vel (swift, from ozvel-wind family) + shak (nimble-grip). 'Swift-nimble creature.' Shassh-Velshak = Hoodwink (forest-squirrel)."
-armadillo / shell-back-creature,skavreth,"[INVENTED] skav (above/shell-covering, from skaveth=helm) + -reth (back-covered creature). 'Shell-backed creature.' Skavreth-Murf = Pangolier (armadillo-guy). skav root repurposed from 'above' to 'shell/cover'"
-poison / toxic-substance,shekath,"[INVENTED] shek (toxic: sh=sibilant-harm, ek=piercing) + -ath (substance domain). 'Toxic substance domain.' Shekath-Ensh'Osh = Venomancer (poison-mage). shek- cluster used because poison is a quiet, sibilant threat."
-vengeance / returning-harm-force,vozmath,"[INVENTED] voz (returning: voz=the motion-back, v=movement, oz=outward-then-back reference) + -math (force). 'The returning force of harm.' Initially derived from wroth, but was deliberately changed"
-fly / sky-bound-state,veldath,"[INVENTED] vel (wing/flight, from vel in velosh/ozvel family) + -dath (bound-state: d=settled, -ath=domain). 'State of being wing-bound to sky.' Veldath-Uchakrav = Gyrocopter (flying-old-man)."
-eat / consume / take-inside,zomvak,"[INVENTED] zom (consume-inward: zo=taking-in, m=mass-absorption) + -vak (action marker). 'Inward-mass-action' = eating. Kish-Zomvak = Pudge (corruption-eater)."
-death-striker / assassin,gankesh,"[INVENTED] gang (death) compressed to gan- + -kesh (striker-actor: k=impact, esh=person-suffix variant). 'Death-striker person.' Ses-Gankesh = Phantom Assassin (hidden death-striker). Enshat-Gankesh = Templar Assassin (knowledge-striker)"
-axe (weapon),gorakh,"[INVENTED] gor (chopping/heavy-strike: g=weight, or=rotational impact) + -akh (metal/mineral guttural ending, cf. grakh). 'Chopping-iron.' Hero Axe = Gorakh, his nickname from the weapon he was named after."
-mechanism / gear-system,gomrath,"[INVENTED] gom (gear/cog: g=grinding, om=rotating mass) + -rath (mechanism/system). 'The gear-mechanism.' Gomrath-Murf = Tinker (mechanism-guy). Gomrathosh = Clockwerk (mechanism-entity, the robot itself)."
-alchemy / element-transformation,alkum,"[INVENTED] al (element: al=base material, elemental root) + -kum (processing/work: k=action, um=transforming). 'Element-processing.' Alkum-Murf = Alchemist. alkum used as proper-noun-adjacent, not too far from 'alchemy' but with Ozkavosh phonology."
-brew / fermented-substance,vuzl,"[INVENTED] vuz (ferment: v=liquid, uz=bubbling) + -l (substance ending). 'Fermented-liquid.' Zomfa-Vuzl-Ark = Brewmaster (delight-brew-master)."
-friend / companion-entity,neshoth,"[DERIVED] nesh (belonging, from nesh'izhai=teammates/belonging-ones) + -oth (entity variant). 'The belonging-entity' = a companion. Neshoth-Droth = Io (friend-spirit)."
-drow-race / underground-folk,drimath,"[INVENTED] dri (underground, dim: dr=down-dark cluster) + -math (actor/person-type). 'Underground-type person.' Used for the Drow race in Drow Ranger: Drimath-Sathosh."
-warrior / combat-entity / knight,sathosh,"[DERIVED] sath (combat: sa=engage, th=force) + -osh (entity). 'Combat-entity.' Used in many hero names: Maskq-Sathosh (Juggernaut), Ozvel-Sathosh (Windranger), Kentar-Sathosh (Centaur Warrunner), Ashm'Mezrath-Sathosh (Dragon Knight)."
-marauder / raid-striker,sathrak,"[DERIVED] sath (combat) + -rak (raid/wreck: r=force, ak=impact-suffix). 'Combat-raider.' Drath-Sathrak = Terrorblade (demon-marauder). Distinct from sathosh (warrior, honorable combat) -- sathrak implies destruction/raiding."
-female,zhelv,"[INVENTED] zh (soft/curved phoneme: zh=voiced palatal, curved like the form) + -elv (graceful form). 'The curved-graceful form.' zhelv sounds soft and distinct from kravesh. Glath-Zhelv = Crystal Maiden. Hollom-Zhelv = Spectre. Vo'Zatar-Zhelv = Death Prophet."
-male,kravesh,"[INVENTED] kr (hard/direct: kr=sharp consonant cluster) + -avesh (standing/upright form: a=open, vesh=standing). 'The hard-upright form.' Counterpart to zhelv. kravesh = male. uchakrav = old-male (krav is short form used in Veldath-Uchakrav = Gyrocopter)."
-maiden / young female,vom'zhelv,[COMPOUND] vom' (lesser/younger prefix) + zhelv (female). 'Lesser female' = young woman. Ahm'Mesht-Vom'Zhelv was considered for Marci but simplified to Ahm'Mesht-Zhelv.
-lady / senior female,ashm'zhelv,[COMPOUND] ashm (comparative-greater) + zhelv (female). 'Greater female' = lady/senior woman.
-tree / wooden-entity root,nushk,"[INVENTED] nu (growing: n=nurture, u=upward) + -shk (hard bark: sh=surface, k=hard closure). 'Growing-bark-thing.' Nushk'Osh = Treant (tree-entity). Nushk-Gankesh-Trikoth = Timbersaw (tree-killer-goblin)."
-orb / power-sphere,kethul,"[INVENTED] keth (power-charge: k=gathered energy, eth=contained) + -ul (round-vessel suffix: u=full, l=smooth). 'Round power-vessel.' Replaces orzh. Ahm'Kethul = Ultimate Orb. Wrothai-Kethul = Refresher Orb. Lotus-Kethul = Lotus Orb."
-tome / mark-vessel (book),shazeth,"[INVENTED] sha (mark-root: sha=written mark, from shask=record) + -zeth (container: z=bound, eth=vessel). 'Vessel of marks.' Replaces tomq. Enshat-Shazeth = Tome of Knowledge. Gang-Shazeth = Book of the Dead."
-relic / time-kept-thing,chronrast,"[COMPOUND] chron (time, persisting through time) + rast (toy, trinket). 'The thing that persisted through time.'"
-scepter / mastery-channel,arkveth,"[COMPOUND] ark (mastery/lordship) + veth (channel: v=directional, eth=conduit). 'Channel of mastery/authority.' Replaces skeptr. Aghanim-Arkveth = Aghanim's Scepter. Droth-Arkveth = Ghost Scepter."
-staff / focus-rod,thurmak,"[INVENTED] thurm (focus-thin: thur=narrow concentration, m=mass-gathered) + -ak (rod suffix: a=open, k=hardclosure = solid rod). 'Focused narrow rod.' Replaces stav. Thurmak-Varlok = Staff of Wizardry. Hollom-Thurmak = Oblivion Staff."
-ring / binding-circle,zheln,"[INVENTED] zh (circle/enclosure phoneme: zh=soft encircling sound) + -eln (binding-form: el=linking, n=closure). 'The encircling bind.' Replaces rinkq. Droth-Zheln = Soul Ring. Arkan-Zheln = Arcane Ring. Tarask-Zheln = Tarrasque Ring."
-wand / focus-channel,thurmath,"[DERIVED] thurm (focus, from thurmak) + -ath (domain/channel). 'Focus-channel.' Shorter/lighter than thurmak (staff) -- a wand is more delicate than a staff. "
-elixir / transform-liquid,molkath,"[INVENTED] mol (liquid-transform: mo=flowing, l=liquid-quality) + -kath (processed-form suffix). 'Transformation-liquid.' "
-ward (observer) / vision-instrument,vethkast,"[COMPOUND] veth (vision-directed: from zetf=vision family, v=visual, eth=out-directed) + -kast (instrument, canonical -ast variant). 'Vision-directing instrument.'"
-scroll / folded-travel-marks,ruvpath,"[INVENTED] ruv (fold/compress: r=rolled, uv=compact) + -path (marked-way: path=route-marks + instrument marker). 'Folded route-marks.'"
-crown / mastery-peak,arkgorn,"[COMPOUND] ark (mastery/lordship) + gorn (peak/top: go=above, rn=peak-closure). G is silent.  'Mastery's peak/top.' Replaces krown. Only one item: Arkgorn = Crown."
-cloak / hide-wear,sesavr,"[DERIVED] ses (stealth/hide, canonical root) + -avr (wearing-form: a=applied, vr=covering motion). 'The worn-concealment.'"
-boots / earth-contact-wear,nithvath,"[COMPOUND] nith (earth/ground, from Earth Spirit hero root) + -vath (contact-wear: v=touching, ath=wear-domain). 'Earth-touching wear.'"
-greaves / inner-leg-wear,donvath,"[COMPOUND] don (inside/within, new spatial word) + -vath (wear-form). 'Inner-leg-wear.' Replaces griavsk. Greaves encase the leg from inside (the inner surface). Groth-Donvath = Guardian Greaves."
-glaive / spinning-blade,sprevlath,"[COMPOUND] spre (spin: spr=spinning motion cluster) + vlath (blade: vl=edge-motion, -ath=domain). 'Spinning-edge.'"
-gauntlet / hand-strike-instrument,vrethkast,"[INVENTED] vreth (hand/grip: vr=grip, eth=extension) + -kast (instrument suffix, -ast variant). 'Hand-strike instrument.'"
-iron / hard-metal,grakh,"[INVENTED] gr (grinding/hard: gr-cluster is established as heavy/hard in Ozhkavosh, cf. gruv=bear/heavy) + -akh (mineral/guttural ending). 'Hard-metal.'"
-helm / head-armor,skaveth,"[DERIVED] skav (above-covering: skav=the root of above-domain, from the concept of covering from above) + -eth (vessel/wear form). 'The thing that covers from above.'"
-armor / body-protection,skorm,"[DERIVED] sk (protective cluster, from skarm=shield, skaveth=helm) + -orm (body-wrap suffix: or=around, m=mass). 'The protective body-wrap.'"
-lens / seeing-instrument,eyikast,"[COMPOUND] eyik (eye/vision, canonical) + -ast (instrument suffix). 'Eye-instrument/seeing-tool.' Initially was eyikath, but it’s more fluent with -ast"
-ogre / brute,krethum,"[INVENTED] kreth (heavy-body: kr=mass-force, eth=thick) + -um (creature-body suffix). 'Heavy-body creature.' Ogre."
-dragon (general word),ashm'mezrath,[COMPOUND] ahm' (intensifier: great/truly) used as ashm' (comparative-great) + mezrath (lizard). 'The great lizard.' Dragon
-demon / dread-being,drath,[INVENTED] Distinct demon root
-undead (state),vo'gang,[CANONICAL-COMPOUND] vo' (negation) + gang (death). 'Not-dead' = undying. Used for Undying hero. For more nuanced undead: Vo'Zatar = not-dead-state (Death Prophet).
-dead-state / death-condition,zatar,"[DERIVED] za (settling-down: z=terminal, a=settling) + -tar (state-marker). 'Settled/terminal state.' Zatar = the state of having died. Zatar-Glath-Murf = Lich (dead-frost-guy). Vo'Zatar = not-dead-state."
-head / core / center,korn,"[INVENTED] kor (core: k=center, or=round-central) + -n (closure). 'The core-center' = head. Duv'Korn-Mezrath = Jakiro (two-headed-lizard). Metaphor: head is the core of the body."
-delight / pleasure / relaxation,zomfa,[CANONICAL] Leisure/happiness root. Zomfa-Nithvath = Tranquil Boots. Zomfa-Vuzl-Ark = Brewmaster (delight-brew-master).
-destroyer / wrecker,vlath,[CANONICAL] Destructive blade root. vlath = blade/destroying edge. sprevlath = spinning-blade (glaive). Droth-Vathesh uses vath variant.
-artist / mark-maker,vathesh,[DERIVED] vath (mark/visual-impression: from vathq=color/mark) + -esh (actor suffix). 'Mark-making actor.' Droth-Vathesh = Grimstroke (spirit-artist).
-volatility / sway,drevath,"[INVENTED] drev (volatile motion: dr=unstable, ev=shifting) + -ath (domain). 'The volatile-motion domain.' Introduced for the volatility metrics system. drevath-kotf = relative volatility."
-advantage,tel,[INVENTED] Edge/advantage metric.
-normalized,thaskum,[INVENTED] Calibrated/adjusted value.
-team composition,kavlesh,[INVENTED] The lineup. kav (lineup/arrangement) + -lesh (form).
-win,trukuth,[INVENTED] Victory.
-lose,vrask,[INVENTED] Loss/defeat-state.
-creep,nuth,"[INVENTED] Non-hero unit, more specific term for a creep"
-courier,sofom,[INVENTED] Transport unit. sofom = the carrying-one.
-tower,tharesh,"[INVENTED] Structure/tower, building"
-fountain,vekask,"[INVENTED] Fountain, restoration point, respawn point"
-roshan,Rozhan,[ADAPTED] Phonological adaptation of the boss monster name.
-experience,mord,"[INVENTED] Accumulated data/experience. While enshat=abstract-knowledge (from ensh), mord=recorded-experience/data. Used in Nith-Enshat (Nature's Prophet) but mord retained for data/metadata contexts."
-hero level,gik,[INVENTED] Level/rank. Gik-N = level-N (tier token). Elevation level.
-mana,ensh,[CANONICAL] The in-game mana resource also referenced as ensh (the knowing-force). Context distinguishes game-mana from the knowledge concept.
-movement speed,Thok-ranzh,[INVENTED] Speed of movement.
-strength,mesht,[INVENTED] Physical strength stat. Ahm'Mesht-Zhelv = Marci (very-strong-female).
-agility,ranzh,[INVENTED] Swiftness stat (same as speed root).
-intelligence,ensh,[INVENTED] Knowledge/intelligence stat.
-magic resistance,Poz-Groth,[COMPOUND] poz (power/magic) + groth (protection). Magic protection.
-milestones / collected time-counts,chron-meshf,"[COMPOUND] chron (time, canonical) + meshf (number/count, from 'meshf doq' = number of). 'Time-numbers' = counted records over time."
-per / each (game),dregros,[INVENTED] dregros = distributive per-unit marker. 'dregros voth' = per game. dreg (distributed) + -ros (unit-pass). Used in stat descriptions: 'kills per minute per game'.
-purchase / buy (item action),thars,[INVENTED] thars = the act of purchasing/acquiring. 'thars chron' = purchase time. 'tharsh' = purchased (past form). Central to all item-timing stats.
-purchased (past),tharush,[DERIVED from thars] thars + -u-h (past-completion). 'Was purchased.' Appears constantly in item build descriptions.
-higher / deeper (comparative),dither,[DERIVED] dither = 'more depth/more' — comparative intensifier. 'dither sesl' = higher rank. 'dither meshf' = higher number. From dith (deep) + -er comparative marker.
-least / lower / fewer,narf,[INVENTED] narf = minimal/least amount. 'narf efkth' = least effective. 'narf mifim' = low bans. Harsh short sound appropriate for 'minimum'.
-available / present,lemz,[INVENTED] lemz = present-and-accessible. 'lemz gok' = available stats. 'iv lemz' = if available. Short final-z closure = definite availability.
-categories (plural),catqai,"[LOANWORD adapted] catqai: 'categories' + Ozhkavosh -ai plural. 'catq' = category, 'catqai' = categories."
-picks (plural),veshai,"[DERIVED] vesh (pick/choose, canonical) + -ai (plural). 'veshai' = picks. 'vrazhai' veshai = heroes' picks."
-pair (of heroes/players),rez,"[INVENTED] rez = a linked-pair/connection. Short, harsh. Used in combo/pair stats: 'vrazh rezs' = hero pairs. 'vosh rezs' = without pairs."
-pair / connection (graph edge),shug,[INVENTED] shug = a graph-edge/connection-point. Distinct from rez (a matched pair). Used in graph descriptions.
-set to / configured at,torthiz,[INVENTED] torthiz = fixed-at/configured. 'torthiz tak %val%' = set to %val%. torth (fix/set) + -iz (at-value marker).
-block / section (major),nezuth,[INVENTED] Structured block/section unit for major UI divisions; aligned with established -th closure morphology.
-rate / frequency of,kuqun,[INVENTED] kuqun = the rate/frequency-of. 'vesh kuqun' = pick rate. 'tharsg kuqun' = purchase rate. ku (measure) + -qun (frequency-form).
-without / absent,vosh,[INVENTED] vosh = lacking/without (distinct from vo'=negation prefix). 'vosh rezs' = without pairs. 'vosh lem' = without detail.
-page / view,mert,"[INVENTED] mert = a display-page/view. 'za mert nethg' = the page shows. Short, functional."
-shows / indicates (implies),lisker,[INVENTED] lisker = implies/indicates a meaning. Softer than nethg. 'lisker vak skugu' = means and shows. lis (signal) + -ker (meaning-carrier).
-include / contains,lishsh,"[INVENTED] lishsh = the act of including/holding. 'lishsh datom' = includes data. The doubled-sh gives a containing, enveloping sound."
-early (timing),ker,[INVENTED] ker = the early/initial period. 'ker morkovai' = early items. 'ker alfq datom' = early alpha data. Q1 timing context.
-amount / small number,amth,[INVENTED] amth = amount/count-of. 'migru amth' = small amount. 'amth doq lemz gok' = amount of available stats.
-deviation (statistical),muvz,[INVENTED] Statistical deviation between expected and actual values; paired with thozich and thov in pair/trio analysis.
-order (sequence),thum,[INVENTED] thum = sequence/order. 'thum doq vrazh' = order of heroes. 'thum thaf' = order swaps. thum = the arranged sequence.
-swap / exchange,thash,"[INVENTED] Swap/exchange action in ordered sequences (e.g., build order swaps)."
-without / if not purchased,thin,[INVENTED] thin = the absent/not-present state. 'morkov thin tharsh' = item not purchased. thi (missing) + -n (state-closure).
-gradient (rate of change),zin,[INVENTED] zin = the rate-of-change/slope. 'neqrk-kotf zin' = winrate gradient. 'zin dregros gask' = per-minute gradient. zi (slope) + -n (continuous marker).
-window (timing range),kuz,[INVENTED] kuz = a window/range. 'chron-kez kuz' = timing window. ku (contained range) + -z (boundary).
-minute (time unit),gask,[INVENTED] gask = one minute of game time. 'dregros gask' = per minute. 'gaskai' = minutes (plural). gas (time-tick) + -k (unit-closure).
-roles / role types,gekeshai,[DERIVED] gekesh (role/position assignment) + -ai (plural). 'fur gekeshai' = for roles. 'desm tak gekeshai' = progression for roles. 'gekesh' = singular role.
-role (singular),gekesh,[INVENTED] gekesh = a role/position-assignment. 'evr gekesh' = every role. ge (assigned) + -kesh (position-actor).
-build (item lineup),larth,[INVENTED] larth = the constructed item-lineup. 'morkov larth' = item build. 'narsq larth' = starting build. larth = the purposeful arrangement.
-timeline / chronological view,chron-voth,[COMPOUND] chron (time) + voth (match/game). 'chron-voth' = the timeline within a match. Used for the build timeline block.
-progression / advancement,desm,[INVENTED] desm = the forward-progression/advancement. 'desm nushk' = progression tree. 'desm fur gekeshai' = progression for roles. des (advance) + -m (motion-mass).
-draft (hero selection process),kith,[INVENTED] Draft process root for pick/ban sequencing; compact form aligned with established consonant closures.
-most / highest,foshk,[INVENTED] foshk = the superlative most/highest. 'foshk shen' = most kills. 'foshk sessh' = most common. fosh (peak) + -k (hard closure).
-minimum / threshold,minth,[INVENTED] minth = minimum threshold. 'minth voth shavz' = minimum match count. min (lower bound) + -th (set-point).
-percentage / share,mors,[INVENTED] mors = the proportional percentage. 'mors doq aktq vothai' = percentage of actual matches. mor (portion) + -s (ratio).
-median / middle value,zushk,[INVENTED] zushk = the median/middle-value. 'zushk vrazh fekuizhai' = median hero bans. 'zushk chron-kez' = median purchase time. zu (middle) + -shk (statistical marker).
-travel/blink (instant move),velthok,"[INVENTED] vel (swift, from established vel- prefix for speed) + thok (move, from canonical thok-ranzh). Compound velthok = swift-move = the act of teleporting/blinking."
-javelin (thrown spear),relvlath,"[COMPOUND] rel (reach/extend-far, new root: r=ranging motion + el=extend) + vlath (blade). A blade that extends far = thrown lance/javelin."
-lance (piercing pole-blade),thruvlath,"[COMPOUND] thru (through, established particle for piercing) + vlath (blade). A blade that goes through = lance/piercing weapon. Used in Dragon Lance, Lance of Pursuit."
-fury/raging force,safrath,"[COMPOUND] safras (pain, canonical) + -th (force suffix). Pain-force = the furious energy of battle-rage. Used in Battle Fury."
-mask (face-cover),zeskav,"[INVENTED] zes (face-surface: z=sharp + es=outer layer) + kav (shade/cover, from kav- shadow roots). Face-shade = a mask. Distinct from maskq (category). Used in Mask of Madness, Juggernaut."
-thorn / spike (sharp protrusion),thilsh,[INVENTED] thilsh = a spike or thorn. thil (sharp-point) + -sh (state-suffix). 'Vloth-Thilsh' = bloodthorn (blood-spike).
-soul vessel / spirit container,droth-keth,[COMPOUND] droth (spirit/soul) + keth (stone/vessel). Soul-container. 'Omoz-Droth-Keth' = Urn of Shadows.
-dissolve/diffuse (cut-transform),molkash,"[COMPOUND] mol (transform/dissolve, from molkath = transform-liquid/elixir) + kash (cut, aggressive action). Dissolving cut = diffusal action. Used in Diffusal Blade."
-many-blade (manta-type),trem-vlath,[COMPOUND] trem (many/multiple) + vlath (blade). Many-blade construct. Used in Manta Style = Trem-Vlath.
-assists (plural),akshenai,[DERIVED] akshen (assist) + -ai (ongoing/plural suffix). Multiple assist actions.
-record/battle-glory (singular),sol-voth,"[COMPOUND] sol (light/glory/sacred, canonical) + voth (battle/war, canonical). Battle-glory = a record/peak achievement. The light shining from battle = what is remembered as best."
-records/battle-glories (plural),sol-vothai,[DERIVED] sol-voth (record) + -ai (plural suffix). Multiple peak records/achievements.
-overview (over-look),doq-eyik,"[COMPOUND] doq (above/over, canonical) + eyik (look/see, canonical). Looking-from-above = overview."
-summary/card (one-look),ov-eyik,"[COMPOUND] ov (one, established) + eyik (look/see, canonical). A single glance = summary/card view. Distinct from doq-eyik (overview) but same metaphorical family."
-other-kinds/mixed,vokai,[INVENTED] vok (different/other: v=variation + ok=type-marker) + -ai (plural). Other-kinds = mixed/miscellaneous category.
-raw playtime (played-time),kruva-chron,"[COMPOUND] kruva (played, established past participle of play) + chron (time, canonical). Played-time = raw/actual duration of play."
-card view (lesser-look),vom'eyik,"[COMPOUND] vom' (lesser, established prefix) + eyik (look/view, canonical). Lesser-look = a compact card view. Distinct from doq-eyik (overview) and ov-eyik (summary)."
-rank (power-grade),pozgorv,"[COMPOUND] poz (power, canonical) + gorv (grade, from gorvq=value/grade). Power-grade = a measured rank of strength/capability."
-stuns (plural),fek-pozai,"[DERIVED] fek-poz (stun: fek=stop + poz=power, established) + -ai (plural). Multiple stop-power effects."
-worst (not-best),vo'hedoq,"[DERIVED] vo' (negation prefix, canonical) + hedoq (best/desired, canonical). Not-desired/not-best = worst."
-singer (song-entity),rashosh,[INVENTED] rash (voice/song: r=resonance + ash=breath/sound) + -osh (entity-of suffix). Entity-of-song = singer. Used in Naga Siren = Naga-Rashosh.
-sacred stone / phylactery,sol-keth,"[COMPOUND] sol (sacred/light, canonical) + keth (stone/crystal: keth=mineral vessel from poz-keth=power mineral/rune). Sacred-stone = a phylactery/magical receptacle."
-objectives/targets (plural),zikrai,"[DERIVED] zikr (target, established from counter-pick target context: zikre=target) + -ai (plural). Multiple targets/objectives to claim in-game."
-tie/draw (equal result),kel,[SIMPLIFIED] Simplified from kelq (kel + q-suffix). User noted trailing q after consonants breaks Ozhkavosh flow. kel = balance/level standing alone.
-performance (achieved-result),driv,[SIMPLIFIED] Simplified from drivq. driv = achieve/accomplish as standalone root. No awkward consonant+q cluster.
-common/frequent (item type),tharsh,[SIMPLIFIED] From tharsq → tharsh. thars (purchased/common) + sh (state/nature suffix). The -sh ending is natural in Ozhkavosh. Common item type = often-purchased items with high pick rate.
-regular/plain/standard (item type),verna,[INVENTED] ver (plain/base: v=basic + er=neutral-ground) + na (state suffix). Plain-state = regular/standard. Used for uncolored/default item category.
-FAQ / frequently asked questions,ofn-zeshqai,"[COMPOUND] ofn (often/frequently, established) + zeshqai (questions: zesh=ask/query + -qai=plural form). Often-questions = FAQ. Literal translation of Frequently Asked Questions."
-the / that (definite article),za,"[INVENTED] Core definite article/demonstrative. 'za voth' = the match. Short, heavy, ubiquitous."
-and (conjunction),vak,[INVENTED] Conjunction linking nouns and clauses. 'veshai vak fekuizhai' = picks and bans.
-with / having (attribute preposition),weth,[INVENTED] Preposition of attribution. 'murf weth 10 trukuth' = player with 10 wins. w=accompaniment + eth=state.
-as well as / also-including,meze,[INVENTED] Additive conjunction including both sides. 'meze X meze Y' = both X and Y. mez=middle + e=connector.
-or (disjunction),ur,[INVENTED] Simple disjunction. 'murf ur drav' = player or team.
-which / that (relative pronoun),thot,[INVENTED] Relative pronoun. 'rastai thot ucha tharsh' = items that were common. th=pointing + ot=referent.
-only / filter (restrictive),ves,"[INVENTED] Restrictive particle limiting scope. 'ves foth shith' = only winning lane. Short, sharp."
-not (standalone negation),vo,[CANONICAL] Standalone negation. Also prefix vo'- (see vo'). 'vo nars rastai' = no starting items.
-shows / represents (display verb),shorg,[INVENTED] Display/representation verb. 'shorg trukuth-lash' = shows winrate. shor=reveal + g=active suffix.
-contains / holds (container verb),mavsh,[INVENTED] Container verb: section/page holds or includes data. Used in explanatory section headers.
-together / jointly (union adverb),ovtho,[INVENTED] Together/combined. 'veshui ovtho' = picked together. ov=one-point + tho=location-merge.
-how / in what way,thav,[INVENTED] Manner interrogative. 'thav ofn' = how often. th=manner + av=query-direction.
-from / based on (source marker),morz,[INVENTED] Source marker: from/based on. Used in descriptive formulas and derivation phrasing.
-this (near demonstrative),zoth,[INVENTED] Near demonstrative. 'zoth fen' = this section. zo=near + th=pointer.
-when / at time of (temporal conditional),wen,[INVENTED] Temporal conditional. 'wen lemz' = when available. w=temporal + en=condition.
-after (temporal sequence),aft,"[INVENTED] After/following. 'aft skasu' = after core items. Short, clean."
-highest / maximum,dith,[INVENTED] Highest/maximum. dith=peak-value. 'dith fomog gorvai' = highest average values.
-hero (game unit),vrazh,[INVENTED] A hero. vrazhai = heroes. vr=force + azh=agent.
-heroes (plural),vrazhai,[DERIVED] vrazh + -ai (plural). Multiple heroes.
-players (plural),murfai,[DERIVED] murf + -ai. Multiple players.
-items (plural),rastai,[DERIVED] rast + -ai (plural). Multiple items.
-stat / data point,gok,[INVENTED] Statistics/data. g=measure + ok=value-point.
-data / information set,datom,[INVENTED] A body of data. dat=data + om=body-of.
-difference / delta measurement,vunz,[INVENTED] Measured difference. Simplified from vunzq. vun=apart + z=end-measurement.
-section / page area,fen,[INVENTED] A content section or page area. fen=enclosed-area.
-route / item path,rer,[INVENTED] An item build path/route. Simplified from rerq. r=route + er=path.
-starting / initial,nars,[INVENTED] Start/beginning state. Simplified from narsq. nar=origin + s=point.
-type / category,mask,[INVENTED] Category/type. Simplified from maskq. Note: distinct from zeskav (face-mask). mask=kind-of.
-all / totality,sam,[INVENTED] All/every/total. Simplified from samq. sam=total-together.
-opponent / adversary,tez,"[INVENTED/DERIVED] tez = opponent/foe/against. Root of tezai (opponents, plural). Used as both noun (enemy) and preposition (against/versus)."
-opponents (plural),tezai,[DERIVED] tez + -ai. Multiple opponents.
-detail / deep analysis,shil,[INVENTED] Detailed analysis. Simplified from shilq. shil=depth-view.
-detailed (adjective form),shilg,[DERIVED] shil + -g (adjective suffix). 'ashm shilg' = more detailed.
-calculated / determined result,thoz,[INVENTED] Result of calculation. Simplified from thozq. th=thought-process + oz=output.
-negative / below-baseline,thun,[INVENTED] Negative/below-expected. Simplified from thunq. th=opposite + un=under.
-actual / real (measured),akth,[INVENTED] The actual measured value. Simplified from aktq. ak=real + th=state.
-value / grade (measurement),gorv,[INVENTED] A measured value or grade. Simplified from gorvq. gor=grade + v=value-marker.
-values (plural),gorvai,[DERIVED] gorv + -ai. Multiple values. 'fomog gorvai' = average values.
-change / shift (action),sifva,[INVENTED] A change/shift. Simplified from sifvq: sif=shift + va=state-change. 'trukuth-lash sifva' = winrate change.
-configured / set state,zetsh,[INVENTED] State of being configured to something. Simplified from zetshq. zetsh=established-state.
-situational (context-dependent),shesh,[INVENTED] Context-dependent/situational. Simplified from shesq. shesh=condition-state.
-specific / particular (trait),ruvash,[INVENTED] Specific/distinctive. ruv=distinct-case + ash=state.
-color / visual mark,vath,[INVENTED] Color/visual distinguisher. From vathq. vath=visual-mark used in graphs.
-logo / symbol,gil,[INVENTED] A visual symbol or logo. From logq. g=graphic + il=image-mark.
-official / sanctioned,ofizh,[ADAPTED] Official/sanctioned. More Ozhkavosh-sounding than ofishq. ofizh=validated.
-ongoing / current state,ach,[INVENTED] Ongoing/current. From achq. ach=continuing. 'ach-voth' = ongoing match.
-upcoming / future,kur,[INVENTED] Future/upcoming. From kurq. kur=forward-time.
-alpha (version label),alfz,[ADAPTED] Alpha version. From alfq. alfz=first-version technical marker.
-beta (version label),beth,[ADAPTED] Beta version. From betq. beth=second-version technical marker.
-date / timestamp,det,[INVENTED] A calendar date. From detq. det=fixed-time-point.
-finished / ended (date),votz,[INVENTED] End date or finished state. From votq. votz=sealed-time-point.
-deny / denied (last hit),des,[INVENTED] A deny in Dota. From desq. des=destruction-denied.
-earned / accumulated (adj),ern,[INVENTED] Earned/accumulated. From ernq. ern=gathered. 'lieyev ern' = gold earned.
-buyback (death-cancel purchase),zams,[INVENTED] A buyback. From zamsq. zams=reverse-death-buy. z=cancel + ams=death-purchase.
-diversity / variety metric,dars,[INVENTED] Hero diversity. From darsq. dars=spread-variety.
-some / certain (indefinite qty),gazl,[INVENTED] Indefinite quantity. From gazlq. gazl=partial-set.
-position / role (game),bov,[INVENTED] Player position. bovai = positions. From bovq. bov=assigned-place.
-positions (plural),bovai,[DERIVED] bov + -ai. Multiple positions.
-threshold / cutoff,shoz,[INVENTED] Threshold/cutoff marker for minimum required values in filtered stats.
-threshold level / percentage cut,shel,[INVENTED] A percentage threshold. From shelq. shel=level-cut.
-things / stuff (general),shoth,[INVENTED] Things/general stuff. sh=thing + oth=body-of.
-table / display layout,fath,[INVENTED] A table or structured display. From fathlarth. fath=structured-display.
-random / varied outcome,glidra,[INVENTED] Random/varied. glidra=varied-distribution.
-title / identifier label,tor,[INVENTED] Title or identifying label. From torq. tor=mark-of-identity.
-error / critical failure state,zokh,[INVENTED] Critical error/failure state marker for fatal-error UI contexts.
-valuable (adjective),zov,[INVENTED] Worth-having. From zovq. zov=worth-having.
-branches / covers (verb),vogs,[INVENTED] Branching/covering. From vogsq. vogs=spread-over.
-talent / skill build path,nuzh,[INVENTED] Talent tree or skill build. From nuzq. nuzh=ability-path.
-explore / view deeply,resh,[INVENTED] Explore or view in detail. From reshq. resh=look-deep.
-map ping / map mark,lavask,[COMPOUND] lavas (map) + k (mark suffix). Map-mark = a click-ping on the map.
-undefined / not-labeled,vo'tor,[COMPOUND] vo' (negation) + tor (label). Not-titled = undefined. Technical UI term.
-winrate,trukuth-lash,[COMPOUND] trukuth (win) + lash (rate/proportion). Proportion of wins.
-winrate abbreviation (TR),TR,[ABBREVIATION] TRukuth-lash. First two letters of win-rate word.
-rune (power mineral),poz-keth,"[COMPOUND] poz (power, canonical) + keth (stone/mineral). Power-mineral = rune."
-healing (restore HP),desh,[INVENTED] Heal/healing. desh=restore.
-tower (structure),lozth,[INVENTED] A tower/building. lozth=fixed-structure.
-item timing (when bought),chron-kez,[COMPOUND] chron (time) + kez (point/mark). Time-point = the minute an item was bought.
-stage / phase of game,thoklash,[COMPOUND] thok (move) + lash (part/rate). Moving-portion = a game phase.
-series (chain of matches),zhai'voth,[COMPOUND] zhai (chain/sequence: zh=linked + ai=flow) + voth (match). Chain-of-battles = series.
-neutral / no-lane,hollom-shith,[COMPOUND] hollom (without) + shith (lane). No-lane position = neutral/jungle.
-enchantment (neutral item),poz-rast,[COMPOUND] poz (power/magic) + rast (item). Magic-item = enchantment.
-stun (stop-power effect),fek-poz,[COMPOUND] fek (stop) + poz (power). Stop-power = a stun.
-server ping / latency,sek-chron,[COMPOUND] sek (signal arrival) + chron (time). Signal-time = server latency ping.
-facet / choice node,muz,[INVENTED] A hero facet/choice point. muz=choice-point.
-consumable (temp item),tiv,[INVENTED] Consumable-item root. Used for temporary single-use items and consumable item blocks.
-core / essential items,sirirth,[INVENTED] Core/essential. sir=essential + irth=foundation.
-map (game map),lavas,[INVENTED] The game map. lavas=terrain-overview.
-safe lane (pos 1),sesk-shith,[COMPOUND] sesk (safe/sheltered) + shith (lane). Safe-lane = carry position.
-mid lane (pos 2),meza-shith,[COMPOUND] meza (middle) + shith (lane). Middle-lane.
-hard/off lane (pos 3),drukh-shith,[COMPOUND] drukh (hard/harsh: dr-force + ukh-rough) + shith (lane).
-roaming lane (pos 4),thokur-shith,[COMPOUND] thokur (mover/roamer: thok=move + ur=agent) + shith (lane).
-forest/jungle lane (pos 5),grumash-shith,[COMPOUND] grumash (forest: grum=vegetation + ash=expanse) + shith.
-radiant faction,sol-nith,[COMPOUND] sol (light/radiant) + nith (force/side). Light-force = Radiant.
-dire faction,omoz-nith,[COMPOUND] omoz (darkness) + nith (force/side). Dark-force = Dire.
-FAQ abbreviation,O.Zh,"[ABBREVIATION] Ofn Zeshqai = Frequently Asked Questions. O=Ofn (often), Zh=Zeshqai (questions)."
-bread / baked-grain,vrumkast,[INVENTED] Bread. vrum=grain-dense + kast=formed-object. A dense grain-formed thing.
-meat bun / kill-bread,shen-vrumkast,[COMPOUND] shen (kill) + vrumkast (bread). Kill-bread = bun with meat. Metaphorical: the bread that contains the kill.
-comparison (measure against),ashm-thask,[COMPOUND] ashm (comparative bigger) + thask (measure). Comparative-measure = comparison.
-patch / game version,galo,[INVENTED] Game version/patch. gal=revision + o=state.
-support (role),lefs,[INVENTED] Support role. lefs=sustain-function.
-raw / unprocessed (adj),rav,[INVENTED] Raw/unprocessed data. Simplified from ravq. rav=unrefined.
-increase / go up,foth,[INVENTED] Positive increase. foth=rise-state. 'ves foth shith' = only positive lane.
-decrease / go down,shild,[INVENTED] Decrease/downward shift. Paired with foth (increase/upward shift).
-strength (stat),krath,[INVENTED] Strength stat. krath=physical-force.
-intelligence (stat),ensh-poz,[COMPOUND] ensh (knowledge) + poz (power). Knowledge-power = intelligence stat.
-elixir / transform-liquid,mol-tiv,[COMPOUND] mol (transform/liquid) + tiv (consumable). Liquid-consumable = elixir.
-blink dagger (item),velthok-vlath,[COMPOUND] velthok (blink) + vlath (blade). Travel-blade = Blink Dagger.
-arcane blink (item),arkan-velthok,[COMPOUND] arkan (arcane/knowledge-power) + velthok (blink). Knowledge-blink = Arcane Blink.
-swift blink (item),ranzh-velthok,[COMPOUND] ranzh (speed/velocity) + velthok (blink). Speed-blink = Swift Blink.
-overwhelming blink (item),ahm'velthok,[COMPOUND] ahm' (maximum intensifier) + velthok (blink). Maximum-blink = Overwhelming Blink.
-battle fury (raging force),voth-safrath,[COMPOUND] voth (battle) + safrath (fury/force: safras+th). Battle-fury = Battle Fury.
-blood / vitality element,vloth,[INVENTED] Blood/life-fluid element. vloth=life-fluid. Bloodthorn = Vloth-Thilq.
-diffusal blade (item),molkash-vlath,[COMPOUND] molkash (dissolve-cut) + vlath (blade). Dissolving-cut-blade = Diffusal Blade.
-vanguard (big shield),ashm'skarm,[COMPOUND] ashm' (bigger) + skarm (shield). Big-shield = Vanguard.
-power treads (big boots),poz-ashm'nithvath,[COMPOUND] poz (power) + ashm' (bigger) + nithvath (boots). Power-big-boots = Power Treads.
-assault cuirass (battle armor),sath-skorm,[COMPOUND] sath (assault/battle-intensity) + skorm (body armor). Battle-armor = Assault Cuirass.
-assault / battle intensity,sath,[INVENTED] Combat intensity/assault. sath=combat-intensity.
-anti / against prefix,vo',[CANONICAL] Negation prefix. Anti-Mage = Vo'Ensh'Osh.
-scorpion king compound,thrask-arkosh,[COMPOUND] thrask (sand/scorpion) + arkosh (king-entity). Sand King.
-demon / demon being,ozka,[CANONICAL] Demon. The Ozhkavosh word for demonic entity. Canonical.
-two (number),duvath,[INVENTED] The number two. duv=dual + ath=count. Jakiro = Duvath-Ashm'Mezrath.
-corruption / decay (element),dekrath,[INVENTED] Corruption/decay. dekr=decay-force + ath=state. Pugna = corruption mage.
-undead / death-touched state,irushkai,[DERIVED] irushkai = undead-state. irush (illness/death-sickness) + -ai (state-of-being). Used in hero names (Irushaiosh = Necrophos). Also used as Lore term for the undead in general.
-song / singing action,rash,[INVENTED] Song/singing. rash=resonant-voice. rashosh = singer-entity.
-bottle / liquid-container (general),molkast,"[COMPOUND] mol (liquid/fluid, from mol=dissolve/flow root) + kast (formed-object, instrument suffix). Liquid-container = bottle/flask. Used for the Bottle item and any flask-type vessel. Distinct from kethul (orb/spherical vessel) and droth-keth (soul-vessel/urn)."
-healing ointment / salve (applied liquid),desh-molkath,"[COMPOUND] desh (heal/restore) + molkath (flowing-cover, from mol=flowing + kath=cover — established for cloak). Flowing-healing-cover = a salve or ointment applied to the surface. Healing Salve = Desh-Molkath."
-wrap / band (flexible covering),vreth,"[INVENTED] A wrap, band, or flexible covering. vreth=wrap/bind. Used in: sol-vreth (consecrated-wraps), krav-vreth (bracer = arm-wrap), omoz-vreth (wraith band = shadow-wrap). vr=binding-motion + eth=formed-state."
-wraith band / shadow-wrap,omoz-vreth,"[COMPOUND] omoz (shadow/dark, canonical) + vreth (wrap/band). Shadow-wrap = Wraith Band. The shadow-spirit energy bound into a wristband."
-amulet / protective charm,amul,"[ADAPTED] Phonological simplification of the amulet concept. amul=charm-object. Used in: nushk-amul (Null Talisman), omoz-amul (Shadow Amulet). The protective charm worn on the body."
-null / void (absence state),holv,"[INVENTED] null/void — the state of absolute emptiness. From hollom (without/exclusion, established) root hol=hollow/empty + v=state-end. Short, final-sounding. Paired with hollom for stronger: hollom=without-something, holv=total-void. Used in: Holv-Vom'Rast (Null Talisman), Holv-Grakh (Nullifier)."
-trinket / small worn item,vom'rast,"[COMPOUND] vom' (lesser prefix, established) + rast (item/toy, established). Lesser-item = trinket. Small wearable accessory/charm. Distinct from amul (amulet = protective charm worn with intent), vom'rast = small decorative/functional item. Used in: Holv-Vom'Rast (Null Talisman), Ses-Vom'Rast (Talisman of Evasion)."
-null talisman (void-trinket),holv-vom'rast,[COMPOUND] holv (null/void) + vom'rast (trinket/small-item). Void-trinket = Null Talisman. The small charm that channels void/null energy to reduce magical resonance.
-nullifier (void-iron),holv-grakh,"[COMPOUND] holv (null/void) + grakh (iron/metal, established). Void-iron = Nullifier. The iron weapon that channels void to stop and nullify escape abilities — heavy, canceling, absolute."
-emblem / mark / badge (worn distinction),gilath,"[COMPOUND] gil (mark/image, from logo=gil root) + ath (formed-state). A mark or emblem of distinction. Used in: Nith-Velzath-Gilath (Partisan's Brand = faction-fire-mark), Poz-Gilath (Medallion of Courage = power-emblem), Sol-Gilath (Solar Crest = sacred-emblem)."
-vapor / mist / cloud (gaseous state),vapth,"[INVENTED] vap (gaseous/dispersed: v=dispersal + ap=air-particle) + th (state suffix). A vapor, mist, or cloud. Used in: Omoz-Vapth (Smoke of Deceit = shadow-vapor). Distinct from mol (liquid-flowing) — vapth is gaseous dispersal."
-falling stone / meteor,doz-keth,"[COMPOUND] doz (below/descent, canonical) + keth (stone/mineral, established). Below-stone = a stone descending = meteor. Used in: Doz-Keth-Grakh (Meteor Hammer = falling-stone-iron)."
-skull (head-stone),skav-keth,"[COMPOUND] skav (head-surface, root of skaveth=helmet) + keth (stone/mineral). Head-stone = skull. The hard bone-plate of the head. Used in: Skav-Keth-Sath (Skull Basher = skull-combat)."
-slippers / lesser boots,vom'nithvath,"[COMPOUND] vom' (lesser prefix, established) + nithvath (boots, established). Lesser-boots = light footwear/slippers. Used in: Ranzh-Vom'Nithvath (Slippers of Agility = agility-lesser-boots)."
-shadow-vapor / smoke of concealment,omoz-vapth,"[COMPOUND] omoz (shadow/dark/deception, established) + vapth (vapor/cloud). Shadow-vapor = concealment smoke. Smoke of Deceit = Omoz-Vapth. The dark cloud that deceives and hides."
-meteor hammer (falling-stone-iron),doz-keth-grakh,[COMPOUND] doz-keth (falling-stone/meteor) + grakh (iron/metal). Falling-stone-iron = Meteor Hammer. The iron weapon that falls like a meteor to stun.
-medallion / power-emblem,poz-gilath,[COMPOUND] poz (power/courage) + gilath (emblem/mark). Power-emblem = Medallion of Courage. A badge of power and bravery.
-magic-speed orb (octarine core),ensh-ranzh-kethul,[COMPOUND] ensh (magic/knowledge/spell) + ranzh (speed/velocity) + kethul (orb/vessel). Magic-speed-orb = Octarine Core. The orb that accelerates spell casting and reduces cooldowns.
-skull-combat (skull basher),skav-keth-sath,[COMPOUND] skav-keth (skull = head-stone) + sath (combat-intensity). Skull-combat-intensity = Skull Basher. The weapon of skull-crushing combat force.
-solar emblem / sacred crest,sol-gilath,"[COMPOUND] sol (sacred/light/radiant, canonical) + gilath (emblem/mark). Sacred-emblem = Solar Crest. The radiant badge that bestows divine protection."
-diadem / sacred-peak crown,Sol-Gorn,"[COMPOUND] sol (sacred/light/radiant, canonical) + gorn (peak/top, from arkgorn=Crown). Sacred-peak = diadem. Contrast with Arkgorn (mastery-peak = Crown) — where Crown is authority, Diadem is radiance. Neutral item granting all stats."
-spectral / ethereal-void (adjective),Hol'ethiresh,"[COMPOUND] hol (void, short for hollom) + ethir (ethereal quality) + -esh (adjective suffix) = 'of void-ethereal nature.' Brand name for Spectral.gg."
-ethereal / ghost-quality (adjective component),ethir,"[INVENTED ROOT] The ethereal quality; relates to ghost-light, immaterial essence as an adjective quality. Distinct from drezath (ethereal-essence as a noun/substance, used in items like Aether Lens). ethir = the quality, drezath = the material."
-hub / gathering-center,gliskesk,[INVENTED] glis (flow/gathering) + kesk (fixed-center structure) = gathering-center. Used for 'Spectral Stats Hub'.
-professional / skilled (long-form root),hedoqesh,[DERIVED] hedoqesh = full form of hesh. hedoq (desirable/best) + -esh (adjective-suffix). The root from which 'hesh' derives. Hesh is the short practical form used in UI.
-month / moon-cycle (time unit),wroth-chron,"[COMPOUND] wroth (canonical: the going-again, returning motion = cycle) + chron (time) = cycle-time = month. Fits the chron-based time system: vom'chron=minute, wroth-chron=month."
-ranked / competitive-grade (adjective),saz,"[INVENTED] saz = graded/ranked by merit. Used consistently for 'Ranked' mode in Dota 2 (Ranked matches, Ranked stats)."
-report / compiled document,vorsk,"[INVENTED] vorsk = a compiled, structured record of events. vors=gather-record + k=finalized. Plural: vorskai."
-reports (plural),vorskai,[DERIVED] vorsk (report) + -ai (plural suffix) = compiled reports. Follows standard Ozhkavosh plural convention.
-notice / alert / warning,vask,"[INVENTED] vask = a short warning or data-quality alert. Short, harsh consonant cluster."
-tag / short label / identifier,shriv,[INVENTED] shriv = a compact identifier or label. shr- consonant cluster (Ozhkavosh-style) + -iv ending. Used for league tags and team tags.
-count / number / score,thov,"[INVENTED] thov = count/number. Short single-syllable word, ends in v. Used for 'number of X', milestones (chron-thov = time-counts)."
-over / above (spatial relational),doq,[CANONICAL] Uses established doq (above/over) for spatial relation; shared with hover-over and overview contexts.
-hover / inspect (interactive action),shov,[INVENTED] shov = hover or interactive inspect action. Used as 'shov vosf' = 'hover over' (UI interaction). Related form: shovz (hover-action ongoing).
-list / sequence,sash,"[INVENTED] sash = a list or ordered sequence. Used for 'Reports List' (Vorskai sash), 'Categories List' (Catqai sash). Short and clean."
-donations / act of giving,lefth,[INVENTED] lef (give/offer freely) + th (act/result) = act of giving. Used for 'Donations' and 'Donations this month' (Lefth zoth wroth-chron).
-league / competition / battle-group,rashk,[INVENTED] rashk = structured competition group. rash (battle-form) + k (finalized-structure). 'Group of structured battles' = tournament/league. Plural: rashkai.
-leagues (plural),rashkai,[DERIVED] rashk (league) + -ai (plural suffix). Follows standard Ozhkavosh plural convention.
-pro / professional (short adjective),hesh,[SHORT FORM] Abbreviated form of hedoqesh (hedoq=best + esh=adj). Used as the practical 'pro' label. shosiz-hesh = semi-pro. Full form: hedoqesh.
-ally / comrade (individual),kesh,"[INVENTED] kesh = ally/comrade in battle. Harsh consonant-closed syllable, Ozhkavosh-style. Root for keshai (allies plural)."
-allies / combos (plural),keshai,"[DERIVED] kesh (ally) + -ai (plural suffix) = allies/comrades. Used for 'Combos' (hero/player ally groupings), Lane Combos (Shith keshai), Full hero combinations (keshai gok)."
-pairs / duos (plural of two),duvai,"[DERIVED] duv (two, canonical in Jakiro=Duv'Korn-Mezrath) + -ai (plural suffix) = twos/pairs. Used for 'Pairs' section (hero and player pair statistics). Singular pair: duv-osh or just duv context."
-description / explanation,tharv,[INVENTED] tharv = a textual description or explanation. thar (explain/describe-root) + v (output/result). Used as UI label for 'Description' fields. Distinct from nesh (name) and eyik (view).
-expected / projected (calculated-forward),thozich,[INVENTED] thozich = expected/projected value. thoz (calculated result) + ich (from icha = forward-potential). 'thozich thov' = expected count.
-but / however / yet (contrastive connector),suq,"[INVENTED] suq = contrastive pivot conjunction. su (continuation-flow) + q (pivot-closure) = 'continuation that pivots' = but/however. 'X vak Y, suq Z' = X and Y, but Z."
+english_concept,Rework,Ozkavosh,type,domain,notes
+I / self,,ozh,pronoun,basic,"[CANON] first-person pronoun Self (I, me, my, mine, etc)"
+You / him / her,,izh,pronoun,basic,"[CANON] Other person (you, him, her, etc)"
+"Group, they, others",,izhai,pronoun,basic,"[CANON] Group (not gender specific), they"
+"at (location), you (direct, locative)",,tho,preposition,basic,"[CANON] At (where you currently are, etc), also can be used as a second-person singular"
+They / those,,ish,pronoun,basic,[INVENTED] Third-person plural / those ones.
+demons,,Ozkavosh,name/race,races,[CANON] Demons and spirits as a group/species
+this (near demonstrative),,sa,determiner,basic,"[CANON] Near object(this, etc)"
+That / which,,vu,determiner,basic,"[CANON] Far object (that, etc)"
+on (locative / from / at / above) / based on,,doq,preposition,basic,"[CANON] On (upon, on top of, above, etc)"
+closeness marker,,do-,root,basic,[DERIVED] Attached to object or direction marker
+Below / downward,,doz,preposition,basic,"[CANON] follows the same scheme as doq, basically “attached to below” or being lower"
+Inside / within / contents,,don,preposition,basic,"[INVENTED] same as doq/doz, “attached to inside”"
+"off (not near, etc)",,roq,preposition,basic,"[CANON] Off (not near, etc), opposite of doq"
+Un-closeness marker,,ro-,root,basic,"[DERIVED] Detached from object, opposite direction, reverse of do-"
+Outside,,ron,preposition,basic,[INVENTED] literally opposite of inside
+Behind,,dosh,preposition,basic,[INVENTED] behind
+not below,,roz,preposition,basic,"[INVENTED] not below (but not necessarily above or not attached to the object, moving away)"
+forward / upward / ahead,,alatho,direction,basic,"[CANON] Forward (ahead, etc) – first vowel acts as time marker"
+Backward / downward / behind,,ulatho,direction,basic,"[CANON] Back (backwards, etc)"
+forward motion,,ala-,root,basic,[DERIVED] general forward direction marker
+backward motion,,ula-,root,basic,[DERIVED] general backward direction marker
+negation prefix,,vo'-,affix,basic,"[CANON] Negative (modifier for negatives, i.e. not, etc)"
+intensifier / very / extreme,,ahm'-,affix,basic,[CANON] Very (modifier for emphasis or severity)
+comparative / more / bigger,,ashm,adjective,basic,[CANON] More
+Less / lesser / smaller,,vom,adjective,basic,[CANON] less (negative marker + general size marker ‘m’)
+Now / is / present / to be,,acha,verb,basic,"[CANON] Current state of being (am, be, now, etc)"
+Before / was / past / ancient,,ucha,verb,basic,"[CANON] Past state of being (was, had been, etc)"
+Will be / could / future / potential / after,,icha,verb,basic,"[CANON] Future state of being (could, will be, etc)"
+Ever / untimed,,’cha,verb/affix,basic,"[DERIVED] untimed marker, anytime/everytime, ever"
+Without / empty / void,,hollom,adjective,basic,"[CANON] Without (nothing, hollow, etc)"
+Empty / none / not,,holm,adjective,basic,[DERIVED] shorthand version of hollom
+take / have / for / toward (purpose),,tak,verb,basic,"[CANON] Take (have, own, for a person, etc)"
+give away,,rak,verb,basic,"[INVENTED] Give (share, have something move towards self), derived from “tak” + reverse marker “ro-” "
+Face / front side / against,,dok,noun,basic,[INVENTED] using do- as noun self marker and -ak as forward action
+renewal / return / cycle / rebirth,,wroth,noun,basic,"[CANON] Again (once more, etc)"
+renewal (ongoing state),,wrothai,noun,basic,[DERIVED] wroth (cycle/return) + -ai (ongoing-state suffix). 'The state of returning.' Used in items: Wrothai-Kethul = Refresher Orb.
+Part / segment / share / rate,,lash,noun,basic,"[CANON] Part (segment, share, etc)"
+repeating marker,,wr-,affix,basic,[DERIVED] repeating action marker
+entity-of suffix,,-osh,affix,basic,"[DERIVED] Core noun-maker suffix: 'the thing that is X'. arkosh = entity-of-mastery (king). ensh'osh = entity-of-knowledge (mage). -osh implies singular, concrete personhood"
+entity-of plural suffix,,-oshai,affix,basic,[DERIVED] Plural of -osh. ensh'oshai = mages. Krethum-Ensh'Oshai = ogre-mages. -ai is the standard Ozhkavosh plural/ongoing marker appended
+entity-of abstract / many / plural,,-ai,affix,basic,[DERIVED] Ongoing state / plural marker. Works both as plural (izhai=others-plural) and as ongoing-action suffix (wroth-ai = returning state = renewal)
+flow or active process / ongoing action,,-zh-,affix,basic,[DERIVED] The zh- interfix creates flow/continuity in a word. Used in fekuizhai: fek+ui+zh+ai = ban+past+flow+plural. Represents the stream or set of completed-then-flowing things.
+past completed state,,-ui,affix,basic,"[DERIVED] Suffix marking a past action that is now a permanent/completed state. fek=stop → fekui=was-stopped/banned (the stopped state). Pair with -ai (current state). Etymology: u=settled/done, -i=minimal suffix. 'ui' closes the action into its result."
+future ongoing state,,-ii,affix,basic,"[DERIVED] Same rules as -ai and -ui, but using future marker"
+possession/compound marker,,-',affix,basic,[CANON] The apostrophe-separator in Ozhkavosh compounds shows tight semantic bonding: ensh'osh = knowing-entity (inseparable). Separate from hyphen (looser compound). ensh'poz = knowledge-power as unified concept.
+hyphen compound,,-,affix,basic,[CANON] Looser compound marker. Joins two concepts that remain distinct: Glath-Zhelv = frost-female (two concepts). Skavrath-Droth = storm-spirit (two identities). Hyphen reads left-right: modifier then head.
+to know / to learn / to read,,ensh,verb/noun,actions,[CANON] Core knowledge verb. Given in the table. ensh = the act of knowing/learning/reading. All knowledge-words derive from this root.
+noun marker,,-at / -it / -ath / -ith / -ut / -uth / -ot / -oth,affix,basic,"[INVENTED] A counterpart to -osh for abstract nouns, also domain indicator"
+instrument suffix,,-ast,affix,basic,[INVENTED] Tool/instrument marker. Used for things that are instruments of perception or action. eyikast = seeing-instrument (lens/eye-tool)
+knowledge (noun) / intelligence,,enshat,noun,actions,[DERIVED] ensh (know) + -at (abstract-noun essence marker). enshat = the essence/substance of knowing. Used in Enshat-Gankesh (knowledge-assassin = Templar Assassin).
+come,,sek,verb,actions,"[CANON] Come (to self, etc)"
+Relative / comparison,,ashamath,noun,actions,[INVENTED] based of “ashm” as general comparative + “-ath” as noun marker + “-a-” marking as present time.
+Move / proceed,,thok,verb,actions,"[CANON] Move (go, etc), continue, proceed"
+stop / prevent / silence / ban,,fek,verb/noun,actions,"[CANON] Stop (cease, etc), prevent, act of being stopped (banned on draft  in dota context)"
+Hide / hidden / unseen,,ses,verb/noun,actions,"[CANON] Hide (unseen, etc) – also phantom, stealth"
+Feel / touch / experience,,hahsh,verb/noun,actions,"[CANON] Feel (touch, etc)"
+look at / witness / behold / sight (as a noun),,eyik,verb/noun,actions,"[CANON] Look at (witness, behold, etc)"
+Happiness / positivity / leisure,,zomfa,noun,state,"[CANON] leisure (happiness, positive emotions)"
+Reign / dominion / domination / kingship,,domosh,noun,state,"[CANON] Reign (domination, dominion, kingship, etc)"
+master,,arkosh,noun,state,"[CANON] Master (king, etc.)"
+mastery / lordship / ownership,,ark,noun,generic,"[DERIVED] mastery, kingship, lordship, ownership"
+War / battle,,voth,noun,world,"[CANON] Battle, war, also match or competition"
+ban / banned,,fekui,noun,generic,"[DERIVED] past of fek, literally “was prevented”"
+bans,,fekuizhai,noun,generic,"[DERIVED] plural of fekui, multiple of bans"
+Desirable / delicious / wanted / ideal,,hedoq,adjective,state,"[CANON] Desirable (delicious, wanted, etc.), ideal, most wanted"
+Appeal / desire in general,,he,root,generic,"[DERIVED] considering “doq” meaning upward/above, the other part of “hedoq” could be seen as a general “appeal” root"
+Land / earth / ground / kingdom,,nith,noun,generic,"[CANON] Land (earth, ground, kingdom, etc)"
+Eat / devour / consume / gluttony,,gluth,verb/noun,actions,"[CANON] Eat (devour, consume, etc), gluttony"
+Darkness / dire / hell,,omoz,noun,generic,"[CANON] Darkness (abyss, blackness, Hell, etc), also Dire"
+Hope / light / sun / radiant,,sol,noun,generic,"[CANON] Hope (light, brightness, the sun, etc), also Radiant"
+Home / sanctuary / safety,,nesh,noun,generic,"[CANON] Home (sanctuary, safety, etc)"
+Pain / suffering / wound,,safras,noun,generic,"[CANON] Pain (suffer, wound, etc)"
+Spread / widen / open / welcome / growth / build,,groth,verb/noun,generic,"[CANON] Spread (widen, open, welcome, etc)"
+Create / manufacture / craft,,girith,verb,generic,"[INVENTED] if “gluth” can be seen as matter destruction, and “groth” as spread/build, creating something small could be g+consonant+future+th → r fits the best because it’s used with items/give, even if “gr-” is a bit overloaded. I settled on “girith” – two future markers to make the word stand out"
+Change / shift,,chroth,verb/noun,actions,"[INVENTED] same logic as wroth/groth → with “w” being return marker and “g” being consume marker, “ch” coming from “acha/chron” is a good “change/existence” marker"
+Disappear / end,,hroth,verb/noun,actions,[INVENTED] ...and “h” coming from hollom
+Debt / lack thereof / loan,,greesh,noun,generic,"[CANON] Debt (lack thereof, etc)"
+Payment / bounty / gold,,lieyev,noun,generic,"[CANON] Payment (gift, tithe, etc), also bounty, wealth, gold"
+time,,chron,noun,time,"[CANON] [Length of] time, general temporal root"
+timeless,,vo’chron,adjective,time,[DERIVED] timeless
+minute (time unit),,vom’chron,noun,time,"[DERIVED] minute, literally “lesser time”"
+hour (greater time unit),,ahm'chron,noun,time,[DERIVED] ahm' (greater/bigger prefix) + chron (time). A larger unit of time = hour.
+minute (abbreviation),,V’c,abbreviation,time,"[ABBREVIATION] Short form of Vom'chron (lesser-time). V' from Vom', c from chron."
+GPM abbreviation,,L.Vc,abbreviation,math,"[ABBREVIATION] lieyev Vom'chron. L=lieyev (gold/wealth), Vc=vom'chron (minute)."
+XPM abbreviation,,E.Vc,abbreviation,math,"[ABBREVIATION] Ensh per Vom'chron. E=ensh (knowledge/experience), Vc=vom'chron."
+MP abbreviation (median picks),,Z.V,abbreviation,math,"[ABBREVIATION] Zushk Veshai. Z=zushk (median), V=vesh (pick). Replaces English MP."
+MB abbreviation (median bans),,Z.F,abbreviation,math,"[ABBREVIATION] Zushk Fekuizhai. Z=zushk (median), F=fekui (ban). Replaces English MB."
+WR abbreviation (winrate),,H.L,abbreviation,math,[ABBREVIATION] Hedui Lash
+KDA abbreviation,,S.G.A,abbreviation,math,"[ABBREVIATION] Shen/Gang/Akshen. S=shen (kill), G=gang (death), A=akshen (assist)"
+featured/highlighted (above-light),,Doq-sol,noun,generic,"[COMPOUND] doq (above/at, canonical) + sol (light/hope, canonical). Light-from-above = something highlighted/featured. Used for pinned/featured builds."
+Toys / puppets / amusements,,rast,noun,generic,"[CANON] Toys, puppets, amusements, entertainments, etc., also items in dota, artifacts, tools, weapons"
+Failure / incomplete / unfinished / loss,,miskath,noun,generic,"[CANON] Failure (uncompleted, unfinished, etc)"
+Weakling / peasant,,fol,adjective,generic,"[CANON] Weakling (whelp, peasant, etc), can also mean creep"
+Power / skill / ability / strength,,poz,noun,generic,"[CANON] Power (ability, skill, action currently occuring, etc)"
+Illness / sickness / plague,,irush,noun,generic,"[CANON] Illness (common cold, [with modifier] plague, etc)"
+full / complete / entire,,zuz,adjective,state,"[INVENTED] Complete, full. Follows a similar structure to doz/roz, but with a “completeness status” marker"
+death / kill,,gang,noun,generic,[INVENTED] Terminal/death root. gang = death-event. Gang-Shazeth = Book of the Dead. vo'gang = undying.
+more / excess / again / surplus,,wrashm,noun,generic,[DERIVED] “again more”
+undead ,,vo'gang,adjective/noun,generic,[INVENTED] Strictly: vo' (negation) + gang (death) = undying. But contextually: vo'gang = the thing that keeps coming back. Used for 'Undying' hero.
+Number / singular unit / stat,,Chovath / chov,noun,generic,"[INVENTED] ch- existence marker, -ath as present and -ov from one => existing number, single entity. Chov is a shorter version"
+Stats / data,,Chovathai / chovai,noun,generic,[DERIVED] chov + plural
+dataset,,chovizhai,noun,generic,[DERIVED] chov + group
+Assign / number (verb),,chov,verb,generic,"[INVENTED] from short “number”, equivalent to “nem-” root in PIE"
+maximum,,pochov / poc,noun,math,"[DERIVED] poz + chov, powerful number"
+minimum,,vochov,noun,math,"[DERIVED] vom + chov, weakest number"
+Extremums / (power) spikes,,chro’groth,noun,math,[DERIVED] time growth
+split,,lazhai,verb/noun,math,[DERIVED] lash (part) + zh (action) + ai (present marker) → split action
+Combine / unite / unity / complete / together,,nezhai,verb/noun,generic,"[INVENTED] nesh (home, safety) + opposite of lash (part) + zh (action marker) → nezhai"
+sum / total / all together,,donezhat / nez (shorthand),noun,math,"[INVENTED] combine/unity/complete, but as a noun and nearness marker “do”"
+average / mean / middle,,mek,noun,math,"[INVENTED] basically the most balanced sounding word to complement “poz” and “vom”, with “e” as a means to balance the sound (and to avoid confusion with “moq”)"
+undo marker / un-,,uz,affix/particle,basic,"[INVENTED] reversing action, using past marker “u” and action marker “zh”"
+one / alone,,ov,noun,math,"[CANON] one, alone, once, etc"
+two,,duv,noun,math,"[INVENTED] two, second, etc"
+three,,ren,noun,math,"[INVENTED] in PIE it’s a derivative of to cross, go beyond, here I didn’t yet come up with this root, but “ron” could serve as a good substitute, meaning “far above, far beyond”,  but it’s too short on its own, and “q” is not essential here. So I went with “r-” + “e” to distinguish it from direction markers"
+four,,laz,noun,math,[INVENTED] inspired by PIE origin – to cut
+five,,taq,noun,math,[INVENTED] based of “takat” for hand
+six,,tov,noun,math,[INVENTED] hand over one
+seven,,sav,noun,math,"[CANON] seven, seventh, etc"
+eight,,duaz,noun,math,[INVENTED] double four
+nine,,qov,noun,math,"[INVENTED] like PIE, ten without one. Started as duv taq ov → dutaqov → while dutaq eventually shifted to draq, nine shifted towards the later part to make it easier to recognize"
+ten,,draq,noun,math,"[INVENTED] two fives, but changed over time: duv taq → dutaq → dtaq → t shifts to r for easier pronounciation → draq"
+hundred,,duamaq,noun,math,[INVENTED] inspired by PIR ten tens (dekm-tom); duv ahm taq (bigger two fives) → duahmtaq → duamaq
+thousand,,ahm’amaq,noun,math,"[INVENTED] big hundred, “du” is dropped completely over time"
+point,,lez,noun,math,[INVENTED] from “dlezh” – to pierce
+line,,gron,noun,math,"[INVENTED] using the same “spread” idea in the same way as with bone, leaving “bone” as “line inside”"
+Opener / first,,ovath,adjective,math,"[INVENTED] opener, also first, one + marker"
+Follower / second / other,,dift,adjective,math,[INVENTED] using duv as a reference
+Last (order),,hrothov,adjective,math,[INVENTED] from end/finish + one
+Excrement / waste,,kish,noun,nature,"[CANON] Excrement, waste, etc., general disgrace, corruption"
+curse,,sof,noun,nature,[CANON] [curses beyond mortal knowledge]
+matter,,cheth,noun,nature,"[INVENTED] using “ch” as existence marker and “nith” as general big domain/concept reference. Basically “the domain of existence”, implying lesser parts"
+liquid,,veth,noun,nature,"[INVENTED] using “v” as marker for liquid matter, lacking form, coming from vom’cheth → veth"
+sky,,qeth,noun,nature,"[INVENTED] same formula as other “domains”, basically “above domain”, with “-q” being upward direction marker in doq/roq"
+### HERE START INVENTED AND SPECULATIVE WORDS,,,,,
+spirit / soul / essence,,droth,noun,nature,"[INVENTED] Spiritual substance root. dro- (subtle, unseen) + -oth (substance domain)"
+protection / guard,,nereth,noun,actions,[INVENTED] Defensive root. Comes from “nesh” as safe space
+shield / defense surface,,skarm,noun,objects,[INVENTED] Physical shield. Distinct from nereth (conceptual protection). skarm = the blocking surface.
+scale (skin),,doskarlash,noun,objects,"[DERIVED] specifically scales on a skin, skarm (shield) + close marker (do-) + part (lash)"
+enchantment / magic-shaping,,-shath,affix,actions,[INVENTED] Enchantment suffix. Shath = the applied magic.
+Assembly / completetion,,ichtak,noun,actions,"[INVENTED] assembly, the process of assembling something. Derived from “icha” future state and “tak” take, meaning “in the completed state in the future”"
+Recipe / assembly guide,,Ichtak-henshai,noun,actions,[DERIVED] derived from “henshai” meaning “many marks” or “many knowledge” or a sheet + ichtak meaning assembly
+recipe (shorter form),,ikenshai,noun,actions,"[DERIVED] shorter, informal form of recipe"
+normalized / adjusted / brought to one’s level,,vogik,adjective,math,"[INVENTED] using “gik” for level and “vo-” marker for bringing down, lessening. Meaning “bring down to the level”"
+correlation / relationship / connection / link,,Ashumai / ashumeth,noun,math,"[INVENTED] Coming from “ashamath” for general comparison/relation + “-u-” past marker and “-ai” plural, meaning “established past comparisons”"
+lane,,nigroth,noun,battle,[DERIVED] using “nith” + “groth” meaning “land spread”
+protected realm / safe (lane),,neresh,adjective,battle,"[INVENTED] protected realm, defended place, in lane context – safe lane"
+middle,,Mekath / mekat,adjective,battle,"[INVENTED] middle + domain, middle ground"
+hard realm / pain realm / off (lane),,safresh,adjective,battle,"[INVENTED] safras (pain) with realm ending and a vowel change for distinction, literally “pain realm”"
+roamer,,thokur,noun/adjective,battle,[DERIVED] thok (move) + ur (agent/doer suffix). Moving-agent = roamer/soft support.
+tree / wooden-entity root,,podogroth,noun,nature,"[INVENTED] “doq” for upward, “groth” for spreading, giving “growth” and “poz” for mighty, giving “po-do-groth”"
+branch,,podoglash,noun,nature,[INVENTED] part of the tree → podog + lash
+Treant / single small tree / sapling / tree general,,drogh,noun,nature,[INVENTED] smaller version of podogroth
+Forest / jungle / neutrals (creeps),,droghaish,noun,nature,[INVENTED] domain of many trees
+pick (hero selection) / call / summon / choice,,vesh,noun,battle,"[INVENTED] selection, summoning, with “v” being in war/liquid/flow words and “-sh” also having a meaning of “state marker”, quick and catchy word"
+team,,Vothizhai / vozhai / vozhath,noun,battle,"[DERIVED] “voth” battle + “izhai” group, second version is a shorthand and another version as a complete noun"
+kill,,Safrashm / shen,noun,battle,"[INVENTED] Kill, from “safras” meaning wound, this has a comparative/more marker and a more complete vibe. “shen” acts as a shorthand and a less formal version of the word, coming from a series of likely phonetic changes"
+killed,,shenui,adjective,state,[DERIVED] -ai in past
+death,,gang,noun,battle,"[INVENTED] Death, pretty much completely made up based on vibes"
+Assist / help,,akshen,noun,battle,"[INVENTED] Assist, basically shorthand for kill + “ak-” suffix as an assist marker. Kind of arbitrary, but gives a nice symmetry"
+Birth / coming into existence,,monk,verb/noun,nature,[INVENTED] coming from “person” and mirroring “death” in structure
+Existing / possible,,achai,adverb,state,[INVENTED] to be + state marker
+Player / participant / person / being,,mokish,noun,battle,"[INVENTED] General word for a person, player, participant. Started as a variant of “ish”, but had to develop a more distinct sounding. “m” was relatively unused and “m-ok-ish” gave a nice balance"
+human,,folmoq,noun,nature,"[INVENTED] from “fol” weakling + “mokish” person, shortened to “moq”"
+Guy / person,,mush,noun,generic,"[INVENTED] Guy, shorthand of mokish"
+knowledge-entity / mage / enchanter,,ensh'osh,noun,nature,"[DERIVED] ensh (know, canonical) + ' (bond marker) + -osh (entity suffix). 'The knowing-entity.'"
+knowledge-power / magic,,Ensh'poz / enshoz (short),noun,nature,"[DERIVED] ensh (know) + ' + poz (power, canonical). 'Knowledge-force' = magic as concept."
+knowledge (noun),,enshat,noun,nature,[DERIVED] ensh (know) + -at (abstract-quality marker). enshat = the substance of knowing. Enshat-Gankesh = Templar Assassin (knowledge-assassin). Enshat-Shazeth = Tome of Knowledge.
+spirit-caller / shaman,,drothvesh,noun,nature,"[INVENTED] droth (spirit, invented) + vesh (pick/call, canonical). 'One who calls spirits.' "
+Haste / speed marker / flow,,vok-,affix,nature,"[INVENTED] liquid “veth” and movement “thok”, action flow"
+storm / wind,,qethok,noun,nature,"[INVENTED] sky movement, storm or intense wind, literally moving the sky around"
+wind / outward-flowing-force,,rothok,noun,nature,[INVENTED] thok + ro as reverse direction/outward
+fire / burning-domain,,sorath,noun,nature,[INVENTED] “sol” as light/sun and “r” as a burning version of the word + -ath (domain suffix). 'The burning domain.'
+ash,,soruth,noun,nature,"[INVENTED] sorath + past marker, something that burned"
+frost / cold,,glath,noun,nature,"[INVENTED] gl (cold cluster, icy vibes) + -ath (domain)"
+water / flowing-substance / sea,,vezhath,noun,nature,[INVENTED] veth (liquid) + -zh- (continued action) + ath (domain)
+Tide / stream,,Vozh / vethok,noun,nature,"[INTENTED] vezhath + vok, initially “veth thok zhai” as “water movement flows”, but over time it should have shortened to vethok zhai → vetokzh → vokzh → vozh. Vethok acts as a more formal/upper style"
+lizard,,skarath,noun,nature,"[INVENTED] scaled crawling creature, crawling is close/below movement (“do-” or “doz”) + scales are armor/protection/shield (“skarm”) + creature “rath”, eventually I decided to omit do- part (dragons are not crawling)"
+weapon (general),,safrast,noun,weapon,"[DERIVED] literally “wound tool”, the tool to create wounds"
+Venom / toxic / toxicity / venomous,,Irushvest / irvest,noun/adjective,nature,[DERIVED] illness + water
+Sting / needle / spike,,Irvufrast / irvuf,noun/verb,weapon,[DERIVED] irush (illness) + irvest (sting) + safrast (pain dealer) → irush vest safrast → ir(u)vest safrast → irvufrast
+to cut,,lazhras,verb,actions,"[DERIVED] using “lazhai” (split) as reference, cut is basically split or inflict pain (safras)"
+sword,,lazhast,noun,weapon,[DERIVED] split/cut + instrument marker
+Squeeze / apply pressure,,dloth,verb,actions,[INVENTED] using “groth” as a blueprint + negation and phonetic symmetry + do- as nearness marker
+Knife / blade,,dlast,noun,weapon,"[DERIVED] can’t be a “short knife”, the word becomes too long, so I’m using the same etymology root as PIE"
+Polearm / lance,,ahm’irvuf,noun,weapon,[DERIVED] more/long + stinger
+broadsword,,ahm’lazhrast,noun,weapon,[DERIVED] more/great + sword
+Claymore / heavy sword,,po’hazhrast,noun,weapon,[DERIVED] mighty sword
+Pierce / push / strike / attack,,dlezh,verb,actions,"[INVENTED] using “dloth” as a base, recreating “stewk” from PIE as a base for pierce/stick → zh as action marker and e for sound differentiation"
+staff,,ahm’enshez,noun,weapon,[DERIVED] long wand
+wand,,enshez,noun,weapon,[DERIVED] stick + magic/power → ensh shesh poz
+stick,,shesh,noun,weapon,"[DERIVED] following similar evolution from PIE, dlezh → shesh"
+javelin,,qethoshezh,noun,weapon,"[DERIVED] throwing stick, throw as fly-movement + stick → qethoshezh"
+paladin,,Sol-mush,noun,actors,[COMPOUND] holy man → sol mush
+hammer,,pozlast,noun,weapon,[INVENTED] heavy tool → poz dlezh ast → pozlast
+scorpion / sting-creature,,irvudrath,noun,nature,"[DERIVED] irvufrast (needle) + vodo- (crawler) + rath (creature) → do (crawl) combines with irvu and creates irvud, rath remains the same"
+sand / fine-earth,,nilash,noun,nature,[DERIVED] nith (land/earth) + lash (part) → earth grains → nith lash → nilash
+bear / heavy-furred-creature,,Gruv / gruvrath,noun,nature,"[INVENTED] gr (heavy, grinding: grakh uses same cluster) + -uv (dense-warm form: u=full, v=soft). 'Heavy and full-bodied.'"
+angry / fierce / fury,,rofras,noun/adjective,state,"[INVENTED] outward (ron) + pain (safras), or even general “ro-” as outward direction, external direction of pain → ron safras → rofras"
+Beast / animal / feral,,rath,noun/adjective,nature,"[INVENTED] sort of continuing the trend of “tornath”, but in a different way"
+to hunt / hunt (noun),,ganzh,verb/noun,actions,[INVENTED] death + action
+wolf / wild dog,,ganrath,noun,nature,"[INVENTED] this was a bit tricky, wolf is basically self contained word in PIE and it’s hard to come up with a more abstract conceptual view for it, I ultimately went with “death beast”, like “hunter beast”"
+bird / winged-entity,,qetosh,noun,nature,[INVENTED] sky (qeth) + entity (-osh)
+phoenix,,feniks,noun,nature,"[ADAPTED] while phoenix could be named as “burning bird”, I think it makes more sense to just adapt the name"
+insect / small-crawler,,vodrath,noun,nature,"[INVENTED] do- for crawling, vom for lesser, rath for creature → vom’dorath (lesser crawler) or vodrath as a more stable form"
+goblin / small-mischief-being,,sovomoq,noun,nature,"[INVENTED] sof (curse, because they are mischievous) + vom (lesser) + moq (person) → f/v merge together → sovomoq"
+god,,pozmoq,noun,nature,[INVENTED] “power person”
+nimble,,shak,adjective,generic,"[INVENTED] nimble, “sh” as a quick and sharp sound, “ak” derived from “thok”"
+ape / monkey / nimble-climber,,shakmoq,noun,nature,[INVENTED] nimble + person
+Rat / small primate / rodent,,Fomrath / fom,noun,nature,"[INVENTED] weakling (fol) + lesser, small (vom) + creature (rath) → fomrath or fom for short (but it would likely be any small rodent in general, as demons are unlikely to use it very often for mice specifically)"
+squirrel / nimble-tree-creature,,fomshak,noun,nature,"[INVENTED] nimble (shak) + tree (drogh) + mouse (fom) → there three words are hard to combine, so I went with nimblemouse, as it’s more in line with dota world"
+armadillo / shell-back-creature,,skareth,noun,nature,[DERIVED] armor (skarm) + creature (rath)
+horse,,wathok,noun,nature,"[INVENTED] initially went with “movement” + “creature”, decided to drop the creature part and add “wa-” as a marker of repeat/circle (like riding a chariot or other wheel thing)"
+centaur,,wathomoq,noun,nature,"[INVENTED] using greek origins as a blueprint, it was originally “horse rider” or “piercing bull”, so I went with horse man"
+warrunner,,vothokosh,noun,state,[DERIVED] war + movement + entity
+horn,,chadlezh,noun,nature,"[INVENTED] pointy/stick-like head thing, head piercer → encha + dlezh → chadlezh, with “zh” part dropping eventually when naming horned creatures"
+magnataur,,Pozhadloq,noun,nature,"[INVENTED] using centaur as reference for structure, but with accent on big horn, so mighty (poz) + horn (chadle(zh)) + person (moq) → poz chadlezh moq → pochadlezh moq → pochadlemoq → pochadloq"
+bull,,duchadlezh,noun,nature,"[INVENTED] double horn, bull"
+troll,,trolsh,noun,nature,"[ADAPTED] initially I wanted to fully translate this word, but ultimately decided to treat it as a self name for a race"
+vengeance / returning-harm-force,,wrofrash,noun,actions,"[INVENTED] wr- from returning/repeating action, -sh as backwards marker, pain/harm → wrofrash"
+fly / sky-bound-state,,qethok,noun,actions,[DERIVED] sky (qeth) + movement (thok)
+death-striker / assassin / hunter person,,ganzhesh,noun,actions,[INVENTED] hunt + person marker
+axe (weapon),,dlazhoz,noun,weapon,[DERIVED] dlast (knife) + lazhras (cut) + poz (force/power) → dlazhroz (powerful cutter)
+Created / creation,,giruth,noun/adjective,state,"[DERIVED] create + past marker + noun marker, here the second future marker of girith came in handy"
+Artificial / manufactured / man-made,,enchiruth,noun/adjective,state,[DERIVED] using alchemy as a proxy for creating “artificial” root “enc(h)” + g is already close to “ch” in sounds so it naturally merges with “ch”
+mechanism / gear-system,,enchirurath,noun,objects,[DERIVED] artificially made item
+mechanic,,arkenchiruth,noun,objects,[DERIVED] master of creations – ark + enchiruth
+alchemy / element-transformation,,enchetrozh,noun,nature,[INVENTED] matter + change + knowledge
+mechanical being / artificial being / golem,,enchirosh,noun,nature,[DERIVED] enchiruth + actor marker
+alchemist,,enchetrath,noun,nature,[DERIVED] alchemy + noun marker
+brew / fermented-substance,,vezof,noun,objects,"[INVENTED] liquid (veth) + delight (zomfa), wanted to add delight+spread here, but that would make the word too long"
+friend / companion-entity,,neshoth,noun,generic,[DERIVED] nesh (home/safe) + -oth (entity variant). 'The belonging-entity' = a companion. Neshoth-Droth = Io (friend-spirit).
+drow-race / underground-folk,,drow,noun,names,"[ADAPTED] Drow are dark elves and live underground, their alternative name could be “nithoz” or “omoz”, but I think it’s better to just adapt it"
+warrior / combat-entity / knight / competitor,,vothosh,noun,generic,[DERIVED] war/battle + entity
+steal,,doptak,verb,actions,[INVENTED] take + closeness marker + force → tak + do- + poz → doptak
+marauder / raid-striker,,thogan,noun,actions,"[DERIVED] Two routes are combat/fight (voth) + hunt (ganzh) + steal (doptak) OR roamer (thokur) + kill (gang), I think raider (roaming killer) fits a bit more the nature and fits terrorblade more, but slightly shortened to make it easier to pronounce so thok + gang + ur → thogangur → thogan or thogath"
+female,,zosh,noun,basic,"[INVENTED] “zo” coming from “zomfa” (delight) and “osh” being person marker, so “delightful person”"
+male,,path,noun,basic,"[INVENTED] “rath” for beast/creature + “p” from “poz” and generally one of the free to use consonants, so “powerful beast”"
+maiden / young female,,vom'zosh,noun,generic,[COMPOUND] lesser + female
+lady / senior female,,ahm'zosh,noun,generic,[COMPOUND] 'Greater female' = lady/senior woman.
+Boy / young male,,vom’path,noun,generic,[COMPOUND] lesser + male
+Kid / small person,,Vom’moq / vomoq,noun,generic,[DERIVED] lesser person
+orb / power-sphere,,powroth,noun,weapon,"[DERIVED] wroth (again, but also a general root for circular motion) + poz (power)"
+mark,,Hen / hensh / henshai,noun,weapon,"[INVENTED] based of “ensh” (know) and “hedoq” (desirable) I went for a simplified form of a combined word, that would mean something desirable enough to commit to memory. Since “hedoq” could be split into “he” and “doq” (upward), “he” could be seen as appeal or desire in general."
+tome / mark-vessel (book),,henshet,noun,weapon,"[INVENTED] hensh + domain marker, literally “a place/domain of marks”, meaning book"
+relic / time-kept-thing,,chronrast,noun,weapon,"[COMPOUND] chron (time, persisting through time) + rast (toy, trinket). 'The thing that persisted through time.'"
+scepter / mastery-channel,,arkenshath,noun,weapon,[DERIVED] Mastery + stick + tool → mastery staff
+ring / binding-circle,,newrast,noun,weapon,"[UPDATE] wro- as repeating/circular marker, rast as toy/trinket, “ne” as completeness marker (home/safe/enclosure) → newrast"
+elixir / transform-liquid / potion,,chroveth,noun,weapon,[DERIVED] liquid + change
+ward / guarding vision-instrument,,nereyikosh,noun,tools,"[COMPOUND] vision (eyik) + osh (entity) + guard (nereth), “home turf watcher”"
+scroll / folded-travel-marks / page / list of data,,genroth,noun,weapon,[COMPOUND] spread of marks → groth + hen → ghenroth → more natural sounding genroth
+hair,,encir,noun,generic,"[INVENTED] using “encha” of head as a base, I thought about stick/needle or flow, decided to go with needle, but leaving only the first part"
+to wear,,takdozh,verb,actions,"[INVENTED] coming from “have on self”, like in swedish → tak doq ozh → “above” marker is not important, we need posession + near → takdozh"
+crown / mastery-peak,,arqench,noun,objects,[COMPOUND] ark (mastery/lordship) + above marker q + head → something on top of the lord
+throw,,arotho,verb,actions,"[INVENTED] ro- as outward movement marker + thok for movement, except rothok was already used, so instead went with “alatho”, but modified it to represent action on outward object"
+drop,,adozho,verb,actions,"[INVENTED] continuing with the same pattern, coming to “la” meaning action on self, “do” marking close action on an object and “ro” is far action on an object"
+cloak / hide-wear,,sesdozh,noun,objects,"[INVENTED] I wanted to go for “something to throw on self” and “to wear” already has a similar pattern, so I had to use “hide” + “have on self”"
+limb,,lanesh,noun,basic,[DERIVED] lash (part) + nez (unite)
+joint,,nezat,noun,basic,[DERIVED] join/combine
+leg,,tholash,noun,basic,[DERIVED] move limb – thok lanesh → tholanesh → tholash
+claw,,takirvuf,noun,basic,[INVENTED] hand + spike → claw
+hand,,takath,noun,basic,"[DERIVED] grasp/seize, taker instrument"
+Head / mental core,,encha,noun,basic,"[INVENTED] in PIE head evolved from “person”, which doesn’t work for this cause, I wanted something more abstract and not tied to eyesight too. Using ensh (know) + acha (exist) → part of body that holds existence"
+head cover / hat,,nerencha,noun,objects,[INVENTED] cover + head
+big hat,,ahm’nerencha,noun,objects,[DERIVED] bigger + hat
+body,,grothet,noun,basic,"[DERIVED] growing thing, thing that spreads"
+heart,,mokon,noun,basic,[DERIVED] life + inside marker (-on)
+bone,,rogron,noun,basic,"[DERIVED] spread + inside, straight thing inside"
+blood,,vethon,noun,basic,[DERIVED] liquid inside
+tooth,,glutath,noun,basic,[DERIVED] thing to eat with
+Straight / direct,,thogro,adjective,basic,"[DERIVED] movement + spread, implying spread in a single direction"
+boots / earth-contact-wear,,nidoz,noun,objects,"[INVENTED] using “nith” for earth and “dozh” for wearing/having close below, keeping it short as a commonly used word"
+greaves / inner-leg-wear,,skathorash,noun,weapon,[DERIVED] leg + shield/armor
+glaive / spinning-blade,,wrodlast,noun,weapon,[DERIVED] wroth for repeating/general spin root + dlast for blade
+gauntlet / hand-strike-instrument,,takezhast,noun,weapon,[INVENTED] hand + attack + instrument → takath + dlezh + -ast → takezhast
+Glove / hand cover,,tasknereth,noun,objects,"[INVENTED] hand + cover/armor, "
+Stone / ore,,keth,noun,nature,"[INTENTED] I was limited in available basic roots, but “ke(th)” sounded like a good an relatively close to “nith”"
+iron / power-metal / power ore,,poketh,noun,nature,"[INVENTED] all basic ores should still sound like “ore” but have different modifiers (like “iron”, “copper” and “gold” still sound somewhat like “ore”), I went with “power” for iron, so “power metal”"
+helm / head-armor,,skarench,noun,weapon,[DERIVED] skarm (shield) + encha (head)
+armor / body-protection,,skagor,noun,weapon,"[INVENTED] skarm (shield) + grothet (body), but had to keep it close to basic roots"
+lens / seeing-instrument,,eyikast,noun,weapon,"[COMPOUND] eyik (eye/vision, canonical) + -ast (instrument suffix). 'Eye-instrument/seeing-tool.'"
+ogre / brute,,ogre,name,names,[ADAPTED] decided that adapting ogre as is would be better
+dragon (general word),,ashm'skarath,noun,nature,[COMPOUND] big + lizard
+demon / demonic,,Ozmoth / ozmo,noun,nature,"[INVENTED] had to find a speficially demon term, as ozka is more of an umbrella term. Ozka is still used in most cases when “demon” is used, but this word won’t hurt"
+undead (state),,vo'gang,noun/adjective,state,[COMPOUND] vo' (negation) + gang (death). 'Not-dead' = undying. Used for Undying hero.
+dead-state / death-condition,,gunesh,adjective/noun,state,[INVENTED] gang + past marker + more adjective-like ending
+to destroy,,vogith,verb,actions,"[INVENTED] girith + reversal → vo’girith, but I think the word would eventually merge and get shortened over time, reducing to vogith and vogitosh"
+destroyer / wrecker,,vogitosh,noun,actors,[INVENTED] noun from vogith
+outworld,,ronith,adjective,state,[DERIVED] ro- as outward + earth → outworld
+artist / mark-maker,,henzosh,noun,actors,[INVENTED] delight + mark + actor → zomfa + hen + osh
+Stable / unmoving,,votho,adjective,state,[DERIVED] no-move
+volatility / sway,,Ahm’tho,adjective,state,[DERIVED] intense + move
+advantage,,ithast,noun,math,[DERIVED] ahead (future + movement) + instrument
+win,,hedui,noun,state,[DERIVED] desirable + completed state
+wins,,heduitai,noun,state,"[DERIVED] plural of wins, added “t” for better flow"
+currently winning,,hedai,noun,state,[DERIVED] win + present
+creep,,folush,noun,actors,[DERIVED] weakling + person
+courier,,thomush,noun,actors,[DERIVED] move + person → thomush
+tower,,grothosh,noun,objects,"[DERIVED] Entity of build, building"
+fountain,,veqtok,noun,objects,[INVENTED] upward water flow → doq vethok → veqtok
+roshan,,Rozhan,name,names,[ADAPTED] Phonological adaptation of the boss monster name.
+experience,,hahsh,noun,generic,[CANON] using verb “hahsh” to experience as a noun meaning experience in general
+Level / tier,,gik,noun,generic,[INVENTED] Level/rank. Gik-N = level-N (tier token). Elevation level.
+mana,,ensh,noun,generic,[CANONICAL] The in-game mana resource also referenced as ensh (the knowing-force). Context distinguishes game-mana from the knowledge concept.
+Speed / change metric,,chronak,noun,generic,"[DERIVED] chron for time and initially wanted to go with “number”, but sort of invented this for as “present time move”"
+movement speed,,Thok-chronak,noun,compound,[INVENTED] Speed of movement. Measurement of movement
+agility,,chrothosh,noun,generic,[DERIVED] entity of change and movement
+magic resistance,,Poz-Nereth,noun,battle,[COMPOUND] poz (power/magic) + nereth (protection). Magic protection.
+milestones / collected time-counts,,Chron-chov,noun,compound,[COMPOUND] chron (time) + chov (number)
+every single / each,,ev,preposition,basic,[INVENTED] using “ov” for one as blueprint
+per,,ovon,preposition,basic,[DERIVED] ov (one) + -on (inside)
+purchase / buy (item action),,ralie,verb/noun,actions,[INVENTED] give (rak) or reverse marker (ro) + shorthand for money/whealth (liev)
+purchases,,raliethai,noun,actions,[DERIVED] ralie + noun marker + plural
+purchased (past),,rulie,adjective,actions,[DERIVED] ralie + past marker
+least / lower / fewer,,ahm’vom,adjective,generic,"[DERIVED] “ahm’” biggest + “vom” comparative less, together being the least"
+available / present,,pozak,adjective,state,"[INVENTED] poz (ability) + “ok” part of “thok”, but in present state"
+Category / type,,henizh,noun,objects,"[INVENTED] category is essentially a collection of objects → hen for marks, nezha for together, izhai for group → henizh"
+picks (plural),,veshai,noun,battle,"[DERIVED] vesh (pick/choose, canonical) + -ai (plural). 'veshai' = picks. 'vrazhai' veshai = heroes' picks."
+pair (of heroes/players),,dunez,noun,generic,[DERIVED] two + togetherness
+set to / configured at / manipulated into,,arkulez,noun,state,"[INVENTED] lordship + point, past marker as a joint"
+block / section,,lash’gen,noun,objects,[COMPOUND] part of scroll (page) → lash + genroth
+rate / frequency of,,chrash,noun,state,"[INVENTED] chron + lash → time part, frequency, rate"
+without / absent,,rosh,preposition,basic,"[INVENTED] ro (uncloseness) + sh (general “with” direction). Kind of a duplicate of hollom/holm, but they have differeht implications"
+With / present,,dosh,preposition,basic,"[INVENTED] same logic as rosh, but with closeness marker do-"
+shows / indicates (implies) / represents,,raey,verb/noun,actions,[INVENTED] ro- (outside) + -a- (present verb marker) + eyik (vision)
+include / contains,,achadon,verb/preposition,state,[DERIVED] to be + inside → acha don
+day,,achran,noun,time,"[INVENTED] logical route could be “sun time”, but demons live in the seven hells, they don’t have sun during days and nights, so it had to be something else. I settled on “time part”, but it is already taken by rate. So “exist time” (acha + chron → achran)"
+night,,chrogun,noun,time,"[INVENTED] then night is the time when “time” is “dead”, it “has died” → gang/gunesh + chron + u → chrogun"
+morning,,wrachron,noun,time,[INVENTED] “time creating” or “time rebirth”
+evening,,ganchron,noun,time,"[INVENTED] “time is dying”, “death time”"
+Start / beginning / initial,,giruchron,noun,time,[INVENTED] “creation time”
+Finish / ending / end state,,ichtakron,noun,time,[INVENTED] “complete time”
+next,,ichroz,adverb,time,[INVENTED] future + below/backward + time
+previous,,uchroq,adverb,time,[INVENTED] past + ahead/upward + time
+order (sequence),,Archovoth / archov,noun,time,[INVENTED] lordship + number + domain → ark + chov + -oth → archovoth / archov
+early,,uthoch,adverb,time,[INVENTED] close forward past
+late,,idoshak,adverb,time,"[INVENTED] close backward future, ch shifts to k"
+deviation (statistical),,Meklazhai,noun,math,[INVENTED] average + split
+oversight,,doqeyik,noun,state,[COMPOUND] over sight
+swap / exchange,,takrak,noun/verb,actions,"[INVENTED] sort of “give and take”, exchange vibes"
+gradient (rate of change),,alachok,noun,math,[DERIVED] forward (alatho) + change (chroth) + normalized (vogik) → alachok
+range,,gronath,noun,math,[DERIVED] line + noun/domain marker
+window (timing range),,chrogroth,noun,math,[INVENTED] time + spread/range
+roles / role types,,Chalai / chalavethai,noun,generic,"[INVENTED] chalavethai is too long, but is a formal version, casual is chalai"
+role (singular),,Chalaveth / chal,noun,generic,"[INVENTED] existing (“-cha”) + part (“lash”) + fluid (“veth”) → fluid existence, playing your part. Shortened version is chal"
+position,,chalezosh,noun,generic,"[INVENTED] position is not the same as role, exist/live + domain + point, meaning existing in this space"
+item build,,ragroth,noun,objects,"[INVENTED] rast + groth → ragroth, item build"
+timeline / chronological view,,chron-voth,noun,generic,[COMPOUND] chron (time) + voth (match/game). 'chron-voth' = the timeline within a match. Used for the build timeline block.
+progression / advancement,,Ulatho / ulathoth,verb/noun,state,[CANONICAL] future movement
+draft (hero selection process),,giruvesh,noun,gameplay,"[DERIVED] beginning + pick, implying it’s the beginning of the draft stage"
+most / highest,,ahm’ashm,adjective,generic,"[DERIVED] From “ahm’” biggest and “ashm” more, together meaning the highest"
+Threshold / cutoff point / minimum number,,Vom-lez,noun,math,[DERIVED] vom (lesser) + lez (point) → lesser point
+median / middle value,,mekalez,noun,math,[DERIVED] middle (mekat) + point (lez) → mekalez
+travel/blink (instant move),,vokthok,noun,actions,[COMPOUND] haste marker + movement
+mask (face-cover),,Dok-nereth,noun,objects,[COMPOUND] face + protection → dok + nereth
+soul vessel / spirit container,,drothet,noun,objects,[COMPOUND] droth (spirit/soul) + domain suffix
+Dissolve / diffuse / matter breaking down,,chelazhai,verb,actions,[INVENTED] matter “cheth” + split “lazh” → cheth-lazh(ai) → chelazhai
+illusion blade (manta style),,Izhai-dlast,noun,compound,[COMPOUND] group + blade
+assists (plural),,akshenai,noun,generic,[DERIVED] akshen (assist) + -ai (ongoing/plural suffix). Multiple assist actions.
+record/battle-glory (singular),,sol-voth,noun,math,"[COMPOUND] sol (light/glory/sacred, canonical) + voth (battle/war, canonical). Battle-glory = a record/peak achievement. The light shining from battle = what is remembered as best."
+records/battle-glories (plural),,sol-vothai,noun,math,[DERIVED] sol-voth (record) + -ai (plural suffix). Multiple peak records/achievements.
+overview (over-look),,doq-eyik,noun,generic,"[COMPOUND] doq (above/over, canonical) + eyik (look/see, canonical). Looking-from-above = overview."
+summary/card (one-look),,ov-eyik,noun,generic,"[COMPOUND] ov (one, established) + eyik (look/see, canonical). A single glance = summary/card view."
+other-kinds/mixed,,nezath,noun/adjective,generic,[INVENTED] all + one + entity
+raw playtime (played-time),,Voth-chronez,noun,time,[COMPOUND-INVENTED] match + time + total/combined
+card view (lesser-look),,vom'eyik,noun,generic,[COMPOUND] vom' (lesser) + eyik (look/view). Lesser-look = a compact card view
+Grade / value / measurement,,gichov,noun,math,[INVENTED] level number
+rank (power-grade),,pozgik,noun,math,"[INVENTED] two versions: power value (pogichov) or power level (pozgik), second I like more"
+ranked,,pozgikui,adjective,math,[INVENTED] rank + past + essence/plural marker
+stuns (plural),,fek-pozai,noun,compound,[DERIVED] fek-poz (stun: fek=stop + poz=power) + -ai (plural)
+worst (not-best),,vo'hedoq,adjective,generic,"[DERIVED] vo' (negation prefix, canonical) + hedoq (best/desired, canonical). Not-desired/not-best = worst."
+Sound / sonic,,Qezh / qezhai,noun/adjective,nature,[INVENTED] sky/air + flow/action → qeth + zh + ai for adjective
+Music / melody / song,,qezhok,noun,nature,[INVENTED] qezh + vethok (stream)
+singer (song-entity),,qezhokosh,noun,actors,[DERIVED] song entity
+sacred stone / phylactery,,sol-keth,noun,compound,[COMPOUND] sol (sacred/light) + keth (stone). Ritual stone
+objectives/targets (plural),,hedolez,noun,generic,[INVENTED] desirable + point → hedoqlez → reduced to hedolez
+tie/draw (equal result),,mek’domosh,noun,generic,[INVENTED] middle + ownership → mek’domosh
+result,,ichuchov,noun,generic,"[INVENTED] finish “ichtakron” + past marker to show that it’s final, but it’s achieved + number “chov” "
+performance (achieved-result),,pozichuchov,noun,generic,[INVENTED] power + result
+common/frequent (item type),,ahm’wroth,adjective,status,[INVENTED] many repeats → ashm + wroth → very repeat → ahm’wroth
+regular/plain/standard (item type),,holm’hen,adjective,status,"[INVENTED] not remarkable, non-existence of marks → holm’hen"
+question,,enshron,noun,generic,[INVENTED] knowledge outside
+FAQ / frequently asked questions,,ahm’wroth enshron,noun,compound,[COMPOUND] common + questions
+FAQ abbreviation,,A’W.E,abbreviation,compound,[ABBREVIATION] 
+and (conjunction),,ne,conjunction,basic,[INVENTED] coming from “nesh” or “nezhai” / “nez”
+as well as / also-including,,nedosh,conjunction,basic,[INVENTED] “also including” → “and with” → ne + dosh → nedosh
+or (disjunction),,ve,conjunction,basic,[INVENTED] From “vesh” (pick)
+only / filter (restrictive),,hol’nez,conjunction,basic,[INVENTED] empty/nothing + other → “no others” → holm + nezath → hol’nez
+not (standalone negation),,vo,particle,basic,[CANONICAL] Standalone negation. Also prefix vo'- (see vo'). 'vo nars rastai' = no starting items.
+thing,,chath,noun,basic,[INVENTED] to be (acha) + noun marker
+direction,,thokath,noun,generic,[DERIVED] move + noun
+question marker,,vu’,affix,basic,"[DERIVED] comes from canonical “that”, also means “undefined thing”"
+how / in what way,,vu’acha,noun,basic,[DERIVED] question + to be → existence question
+what,,vu’chath,noun,basic,[DERIVED] question + thing
+when / at time of (temporal conditional),,vu’chron,noun,basic,[DERIVED] question + time
+where at,,vu’lez,noun,basic,[DERIVED] question + point
+where to,,vu’thokath,noun,basic,[DERIVED] question + direction → where to
+who,,vu’mush,noun,basic,[DERIVED] question + person
+which,,vu’chov,noun,basic,[DERIVED] question + number
+hero (game unit),,vrazh,noun,generic,[INVENTED] voth + rath + flow interfix → voth rath zh → vorazh → vrazh
+items (plural),,rastai,noun,generic,[DERIVED] rast + -ai (plural). Multiple items.
+difference / delta measurement,,lazath,noun,math,"[INVENTED] lazh + ath, split + noun marker"
+route / item path,,larth-gron,noun,gameplay,[COMPOUND] build line
+opponent / adversary,,dokosh,noun,generic,"[INVENTED] face + entity, someone you face against"
+opponents (plural),,dokoshai,noun,generic,[DERIVED] dokosh + plural
+vs,,dk,abbreviation,basic,[DERIVED] dok (face) → dk
+rival,,wrokosh,noun,generic,[INVENTED] wroth (repeat) + opponent (dokosh) → repeated opponent → rival
+detail / deep analysis / detailed,,Donesh / doneshai (adj.),noun,generic,[DERIVED] inside + knowledge → don ensh
+calculated / determined result,,chovui,noun/adjective,math,[DERIVED] number + past state marker → chov ui
+negative / below-baseline,,dozchov,adjective,math,[DERIVED] below number
+situational (context-dependent),,chrothath,adjective,generic,"[INVENTED] change + noun marker → changing context, essence of changes"
+specific / particular (trait),,lezath,adjective,generic,[INVENTED] point + noun → something pointed
+logo / symbol,,arkhensh,noun,objects,[INVENTED] master + mark
+special,,ahm’hensh,adjective,state,[INVENTED] very + mark
+official / sanctioned,,arhenui,adjective,state,[INVENTED] master + mark + past → ark hensh ui → arkhenui → arhenui
+alpha (version label),,alef,noun,other,[ADAPTED] Alpha version
+beta (version label),,beth,noun,other,[ADAPTED] Beta version
+date / timestamp,,chrohen,noun,generic,"[DERIVED] Time + mark, chron + hensh → chrohen"
+deny / denied (last hit),,shefek,noun,state,[INVENTED] shen (kill) + fek (stop)
+to earn,,oztak,verb,actions,[INVENTED] self + take
+earned / accumulated (adj),,Oztukui,adverb,state,[INVENTED] self + take + past → ozh tak ui
+buyback (death-cancel purchase),,wraliev,verb,actions,"[INVENTED] again + purchase + life → wroth + ralie + monk → wraliev-monk in context of dota, wraliev in general"
+diversity / variety metric,,nezachov,noun,math,[INVENTED] mixed + number → nezath + chov
+some / certain (indefinite qty),,Ovlash / olash,noun,basic,"[INVENTED] one + part → ov + lash, v is dropped for easier pronunciation"
+things / stuff (general),,chathai,noun,basic,[DERIVED] things plural
+table / display layout,,gronizath,noun,generic,[INVENTED] domain of many lines → line group domain → gron izha ath → gronizath
+grid,,grodokath,noun,generic,[INVENTED] table + opposing/intersecting → domain of opposing lines → gron dok- ath
+random / varied outcome,,rovesh,adjective,basic,[INVENTED] not selected → vesh + reverse marker → ro- vesh
+title / identifier label,,doqhen,noun,objects,[INVENTED] above mark
+error / critical failure state,,ahm’miskath,noun,state,[DERIVED] big failure
+valuable (adjective),,ahm’lie,adjective,state,[DERIVED] many + money → ahm’liyev → ahm’lie
+talent / skill build path,,pozliev,noun,generic,"[INVENTED] talent is originally a measure of wealth, so “skill of value” → pozliev"
+Map / field / battlefield overview,,vonith,noun,gameplay,[INVENTED] battle + land
+map ping / map mark,,vonith qezh-hen,noun,gameplay,[COMPOUND] map + sound + mark
+undefined / not-labeled,,vo'hensh,adjective/noun,state,"[COMPOUND] vo' (negation) + hensh (mark) – not marked, not recorded"
+new,,sekui,adjective,state,[DERIVED] come/arrive + past
+mischief,,zomkish,noun,actions,"[INVENTED] leisure + disgrace, basically “disgraceful fun”"
+love,,Dronezosh / dronezai,noun/verb,state,[INVENTED] spirit + safety + leisure → droth nesh zomfa → dronezosh
+affection,,zomha’sh,noun,state,"[INVENTED] delight + feeling → zomfa + hahsh → zomha’sh, hsh is too awkward to pronounce in such a long word so gluttal stop"
+congratulate,,rakzomfai,noun/verb,actions,[INVENTED] give happiness essence
+to ride,,dothok,verb,actions,[INVENTED] close + movement → do- thok
+rider,,dothokosh,noun,actors,[DERIVED] ride actor
+knight,,vothdothok,noun,actors,[DERIVED] battle rider
+Stupid / dumb,,hol’ensh,adjective,state,[INVENTED] empty knowledge
+bat,,gunqeth,noun,nature,[INVENTED] night “chrogun” → gun + bird “qetosh” → gunqeth
+Skin / leather,,grokarm,noun,objects,[INVENTED] grothet + skarm – body + armor
+Meat / flesh,,grocheth,noun,objects,[INVENTED] grothet + cheth – body + matter
+winrate,,hedui-lash,noun,math,[COMPOUND] hedui (win) + lash (part/win)
+rune (power mineral),,poz-keth,noun,objects,"[COMPOUND] poz (power, canonical) + keth (stone/mineral). Power-mineral = rune."
+healing (restore HP),,desh,,,[INVENTED] Heal/healing. desh=restore.
+item timing (when bought),,chron-kez,,,[COMPOUND] chron (time) + kez (point/mark). Time-point = the minute an item was bought.
+stage / phase of game,,thoklash,,,[COMPOUND] thok (move) + lash (part/rate). Moving-portion = a game phase.
+series (chain of matches),,zhai'voth,,,[COMPOUND] zhai (chain/sequence: zh=linked + ai=flow) + voth (match). Chain-of-battles = series.
+neutral / no-lane,,Hollom-nigroth,noun,battle,[COMPOUND] hollom (without) + nigroth (lane). No-lane position = neutral
+enchantment (neutral item),,poz-rast,noun,objects,[COMPOUND] poz (power/magic) + rast (item). Magic-item = enchantment.
+stun (stop-power effect),,fek-poz,noun,state,[COMPOUND] fek (stop) + poz (power). Stop-power = a stun.
+server ping / latency,,sek-chron,,,[COMPOUND] sek (signal arrival) + chron (time). Signal-time = server latency ping.
+facet / choice node / side,,muz,,,[INVENTED] A hero facet/choice point. muz=choice-point.
+consumable (temp item),,tiv,,,[INVENTED] Consumable-item root. Used for temporary single-use items and consumable item blocks.
+core / essential items,,sirirth,,,[INVENTED] Core/essential. sir=essential + irth=foundation.
+radiant faction,,sol-nith,noun,compound,[COMPOUND] sol (light/radiant) + nith (land/side). Light-force = Radiant.
+dire faction,,omoz-nith,noun,compound,[COMPOUND] omoz (darkness) + nith (land/side). Dark-force = Dire.
+patch / game version,,galo,,,[INVENTED] Game version/patch. gal=revision + o=state.
+support (role),,lefs,,,[INVENTED] Support role. lefs=sustain-function.
+increase / go up,,foth,,,[INVENTED] Positive increase. foth=rise-state. 'ves foth shith' = only positive lane.
+blink dagger (item),,Vokthok-dlast,noun,compound,[COMPOUND] velthok (blink) + dlast (blade). Travel-blade = Blink Dagger.
+arcane blink (item),,Ensh-Vokthok,noun,compound,[COMPOUND] knowledge/intelligence + blink
+swift blink (item),,Chrothosh-Vokthok,noun,compound,[COMPOUND] agility + blink
+overwhelming blink (item),,Poz-vokthok,noun,compound,[COMPOUND] strength + blink
+vanguard (big shield),,ashm'skarm,,,[COMPOUND] ashm' (bigger) + skarm (shield). Big-shield = Vanguard.
+power treads (big boots),,Poz-ashm'nidoz,noun,compound,[COMPOUND] poz (power) + ashm' (bigger) + nidoz  (boots)
+assault / battle intensity,,sath,,,[INVENTED] Combat intensity/assault. sath=combat-intensity.
+bottle / liquid-container (general),,molkast,,,"[COMPOUND] mol (liquid/fluid, from mol=dissolve/flow root) + kast (formed-object, instrument suffix). Liquid-container = bottle/flask. Used for the Bottle item and any flask-type vessel. Distinct from kethul (orb/spherical vessel) and droth-keth (soul-vessel/urn)."
+wraith band / shadow-wrap,,omoz-vreth,,,"[COMPOUND] omoz (shadow/dark, canonical) + vreth (wrap/band). Shadow-wrap = Wraith Band. The shadow-spirit energy bound into a wristband."
+trinket / small worn item,,vom'rast,noun,objects,"[COMPOUND] vom' (lesser prefix, established) + rast (item/toy, established). Lesser-item = trinket. Small wearable accessory/charm. Distinct from amul (amulet = protective charm worn with intent), vom'rast = small decorative/functional item. Used in: Holv-Vom'Rast (Null Talisman), Ses-Vom'Rast (Talisman of Evasion)."
+falling stone / meteor,,dozketh,noun,nature,[DERIVED] doz (downward) + keth (stone
+skull (head-stone),,enchaketh,noun,nature,[DERIVED] head + stone
+shadow-vapor / smoke of concealment,,omoz-vapth,,,"[COMPOUND] omoz (shadow/dark/deception, established) + vapth (vapor/cloud). Shadow-vapor = concealment smoke. Smoke of Deceit = Omoz-Vapth. The dark cloud that deceives and hides."
+medallion / power-emblem,,poz-gilath,,,[COMPOUND] poz (power/courage) + gilath (emblem/mark). Power-emblem = Medallion of Courage. A badge of power and bravery.
+skull hammer (skull basher),,Skav-keth-pozlast,noun,compound,[COMPOUND] skull + hammer
+solar emblem / sacred crest,,sol-gilath,,,"[COMPOUND] sol (sacred/light/radiant, canonical) + gilath (emblem/mark). Sacred-emblem = Solar Crest. The radiant badge that bestows divine protection."
+diadem / sacred-peak crown,,Sol-Gorn,,,"[COMPOUND] sol (sacred/light/radiant, canonical) + gorn (peak/top, from arkgorn=Crown). Sacred-peak = diadem. Contrast with Arkgorn (mastery-peak = Crown) — where Crown is authority, Diadem is radiance. Neutral item granting all stats."
+spectral / ethereal-void (adjective),,Hol'ethiresh,,,"[COMPOUND] hol (void, short for hollom) + ethir (ethereal quality) + -esh (adjective suffix) = 'of void-ethereal nature.' Brand name for Spectral.gg."
+hub / gathering-center,,gliskesk,,,[INVENTED] glis (flow/gathering) + kesk (fixed-center structure) = gathering-center. Used for 'Spectral Stats Hub'.
+month / moon-cycle (time unit),,wroth-chron,,,"[COMPOUND] wroth (canonical: the going-again, returning motion = cycle) + chron (time) = cycle-time = month. Fits the chron-based time system: vom'chron=minute, wroth-chron=month."
+ranked / competitive-grade (adjective),,saz,,,"[INVENTED] saz = graded/ranked by merit. Used consistently for 'Ranked' mode in Dota 2 (Ranked matches, Ranked stats)."
+report / compiled document,,vorsk,,,"[INVENTED] vorsk = a compiled, structured record of events. vors=gather-record + k=finalized. Plural: vorskai."
+reports (plural),,vorskai,,,[DERIVED] vorsk (report) + -ai (plural suffix) = compiled reports. Follows standard Ozhkavosh plural convention.
+notice / alert / warning,,vask,,,"[INVENTED] vask = a short warning or data-quality alert. Short, harsh consonant cluster."
+tag / short label / identifier,,shriv,,,[INVENTED] shriv = a compact identifier or label. shr- consonant cluster (Ozhkavosh-style) + -iv ending. Used for league tags and team tags.
+search / seek / look for,,shev,,,[INVENTED] shev = search/seek. Replaces prior collision where 'thov' was reused for 'search'.
+hover / inspect (interactive action),,shov,,,[INVENTED] shov = hover or interactive inspect action. Used as 'shov vosf' = 'hover over' (UI interaction). Related form: shovz (hover-action ongoing).
+list / sequence,,sash,,,"[INVENTED] sash = a list or ordered sequence. Used for 'Reports List' (Vorskai sash), 'Categories List' (Catqai sash). Short and clean."
+donations / act of giving,,lefth,,,[INVENTED] lef (give/offer freely) + th (act/result) = act of giving. Used for 'Donations' and 'Donations this month' (Lefth zoth wroth-chron).
+league / competition / battle-group,,rashk,,,[INVENTED] rashk = structured competition group. rash (battle-form) + k (finalized-structure). 'Group of structured battles' = tournament/league. Plural: rashkai.
+leagues (plural),,rashkai,,,[DERIVED] rashk (league) + -ai (plural suffix). Follows standard Ozhkavosh plural convention.
+pro / professional (short adjective),,hesh,,,[SHORT FORM] Abbreviated form of hedoqesh (hedoq=best + esh=adj). Used as the practical 'pro' label. shosiz-hesh = semi-pro. Full form: hedoqesh.
+ally / comrade (individual),,kesh,,,"[INVENTED] kesh = ally/comrade in battle. Harsh consonant-closed syllable, Ozhkavosh-style. Root for keshai (allies plural)."
+allies / combos (plural),,keshai,,,"[DERIVED] kesh (ally) + -ai (plural suffix) = allies/comrades. Used for 'Combos' (hero/player ally groupings), Lane Combos (Shith keshai), Full hero combinations (keshai gok)."
+pairs / duos (plural of two),,duvai,noun,generic,[DERIVED] two plural
+trios,,renai,noun,generic,[DERIVED] three plural
+description / explanation,,tharv,,,[INVENTED] tharv = a textual description or explanation. thar (explain/describe-root) + v (output/result). Used as UI label for 'Description' fields. Distinct from nesh (name) and eyik (view).
+expected / projected (calculated-forward),,thozich,,,[INVENTED] thozich = expected/projected value. thoz (calculated result) + ich (from icha = forward-potential). 'thozich thov' = expected count.
+Break / breaker,1,vrak,,,"[INVENTED] break, breaker, general meaning of destroying something"
+access,1,aksh,,,[ADAPTED/INVENTED] access
+,5,an,,,"[USAGE] [notice_missing_data] Zoth vorsk lishsh datom fram an matsh, zith ucha vo' th | [desc_meta_graph] Zoth fath shorg thav ofn vrazhai ucha veshui ovtho. luz"
+today,,,,,
+yesterday,,,,,
+apex,,arkpozh,noun,state,"[DERIVED] poz+mastery, meaning the pinaccle of power"
+dominant,,arkrath,,,[USAGE] [itemid1648] Arkrath (Dominant) | [AUTO-GUESS] from item-name pattern.
+thick,,ashgrakh,,,[USAGE] [itemid1650] Ashgrakh (Thick) | [AUTO-GUESS] from item-name pattern.
+,,vo'ushoth,,,[USAGE] [shady_alert
+?? By / position,,bi,,,[USAGE] [team_first_total_role] Bi bov | [team_first_region_positions] Bi nithv vak bov | [AUTO-GUESS] positional candidates from [team_first_total_role]: By / position
+?? and / Families / of,,daglik,,,[USAGE] [cat_group_orgs] Dragath diti vak daglik doq rufa | [AUTO-GUESS] positional candidates from [cat_group_orgs]: and / Families / of
+ratio,,daq,,,[USAGE] [ratio] Daq | [ratio_pos] Daq
+?? Professional / Competitive,,daza,,professional,[USAGE] [main_specgg_desc_long] Daza grithurth vak shus pozgorvesh Dota 2 gok tak murfa | [AUTO-GUESS] positional candidates from [main_specgg_desc_long]: Professional / Competitive
+?? Unique / heroes,,dazuq,,,[USAGE] [team_players_unique_heroes] Dazuq vrazhai dregros murf | [AUTO-GUESS] positional candidates from [team_players_unique_heroes]: Unique / heroes
+?? Shortest / match,,desdith,,smallest time,[USAGE] [shortest_match] Desdith voth | [AUTO-GUESS] positional candidates from [shortest_match]: Shortest / match
+restorative,,deshrath,,healing,[USAGE] [itemid1649] Deshrath (Restorative) | [AUTO-GUESS] from item-name pattern.
+?? automatically / generated / report,,deshv,,,[USAGE] [over-pregen-report] Zoth acha thev deshv vorsk tak | [builds_desc_1] Zoth larth acha deshv morz doq rast larth thok-chron nu | [AUTO-GUESS] positional candidates from [over-pregen-report]: automatically / generated / report
+?? Long / description,,deskr,,,[USAGE] [main_default_desc_long] Ulath deskr | [main_default_intance_desc] Kraze deskr | [AUTO-GUESS] positional candidates from [main_default_desc_long]: Long / description
+?? Rampage / with,,desv,,,[USAGE] [lowest_rampage] Desv weth vedresh drav meshfuz-lieyev vunz | [highest_rampage] Desv weth dith drav meshfuz-lieyev vunz | [AUTO-GUESS] positional candidates from [lowest_rampage]: Rampage / with
+stacks (neutral camps stacked) / stack-pile,,droghaish-groth,,,[DERIVED] droghaish (forest/jungle) + groth (build/grow/pile). Used for [stacks]/[neutral_camps_stacked].
+stacks (short form),,drogroth,,,[DERIVED] contraction of droghaish-groth. Used for [stacks_s].
+others,1,dili,,,[USAGE] [region199] Dili
+?? Tournament / Organizers / and,,diti,,,[USAGE] [cat_group_orgs] Dragath diti vak daglik doq rufa | [AUTO-GUESS] positional candidates from [cat_group_orgs]: Tournament / Organizers / and
+cost,,diz,,,[USAGE] [item_cost] Diz | [builds_desc_1] Zoth larth acha deshv morz doq rast larth thok-chron nu
+?? Obs / Wards,,dosis,,,[USAGE] [wards_destroyed] Dosis vethkast nunerth | [wards_lost] Dosis vethkast miskath tak kish'izhai | [AUTO-GUESS] positional candidates from [wards_destroyed]: Obs / Wards
+?? Tournament / Organizers,,dragath,,,[USAGE] [cat_group_orgs] Dragath diti vak daglik doq rufa | [desc_teams_summary] Zoth fath mavsh dravai' fomog gok neqos za dragath. | [AUTO-GUESS] positional candidates from [cat_group_orgs]: Tournament / Organizers
+?? Active / players,,draglas,,,[USAGE] [roster] Draglas murfai | [active_roster] Draglas thash | [AUTO-GUESS] positional candidates from [roster]: Active / players
+?? Outcome / Impact,,dragre,,,[USAGE] [outcome_impact] Dragre impaq | [desc_laning_4] Ther acha sum zhizuz vak ves gruzaq krusov zetsh tak ru | [AUTO-GUESS] positional candidates from [outcome_impact]: Outcome / Impact
+nickname,,drimo,,,[USAGE] [player_nickname] Drimo
+?? Report / Generator / Instance,,drodrirth,,,[USAGE] [main_default_instance_name] Rashk vorsk drodrirth nomask | [AUTO-GUESS] positional candidates from [main_default_instance_name]: Report / Generator / Instance
+?? Pro / Circuit,,drono,,,[USAGE] [cat_group_dpc] Dota hesh drono | [AUTO-GUESS] positional candidates from [cat_group_dpc]: Pro / Circuit
+sponsor,,arkgreesh,noun,actors,[DERIVED] loan master
+?? metric / estimates / how,,drukra,,,[USAGE] [desc_balance] Vrak vovun drukra thav graz za fash acha (0 tak 100) | [AUTO-GUESS] positional candidates from [desc_balance]: metric / estimates / how
+?? Heroes / present / in,,druton,,,[USAGE] [series_heroes] Vrazhai druton in zhai'voth vothai | [AUTO-GUESS] positional candidates from [series_heroes]: Heroes / present / in
+?? Godlike / sprees,,dunu,,,[USAGE] [godlikes] Dunu vole | [AUTO-GUESS] positional candidates from [godlikes]: Godlike / sprees
+critical,,far,,,[USAGE] [item_time_critical] Far | [item_time_critical_long] Far chron-kez
+meta,,fash,,,[USAGE] [meta_graph] Fash fath | [cat_meta] Fash
+?? longest / streak / of,,fashuth,,,[USAGE] [team_series_win_streak] Drav weth ulathdith fashuth doq zhai'voth hollom miskai | [team_series_loss_streak] Drav weth ulathdith fashuth doq miskath zhai'voth | [AUTO-GUESS] positional candidates from [team_series_win_streak]: longest / streak / of
+ninja,,sesmoq,noun,actors,[DERIVED] hidden person
+?? wards / planted,,favask,,,[USAGE] [obs_total] meshfuz keskuth vethkast favask | [AUTO-GUESS] positional candidates from [obs_total]: wards / planted
+pavise,,favish,,,[USAGE] [itemid1127] Suzm: Favish (Pavise Recipe) | [itemid1128] Favish (Pavise) | [AUTO-GUESS] from item-name pattern.
+?? Favorite / heroes,,favr,,,[USAGE] [top_pick_heroes] Favr vrazhai | [top_pick_pairs] Favr duvai | [AUTO-GUESS] positional candidates from [top_pick_heroes]: Favorite / heroes
+?? to / filter,,filth,,,[USAGE] [filter_placeholder] Mask tho tak filth... | [AUTO-GUESS] positional candidates from [filter_placeholder]: to / filter
+flicker,,flikr,,,[USAGE] [itemid335] Flikr (Flicker) | [AUTO-GUESS] from item-name pattern.
+?? Highest / averages,,fosh,,,[USAGE] [haverages] Dith fosh | [AUTO-GUESS] positional candidates from [haverages]: Highest / averages
+?? Crucial / timings,,fothek,,,[USAGE] [icritical] Fothek chron-ashm | [AUTO-GUESS] positional candidates from [icritical]: Crucial / timings
+,,fram,,,"[USAGE] [notice_old_source1] Zoth vorsk lishsh datom fram ker lashkai doq glura 1 Do | [notice_source1] Zoth vorsk lishsh datom fram glura 1 Dota, sum gifu tiq"
+?? this / site,,fudul,,,[USAGE] [main_about_site] Doq zoth fudul | [AUTO-GUESS] positional candidates from [main_about_site]: this / site
+?? Nothing / too / special,,fum,,,[USAGE] [build_item_type_regular_explain] Gikrez fum resmv | [desc_laning_2] Shith shos doq a lefs acha morz doq a meshfuz-lieyev do | [AUTO-GUESS] positional candidates from [build_item_type_regular_explain]: Nothing / too / special
+?? For / heroes,,fur,,,[USAGE] [items_most_impactful_heroes_header] Fur vrazhai | [builds_desc_1] Zoth larth acha deshv morz doq rast larth thok-chron nu | [AUTO-GUESS] positional candidates from [items_most_impactful_heroes_header]: For / heroes
+?? purchase / ranks,,futhoz,,,[USAGE] [item_profile_heroes_best_rank] Vrazhai weth hedoq thars futhoz | [item_profile_heroes_worst_rank] Vrazhai weth vo'hedoq thars futhoz | [AUTO-GUESS] positional candidates from [item_profile_heroes_best_rank]: purchase / ranks
+Gate / doorway,,grothet,noun,objects,"[INVENTED] gateway/window, literally “open” + -et as domain/noun marker"
+?? for / selected / tag,,gazlsh,,,[USAGE] [noreports_desc] Vo vorskai lemz tak gazlsh shriv | [pairs_desc] Trukuth-lash vunz acha thoz mothe tak gazlsh vrazh-izh  | [AUTO-GUESS] positional candidates from [noreports_desc]: for / selected / tag
+?? Notable / matches,,gegrak,,,[USAGE] [notable_matches] Gegrak vothai | [items_overview_timings_header] Foshk gegrak chron-ashm sol-vothai | [AUTO-GUESS] positional candidates from [notable_matches]: Notable / matches
+headdress,,gheldresh,,,[USAGE] [itemid93] Suzm: Gheldresh (Recipe: Headdress) | [itemid94] Gheldresh (Headdress)
+,,gifu,,,"[USAGE] [notice_source1] Zoth vorsk lishsh datom fram glura 1 Dota, sum gifu tiq | [notice_mixed_old_source1] Zoth vorsk lishsh datom fram glura 1 Dota, rafs vothai "
+?? Nothing / too,,gikrez,,,[USAGE] [build_item_type_regular_explain] Gikrez fum resmv | [AUTO-GUESS] positional candidates from [build_item_type_regular_explain]: Nothing / too
+?? see / his / performance,,gladrisk,,,[USAGE] [desc_heroes_hvh] Retu a vrazh tak vis gladrisk driv tez shish vrazhai | [desc_players_pvp] Retu a murf tak vis gladrisk thozos tez shish rashk ske | [AUTO-GUESS] positional candidates from [desc_heroes_hvh]: see / his / performance
+?? Freshly / updated,,glileth,,,[USAGE] [noleague_desc] Glileth shashn vorskai | [AUTO-GUESS] positional candidates from [noleague_desc]: Freshly / updated
+?? went / wrong,,glirosk,,,[USAGE] [fatal_error_desc] Zhidre thison glirosk. | [AUTO-GUESS] positional candidates from [fatal_error_desc]: went / wrong
+awards,,glivrok,,,[USAGE] [fantasy_summary_desc] Zoth fen trokos driv morz doq tremok soshuk vak kretaz. | [total_awards] meshfuz glivrok
+?? Parties / Graph,,glumom,,,[USAGE] [party_graph] Glumom fath | [AUTO-GUESS] positional candidates from [party_graph]: Parties / Graph
+profiles,,glusa,,,"[USAGE] [profiles] Glusa | [desc_meta_graph_add] Fash fath lishsh ves fetl 20% doq vrazh duvai, alosh ra"
+?? fantasy / performance / points,,goglu,,,[USAGE] [fantasy_summary_desc] Zoth fen trokos driv morz doq tremok soshuk vak kretaz. | [total_points_fantasy] meshfuz goglu | [AUTO-GUESS] positional candidates from [fantasy_summary_desc]: fantasy / performance / points
+?? how / balanced / the,,graz,,,[USAGE] [desc_balance] Vrak vovun drukra thav graz za fash acha (0 tak 100) | [AUTO-GUESS] positional candidates from [desc_balance]: how / balanced / the
+?? Professional / Competitive / and,,grithurth,,,[USAGE] [main_specgg_desc_long] Daza grithurth vak shus pozgorvesh Dota 2 gok tak murfa | [shady_alert] Zoth rashk (ur sev) luv skazan zeglusk in toskith glisa | [AUTO-GUESS] positional candidates from [main_specgg_desc_long]: Professional / Competitive / and
+?? Biggest / difference,,grivush,,,[USAGE] [biggest_nw_difference] Grivush vunz in lieyev ern | [match_stomp] Voth weth grivush rorg | [AUTO-GUESS] positional candidates from [biggest_nw_difference]: Biggest / difference
+?? common / laners / value,,grokus,,,[USAGE] [data_filter_lane_rate] Ves tharush grokus (%value%%) | [AUTO-GUESS] positional candidates from [data_filter_lane_rate]: common / laners / value
+?? Eastern / Europe,,grovak,,,[USAGE] [region1022] Grovak europzhi | [AUTO-GUESS] positional candidates from [region1022]: Eastern / Europe
+?? least / one / purchase,,gruzaq,,,[USAGE] [matches_cons_all] Tho vom gruzaq thars meze tiv | [desc_heroes_positions] Zoth fen mavsh gok tak vrazhai' driv doq treq bovai. bo | [AUTO-GUESS] positional candidates from [matches_cons_all]: least / one / purchase
+?? have / enough / data,,guf,,,[USAGE] [builds_partial] Zoth larth gonush lem guf datom in za rast thok-chron n | [items_stats_empty] Ther acha vo' guf datom :( | [AUTO-GUESS] positional candidates from [builds_partial]: have / enough / data
+?? Avg / Win,,gugav,,,[USAGE] [avg_win_len_s] Gugav trukuth chron | [lane_avg_gold_diff] Gugav zuke | [AUTO-GUESS] positional candidates from [avg_win_len_s]: Avg / Win
+horizon's equilibrium,,horizn,,,[USAGE] [itemid2098] Horizn-Ekval (Horizon's Equilibrium) | [itemid312] Horizn (Horizon) | [AUTO-GUESS] from item-name pattern.
+imp,,imp,name,nature,Unchanged
+?? Outcome / Impact,,impaq,,,"[USAGE] [outcome_impact] Dragre impaq | [builds_desc_2] Evr gekesh vogs ves gruzaq larth. rolerth, izh icha ofn | [AUTO-GUESS] positional candidates from [outcome_impact]: Outcome / Impact"
+,,in,,,[USAGE] [shady_alert] Zoth rashk (ur sev) luv skazan zeglusk in toskith glisa | [enchantments_recalc_notice] Poz-rastai datom in zoth vorsk ucha fushush vak shashn 
+india,,indizh,name,names,[ADAPTED] India
+?? Winrate / increase,,inkrath,,,[USAGE] [items_winrate_increase] Trukuth-lash inkrath | [build_item_type_strong_explain] Metroz dith trukuth-lash inkrath wen tharush | [AUTO-GUESS] positional candidates from [items_winrate_increase]: Winrate / increase
+,,it,,,"[USAGE] [notice_wc3] Zoth vorsk lishsh ker alfz datom vak gesaz-Dota 2 gok,  | [builds_partial] Zoth larth gonush lem guf datom in za rast thok-chron n"
+?? First / quantile / purchases,,kantileth,,,[USAGE] [q1_cons_all] Rugh kantileth tharesh meze tiv (meshfuz) | [q3_cons_all] Ter kantileth tharesh meze tiv (meshfuz) | [AUTO-GUESS] positional candidates from [q1_cons_all]: First / quantile / purchases
+counters,,kantorai,,,[USAGE] [counters] Kantorai doq-eyik | [hvh] Kantorai
+?? Laning / stats / calculation,,karth,,,[USAGE] [laning_desc] Izh icha menth shilg doq razm gok karth in FAQ fen | [AUTO-GUESS] positional candidates from [laning_desc]: Laning / stats / calculation
+Mode / ruleset,,kask,,,[USAGE] [game_modes] Voth kask
+?? Events / hosted / by,,kertheq,,,[USAGE] [cat_group_valve] Ofizh rufa (kertheq acha trovov) | [AUTO-GUESS] positional candidates from [cat_group_valve]: Events / hosted / by
+?? About / me,,kes,,,[USAGE] [main_about_me] Doq kes | [explain_summary] Suv zoth tak kes | [AUTO-GUESS] positional candidates from [main_about_me]: About / me
+?? Total / observer / wards,,keskuth,,,[USAGE] [obs_total] meshfuz keskuth vethkast favask | [obs_killed_total] meshfuz keskuth vethkast nunerth | [AUTO-GUESS] positional candidates from [obs_total]: Total / observer / wards
+?? against / another / player,,kevoz,,,[USAGE] [desc_players_pvp_grid] Zoth fathlarth shorg murf-izh trukuth-lash tez kevoz mu | [desc_tvt] Zoth fathlarth shorg drav-izh trukuth-lash tez kevoz dr | [AUTO-GUESS] positional candidates from [desc_players_pvp_grid]: against / another / player
+,,kez,,,[USAGE] [item_timing] Chron-kez | [items_early_wr_long] Trukuth-lash weth ker chron-kez
+china,,kina,name,names,[ADAPTED] China
+?? Most / impactful / items,,kisen,,,[USAGE] [items_most_impactful_header] Foshk kisen rastai | [items_most_impactful_desc] In za rastai rogrev izh sush vis treq rastai gok. doq-e | [AUTO-GUESS] positional candidates from [items_most_impactful_header]: Most / impactful / items
+website,,kishkis,,,[USAGE] [website] Kishkis | [website_long] Ofizh kishkis
+?? search / commands,,komandqai,,,[USAGE] [search_info_link] Doq thov komandqai | [AUTO-GUESS] positional candidates from [search_info_link]: search / commands
+?? a / single / match,,korth,,,[USAGE] [buybacks_in_game] Zams meshfuz in a korth voth | [time_dead_total_game] meshfuz chron zatar in a korth voth | [AUTO-GUESS] positional candidates from [buybacks_in_game]: a / single / match
+?? Header / description,,kraze,,,[USAGE] [main_default_intance_desc] Kraze deskr | [AUTO-GUESS] positional candidates from [main_default_intance_desc]: Header / description
+?? gm / gamemode,,kreskash,,,[USAGE] [over-one-mode] Sam vothai ucha kruva in %gm% kreskash. | [over-most-mode] %num% vothai ucha kruva in %gm% kreskash. | [AUTO-GUESS] positional candidates from [over-one-mode]: gm / gamemode
+?? Recently / Ongoing,,kresom,,,[USAGE] [cat_ongoing] Kresom ach-voth | [AUTO-GUESS] positional candidates from [cat_ongoing]: Recently / Ongoing
+?? Fewest / deaths,,krikre,,,[USAGE] [fewest_deaths_by_team] Krikre gang doq a drav in a voth | [AUTO-GUESS] positional candidates from [fewest_deaths_by_team]: Fewest / deaths
+?? South / Africa,,krokresh,,,[USAGE] [region11] Suvth krokresh | [AUTO-GUESS] positional candidates from [region11]: South / Africa
+uncontested,,krovurth,,,[USAGE] [heroes_uncontested] Vrazhai krovurth
+factor,,krusov,,,[USAGE] [sti_factor] Krusov | [desc_laning_4] Ther acha sum zhizuz vak ves gruzaq krusov zetsh tak ru
+?? matches / played,,kruva,,,[USAGE] [over-matches] Ther ucha %NUM% vothai kruva. | [over-one-version] Sam vothai ucha kruva doq %ver% galo. | [AUTO-GUESS] positional candidates from [over-matches]: matches / played
+?? Other / Tournaments,,kusuq,,,[USAGE] [cat_other] Shish kusuq | [AUTO-GUESS] positional candidates from [cat_other]: Other / Tournaments
+,,lazenshez,,,[DERIVED] four (laz) + staff (ahm’enshez) or wand → lazenshez
+americas,,lasham,,,[USAGE] [region108] Lasham
+?? per / day,,lashk,,,[USAGE] [matches_per_day] Vothai dregros lashk | [AUTO-GUESS] positional candidates from [matches_per_day]: per / day
+days,,lashkai,,,[USAGE] [notice_old_source1] Zoth vorsk lishsh datom fram ker lashkai doq glura 1 Do | [notice_mixed_source1] Zoth vorsk lishsh vokai datom fram drosa glura 1 vak 2 
+winner,,ler,,,[USAGE] [winner] Ler | [np_winner] Lash voth ler
+?? Fatal / Error,,lerl,,,[USAGE] [fatal_error_title] Lerl zokh | [AUTO-GUESS] positional candidates from [fatal_error_title]: Fatal / Error
+?? Social / Links,,lezsh,,,[USAGE] [main_social] Lezsh zigra | [AUTO-GUESS] positional candidates from [main_social]: Social / Links
+?? to / lim,,lim,,,[USAGE] [desc_meta_graph] Zoth fath shorg thav ofn vrazhai ucha veshui ovtho. luz | [AUTO-GUESS] positional candidates from [desc_meta_graph]: to / lim
+?? Less / Experienced / Players,,losk,,,[USAGE] [wrp_q1_players] Vom losk murfai | [wrp_q3_players] Ashm losk murfai | [AUTO-GUESS] positional candidates from [wrp_q1_players]: Less / Experienced / Players
+moon shard,,lunak,,,[USAGE] [itemid246] Suzm: Lunak-Vom'Keth (Recipe: Moon Shard) | [itemid247] Lunak-Vom'Keth (Moon Shard) | [AUTO-GUESS] from item-name pattern.
+?? Hero / Pool,,luz,,,[USAGE] [hero_pool] Vrazh luz | [widest_hero_pool] Murf weth tethik vrazh luz | [AUTO-GUESS] positional candidates from [hero_pool]: Hero / Pool
+misc,,maki,,,[USAGE] [permagroup] Maki
+?? Recent / matches,,mang,,,[USAGE] [recent_matches] Mang vothai | [noleague_cap] Mang vorskai | [AUTO-GUESS] positional candidates from [recent_matches]: Recent / matches
+,,matsh,,,"[USAGE] [notice_missing_data] Zoth vorsk lishsh datom fram an matsh, zith ucha vo' th | [teams_on_event] Dravai doq matsh"
+mekansm,,mekan,,,[USAGE] [itemid78] Suzm: Mekan (Recipe: Mekansm) | [itemid79] Mekan (Mekansm) | [AUTO-GUESS] from item-name pattern.
+?? can / find / details,,menth,,,[USAGE] [laning_desc] Izh icha menth shilg doq razm gok karth in FAQ fen | [search_submit] Menth shoth | [AUTO-GUESS] positional candidates from [laning_desc]: can / find / details
+?? Incredibly / high,,metroz,,,[USAGE] [build_item_type_strong_explain] Metroz dith trukuth-lash inkrath wen tharush | [AUTO-GUESS] positional candidates from [build_item_type_strong_explain]: Incredibly / high
+?? Loss / to,,misk,,,[USAGE] [laning_loss_to_win] Misk tak trukuth | [AUTO-GUESS] positional candidates from [laning_loss_to_win]: Loss / to
+?? without / losses,,miskai,,,[USAGE] [team_series_win_streak] Drav weth ulathdith fashuth doq zhai'voth hollom miskai | [AUTO-GUESS] positional candidates from [team_series_win_streak]: without / losses
+main,,mosh,,,[USAGE] [main_region] Mosh nithv | [common_position] Mosh bov
+?? Teams / Summary,,muf,,,[USAGE] [summary_teams] Dravai muf | [vsummary] Muzai muf | [AUTO-GUESS] positional candidates from [summary_teams]: Teams / Summary
+?? Early / preview,,muvrusk,,,[USAGE] [earlypreview] Ker muvrusk | [AUTO-GUESS] positional candidates from [earlypreview]: Early / preview
+plural of facet / choice node,,muzai,,,[USAGE] [variantspb] Sath weth muzai | [variants] Muzai
+?? frequent / least / effective,,muzush,,,"[USAGE] [team_aranked_picks] Foshk muzush, vom pozmuth veshai acha drav | [team_aranked_bans] Foshk muzush, vom pozmuth tez za drav | [AUTO-GUESS] positional candidates from [team_aranked_picks]: frequent / least / effective"
+mjollnir,,myolnir,,,[USAGE] [itemid157] Suzm: Myolnir (Recipe: Mjollnir) | [itemid158] Myolnir (Mjollnir) | [AUTO-GUESS] from item-name pattern.
+?? a / cell / to,,nak,,,[USAGE] [desc_players_pvp_grid] Zoth fathlarth shorg murf-izh trukuth-lash tez kevoz mu | [desc_tvt] Zoth fathlarth shorg drav-izh trukuth-lash tez kevoz dr | [AUTO-GUESS] positional candidates from [desc_players_pvp_grid]: a / cell / to
+?? Contest / Rate,,nal,,,[USAGE] [contest_rate] Nal lash | [AUTO-GUESS] positional candidates from [contest_rate]: Contest / Rate
+necronomicon,,Ozka-henshet,noun,compound,[COMPOUND] Demon tome
+?? values / across / all,,neqos,,,[USAGE] [desc_records] Zoth fen mavsh datom doq dith ur vedresh gorvai neqos s | [desc_heroes_positions] Zoth fen mavsh gok tak vrazhai' driv doq treq bovai. bo | [AUTO-GUESS] positional candidates from [desc_records]: values / across / all
+show,,neth,,,[USAGE] [show_tags] Neth sam catqai | [see_more_cats] Neth sam
+?? page / shows / a,,nethg,,,"[USAGE] [desc_heroes_hvh_2] Za mert nethg a vrazh-izh thozos tez redaq vroth, meze  | [desc_heroes_counters_pairs] Zoth mert nethg duvai doq vrazhai doq shaz dravai thot  | [AUTO-GUESS] positional candidates from [desc_heroes_hvh_2]: page / shows / a"
+new,,nev,,,[USAGE] [desc_draft_explainer] Zoth fen shorg gok tak tremok kith thoklashai. ech thok | [section_marker_new] Nev
+?? consumable / usage / stats,,nevsh,,,[USAGE] [items_overview_consumables_blocks_all_header] meshfuz tiv nevsh gok | [items_overview_consumables_blocks_roles_header] Tiv nevsh gok acha gekesh tho 10 gaskai | [AUTO-GUESS] positional candidates from [items_overview_consumables_blocks_all_header]: consumable / usage / stats
+?? builds / guides / item,,nez,,,"[USAGE] [system_meta_keywords] Dota 2 gok, Dota 2 gok, Dota 2, gok, Dota, vrazh larth, | [AUTO-GUESS] positional candidates from [system_meta_keywords]: builds / guides / item"
+?? draft / happened / Bigger,,nin,,,[USAGE] [desc_draft_tree] Kith nushk acha a naskis tak vismv shor kith larth vak  | [region5] Nin azh | [AUTO-GUESS] positional candidates from [desc_draft_tree]: draft / happened / Bigger
+region,,nithv,,,[USAGE] [variants_regions] Muzai dregros nithv | [main_region] Mosh nithv
+regions,,nithvai,,,[USAGE] [regions] Nithvai
+?? Generator / Instance,,nomask,,,[USAGE] [main_default_instance_name] Rashk vorsk drodrirth nomask | [empty_instance_cap] Lieyev nomask | [AUTO-GUESS] positional candidates from [main_default_instance_name]: Generator / Instance
+?? Efficiency / on,,noq,,,[USAGE] [lane_efficiency] Noq doq shith | [pairs_desc_2] Dither pozgorv skugu thot za rez doq vrazhai acha ashm  | [AUTO-GUESS] positional candidates from [lane_efficiency]: Efficiency / on
+?? Unpicked / heroes,,nothen,,,[USAGE] [heroes_unpicked] Nothen vrazhai | [AUTO-GUESS] positional candidates from [heroes_unpicked]: Unpicked / heroes
+?? on / earned / fantasy,,novoth,,,[USAGE] [fantasy_summary_desc] Zoth fen trokos driv morz doq tremok soshuk vak kretaz. | [fantasy] Novoth & He.Mu | [AUTO-GUESS] positional candidates from [fantasy_summary_desc]: on / earned / fantasy
+?? wards / destroyed,,nunerth,,,[USAGE] [obs_killed_total] meshfuz keskuth vethkast nunerth | [radiant_avg_wards_destroyed] Fomog vethkast nunerth dregros voth acha Sol-nith | [AUTO-GUESS] positional candidates from [obs_killed_total]: wards / destroyed
+?? Networth / comeback / by,,nushg,,,[USAGE] [comeback] meshfuz-lieyev nushg acha a drav | [match_comeback] Voth weth grivush nushg | [AUTO-GUESS] positional candidates from [comeback]: Networth / comeback / by
+?? incorrect / due / to,,nuv,,,[USAGE] [desc_inaccurate_draft] Kith thoklashai datom sush acha nomask nuv tak gifu mas | [desc_laning_4] Ther acha sum zhizuz vak ves gruzaq krusov zetsh tak ru | [AUTO-GUESS] positional candidates from [desc_inaccurate_draft]: incorrect / due / to
+patches,,nuvaz,,,[USAGE] [patches] Nuvaz
+?? extremely / often,,ofn,,,[USAGE] [build_item_type_common_explain] Tharush ahm' ofn | [sti_items_explainer] Zoth fen mavsh gok tak nars rastai vak tiv. nars rastai | [AUTO-GUESS] positional candidates from [build_item_type_common_explain]: extremely / often
+outcome impact (abbr),,oi,,end manipulate,[USAGE] [outcome_impact_s] OI
+parasma,,parasma,,,[USAGE] [itemid1805] Suzm: Parasma (Parasma Recipe) | [itemid1806] Parasma (Parasma)
+?? top / per / of,,per,,,"[USAGE] [desc_meta_graph_add] Fash fath lishsh ves fetl 20% doq vrazh duvai, alosh ra | [AUTO-GUESS] positional candidates from [desc_meta_graph_add]: top / per / of"
+peru,,peruzh,name,names,[ADAPTED] Peru
+perseverance,,pervr,,,[USAGE] [itemid68] Suzm: Pervr (Recipe: Perseverance) | [itemid69] Pervr (Perseverance) | [AUTO-GUESS] from item-name pattern.
+?? effective / picks / by,,pozmuth,,,"[USAGE] [team_best_ranked_picks] Foshk pozmuth veshai acha drav | [team_aranked_picks] Foshk muzush, vom pozmuth veshai acha drav | [AUTO-GUESS] positional candidates from [team_best_ranked_picks]: effective / picks / by"
+,,rafs,,,"[USAGE] [notice_mixed_old_source1] Zoth vorsk lishsh datom fram glura 1 Dota, rafs vothai  | [notice_mixed_to_source2] Zoth vorsk lishsh vokai datom fram glura 1 vak 2 Dota, "
+?? player / Click / on,,rasf,,,[USAGE] [desc_players_pvp_grid] Zoth fathlarth shorg murf-izh trukuth-lash tez kevoz mu | [desc_tvt] Zoth fathlarth shorg drav-izh trukuth-lash tez kevoz dr | [AUTO-GUESS] positional candidates from [desc_players_pvp_grid]: player / Click / on
+?? on / Laning / stats,,razm,,,[USAGE] [laning_desc] Izh icha menth shilg doq razm gok karth in FAQ fen | [laning_total] meshfuz razm gok | [AUTO-GUESS] positional candidates from [laning_desc]: on / Laning / stats
+,,reshg,,,[USAGE] [items_stats_desc] Trukuth-lash detri acha drotith in trukuth-lash nevs ta | [items_progression_list_desc] Desm sash nethg duvai doq rastai reshg gruzaq aft za sh
+?? too / special,,resmv,,,"[USAGE] [build_item_type_regular_explain] Gikrez fum resmv | [builds_desc_3] Ther acha teskin mask doq rastai: <b>verna</b>, <b>thar | [AUTO-GUESS] positional candidates from [build_item_type_regular_explain]: too / special"
+?? Choose / a,,retu,,,[USAGE] [desc_heroes_hvh] Retu a vrazh tak vis gladrisk driv tez shish vrazhai | [desc_players_pvp] Retu a murf tak vis gladrisk thozos tez shish rashk ske | [AUTO-GUESS] positional candidates from [desc_heroes_hvh]: Choose / a
+reaver,,reviur,,,[USAGE] [itemid53] Reviur (Reaver)
+results,,rezultqai,,,[USAGE] [search_header] Thov rezultqai
+?? View / all,,risiv,,,[USAGE] [items_enchantments_full] Risiv sam poz-rastai | [AUTO-GUESS] positional candidates from [items_enchantments_full]: View / all
+?? Networth / stomp / by,,rorg,,,[USAGE] [stomp] meshfuz-lieyev rorg acha a drav | [match_stomp] Voth weth grivush rorg | [AUTO-GUESS] positional candidates from [stomp]: Networth / stomp / by
+?? upcoming / events,,rufa,,,[USAGE] [cat_upcoming_description] Vorskai tak kur rufa | [cat_group_valve] Ofizh rufa (kertheq acha trovov) | [AUTO-GUESS] positional candidates from [cat_upcoming_description]: upcoming / events
+chart,,rum,,,[USAGE] [chart] Rum | [items_stats_desc] Trukuth-lash detri acha drotith in trukuth-lash nevs ta
+?? custom / league,,ruvz,,,[USAGE] [over-custom-league] ruvz rashk | [AUTO-GUESS] positional candidates from [over-custom-league]: custom / league
+russia,,ruzhki,name,names,[ADAPTED] Russia
+satchel,,sach,,,[USAGE] [itemid731] Sach (Satchel) | [AUTO-GUESS] from item-name pattern.
+?? assists / by / a,,sag,,,[USAGE] [most_assists_by_team] Foshk sag acha a drav in a voth | [contribution] Shen vak sag | [AUTO-GUESS] positional candidates from [most_assists_by_team]: assists / by / a
+?? Closest / match,,sakiv,,,[USAGE] [closest_match] Sakiv voth | [desc_laning_2] Shith shos doq a lefs acha morz doq a meshfuz-lieyev do | [AUTO-GUESS] positional candidates from [closest_match]: Closest / match
+sange and yasha,,sange,,,[USAGE] [itemid153] Suzm: Sange-Yasha (Recipe: Sange and Yasha) | [itemid154] Sange-Yasha (Sange and Yasha) | [AUTO-GUESS] from item-name pattern.
+link,,sast,,,[USAGE] [link] Sast | [latest_permalink] Mang vorsk sast
+?? Normal / item,,sessh,,,[USAGE] [build_item_type_regular] Sessh rast | [AUTO-GUESS] positional candidates from [build_item_type_regular]: Normal / item
+?? total / playtime,,sham,,,[USAGE] [longest_series_duration] Ulathdith zhai'voth acha meshfuz sham | [playtime] meshfuz sham | [AUTO-GUESS] positional candidates from [longest_series_duration]: total / playtime
+harmonizer,,sharakath,,,[USAGE] [itemid1863] Sharakath (Harmonizer) | [AUTO-GUESS] from item-name pattern.
+?? collected / and / recorded,,sharthom,,,[USAGE] [enchantments_recalc_notice] Poz-rastai datom in zoth vorsk ucha fushush vak shashn  | [desc_draft_targeted_bans_estimate_explainer] Murfai kith fen shorg thav ofn vrazhai tak zoth ruvash  | [AUTO-GUESS] positional candidates from [enchantments_recalc_notice]: collected / and / recorded
+updated,,shashn,,,"[USAGE] [notice_missing_data] Zoth vorsk lishsh datom fram an matsh, zith ucha vo' th | [enchantments_recalc_notice] Poz-rastai datom in zoth vorsk ucha fushush vak shashn "
+alternatives,,shashr,,,[USAGE] [builds_alt_subheader] Shashr | [builds_alts] Shashr
+?? them / passed / the,,shashz,,,[USAGE] [items_overview_sti_builds_no_builds] Vo nars larth rafs zoth rast (ur nushk doq thiv shashz  | [AUTO-GUESS] positional candidates from [items_overview_sti_builds_no_builds]: them / passed / the
+situation,,shes,,,[USAGE] [builds_situational_short] Shes | [region106] Shes ezt
+?? Parts / of,,shifg,,,[USAGE] [items_category_parts] Shifg doq shish rastai | [AUTO-GUESS] positional candidates from [items_category_parts]: Parts / of
+?? of / other / items,,shish,,,[USAGE] [items_category_parts] Shifg doq shish rastai | [cat_other] Shish kusuq | [AUTO-GUESS] positional candidates from [items_category_parts]: of / other / items
+?? uses / teams / data,,shorthom,,,[USAGE] [desc_teams_summary_softgen] Zoth fen shorthom dravai datom morz doq zuz vorsk. | [desc_players_summary_softgen] Zoth fen shorthom murfai datom morz doq zuz vorsk. | [AUTO-GUESS] positional candidates from [desc_teams_summary_softgen]: uses / teams / data
+?? general / information / about,,shovz,,,[USAGE] [desc_overview] Zoth mert ves mavsh gorf shovz doq rashk vak migru amth | [desc_players_pvp_grid] Zoth fathlarth shorg murf-izh trukuth-lash tez kevoz mu | [AUTO-GUESS] positional candidates from [desc_overview]: general / information / about
+?? purchase / variants,,shuq,,,[USAGE] [items_overview_sti_variants_header] Nars thars shuq | [AUTO-GUESS] positional candidates from [items_overview_sti_variants_header]: purchase / variants
+?? builds / immortal,,shus,,,"[USAGE] [system_meta_keywords] Dota 2 gok, Dota 2 gok, Dota 2, gok, Dota, vrazh larth, | [main_specgg_desc_long] Daza grithurth vak shus pozgorvesh Dota 2 gok tak murfa | [AUTO-GUESS] positional candidates from [system_meta_keywords]: builds / immortal"
+circlet,,sirklet,,,[USAGE] [itemid20] Sirklet (Circlet)
+?? Enchancements / Tier,,skaglu,,,[USAGE] [items_category_enhancement_tier_1] Skaglu - gik 1 | [items_category_enhancement_tier_2] Skaglu - gik 2 | [AUTO-GUESS] positional candidates from [items_category_enhancement_tier_1]: Enchancements / Tier
+?? Western / Europe,,skana,,,[USAGE] [region1021] Skana europzhi | [AUTO-GUESS] positional candidates from [region1021]: Western / Europe
+participants,,skese,,,[USAGE] [participants] Skese | [notable_paricipans] Gegrak skese
+?? You / don't / have,,skifu,,,[USAGE] [no_access_error_desc] Izh skifu lem aksh tak zoth fen. | [builds_desc_5] Za fen acha druskiv shothurth fuv nezuth kusas. za rugh | [AUTO-GUESS] positional candidates from [no_access_error_desc]: You / don't / have
+?? Seasonal / Major,,skuzo,,,[USAGE] [region2001] Skuzo nezuth | [AUTO-GUESS] positional candidates from [region2001]: Seasonal / Major
+boxplots,,sothosk,,,[USAGE] [bplots] Sothosk | [boxplots] Chron-ashm sothosk
+rampages,,surth,,,[USAGE] [rampages_total] Surth meshfuz | [rampages] Surth
+,,sush,,,"[USAGE] [notice_wc3] Zoth vorsk lishsh ker alfz datom vak gesaz-Dota 2 gok,  | [notice_old_source1] Zoth vorsk lishsh datom fram ker lashkai doq glura 1 Do"
+?? Explain / this,,suv,,,[USAGE] [explain_summary] Suv zoth tak kes | [AUTO-GUESS] positional candidates from [explain_summary]: Explain / this
+?? South / Korea,,suvth,,,[USAGE] [region4] Suvth zhise | [region10] Suvth amerizh | [AUTO-GUESS] positional candidates from [region4]: South / Korea
+deviation?,,tanis,,,[USAGE] [std_dev] Thask.tanis | [item_time_std_dev] Thask.tanis
+?? No / elements,,tavaq,,,[USAGE] [stats_no_elements] Vo tavaq :( | [desc_draft_tree] Kith nushk acha a naskis tak vismv shor kith larth vak  | [AUTO-GUESS] positional candidates from [stats_no_elements]: No / elements
+?? Third / quantile,,ter,,,[USAGE] [q3_cons_all] Ter kantileth tharesh meze tiv (meshfuz) | [items_stats_desc] Trukuth-lash detri acha drotith in trukuth-lash nevs ta | [AUTO-GUESS] positional candidates from [q3_cons_all]: Third / quantile
+?? with / Widest / Hero,,tethik,,,[USAGE] [widest_hero_pool] Murf weth tethik vrazh luz | [widest_hero_pool_team] Drav weth tethik vrazh luz | [AUTO-GUESS] positional candidates from [widest_hero_pool]: with / Widest / Hero
+?? stats / instead / This,,thasg,,,"[USAGE] [builds_partial] Zoth larth gonush lem guf datom in za rast thok-chron n | [sti_builds_fallback_alert] Nars larth acha vo' lemz in zoth vorsk, zetsh vrask mor | [AUTO-GUESS] positional candidates from [builds_partial]: stats / instead / This"
+?? Std / dev,,thask,,,[USAGE] [std_dev] Thask.tanis | [item_time_std_dev] Thask.tanis | [AUTO-GUESS] positional candidates from [std_dev]: Std / dev
+hits,,thequth,,,[USAGE] [lasthits] Lash thequth | [lasthits_per_min] Lash thequth / V'c
+,,ther,,,"[USAGE] [notice_missing_data] Zoth vorsk lishsh datom fram an matsh, zith ucha vo' th | [over-matches] Ther ucha %NUM% vothai kruva."
+?? is / automatically / generated,,thev,,,[USAGE] [over-pregen-report] Zoth acha thev deshv vorsk tak | [AUTO-GUESS] positional candidates from [over-pregen-report]: is / automatically / generated
+version,,thik,,,[USAGE] [ana_version] Vavuk thik | [builds_desc_tldr_0] Des thik
+?? Something / went / wrong,,thison,,,[USAGE] [fatal_error_desc] Zhidre thison glirosk. | [AUTO-GUESS] positional candidates from [fatal_error_desc]: Something / went / wrong
+?? of / them / passed,,thiv,,,[USAGE] [items_overview_sti_builds_no_builds] Vo nars larth rafs zoth rast (ur nushk doq thiv shashz  | [sti_consumables_explainer] Zoth fen mavsh gok tak tiv tharesh. nars rastai acha fu | [AUTO-GUESS] positional candidates from [items_overview_sti_builds_no_builds]: of / them / passed
+plural of stage / phase of game,,thoklashai,,,[USAGE] [pick_stages] Vesh thoklashai | [ban_stages] Fekui thoklashai
+tickets,,thoskuk,,pass scroll,[USAGE] [tickets] Thoskuk
+?? hero's / winrates / against,,thozos,,,"[USAGE] [desc_heroes_hvh_2] Za mert nethg a vrazh-izh thozos tez redaq vroth, meze  | [desc_players_pvp] Retu a murf tak vis gladrisk thozos tez shish rashk ske | [AUTO-GUESS] positional candidates from [desc_heroes_hvh_2]: hero's / winrates / against"
+vital,,thruvrath,,nealthy,[USAGE] [itemid1865] Thruvrath (Vital) | [itemid1869] Thruvrath-Tiv (Vital Toadstool)
+?? longest / killstreak / in,,thus,,,[USAGE] [longest_killstreak_in_match] Fomog ulathdith thus in voth | [AUTO-GUESS] positional candidates from [longest_killstreak_in_match]: longest / killstreak / in
+?? very / important,,thush,,,"[USAGE] [build_item_type_critical_explain] Chron-kez doq thars acha ahm thush | [builds_desc_3] Ther acha teskin mask doq rastai: <b>verna</b>, <b>thar | [AUTO-GUESS] positional candidates from [build_item_type_critical_explain]: very / important"
+?? Game / Length,,tiq,,,[USAGE] [wrtimings] Voth tiq | [AUTO-GUESS] positional candidates from [wrtimings]: Game / Length
+score,,tizem,,,[USAGE] [score] Tizem
+,,tok,,,[USAGE] [itemid2091] Giku-1 Tok (Tier 1 Token) | [itemid2092] Giku-2 Tok (Tier 2 Token)
+?? Same / lane,,tokurth,,,[USAGE] [lane_rate] Tokurth shith lash | [sti_items_explainer] Zoth fen mavsh gok tak nars rastai vak tiv. nars rastai | [AUTO-GUESS] positional candidates from [lane_rate]: Same / lane
+manic,,tornesh,,,[USAGE] [itemid1867] Tornesh (Manic)
+?? more / info,,tras,,,[USAGE] [desc_tvt] Zoth fathlarth shorg drav-izh trukuth-lash tez kevoz dr | [AUTO-GUESS] positional candidates from [desc_tvt]: more / info
+,,tremok,,,[USAGE] [builds_desc_tldr_1] Zoth rast larth acha morz doq gok. lishsh shashr rast g | [sti_builds_explainer] Zoth fen mavsh gok tak zuz nars larth. nars larth acha 
+?? at / various / draft,,treq,,,[USAGE] [desc_heroes_draft] Zoth fen mavsh gok tak vrazhai' veshai vak fekuizhai th | [desc_heroes_positions] Zoth fen mavsh gok tak vrazhai' driv doq treq bovai. bo | [AUTO-GUESS] positional candidates from [desc_heroes_draft]: at / various / draft
+?? wards / placed / per,,trethom,,,[USAGE] [radiant_avg_wards] Fomog vethkast trethom dregros voth acha Sol-nith | [dire_avg_wards] Fomog vethkast trethom dregros voth acha Omoz-nith | [AUTO-GUESS] positional candidates from [radiant_avg_wards]: wards / placed / per
+trident,,trident,,tri blade,[USAGE] [itemid369] Trident (Trident) | [itemid275] Suzm: Trident (Recipe: Trident)
+,,trisk,,,[USAGE] [shady_alert_alt] Zoth rashk (ur sev) ucha kruloz (ur mesht rure tak zhet | [desc_inaccurate_draft] Kith thoklashai datom sush acha nomask nuv tak gifu mas
+?? with / Smallest / Hero,,trok,,,[USAGE] [smallest_hero_pool] Murf weth trok vrazh luz | [smallest_hero_pool_team] Drav weth trok vrazh luz | [AUTO-GUESS] positional candidates from [smallest_hero_pool]: with / Smallest / Hero
+?? by / Valve,,trovov,,,[USAGE] [cat_group_valve] Ofizh rufa (kertheq acha trovov) | [AUTO-GUESS] positional candidates from [cat_group_valve]: by / Valve
+?? Long / description,,ulath,,,[USAGE] [main_default_desc_long] Ulath deskr | [AUTO-GUESS] positional candidates from [main_default_desc_long]: Long / description
+?? Average / longest / killstreak,,ulathdith,,,[USAGE] [longest_killstreak_in_match] Fomog ulathdith thus in voth | [longest_series_duration] Ulathdith zhai'voth acha meshfuz sham | [AUTO-GUESS] positional candidates from [longest_killstreak_in_match]: Average / longest / killstreak
+?? US / West,,us,,,[USAGE] [region1] US glath | [region2] US ezh | [AUTO-GUESS] positional candidates from [region1]: US / West
+ballista,,valist,,,[USAGE] [itemid367] Valist (Ballista) | [AUTO-GUESS] from item-name pattern.
+vambrace,,vamvrask,,,[USAGE] [itemid329] Suzm: Vamvrask (Recipe: Vambrace) | [itemid331] Vamvrask (Vambrace) | [AUTO-GUESS] from item-name pattern.
+analyzer,,vavuk,,,[USAGE] [ana_version] Vavuk thik
+?? with / lowest / team,,vedresh,,,[USAGE] [lowest_rampage] Desv weth vedresh drav meshfuz-lieyev vunz | [lowest_rampage_lost] Desv weth vedresh meshfuz-lieyev vunz in a vrask voth | [AUTO-GUESS] positional candidates from [lowest_rampage]: with / lowest / team
+picked,,veshui,,,[USAGE] [heroes_picked] Vrazhai veshui | [heroes_pickbanned] Vrazhai veshui vak fekui
+?? See / full,,vis,,,[USAGE] [vsummary_more] Vis zuz muzai muf | [builds_more] Vis shil rast larth | [AUTO-GUESS] positional candidates from [vsummary_more]: See / full
+apply,,vitf,,,[USAGE] [apply] Vitf
+butterfly,,vlatraf,,,[USAGE] [itemid138] Suzm: Vlatraf (Recipe: Butterfly) | [itemid139] Vlatraf (Butterfly)
+?? Godlike / sprees,,vole,,,[USAGE] [godlikes] Dunu vole | [AUTO-GUESS] positional candidates from [godlikes]: Godlike / sprees
+?? Balance / metric / estimates,,vovun,,,[USAGE] [desc_balance] Vrak vovun drukra thav graz za fash acha (0 tak 100) | [AUTO-GUESS] positional candidates from [desc_balance]: Balance / metric / estimates
+,,vr,,,[USAGE] [hero_s] Vr
+?? Teamfight / participation,5,vraskuz,,,[USAGE] [teamfight_participation] Zhozisk vraskuz | [AUTO-GUESS] positional candidates from [teamfight_participation]: Teamfight / participation
+bloodbath,,vrazerth,,,[USAGE] [bloodbath] Vrazerth
+archive,,vrirthis,,,[USAGE] [cat_group_archive] Vrirthis
+blitz knuckles,,vukl,,,[USAGE] [itemid485] Ranzh-Vukl (Blitz Knuckles) | [itemid85] Suzm: Vukl (Recipe: Buckler) | [AUTO-GUESS] from item-name pattern.
+contested,,zadriq,,,[USAGE] [heroes_contested] Vrazhai zadriq | [least_contested] Narf zadriq
+?? couriers / killed,,zash,,,[USAGE] [couriers_killed_total] meshfuz sofom zash | [roshans_killed_total] meshfuz dolem zash | [AUTO-GUESS] positional candidates from [couriers_killed_total]: couriers / killed
+?? Entity / not,,zhasko,,,[USAGE] [error_404] Zhasko vo' menth | [AUTO-GUESS] positional candidates from [error_404]: Entity / not
+?? Game / mode,,zheki,,flavor,[USAGE] [game_mode] Voth zheki | [AUTO-GUESS] positional candidates from [game_mode]: Game / mode
+?? Something / went,,zhidre,,,[USAGE] [fatal_error_desc] Zhidre thison glirosk. | [AUTO-GUESS] positional candidates from [fatal_error_desc]: Something / went
+?? South / Korea,,zhise,,,[USAGE] [region4] Suvth zhise | [AUTO-GUESS] positional candidates from [region4]: South / Korea
+?? server / servers,,zhiskirth,,,[USAGE] [over-one-region] Sam vothai ucha kruva doq %server% zhiskirth. | [over-most-region] %num% vothai ucha kruva doq %server% zhiskirth. | [AUTO-GUESS] positional candidates from [over-one-region]: server / servers
+?? Teamfight / participation,,zhozisk,,,[USAGE] [teamfight_participation] Zhozisk vraskuz | [AUTO-GUESS] positional candidates from [teamfight_participation]: Teamfight / participation
+overall,,zhusik,,,"[USAGE] [items_most_impactful_total_header] Zhusik | [desc_heroes_hvh_2] Za mert nethg a vrazh-izh thozos tez redaq vroth, meze "
+?? teams / participated / in,,zidri,,,[USAGE] [over-teams] %NUM% dravai zidri in zoth matsh. | [over-players] %NUM% murfai zidri in zoth matsh. | [AUTO-GUESS] positional candidates from [over-teams]: teams / participated / in
+?? Social / Links,,zigra,,,[USAGE] [main_social] Lezsh zigra | [AUTO-GUESS] positional candidates from [main_social]: Social / Links
+?? Avg / Diff,,zuke,,,[USAGE] [lane_avg_gold_diff] Gugav zuke | [data_filter_wr_diff] Ves foth trukuth-lash zuke | [AUTO-GUESS] positional candidates from [lane_avg_gold_diff]: Avg / Diff
+integrity / genuineness,,gliv,,,[INVENTED PLACEHOLDER] integrity. Used in [shady_alert] (voth gliv = data integrity).
+fragile / unreliable / weakened,,safrash,,,[INVENTED PLACEHOLDER] fragile/unreliable. Used in [shady_alert].
+display / show (infer),,pozai,,,[INVENTED PLACEHOLDER] derived from poz (display). Used in [shady_alert].
+update / refresh,,henzuz,,,[INVENTED PLACEHOLDER] update. Used in [*_recalc_notice].
+?? between,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_draft_tree, desc_heroes_counters_pairs, desc_heroes_counters_pairs_graph, desc_heroes_pairs, desc_heroes_trios..."
+?? better,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_heroes_counters_pairs, desc_heroes_pairs, desc_heroes_trios, desc_players_pairs, desc_players_trios..."
+?? usually,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_6, desc_heroes_counters_pairs, desc_heroes_pairs, desc_heroes_trios, desc_matches..."
+?? compared,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_3, desc_heroes_hvh_2, items_combos_desc, items_combos_overview_desc, items_most_impactful_desc..."
+?? percentage,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_heroes_counters_pairs, desc_heroes_pairs, desc_heroes_trios, desc_players_pairs, desc_players_trios..."
+?? actual,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_heroes_counters_pairs, desc_heroes_pairs, desc_heroes_trios, desc_players_pairs, desc_players_trios..."
+?? count,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_heroes_combo_graph, desc_heroes_counters_pairs, desc_heroes_counters_pairs_graph, desc_meta_graph, desc_players_combo_graph..."
+?? features,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: notice_missing_data, notice_mixed_old_source1, notice_mixed_source1, notice_mixed_to_source2, notice_source1..."
+?? intentionally,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_heroes_counters_pairs, desc_heroes_pairs, desc_heroes_trios, desc_players_pairs, desc_players_trios..."
+?? multiple,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_1, desc_draft_targeted_bans_estimate_explainer, desc_laning_6, sti_builds_explainer, sti_consumables_explainer..."
+?? otherwise,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_heroes_counters_pairs, desc_heroes_pairs, desc_heroes_trios, desc_players_pairs, desc_players_trios..."
+?? possible,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_draft_targeted_bans_estimate_explainer, desc_laning_3, notice_missing_data, notice_mixed_to_source2, notice_wc3..."
+?? than,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_4, builds_desc_7, desc_heroes_wrtimings, items_records_desc, sti_builds_limited..."
+?? there,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_3, desc_laning_3, desc_laning_4, desc_laning_5, desc_laning_7..."
+?? accurate,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_partial, desc_heroes_positions, desc_laning_4, desc_players_positions, items_recalc_notice"
+?? color,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_3, desc_draft_tree, desc_meta_graph, desc_players_combo_graph, items_progression_desc"
+?? displayed,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_heroes_combo_graph, desc_players_combo_graph, items_boxplots_timings_desc, items_records_desc, sti_builds_limited"
+?? randomly,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_heroes_pairs, desc_heroes_trios, desc_players_pairs, desc_players_trios, pairs_desc"
+?? replay,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: notice_mixed_old_source1, notice_mixed_source1, notice_mixed_to_source2, notice_source1, sti_consumables_explainer"
+?? source,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: notice_mixed_old_source1, notice_mixed_source1, notice_mixed_to_source2, notice_old_source1, notice_source1"
+?? treated,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_heroes_positions, desc_laning_1, desc_laning_2, desc_players_positions, sti_builds_explainer"
+?? using,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_1, builds_desc_7, desc_pickban_teams, enchantments_recalc_notice, items_recalc_notice"
+?? additional,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_1, builds_desc_2, builds_desc_5, builds_desc_6"
+?? alternative,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_1, builds_desc_2, builds_desc_5, builds_desc_tldr_1"
+?? around,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_draft_tree, desc_laning_7, desc_meta_graph, desc_players_combo_graph"
+?? blue,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_draft_tree, desc_meta_graph, desc_players_combo_graph, items_progression_desc"
+?? bolder,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_draft_tree, desc_heroes_combo_graph, desc_meta_graph, desc_players_combo_graph"
+?? chosen,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_1, items_combos_desc, items_records_desc, items_stats_critical_desc"
+?? different,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_tldr_1, desc_draft_explainer, fantasy_summary_desc, sti_builds_explainer"
+?? given,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_2, desc_pickban_variants, fantasy_summary_desc, notice_missing_data"
+?? implemented,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: notice_mixed_old_source1, notice_mixed_source1, notice_mixed_to_source2, notice_source1"
+?? picture,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_laning_4, desc_laning_6, desc_laning_7, enchantments_recalc_notice"
+?? affect,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_laning_6, notice_mixed_source1, sti_consumables_explainer"
+?? among,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_heroes_avg, desc_pickban_teams, desc_players_avg"
+?? basic,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_5, desc_matches, desc_participants"
+?? closer,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_meta_graph, desc_players_combo_graph, items_progression_desc"
+?? consistent,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: notice_missing_data, notice_mixed_to_source2, notice_wc3"
+?? differences,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_heroes_counters_pairs, desc_laning_3, items_stats_desc"
+?? distribution,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_draft_targeted_bans_estimate_explainer, items_boxplots_timings_desc, items_stats_desc"
+?? earliest,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: items_most_impactful_desc, items_records_desc, items_records_overview_desc"
+?? edge,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_meta_graph, desc_players_combo_graph, items_progression_desc"
+?? event,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_draft_targeted_bans_estimate_explainer, notice_missing_data, sti_consumables_explainer"
+?? found,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_draft_targeted_bans_estimate_explainer, desc_meta_graph_add, fantasy_summary_desc"
+?? however,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_2, desc_laning_4, desc_laning_7"
+?? instances,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: sti_builds_explainer, sti_consumables_explainer, sti_items_explainer"
+?? keep,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: notice_missing_data, notice_mixed_to_source2, notice_wc3"
+?? lategame,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_2, builds_desc_5, builds_desc_6"
+?? positive,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: items_combos_desc, items_combos_overview_desc, items_most_impactful_desc"
+?? red,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_3, desc_meta_graph, desc_players_combo_graph"
+?? strong,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_3, desc_pickban_teams, shady_alert_alt"
+?? supports,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_heroes_positions, desc_laning_6, desc_players_positions"
+?? tried,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: notice_missing_data, notice_mixed_to_source2, notice_wc3"
+?? use,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_draft_tree, desc_matches, desc_participants"
+?? visually,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_6, desc_draft_tree, items_progression_desc"
+?? accuracy,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: notice_mixed_source1, notice_wc3"
+?? approximately,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_pickban_roles, desc_pickban_variants"
+?? case,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_6, desc_laning_3"
+?? cases,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_draft_tree, fantasy_summary_desc"
+?? chances,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_4, desc_heroes_wrtimings"
+?? connections,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_heroes_counters_pairs_graph, items_progression_desc"
+?? consumables,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: sti_consumables_explainer, sti_items_explainer"
+?? counter,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_heroes_counters_pairs, desc_heroes_counters_pairs_graph"
+?? delayed,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_4, items_stats_desc"
+?? depending,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_5, notice_mixed_source1"
+?? easier,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_6, desc_heroes_hvh_2"
+?? enabled,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: sti_builds_limited, sti_builds_roles_limited"
+?? estimation,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_draft_targeted_bans_estimate_explainer, enchantments_recalc_notice"
+?? everything,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: notice_missing_data, notice_mixed_to_source2"
+?? expectation,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: items_combos_desc, items_combos_overview_desc"
+?? fit,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_5, builds_desc_6"
+?? format,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: notice_mixed_old_source1, notice_mixed_to_source2"
+?? frame,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: notice_mixed_source1, notice_mixed_to_source2"
+?? goes,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_laning_7, items_stats_critical_desc"
+?? grey,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_meta_graph, desc_players_combo_graph"
+?? highlight,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_3, items_progression_desc"
+?? inventory,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: sti_builds_explainer, sti_items_explainer"
+?? like,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_1, builds_desc_tldr_1"
+?? likely,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_draft_targeted_bans_estimate_explainer, desc_heroes_counters_pairs"
+?? matchups,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_laning_6, desc_volatility"
+?? mouse,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_3, desc_draft_tree"
+?? naturally,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_7, desc_laning_5"
+?? orange,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_draft_tree, items_progression_desc"
+?? play,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_players_pairs, desc_players_trios"
+?? popular,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_6, desc_heroes_counters_pairs_graph"
+?? real,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_laning_4, enchantments_recalc_notice"
+?? respectively,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: items_most_impactful_desc, items_stats_desc"
+?? rev,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_pickban_ranks, pairs_desc_2"
+?? robust,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_1, enchantments_recalc_notice"
+?? several,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_5, notice_missing_data"
+?? shown,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_6, desc_heroes_counters_pairs"
+?? significant,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: fantasy_summary_desc, notice_missing_data"
+?? since,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_1, desc_laning_5"
+?? skipped,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_5, builds_desc_6"
+?? snapshot,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: sti_builds_explainer, sti_items_explainer"
+?? stages,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_draft_explainer, desc_draft_tree"
+?? stronger,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_pickban_ranks, desc_pickban_teams"
+?? supported,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: notice_mixed_source1, notice_mixed_to_source2"
+?? techniques,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: enchantments_recalc_notice, notice_missing_data"
+?? while,1,,,,"[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_2, builds_desc_6"
+?? abuse,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: sti_consumables_explainer
+?? account,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_pickban_ranks
+?? actually,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_laning_7
+?? advanced,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_overview
+?? affected,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_laning_5
+?? aimed,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_draft_targeted_bans_estimate_explainer
+?? arrow,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: items_progression_desc
+?? assigned,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_draft_targeted_bans_estimate_explainer
+?? assumptions,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_laning_4
+?? award,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: fantasy_summary_desc
+?? background,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_6
+?? bayesian,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: items_recalc_notice
+?? becomes,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_4
+?? benefit,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_laning_3
+?? border,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: items_progression_desc
+?? both,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: notice_mixed_source1
+?? bottom,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_3
+?? boxes,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: items_boxplots_timings_desc
+?? brighter,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_6
+?? bug,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: sti_consumables_explainer
+?? buying,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: sti_consumables_explainer
+?? caused,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: sti_consumables_explainer
+?? changed,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_5
+?? changes,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: items_boxplots_timings_desc
+?? circumstances,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: notice_missing_data
+?? columns,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_draft_tree
+?? combined,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: sti_consumables_explainer
+?? combining,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: sti_consumables_explainer
+?? commonly,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: items_combos_desc
+?? completely,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_laning_5
+?? completing,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_laning_7
+?? component,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: items_most_impactful_desc
+?? confirmed,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: shady_alert_alt
+?? consider,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_volatility
+?? cores,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_laning_6
+?? corner,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_3
+?? counted,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: sti_consumables_explainer
+?? couple,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: notice_mixed_to_source2
+?? covers,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_2
+?? current,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_laning_4
+?? cursor,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_draft_tree
+?? depth,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: fantasy_summary_desc
+?? detect,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_laning_4
+?? documentation,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: fantasy_summary_desc
+?? drafting,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_pickban_teams
+?? duration,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_heroes_wrtimings
+?? easiest,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_laning_3
+?? either,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_laning_3
+?? eligible,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_draft_targeted_bans_estimate_explainer
+?? ends,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_draft_explainer
+?? enemies,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_heroes_hvh_2
+?? enemy,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_pickban_teams
+?? entities,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: items_recalc_notice
+?? estimate,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_draft_targeted_bans_estimate_explainer
+?? estimated,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_draft_targeted_bans_estimate_explainer
+?? ethical,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: shady_alert_alt
+?? even,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_laning_6
+?? explore,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_1
+?? exploring,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_2
+?? factors,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: fantasy_summary_desc
+?? fill,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_1
+?? filtered,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: items_combos_overview_desc
+?? following,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_5
+?? formula,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: fantasy_summary_desc
+?? gaps,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_1
+?? gesture,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_draft_tree
+?? get,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_7
+?? gives,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: fantasy_summary_desc
+?? got,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_laning_5
+?? graphs,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_meta_graph_add
+?? green,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_3
+?? half,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_laning_1
+?? highlighting,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_6
+?? holds,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_6
+?? huge,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_laning_1
+?? icon,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_draft_tree
+?? ignored,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: sti_consumables_explainer
+?? impacts,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: items_most_impactful_desc
+?? inconsistencies,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: notice_missing_data
+?? initiates,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: sti_consumables_explainer
+?? initiating,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: sti_consumables_explainer
+?? involved,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: shady_alert_alt
+?? issues,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: shady_alert_alt
+?? itself,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_7
+?? kind,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_draft_tree
+?? laqu,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_heroes_wrplayers
+?? leading,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_3
+?? leave,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_laning_5
+?? left,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_heroes_counters_pairs
+?? limitations,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_laning_4
+?? limited,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_laning_6
+?? lines,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_3
+?? listed,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: items_combos_desc
+?? lists,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_pickban_teams_profile
+?? lot,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_5
+?? lotus,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: sti_consumables_explainer
+?? low,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: pairs_desc_2
+?? make,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_6
+?? margin,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: sti_consumables_partial_notice
+?? mass,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: sti_consumables_explainer
+?? matched,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_players_combo_graph
+?? matchfixing,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: shady_alert_alt
+?? matchup,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_laning_1
+?? measures,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_volatility
+?? met,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_heroes_counters_pairs
+?? metadata,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_1
+?? methods,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: enchantments_recalc_notice
+?? metrics,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: fantasy_summary_desc
+?? networthes,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_laning_1
+?? nodes,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_draft_tree
+?? occurring,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: items_combos_overview_desc
+?? once,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_draft_explainer
+?? ones,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_pickban_teams
+?? opposite,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_heroes_counters_pairs
+?? org,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: shady_alert_alt
+?? original,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: items_recalc_notice
+?? pinch,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_draft_tree
+?? place,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: fantasy_summary_desc
+?? places,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_5
+?? playstyle,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_2
+?? populated,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_2
+?? practically,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_laning_5
+?? practice,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_laning_4
+?? pretty,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_laning_4
+?? prior,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_draft_targeted_bans_estimate_explainer
+?? priorities,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_draft_tree
+?? produced,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_laning_3
+?? proper,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_7
+?? provide,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_1
+?? purely,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_1
+?? quantiles,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: items_stats_desc
+?? quartile,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_volatility
+?? rage,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: sti_consumables_explainer
+?? realistic,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_3
+?? reason,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: sti_consumables_explainer
+?? reasons,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: shady_alert_alt
+?? recipes,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_1
+?? reconstructed,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: sti_consumables_partial_notice
+?? reference,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: items_recalc_notice
+?? removal,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: sti_consumables_explainer
+?? removed,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: sti_builds_roles_limited
+?? restored,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: items_recalc_notice
+?? reverse,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_pickban_ranks
+?? right,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_3
+?? roughly,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: enchantments_recalc_notice
+?? selling,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: sti_consumables_explainer
+?? sensitive,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: items_stats_critical_desc
+?? separated,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_draft_tree
+?? shifts,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: items_stats_desc
+?? similar,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: sti_builds_explainer
+?? size,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: items_progression_desc
+?? slight,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_laning_3
+?? sort,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_pickban_ranks
+?? sorted,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_6
+?? specifically,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_heroes_counters_pairs
+?? stability,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_volatility
+?? starts,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_draft_explainer
+?? statistics,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_draft_explainer
+?? status,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_laning_2
+?? suspicions,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: shady_alert_alt
+?? switch,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: builds_desc_5
+?? switched,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_laning_5
+?? tab,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_meta_graph_add
+?? taking,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_pickban_ranks
+?? target,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_draft_targeted_bans_estimate_explainer
+?? targeted,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_draft_targeted_bans_estimate_explainer
+?? thickness,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: items_progression_desc
+?? treat,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: fantasy_summary_desc
+?? turns,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_laning_4
+?? underperformance,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: fantasy_summary_desc
+?? untrustworthy,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: shady_alert_alt
+?? used,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_laning_4
+?? versa,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_pickban_teams
+?? versions,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: sti_consumables_explainer
+?? vertical,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_draft_tree
+?? vertically,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: items_progression_desc
+?? vice,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_pickban_teams
+?? weighted,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_volatility
+?? white,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: items_boxplots_timings_desc
+?? years,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: notice_mixed_old_source1
+?? zero,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: items_progression_desc
+?? zoom,1,,,,[FROM-PARAGRAPHS] needs Ozkavosh translation; appears in keys: desc_draft_tree
+january,,,,,
+february,,,,,
+march,,,,,
+april,,,,,
+may,,,,,
+june,,,,,
+july,,,,,
+august,,,,,
+september,,,,,
+november,,,,,
+december,,,,,
+group (tournament),,,,,
+division (tournament),,,,,
+bracket,,,,,[FROM STRINGS] bracket
+,,,,,[FROM STRINGS] bracket_flag_fixed – Outcome Auto Corrected
+,,,,,[FS] bracket_flag_override outcome overridden
+,,,,,[FS] bracket_flag_tech tech loss
+,,,,,[FS] bracket_notice
+,,,,,[FS] bracket_placements
+,,,,,[FS] bracket_tiebreakers
+,,,,,[FS] bracket_decider
+,,,,,[FS] bracket_unplaced
+,,,,,[FS] bracket_wildcard
+,,,,,[FS] elimination
+,,,,,[FS] quarter*
+,,,,,[FS] semi*
+,,,,,[FS] grand final
+,,,,,[FS] upper bracket
+,,,,,[FS] lower bracket
+,,,,,[FS] round
