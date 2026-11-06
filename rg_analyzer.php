@@ -298,6 +298,10 @@ if (isset($lg_settings['ana']['regions']) && is_array($lg_settings['ana']['regio
   require_once("modules/analyzer/regions/__main.php");
 }
 
+if (!empty($schema['matches_ext']) || !empty($schema['adv_matchlines_timeseries'])) {
+  require_once("modules/analyzer/nw.php");
+}
+
 if ($lg_settings['ana']['matchlist']) {
   # matches information
   require_once("modules/analyzer/matchlist.php");
