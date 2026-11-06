@@ -20,7 +20,12 @@ function summary_prepare_value($key, $value) {
     return number_format((float)($value ?? 0) * 100, 2)."%";
 
   if (strpos($key, "matches") !== FALSE) return number_format((float)($value ?? 0), 0);
-  
+
+  if ($key === 'nw_chart') return (string)($value ?? '');
+  if (preg_match('/^nw_\d+$/', $key)) {
+    return is_numeric($value) ? number_format((float)$value, 0) : '-';
+  }
+
   if(!is_numeric($value)) return $value;
 
   if ($value > 10)

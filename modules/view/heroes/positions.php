@@ -29,6 +29,8 @@ function rg_view_generate_heroes_positions() {
   }
   {
     include_once($root."/modules/view/generators/summary.php");
+    include_once($root."/modules/view/functions/nw_at.php");
+    include_once($root."/modules/analyzer/__constants/positions.php");
 
     for ($i=1; $i>=0; $i--) {
       for ($j=($i ? 0 : 5); $j<6 && $j>=0; ($i ? $j++ : $j--)) {
@@ -47,11 +49,15 @@ function rg_view_generate_heroes_positions() {
           }
         }
 
+        $role = POSITION_TO_ROLE_MAP[$i][$j] ?? null;
+        $nw_rows = ($role !== null) ? (rg_nw_bucket('hr')[$role] ?? []) : [];
         $res["position_$i.$j"] = rg_generator_summary(
-          "heroes-positions-$i-$j", 
-          $report['hero_positions'][$i][$j], 
-          true, 
+          "heroes-positions-$i-$j",
+          $report['hero_positions'][$i][$j],
           true,
+          true,
+          false,
+          rg_nw_merge_inject([], $nw_rows)
         );
 
         $res["position_$i.$j"] .= "<div class=\"content-text\">".locale_string("desc_heroes_positions")."</div>";

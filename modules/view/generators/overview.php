@@ -125,7 +125,6 @@ function rg_view_generator_overview($modlink, &$context, $foreword = "") {
 
   $res .= "</div>";
 
-
   if($report['settings']['overview_charts']) {
     global $use_graphjs;
     $use_graphjs = true;
@@ -272,6 +271,12 @@ function rg_view_generator_overview($modlink, &$context, $foreword = "") {
               });</script></div>";
 
       }
+
+    if (!empty($context['nw_adv'])) {
+      $res .= "<h1>".locale_string("nw_adv")."</h1>".
+        rg_generator_overview_nw($prefix."nw-adv", $context['nw_adv']);
+    }
+
     $res .= "</div>";
   }
 

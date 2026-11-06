@@ -1,5 +1,6 @@
 <?php
 include_once($root."/modules/view/generators/summary.php");
+include_once($root."/modules/view/functions/nw_at.php");
 include_once($root."/modules/commons/volatility.php");
 include_once($root."/modules/view/generators/pvp_unwrap_data.php");
 
@@ -22,6 +23,8 @@ function rg_view_generate_heroes_summary() {
     }
     unset($hvh);
   }
+
+  $inject = rg_nw_merge_inject($inject, rg_nw_bucket('h'));
 
   $res = rg_generator_summary("heroes-summary", $report['hero_summary'], true, false, false, $inject);
 

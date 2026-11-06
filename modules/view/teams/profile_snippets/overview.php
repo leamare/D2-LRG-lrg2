@@ -433,4 +433,12 @@ if (!empty($context[$tid]['add_info'])) {
 }
 $res["team".$tid]['overview'] .= "</table>";
 
+if (!empty($context[$tid]['nw_adv'])) {
+  include_once($root."/modules/view/generators/overview_sections.php");
+  $res["team".$tid]['overview'] .= "<div class=\"content-text overview overview-charts\">".
+    "<h1>".locale_string("nw_adv")."</h1>".
+    rg_generator_overview_nw("team$tid-nw-adv", $context[$tid]['nw_adv']).
+  "</div>";
+}
+
 $res["team".$tid]['overview'] .= "<div class=\"content-text\">".locale_string("desc_teams")."</div>";

@@ -6,6 +6,34 @@ include_once($root."/modules/view/generators/draft.php");
 include_once($root."/modules/view/generators/positions_overview_section.php");
 include_once($root."/modules/view/functions/teams_diversity_recalc.php");
 
+function rg_generator_overview_nw($name, array $series) {
+  if (!$series) return "";
+  global $use_graphjs;
+  $use_graphjs = true;
+  $labels = [];
+  for ($i = 0, $n = count($series); $i < $n; $i++) $labels[] = 10 + $i;
+  return "<div class=\"chart-line\"><canvas id=\"$name\"></canvas><script>".
+    "new Chart(document.getElementById('$name').getContext('2d'), {".
+      "type: 'line',".
+      "data: { labels: [".implode(',', $labels)."], datasets: [{".
+        "label: '".addslashes(locale_string('nw_adv'))."',".
+        "data: [".implode(',', $series)."],".
+        "borderColor: '#6af', backgroundColor: 'rgba(102,170,255,0.15)',".
+        "fill: true, pointRadius: 0, pointHoverRadius: 3, pointHitRadius: 8, borderWidth: 2".
+      "}]},".
+      "options: { responsive: true, maintainAspectRatio: false, legend: { display: false },".
+        "hover: { mode: 'index', intersect: false },".
+        "tooltips: { mode: 'index', intersect: false, callbacks: {".
+          "title: function(items) { return items[0].xLabel + ' ".addslashes(locale_string('minute_short'))."'; },".
+          "label: function(item, data) {".
+            "var v = item.yLabel;".
+            "return data.datasets[item.datasetIndex].label + ': ' + (typeof v === 'number' ? v.toLocaleString() : v);".
+          "}".
+        "} },".
+        "scales: { yAxes: [{ ticks: { beginAtZero: true } }] } }".
+    "});</script></div>";
+}
+
 function rg_generator_overview_chart($name, $labels, $context) {
   if(!sizeof($context)) return "";
   global $charts_colors;

@@ -1,5 +1,6 @@
 <?php
 include_once($root."/modules/view/generators/summary.php");
+include_once($root."/modules/view/functions/nw_at.php");
 include_once($root."/modules/commons/volatility.php");
 include_once($root."/modules/view/generators/pvp_unwrap_data.php");
 
@@ -44,6 +45,8 @@ function rg_view_generate_players_summary() {
     }
     unset($pvp, $winrates);
   }
+
+  $inject = rg_nw_merge_inject($inject, rg_nw_bucket('p'));
 
   $res = rg_generator_summary("players-summary", $report['players_summary'], false, false, false, $inject);
 

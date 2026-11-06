@@ -26,6 +26,8 @@ function rg_view_generate_players_positions() {
   }
   {
     include_once($root."/modules/view/generators/summary.php");
+    include_once($root."/modules/view/functions/nw_at.php");
+    include_once($root."/modules/analyzer/__constants/positions.php");
 
     for ($i=1; $i>=0; $i--) {
       for ($j=0; $j<6 && $j>=0; $j++) {
@@ -44,7 +46,16 @@ function rg_view_generate_players_positions() {
           }
         }
 
-        $res["position_$i.$j"] = rg_generator_summary("players-positions-$i-$j", $report['player_positions'][$i][$j], false);
+        $role = POSITION_TO_ROLE_MAP[$i][$j] ?? null;
+        $nw_rows = ($role !== null) ? (rg_nw_bucket('pr')[$role] ?? []) : [];
+        $res["position_$i.$j"] = rg_generator_summary(
+          "players-positions-$i-$j",
+          $report['player_positions'][$i][$j],
+          false,
+          false,
+          false,
+          rg_nw_merge_inject([], $nw_rows)
+        );
 
         $res["position_$i.$j"] .= "<div class=\"content-text\">".locale_string("desc_players_positions")."</div>";
         // if (!$i) { break; }
