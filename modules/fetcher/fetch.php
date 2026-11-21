@@ -14,6 +14,7 @@ include_once __DIR__.'/match_fail.php';
 include_once __DIR__.'/draft_donate.php';
 include_once __DIR__.'/bot_match_detector.php';
 include_once __DIR__.'/../../modules/commons/fantasy_mvp.php';
+include_once __DIR__.'/../../modules/commons/neutral_tiers.php';
 
 function conn_restart() {
   global $conn, $lrg_sql_host, $lrg_sql_user, $lrg_sql_pass, $lrg_sql_db;
@@ -2104,7 +2105,9 @@ function fetch($match) {
             'hero_id' => $matchdata['players'][$j]['hero_id'] ?? $t_matchlines[$i]['heroid'],
             'item_id' => $item_id,
             'time' => $e['time'],
-            'category_id' => array_search('enhancement_tier_'.($i+1), array_keys($meta['item_categories'])),
+            // enhancement tier is deduced from craft time, not history index:
+            // one enhancement may belong to several tiers, and players may skip crafts
+            'category_id' => array_search('enhancement_tier_'.neutral_item_tier($e['time'], $t_match['version'] ?? 0), array_keys($meta['item_categories'])),
           ];
         }
 
