@@ -1,6 +1,7 @@
 <?php 
 
 require("modules/commons/wrap_data.php");
+require_once("modules/commons/enchantments_stats.php");
 
 ini_set('memory_limit', '16192M');
 
@@ -390,6 +391,45 @@ foreach ($progpairs as $hid => $roles) {
       $report['items']['progrole']['data'][$hid][$roleid][] = array_values($pair);
     }
   }
+}
+
+// enchantments
+$enchantments = [];
+foreach ($source_reports as &$rep) {
+  if (empty($rep['items']['enchantments']) || !is_array($rep['items']['enchantments'])) continue;
+  $enc = $rep['items']['enchantments'];
+  if (is_wrapped($enc)) $enc = unwrap_data($enc);
+  if (empty($enc)) continue;
+
+  foreach ($enc as $hid => $categories) {
+    if (!is_array($categories)) continue;
+    if (!isset($enchantments[$hid])) $enchantments[$hid] = [];
+    foreach ($categories as $cat => $items) {
+      if (!is_array($items)) continue;
+      if (!isset($enchantments[$hid][$cat])) $enchantments[$hid][$cat] = [];
+      foreach ($items as $iid => $st) {
+        if (!is_array($st)) continue;
+        if (empty($enchantments[$hid][$cat][$iid])) {
+          $enchantments[$hid][$cat][$iid] = [
+            'matches' => (int)($st['matches'] ?? 0),
+            'wins' => (int)($st['wins'] ?? 0),
+          ];
+          continue;
+        }
+        $enchantments[$hid][$cat][$iid]['matches'] += (int)($st['matches'] ?? 0);
+        $enchantments[$hid][$cat][$iid]['wins'] += (int)($st['wins'] ?? 0);
+      }
+    }
+  }
+}
+if ($enchantments) {
+  foreach ($enchantments as &$categories) {
+    foreach ($categories as &$items) {
+      enchantments_finalize_category($items);
+    }
+  }
+  unset($categories, $items);
+  $report['items']['enchantments'] = $enchantments;
 }
 
 $report['items']['stats'] = wrap_data($report['items']['stats'], true, true, true);
